@@ -568,7 +568,10 @@ public class CallState(
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
 
-                Log.d("RingingStateDebug", "CallRejectedEvent. Rejected by: ${event.user.id}. Will call updateRingingState().")
+                Log.d(
+                    "RingingStateDebug",
+                    "CallRejectedEvent. Rejected by: ${event.user.id}. Will call updateRingingState().",
+                )
 
                 updateRingingState()
             }
@@ -948,6 +951,11 @@ public class CallState(
             // stop the call ringing timer if it's running
         }
         Log.d("RingingState", "Update: $state")
+
+        Log.d("RingingStateDebug", "updateRingingState 1. Called by: ${getCallingMethod()}")
+        Log.d("RingingStateDebug", "updateRingingState 2. New state: $state")
+        Log.d("RingingStateDebug", "-------------------")
+
         _ringingState.value = state
     }
 
@@ -996,7 +1004,10 @@ public class CallState(
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     call.reject()
                     call.leave()
-                    updateRingingState(true)
+
+                    Log.d("RingingStateDebug", "startRingingTimer. Timeout. Will call updateRingingState().")
+
+                    updateRingingState(timedOut = true)
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
@@ -1285,4 +1296,16 @@ private fun MemberResponse.toMemberState(): MemberState {
         updatedAt = updatedAt,
         deletedAt = deletedAt,
     )
+}
+
+private fun getCallingMethod(): String {
+    val stackTrace = Thread.currentThread().stackTrace
+
+    return if (stackTrace.isEmpty()) {
+        ""
+    } else {
+        stackTrace[6].let { callingMethod ->
+            callingMethod.className + "." + callingMethod.methodName
+        }
+    }
 }
