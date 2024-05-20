@@ -527,7 +527,7 @@ public class CallState(
         if (it != null) {
             val token = call.clientImpl.token
             val apiKey = call.clientImpl.apiKey
-            Ingress(rtmp = RTMP(address = it.rtmp.address, streamKey = "$apiKey/$token"))
+            Ingress(rtmp = RTMP(address = it.rtmp.address, streamKey = token))
         } else {
             null
         }
