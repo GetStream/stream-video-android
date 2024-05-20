@@ -567,6 +567,9 @@ public class CallState(
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
+
+                Log.d("RingingStateDebug", "CallRejectedEvent. Rejected by: ${event.user.id}. Will call updateRingingState().")
+
                 updateRingingState()
             }
 
@@ -882,7 +885,13 @@ public class CallState(
         )
 
         // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall) {
+        val state: RingingState = if (timedOut) {
+            // It was an outgoing, or incoming call, but timeout was reached
+            // Call leave same as CallEndedEvent we do not want to receive updates anymore
+            call.leave()
+            cancelTimeout()
+            RingingState.TimeoutNoAnswer
+        } else if (hasActiveCall) {
             cancelTimeout()
             RingingState.Active
         } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
@@ -890,13 +899,14 @@ public class CallState(
             // since we or the caller timed-out or the call was rejected.
             // We leave the call, we do not depend on the SDK user to call leave()
             call.leave()
-            if (timedOut || !rejectedByMeBool) {
-                cancelTimeout()
-                RingingState.TimeoutNoAnswer
-            } else {
-                cancelTimeout()
-                RingingState.RejectedByAll
-            }
+//            if (timedOut || !rejectedByMeBool) {
+//                cancelTimeout()
+//                RingingState.TimeoutNoAnswer
+//            } else {
+//                cancelTimeout()
+//                RingingState.RejectedByAll // Pe deviceul pe care ai apasat reject
+//            }
+            RingingState.RejectedByAll
         } else if (hasRingingCall && createdBy?.id != client.userId) {
             // Member list is not empty, it's not rejected - it's an incoming call
             // If it's already accepted by me then we are in an Active call
@@ -919,12 +929,6 @@ public class CallState(
                 cancelTimeout()
                 RingingState.Active
             }
-        } else if (timedOut) {
-            // It was an outgoing, or incoming call, but timeout was reached
-            // Call leave same as CallEndedEvent we do not want to receive updates anymore
-            call.leave()
-            cancelTimeout()
-            RingingState.TimeoutNoAnswer
         } else {
             RingingState.Idle
         }
