@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.GEO
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
@@ -47,7 +46,7 @@ fun LiveAudience() {
         apiKey = "k436tyde94hj", // demo API key
         geo = GEO.GlobalEdgeNetwork,
         user = user,
-        token =  "",
+        token = "",
         ensureSingleInstance = false,
     ).build()
 
