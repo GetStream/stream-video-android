@@ -44,6 +44,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.model.User
@@ -52,23 +53,21 @@ import kotlinx.coroutines.launch
 @Composable
 fun LiveHost() {
     val context = LocalContext.current
-
-    val userToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiRGFydGhfS3JheXQiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL0RhcnRoX0tyYXl0IiwiaWF0IjoxNjk2OTgzMjk1LCJleHAiOjE2OTc1ODgxMDB9.g5K76Vv5D-uCoBfAfDpI3pyQIpoFMx8J9Eus0VkHk-M"
     val userId = "Darth_Krayt"
+    val userToken = StreamVideo.devToken(userId)
     val callId = "dE8AsD5Qxqrt"
 
     // step1 - create a user.
     val user = User(
         id = userId, // any string
         name = "Tutorial", // name and image are used in the UI
-        role = "guest",
+        role = "admin",
     )
 
     // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
     val client = StreamVideoBuilder(
         context = context,
-        apiKey = "hd8szvscpxvd", // demo API key
+        apiKey = "k436tyde94hj", // demo API key
         geo = GEO.GlobalEdgeNetwork,
         user = user,
         token = userToken,
