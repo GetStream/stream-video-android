@@ -43,7 +43,6 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -162,55 +161,6 @@ internal class CallService : Service() {
                     TRIGGER_REMOVE_INCOMING_CALL,
                 ),
             )
-        }
-    }
-
-    override fun onTimeout(startId: Int) {
-        super.onTimeout(startId)
-        logger.w { "Timeout received from the system, service will stop." }
-        stopService()
-    }
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        super.onTaskRemoved(rootIntent)
-
-        endCall()
-        stopService()
-    }
-
-    private fun endCall() {
-        callId?.let { callId ->
-            StreamVideo.instanceOrNull()?.let { streamVideo ->
-                val call = streamVideo.call(callId.type, callId.id)
-                val ringingState = call.state.ringingState.value
-
-                if (ringingState is RingingState.Outgoing) {
-                    // If I'm calling, end the call for everyone
-                    serviceScope.launch {
-                        call.reject()
-                        logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
-                    }
-                } else if (ringingState is RingingState.Incoming) {
-                    // If I'm receiving a call...
-                    val memberCount = call.state.members.value.size
-                    logger.i { "[onTaskRemoved] Total members: $memberCount" }
-                    if (memberCount == 2) {
-                        // ...and I'm the only one being called, end the call for both users
-                        serviceScope.launch {
-                            call.reject()
-                            logger.i { "[onTaskRemoved] Ended incoming call for both users." }
-                        }
-                    } else {
-                        // ...and there are other users other than me and the caller, end the call just for me
-                        call.leave()
-                        logger.i { "[onTaskRemoved] Ended incoming call for me." }
-                    }
-                } else {
-                    // If I'm in an ongoing call, end the call for me
-                    call.leave()
-                    logger.i { "[onTaskRemoved] Ended ongoing call for me." }
-                }
-            }
         }
     }
 
@@ -340,6 +290,53 @@ internal class CallService : Service() {
             observeCallState(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showIncomingCall(notification: Notification, notificationId: Int) {
+        if (callId == null) { // If there isn't another call in progress (callId is set in onStartCommand())
+            startForeground(
+                notificationId,
+                notification,
+            ) // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
+        } else {
+            NotificationManagerCompat // Else, we show a simple notification (the service was already started as a foreground service).
+                .from(this)
+                .notify(notificationId, notification)
+        }
+    }
+
+    private fun removeIncomingCall(notificationId: Int) {
+        NotificationManagerCompat.from(this).cancel(notificationId)
+
+        if (callId == null) {
+            stopService()
+        }
+    }
+
+    private fun initializeCallAndSocket(
+        streamVideo: StreamVideo,
+        callId: StreamCallId,
+    ) {
+        // Update call
+        serviceScope.launch {
+            val call = streamVideo.call(callId.type, callId.id)
+            val update = call.get()
+            if (update.isFailure) {
+                update.errorOrNull()?.let {
+                    logger.e { it.message }
+                } ?: let {
+                    logger.e { "Failed to update call." }
+                }
+                stopService() // Failed to update call
+                return@launch
+            }
+        }
+
+        // Monitor coordinator socket
+        serviceScope.launch {
+            streamVideo.connectIfNotAlreadyConnected()
         }
     }
 
@@ -483,59 +480,87 @@ internal class CallService : Service() {
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun initializeCallAndSocket(
-        streamVideo: StreamVideo,
-        callId: StreamCallId,
-    ) {
-        // Update call
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
-            val update = call.get()
-            if (update.isFailure) {
-                update.errorOrNull()?.let {
-                    logger.e { it.message }
-                } ?: let {
-                    logger.e { "Failed to update call." }
-                }
-                stopService() // Failed to update call
-                return@launch
+    private fun registerToggleCameraBroadcastReceiver() {
+        if (!isToggleCameraBroadcastReceiverRegistered) {
+            try {
+                registerReceiver(
+                    toggleCameraBroadcastReceiver,
+                    IntentFilter().apply {
+                        addAction(Intent.ACTION_SCREEN_ON)
+                        addAction(Intent.ACTION_SCREEN_OFF)
+                        addAction(Intent.ACTION_USER_PRESENT)
+                    },
+                )
+                isToggleCameraBroadcastReceiverRegistered = true
+            } catch (e: Exception) {
+                logger.d { "Unable to register ToggleCameraBroadcastReceiver." }
             }
         }
+    }
 
-        // Monitor coordinator socket
-        serviceScope.launch {
-            streamVideo.connectIfNotAlreadyConnected()
+    private fun unregisterToggleCameraBroadcastReceiver() {
+        if (isToggleCameraBroadcastReceiverRegistered) {
+            try {
+                unregisterReceiver(toggleCameraBroadcastReceiver)
+                isToggleCameraBroadcastReceiverRegistered = false
+            } catch (e: Exception) {
+                logger.d { "Unable to unregister ToggleCameraBroadcastReceiver." }
+            }
+        }
+    }
+
+    override fun onTimeout(startId: Int) {
+        super.onTimeout(startId)
+        logger.w { "Timeout received from the system, service will stop." }
+        stopService()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+
+        endCall()
+        stopService()
+    }
+
+    private fun endCall() {
+        callId?.let { callId ->
+            StreamVideo.instanceOrNull()?.let { streamVideo ->
+                val call = streamVideo.call(callId.type, callId.id)
+                val ringingState = call.state.ringingState.value
+
+                if (ringingState is RingingState.Outgoing) {
+                    // If I'm calling, end the call for everyone
+                    serviceScope.launch {
+                        call.reject()
+                        logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
+                    }
+                } else if (ringingState is RingingState.Incoming) {
+                    // If I'm receiving a call...
+                    val memberCount = call.state.members.value.size
+                    logger.i { "[onTaskRemoved] Total members: $memberCount" }
+                    if (memberCount == 2) {
+                        // ...and I'm the only one being called, end the call for both users
+                        serviceScope.launch {
+                            call.reject()
+                            logger.i { "[onTaskRemoved] Ended incoming call for both users." }
+                        }
+                    } else {
+                        // ...and there are other users other than me and the caller, end the call just for me
+                        call.leave()
+                        logger.i { "[onTaskRemoved] Ended incoming call for me." }
+                    }
+                } else {
+                    // If I'm in an ongoing call, end the call for me
+                    call.leave()
+                    logger.i { "[onTaskRemoved] Ended ongoing call for me." }
+                }
+            }
         }
     }
 
     override fun onDestroy() {
         stopService()
         super.onDestroy()
-    }
-
-    // This service does not return a Binder
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    // Internal logic
-    @SuppressLint("MissingPermission")
-    private fun showIncomingCall(notification: Notification, notificationId: Int) {
-        if (callId == null) { // If there isn't another call in progress (callId is set in onStartCommand())
-            startForeground(
-                notificationId,
-                notification,
-            ) // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
-        } else {
-            NotificationManagerCompat // Else, we show a simple notification (the service was already started as a foreground service).
-                .from(this)
-                .notify(notificationId, notification)
-        }
-    }
-
-    private fun removeIncomingCall(notificationId: Int) {
-        NotificationManagerCompat.from(this).cancel(notificationId)
-
-        if (callId == null) stopService()
     }
 
     /**
@@ -568,37 +593,11 @@ internal class CallService : Service() {
         stopSelf()
     }
 
-    private fun registerToggleCameraBroadcastReceiver() {
-        if (!isToggleCameraBroadcastReceiverRegistered) {
-            try {
-                registerReceiver(
-                    toggleCameraBroadcastReceiver,
-                    IntentFilter().apply {
-                        addAction(Intent.ACTION_SCREEN_ON)
-                        addAction(Intent.ACTION_SCREEN_OFF)
-                        addAction(Intent.ACTION_USER_PRESENT)
-                    },
-                )
-                isToggleCameraBroadcastReceiverRegistered = true
-            } catch (e: Exception) {
-                logger.d { "Unable to register ToggleCameraBroadcastReceiver." }
-            }
-        }
-    }
-
-    private fun unregisterToggleCameraBroadcastReceiver() {
-        if (isToggleCameraBroadcastReceiverRegistered) {
-            try {
-                unregisterReceiver(toggleCameraBroadcastReceiver)
-                isToggleCameraBroadcastReceiverRegistered = false
-            } catch (e: Exception) {
-                logger.d { "Unable to unregister ToggleCameraBroadcastReceiver." }
-            }
-        }
-    }
-
     private fun clearMediaPlayer() {
         mediaPlayer?.release()
         mediaPlayer = null
     }
+
+    // This service does not return a Binder
+    override fun onBind(intent: Intent?): IBinder? = null
 }
