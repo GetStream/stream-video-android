@@ -171,6 +171,35 @@ class CallStateTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `Update sorting order`() = runTest {
+        val call = client.call("default", randomUUID())
+        val sortedParticipants = call.state.sortedParticipants.stateIn(
+            this,
+            SharingStarted.Eagerly,
+            emptyList(),
+        )
+        call.state.updateParticipantSortingOrder(
+            compareByDescending {
+                it.sessionId
+            },
+        )
+
+        call.state.updateParticipant(
+            ParticipantState("1", call, "1"),
+        )
+        call.state.updateParticipant(
+            ParticipantState("2", call, "2").apply { _screenSharingEnabled.value = true },
+        )
+        call.state.updateParticipant(
+            ParticipantState("3", call, "3").apply { _dominantSpeaker.value = true },
+        )
+
+        delay(1000)
+        val sorted = sortedParticipants.value.map { it.sessionId }
+        assertThat(sorted).isEqualTo(listOf("3", "2", "1"))
+    }
+
+    @Test
     fun `Querying calls should populate the state`() = runTest {
 //        val createResult = client.call("default", randomUUID()).create(custom=mapOf("color" to "green"))
 //        assertSuccess(createResult)
