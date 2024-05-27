@@ -293,56 +293,12 @@ public class CallState(
     val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.debounce(1000)
         .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
-    internal val sortedParticipantsFlow = channelFlow {
-        // uses a channel flow to handle concurrency and 3 things updating: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
-
-        fun emitSorted() {
-            val participants = participants.value
-            val pinned = _pinnedParticipants.value
-            var lastParticipants: List<ParticipantState>? = null
-            val sorted = participants.sortedWith(
-                compareBy(
-                    { pinned.containsKey(it.sessionId) },
-                    { it.screenSharingEnabled.value },
-                    { it.dominantSpeaker.value },
-                    { it.videoEnabled.value },
-                    { it.lastSpeakingAt.value },
-                    { it.joinedAt.value },
-                    { it.userId.value },
-                ),
-            ).reversed()
-            scope.launch {
-                if (lastParticipants != sorted) {
-                    send(sorted)
-                    lastParticipants = sorted
-                }
-            }
-        }
-
-        scope.launch {
-            _participants.collect {
-                emitSorted()
-            }
-        }
-        // Since participant state exposes it's own stateflows this is a little harder to do than usual
-        // we need to listen to the events and update the flow when it changes
-
-        // emit the sorted list
-        emitSorted()
-
-        // TODO: could optimize performance by subscribing only to relevant events
-        call.subscribe {
-            emitSorted()
-        }
-
-        scope.launch {
-            _pinnedParticipants.collect {
-                emitSorted()
-            }
-        }
-
-        awaitClose {}
-    }
+    private var _sortedParticipantsState = SortedParticipantsState(
+        scope,
+        call,
+        _participants,
+        _pinnedParticipants,
+    )
 
     /**
      * Sorted participants based on
@@ -355,12 +311,16 @@ public class CallState(
      *
      * Debounced 100ms to avoid rapid changes
      */
-    val sortedParticipants = SortedParticipantsState(
-        scope,
-        call,
-        _participants,
-        _pinnedParticipants,
-    ).asFlow().debounce(100)
+    val sortedParticipants = _sortedParticipantsState.asFlow().debounce(100)
+
+    /**
+     * Update participant sorting order
+     *
+     * @param comparator a new comparator to be used in [sortedParticipants] flow.
+     */
+    fun updateParticipantSortingOrder(
+        comparator: Comparator<ParticipantState>,
+    ) = _sortedParticipantsState.updateComparator(comparator)
 
     /** Members contains the list of users who are permanently associated with this call. This includes users who are currently not active in the call
      * As an example if you invite "john", "bob" and "jane" to a call and only Jane joins.
