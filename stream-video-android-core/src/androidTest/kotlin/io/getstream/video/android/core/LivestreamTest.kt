@@ -74,8 +74,12 @@ class LivestreamTest : IntegrationTestBase() {
         assertSuccess(response)
 
         val rtmp = call.state.ingress.value?.rtmp
+        println("client token: ${clientImpl.token}")
         println("rtmp address: ${rtmp?.address}")
         println("rtmp streamKey: ${rtmp?.streamKey}")
+
+        // streamKey should be just the token, not apiKey/token
+        assertThat(rtmp?.streamKey?.equals(clientImpl.token)).isTrue()
     }
 
     @Test
