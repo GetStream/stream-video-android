@@ -38,7 +38,6 @@ import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * The [StreamVideoBuilder] is used to create a new instance of the [StreamVideo] client. This is the
@@ -77,9 +76,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     private val apiKey: ApiKey,
     private val geo: GEO = GEO.GlobalEdgeNetwork,
-    private var user: User = User(
-        type = UserType.Anonymous,
-    ),
+    private var user: User = User.anonymous(),
     private val token: UserToken = "",
     private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     private val loggingLevel: LoggingLevel = LoggingLevel(),
@@ -122,9 +119,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException(
                 "Please specify the user id for authenticated users",
             )
-        } else if (user.type == UserType.Anonymous && user.id.isEmpty()) {
-            val randomId = UUID.randomUUID().toString()
-            user = user.copy(id = "anon-$randomId")
+        }
+
+        if (user.role.isEmpty()) {
+            user = user.copy(role = "user")
         }
 
         /** initialize Stream internal loggers. */

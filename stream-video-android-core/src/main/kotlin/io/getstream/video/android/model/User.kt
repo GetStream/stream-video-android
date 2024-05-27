@@ -70,7 +70,7 @@ public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
 public data class User(
     /** ID is required, the rest is optional */
     val id: String = "",
-    val role: String = "",
+    val role: String = "user",
     val type: UserType = UserType.Authenticated,
     val name: String = "",
     val image: String = "",
@@ -89,4 +89,10 @@ public data class User(
 
     public val userNameOrId: String
         inline get() = name.ifEmpty { id }
+
+    companion object {
+
+        /** Get the anonymous user. */
+        fun anonymous() = User(id = "!anon", type = UserType.Anonymous, role = "user")
+    }
 }

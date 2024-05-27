@@ -5908,6 +5908,7 @@ public final class io/getstream/video/android/model/User$$serializer : kotlinx/s
 }
 
 public final class io/getstream/video/android/model/User$Companion {
+	public final fun anonymous ()Lio/getstream/video/android/model/User;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
