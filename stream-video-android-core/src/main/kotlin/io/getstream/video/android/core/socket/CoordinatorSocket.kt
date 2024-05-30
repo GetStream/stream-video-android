@@ -23,6 +23,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import org.openapitools.client.infrastructure.Serializer
@@ -98,12 +99,9 @@ public class CoordinatorSocket(
 
             // handle errors
             if (text.isNotEmpty() && processedEvent == null) {
-                val errorAdapter: JsonAdapter<SocketError> =
-                    Serializer.moshi.adapter(SocketError::class.java)
-
                 try {
-                    val parsedError = errorAdapter.fromJson(text)
-                    parsedError?.let {
+                    val parsedError = Json.decodeFromString<SocketError>(text)
+                    parsedError.let {
                         logger.w { "[onMessage] socketErrorEvent: ${parsedError.error}" }
                         handleError(it.error)
                     }
