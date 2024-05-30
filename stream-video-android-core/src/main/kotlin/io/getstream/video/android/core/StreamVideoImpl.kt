@@ -78,6 +78,7 @@ import okhttp3.Response
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.BlockUserRequest
 import org.openapitools.client.models.BlockUserResponse
+import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallRequest
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.ConnectedEvent
@@ -141,8 +142,7 @@ internal class StreamVideoImpl internal constructor(
     internal val sounds: Sounds,
     internal val crashOnMissingPermission: Boolean = true,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
-) : StreamVideo,
-    NotificationHandler by streamNotificationManager {
+) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
 
@@ -304,9 +304,7 @@ internal class StreamVideoImpl internal constructor(
     }
 
     override suspend fun connectIfNotAlreadyConnected() {
-        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected &&
-            connectionModule.coordinatorSocket.connectionState.value != SocketState.Connecting
-        ) {
+        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && connectionModule.coordinatorSocket.connectionState.value != SocketState.Connecting) {
             connectionModule.coordinatorSocket.connect()
         }
     }
@@ -314,32 +312,29 @@ internal class StreamVideoImpl internal constructor(
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
-    private val lifecycleObserver =
-        StreamLifecycleObserver(
-            lifecycle,
-            object : LifecycleHandler {
-                override fun started() {
-                    scope.launch {
-                        // We should only connect if we were previously connected
-                        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
-                            connectionModule.coordinatorSocket.connect()
-                        }
+    private val lifecycleObserver = StreamLifecycleObserver(
+        lifecycle,
+        object : LifecycleHandler {
+            override fun started() {
+                scope.launch {
+                    // We should only connect if we were previously connected
+                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
+                        connectionModule.coordinatorSocket.connect()
                     }
                 }
+            }
 
-                override fun stopped() {
-                    // We should only disconnect if we were previously connected
-                    // Also don't disconnect the socket if we are in an active call
-                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected &&
-                        state.activeCall.value == null
-                    ) {
-                        connectionModule.coordinatorSocket.disconnect(
-                            PersistentSocket.DisconnectReason.ByRequest,
-                        )
-                    }
+            override fun stopped() {
+                // We should only disconnect if we were previously connected
+                // Also don't disconnect the socket if we are in an active call
+                if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && state.activeCall.value == null) {
+                    connectionModule.coordinatorSocket.disconnect(
+                        PersistentSocket.DisconnectReason.ByRequest,
+                    )
                 }
-            },
-        )
+            }
+        },
+    )
 
     init {
 
@@ -522,6 +517,21 @@ internal class StreamVideoImpl internal constructor(
         }
 
         if (selectedCid.isNotEmpty()) {
+            // Special handling  for accepted events
+            if (event is CallAcceptedEvent) {
+                // Skip accepted events not meant for the current outgoing call.
+                val currentRingingCall = state.ringingCall.value
+                val state = currentRingingCall?.state?.ringingState?.value
+                if (currentRingingCall != null &&
+                    (state is RingingState.Outgoing || state == RingingState.Idle) &&
+                    currentRingingCall.cid != event.callCid
+                ) {
+                    // Skip this event
+                    return
+                }
+            }
+
+            // Update calls as usual
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
                 it.session?.handleEvent(event)
@@ -938,12 +948,11 @@ internal class StreamVideoImpl internal constructor(
         sessionId: String?,
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
-            val result =
-                if (sessionId == null) {
-                    connectionModule.api.listRecordingsTypeId0(type, id)
-                } else {
-                    connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
-                }
+            val result = if (sessionId == null) {
+                connectionModule.api.listRecordingsTypeId0(type, id)
+            } else {
+                connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
+            }
             result
         }
     }
@@ -1000,10 +1009,7 @@ internal class StreamVideoImpl internal constructor(
     suspend fun _selectLocation(): Result<String> {
         return wrapAPICall {
             val url = "https://hint.stream-io-video.com/"
-            val request: Request = Request.Builder()
-                .url(url)
-                .method("HEAD", null)
-                .build()
+            val request: Request = Request.Builder().url(url).method("HEAD", null).build()
             val call = connectionModule.okHttpClient.newCall(request)
             val response = suspendCancellableCoroutine { continuation ->
                 call.enqueue(object : Callback {
