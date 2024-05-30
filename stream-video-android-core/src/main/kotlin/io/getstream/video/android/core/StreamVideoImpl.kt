@@ -522,9 +522,10 @@ internal class StreamVideoImpl internal constructor(
                 // Skip accepted events not meant for the current outgoing call.
                 val currentRingingCall = state.ringingCall.value
                 val state = currentRingingCall?.state?.ringingState?.value
-                if (currentRingingCall != null
-                    && (state is RingingState.Outgoing || state == RingingState.Idle)
-                    && currentRingingCall.cid != event.callCid) {
+                if (currentRingingCall != null &&
+                    (state is RingingState.Outgoing || state == RingingState.Idle) &&
+                    currentRingingCall.cid != event.callCid
+                ) {
                     // Skip this event
                     return
                 }
@@ -614,9 +615,9 @@ internal class StreamVideoImpl internal constructor(
     }
 
     private suspend fun waitForConnectionId(): String? =
-    // The Coordinator WS connection can take a moment to set up - this can be an issue
-    // if we jump right into the call from a deep link and we connect the call quickly.
-    // We return null on timeout. The Coordinator WS will update the connectionId later
+        // The Coordinator WS connection can take a moment to set up - this can be an issue
+        // if we jump right into the call from a deep link and we connect the call quickly.
+        // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
         withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
             val value = connectionModule.coordinatorSocket.connectionId.first { it != null }
