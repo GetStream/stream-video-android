@@ -10,6 +10,9 @@
 ## Moshi model classes
 -keep class org.openapitools.client.** { *; }
 
+## Kotlin serialized classes
+-keep @kotlinx.serialization.Serializable class * {*;}
+
 ## Retrofit (https://github.com/square/retrofit/blob/master/retrofit/src/main/resources/META-INF/proguard/retrofit2.pro)
 
 # Retrofit does reflection on generic parameters. InnerClasses is required to use Signature and
