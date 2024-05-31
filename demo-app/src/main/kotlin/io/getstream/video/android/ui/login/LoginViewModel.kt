@@ -68,7 +68,7 @@ class LoginViewModel @Inject constructor(
                 is LoginEvent.SignInFailure -> flowOf(
                     LoginUiState.SignInFailure(event.errorMessage),
                 )
-
+                is LoginEvent.SignIn -> signIn(event.user)
                 else -> flowOf(LoginUiState.Nothing)
             }
         }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
@@ -102,6 +102,32 @@ class LoginViewModel @Inject constructor(
                         image = if (autoLogIn) "" else loggedInGoogleUser?.photoUrl ?: "",
                         role = "admin",
                         custom = mapOf("email" to authData.userId),
+                    )
+                    // Store the data in the demo app
+                    dataStore.updateUser(user)
+                    // Init the Video SDK with the data
+                    StreamVideoInitHelper.loadSdk(dataStore)
+                    flowOf(LoginUiState.SignInComplete(authData))
+                } catch (exception: Throwable) {
+                    val message = "Sign in failed: ${exception.message ?: "Generic error"}"
+                    streamLog { "Failed to fetch token - cause: $exception" }
+                    flowOf(LoginUiState.SignInFailure(message))
+                }
+            }
+        } else {
+            flowOf(LoginUiState.Loading)
+        }
+    }
+
+    private fun signIn(user: User): Flow<LoginUiState> = AppConfig.currentEnvironment.flatMapLatest {
+        if (it != null) {
+            if (StreamVideo.isInstalled) {
+                flowOf(LoginUiState.AlreadyLoggedIn)
+            } else {
+                try {
+                    val authData = StreamService.instance.getAuthData(
+                        environment = it.env,
+                        userId = user.id,
                     )
                     // Store the data in the demo app
                     dataStore.updateUser(user)
@@ -160,13 +186,15 @@ sealed interface LoginUiState {
 }
 
 sealed interface LoginEvent {
-    object Nothing : LoginEvent
+    data object Nothing : LoginEvent
 
-    object Loading : LoginEvent
+    data object Loading : LoginEvent
 
     data class GoogleSignIn(val id: String = UUID.randomUUID().toString()) : LoginEvent
 
     data class SignInSuccess(val userId: String) : LoginEvent
 
     data class SignInFailure(val errorMessage: String) : LoginEvent
+
+    data class SignIn(val user: User) : LoginEvent
 }

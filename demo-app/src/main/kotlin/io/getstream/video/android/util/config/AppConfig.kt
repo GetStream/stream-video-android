@@ -68,6 +68,12 @@ object AppConfig {
             displayName = "Staging",
             sharelink = "https://staging.getstream.io/join/",
         ),
+        StreamEnvironment(
+            env = "pronto-staging",
+            aliases = emptyList(),
+            displayName = "Pronto Staging",
+            sharelink = "https://pronto-staging.getstream.io/join/",
+        ),
     )
 
     // Utilities

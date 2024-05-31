@@ -56,7 +56,6 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
-import io.getstream.video.android.models.GoogleAccount
 import java.util.UUID
 
 @Composable
@@ -143,7 +142,7 @@ private fun Body(
                 color = VideoTheme.colors.brandPrimary,
             )
         } else {
-            uiState.googleAccounts?.let { users ->
+            uiState.otherUsers?.let { users ->
                 UserList(
                     entries = users,
                     onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
@@ -167,10 +166,11 @@ private fun Body(
                         style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
                         onClick = {
                             onStartCallClick(
-                                StreamCallId("audio_call", UUID.randomUUID().toString()),
+                                //StreamCallId("audio_call", UUID.randomUUID().toString()),
+                                StreamCallId("default", UUID.randomUUID().toString()),
                                 users
                                     .filter { it.isSelected }
-                                    .joinToString(separator = ",") { it.account.id ?: "" },
+                                    .joinToString(separator = ",") { it.user.id ?: "" },
                             )
                         },
                     )
@@ -189,7 +189,7 @@ private fun Body(
                                 StreamCallId("default", UUID.randomUUID().toString()),
                                 users
                                     .filter { it.isSelected }
-                                    .joinToString(separator = ",") { it.account.id ?: "" },
+                                    .joinToString(separator = ",") { it.user.id ?: "" },
                             )
                         },
                     )
@@ -209,14 +209,14 @@ private fun Body(
 }
 
 @Composable
-private fun UserList(entries: List<GoogleAccountUiState>, onUserClick: (Int) -> Unit) {
+private fun UserList(entries: List<UserUiState>, onUserClick: (Int) -> Unit) {
     LazyColumn {
         items(entries.size) { index ->
             with(entries[index]) {
                 UserRow(
                     index = index,
-                    name = account.name ?: "",
-                    avatarUrl = account.photoUrl,
+                    name = user.name,
+                    avatarUrl = user.image,
                     isSelected = isSelected,
                     onClick = { onUserClick(index) },
                 )
@@ -273,16 +273,13 @@ private fun HeaderPreview() {
         Header(user = User(name = "Very very very long user name here"))
         Body(
             uiState = DirectCallUiState(
-                googleAccounts =
+                otherUsers =
                 previewUsers.map {
-                    GoogleAccountUiState(
+                    UserUiState(
                         isSelected = false,
-                        account = GoogleAccount(
-                            it.id,
-                            it.id,
-                            it.name,
-                            null,
-                            false,
+                        user = User(
+                            id = it.id,
+                            name = it.name,
                         ),
                     )
                 },
