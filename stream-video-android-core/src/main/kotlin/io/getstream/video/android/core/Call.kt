@@ -119,7 +119,7 @@ public class Call(
 
     internal val clientImpl = client as StreamVideoImpl
 
-    private val logger by taggedLogger("Call")
+    private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
 
@@ -305,6 +305,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        logger.d { "[join] #ringing; create: $create, ring: $ring, notify: $notify" }
         val permissionPass =
             clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
@@ -591,12 +592,14 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
+        logger.d { "[leave] #ringing; no args" }
         leave(disconnectionReason = null)
     }
 
     private fun leave(disconnectionReason: Throwable?) {
+        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
-            logger.w { "[leave] Call already destroyed, ignoring" }
+            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return
         }
         isDestroyed = true
@@ -1008,14 +1011,17 @@ public class Call(
     }
 
     suspend fun ring(): Result<GetCallResponse> {
+        logger.d { "[ring] #ringing; no args" }
         return clientImpl.ring(type, id)
     }
 
     suspend fun notify(): Result<GetCallResponse> {
+        logger.d { "[notify] #ringing; no args" }
         return clientImpl.notify(type, id)
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
+        logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
@@ -1024,6 +1030,7 @@ public class Call(
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
+        logger.d { "[reject] #ringing; rejectReason: $reason" }
         return clientImpl.reject(type, id, reason)
     }
 

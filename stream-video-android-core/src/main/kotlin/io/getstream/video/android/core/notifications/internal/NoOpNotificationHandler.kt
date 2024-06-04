@@ -23,6 +23,7 @@ import io.getstream.video.android.model.StreamCallId
 
 internal object NoOpNotificationHandler : NotificationHandler {
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
+    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun getOngoingCallNotification(

@@ -26,7 +26,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -66,7 +65,7 @@ public open class DefaultNotificationHandler(
 ) : NotificationHandler,
     NotificationPermissionHandler by notificationPermissionHandler {
 
-    private val logger: TaggedLogger by taggedLogger("Video:DefaultNotificationHandler")
+    private val logger by taggedLogger("Call:NotificationHandler")
     private val intentResolver = DefaultStreamIntentResolver(application)
     private val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
@@ -86,8 +85,21 @@ public open class DefaultNotificationHandler(
     }
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        Log.d("ServiceDebug", "[onRingingCall] callId: ${callId.id}")
+        logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         CallService.showIncomingCall(application, callId, callDisplayName)
+    }
+
+    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+        logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
+        val notificationId = callId.hashCode()
+        intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
+            ?.let { notificationPendingIntent ->
+                showMissedCallNotification(
+                    notificationPendingIntent,
+                    callDisplayName,
+                    notificationId,
+                )
+            } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
     }
 
     override fun getRingingCallNotification(
@@ -343,6 +355,17 @@ public open class DefaultNotificationHandler(
         showNotification(notificationId) {
             setContentTitle("Incoming call")
             setContentText("$callDisplayName is calling you.")
+            setContentIntent(notificationPendingIntent)
+        }
+    }
+
+    private fun showMissedCallNotification(
+        notificationPendingIntent: PendingIntent,
+        callDisplayName: String,
+        notificationId: Int,
+    ) {
+        showNotification(notificationId) {
+            setContentTitle("Missed call from $callDisplayName")
             setContentIntent(notificationPendingIntent)
         }
     }

@@ -31,10 +31,12 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
  */
 internal class LeaveCallBroadcastReceiver : GenericCallActionBroadcastReceiver() {
 
-    val logger by taggedLogger("LeaveCallBroadcastReceiver")
+    val logger by taggedLogger("Call:LeaveReceiver")
     override val action = ACTION_LEAVE_CALL
 
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
+        logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
+
         call.leave()
         val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
         NotificationManagerCompat.from(context).cancel(notificationId)
