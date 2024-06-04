@@ -23,34 +23,19 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.OwnUser
 
-
-
-
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
  *
- * @param cid
  * @param connectionId
  * @param createdAt
  * @param type
- * @param me
  */
 
 
 data class HealthCheckEvent (
-
-    @Json(name = "cid")
-    val cid: kotlin.String,
 
     @Json(name = "connection_id")
     val connectionId: kotlin.String,
@@ -60,9 +45,6 @@ data class HealthCheckEvent (
 
     @Json(name = "type")
     val type: kotlin.String = "health.check",
-
-    @Json(name = "me")
-    val me: OwnUser? = null
 
 ) : VideoEvent(), WSClientEvent {
 
