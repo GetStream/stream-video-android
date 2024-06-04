@@ -20,6 +20,9 @@ library/.env
 # Java class files
 *.class
 
+# Kotlin class files
+.kotlin
+
 # Generated files
 bin/
 gen/
