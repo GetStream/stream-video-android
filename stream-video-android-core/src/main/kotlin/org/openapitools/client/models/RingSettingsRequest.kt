@@ -40,15 +40,19 @@ import org.openapitools.client.infrastructure.Serializer
  *
  * @param autoCancelTimeoutMs
  * @param incomingCallTimeoutMs
+ * @param missedCallTimeoutMs
  */
 
 
 data class RingSettingsRequest (
 
     @Json(name = "auto_cancel_timeout_ms")
-    val autoCancelTimeoutMs: kotlin.Int? = null,
+    val autoCancelTimeoutMs: kotlin.Int,
 
     @Json(name = "incoming_call_timeout_ms")
-    val incomingCallTimeoutMs: kotlin.Int? = null
+    val incomingCallTimeoutMs: kotlin.Int,
+
+    @Json(name = "missed_call_timeout_ms")
+    val missedCallTimeoutMs: kotlin.Int? = null
 
 )

@@ -23,7 +23,7 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.TargetResolutionRequest
+import org.openapitools.client.models.TargetResolution
 
 
 
@@ -62,7 +62,7 @@ data class VideoSettingsRequest (
     val enabled: kotlin.Boolean? = null,
 
     @Json(name = "target_resolution")
-    val targetResolution: TargetResolutionRequest? = null
+    val targetResolution: TargetResolution? = null
 
 )
 

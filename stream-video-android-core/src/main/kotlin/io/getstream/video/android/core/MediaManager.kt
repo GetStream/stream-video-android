@@ -38,12 +38,13 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openapitools.client.models.VideoSettings
+import org.openapitools.client.models.VideoSettingsResponse
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
@@ -51,7 +52,6 @@ import org.webrtc.EglBase
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
 import stream.video.sfu.models.VideoDimension
-import java.util.UUID
 
 sealed class DeviceStatus {
     data object NotSelected : DeviceStatus()
@@ -728,7 +728,7 @@ public class CameraManager(
      */
     internal fun selectDesiredResolution(
         supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
-        videoSettings: VideoSettings?,
+        videoSettings: VideoSettingsResponse?,
     ): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960

@@ -38,13 +38,18 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
+ * @param recordingStorageName
  * @param startHls
  * @param startRecording
  * @param startTranscription
+ * @param transcriptionStorageName
  */
 
 
 data class GoLiveRequest (
+
+    @Json(name = "recording_storage_name")
+    val recordingStorageName: kotlin.String? = null,
 
     @Json(name = "start_hls")
     val startHls: kotlin.Boolean? = null,
@@ -53,6 +58,9 @@ data class GoLiveRequest (
     val startRecording: kotlin.Boolean? = null,
 
     @Json(name = "start_transcription")
-    val startTranscription: kotlin.Boolean? = null
+    val startTranscription: kotlin.Boolean? = null,
+
+    @Json(name = "transcription_storage_name")
+    val transcriptionStorageName: kotlin.String? = null
 
 )

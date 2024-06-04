@@ -35,6 +35,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
@@ -44,6 +45,8 @@ import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import java.util.Collections
+import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -56,7 +59,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.openapitools.client.models.AcceptCallResponse
-import org.openapitools.client.models.AudioSettings
+import org.openapitools.client.models.AudioSettingsResponse
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.CallSettingsResponse
@@ -70,7 +73,7 @@ import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
-import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnpinResponse
@@ -80,15 +83,13 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoSettings
+import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import java.util.Collections
-import kotlin.coroutines.resume
 
 /**
  * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
@@ -770,7 +771,7 @@ public class Call(
         return result
     }
 
-    suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendEventResponse> {
+    suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> {
         return clientImpl.sendCustomEvent(this.type, this.id, data)
     }
 
@@ -905,7 +906,7 @@ public class Call(
                     // be a new audio.defaultDevice setting returned from backend
                     true
                 } else {
-                    callSettings.audio.defaultDevice == AudioSettings.DefaultDevice.Speaker
+                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker
                 }
             speaker.setEnabled(enableSpeaker)
         }
@@ -913,7 +914,7 @@ public class Call(
         // Camera
         if (camera.status.value is DeviceStatus.NotSelected) {
             val defaultDirection =
-                if (callSettings.video.cameraFacing == VideoSettings.CameraFacing.Front) {
+                if (callSettings.video.cameraFacing == VideoSettingsResponse.CameraFacing.Front) {
                     CameraDirection.Front
                 } else {
                     CameraDirection.Back
@@ -1022,8 +1023,8 @@ public class Call(
         return clientImpl.accept(type, id)
     }
 
-    suspend fun reject(): Result<RejectCallResponse> {
-        return clientImpl.reject(type, id)
+    suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
+        return clientImpl.reject(type, id, reason)
     }
 
     fun processAudioSample(audioSample: AudioSamples) {

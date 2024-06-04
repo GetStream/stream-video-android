@@ -38,21 +38,21 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
+ * @param qualityTracks
  * @param autoOn
  * @param enabled
- * @param qualityTracks
  */
 
 
 data class HLSSettingsRequest (
 
+    @Json(name = "quality_tracks")
+    val qualityTracks: kotlin.collections.List<kotlin.String>,
+
     @Json(name = "auto_on")
     val autoOn: kotlin.Boolean? = null,
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null,
-
-    @Json(name = "quality_tracks")
-    val qualityTracks: kotlin.collections.List<kotlin.String>? = null
+    val enabled: kotlin.Boolean? = null
 
 )

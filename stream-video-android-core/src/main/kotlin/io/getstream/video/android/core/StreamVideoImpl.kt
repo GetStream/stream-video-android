@@ -38,6 +38,7 @@ import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueriedMembers
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
@@ -58,6 +59,9 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import java.util.*
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -95,16 +99,18 @@ import org.openapitools.client.models.ListRecordingsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.PinRequest
+import org.openapitools.client.models.QueryCallMembersRequest
+import org.openapitools.client.models.QueryCallMembersResponse
 import org.openapitools.client.models.QueryCallsRequest
-import org.openapitools.client.models.QueryMembersRequest
-import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.RejectCallRequest
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.RequestPermissionRequest
-import org.openapitools.client.models.SendEventRequest
-import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendCallEventRequest
+import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StartBroadcastingResponse
+import org.openapitools.client.models.StartHLSBroadcastingResponse
+import org.openapitools.client.models.StartRecordingRequest
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UnpinRequest
@@ -117,9 +123,6 @@ import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
-import java.util.*
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resumeWithException
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 
@@ -711,14 +714,14 @@ internal class StreamVideoImpl internal constructor(
         type: String,
         id: String,
         dataJson: Map<String, Any>,
-    ): Result<SendEventResponse> {
+    ): Result<SendCallEventResponse> {
         logger.d { "[sendCustomEvent] callCid: $type:$id, dataJson: $dataJson" }
 
         return wrapAPICall {
-            connectionModule.api.sendEvent(
+            connectionModule.api.sendCallEvent(
                 type,
                 id,
-                SendEventRequest(custom = dataJson),
+                SendCallEventRequest(custom = dataJson),
             )
         }
     }
@@ -731,10 +734,10 @@ internal class StreamVideoImpl internal constructor(
         prev: String?,
         next: String?,
         limit: Int,
-    ): Result<QueryMembersResponse> {
+    ): Result<QueryCallMembersResponse> {
         return wrapAPICall {
-            connectionModule.api.queryMembers(
-                QueryMembersRequest(
+            connectionModule.api.queryCallMembers(
+                QueryCallMembersRequest(
                     type = type,
                     id = id,
                     filterConditions = filter,
@@ -908,18 +911,23 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    suspend fun startBroadcasting(type: String, id: String): Result<StartBroadcastingResponse> {
+    suspend fun startBroadcasting(type: String, id: String): Result<StartHLSBroadcastingResponse> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
-        return wrapAPICall { connectionModule.api.startBroadcasting(type, id) }
+        return wrapAPICall { connectionModule.api.startHLSBroadcasting(type, id) }
     }
 
     suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
-        return wrapAPICall { connectionModule.api.stopBroadcasting(type, id) }
+        return wrapAPICall { connectionModule.api.stopHLSBroadcasting(type, id) }
     }
 
-    suspend fun startRecording(type: String, id: String): Result<Unit> {
-        return wrapAPICall { connectionModule.api.startRecording(type, id) }
+    suspend fun startRecording(
+        type: String, id: String, externalStorage: String? = null,
+    ): Result<Unit> {
+        return wrapAPICall {
+            val req = StartRecordingRequest(externalStorage)
+            connectionModule.api.startRecording(type, id, req)
+        }
     }
 
     suspend fun stopRecording(type: String, id: String): Result<Unit> {
@@ -948,12 +956,7 @@ internal class StreamVideoImpl internal constructor(
         sessionId: String?,
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
-            val result = if (sessionId == null) {
-                connectionModule.api.listRecordingsTypeId0(type, id)
-            } else {
-                connectionModule.api.listRecordingsTypeIdSession1(type, id, sessionId)
-            }
-            result
+            connectionModule.api.listRecordings(type, id)
         }
     }
 
@@ -1039,9 +1042,11 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    internal suspend fun reject(type: String, id: String): Result<RejectCallResponse> {
+    internal suspend fun reject(
+        type: String, id: String, reason: RejectReason? = null,
+    ): Result<RejectCallResponse> {
         return wrapAPICall {
-            connectionModule.api.rejectCall(type, id)
+            connectionModule.api.rejectCall(type, id, RejectCallRequest(reason?.alias))
         }
     }
 

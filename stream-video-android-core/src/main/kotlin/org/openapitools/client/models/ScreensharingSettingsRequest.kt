@@ -23,6 +23,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.TargetResolution
 
 
 
@@ -40,6 +41,7 @@ import org.openapitools.client.infrastructure.Serializer
  *
  * @param accessRequestEnabled
  * @param enabled
+ * @param targetResolution
  */
 
 
@@ -49,6 +51,9 @@ data class ScreensharingSettingsRequest (
     val accessRequestEnabled: kotlin.Boolean? = null,
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null
+    val enabled: kotlin.Boolean? = null,
+
+    @Json(name = "target_resolution")
+    val targetResolution: TargetResolution? = null
 
 )

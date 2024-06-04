@@ -23,6 +23,8 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.PrivacySettings
+import org.openapitools.client.models.PushNotificationSettingsInput
 
 
 
@@ -41,7 +43,11 @@ import org.openapitools.client.infrastructure.Serializer
  * @param id User ID
  * @param custom
  * @param image
+ * @param invisible
+ * @param language
  * @param name Optional name of user
+ * @param privacySettings
+ * @param pushNotifications
  */
 
 
@@ -57,8 +63,20 @@ data class UserRequest (
     @Json(name = "image")
     val image: kotlin.String? = null,
 
+    @Json(name = "invisible")
+    val invisible: kotlin.Boolean? = null,
+
+    @Json(name = "language")
+    val language: kotlin.String? = null,
+
     /* Optional name of user */
     @Json(name = "name")
-    val name: kotlin.String? = null
+    val name: kotlin.String? = null,
+
+    @Json(name = "privacy_settings")
+    val privacySettings: PrivacySettings? = null,
+
+    @Json(name = "push_notifications")
+    val pushNotifications: PushNotificationSettingsInput? = null
 
 )

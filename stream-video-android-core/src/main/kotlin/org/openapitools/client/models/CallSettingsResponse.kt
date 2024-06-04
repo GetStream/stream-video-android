@@ -23,15 +23,17 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.AudioSettings
-import org.openapitools.client.models.BackstageSettings
-import org.openapitools.client.models.BroadcastSettings
-import org.openapitools.client.models.GeofenceSettings
-import org.openapitools.client.models.RecordSettings
-import org.openapitools.client.models.RingSettings
-import org.openapitools.client.models.ScreensharingSettings
-import org.openapitools.client.models.TranscriptionSettings
-import org.openapitools.client.models.VideoSettings
+import org.openapitools.client.models.AudioSettingsResponse
+import org.openapitools.client.models.BackstageSettingsResponse
+import org.openapitools.client.models.BroadcastSettingsResponse
+import org.openapitools.client.models.GeofenceSettingsResponse
+import org.openapitools.client.models.LimitsSettingsResponse
+import org.openapitools.client.models.RecordSettingsResponse
+import org.openapitools.client.models.RingSettingsResponse
+import org.openapitools.client.models.ScreensharingSettingsResponse
+import org.openapitools.client.models.ThumbnailsSettingsResponse
+import org.openapitools.client.models.TranscriptionSettingsResponse
+import org.openapitools.client.models.VideoSettingsResponse
 
 
 
@@ -51,9 +53,11 @@ import org.openapitools.client.infrastructure.Serializer
  * @param backstage
  * @param broadcasting
  * @param geofencing
+ * @param limits
  * @param recording
  * @param ring
  * @param screensharing
+ * @param thumbnails
  * @param transcription
  * @param video
  */
@@ -62,30 +66,36 @@ import org.openapitools.client.infrastructure.Serializer
 data class CallSettingsResponse (
 
     @Json(name = "audio")
-    val audio: AudioSettings,
+    val audio: AudioSettingsResponse,
 
     @Json(name = "backstage")
-    val backstage: BackstageSettings,
+    val backstage: BackstageSettingsResponse,
 
     @Json(name = "broadcasting")
-    val broadcasting: BroadcastSettings,
+    val broadcasting: BroadcastSettingsResponse,
 
     @Json(name = "geofencing")
-    val geofencing: GeofenceSettings,
+    val geofencing: GeofenceSettingsResponse,
+
+    @Json(name = "limits")
+    val limits: LimitsSettingsResponse,
 
     @Json(name = "recording")
-    val recording: RecordSettings,
+    val recording: RecordSettingsResponse,
 
     @Json(name = "ring")
-    val ring: RingSettings,
+    val ring: RingSettingsResponse,
 
     @Json(name = "screensharing")
-    val screensharing: ScreensharingSettings,
+    val screensharing: ScreensharingSettingsResponse,
+
+    @Json(name = "thumbnails")
+    val thumbnails: ThumbnailsSettingsResponse,
 
     @Json(name = "transcription")
-    val transcription: TranscriptionSettings,
+    val transcription: TranscriptionSettingsResponse,
 
     @Json(name = "video")
-    val video: VideoSettings
+    val video: VideoSettingsResponse
 
 )

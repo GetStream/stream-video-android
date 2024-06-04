@@ -23,6 +23,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.OwnUser
 
 
 
@@ -38,24 +39,30 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param connectionId The connection_id for this client
+ * @param cid
+ * @param connectionId
  * @param createdAt
- * @param type The type of event: \"health.check\" in this case
+ * @param type
+ * @param me
  */
 
 
 data class HealthCheckEvent (
 
-    /* The connection_id for this client */
+    @Json(name = "cid")
+    val cid: kotlin.String,
+
     @Json(name = "connection_id")
     val connectionId: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* The type of event: \"health.check\" in this case */
     @Json(name = "type")
-    val type: kotlin.String = "health.check"
+    val type: kotlin.String = "health.check",
+
+    @Json(name = "me")
+    val me: OwnUser? = null
 
 ) : VideoEvent(), WSClientEvent {
 
