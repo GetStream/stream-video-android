@@ -105,7 +105,7 @@ interface ProductvideoApi {
      * @param id
      * @return [AcceptCallResponse]
      */
-    @POST("/video/video/call/{type}/{id}/accept")
+    @POST("/video/call/{type}/{id}/accept")
     suspend fun acceptCall(
         @Path("type") type: String,
         @Path("id") id: String
@@ -124,7 +124,7 @@ interface ProductvideoApi {
      * @param blockUserRequest
      * @return [BlockUserResponse]
      */
-    @POST("/video/video/call/{type}/{id}/block")
+    @POST("/video/call/{type}/{id}/block")
     suspend fun blockUser(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -145,7 +145,7 @@ interface ProductvideoApi {
      * @param collectUserFeedbackRequest
      * @return [CollectUserFeedbackResponse]
      */
-    @POST("/video/video/call/{type}/{id}/feedback/{session}")
+    @POST("/video/call/{type}/{id}/feedback/{session}")
     suspend fun collectUserFeedback(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -164,7 +164,7 @@ interface ProductvideoApi {
      * @param createDeviceRequest
      * @return [Response]
      */
-    @POST("/video/video/devices")
+    @POST("/video/devices")
     suspend fun createDevice(
         @Body createDeviceRequest: CreateDeviceRequest
     ): Response
@@ -180,7 +180,7 @@ interface ProductvideoApi {
      * @param createGuestRequest
      * @return [CreateGuestResponse]
      */
-    @POST("/video/video/guest")
+    @POST("/video/guest")
     suspend fun createGuest(
         @Body createGuestRequest: CreateGuestRequest
     ): CreateGuestResponse
@@ -197,7 +197,7 @@ interface ProductvideoApi {
      * @param userId  (optional)
      * @return [Response]
      */
-    @DELETE("/video/video/devices")
+    @DELETE("/video/devices")
     suspend fun deleteDevice(
         @Query("id") id: String,
         @Query("user_id") userId: String? = null
@@ -217,7 +217,7 @@ interface ProductvideoApi {
      * @param filename
      * @return [DeleteRecordingResponse]
      */
-    @DELETE("/video/video/call/{type}/{id}/{session}/recordings/{filename}")
+    @DELETE("/video/call/{type}/{id}/{session}/recordings/{filename}")
     suspend fun deleteRecording(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -239,7 +239,7 @@ interface ProductvideoApi {
      * @param filename
      * @return [DeleteTranscriptionResponse]
      */
-    @DELETE("/video/video/call/{type}/{id}/{session}/transcriptions/{filename}")
+    @DELETE("/video/call/{type}/{id}/{session}/transcriptions/{filename}")
     suspend fun deleteTranscription(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -259,7 +259,7 @@ interface ProductvideoApi {
      * @param id
      * @return [EndCallResponse]
      */
-    @POST("/video/video/call/{type}/{id}/mark_ended")
+    @POST("/video/call/{type}/{id}/mark_ended")
     suspend fun endCall(
         @Path("type") type: String,
         @Path("id") id: String
@@ -281,7 +281,7 @@ interface ProductvideoApi {
      * @param notify  (optional)
      * @return [GetCallResponse]
      */
-    @GET("/video/video/call/{type}/{id}")
+    @GET("/video/call/{type}/{id}")
     suspend fun getCall(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -304,7 +304,7 @@ interface ProductvideoApi {
      * @param session
      * @return [GetCallStatsResponse]
      */
-    @GET("/video/video/call/{type}/{id}/stats/{session}")
+    @GET("/video/call/{type}/{id}/stats/{session}")
     suspend fun getCallStats(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -321,7 +321,7 @@ interface ProductvideoApi {
      *
      * @return [GetEdgesResponse]
      */
-    @GET("/video/video/edges")
+    @GET("/video/edges")
     suspend fun getEdges(
     ): GetEdgesResponse
 
@@ -339,7 +339,7 @@ interface ProductvideoApi {
      * @param connectionId  (optional)
      * @return [GetOrCreateCallResponse]
      */
-    @POST("/video/video/call/{type}/{id}")
+    @POST("/video/call/{type}/{id}")
     suspend fun getOrCreateCall(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -360,7 +360,7 @@ interface ProductvideoApi {
      * @param goLiveRequest
      * @return [GoLiveResponse]
      */
-    @POST("/video/video/call/{type}/{id}/go_live")
+    @POST("/video/call/{type}/{id}/go_live")
     suspend fun goLive(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -381,7 +381,7 @@ interface ProductvideoApi {
      * @param connectionId  (optional)
      * @return [JoinCallResponse]
      */
-    @POST("/video/video/call/{type}/{id}/join")
+    @POST("/video/call/{type}/{id}/join")
     suspend fun joinCall(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -400,7 +400,7 @@ interface ProductvideoApi {
      * @param userId  (optional)
      * @return [ListDevicesResponse]
      */
-    @GET("/video/video/devices")
+    @GET("/video/devices")
     suspend fun listDevices(
         @Query("user_id") userId: String? = null
     ): ListDevicesResponse
@@ -417,7 +417,7 @@ interface ProductvideoApi {
      * @param id
      * @return [ListRecordingsResponse]
      */
-    @GET("/video/video/call/{type}/{id}/recordings")
+    @GET("/video/call/{type}/{id}/recordings")
     suspend fun listRecordings(
         @Path("type") type: String,
         @Path("id") id: String
@@ -435,7 +435,7 @@ interface ProductvideoApi {
      * @param id
      * @return [ListTranscriptionsResponse]
      */
-    @GET("/video/video/call/{type}/{id}/transcriptions")
+    @GET("/video/call/{type}/{id}/transcriptions")
     suspend fun listTranscriptions(
         @Path("type") type: String,
         @Path("id") id: String
@@ -454,7 +454,7 @@ interface ProductvideoApi {
      * @param muteUsersRequest
      * @return [MuteUsersResponse]
      */
-    @POST("/video/video/call/{type}/{id}/mute_users")
+    @POST("/video/call/{type}/{id}/mute_users")
     suspend fun muteUsers(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -472,7 +472,7 @@ interface ProductvideoApi {
      * @param queryCallMembersRequest
      * @return [QueryCallMembersResponse]
      */
-    @POST("/video/video/call/members")
+    @POST("/video/call/members")
     suspend fun queryCallMembers(
         @Body queryCallMembersRequest: QueryCallMembersRequest
     ): QueryCallMembersResponse
@@ -488,7 +488,7 @@ interface ProductvideoApi {
      * @param queryCallStatsRequest
      * @return [QueryCallStatsResponse]
      */
-    @POST("/video/video/call/stats")
+    @POST("/video/call/stats")
     suspend fun queryCallStats(
         @Body queryCallStatsRequest: QueryCallStatsRequest
     ): QueryCallStatsResponse
@@ -505,7 +505,7 @@ interface ProductvideoApi {
      * @param connectionId  (optional)
      * @return [QueryCallsResponse]
      */
-    @POST("/video/video/calls")
+    @POST("/video/calls")
     suspend fun queryCalls(
         @Body queryCallsRequest: QueryCallsRequest,
         @Query("connection_id") connectionId: String? = null
@@ -524,7 +524,7 @@ interface ProductvideoApi {
      * @param rejectCallRequest
      * @return [RejectCallResponse]
      */
-    @POST("/video/video/call/{type}/{id}/reject")
+    @POST("/video/call/{type}/{id}/reject")
     suspend fun rejectCall(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -544,7 +544,7 @@ interface ProductvideoApi {
      * @param requestPermissionRequest
      * @return [RequestPermissionResponse]
      */
-    @POST("/video/video/call/{type}/{id}/request_permission")
+    @POST("/video/call/{type}/{id}/request_permission")
     suspend fun requestPermission(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -564,7 +564,7 @@ interface ProductvideoApi {
      * @param sendCallEventRequest
      * @return [SendCallEventResponse]
      */
-    @POST("/video/video/call/{type}/{id}/event")
+    @POST("/video/call/{type}/{id}/event")
     suspend fun sendCallEvent(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -584,7 +584,7 @@ interface ProductvideoApi {
      * @param sendReactionRequest
      * @return [SendReactionResponse]
      */
-    @POST("/video/video/call/{type}/{id}/reaction")
+    @POST("/video/call/{type}/{id}/reaction")
     suspend fun sendVideoReaction(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -603,7 +603,7 @@ interface ProductvideoApi {
      * @param id
      * @return [StartHLSBroadcastingResponse]
      */
-    @POST("/video/video/call/{type}/{id}/start_broadcasting")
+    @POST("/video/call/{type}/{id}/start_broadcasting")
     suspend fun startHLSBroadcasting(
         @Path("type") type: String,
         @Path("id") id: String
@@ -622,7 +622,7 @@ interface ProductvideoApi {
      * @param startRecordingRequest
      * @return [StartRecordingResponse]
      */
-    @POST("/video/video/call/{type}/{id}/start_recording")
+    @POST("/video/call/{type}/{id}/start_recording")
     suspend fun startRecording(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -642,7 +642,7 @@ interface ProductvideoApi {
      * @param startTranscriptionRequest
      * @return [StartTranscriptionResponse]
      */
-    @POST("/video/video/call/{type}/{id}/start_transcription")
+    @POST("/video/call/{type}/{id}/start_transcription")
     suspend fun startTranscription(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -661,7 +661,7 @@ interface ProductvideoApi {
      * @param id
      * @return [StopHLSBroadcastingResponse]
      */
-    @POST("/video/video/call/{type}/{id}/stop_broadcasting")
+    @POST("/video/call/{type}/{id}/stop_broadcasting")
     suspend fun stopHLSBroadcasting(
         @Path("type") type: String,
         @Path("id") id: String
@@ -679,7 +679,7 @@ interface ProductvideoApi {
      * @param id
      * @return [StopLiveResponse]
      */
-    @POST("/video/video/call/{type}/{id}/stop_live")
+    @POST("/video/call/{type}/{id}/stop_live")
     suspend fun stopLive(
         @Path("type") type: String,
         @Path("id") id: String
@@ -697,7 +697,7 @@ interface ProductvideoApi {
      * @param id
      * @return [StopRecordingResponse]
      */
-    @POST("/video/video/call/{type}/{id}/stop_recording")
+    @POST("/video/call/{type}/{id}/stop_recording")
     suspend fun stopRecording(
         @Path("type") type: String,
         @Path("id") id: String
@@ -715,7 +715,7 @@ interface ProductvideoApi {
      * @param id
      * @return [StopTranscriptionResponse]
      */
-    @POST("/video/video/call/{type}/{id}/stop_transcription")
+    @POST("/video/call/{type}/{id}/stop_transcription")
     suspend fun stopTranscription(
         @Path("type") type: String,
         @Path("id") id: String
@@ -734,7 +734,7 @@ interface ProductvideoApi {
      * @param unblockUserRequest
      * @return [UnblockUserResponse]
      */
-    @POST("/video/video/call/{type}/{id}/unblock")
+    @POST("/video/call/{type}/{id}/unblock")
     suspend fun unblockUser(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -754,7 +754,7 @@ interface ProductvideoApi {
      * @param updateCallRequest
      * @return [UpdateCallResponse]
      */
-    @PATCH("/video/video/call/{type}/{id}")
+    @PATCH("/video/call/{type}/{id}")
     suspend fun updateCall(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -774,7 +774,7 @@ interface ProductvideoApi {
      * @param updateCallMembersRequest
      * @return [UpdateCallMembersResponse]
      */
-    @POST("/video/video/call/{type}/{id}/members")
+    @POST("/video/call/{type}/{id}/members")
     suspend fun updateCallMembers(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -794,7 +794,7 @@ interface ProductvideoApi {
      * @param updateUserPermissionsRequest
      * @return [UpdateUserPermissionsResponse]
      */
-    @POST("/video/video/call/{type}/{id}/user_permissions")
+    @POST("/video/call/{type}/{id}/user_permissions")
     suspend fun updateUserPermissions(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -810,7 +810,7 @@ interface ProductvideoApi {
      *
      * @return [Unit]
      */
-    @GET("/video/video/longpoll")
+    @GET("/video/longpoll")
     suspend fun videoConnect(
     ): Unit
 
@@ -827,7 +827,7 @@ interface ProductvideoApi {
      * @param pinRequest
      * @return [PinResponse]
      */
-    @POST("/video/video/call/{type}/{id}/pin")
+    @POST("/video/call/{type}/{id}/pin")
     suspend fun videoPin(
         @Path("type") type: String,
         @Path("id") id: String,
@@ -847,7 +847,7 @@ interface ProductvideoApi {
      * @param unpinRequest
      * @return [UnpinResponse]
      */
-    @POST("/video/video/call/{type}/{id}/unpin")
+    @POST("/video/call/{type}/{id}/unpin")
     suspend fun videoUnpin(
         @Path("type") type: String,
         @Path("id") id: String,
