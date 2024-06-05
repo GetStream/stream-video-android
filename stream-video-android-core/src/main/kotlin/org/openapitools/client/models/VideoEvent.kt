@@ -144,13 +144,13 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.session_participant_joined" -> CallSessionParticipantJoinedEvent::class.java
             "call.session_participant_left" -> CallSessionParticipantLeftEvent::class.java
             "call.session_started" -> CallSessionStartedEvent::class.java
-            "call.transcription_failed" -> CallTranscriptionFailedEvent::class.java
-            "call.transcription_ready" -> CallTranscriptionReadyEvent::class.java
-            "call.transcription_started" -> CallTranscriptionStartedEvent::class.java
-            "call.transcription_stopped" -> CallTranscriptionStoppedEvent::class.java
             "call.unblocked_user" -> UnblockedUserEvent::class.java
             "call.updated" -> CallUpdatedEvent::class.java
             "call.user_muted" -> CallUserMutedEvent::class.java
+            "call.transcription_started" -> CallTranscriptionStartedEvent::class.java
+            "call.transcription_stopped" -> CallTranscriptionStoppedEvent::class.java
+            "call.transcription_ready" -> CallTranscriptionReadyEvent::class.java
+            "call.transcription_failed" -> CallTranscriptionFailedEvent::class.java
             "connection.error" -> ConnectionErrorEvent::class.java
             "connection.ok" -> ConnectedEvent::class.java
             "custom" -> CustomVideoEvent::class.java
@@ -163,7 +163,13 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "user.reactivated" -> UserReactivatedEvent::class.java
             "user.unbanned" -> UserUnbannedEvent::class.java
             "user.updated" -> UserUpdatedEvent::class.java
-            else -> throw IllegalArgumentException("Unknown type: $type")
+            else -> UnknownVideoEvent(type)::class.java
         }
     }
+}
+
+data class UnknownVideoEvent(
+    @Json(name = "type") val expectedType: String
+) : VideoEvent() {
+    override fun getEventType() = "unknown"
 }
