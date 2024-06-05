@@ -75,7 +75,7 @@ public open class PersistentSocket<T>(
     var reconnectTimeout: Long = 500
 
     /** flow with all the events, listen to this */
-    val events = MutableSharedFlow<VideoEvent>()
+    val events = MutableSharedFlow<VideoEvent>(replay = 3)
 
     /** flow with temporary and permanent errors */
     val errors = MutableSharedFlow<Throwable>()
