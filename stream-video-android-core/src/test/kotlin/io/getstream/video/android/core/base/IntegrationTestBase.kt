@@ -28,35 +28,38 @@ import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.mockk.MockKAnnotations
 import io.mockk.mockk
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
-import org.openapitools.client.models.AudioSettings
-import org.openapitools.client.models.BackstageSettings
-import org.openapitools.client.models.BroadcastSettings
+import org.openapitools.client.models.AudioSettingsResponse
+import org.openapitools.client.models.BackstageSettingsResponse
+import org.openapitools.client.models.BroadcastSettingsResponse
 import org.openapitools.client.models.CallIngressResponse
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.EgressResponse
-import org.openapitools.client.models.GeofenceSettings
-import org.openapitools.client.models.HLSSettings
+import org.openapitools.client.models.GeofenceSettingsResponse
+import org.openapitools.client.models.HLSSettingsResponse
+import org.openapitools.client.models.LimitsSettingsResponse
 import org.openapitools.client.models.RTMPIngress
-import org.openapitools.client.models.RecordSettings
-import org.openapitools.client.models.RingSettings
-import org.openapitools.client.models.ScreensharingSettings
+import org.openapitools.client.models.RecordSettingsRequest
+import org.openapitools.client.models.RecordSettingsResponse
+import org.openapitools.client.models.RingSettingsResponse
+import org.openapitools.client.models.ScreensharingSettingsResponse
 import org.openapitools.client.models.TargetResolution
-import org.openapitools.client.models.TranscriptionSettings
+import org.openapitools.client.models.ThumbnailsSettingsResponse
+import org.openapitools.client.models.TranscriptionSettingsResponse
 import org.openapitools.client.models.UserResponse
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoSettings
+import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 object IntegrationTestState {
     var client: StreamVideo? = null
@@ -202,37 +205,44 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
 internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
     val now = OffsetDateTime.now(Clock.systemUTC())
     val ingress = CallIngressResponse(rtmp = RTMPIngress(address = ""))
-    val audioSettings = AudioSettings(
+    val audioSettings = AudioSettingsResponse(
         accessRequestEnabled = true,
         micDefaultOn = true,
         opusDtxEnabled = true,
         redundantCodingEnabled = true,
         speakerDefaultOn = true,
-        defaultDevice = AudioSettings.DefaultDevice.Speaker,
+        defaultDevice = AudioSettingsResponse.DefaultDevice.Speaker,
     )
     val settings = CallSettingsResponse(
         audio = audioSettings,
-        backstage = BackstageSettings(enabled = false),
-        broadcasting = BroadcastSettings(
+        backstage = BackstageSettingsResponse(enabled = false),
+        broadcasting = BroadcastSettingsResponse(
             enabled = false,
-            hls = HLSSettings(autoOn = false, enabled = false, qualityTracks = listOf("f")),
+            hls = HLSSettingsResponse(autoOn = false, enabled = false, qualityTracks = listOf("f")),
         ),
-        geofencing = GeofenceSettings(names = emptyList()),
-        recording = RecordSettings(
+        geofencing = GeofenceSettingsResponse(names = emptyList()),
+        recording = RecordSettingsResponse(
             audioOnly = false,
-            mode = RecordSettings.Mode.Available,
-            quality = RecordSettings.Quality.`720p`,
+            mode = RecordSettingsRequest.Mode.Available.value,
+            quality = RecordSettingsRequest.Quality.`720p`.value,
         ),
-        ring = RingSettings(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000),
-        screensharing = ScreensharingSettings(false, false),
-        transcription = TranscriptionSettings("test", TranscriptionSettings.Mode.Available),
-        video = VideoSettings(
+        ring = RingSettingsResponse(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000, missedCallTimeoutMs = 10000),
+        screensharing = ScreensharingSettingsResponse(false, false),
+        transcription = TranscriptionSettingsResponse("test", emptyList(), TranscriptionSettingsResponse.Mode.Available),
+        video = VideoSettingsResponse(
             false,
             false,
-            VideoSettings.CameraFacing.Front,
+            VideoSettingsResponse.CameraFacing.Front,
             false,
             TargetResolution(3000000, 1024, 1280),
         ),
+        limits = LimitsSettingsResponse(
+            maxParticipants = 10,
+            maxDurationSeconds = 10,
+        ),
+        thumbnails = ThumbnailsSettingsResponse(
+            enabled = false,
+        )
     )
     val response = CallResponse(
         id = id,
