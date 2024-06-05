@@ -23,10 +23,10 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import org.openapitools.client.infrastructure.Serializer
+import org.openapitools.client.models.APIError
 import org.openapitools.client.models.ConnectUserDetailsRequest
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.UnknownVideoEvent
@@ -82,52 +82,47 @@ public class CoordinatorSocket(
     override fun onMessage(webSocket: WebSocket, text: String) {
         logger.d { "[onMessage] text: $text " }
 
-        if (text.isEmpty()) {
+        if (text.isEmpty() || text == "null") {
             logger.w { "[onMessage] Received empty socket message" }
             return
         }
 
         scope.launch(singleThreadDispatcher) {
-            // parse the message
-            val jsonAdapter: JsonAdapter<VideoEvent> = Serializer.moshi.adapter(
-                VideoEvent::class.java,
-            )
-
-            val parsedEvent = try {
-                jsonAdapter.fromJson(text)
+            try {
+                // Try to parse an APIError first
+                Serializer.moshi.adapter(APIError::class.java).let { errorAdapter ->
+                    errorAdapter.fromJson(text)?.let { parsedError ->
+                        handleError(
+                            ErrorResponse(
+                                code = parsedError.code,
+                                message = parsedError.message,
+                                statusCode = parsedError.statusCode,
+                                exceptionFields = parsedError.exceptionFields ?: emptyMap(),
+                                moreInfo = parsedError.moreInfo,
+                            ),
+                        )
+                    }
+                }
             } catch (e: Throwable) {
-                logger.w { "[onMessage] VideoEvent parsing error ${e.message}" }
-                null
-            }
-
-            when (parsedEvent) {
-                is UnknownVideoEvent ->
-                    logger.w { "[onMessage] Received unknown VideoEvent type: ${parsedEvent.expectedType}" }
-
-                null -> tryParseApiError(text)
-
-                else -> processEvent(parsedEvent)
+                // If parsing an APIError fails, try to parse a VideoEvent
+                // This will also catch unmapped events, that's why we parse APIError first
+                try {
+                    Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
+                        eventAdapter.fromJson(text)?.let { parsedEvent ->
+                            if (parsedEvent is UnknownVideoEvent) {
+                                logger.w { "[onMessage] Received unknown VideoEvent type: ${parsedEvent.expectedType}" }
+                            } else {
+                                processEvent(parsedEvent)
+                            }
+                        }
+                    }
+                } catch (e: Throwable) {
+                    logger.w { "[onMessage] VideoEvent parsing error ${e.message}" }
+                }
             }
         }
     }
 
-    private fun tryParseApiError(text: String) {
-        try {
-            val json = Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            }
-
-            val parsedError = json.decodeFromString<SocketError>(text)
-            parsedError.let {
-                logger.w { "[onMessage] SocketError: ${parsedError.error}" }
-                handleError(it.error)
-            }
-        } catch (e: Throwable) {
-            logger.w { "[onMessage] Error when trying to parse SocketError: ${e.message}" }
-            handleError(e)
-        }
-    }
     private suspend fun processEvent(parsedEvent: VideoEvent) {
         if (parsedEvent is ConnectedEvent) {
             _connectionId.value = parsedEvent.connectionId
