@@ -166,7 +166,7 @@ private fun Body(
                         style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
                         onClick = {
                             onStartCallClick(
-                                //StreamCallId("audio_call", UUID.randomUUID().toString()),
+                                // StreamCallId("audio_call", UUID.randomUUID().toString()),
                                 StreamCallId("default", UUID.randomUUID().toString()),
                                 users
                                     .filter { it.isSelected }

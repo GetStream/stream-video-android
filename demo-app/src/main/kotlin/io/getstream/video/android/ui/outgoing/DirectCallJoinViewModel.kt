@@ -23,7 +23,6 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
-import io.getstream.video.android.models.GoogleAccount
 import io.getstream.video.android.models.builtInUsers
 import io.getstream.video.android.models.toUsers
 import io.getstream.video.android.tooling.util.StreamFlavors

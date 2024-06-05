@@ -18,7 +18,6 @@ package io.getstream.video.android.core.notifications.internal.receivers
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call

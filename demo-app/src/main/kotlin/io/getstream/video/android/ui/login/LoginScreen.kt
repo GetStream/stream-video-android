@@ -434,7 +434,6 @@ private fun BuiltInUsersLoginDialog(
                     }
                 }
             }
-
         },
         negativeButton = Triple("Cancel", ButtonStyles.secondaryButtonStyle(), onDismissRequest),
     )

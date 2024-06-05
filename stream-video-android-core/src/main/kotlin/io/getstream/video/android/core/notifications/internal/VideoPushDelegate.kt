@@ -17,11 +17,9 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.content.Context
-import android.util.Log
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.android.push.delegate.PushDelegateProvider
-import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -159,7 +157,7 @@ internal class VideoPushDelegate(
      * Verify if the map contains all keys/values for a Missed Type.
      */
     private fun Map<String, Any?>.isValidMissedType(): Boolean =
-    // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
         // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
         true
 

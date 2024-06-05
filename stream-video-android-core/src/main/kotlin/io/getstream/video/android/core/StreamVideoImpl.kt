@@ -59,9 +59,6 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
-import java.util.*
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -123,6 +120,9 @@ import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
+import java.util.*
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resumeWithException
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 
@@ -922,7 +922,9 @@ internal class StreamVideoImpl internal constructor(
     }
 
     suspend fun startRecording(
-        type: String, id: String, externalStorage: String? = null,
+        type: String,
+        id: String,
+        externalStorage: String? = null,
     ): Result<Unit> {
         return wrapAPICall {
             val req = StartRecordingRequest(externalStorage)
@@ -1043,7 +1045,9 @@ internal class StreamVideoImpl internal constructor(
     }
 
     internal suspend fun reject(
-        type: String, id: String, reason: RejectReason? = null,
+        type: String,
+        id: String,
+        reason: RejectReason? = null,
     ): Result<RejectCallResponse> {
         return wrapAPICall {
             connectionModule.api.rejectCall(type, id, RejectCallRequest(reason?.alias))

@@ -21,7 +21,6 @@ import android.graphics.Typeface
 import android.widget.TextView
 import androidx.annotation.FontRes
 import androidx.core.content.res.ResourcesCompat
-import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import java.util.HashMap
 

@@ -38,7 +38,6 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
-import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +51,7 @@ import org.webrtc.EglBase
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
 import stream.video.sfu.models.VideoDimension
+import java.util.UUID
 
 sealed class DeviceStatus {
     data object NotSelected : DeviceStatus()

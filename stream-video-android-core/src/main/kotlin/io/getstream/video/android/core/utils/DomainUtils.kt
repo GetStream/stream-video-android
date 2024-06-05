@@ -33,8 +33,8 @@ import org.openapitools.client.models.CallRecording
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
 import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.QueryCallMembersResponse
+import org.openapitools.client.models.QueryCallsResponse
 import org.openapitools.client.models.ReactionResponse
 import org.openapitools.client.models.UserResponse
 import stream.video.sfu.models.Participant

@@ -45,8 +45,6 @@ import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-import java.util.Collections
-import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -90,6 +88,8 @@ import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import java.util.Collections
+import kotlin.coroutines.resume
 
 /**
  * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
