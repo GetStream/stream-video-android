@@ -32,16 +32,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -91,7 +87,6 @@ internal fun PortraitScreenSharingVideoRenderer(
 ) {
     val sharingParticipant = session.participant
     val me by call.state.me.collectAsStateWithLifecycle()
-    var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
 
     val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -118,10 +113,10 @@ internal fun PortraitScreenSharingVideoRenderer(
                     }
                     val participant = participants[key]
                     videoRenderer.invoke(
-                        modifier = paddedModifier.height(itemHeight),
-                        call = call,
-                        participant = participant,
-                        style = style.copy(
+                        paddedModifier.height(itemHeight),
+                        call,
+                        participant,
+                        style.copy(
                             isFocused = dominantSpeaker?.sessionId == participant.sessionId,
                         ),
                     )
