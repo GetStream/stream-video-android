@@ -26,10 +26,10 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import org.openapitools.client.infrastructure.Serializer
-import org.openapitools.client.models.APIError
 import org.openapitools.client.models.ConnectUserDetailsRequest
 import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.UnknownVideoEvent
+import org.openapitools.client.models.ConnectionErrorEvent
+import org.openapitools.client.models.UnsupportedVideoEventException
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSAuthMessageRequest
 
@@ -89,41 +89,35 @@ public class CoordinatorSocket(
 
         scope.launch(singleThreadDispatcher) {
             try {
-                // Try to parse an APIError first
-                Serializer.moshi.adapter(APIError::class.java).let { errorAdapter ->
-                    errorAdapter.fromJson(text)?.let { parsedError ->
-                        handleError(
-                            ErrorResponse(
-                                code = parsedError.code,
-                                message = parsedError.message,
-                                statusCode = parsedError.statusCode,
-                                exceptionFields = parsedError.exceptionFields ?: emptyMap(),
-                                moreInfo = parsedError.moreInfo,
-                            ),
-                        )
-                    }
+                Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
+                    eventAdapter.fromJson(text)?.let { parsedEvent -> processEvent(parsedEvent) }
                 }
             } catch (e: Throwable) {
-                // If parsing an APIError fails, try to parse a VideoEvent
-                // This will also catch unmapped events, that's why we parse APIError first
-                try {
-                    Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
-                        eventAdapter.fromJson(text)?.let { parsedEvent ->
-                            if (parsedEvent is UnknownVideoEvent) {
-                                logger.w { "[onMessage] Received unknown VideoEvent type: ${parsedEvent.expectedType}" }
-                            } else {
-                                processEvent(parsedEvent)
-                            }
-                        }
-                    }
-                } catch (e: Throwable) {
-                    logger.w { "[onMessage] VideoEvent parsing error ${e.message}" }
+                if (e.cause is UnsupportedVideoEventException) {
+                    val ex = e.cause as UnsupportedVideoEventException
+                    logger.w { "[onMessage] Received unsupported VideoEvent type: ${ex.type}. Ignoring." }
+                } else {
+                    logger.w { "[onMessage] VideoEvent parsing error ${e.message}." }
+                    handleError(e)
                 }
             }
         }
     }
 
     private suspend fun processEvent(parsedEvent: VideoEvent) {
+        if (parsedEvent is ConnectionErrorEvent) {
+            handleError(
+                ErrorResponse(
+                    code = parsedEvent.error?.code ?: -1,
+                    message = parsedEvent.error?.message ?: "",
+                    statusCode = parsedEvent.error?.statusCode ?: -1,
+                    exceptionFields = parsedEvent.error?.exceptionFields ?: emptyMap(),
+                    moreInfo = parsedEvent.error?.moreInfo ?: "",
+                ),
+            )
+            return
+        }
+
         if (parsedEvent is ConnectedEvent) {
             _connectionId.value = parsedEvent.connectionId
             setConnectedStateAndContinue(parsedEvent)

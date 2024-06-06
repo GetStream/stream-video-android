@@ -168,8 +168,4 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
     }
 }
 
-data class UnknownVideoEvent(
-    @Json(name = "type") val expectedType: String
-) : VideoEvent() {
-    override fun getEventType() = "unknown"
-}
+class UnsupportedVideoEventException(val type: String) : Exception()
