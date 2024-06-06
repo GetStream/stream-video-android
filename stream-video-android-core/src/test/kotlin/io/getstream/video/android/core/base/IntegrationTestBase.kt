@@ -28,9 +28,6 @@ import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.mockk.MockKAnnotations
 import io.mockk.mockk
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -60,6 +57,9 @@ import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object IntegrationTestState {
     var client: StreamVideo? = null
@@ -226,9 +226,17 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
             mode = RecordSettingsRequest.Mode.Available.value,
             quality = RecordSettingsRequest.Quality.`720p`.value,
         ),
-        ring = RingSettingsResponse(autoCancelTimeoutMs = 10000, incomingCallTimeoutMs = 10000, missedCallTimeoutMs = 10000),
+        ring = RingSettingsResponse(
+            autoCancelTimeoutMs = 10000,
+            incomingCallTimeoutMs = 10000,
+            missedCallTimeoutMs = 10000,
+        ),
         screensharing = ScreensharingSettingsResponse(false, false),
-        transcription = TranscriptionSettingsResponse("test", emptyList(), TranscriptionSettingsResponse.Mode.Available),
+        transcription = TranscriptionSettingsResponse(
+            "test",
+            emptyList(),
+            TranscriptionSettingsResponse.Mode.Available,
+        ),
         video = VideoSettingsResponse(
             false,
             false,
@@ -242,7 +250,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         ),
         thumbnails = ThumbnailsSettingsResponse(
             enabled = false,
-        )
+        ),
     )
     val response = CallResponse(
         id = id,
