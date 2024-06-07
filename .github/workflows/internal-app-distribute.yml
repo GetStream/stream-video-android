@@ -12,13 +12,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
-
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           distribution: adopt
           java-version: 17
-
       - name: Prepare environment
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
@@ -28,6 +26,5 @@ jobs:
           echo "${{ secrets.SERVICE_ACCOUNT_CREDENTIALS }}" > .sign/service-account-credentials.json.asc
           gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/service-account-credentials.json.asc > .sign/service-account-credentials.json
           echo "${{ secrets.ENV_PROPERTIES }}" > .env.properties
-
-      - name: Build release bundle
-        run: ./gradlew bundleRelease --stacktrace
+      - name: Publish Bundle
+        run: bash ./gradlew publishBundle --stacktrace

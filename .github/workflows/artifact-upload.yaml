@@ -38,4 +38,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: app-bundle
-          path: app/build/outputs/bundle/release/*.aab
+          path: demo-app/build/outputs/bundle/productionRelease/demo-app-production-release.aab
