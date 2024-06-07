@@ -19,25 +19,40 @@ package io.getstream.video.android.tutorial.ringing
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import io.getstream.video.android.core.notifications.NotificationHandler
 
-/**
- * Request the audio permission for a result launcher.
- */
-fun ActivityResultLauncher<String>.requestAudioPermission() =
-    launch(Manifest.permission.RECORD_AUDIO)
 
-/**
- * Check if RECORD_AUDIO is granted.
- */
 fun Context.isAudioPermissionGranted() = ContextCompat.checkSelfPermission(
     this, Manifest.permission.RECORD_AUDIO,
 ) == PackageManager.PERMISSION_GRANTED
 
-/**
- * Check if the current activity was started as a caller.
- */
-fun ComponentActivity.isCaller() = intent.action == NotificationHandler.ACTION_OUTGOING_CALL
+fun Context.isCameraPermissionGranted() = ContextCompat.checkSelfPermission(
+    this, Manifest.permission.CAMERA,
+) == PackageManager.PERMISSION_GRANTED
+
+fun ComponentActivity.defaultPermissionLauncher(allGranted: () -> Unit) = registerForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions(),
+) { granted ->
+    // Handle the permissions result here
+    granted.entries.forEach { (permission, granted) ->
+        if (!granted) {
+            Toast.makeText(this, "$permission permission is required.", Toast.LENGTH_LONG).show()
+        }
+    }
+    if (granted.entries.all { it.value }) {
+        allGranted()
+    }
+}
+
+fun ActivityResultLauncher<Array<String>>.requestDefaultPermissions() {
+    launch(
+        arrayOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA,
+        ),
+    )
+}

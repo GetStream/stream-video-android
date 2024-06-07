@@ -44,14 +44,15 @@ class RingingApp : Application() {
 
     companion object {
 
-        val client: StreamVideo get() = StreamVideo.instance()
+        val caller get() = TutorialUser.builtIn.first { it.id == StreamVideo.instance().user.id }
 
-        fun initClient(context: Context, user: TutorialUser): StreamVideo {
-            var instance = StreamVideo.instanceOrNull()
-            if (instance == null) {
+        val callee get() = TutorialUser.builtIn.first { it.id != StreamVideo.instance().user.id }
+
+        fun login(context: Context, user: TutorialUser) {
+            if (!StreamVideo.isInstalled) {
                 // step2 - initialize StreamVideo. For a production app we recommend adding
                 // the client to your Application class or di module.
-                instance = StreamVideoBuilder(
+                StreamVideoBuilder(
                     context = context.applicationContext,
                     apiKey = "mmhfdzb5evj2",
                     geo = GEO.GlobalEdgeNetwork,
@@ -77,10 +78,12 @@ class RingingApp : Application() {
                     ),
                 ).build()
             }
-            return instance
         }
 
-        fun destroyClient() {
+        fun logout() {
+            if (StreamVideo.isInstalled) {
+                StreamVideo.instance().logOut()
+            }
             StreamVideo.removeClient()
         }
     }

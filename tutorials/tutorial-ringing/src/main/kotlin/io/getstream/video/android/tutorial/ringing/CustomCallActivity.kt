@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -386,3 +387,8 @@ fun <T> defaultBufferedFlow() = MutableSharedFlow<T>(
     extraBufferCapacity = 15, // 15 events to be buffered at most
     onBufferOverflow = BufferOverflow.DROP_OLDEST,
 )
+
+/**
+ * Check if the current activity was started as a caller.
+ */
+fun ComponentActivity.isCaller() = intent.action == NotificationHandler.ACTION_OUTGOING_CALL
