@@ -29,15 +29,14 @@ jobs:
           gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/service-account-credentials.json.asc > .sign/service-account-credentials.json
           echo "${{ secrets.ENV_PROPERTIES }}" > .env.properties
 
-      - name: Publish Bundle
-        id: publish_bundle
-        run: bash ./gradlew publishBundle --stacktrace
+      - name: Build release bundle
+        run: ./gradlew bundleRelease --stacktrace
 
-      - name: Upload AAB
-        if: always() && secrets.UPLOAD_URL != ''
-        env:
-          UPLOAD_URL: ${{ secrets.UPLOAD_URL }}
-        run: |
-          AAB_PATH=$(find . -name '*.aab' | head -n 1)
-          echo "Uploading $AAB_PATH to $UPLOAD_URL"
-          curl -X POST -H "Content-Type: application/octet-stream" --data-binary @$AAB_PATH $UPLOAD_URL
+      - name: Upload AAB as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-bundle
+          path: app/build/outputs/bundle/release/*.aab
+
+      - name: Publish Bundle
+        run: bash ./gradlew publishBundle --stacktrace
