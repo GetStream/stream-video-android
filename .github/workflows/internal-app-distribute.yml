@@ -12,11 +12,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           distribution: adopt
           java-version: 17
+
       - name: Prepare environment
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
@@ -26,5 +28,16 @@ jobs:
           echo "${{ secrets.SERVICE_ACCOUNT_CREDENTIALS }}" > .sign/service-account-credentials.json.asc
           gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/service-account-credentials.json.asc > .sign/service-account-credentials.json
           echo "${{ secrets.ENV_PROPERTIES }}" > .env.properties
+
       - name: Publish Bundle
+        id: publish_bundle
         run: bash ./gradlew publishBundle --stacktrace
+
+      - name: Upload AAB
+        if: always() && secrets.UPLOAD_URL != ''
+        env:
+          UPLOAD_URL: ${{ secrets.UPLOAD_URL }}
+        run: |
+          AAB_PATH=$(find . -name '*.aab' | head -n 1)
+          echo "Uploading $AAB_PATH to $UPLOAD_URL"
+          curl -X POST -H "Content-Type: application/octet-stream" --data-binary @$AAB_PATH $UPLOAD_URL
