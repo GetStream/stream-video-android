@@ -136,7 +136,7 @@ class MainActivity : ComponentActivity() {
             members = emptyList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_INCOMING_CALL,
-            clazz = ComposeStreamCallActivity::class.java,
+            clazz = CustomCallActivity::class.java,
         )
         startActivity(intent)
     }
