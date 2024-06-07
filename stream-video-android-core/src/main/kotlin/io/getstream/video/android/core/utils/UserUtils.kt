@@ -31,5 +31,9 @@ internal fun User.toResponse(): UserResponse {
         createdAt = createdAt ?: OffsetDateTime.now(),
         updatedAt = updatedAt ?: OffsetDateTime.now(),
         deletedAt = deletedAt,
+        // TODO: Implement these fields
+        banned = false,
+        language = "",
+        online = false,
     )
 }

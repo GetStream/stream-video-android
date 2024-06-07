@@ -38,19 +38,28 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
+ * @param banned
  * @param createdAt Date/time of creation
  * @param custom
  * @param id
+ * @param language
+ * @param online
  * @param role
  * @param teams
  * @param updatedAt Date/time of the last update
+ * @param deactivatedAt
  * @param deletedAt Date/time of deletion
  * @param image
+ * @param lastActive
  * @param name
+ * @param revokeTokensIssuedBefore
  */
 
 
 data class UserResponse (
+
+    @Json(name = "banned")
+    val banned: kotlin.Boolean,
 
     /* Date/time of creation */
     @Json(name = "created_at")
@@ -62,6 +71,12 @@ data class UserResponse (
     @Json(name = "id")
     val id: kotlin.String,
 
+    @Json(name = "language")
+    val language: kotlin.String,
+
+    @Json(name = "online")
+    val online: kotlin.Boolean,
+
     @Json(name = "role")
     val role: kotlin.String,
 
@@ -72,6 +87,9 @@ data class UserResponse (
     @Json(name = "updated_at")
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "deactivated_at")
+    val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
+
     /* Date/time of deletion */
     @Json(name = "deleted_at")
     val deletedAt: org.threeten.bp.OffsetDateTime? = null,
@@ -79,7 +97,13 @@ data class UserResponse (
     @Json(name = "image")
     val image: kotlin.String? = null,
 
+    @Json(name = "last_active")
+    val lastActive: org.threeten.bp.OffsetDateTime? = null,
+
     @Json(name = "name")
-    val name: kotlin.String? = null
+    val name: kotlin.String? = null,
+
+    @Json(name = "revoke_tokens_issued_before")
+    val revokeTokensIssuedBefore: org.threeten.bp.OffsetDateTime? = null
 
 )

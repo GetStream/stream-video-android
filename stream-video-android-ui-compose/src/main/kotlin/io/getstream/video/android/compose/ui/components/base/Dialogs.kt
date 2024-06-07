@@ -81,7 +81,7 @@ public fun StreamDialogPositiveNegative(
     title: String? = null,
     icon: ImageVector? = null,
     contentText: String? = null,
-    positiveButton: Triple<String, StreamButtonStyle, () -> Unit>,
+    positiveButton: Triple<String, StreamButtonStyle, () -> Unit>? = null,
     negativeButton: Triple<String, StreamButtonStyle, () -> Unit>? = null,
     content: (@Composable () -> Unit)? = null,
 ): Unit = StreamDialog(
@@ -134,12 +134,14 @@ public fun StreamDialogPositiveNegative(
                 )
                 Spacer(modifier = Modifier.size(16.dp))
             }
-            StreamButton(
-                modifier = Modifier.weight(1f),
-                text = positiveButton.first,
-                style = positiveButton.second,
-                onClick = positiveButton.third,
-            )
+            positiveButton?.let {
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    text = it.first,
+                    style = it.second,
+                    onClick = it.third,
+                )
+            }
         }
     }
 }

@@ -22,6 +22,8 @@ import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +37,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
@@ -42,7 +46,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Adb
 import androidx.compose.material.icons.outlined.GroupAdd
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -81,6 +87,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
@@ -88,7 +95,10 @@ import io.getstream.video.android.compose.ui.components.base.StreamTextField
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.IconStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
+import io.getstream.video.android.model.User
+import io.getstream.video.android.models.builtInUsers
 import io.getstream.video.android.tooling.extensions.toPx
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
@@ -116,9 +126,13 @@ fun LoginScreen(
         }
         val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
         val availableEnvs by remember { mutableStateOf(AppConfig.availableEnvironments) }
-        val availableLogins = listOf("google", "email", "guest")
+        val availableLogins = when (BuildConfig.FLAVOR == StreamFlavors.development) {
+            true -> listOf("built-in", "google", "email", "guest")
+            else -> listOf("google", "email", "guest")
+        }
 
         var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
+        var isShowingBuiltInUsersDialog by remember { mutableStateOf(false) }
 
         HandleLoginUiStates(
             autoLogIn = autoLogIn,
@@ -133,6 +147,7 @@ fun LoginScreen(
             autoLogIn = autoLogIn,
             isLoading = isLoading,
             showEmailLoginDialog = { isShowingEmailLoginDialog = true },
+            showBuiltInUserDialog = { isShowingBuiltInUsersDialog = true },
             reloadSdk = {
                 loginViewModel.reloadSdk()
             },
@@ -161,6 +176,19 @@ fun LoginScreen(
                 onDismissRequest = { isShowingEmailLoginDialog = false },
             )
         }
+        if (isShowingBuiltInUsersDialog) {
+            BuiltInUsersLoginDialog(
+                login = { autoLoginBoolean, event ->
+                    autoLoginBoolean?.let {
+                        loginViewModel.autoLogIn = it
+                    }
+                    event?.let {
+                        loginViewModel.handleUiEvent(event)
+                    }
+                },
+                onDismissRequest = { isShowingBuiltInUsersDialog = false },
+            )
+        }
     }
 }
 
@@ -170,6 +198,7 @@ private fun LoginContent(
     autoLogIn: Boolean,
     isLoading: Boolean,
     showEmailLoginDialog: () -> Unit = {},
+    showBuiltInUserDialog: () -> Unit = {},
     reloadSdk: () -> Unit = {},
     login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
     availableEnvs: List<StreamEnvironment>,
@@ -241,6 +270,17 @@ private fun LoginContent(
             if (!isLoading) {
                 availableLogins.forEach {
                     when (it) {
+                        "built-in" -> {
+                            StreamButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                icon = Icons.Outlined.Adb,
+                                enabled = !isLoading,
+                                text = stringResource(id = R.string.builtin_user_sign_in),
+                                style = ButtonStyles.secondaryButtonStyle(),
+                                onClick = showBuiltInUserDialog,
+                            )
+                        }
+
                         "google" -> {
                             StreamButton(
                                 icon = ImageVector.vectorResource(R.drawable.google_button_logo),
@@ -344,6 +384,61 @@ private fun EmailLoginDialog(
     )
 }
 
+@Composable
+private fun BuiltInUsersLoginDialog(
+    onDismissRequest: () -> Unit = {},
+    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
+) {
+    val users = User.builtInUsers()
+    StreamDialogPositiveNegative(
+        style = StreamDialogStyles.defaultDialogStyle(),
+        onDismiss = onDismissRequest,
+        icon = Icons.Default.Email,
+        title = stringResource(R.string.select_user),
+        content = {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+            ) {
+                items(users) { user ->
+                    Row(
+                        modifier = Modifier
+                            .height(64.dp)
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(bounded = true),
+                                onClick = {
+                                    login(true, LoginEvent.SignIn(user))
+                                    onDismissRequest()
+                                },
+                            ),
+                    ) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        UserAvatar(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .align(Alignment.CenterVertically),
+                            userImage = user.image,
+                            userName = user.userNameOrId,
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                            text = user.name,
+                            color = VideoTheme.colors.basePrimary,
+                            style = VideoTheme.typography.subtitleS,
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                    }
+                }
+            }
+        },
+        negativeButton = Triple("Cancel", ButtonStyles.secondaryButtonStyle(), onDismissRequest),
+    )
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SelectableDialog(
@@ -381,10 +476,12 @@ fun SelectableDialog(
                     ),
                 ) {
                     Column(
-                        Modifier.background(
-                            color = VideoTheme.colors.baseSheetTertiary,
-                            shape = VideoTheme.shapes.dialog,
-                        ).width(180.dp),
+                        Modifier
+                            .background(
+                                color = VideoTheme.colors.baseSheetTertiary,
+                                shape = VideoTheme.shapes.dialog,
+                            )
+                            .width(180.dp),
                     ) {
                         items.forEach { item ->
                             StreamButton(
@@ -395,7 +492,9 @@ fun SelectableDialog(
                                     showDialog = !showDialog
                                 },
                                 style = ButtonStyles.tertiaryButtonStyle(),
-                                modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .fillMaxWidth(),
                             )
                         }
                     }

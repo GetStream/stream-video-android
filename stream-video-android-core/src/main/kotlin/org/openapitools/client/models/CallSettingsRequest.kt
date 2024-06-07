@@ -27,9 +27,11 @@ import org.openapitools.client.models.AudioSettingsRequest
 import org.openapitools.client.models.BackstageSettingsRequest
 import org.openapitools.client.models.BroadcastSettingsRequest
 import org.openapitools.client.models.GeofenceSettingsRequest
+import org.openapitools.client.models.LimitsSettingsRequest
 import org.openapitools.client.models.RecordSettingsRequest
 import org.openapitools.client.models.RingSettingsRequest
 import org.openapitools.client.models.ScreensharingSettingsRequest
+import org.openapitools.client.models.ThumbnailsSettingsRequest
 import org.openapitools.client.models.TranscriptionSettingsRequest
 import org.openapitools.client.models.VideoSettingsRequest
 
@@ -51,9 +53,11 @@ import org.openapitools.client.infrastructure.Serializer
  * @param backstage
  * @param broadcasting
  * @param geofencing
+ * @param limits
  * @param recording
  * @param ring
  * @param screensharing
+ * @param thumbnails
  * @param transcription
  * @param video
  */
@@ -73,6 +77,9 @@ data class CallSettingsRequest (
     @Json(name = "geofencing")
     val geofencing: GeofenceSettingsRequest? = null,
 
+    @Json(name = "limits")
+    val limits: LimitsSettingsRequest? = null,
+
     @Json(name = "recording")
     val recording: RecordSettingsRequest? = null,
 
@@ -81,6 +88,9 @@ data class CallSettingsRequest (
 
     @Json(name = "screensharing")
     val screensharing: ScreensharingSettingsRequest? = null,
+
+    @Json(name = "thumbnails")
+    val thumbnails: ThumbnailsSettingsRequest? = null,
 
     @Json(name = "transcription")
     val transcription: TranscriptionSettingsRequest? = null,

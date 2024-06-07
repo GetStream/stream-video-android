@@ -47,6 +47,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
@@ -250,24 +251,25 @@ public abstract class StreamCallActivity : ComponentActivity() {
         action: String?,
         onError: (suspend (Exception) -> Unit)? = onErrorFinish,
     ) {
+        logger.d { "[onIntentAction] #ringing; action: $action, call.cid: ${call.cid}" }
         when (action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
-                logger.d { "Action ACCEPT_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action ACCEPT_CALL, ${call.cid}" }
                 accept(call, onError = onError)
             }
 
             NotificationHandler.ACTION_REJECT_CALL -> {
-                logger.d { "Action REJECT_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action REJECT_CALL, ${call.cid}" }
                 reject(call, onError = onError)
             }
 
             NotificationHandler.ACTION_INCOMING_CALL -> {
-                logger.d { "Action INCOMING_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action INCOMING_CALL, ${call.cid}" }
                 get(call, onError = onError)
             }
 
             NotificationHandler.ACTION_OUTGOING_CALL -> {
-                logger.d { "Action OUTGOING_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action OUTGOING_CALL, ${call.cid}" }
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 create(
@@ -280,7 +282,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
             else -> {
                 logger.w {
-                    "No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
+                    "[onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
                 }
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 // If the call does not exist it will be created.
@@ -523,8 +525,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
         onSuccess: (suspend (Call) -> Unit)? = null,
         onError: (suspend (Exception) -> Unit)? = null,
     ) {
+        logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
-            logger.d { "Accept then join, ${call.cid}" }
             call.acceptThenJoin()
         }
     }
@@ -541,12 +543,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
     @StreamCallActivityDelicateApi
     public open fun reject(
         call: Call,
+        reason: RejectReason? = null,
         onSuccess: (suspend (Call) -> Unit)? = null,
         onError: (suspend (Exception) -> Unit)? = null,
     ) {
-        logger.d { "Reject call, ${call.cid}" }
+        logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
         lifecycleScope.launch(Dispatchers.IO) {
-            val result = call.reject()
+            val result = call.reject(reason)
             result.onOutcome(call, onSuccess, onError)
             // Leave regardless of outcome
             call.leave()
@@ -566,7 +569,10 @@ public abstract class StreamCallActivity : ComponentActivity() {
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
         onError: (suspend (Exception) -> Unit)? = null,
-    ): Unit = reject(call, onSuccess, onError)
+    ) {
+        logger.d { "[cancel] #ringing; call.cid: ${call.cid}" }
+        reject(call, RejectReason.Cancel, onSuccess, onError)
+    }
 
     /**
      * Leave the call from the parameter.
@@ -622,14 +628,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
      */
     @CallSuper
     public open fun onCallAction(call: Call, action: CallAction) {
-        logger.d { "======-- Action --======\n$action\n================" }
+        logger.i { "[onCallAction] #ringing; action: $action, call.cid: ${call.cid}" }
         when (action) {
             is LeaveCall -> {
                 leave(call, onSuccessFinish, onErrorFinish)
             }
 
             is DeclineCall -> {
-                reject(call, onSuccessFinish, onErrorFinish)
+                reject(call, RejectReason.Decline, onSuccessFinish, onErrorFinish)
             }
 
             is CancelCall -> {

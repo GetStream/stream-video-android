@@ -38,19 +38,19 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param audioOnly
  * @param mode
+ * @param audioOnly
  * @param quality
  */
 
 
 data class RecordSettingsRequest (
 
+    @Json(name = "mode")
+    val mode: RecordSettingsRequest.Mode,
+
     @Json(name = "audio_only")
     val audioOnly: kotlin.Boolean? = null,
-
-    @Json(name = "mode")
-    val mode: RecordSettingsRequest.Mode? = null,
 
     @Json(name = "quality")
     val quality: RecordSettingsRequest.Quality? = null
@@ -100,7 +100,7 @@ data class RecordSettingsRequest (
     /**
      *
      *
-     * Values: audioOnly,_360p,_480p,_720p,_1080p,_1440p
+     * Values: _360p,_480p,_720p,_1080p,_1440p
      */
 
     sealed class Quality(val value: kotlin.String) {
@@ -108,7 +108,6 @@ data class RecordSettingsRequest (
 
         companion object {
             fun fromString(s: kotlin.String): Quality = when (s) {
-                "audio-only" -> AudioOnly
                 "360p" -> `360p`
                 "480p" -> `480p`
                 "720p" -> `720p`
@@ -118,7 +117,6 @@ data class RecordSettingsRequest (
             }
         }
 
-        object AudioOnly : Quality("audio-only")
         object `360p` : Quality("360p")
         object `480p` : Quality("480p")
         object `720p` : Quality("720p")

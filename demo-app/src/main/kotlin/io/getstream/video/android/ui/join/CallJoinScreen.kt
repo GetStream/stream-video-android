@@ -137,6 +137,7 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             user = user,
+            showDirectCall = BuildConfig.FLAVOR == StreamFlavors.development,
             onAvatarLongClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {

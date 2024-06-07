@@ -325,5 +325,9 @@ private fun io.getstream.video.android.model.User.toUserResponse(): UserResponse
         createdAt = OffsetDateTime.now(),
         updatedAt = OffsetDateTime.now(),
         deletedAt = OffsetDateTime.now(),
+        // TODO: implement these
+        banned = false,
+        language = "",
+        online = false,
     )
 }

@@ -38,12 +38,13 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param duration
+ * @param duration Duration of the request in human-readable format
  */
 
 
 data class Response (
 
+    /* Duration of the request in human-readable format */
     @Json(name = "duration")
     val duration: kotlin.String
 
