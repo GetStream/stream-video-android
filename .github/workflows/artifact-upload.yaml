@@ -1,4 +1,4 @@
-name: Internal App Distribute CI
+name: Build and Upload AAB
 
 on:
   push:
@@ -7,11 +7,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  distribute_stream_video_calls_to_google_play:
-    name: Distribute Stream Video Calls to Google Play
+  build:
+    name: Build and Upload AAB
     runs-on: ubuntu-22.04
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
@@ -31,3 +33,9 @@ jobs:
 
       - name: Build release bundle
         run: ./gradlew bundleRelease --stacktrace
+
+      - name: Upload AAB as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-bundle
+          path: app/build/outputs/bundle/release/*.aab
