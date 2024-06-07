@@ -43,6 +43,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
@@ -135,6 +137,7 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             user = user,
+            showDirectCall = BuildConfig.FLAVOR == StreamFlavors.development,
             onAvatarLongClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {
@@ -299,7 +302,7 @@ private fun CallJoinHeader(
                         if (!isProduction) {
                             StreamButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                icon = Icons.Default.Logout,
+                                icon = Icons.AutoMirrored.Filled.Logout,
                                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                                 text = stringResource(id = R.string.sign_out),
                                 onClick = {
@@ -489,7 +492,7 @@ private fun JoinCallForm(
         )
 
         StreamButton(
-            icon = Icons.Default.Login,
+            icon = Icons.AutoMirrored.Filled.Login,
             style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier
                 .padding(start = 16.dp)

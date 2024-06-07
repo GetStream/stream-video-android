@@ -29,6 +29,26 @@ service SignalServer {
   rpc IceRestart(ICERestartRequest) returns (ICERestartResponse);
 
   rpc SendStats(SendStatsRequest) returns (SendStatsResponse);
+
+  rpc StartNoiseCancellation(StartNoiseCancellationRequest) returns (StartNoiseCancellationResponse);
+
+  rpc StopNoiseCancellation(StopNoiseCancellationRequest) returns (StopNoiseCancellationResponse);
+}
+
+message StartNoiseCancellationRequest {
+  string session_id = 1;
+}
+
+message StartNoiseCancellationResponse {
+  models.Error error = 1;
+}
+
+message StopNoiseCancellationRequest {
+  string session_id = 1;
+}
+
+message StopNoiseCancellationResponse {
+  models.Error error = 1;
 }
 
 message SendStatsRequest {

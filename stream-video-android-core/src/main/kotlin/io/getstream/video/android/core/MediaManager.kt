@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openapitools.client.models.VideoSettings
+import org.openapitools.client.models.VideoSettingsResponse
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
@@ -728,7 +728,7 @@ public class CameraManager(
      */
     internal fun selectDesiredResolution(
         supportedFormats: MutableList<CameraEnumerationAndroid.CaptureFormat>?,
-        videoSettings: VideoSettings?,
+        videoSettings: VideoSettingsResponse?,
     ): CameraEnumerationAndroid.CaptureFormat? {
         // needs the settings that we're going for
         // sort and get the one closest to 960

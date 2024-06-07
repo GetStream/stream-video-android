@@ -34,6 +34,6 @@ public fun String.toTypeAndId(): Pair<String, String> {
         ?: error("unexpected StreamCallCid format: $this")
 }
 
-public fun String.isValidCallId(): Boolean {
+public fun String.isValidCallCid(): Boolean {
     return this.contains(":")
 }

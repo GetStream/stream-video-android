@@ -27,6 +27,7 @@ import org.openapitools.client.models.CallIngressResponse
 import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.EgressResponse
+import org.openapitools.client.models.ThumbnailResponse
 import org.openapitools.client.models.UserResponse
 
 
@@ -62,6 +63,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param session
  * @param startsAt Date/time when the call will start
  * @param team
+ * @param thumbnails
  */
 
 
@@ -130,6 +132,9 @@ data class CallResponse (
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
-    val team: kotlin.String? = null
+    val team: kotlin.String? = null,
+
+    @Json(name = "thumbnails")
+    val thumbnails: ThumbnailResponse? = null
 
 )

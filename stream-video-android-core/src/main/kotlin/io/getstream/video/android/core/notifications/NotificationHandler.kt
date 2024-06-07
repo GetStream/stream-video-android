@@ -23,6 +23,7 @@ import io.getstream.video.android.model.StreamCallId
 
 public interface NotificationHandler : NotificationPermissionHandler {
     fun onRingingCall(callId: StreamCallId, callDisplayName: String)
+    fun onMissedCall(callId: StreamCallId, callDisplayName: String)
     fun onNotification(callId: StreamCallId, callDisplayName: String)
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
     fun getOngoingCallNotification(callDisplayName: String?, callId: StreamCallId): Notification?

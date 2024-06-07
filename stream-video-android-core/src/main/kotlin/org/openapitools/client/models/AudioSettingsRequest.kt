@@ -23,6 +23,7 @@
 
 package org.openapitools.client.models
 
+import org.openapitools.client.models.NoiseCancellationSettings
 
 
 
@@ -41,6 +42,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param defaultDevice
  * @param accessRequestEnabled
  * @param micDefaultOn
+ * @param noiseCancellation
  * @param opusDtxEnabled
  * @param redundantCodingEnabled
  * @param speakerDefaultOn
@@ -57,6 +59,9 @@ data class AudioSettingsRequest (
 
     @Json(name = "mic_default_on")
     val micDefaultOn: kotlin.Boolean? = null,
+
+    @Json(name = "noise_cancellation")
+    val noiseCancellation: NoiseCancellationSettings? = null,
 
     @Json(name = "opus_dtx_enabled")
     val opusDtxEnabled: kotlin.Boolean? = null,

@@ -38,21 +38,21 @@ import org.openapitools.client.infrastructure.Serializer
 /**
  *
  *
- * @param bitrate
  * @param height
  * @param width
+ * @param bitrate
  */
 
 
 data class TargetResolution (
 
-    @Json(name = "bitrate")
-    val bitrate: kotlin.Int,
-
     @Json(name = "height")
     val height: kotlin.Int,
 
     @Json(name = "width")
-    val width: kotlin.Int
+    val width: kotlin.Int,
+
+    @Json(name = "bitrate")
+    val bitrate: kotlin.Int? = null
 
 )

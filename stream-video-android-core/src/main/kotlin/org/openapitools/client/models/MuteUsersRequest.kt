@@ -41,6 +41,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param audio
  * @param muteAllUsers
  * @param screenshare
+ * @param screenshareAudio
  * @param userIds
  * @param video
  */
@@ -56,6 +57,9 @@ data class MuteUsersRequest (
 
     @Json(name = "screenshare")
     val screenshare: kotlin.Boolean? = null,
+
+    @Json(name = "screenshare_audio")
+    val screenshareAudio: kotlin.Boolean? = null,
 
     @Json(name = "user_ids")
     val userIds: kotlin.collections.List<kotlin.String>? = null,

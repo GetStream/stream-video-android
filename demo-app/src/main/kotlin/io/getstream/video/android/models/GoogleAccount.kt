@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.models
 
+import io.getstream.video.android.model.User
+
 data class GoogleAccount(
     val email: String?,
     val id: String?,
@@ -23,3 +25,15 @@ data class GoogleAccount(
     val photoUrl: String?,
     val isFavorite: Boolean = false,
 )
+
+fun GoogleAccount.toUser(): User {
+    return User(
+        id = id ?: error("GoogleAccount id can not be null"),
+        name = name.orEmpty(),
+        image = photoUrl.orEmpty(),
+    )
+}
+
+fun List<GoogleAccount>.toUsers(): List<User> {
+    return map { it.toUser() }
+}

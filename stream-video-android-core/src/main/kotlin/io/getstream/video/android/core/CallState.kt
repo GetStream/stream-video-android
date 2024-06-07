@@ -105,9 +105,9 @@ import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.MemberResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PermissionRequestEvent
-import org.openapitools.client.models.QueryMembersResponse
+import org.openapitools.client.models.QueryCallMembersResponse
 import org.openapitools.client.models.ReactionResponse
-import org.openapitools.client.models.StartBroadcastingResponse
+import org.openapitools.client.models.StartHLSBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnblockedUserEvent
 import org.openapitools.client.models.UpdateCallResponse
@@ -1166,7 +1166,7 @@ public class CallState(
         updateFromResponse(callData.members)
     }
 
-    fun updateFromResponse(it: QueryMembersResponse) {
+    fun updateFromResponse(it: QueryCallMembersResponse) {
         updateFromResponse(it.members)
     }
 
@@ -1194,7 +1194,7 @@ public class CallState(
         updateFromResponse(result.call)
     }
 
-    fun updateFromResponse(response: StartBroadcastingResponse) {
+    fun updateFromResponse(response: StartHLSBroadcastingResponse) {
         val curEgress = _egress.value
         logger.d { "[updateFromResponse] response: $response, curEgress: $curEgress" }
         val newEgress = curEgress?.copy(

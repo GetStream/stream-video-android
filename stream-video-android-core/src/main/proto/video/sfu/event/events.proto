@@ -70,6 +70,11 @@ message SfuEvent {
     ICERestart ice_restart = 21;
     // PinsChanged is sent the list of pins in the call changes. This event contains the entire list of pins.
     PinsChanged pins_updated = 22;
+    // CallEnded is sent by the SFU to the client to signal that the call has ended.
+    // The reason may specify why the call has ended.
+    CallEnded call_ended = 23;
+    // ParticipantUpdated is sent when user data is updated
+    ParticipantUpdated participant_updated = 24;
   }
 }
 
@@ -81,6 +86,8 @@ message PinsChanged {
 
 message Error {
   models.Error error = 4;
+  // returns the reconnect strategy to be used by the client
+  models.WebsocketReconnectStrategy reconnect_strategy = 5;
 }
 
 message ICETrickle {
@@ -174,6 +181,12 @@ message ParticipantJoined {
 
 // ParticipantJoined is fired when a user leaves a call
 message ParticipantLeft {
+  string call_cid = 1;
+  models.Participant participant = 2;
+}
+
+// ParticipantUpdated is fired when user data is updated
+message ParticipantUpdated {
   string call_cid = 1;
   models.Participant participant = 2;
 }
@@ -291,4 +304,10 @@ message CallGrantsUpdated {
 // The evict reason may specify why the user is being evicted.
 message GoAway {
   models.GoAwayReason reason = 1;
+}
+
+// CallEnded is sent by the SFU to the client to signal that the call has ended.
+// The reason may specify why the call has ended.
+message CallEnded {
+  models.CallEndedReason reason = 1;
 }

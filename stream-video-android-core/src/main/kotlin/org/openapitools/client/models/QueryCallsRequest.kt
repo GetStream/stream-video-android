@@ -23,7 +23,7 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.SortParamRequest
+import org.openapitools.client.models.SortParam
 
 
 
@@ -63,7 +63,7 @@ data class QueryCallsRequest (
     val prev: kotlin.String? = null,
 
     @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParamRequest>? = null,
+    val sort: kotlin.collections.List<SortParam>? = null,
 
     @Json(name = "watch")
     val watch: kotlin.Boolean? = null

@@ -20,7 +20,7 @@ import android.content.Context
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.android.push.delegate.PushDelegateProvider
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.model.StreamCallId
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 internal class VideoPushDelegate(
     context: Context,
 ) : PushDelegate(context) {
-    private val logger = StreamLog.getLogger("VideoPushDelegate")
+    private val logger by taggedLogger("Call:PushDelegate")
     private val DEFAULT_CALL_TEXT = "Unknown caller"
 
     /**
@@ -57,6 +57,7 @@ internal class VideoPushDelegate(
             CoroutineScope(DispatcherProvider.IO).launch {
                 when (payload[KEY_TYPE]) {
                     KEY_TYPE_RING -> handleRingType(callId, payload)
+                    KEY_TYPE_MISSED -> handleMissedType(callId, payload)
                     KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
                     KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
                 }
@@ -67,6 +68,11 @@ internal class VideoPushDelegate(
     private suspend fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("ring-type-notification")?.onRingingCall(callId, callDisplayName)
+    }
+
+    private suspend fun handleMissedType(callId: StreamCallId, payload: Map<String, Any?>) {
+        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        getStreamVideo("missed-type-notification")?.onMissedCall(callId, callDisplayName)
     }
 
     private suspend fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
@@ -133,6 +139,7 @@ internal class VideoPushDelegate(
      */
     private fun Map<String, Any?>.containsKnownType(): Boolean = when (this[KEY_TYPE]) {
         KEY_TYPE_RING -> isValidRingType()
+        KEY_TYPE_MISSED -> isValidMissedType()
         KEY_TYPE_NOTIFICATION -> isValidNotificationType()
         KEY_TYPE_LIVE_STARTED -> isValidLiveStarted()
         else -> false
@@ -142,6 +149,14 @@ internal class VideoPushDelegate(
      * Verify if the map contains all keys/values for a Ring Type.
      */
     private fun Map<String, Any?>.isValidRingType(): Boolean =
+        // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
+        // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
+        true
+
+    /**
+     * Verify if the map contains all keys/values for a Missed Type.
+     */
+    private fun Map<String, Any?>.isValidMissedType(): Boolean =
         // TODO: KEY_CALL_DISPLAY_NAME can be empty. Are there any other important key/values?
         // !(this[KEY_CALL_DISPLAY_NAME] as? String).isNullOrBlank()
         true
@@ -178,6 +193,7 @@ internal class VideoPushDelegate(
         private const val KEY_SENDER = "sender"
         private const val KEY_TYPE = "type"
         private const val KEY_TYPE_RING = "call.ring"
+        private const val KEY_TYPE_MISSED = "call.missed"
         private const val KEY_TYPE_NOTIFICATION = "call.notification"
         private const val KEY_TYPE_LIVE_STARTED = "call.live_started"
         private const val KEY_CALL_CID = "call_cid"

@@ -41,6 +41,7 @@ import org.openapitools.client.infrastructure.Serializer
  *
  * @param acceptedBy
  * @param id
+ * @param missedBy
  * @param participants
  * @param participantsCountByRole
  * @param rejectedBy
@@ -48,6 +49,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param liveEndedAt
  * @param liveStartedAt
  * @param startedAt
+ * @param timerEndsAt
  */
 
 
@@ -58,6 +60,9 @@ data class CallSessionResponse (
 
     @Json(name = "id")
     val id: kotlin.String,
+
+    @Json(name = "missed_by")
+    val missedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
 
     @Json(name = "participants")
     val participants: kotlin.collections.List<CallParticipantResponse>,
@@ -78,6 +83,9 @@ data class CallSessionResponse (
     val liveStartedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "started_at")
-    val startedAt: org.threeten.bp.OffsetDateTime? = null
+    val startedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "timer_ends_at")
+    val timerEndsAt: org.threeten.bp.OffsetDateTime? = null
 
 )

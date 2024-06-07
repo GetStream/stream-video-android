@@ -35,6 +35,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
@@ -56,7 +57,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.openapitools.client.models.AcceptCallResponse
-import org.openapitools.client.models.AudioSettings
+import org.openapitools.client.models.AudioSettingsResponse
 import org.openapitools.client.models.BlockUserResponse
 import org.openapitools.client.models.CallSettingsRequest
 import org.openapitools.client.models.CallSettingsResponse
@@ -70,7 +71,7 @@ import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
-import org.openapitools.client.models.SendEventResponse
+import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.UnpinResponse
@@ -80,7 +81,7 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoSettings
+import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
@@ -118,7 +119,7 @@ public class Call(
 
     internal val clientImpl = client as StreamVideoImpl
 
-    private val logger by taggedLogger("Call")
+    private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
 
@@ -304,6 +305,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        logger.d { "[join] #ringing; create: $create, ring: $ring, notify: $notify" }
         val permissionPass =
             clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
@@ -590,12 +592,14 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
+        logger.d { "[leave] #ringing; no args" }
         leave(disconnectionReason = null)
     }
 
     private fun leave(disconnectionReason: Throwable?) {
+        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
-            logger.w { "[leave] Call already destroyed, ignoring" }
+            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return
         }
         isDestroyed = true
@@ -770,7 +774,7 @@ public class Call(
         return result
     }
 
-    suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendEventResponse> {
+    suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> {
         return clientImpl.sendCustomEvent(this.type, this.id, data)
     }
 
@@ -905,7 +909,7 @@ public class Call(
                     // be a new audio.defaultDevice setting returned from backend
                     true
                 } else {
-                    callSettings.audio.defaultDevice == AudioSettings.DefaultDevice.Speaker
+                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker
                 }
             speaker.setEnabled(enableSpeaker)
         }
@@ -913,7 +917,7 @@ public class Call(
         // Camera
         if (camera.status.value is DeviceStatus.NotSelected) {
             val defaultDirection =
-                if (callSettings.video.cameraFacing == VideoSettings.CameraFacing.Front) {
+                if (callSettings.video.cameraFacing == VideoSettingsResponse.CameraFacing.Front) {
                     CameraDirection.Front
                 } else {
                     CameraDirection.Back
@@ -1007,14 +1011,17 @@ public class Call(
     }
 
     suspend fun ring(): Result<GetCallResponse> {
+        logger.d { "[ring] #ringing; no args" }
         return clientImpl.ring(type, id)
     }
 
     suspend fun notify(): Result<GetCallResponse> {
+        logger.d { "[notify] #ringing; no args" }
         return clientImpl.notify(type, id)
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
+        logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
@@ -1022,8 +1029,9 @@ public class Call(
         return clientImpl.accept(type, id)
     }
 
-    suspend fun reject(): Result<RejectCallResponse> {
-        return clientImpl.reject(type, id)
+    suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
+        logger.d { "[reject] #ringing; rejectReason: $reason" }
+        return clientImpl.reject(type, id, reason)
     }
 
     fun processAudioSample(audioSample: AudioSamples) {

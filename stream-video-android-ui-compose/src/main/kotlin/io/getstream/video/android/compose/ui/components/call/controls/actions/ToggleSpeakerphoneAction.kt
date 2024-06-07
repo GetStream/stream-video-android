@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.call.controls.actions
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.runtime.Composable
@@ -58,7 +59,7 @@ public fun ToggleSpeakerphoneAction(
     enabledIconTint = enabledIconTint,
     disabledIconTint = disabledIconTint,
     isActionActive = isSpeakerphoneEnabled,
-    iconOnOff = Pair(Icons.Default.VolumeUp, Icons.Default.VolumeOff),
+    iconOnOff = Pair(Icons.AutoMirrored.Filled.VolumeUp, Icons.Default.VolumeOff),
 ) {
     onCallAction(ToggleSpeakerphone(isSpeakerphoneEnabled.not()))
 }
