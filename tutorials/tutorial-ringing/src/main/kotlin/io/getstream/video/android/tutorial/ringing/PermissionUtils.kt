@@ -19,6 +19,7 @@ package io.getstream.video.android.tutorial.ringing
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -49,10 +50,12 @@ fun ComponentActivity.defaultPermissionLauncher(allGranted: () -> Unit = {}) = r
 }
 
 fun ActivityResultLauncher<Array<String>>.requestDefaultPermissions() {
-    launch(
-        arrayOf(
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.CAMERA,
-        ),
+    var permissions = arrayOf(
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.CAMERA,
     )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        permissions += Manifest.permission.POST_NOTIFICATIONS
+    }
+    launch(permissions)
 }

@@ -55,21 +55,12 @@ class RingingApp : Application() {
                 StreamVideoBuilder(
                     context = context.applicationContext,
 //                    apiKey = "mmhfdzb5evj2",
-                    apiKey = "par8f5s3gn2j",
+//                    apiKey = "par8f5s3gn2j",
+                    apiKey = "hd8szvscpxvd",
                     geo = GEO.GlobalEdgeNetwork,
                     user = user.delegate,
                     token = user.token,
                     loggingLevel = LoggingLevel(Priority.VERBOSE, HttpLoggingLevel.BODY),
-                    crashOnMissingPermission = false,
-                    permissionCheck = object : StreamPermissionCheck {
-                        override fun checkAndroidPermissions(
-                            context: Context,
-                            call: Call,
-                        ): Boolean {
-                            // Pass for all permissions.
-                            return true
-                        }
-                    },
                     notificationConfig = NotificationConfig(
                         // Make the notification low prio if the app is in foreground, so its not visible as a popup, since we want to handle
                         // the incoming call in full screen when app is running.
