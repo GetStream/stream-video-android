@@ -26,13 +26,15 @@ plugins {
 }
 
 android {
-    // namespace = "io.getstream.video.android.tutorial.video"
+    //namespace = "io.getstream.video.android.tutorial.video"
     namespace = "io.getstream.android.samples.ringingcall"
+    //namespace = "io.getstream.video.android"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
-        // applicationId = "io.getstream.video.android.tutorial.video"
+        //applicationId = "io.getstream.video.android.tutorial.video"
         applicationId = "io.getstream.android.samples.ringingcall"
+        //applicationId = "io.getstream.video.android"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
         versionCode = 1

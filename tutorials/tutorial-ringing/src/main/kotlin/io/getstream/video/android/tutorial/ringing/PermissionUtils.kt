@@ -34,7 +34,7 @@ fun Context.isCameraPermissionGranted() = ContextCompat.checkSelfPermission(
     this, Manifest.permission.CAMERA,
 ) == PackageManager.PERMISSION_GRANTED
 
-fun ComponentActivity.defaultPermissionLauncher(allGranted: () -> Unit) = registerForActivityResult(
+fun ComponentActivity.defaultPermissionLauncher(allGranted: () -> Unit = {}) = registerForActivityResult(
     ActivityResultContracts.RequestMultiplePermissions(),
 ) { granted ->
     // Handle the permissions result here

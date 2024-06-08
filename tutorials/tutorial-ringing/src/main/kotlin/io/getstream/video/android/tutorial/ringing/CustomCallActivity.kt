@@ -40,8 +40,10 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 // Extends the ComposeStreamCallActivity class to provide a custom UI for the calling screen.
 @Suppress("UNCHECKED_CAST")
@@ -54,8 +56,12 @@ class CustomCallActivity : ComposeStreamCallActivity() {
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity>
         get() = _internalDelegate
 
+    @OptIn(StreamCallActivityDelicateApi::class)
     override fun onCallAction(call: Call, action: CallAction) {
-        super.onCallAction(call, action)
+        when (action) {
+            is BusyCall -> reject(call, RejectReason.Busy, onSuccessFinish, onErrorFinish)
+            else -> super.onCallAction(call, action)
+        }
     }
 
     // Custom delegate class to define specific UI behaviors and layouts for call states.
@@ -95,6 +101,11 @@ class CustomCallActivity : ComposeStreamCallActivity() {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
+
+                        BusyCallAction(
+                            onCallAction = onCallAction,
+                        )
+
                         DeclineCallAction(
                             onCallAction = onCallAction,
                         )

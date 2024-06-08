@@ -119,14 +119,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
-    private val onSuccessFinish: suspend (Call) -> Unit = { call ->
+    protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.w { "The call was successfully finished! Closing activity" }
         onEnded(call)
         if (configuration.closeScreenOnCallEnded) {
             finish()
         }
     }
-    private val onErrorFinish: suspend (Exception) -> Unit = { error ->
+    protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong, finishing the activity!" }
         onFailed(error)
         if (configuration.closeScreenOnError) {

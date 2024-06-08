@@ -46,7 +46,7 @@ class RingingApp : Application() {
 
         val caller get() = TutorialUser.builtIn.first { it.id == StreamVideo.instance().user.id }
 
-        val callee get() = TutorialUser.builtIn.first { it.id != StreamVideo.instance().user.id }
+        val callees get() = TutorialUser.builtIn.filter { it.id != StreamVideo.instance().user.id }
 
         fun login(context: Context, user: TutorialUser) {
             if (!StreamVideo.isInstalled) {
@@ -54,7 +54,8 @@ class RingingApp : Application() {
                 // the client to your Application class or di module.
                 StreamVideoBuilder(
                     context = context.applicationContext,
-                    apiKey = "mmhfdzb5evj2",
+//                    apiKey = "mmhfdzb5evj2",
+                    apiKey = "par8f5s3gn2j",
                     geo = GEO.GlobalEdgeNetwork,
                     user = user.delegate,
                     token = user.token,

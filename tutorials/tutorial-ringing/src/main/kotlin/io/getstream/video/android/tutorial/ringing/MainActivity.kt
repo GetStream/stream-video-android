@@ -21,6 +21,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,12 +29,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -43,7 +46,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
-import androidx.compose.material.icons.outlined.ExitToApp
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -79,9 +83,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val resultLauncher = defaultPermissionLauncher {
-            startOutgoingCallActivity(RingingApp.callee.id)
-        }
+        val resultLauncher = defaultPermissionLauncher()
 
         setContent {
             VideoTheme {
@@ -89,18 +91,17 @@ class MainActivity : ComponentActivity() {
                 when (selectedUser) {
                     null -> LoginScreen(onUserSelected = { user ->
                         RingingApp.login(applicationContext, user)
+                        // For the simplicity of the tutorial, we are requesting the required permissions here.
+                        // In a real app, you should request the permissions when needed.
+                        resultLauncher.requestDefaultPermissions()
                         selectedUser = user
                     })
 
                     else -> HomeScreen(onLogoutClick = {
                         RingingApp.logout()
                         selectedUser = null
-                    }, onDialClick = {
-                        if (isAudioPermissionGranted() && isCameraPermissionGranted()) {
-                            startOutgoingCallActivity(RingingApp.callee.id)
-                        } else {
-                            resultLauncher.requestDefaultPermissions()
-                        }
+                    }, onDialClick = { callees ->
+                        startOutgoingCallActivity(callees)
                     })
                 }
             }
@@ -141,11 +142,11 @@ class MainActivity : ComponentActivity() {
         startActivity(intent)
     }
 
-    private fun startOutgoingCallActivity(vararg members: String) {
+    private fun startOutgoingCallActivity(callees: List<String>) {
         val intent = StreamCallActivity.callIntent(
             context = this,
             cid = StreamCallId(type = "default", id = UUID.randomUUID().toString()),
-            members = members.toList(),
+            members = callees.toList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_OUTGOING_CALL,
             clazz = ComposeStreamCallActivity::class.java,
@@ -155,55 +156,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun HomeScreen(onLogoutClick: () -> Unit, onDialClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = VideoTheme.colors.baseTertiary),
-    ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            UserAvatar(
-                modifier = Modifier.size(48.dp),
-                userImage = RingingApp.caller.image,
-                userName = RingingApp.caller.name,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = RingingApp.caller.name,
-                style = VideoTheme.typography.titleS,
-                color = VideoTheme.colors.basePrimary,
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(
-                onClick = onLogoutClick,
-                modifier = Modifier.size(48.dp),
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Outlined.ExitToApp,
-                    tint = VideoTheme.colors.iconDefault,
-                    contentDescription = null
-                )
-            }
-
-        }
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            Button(onClick = onDialClick, modifier = Modifier.align(Alignment.Center)) {
-                Text(text = "Dial ${RingingApp.callee.name}")
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
 fun LoginScreen(onUserSelected: (TutorialUser) -> Unit) {
     // step1 - select a user.
     Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.baseTertiary) {
         Column(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start,
         ) {
             Text(
                 text = "Select a User",
@@ -211,36 +168,115 @@ fun LoginScreen(onUserSelected: (TutorialUser) -> Unit) {
                 color = VideoTheme.colors.basePrimary,
                 modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
             )
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start,
-            ) {
-                itemsIndexed(TutorialUser.builtIn) { idx, user ->
-                    ListItem(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onUserSelected(user) }
-                            .padding(vertical = 8.dp, horizontal = 16.dp),
-                        icon = {
-                            UserAvatar(
-                                modifier = Modifier.size(48.dp),
-                                userImage = user.image,
-                                userName = user.name,
-                            )
-                        },
-                        text = {
-                            Text(
-                                text = user.name,
-                                style = VideoTheme.typography.titleS,
-                            )
-                        },
-                    )
-                    if (idx < TutorialUser.builtIn.lastIndex) {
-                        Divider(color = VideoTheme.colors.baseQuinary, thickness = 1.dp)
+            Spacer(modifier = Modifier.weight(1f))
+            val users = TutorialUser.builtIn
+            UserList(users, onUserClick = { userId ->
+                users.find { it.id == userId }?.let { onUserSelected(it) }
+            })
+            Spacer(modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun HomeScreen(onLogoutClick: () -> Unit, onDialClick: (callees: List<String>) -> Unit) {
+    Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.baseTertiary) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            HomeHeader(onLogoutClick)
+            Spacer(modifier = Modifier.weight(1f))
+            var callees by remember { mutableStateOf(RingingApp.callees) }
+            UserList(callees, checkboxVisible = true) { calleeId ->
+                callees = callees.map {
+                    when (it.id == calleeId) {
+                        true -> it.copy(checked = !it.checked)
+                        else -> it
                     }
+
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { onDialClick(callees.filter { it.checked }.map { it.id }) },
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                enabled = callees.any { it.checked }
+            ) {
+                Text(text = "Dial Selected Users")
+            }
+            Spacer(modifier = Modifier.weight(1f))
         }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterialApi::class)
+private fun UserList(
+    users: List<TutorialUser>,
+    modifier: Modifier = Modifier,
+    checkboxVisible: Boolean = false,
+    onUserClick: (userId: String) -> Unit
+) {
+    LazyColumn(modifier = modifier) {
+        itemsIndexed(users) { idx, user ->
+            ListItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onUserClick(user.id) }
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                icon = {
+                    UserAvatar(
+                        modifier = Modifier.size(48.dp),
+                        userImage = user.image,
+                        userName = user.name,
+                    )
+                },
+                text = {
+                    Text(
+                        text = user.name,
+                        style = VideoTheme.typography.titleS,
+                    )
+                },
+                trailing = {
+                    if (checkboxVisible && user.checked) {
+                        Icon(
+                            Icons.Rounded.Check,
+                            contentDescription = null,
+                            tint = VideoTheme.colors.iconDefault
+                        )
+                    }
+                }
+            )
+            if (idx < users.lastIndex) {
+                Divider(color = VideoTheme.colors.baseQuinary, thickness = 1.dp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeHeader(onLogoutClick: () -> Unit) {
+    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        UserAvatar(
+            modifier = Modifier.size(48.dp),
+            userImage = RingingApp.caller.image,
+            userName = RingingApp.caller.name,
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = RingingApp.caller.name,
+            style = VideoTheme.typography.titleS,
+            color = VideoTheme.colors.basePrimary,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = onLogoutClick,
+            modifier = Modifier.size(48.dp),
+        ) {
+            Icon(
+                Icons.AutoMirrored.Outlined.ExitToApp,
+                tint = VideoTheme.colors.iconDefault,
+                contentDescription = null
+            )
+        }
+
     }
 }
