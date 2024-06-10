@@ -22,14 +22,12 @@ import com.google.firebase.FirebaseApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.android.samples.ringingcall.FirebasePushService
 import io.getstream.log.Priority
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 
 class RingingApp : Application() {
 
@@ -44,12 +42,17 @@ class RingingApp : Application() {
 
     companion object {
 
-        val caller get() = TutorialUser.builtIn.first { it.id == StreamVideo.instance().user.id }
+        var currentUser: TutorialUser? = null
 
-        val callees get() = TutorialUser.builtIn.filter { it.id != StreamVideo.instance().user.id }
+        val caller get() = currentUser ?: error("#caller; user not logged in")
+
+        val callees get() = currentUser?.let { loggedInUser ->
+            TutorialUser.builtIn.filter { it.id != loggedInUser.id }
+        } ?: error("#callees; user not logged in")
 
         fun login(context: Context, user: TutorialUser) {
             if (!StreamVideo.isInstalled) {
+                currentUser = user
                 // step2 - initialize StreamVideo. For a production app we recommend adding
                 // the client to your Application class or di module.
                 StreamVideoBuilder(
@@ -62,11 +65,19 @@ class RingingApp : Application() {
                     token = user.token,
                     loggingLevel = LoggingLevel(Priority.VERBOSE, HttpLoggingLevel.BODY),
                     notificationConfig = NotificationConfig(
-                        // Make the notification low prio if the app is in foreground, so its not visible as a popup, since we want to handle
+                        // Make the notification low priority if the app is in foreground, so its not visible as a popup, since we want to handle
                         // the incoming call in full screen when app is running.
                         hideRingingNotificationInForeground = true,
                         // Make sure that the provider name is equal to the "Name" of the configuration in Stream Dashboard.
-                        pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = FirebasePushService.PROVIDER_NAME)),
+                        pushDeviceGenerators = listOf(
+                            FirebasePushDeviceGenerator(
+                                providerName = FirebasePushService.PROVIDER_NAME,
+                            ),
+                        ),
+
+                        notificationHandler = CustomNotificationHandler(
+                            context.applicationContext as Application,
+                        ),
                     ),
                 ).build()
             }
@@ -75,8 +86,9 @@ class RingingApp : Application() {
         fun logout() {
             if (StreamVideo.isInstalled) {
                 StreamVideo.instance().logOut()
+                StreamVideo.removeClient()
+                currentUser = null
             }
-            StreamVideo.removeClient()
         }
     }
 }

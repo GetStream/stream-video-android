@@ -36,6 +36,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
+        const val ACTION_MISSED_CALL = "io.getstream.video.android.action.MISSED_CALL"
         const val ACTION_LIVE_CALL = "io.getstream.video.android.action.LIVE_CALL"
         const val ACTION_INCOMING_CALL = "io.getstream.video.android.action.INCOMING_CALL"
         const val ACTION_OUTGOING_CALL = "io.getstream.video.android.action.OUTGOING_CALL"

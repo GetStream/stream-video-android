@@ -41,6 +41,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun get (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun get$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun getConfiguration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
+	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;
 	public abstract fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
 	public fun isVideoCall (Lio/getstream/video/android/core/Call;)Z
 	public fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V

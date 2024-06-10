@@ -26,7 +26,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 
-
 fun Context.isAudioPermissionGranted() = ContextCompat.checkSelfPermission(
     this, Manifest.permission.RECORD_AUDIO,
 ) == PackageManager.PERMISSION_GRANTED
@@ -35,7 +34,10 @@ fun Context.isCameraPermissionGranted() = ContextCompat.checkSelfPermission(
     this, Manifest.permission.CAMERA,
 ) == PackageManager.PERMISSION_GRANTED
 
-fun ComponentActivity.defaultPermissionLauncher(allGranted: () -> Unit = {}) = registerForActivityResult(
+fun ComponentActivity.defaultPermissionLauncher(
+    allGranted: () -> Unit = {
+    },
+) = registerForActivityResult(
     ActivityResultContracts.RequestMultiplePermissions(),
 ) { granted ->
     // Handle the permissions result here

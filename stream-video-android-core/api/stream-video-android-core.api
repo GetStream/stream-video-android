@@ -1142,6 +1142,9 @@ public final class io/getstream/video/android/core/call/state/Settings : io/gets
 
 public final class io/getstream/video/android/core/call/state/ShowCallParticipantInfo : io/getstream/video/android/core/call/state/CallAction {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/state/ShowCallParticipantInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/call/state/ToggleCamera : io/getstream/video/android/core/call/state/CallAction {
@@ -4127,6 +4130,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun getChannelName ()Ljava/lang/String;
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationIconRes ()I
+	protected final fun getNotificationManager ()Landroidx/core/app/NotificationManagerCompat;
 	public fun getOngoingCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
@@ -4166,6 +4170,7 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
 	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
+	public static final field ACTION_MISSED_CALL Ljava/lang/String;
 	public static final field ACTION_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_ONGOING_CALL Ljava/lang/String;
 	public static final field ACTION_OUTGOING_CALL Ljava/lang/String;
@@ -4189,6 +4194,7 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 	public static final field ACTION_INCOMING_CALL Ljava/lang/String;
 	public static final field ACTION_LEAVE_CALL Ljava/lang/String;
 	public static final field ACTION_LIVE_CALL Ljava/lang/String;
+	public static final field ACTION_MISSED_CALL Ljava/lang/String;
 	public static final field ACTION_NOTIFICATION Ljava/lang/String;
 	public static final field ACTION_ONGOING_CALL Ljava/lang/String;
 	public static final field ACTION_OUTGOING_CALL Ljava/lang/String;

@@ -19,11 +19,7 @@ package io.getstream.video.android.tutorial.ringing
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,7 +32,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Button
-import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -54,8 +49,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -87,7 +80,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             VideoTheme {
-                var selectedUser by remember { mutableStateOf<TutorialUser?>(null) }
+                var selectedUser by remember { mutableStateOf(RingingApp.currentUser) }
                 when (selectedUser) {
                     null -> LoginScreen(onUserSelected = { user ->
                         RingingApp.login(applicationContext, user)
@@ -191,14 +184,13 @@ fun HomeScreen(onLogoutClick: () -> Unit, onDialClick: (callees: List<String>) -
                         true -> it.copy(checked = !it.checked)
                         else -> it
                     }
-
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = { onDialClick(callees.filter { it.checked }.map { it.id }) },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                enabled = callees.any { it.checked }
+                enabled = callees.any { it.checked },
             ) {
                 Text(text = "Dial Selected Users")
             }
@@ -213,7 +205,7 @@ private fun UserList(
     users: List<TutorialUser>,
     modifier: Modifier = Modifier,
     checkboxVisible: Boolean = false,
-    onUserClick: (userId: String) -> Unit
+    onUserClick: (userId: String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(users) { idx, user ->
@@ -240,10 +232,10 @@ private fun UserList(
                         Icon(
                             Icons.Rounded.Check,
                             contentDescription = null,
-                            tint = VideoTheme.colors.iconDefault
+                            tint = VideoTheme.colors.iconDefault,
                         )
                     }
-                }
+                },
             )
             if (idx < users.lastIndex) {
                 Divider(color = VideoTheme.colors.baseQuinary, thickness = 1.dp)
@@ -274,9 +266,8 @@ private fun HomeHeader(onLogoutClick: () -> Unit) {
             Icon(
                 Icons.AutoMirrored.Outlined.ExitToApp,
                 tint = VideoTheme.colors.iconDefault,
-                contentDescription = null
+                contentDescription = null,
             )
         }
-
     }
 }
