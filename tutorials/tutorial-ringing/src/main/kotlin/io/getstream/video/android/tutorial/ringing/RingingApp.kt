@@ -132,24 +132,6 @@ data class TutorialUser(
                 // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.K4oueQJv1Qmp2cQm9y1WslZfWAItJSA9BP7Fc0xmRlA",
                 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.5z8Pl8zLIWsiAx2Yw8F7N3XWGu5XUodgytpPBDlGCW8",
             ),
-            TutorialUser(
-                User(
-                    id = "alex",
-                    name = "Alex",
-                    role = "user",
-                    image = "https://ca.slack-edge.com/T02RM6X6B-U05UD37MA1G-f062f8b7afc2-512",
-                ),
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYWxleCJ9.ashnnUkRdHKpCEVp3Urtsmcmj1RikBVBR2kWysWNqaY",
-            ),
-            TutorialUser(
-                User(
-                    id = "kanat",
-                    name = "Kanat",
-                    role = "user",
-                    image = "https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-9a37493e25e0-512",
-                ),
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoia2FuYXQifQ.T0gNUV5BaP0XMJi6xpscaFtjl08C7m_FQik0yRCsqW0",
-            ),
         )
     }
 }
