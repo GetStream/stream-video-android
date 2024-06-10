@@ -51,6 +51,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
 
     // Compose
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling)
