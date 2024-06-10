@@ -20,7 +20,6 @@ import android.app.Application
 import android.content.Context
 import com.google.firebase.FirebaseApp
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
-import io.getstream.android.samples.ringingcall.FirebasePushService
 import io.getstream.log.Priority
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
@@ -28,6 +27,7 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.model.User
 
 class RingingApp : Application() {
 
@@ -36,8 +36,6 @@ class RingingApp : Application() {
         // Initialize firebase first.
         // Ensure that you have the correct service account credentials updated in the Stream Dashboard.
         FirebaseApp.initializeApp(this)
-
-        // You do not have to use runBlocking { } to initialize the StreamVideo instance. Its only for the purpose of loading the mock user.
     }
 
     companion object {
@@ -71,7 +69,7 @@ class RingingApp : Application() {
                         // Make sure that the provider name is equal to the "Name" of the configuration in Stream Dashboard.
                         pushDeviceGenerators = listOf(
                             FirebasePushDeviceGenerator(
-                                providerName = FirebasePushService.PROVIDER_NAME,
+                                providerName = "firebase",
                             ),
                         ),
 
@@ -90,5 +88,68 @@ class RingingApp : Application() {
                 currentUser = null
             }
         }
+    }
+}
+
+data class TutorialUser(
+    val delegate: User,
+    val token: String,
+    val checked: Boolean = false,
+) {
+    val id: String get() = delegate.id
+    val name: String get() = delegate.name
+    val image: String get() = delegate.image
+
+    companion object {
+        val builtIn = listOf(
+            TutorialUser(
+                User(
+                    id = "android-tutorial-1",
+                    name = "User 1",
+                    image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg",
+                ),
+                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.3qB-FI6OAqf5ZEETtgs0XhaMmiaRF2jDJOqCVRsqqbc",
+                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.vDEb3CLKKA79Qfxvx28WldbihkmtXBJxgVjxQab2q5w",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.KPA1bqulbWQ61sRN1xSOkUST-B8n3NU95D-69eefuUE",
+            ),
+            TutorialUser(
+                User(
+                    id = "android-tutorial-2",
+                    name = "User 2",
+                    image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Claudia%20Bradtke.jpg",
+                ),
+                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.ksOq5ahC0745oZdPDKr2hyLp0j9exfwLE-AQITc9ZSc",
+                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.2XR4WtTyPtTPOKOrkaYbufJauzYjrZnp4kFGZ6bCPfA",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.62WBxhmQF4A4bpV8ihyJCiTy-NAhb-WOCj73ljBWRB4",
+            ),
+            TutorialUser(
+                User(
+                    id = "android-tutorial-3",
+                    name = "User 3",
+                    image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg",
+                ),
+                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.g5h8coX8J1XUNHagPFoGBI0D7bN6P0w2Sd2rui89puE",
+                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.K4oueQJv1Qmp2cQm9y1WslZfWAItJSA9BP7Fc0xmRlA",
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.5z8Pl8zLIWsiAx2Yw8F7N3XWGu5XUodgytpPBDlGCW8",
+            ),
+            TutorialUser(
+                User(
+                    id = "alex",
+                    name = "Alex",
+                    role = "user",
+                    image = "https://ca.slack-edge.com/T02RM6X6B-U05UD37MA1G-f062f8b7afc2-512",
+                ),
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYWxleCJ9.ashnnUkRdHKpCEVp3Urtsmcmj1RikBVBR2kWysWNqaY",
+            ),
+            TutorialUser(
+                User(
+                    id = "kanat",
+                    name = "Kanat",
+                    role = "user",
+                    image = "https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-9a37493e25e0-512",
+                ),
+                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoia2FuYXQifQ.T0gNUV5BaP0XMJi6xpscaFtjl08C7m_FQik0yRCsqW0",
+            ),
+        )
     }
 }

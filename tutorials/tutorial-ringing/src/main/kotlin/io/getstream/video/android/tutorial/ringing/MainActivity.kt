@@ -16,9 +16,16 @@
 
 package io.getstream.video.android.tutorial.ringing
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
@@ -271,3 +279,39 @@ private fun HomeHeader(onLogoutClick: () -> Unit) {
         }
     }
 }
+
+private fun ComponentActivity.defaultPermissionLauncher(
+    allGranted: () -> Unit = {
+    },
+) = registerForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions(),
+) { granted ->
+    // Handle the permissions result here
+    granted.entries.forEach { (permission, granted) ->
+        if (!granted) {
+            Toast.makeText(this, "$permission permission is required.", Toast.LENGTH_LONG).show()
+        }
+    }
+    if (granted.entries.all { it.value }) {
+        allGranted()
+    }
+}
+
+private fun ActivityResultLauncher<Array<String>>.requestDefaultPermissions() {
+    var permissions = arrayOf(
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.CAMERA,
+    )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        permissions += Manifest.permission.POST_NOTIFICATIONS
+    }
+    launch(permissions)
+}
+
+private fun Context.isAudioPermissionGranted() = ContextCompat.checkSelfPermission(
+    this, Manifest.permission.RECORD_AUDIO,
+) == PackageManager.PERMISSION_GRANTED
+
+private fun Context.isCameraPermissionGranted() = ContextCompat.checkSelfPermission(
+    this, Manifest.permission.CAMERA,
+) == PackageManager.PERMISSION_GRANTED

@@ -22,10 +22,14 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -33,10 +37,12 @@ import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
@@ -126,3 +132,22 @@ class CustomCallActivity : ComposeStreamCallActivity() {
         }
     }
 }
+
+@Composable
+fun BusyCallAction(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onCallAction: (BusyCall) -> Unit,
+    icon: ImageVector? = null,
+    bgColor: Color? = null,
+    iconTint: Color? = null,
+): Unit = GenericAction(
+    modifier = modifier,
+    enabled = enabled,
+    onAction = { onCallAction(BusyCall) },
+    icon = icon ?: Icons.Default.Close,
+    color = bgColor ?: VideoTheme.colors.alertWarning,
+    iconTint = iconTint ?: VideoTheme.colors.basePrimary,
+)
+
+data object BusyCall : CustomAction(tag = "busy")
