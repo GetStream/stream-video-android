@@ -138,7 +138,7 @@ class MainActivity : ComponentActivity() {
             members = emptyList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_INCOMING_CALL,
-            clazz = CustomCallActivity::class.java,
+            clazz = VideoCallActivity::class.java,
         )
         startActivity(intent)
     }
@@ -150,7 +150,10 @@ class MainActivity : ComponentActivity() {
             members = callees.toList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_OUTGOING_CALL,
-            clazz = CustomCallActivity::class.java,
+            clazz = VideoCallActivity::class.java,
+            extraData = Bundle().apply {
+                putBoolean("is_video_call", true)
+            },
         )
         startActivity(intent)
     }

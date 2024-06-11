@@ -50,6 +50,7 @@ import io.getstream.video.android.ui.common.R
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
+ * @param backgroundContent Content shown for the call background.
  * @param headerContent Content shown for the call header.
  * @param detailsContent Content shown for call details, such as call participant information.
  * @param controlsContent Content shown for controlling call, such as accepting a call or declining a call.
@@ -62,6 +63,7 @@ public fun IncomingCallContent(
     call: Call,
     isVideoType: Boolean = true,
     isShowingHeader: Boolean = true,
+    backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
@@ -105,6 +107,7 @@ public fun IncomingCallContent(
  * @param isCameraEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param isShowingHeader If the app bar header is shown or not.
+ * @param backgroundContent Content shown for the call background.
  * @param onBackPressed Handler when the user taps on the back button.
  * @param onCallAction Handler used when the user interacts with Call UI.
  */
@@ -116,6 +119,7 @@ public fun IncomingCallContent(
     participants: List<MemberState>,
     isCameraEnabled: Boolean,
     isShowingHeader: Boolean = true,
+    backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
@@ -127,7 +131,10 @@ public fun IncomingCallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    CallBackground {
+    CallBackground(
+        modifier = modifier,
+        backgroundContent = backgroundContent
+    ) {
         Column {
             if (isShowingHeader) {
                 headerContent?.invoke(this)

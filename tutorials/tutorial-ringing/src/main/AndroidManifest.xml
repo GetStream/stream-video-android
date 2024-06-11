@@ -44,6 +44,12 @@
         <activity android:name="io.getstream.video.android.tutorial.ringing.CustomCallActivity"
             android:supportsPictureInPicture="true" />
 
+        <activity android:name="io.getstream.video.android.tutorial.ringing.VideoCallActivity"
+            android:supportsPictureInPicture="true" />
+
+        <activity android:name="io.getstream.video.android.tutorial.ringing.BusyCallActivity"
+            android:supportsPictureInPicture="true" />
+
     </application>
 
 </manifest>

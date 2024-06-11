@@ -83,6 +83,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
          * @param members list of members
          * @param action android action.
          * @param clazz the class of the Activity
+         * @param configuration the configuration object
+         * @param extraData extra data to pass to the activity
          */
         public fun <T : StreamCallActivity> callIntent(
             context: Context,
@@ -92,6 +94,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             action: String? = null,
             clazz: Class<T>,
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
+            extraData: Bundle? = null,
         ): Intent {
             return Intent(context, clazz).apply {
                 // Setup the outgoing call action
@@ -108,6 +111,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
                 val membersArrayList = ArrayList<String>()
                 members.forEach { membersArrayList.add(it) }
                 putStringArrayListExtra(EXTRA_MEMBERS_ARRAY, membersArrayList)
+                extraData?.also {
+                    putExtras(it)
+                }
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 logger.d { "Created [${clazz.simpleName}] intent. -> $this" }
             }
