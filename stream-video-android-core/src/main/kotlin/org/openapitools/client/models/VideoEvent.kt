@@ -163,7 +163,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "user.reactivated" -> UserReactivatedEvent::class.java
             "user.unbanned" -> UserUnbannedEvent::class.java
             "user.updated" -> UserUpdatedEvent::class.java
-            else -> UnknownVideoEvent(type)::class.java
+            else -> throw UnsupportedVideoEventException(type)
         }
     }
 }
