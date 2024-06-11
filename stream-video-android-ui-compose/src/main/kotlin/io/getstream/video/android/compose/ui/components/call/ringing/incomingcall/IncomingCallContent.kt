@@ -133,7 +133,7 @@ public fun IncomingCallContent(
 ) {
     CallBackground(
         modifier = modifier,
-        backgroundContent = backgroundContent
+        backgroundContent = backgroundContent,
     ) {
         Column {
             if (isShowingHeader) {

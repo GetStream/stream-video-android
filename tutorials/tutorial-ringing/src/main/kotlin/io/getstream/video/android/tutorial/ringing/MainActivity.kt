@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
@@ -68,12 +67,12 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.StreamCallActivity
-import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * This is the video call sample project follows the official ringing flow tutorial:

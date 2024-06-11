@@ -34,7 +34,6 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
@@ -77,10 +76,10 @@ class CustomCallActivity : ComposeStreamCallActivity() {
             isShowingHeader: Boolean,
             headerContent: (@Composable ColumnScope.() -> Unit)?,
             detailsContent: (
-            @Composable ColumnScope.(
-                participants: List<MemberState>,
-                topPadding: Dp,
-            ) -> Unit
+                @Composable ColumnScope.(
+                    participants: List<MemberState>,
+                    topPadding: Dp,
+                ) -> Unit
             )?,
             controlsContent: (@Composable BoxScope.() -> Unit)?,
             onBackPressed: () -> Unit,
@@ -102,7 +101,6 @@ class CustomCallActivity : ComposeStreamCallActivity() {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
-
                         CustomRejectAction(
                             reason = "custom-cancel-reason",
                             onCallAction = onCallAction,
@@ -131,7 +129,6 @@ class CustomCallActivity : ComposeStreamCallActivity() {
             onBackPressed: () -> Unit,
             onCallAction: (CallAction) -> Unit,
         ) {
-
             io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent(
                 call = call,
                 isVideoType = isVideoType,
@@ -148,7 +145,6 @@ class CustomCallActivity : ComposeStreamCallActivity() {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
-
                         CustomRejectAction(
                             reason = "custom-decline-reason",
                             onCallAction = onCallAction,

@@ -29,7 +29,7 @@ class CustomNotificationHandler(
     private val application: Application,
 ) : DefaultNotificationHandler(
     application = application,
-    hideRingingNotificationInForeground = true
+    hideRingingNotificationInForeground = true,
 ) {
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
