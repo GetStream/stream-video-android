@@ -27,14 +27,21 @@ import io.getstream.video.android.model.StreamCallId
 
 class CustomNotificationHandler(
     private val application: Application,
-) : DefaultNotificationHandler(application) {
+) : DefaultNotificationHandler(
+    application = application,
+    hideRingingNotificationInForeground = true
+) {
+
+    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+        super.onRingingCall(callId, callDisplayName)
+    }
 
     @SuppressLint("MissingPermission")
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
         val notification = NotificationCompat.Builder(application, getChannelId())
             .setSmallIcon(R.drawable.round_call_missed_24)
             .setContentIntent(buildContentIntent())
-            .setContentTitle("Missed call from $callDisplayName")
+            .setContentTitle("Tutorial Missed Call from $callDisplayName")
             .setAutoCancel(true)
             .build()
         notificationManager.notify(callId.hashCode(), notification)

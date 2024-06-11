@@ -68,12 +68,12 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.StreamCallActivity
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * This is the video call sample project follows the official ringing flow tutorial:
@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
             members = callees.toList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_OUTGOING_CALL,
-            clazz = ComposeStreamCallActivity::class.java,
+            clazz = CustomCallActivity::class.java,
         )
         startActivity(intent)
     }

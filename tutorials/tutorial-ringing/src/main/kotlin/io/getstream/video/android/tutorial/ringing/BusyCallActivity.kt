@@ -23,19 +23,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
@@ -47,7 +50,7 @@ import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 // Extends the ComposeStreamCallActivity class to provide a custom UI for the calling screen.
 @Suppress("UNCHECKED_CAST")
-class CustomCallActivity : ComposeStreamCallActivity() {
+class BusyCallActivity : ComposeStreamCallActivity() {
 
     // Internal delegate to customize the UI aspects of the call.
     private val _internalDelegate = CustomUiDelegate()
@@ -59,60 +62,13 @@ class CustomCallActivity : ComposeStreamCallActivity() {
     @OptIn(StreamCallActivityDelicateApi::class)
     override fun onCallAction(call: Call, action: CallAction) {
         when (action) {
-            is CustomRejectCall -> {
-                reject(call, RejectReason.Custom(action.reason), onSuccessFinish, onErrorFinish)
-            }
+            is BusyCall -> reject(call, RejectReason.Busy, onSuccessFinish, onErrorFinish)
             else -> super.onCallAction(call, action)
         }
     }
 
     // Custom delegate class to define specific UI behaviors and layouts for call states.
     private class CustomUiDelegate : StreamCallActivityComposeDelegate() {
-
-        @Composable
-        override fun StreamCallActivity.OutgoingCallContent(
-            modifier: Modifier,
-            call: Call,
-            isVideoType: Boolean,
-            isShowingHeader: Boolean,
-            headerContent: (@Composable ColumnScope.() -> Unit)?,
-            detailsContent: (
-            @Composable ColumnScope.(
-                participants: List<MemberState>,
-                topPadding: Dp,
-            ) -> Unit
-            )?,
-            controlsContent: (@Composable BoxScope.() -> Unit)?,
-            onBackPressed: () -> Unit,
-            onCallAction: (CallAction) -> Unit,
-        ) {
-            io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent(
-                call = call,
-                isVideoType = isVideoType,
-                modifier = modifier,
-                isShowingHeader = isShowingHeader,
-                headerContent = headerContent,
-                detailsContent = detailsContent,
-                controlsContent = {
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = VideoTheme.dimens.componentHeightM)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                    ) {
-
-                        CustomRejectAction(
-                            reason = "custom-cancel-reason",
-                            onCallAction = onCallAction,
-                        )
-                    }
-                },
-                onBackPressed = onBackPressed,
-                onCallAction = onCallAction,
-            )
-        }
 
         @Composable
         override fun StreamCallActivity.IncomingCallContent(
@@ -131,7 +87,6 @@ class CustomCallActivity : ComposeStreamCallActivity() {
             onBackPressed: () -> Unit,
             onCallAction: (CallAction) -> Unit,
         ) {
-
             io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent(
                 call = call,
                 isVideoType = isVideoType,
@@ -140,6 +95,7 @@ class CustomCallActivity : ComposeStreamCallActivity() {
                 headerContent = headerContent,
                 detailsContent = detailsContent,
                 controlsContent = {
+                    val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
                     Row(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
@@ -148,11 +104,22 @@ class CustomCallActivity : ComposeStreamCallActivity() {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
-
-                        CustomRejectAction(
-                            reason = "custom-decline-reason",
+                        BusyCallAction(
                             onCallAction = onCallAction,
                         )
+
+                        DeclineCallAction(
+                            onCallAction = onCallAction,
+                        )
+
+                        if (isVideoType) {
+                            ToggleCameraAction(
+                                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
+                                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                                isCameraEnabled = isCameraEnabled,
+                                onCallAction = onCallAction,
+                            )
+                        }
 
                         AcceptCallAction(
                             onCallAction = onCallAction,
@@ -167,21 +134,20 @@ class CustomCallActivity : ComposeStreamCallActivity() {
 }
 
 @Composable
-public fun CustomRejectAction(
+fun BusyCallAction(
     modifier: Modifier = Modifier,
-    reason: String,
     enabled: Boolean = true,
-    onCallAction: (CustomAction) -> Unit,
+    onCallAction: (BusyCall) -> Unit,
     icon: ImageVector? = null,
     bgColor: Color? = null,
     iconTint: Color? = null,
 ): Unit = GenericAction(
     modifier = modifier,
     enabled = enabled,
-    onAction = { onCallAction(CustomRejectCall(reason)) },
-    icon = icon ?: Icons.Default.Call,
+    onAction = { onCallAction(BusyCall) },
+    icon = icon ?: Icons.Default.Close,
     color = bgColor ?: VideoTheme.colors.alertWarning,
     iconTint = iconTint ?: VideoTheme.colors.basePrimary,
 )
 
-data class CustomRejectCall(val reason: String) : CustomAction(tag = "custom-reject")
+data object BusyCall : CustomAction(tag = "busy")
