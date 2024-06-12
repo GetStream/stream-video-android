@@ -8,9 +8,9 @@ object Configuration {
     const val minorVersion = 0
     const val patchVersion = 5
     const val versionName = "$majorVersion.$minorVersion.$patchVersion"
-    const val versionCode = 28
+    const val versionCode = 29
     const val snapshotVersionName = "$majorVersion.$minorVersion.${patchVersion + 1}-SNAPSHOT"
     const val artifactGroup = "io.getstream"
-    const val streamVideoCallGooglePlayVersion = "1.1.2"
+    const val streamVideoCallGooglePlayVersion = "1.1.3"
     const val streamWebRtcVersionName = "1.1.1"
 }
