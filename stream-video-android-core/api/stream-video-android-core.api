@@ -10063,6 +10063,11 @@ public final class org/openapitools/client/models/UnpinResponse {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/UnsupportedVideoEventException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getType ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/UpdateCallMembersRequest {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;Ljava/util/List;)V
