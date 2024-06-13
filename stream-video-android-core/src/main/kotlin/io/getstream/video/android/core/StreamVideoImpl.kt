@@ -147,7 +147,7 @@ internal class StreamVideoImpl internal constructor(
     internal val sounds: Sounds,
     internal val crashOnMissingPermission: Boolean = true,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
-    internal val audioUsage: Int = defaultAudioUsage
+    internal val audioUsage: Int = defaultAudioUsage,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null

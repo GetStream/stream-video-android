@@ -214,7 +214,7 @@ public class Call(
                 this,
                 scope,
                 clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.audioUsage
+                clientImpl.audioUsage,
             )
         }
     }

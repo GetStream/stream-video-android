@@ -459,7 +459,7 @@ class MicrophoneManager(
 
             audioHandler.start()
         } else {
-            logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch"}
+            logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
         setupCompleted = true
     }

@@ -51,7 +51,7 @@ import java.nio.ByteBuffer
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
-    private val audioUsage: Int = defaultAudioUsage
+    private val audioUsage: Int = defaultAudioUsage,
 ) {
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
@@ -162,7 +162,7 @@ public class StreamPeerConnectionFactory(
                         if (audioUsage != defaultAudioUsage) {
                             setAudioAttributes(
                                 AudioAttributes.Builder().setUsage(audioUsage)
-                                    .build()
+                                    .build(),
                             )
                             audioLogger.d { "[setAudioAttributes] usage: $audioUsage" }
                         }
@@ -314,7 +314,7 @@ public class StreamPeerConnectionFactory(
 
     internal fun makeVideoSource(
         isScreencast: Boolean,
-        filterVideoProcessor: FilterVideoProcessor
+        filterVideoProcessor: FilterVideoProcessor,
     ): VideoSource =
         factory.createVideoSource(isScreencast).apply {
             setVideoProcessor(filterVideoProcessor)

@@ -91,7 +91,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val sounds: Sounds = Sounds(),
     private val crashOnMissingPermission: Boolean = true,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
-    private val audioUsage: Int = defaultAudioUsage
+    private val audioUsage: Int = defaultAudioUsage,
 ) {
     private val context: Context = context.applicationContext
 
@@ -173,7 +173,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
-            audioUsage = audioUsage
+            audioUsage = audioUsage,
         )
 
         if (user.type == UserType.Guest) {
