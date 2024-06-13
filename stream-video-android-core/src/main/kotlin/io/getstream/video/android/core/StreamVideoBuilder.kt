@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
  * @property crashOnMissingPermission if [permissionCheck] returns false there will be an exception.
  * @property permissionCheck used to check for system permission based on call capabilities. See [StreamPermissionCheck].
+ * @property audioUsage used to signal to the system how to treat the audio tracks (voip or media).
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -90,6 +91,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val sounds: Sounds = Sounds(),
     private val crashOnMissingPermission: Boolean = true,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    private val audioUsage: Int = defaultAudioUsage,
 ) {
     private val context: Context = context.applicationContext
 
@@ -171,6 +173,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
+            audioUsage = audioUsage,
         )
 
         if (user.type == UserType.Guest) {
