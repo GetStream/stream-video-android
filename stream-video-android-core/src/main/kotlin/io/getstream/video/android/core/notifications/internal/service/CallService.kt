@@ -481,19 +481,21 @@ internal class CallService : Service() {
     }
 
     private fun registerToggleCameraBroadcastReceiver() {
-        if (!isToggleCameraBroadcastReceiverRegistered) {
-            try {
-                registerReceiver(
-                    toggleCameraBroadcastReceiver,
-                    IntentFilter().apply {
-                        addAction(Intent.ACTION_SCREEN_ON)
-                        addAction(Intent.ACTION_SCREEN_OFF)
-                        addAction(Intent.ACTION_USER_PRESENT)
-                    },
-                )
-                isToggleCameraBroadcastReceiverRegistered = true
-            } catch (e: Exception) {
-                logger.d { "Unable to register ToggleCameraBroadcastReceiver." }
+        serviceScope.launch {
+            if (!isToggleCameraBroadcastReceiverRegistered) {
+                try {
+                    registerReceiver(
+                        toggleCameraBroadcastReceiver,
+                        IntentFilter().apply {
+                            addAction(Intent.ACTION_SCREEN_ON)
+                            addAction(Intent.ACTION_SCREEN_OFF)
+                            addAction(Intent.ACTION_USER_PRESENT)
+                        },
+                    )
+                    isToggleCameraBroadcastReceiverRegistered = true
+                } catch (e: Exception) {
+                    logger.d { "Unable to register ToggleCameraBroadcastReceiver." }
+                }
             }
         }
     }
@@ -561,6 +563,11 @@ internal class CallService : Service() {
     override fun onDestroy() {
         stopService()
         super.onDestroy()
+    }
+
+    override fun stopService(name: Intent?): Boolean {
+        stopService()
+        return super.stopService(name)
     }
 
     /**

@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.media.AudioManager
 import io.mockk.every
 import io.mockk.mockk
@@ -28,11 +29,13 @@ import org.junit.Test
 
 class MicrophoneManagerTest {
 
+    private val audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
+
     @Test
     fun `Ensure setup is called prior to any action onto the microphone manager`() = runTest {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, false)
+        val actual = MicrophoneManager(mediaManager, false, audioUsage)
         val context = mockk<Context>(relaxed = true)
         val microphoneManager = spyk(actual)
         every { mediaManager.context } returns context
@@ -63,7 +66,12 @@ class MicrophoneManagerTest {
     fun `Don't crash when accessing audioHandler prior to setup`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, false)
+        val actual =
+            MicrophoneManager(
+                mediaManager,
+                false,
+                audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+            )
         val context = mockk<Context>(relaxed = true)
         val microphoneManager = spyk(actual)
         every { mediaManager.context } returns context
@@ -83,7 +91,7 @@ class MicrophoneManagerTest {
     fun `Ensure setup if ever the manager was cleaned`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, false)
+        val actual = MicrophoneManager(mediaManager, false, audioUsage)
         val context = mockk<Context>(relaxed = true)
         val microphoneManager = spyk(actual)
         every { mediaManager.context } returns context
@@ -111,7 +119,7 @@ class MicrophoneManagerTest {
     fun `Resume will call enable only if prior status was DeviceStatus#enabled`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, false)
+        val actual = MicrophoneManager(mediaManager, false, audioUsage)
         val context = mockk<Context>(relaxed = true)
         val microphoneManager = spyk(actual)
         every { mediaManager.context } returns context
