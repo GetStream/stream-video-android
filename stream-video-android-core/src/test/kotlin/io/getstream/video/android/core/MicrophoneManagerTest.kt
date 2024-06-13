@@ -66,7 +66,12 @@ class MicrophoneManagerTest {
     fun `Don't crash when accessing audioHandler prior to setup`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, false, audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION)
+        val actual =
+            MicrophoneManager(
+                mediaManager,
+                false,
+                audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+            )
         val context = mockk<Context>(relaxed = true)
         val microphoneManager = spyk(actual)
         every { mediaManager.context } returns context
