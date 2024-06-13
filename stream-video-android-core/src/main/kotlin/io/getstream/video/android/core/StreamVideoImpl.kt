@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import android.media.AudioAttributes
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
 import io.getstream.log.taggedLogger
@@ -125,6 +126,7 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.resumeWithException
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
+internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
@@ -145,6 +147,7 @@ internal class StreamVideoImpl internal constructor(
     internal val sounds: Sounds,
     internal val crashOnMissingPermission: Boolean = true,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    internal val audioUsage: Int = defaultAudioUsage
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -165,7 +168,7 @@ internal class StreamVideoImpl internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory = StreamPeerConnectionFactory(context)
+    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage)
     public override val userId = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")

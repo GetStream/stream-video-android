@@ -30,6 +30,7 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
@@ -328,11 +329,12 @@ class ScreenShareManager(
 class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
     val preferSpeakerphone: Boolean,
+    val audioUsage: Int,
 ) {
     // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
 
-    private lateinit var audioHandler: AudioSwitchHandler
+    private lateinit var audioHandler: AudioHandler
     private var setupCompleted: Boolean = false
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
@@ -434,6 +436,8 @@ class MicrophoneManager(
         setupCompleted = false
     }
 
+    fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
+
     // Internal logic
     internal fun setup() {
         if (setupCompleted) {
@@ -445,14 +449,18 @@ class MicrophoneManager(
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
 
-        audioHandler =
-            AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
-                logger.i { "audio devices. selected $selected, available devices are $devices" }
-                _devices.value = devices.map { it.fromAudio() }
-                _selectedDevice.value = selected?.fromAudio()
-            }
+        if (canHandleDeviceSwitch()) {
+            audioHandler =
+                AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
+                    logger.i { "audio devices. selected $selected, available devices are $devices" }
+                    _devices.value = devices.map { it.fromAudio() }
+                    _selectedDevice.value = selected?.fromAudio()
+                }
 
-        audioHandler.start()
+            audioHandler.start()
+        } else {
+            logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch"}
+        }
         setupCompleted = true
     }
 
@@ -463,7 +471,7 @@ class MicrophoneManager(
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
-            then(this.audioHandler)
+            then(this.audioHandler as AudioSwitchHandler)
         } else {
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
         }
@@ -802,6 +810,7 @@ class MediaManagerImpl(
     val call: Call,
     val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context,
+    val audioUsage: Int = defaultAudioUsage,
 ) {
     private val filterVideoProcessor =
         FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
@@ -838,7 +847,7 @@ class MediaManagerImpl(
     )
 
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this, preferSpeakerphone = true)
+    internal val microphone = MicrophoneManager(this, preferSpeakerphone = true, audioUsage)
     internal val speaker = SpeakerManager(this, microphone)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
