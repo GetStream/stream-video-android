@@ -352,11 +352,9 @@ internal class StreamVideoImpl internal constructor(
             }
         }
         scope.launch {
-            connectionModule.coordinatorSocket.errors.collect {
-                if (developmentMode) {
-                    logger.e(it) { "failure on socket connection" }
-                } else {
-                    logger.e(it) { "failure on socket connection" }
+            connectionModule.coordinatorSocket.errors.collect { throwable ->
+                (throwable as? ErrorResponse)?.let {
+                    if (it.code == VideoErrorCode.TOKEN_EXPIRED.code) refreshToken(it)
                 }
             }
         }
@@ -427,16 +425,24 @@ internal class StreamVideoImpl internal constructor(
                 timer.finish()
                 Success(timer.duration)
             } catch (e: ErrorResponse) {
-                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code && tokenProvider != null) {
-                    val newToken = tokenProvider.invoke(e)
-                    connectionModule.updateToken(newToken)
-                    // quickly reconnect with the new token
-                    socketImpl.reconnect(0)
-                    Failure(Error.GenericError("initialize error. trying to reconnect."))
+                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                    refreshToken(e)
+                    Failure(Error.GenericError("Initialize error. Token expired."))
                 } else {
                     throw e
                 }
             }
+        }
+    }
+
+    private suspend fun refreshToken(error: Throwable) {
+        tokenProvider?.let {
+            val newToken = tokenProvider.invoke(error)
+            connectionModule.updateToken(newToken)
+
+            logger.d { "[refreshToken] Token has been refreshed with: $newToken" }
+
+            socketImpl.reconnect(0)
         }
     }
 
