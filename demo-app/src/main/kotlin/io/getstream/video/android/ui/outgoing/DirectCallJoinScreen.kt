@@ -107,7 +107,7 @@ private fun Header(user: User?) {
             Text(
                 modifier = Modifier.weight(1f),
                 color = Color.White,
-                text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
+                text = user?.userNameOrId ?: "",
                 maxLines = 1,
                 fontSize = 16.sp,
             )
@@ -215,7 +215,7 @@ private fun UserList(entries: List<UserUiState>, onUserClick: (Int) -> Unit) {
             with(entries[index]) {
                 UserRow(
                     index = index,
-                    name = user.name,
+                    name = user.name.orEmpty(),
                     avatarUrl = user.image,
                     isSelected = isSelected,
                     onClick = { onUserClick(index) },
