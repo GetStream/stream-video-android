@@ -461,9 +461,9 @@ internal class StreamVideoImpl internal constructor(
             val response = createGuestUser(
                 userRequest = UserRequest(
                     id = user.id,
-                    image = user.image.takeUnless { it.isBlank() },
-                    name = user.name.takeUnless { it.isBlank() },
-                    custom = user.custom.takeUnless { it.isEmpty() },
+                    image = user.image,
+                    name = user.name,
+                    custom = user.custom,
                 ),
             )
             if (response.isFailure) {

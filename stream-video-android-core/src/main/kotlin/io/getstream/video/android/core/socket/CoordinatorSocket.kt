@@ -20,6 +20,7 @@ import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -68,9 +69,9 @@ public class CoordinatorSocket(
             token = token,
             userDetails = ConnectUserDetailsRequest(
                 id = user.id,
-                name = user.name.takeUnless { it.isBlank() },
-                image = user.image.takeUnless { it.isBlank() },
-                custom = user.custom.takeUnless { it.isEmpty() },
+                name = user.name.takeUnless { it.isWhitespaceOnly() },
+                image = user.image.takeUnless { it.isWhitespaceOnly() },
+                custom = user.custom,
             ),
         )
         val message = adapter.toJson(authRequest)

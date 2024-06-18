@@ -123,7 +123,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             )
         }
 
-        if (user.role.isEmpty()) {
+        if (user.role.isNullOrBlank()) {
             user = user.copy(role = "user")
         }
 
