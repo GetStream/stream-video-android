@@ -6972,21 +6972,23 @@ public final class org/openapitools/client/models/CallRecordingStoppedEvent : or
 }
 
 public final class org/openapitools/client/models/CallRejectedEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
-	public fun <init> (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)V
-	public synthetic fun <init> (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/openapitools/client/models/CallResponse;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lorg/openapitools/client/models/UserResponse;
-	public final fun copy (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;)Lorg/openapitools/client/models/CallRejectedEvent;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallRejectedEvent;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallRejectedEvent;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;)Lorg/openapitools/client/models/CallRejectedEvent;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallRejectedEvent;Lorg/openapitools/client/models/CallResponse;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/CallRejectedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCall ()Lorg/openapitools/client/models/CallResponse;
 	public fun getCallCID ()Ljava/lang/String;
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public fun getEventType ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getUser ()Lorg/openapitools/client/models/UserResponse;
 	public fun hashCode ()I

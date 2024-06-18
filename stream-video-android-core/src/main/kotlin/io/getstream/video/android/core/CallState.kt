@@ -570,7 +570,7 @@ public class CallState(
 
                 Log.d(
                     "RingingStateDebug",
-                    "CallRejectedEvent. Rejected by: ${event.user.id}. Will call updateRingingState().",
+                    "CallRejectedEvent. Rejected by: ${event.user.id}. Reason: ${event.reason}. Will call updateRingingState().",
                 )
 
                 updateRingingState()
