@@ -215,7 +215,7 @@ private fun UserList(entries: List<UserUiState>, onUserClick: (Int) -> Unit) {
             with(entries[index]) {
                 UserRow(
                     index = index,
-                    name = user.name,
+                    name = user.name.orEmpty(),
                     avatarUrl = user.image,
                     isSelected = isSelected,
                     onClick = { onUserClick(index) },

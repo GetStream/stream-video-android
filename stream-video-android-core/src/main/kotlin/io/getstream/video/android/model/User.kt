@@ -70,12 +70,12 @@ public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
 public data class User(
     /** ID is required, the rest is optional */
     val id: String = "",
-    val role: String? = null,
+    val role: String? = "user",
     val type: UserType = UserType.Authenticated,
     val name: String? = null,
     val image: String? = null,
-    val teams: List<String>? = null,
-    val custom: Map<String, String>? = null,
+    val teams: List<String>? = emptyList(),
+    val custom: Map<String, String>? = emptyMap(),
     @Serializable(with = OffsetDateTimeSerializer::class)
     val createdAt: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
