@@ -716,7 +716,6 @@ public final class io/getstream/video/android/core/RingingState$Outgoing : io/ge
 	public fun <init> (Z)V
 	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAcceptedByCallee ()Z
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/RingingState$RejectedByAll : io/getstream/video/android/core/RingingState {
