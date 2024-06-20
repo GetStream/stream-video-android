@@ -40,6 +40,7 @@ import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -573,7 +574,16 @@ public class CallState(
                     "CallRejectedEvent. Rejected by: ${event.user.id}. Reason: ${event.reason}. Will call updateRingingState().",
                 )
 
-                updateRingingState()
+                updateRingingState(
+                    rejectReason = event.reason?.let {
+                        when (it) {
+                            RejectReason.Busy.alias -> RejectReason.Busy
+                            RejectReason.Cancel.alias -> RejectReason.Cancel
+                            RejectReason.Decline.alias -> RejectReason.Decline
+                            else -> RejectReason.Custom(alias = it)
+                        }
+                    },
+                )
             }
 
             is CallEndedEvent -> {
@@ -859,57 +869,45 @@ public class CallState(
         }
     }
 
-    private fun updateRingingState(timedOut: Boolean = false) {
+    private fun updateRingingState(rejectReason: RejectReason? = null) {
         // this is only true when we are in the session (we have accepted/joined the call)
+        val rejectedBy = _rejectedBy.value
+        val isRejectedByMe = _rejectedBy.value.contains(client.userId)
+        val acceptedBy = _acceptedBy.value
+        val isAcceptedByMe = _acceptedBy.value.contains(client.userId)
+        val createdBy = _createdBy.value
+        val hasActiveCall = client.state.activeCall.value != null
+        val hasRingingCall = client.state.ringingCall.value != null
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
-        val rejectedBy = _rejectedBy.value
-        val acceptedBy = _acceptedBy.value
-        val createdBy = _createdBy.value
-        val members = _members.value
-        val rejectedByMe = _rejectedBy.value.findLast { it == client.userId }
-        val acceptedByMe = _acceptedBy.value.findLast { it == client.userId }
-        val hasActiveCall = client.state.activeCall.value != null
-        val hasRingingCall = client.state.ringingCall.value != null
 
         Log.d("RingingState", "Current: ${_ringingState.value}")
-        val rejectedByMeBool = !rejectedByMe.isNullOrBlank()
         Log.d(
             "RingingState",
             "Flags: [\n" +
-                "acceptedByMe: ${!acceptedByMe.isNullOrBlank()},\n" +
-                "rejectedByMe: $rejectedByMeBool,\n" +
+                "acceptedByMe: $isAcceptedByMe,\n" +
+                "rejectedByMe: $isRejectedByMe,\n" +
+                "rejectReason: $rejectReason,\n" +
                 "hasActiveCall: $hasActiveCall\n" +
                 "hasRingingCall: $hasRingingCall\n" +
                 "userIsParticipant: $userIsParticipant,\n" +
-                "timedOut: $timedOut\n" +
                 "]",
         )
 
         // no members - call is empty, we can join
-        val state: RingingState = if (timedOut) {
-            // It was an outgoing, or incoming call, but timeout was reached
-            // Call leave same as CallEndedEvent we do not want to receive updates anymore
-            call.leave()
-            cancelTimeout()
-            RingingState.TimeoutNoAnswer
-        } else if (hasActiveCall) {
+        val state: RingingState = if (hasActiveCall) {
             cancelTimeout()
             RingingState.Active
-        } else if (rejectedBy.isNotEmpty() && acceptedBy.isEmpty() && rejectedBy.size >= outgoingMembersCount) {
-            // Call leave same as CallEndedEvent we do not want to receive updates anymore,
-            // since we or the caller timed-out or the call was rejected.
-            // We leave the call, we do not depend on the SDK user to call leave()
+        } else if (rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) {
             call.leave()
-//            if (timedOut || !rejectedByMeBool) {
-//                cancelTimeout()
-//                RingingState.TimeoutNoAnswer
-//            } else {
-//                cancelTimeout()
-//                RingingState.RejectedByAll // Pe deviceul pe care ai apasat reject
-//            }
-            RingingState.RejectedByAll
+            cancelTimeout()
+
+            if (rejectReason?.alias == REJECT_REASON_TIMEOUT) {
+                RingingState.TimeoutNoAnswer
+            } else {
+                RingingState.RejectedByAll
+            }
         } else if (hasRingingCall && createdBy?.id != client.userId) {
             // Member list is not empty, it's not rejected - it's an incoming call
             // If it's already accepted by me then we are in an Active call
@@ -917,7 +915,7 @@ public class CallState(
                 cancelTimeout()
                 RingingState.Active
             } else {
-                RingingState.Incoming(acceptedByMe = acceptedByMe != null)
+                RingingState.Incoming(acceptedByMe = isAcceptedByMe)
             }
         } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
@@ -1002,12 +1000,9 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
-                    call.reject()
-                    call.leave()
+                    call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
 
-                    Log.d("RingingStateDebug", "startRingingTimer. Timeout. Will call updateRingingState().")
-
-                    updateRingingState(timedOut = true)
+                    Log.d("RingingStateDebug", "startRingingTimer. Timeout.")
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
@@ -1309,3 +1304,5 @@ private fun getCallingMethod(): String {
         }
     }
 }
+
+private const val REJECT_REASON_TIMEOUT = "timeout"
