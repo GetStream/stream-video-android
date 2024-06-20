@@ -89,6 +89,7 @@ public fun IncomingCallContent(
         isCameraEnabled = isCameraEnabled,
         isShowingHeader = isShowingHeader,
         modifier = modifier,
+        backgroundContent = backgroundContent,
         headerContent = headerContent,
         detailsContent = detailsContent,
         controlsContent = controlsContent,

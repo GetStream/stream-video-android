@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.tutorial.ringing
 
+import android.os.Bundle
+import android.os.PersistableBundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
@@ -32,9 +34,12 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
@@ -49,6 +54,15 @@ class VideoCallActivity : ComposeStreamCallActivity() {
     // Getter for UI delegate, specifies the custom UI delegate for handling UI related functionality.
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity>
         get() = _internalDelegate
+
+    override fun onCreate(
+        savedInstanceState: Bundle?,
+        persistentState: PersistableBundle?,
+        call: Call
+    ) {
+        super.onCreate(savedInstanceState, persistentState, call)
+        call.camera.setEnabled(true)
+    }
 
     @StreamCallActivityDelicateApi
     override fun isVideoCall(call: Call): Boolean {
@@ -78,8 +92,6 @@ class VideoCallActivity : ComposeStreamCallActivity() {
             onBackPressed: () -> Unit,
             onCallAction: (CallAction) -> Unit,
         ) {
-            val currentLocal by call.state.me.collectAsStateWithLifecycle()
-
             io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent(
                 call = call,
                 isVideoType = isVideoType,
@@ -91,25 +103,21 @@ class VideoCallActivity : ComposeStreamCallActivity() {
                 onBackPressed = onBackPressed,
                 onCallAction = onCallAction,
                 backgroundContent = {
-                    /*val finalLocal = currentLocal
-                        if (finalLocal != null) {
-                            DefaultFloatingParticipantVideo(
-                                call = call,
-                                me = finalLocal,
-                                callParticipants = listOf(finalLocal),
-                                parentSize = IntSize(400, 400),
-                                style = RegularVideoRendererStyle(),
-                            )
-                        }
-
-                        CallLobby(modifier = Modifier.align(Alignment.Center), call = call, isCameraEnabled = true)
-
-                    // show local video
-
-                    Text(
-                        text = "Custom background",
-                        modifier = Modifier.align(Alignment.Center)
-                    )*/
+                    val cameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+                    if (cameraEnabled) {
+                        VideoRenderer(
+                            call = call,
+                            video = ParticipantState.Video(
+                                sessionId = call.sessionId,
+                                track = VideoTrack(
+                                    streamId = call.sessionId,
+                                    video = call.camera.mediaManager.videoTrack,
+                                ),
+                                enabled = true,
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 },
             )
         }
@@ -159,6 +167,23 @@ class VideoCallActivity : ComposeStreamCallActivity() {
                 },
                 onBackPressed = onBackPressed,
                 onCallAction = onCallAction,
+                backgroundContent = {
+                    val cameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
+                    if (cameraEnabled) {
+                        VideoRenderer(
+                            call = call,
+                            video = ParticipantState.Video(
+                                sessionId = call.sessionId,
+                                track = VideoTrack(
+                                    streamId = call.sessionId,
+                                    video = call.camera.mediaManager.videoTrack,
+                                ),
+                                enabled = true,
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
             )
         }
     }

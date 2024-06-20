@@ -55,9 +55,7 @@ class RingingApp : Application() {
                 // the client to your Application class or di module.
                 StreamVideoBuilder(
                     context = context.applicationContext,
-//                    apiKey = "mmhfdzb5evj2",
-//                    apiKey = "par8f5s3gn2j",
-                    apiKey = "hd8szvscpxvd",
+                    apiKey = "mmhfdzb5evj2",
                     geo = GEO.GlobalEdgeNetwork,
                     user = user.delegate,
                     token = user.token,
@@ -97,8 +95,8 @@ data class TutorialUser(
     val checked: Boolean = false,
 ) {
     val id: String get() = delegate.id
-    val name: String get() = delegate.name
-    val image: String get() = delegate.image
+    val name: String? get() = delegate.name
+    val image: String? get() = delegate.image
 
     companion object {
         val builtIn = listOf(
@@ -108,9 +106,7 @@ data class TutorialUser(
                     name = "User 1",
                     image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Willard%20Hessel.jpg",
                 ),
-                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.3qB-FI6OAqf5ZEETtgs0XhaMmiaRF2jDJOqCVRsqqbc",
-                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.vDEb3CLKKA79Qfxvx28WldbihkmtXBJxgVjxQab2q5w",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.KPA1bqulbWQ61sRN1xSOkUST-B8n3NU95D-69eefuUE",
+                 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.3qB-FI6OAqf5ZEETtgs0XhaMmiaRF2jDJOqCVRsqqbc",
             ),
             TutorialUser(
                 User(
@@ -118,9 +114,7 @@ data class TutorialUser(
                     name = "User 2",
                     image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Claudia%20Bradtke.jpg",
                 ),
-                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.ksOq5ahC0745oZdPDKr2hyLp0j9exfwLE-AQITc9ZSc",
-                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.2XR4WtTyPtTPOKOrkaYbufJauzYjrZnp4kFGZ6bCPfA",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.62WBxhmQF4A4bpV8ihyJCiTy-NAhb-WOCj73ljBWRB4",
+                 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.ksOq5ahC0745oZdPDKr2hyLp0j9exfwLE-AQITc9ZSc",
             ),
             TutorialUser(
                 User(
@@ -128,9 +122,7 @@ data class TutorialUser(
                     name = "User 3",
                     image = "https://getstream.io/chat/docs/sdk/avatars/jpg/Bernard%20Windler.jpg",
                 ),
-                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.g5h8coX8J1XUNHagPFoGBI0D7bN6P0w2Sd2rui89puE",
-                // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.K4oueQJv1Qmp2cQm9y1WslZfWAItJSA9BP7Fc0xmRlA",
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.5z8Pl8zLIWsiAx2Yw8F7N3XWGu5XUodgytpPBDlGCW8",
+                 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.g5h8coX8J1XUNHagPFoGBI0D7bN6P0w2Sd2rui89puE",
             ),
         )
     }

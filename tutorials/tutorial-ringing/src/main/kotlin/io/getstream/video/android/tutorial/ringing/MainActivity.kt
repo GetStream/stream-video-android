@@ -233,7 +233,7 @@ private fun UserList(
                 },
                 text = {
                     Text(
-                        text = user.name,
+                        text = user.name.orEmpty(),
                         style = VideoTheme.typography.titleS,
                     )
                 },
@@ -264,7 +264,7 @@ private fun HomeHeader(onLogoutClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = RingingApp.caller.name,
+            text = RingingApp.caller.name.orEmpty(),
             style = VideoTheme.typography.titleS,
             color = VideoTheme.colors.basePrimary,
         )
