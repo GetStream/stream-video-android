@@ -58,7 +58,7 @@ class VideoCallActivity : ComposeStreamCallActivity() {
     override fun onCreate(
         savedInstanceState: Bundle?,
         persistentState: PersistableBundle?,
-        call: Call
+        call: Call,
     ) {
         super.onCreate(savedInstanceState, persistentState, call)
         call.camera.setEnabled(true)
@@ -183,7 +183,7 @@ class VideoCallActivity : ComposeStreamCallActivity() {
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                }
+                },
             )
         }
     }
