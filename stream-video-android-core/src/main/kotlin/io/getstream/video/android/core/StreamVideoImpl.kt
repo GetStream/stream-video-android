@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.content.Context
+import android.media.AudioAttributes
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
 import io.getstream.log.taggedLogger
@@ -125,6 +126,7 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.resumeWithException
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
+internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
@@ -145,6 +147,7 @@ internal class StreamVideoImpl internal constructor(
     internal val sounds: Sounds,
     internal val crashOnMissingPermission: Boolean = true,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    internal val audioUsage: Int = defaultAudioUsage,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -165,7 +168,7 @@ internal class StreamVideoImpl internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory = StreamPeerConnectionFactory(context)
+    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage)
     public override val userId = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
@@ -352,11 +355,9 @@ internal class StreamVideoImpl internal constructor(
             }
         }
         scope.launch {
-            connectionModule.coordinatorSocket.errors.collect {
-                if (developmentMode) {
-                    logger.e(it) { "failure on socket connection" }
-                } else {
-                    logger.e(it) { "failure on socket connection" }
+            connectionModule.coordinatorSocket.errors.collect { throwable ->
+                (throwable as? ErrorResponse)?.let {
+                    if (it.code == VideoErrorCode.TOKEN_EXPIRED.code) refreshToken(it)
                 }
             }
         }
@@ -427,16 +428,24 @@ internal class StreamVideoImpl internal constructor(
                 timer.finish()
                 Success(timer.duration)
             } catch (e: ErrorResponse) {
-                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code && tokenProvider != null) {
-                    val newToken = tokenProvider.invoke(e)
-                    connectionModule.updateToken(newToken)
-                    // quickly reconnect with the new token
-                    socketImpl.reconnect(0)
-                    Failure(Error.GenericError("initialize error. trying to reconnect."))
+                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                    refreshToken(e)
+                    Failure(Error.GenericError("Initialize error. Token expired."))
                 } else {
                     throw e
                 }
             }
+        }
+    }
+
+    private suspend fun refreshToken(error: Throwable) {
+        tokenProvider?.let {
+            val newToken = tokenProvider.invoke(error)
+            connectionModule.updateToken(newToken)
+
+            logger.d { "[refreshToken] Token has been refreshed with: $newToken" }
+
+            socketImpl.reconnect(0)
         }
     }
 
@@ -452,9 +461,9 @@ internal class StreamVideoImpl internal constructor(
             val response = createGuestUser(
                 userRequest = UserRequest(
                     id = user.id,
-                    image = user.image.takeUnless { it.isBlank() },
-                    name = user.name.takeUnless { it.isBlank() },
-                    custom = user.custom.takeUnless { it.isEmpty() },
+                    image = user.image,
+                    name = user.name,
+                    custom = user.custom,
                 ),
             )
             if (response.isFailure) {

@@ -28,3 +28,7 @@ internal fun StreamPeerType.stringify() = when (this) {
     StreamPeerType.PUBLISHER -> "publisher"
     StreamPeerType.SUBSCRIBER -> "subscriber"
 }
+
+internal fun String?.isWhitespaceOnly(): Boolean {
+    return !this.isNullOrEmpty() && this.all { it.isWhitespace() }
+}

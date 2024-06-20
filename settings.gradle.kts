@@ -20,7 +20,7 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("com.gradle.enterprise").version("3.13.3")
+    id("com.gradle.enterprise").version("3.17.4")
     id("com.github.burrunan.s3-build-cache").version("1.2")
 }
 rootProject.name = "stream-video-android"

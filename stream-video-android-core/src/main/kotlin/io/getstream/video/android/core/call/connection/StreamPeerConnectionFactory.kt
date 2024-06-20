@@ -17,9 +17,11 @@
 package io.getstream.video.android.core.call.connection
 
 import android.content.Context
+import android.media.AudioAttributes
 import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
+import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
@@ -44,8 +46,13 @@ import java.nio.ByteBuffer
  * Builds a factory that provides [PeerConnection]s when requested.
  *
  * @param context Used to build the underlying native components for the factory.
+ * @param audioUsage signal to the system how the audio tracks are used.
+ * Set this to [AudioAttributes.USAGE_MEDIA] if you want the audio track to behave like media, useful for livestreaming scenarios.
  */
-public class StreamPeerConnectionFactory(private val context: Context) {
+public class StreamPeerConnectionFactory(
+    private val context: Context,
+    private val audioUsage: Int = defaultAudioUsage,
+) {
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
@@ -151,7 +158,15 @@ public class StreamPeerConnectionFactory(private val context: Context) {
                     .builder(context)
                     .setUseHardwareAcousticEchoCanceler(
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q,
-                    )
+                    ).apply {
+                        if (audioUsage != defaultAudioUsage) {
+                            setAudioAttributes(
+                                AudioAttributes.Builder().setUsage(audioUsage)
+                                    .build(),
+                            )
+                            audioLogger.d { "[setAudioAttributes] usage: $audioUsage" }
+                        }
+                    }
                     .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :
                         JavaAudioDeviceModule.AudioRecordErrorCallback {
@@ -297,7 +312,10 @@ public class StreamPeerConnectionFactory(private val context: Context) {
      * @return [VideoSource] that can be used to build tracks.
      */
 
-    internal fun makeVideoSource(isScreencast: Boolean, filterVideoProcessor: FilterVideoProcessor): VideoSource =
+    internal fun makeVideoSource(
+        isScreencast: Boolean,
+        filterVideoProcessor: FilterVideoProcessor,
+    ): VideoSource =
         factory.createVideoSource(isScreencast).apply {
             setVideoProcessor(filterVideoProcessor)
         }
