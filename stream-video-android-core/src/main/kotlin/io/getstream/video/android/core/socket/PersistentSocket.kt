@@ -105,7 +105,11 @@ public open class PersistentSocket<T>(
     internal var reconnectionAttempts = 0
 
     /**
-     * Connect the socket, authenticate, start the healthmonitor and see if the network is online
+     * Connect the socket, authenticate, start the health monitor and see if the network is online
+     * @param invocation Provides a way to extend the [connect] method with additional behavior.
+     * This can be useful in cases where additional setup or checks need to be performed
+     * once the socket is connected but before the [connect] method returns.
+     * To return from [connect] and to resume the enclosing coroutine, use the provided [CancellableContinuation] parameter.
      */
     open suspend fun connect(
         invocation: (CancellableContinuation<T>) -> Unit = {},
