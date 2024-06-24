@@ -100,8 +100,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val audioUsage: Int = defaultAudioUsage,
 ) {
     private val context: Context = context.applicationContext
-
-    val scope = CoroutineScope(DispatcherProvider.IO)
+    private val scope = CoroutineScope(DispatcherProvider.IO)
 
     /**
      * Builds the [StreamVideo] client.
@@ -144,11 +143,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user.copy(role = "user")
         }
 
-        /** initialize Stream internal loggers. */
+        // Initialize Stream internal loggers
         StreamLog.install(AndroidStreamLogger())
         StreamLog.setValidator { priority, _ -> priority.level >= loggingLevel.priority.level }
 
-        /** android JSR-310 backport backport. */
+        // Android JSR-310 backport backport
         AndroidThreeTen.init(context)
 
         // This connection module class exposes the connections to the various retrofit APIs.
@@ -165,7 +164,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         val deviceTokenStorage = DeviceTokenStorage(context)
 
-        // install the StreamNotificationManager to configure push notifications.
+        // Install the StreamNotificationManager to configure push notifications.
         val streamNotificationManager = StreamNotificationManager.install(
             context = context,
             scope = scope,
@@ -174,7 +173,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             deviceTokenStorage = deviceTokenStorage,
         )
 
-        // create the client
+        // Create the client
         val client = StreamVideoImpl(
             context = context,
             _scope = scope,
@@ -200,7 +199,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             connectionModule.updateAuthType("anonymous")
         }
 
-        // establish a ws connection with the coordinator (we don't support this for anonymous users)
+        // Establish a WS connection with the coordinator (we don't support this for anonymous users)
         if (user.type != UserType.Anonymous) {
             scope.launch {
                 val createConnectionFailedException = { cause: String ->
@@ -223,13 +222,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             }
         }
 
-        // see which location is best to connect to
+        // See which location is best to connect to
         scope.launch {
             val location = client.loadLocationAsync().await()
             streamLog { "location initialized: ${location.getOrNull()}" }
         }
 
-        // installs Stream Video instance
+        // Installs Stream Video instance
         StreamVideo.install(client)
 
         // Needs to be started after the client is initialised because the VideoPushDelegate

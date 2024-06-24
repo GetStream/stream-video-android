@@ -282,6 +282,7 @@ public open class PersistentSocket<T>(
 
     private fun setPermanentFailureAndContinue(error: Throwable) {
         _connectionState.value = SocketState.DisconnectedPermanently(error)
+
         if (!continuationCompleted) {
             continuationCompleted = true
             connected.resumeWithException(error)
@@ -323,13 +324,13 @@ public open class PersistentSocket<T>(
         if (permanentError) {
             // close the connection loop
             setPermanentFailureAndContinue(error)
-            logger.e { "[handleError] permanent error: $error" }
+            logger.e { "[handleError] Permanent error: $error" }
             // mark us permanently disconnected
             scope.launch {
                 errors.emit(error)
             }
         } else {
-            logger.w { "[handleError] temporary error: $error" }
+            logger.w { "[handleError] Temporary error: $error" }
             _connectionState.value = SocketState.DisconnectedTemporarily(error)
             scope.launch { reconnect(reconnectTimeout) }
         }
