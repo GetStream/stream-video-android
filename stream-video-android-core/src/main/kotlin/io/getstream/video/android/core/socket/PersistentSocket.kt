@@ -39,6 +39,7 @@ import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.Executors
@@ -90,12 +91,12 @@ public open class PersistentSocket<T>(
     val connectionId: StateFlow<String?> = _connectionId
 
     /** Continuation if the socket successfully connected and we've authenticated */
-    lateinit var connected: CancellableContinuation<T>
+    lateinit var connectContinuation: CancellableContinuation<T>
+
+    // Controls when we can resume the continuation
+    private var continuationCompleted: Boolean = false
 
     internal var socket: WebSocket? = null
-
-    // prevent us from resuming the continuation twice
-    private var continuationCompleted: Boolean = false
 
     // True if cleanup was called and socket is completely destroyed (intentionally).
     // You need to create a new instance (this is mainly used for the SfuSocket which is tied
@@ -119,9 +120,9 @@ public open class PersistentSocket<T>(
             return null
         }
 
-        return suspendCancellableCoroutine { connectedContinuation ->
+        return suspendCancellableCoroutine { continuation ->
             logger.i { "[connect]" }
-            connected = connectedContinuation
+            connectContinuation = continuation
 
             _connectionState.value = SocketState.Connecting
 
@@ -142,7 +143,7 @@ public open class PersistentSocket<T>(
                 networkStateProvider.subscribe(networkStateListener)
 
                 // run the invocation
-                invocation.invoke(connectedContinuation)
+                invocation.invoke(continuation)
             }
         }
     }
@@ -219,7 +220,12 @@ public open class PersistentSocket<T>(
 
         reconnectionAttempts++
 
-        connect()
+        continuationCompleted = false
+        try {
+            connect()
+        } catch (e: Exception) {
+            logger.e { "[reconnect] failed to reconnect: $e" }
+        }
     }
 
     open fun authenticate() { }
@@ -276,7 +282,7 @@ public open class PersistentSocket<T>(
 
         if (!continuationCompleted) {
             continuationCompleted = true
-            connected.resume(message as T)
+            connectContinuation.resume(message as T)
         }
     }
 
@@ -285,7 +291,7 @@ public open class PersistentSocket<T>(
 
         if (!continuationCompleted) {
             continuationCompleted = true
-            connected.resumeWithException(error)
+            connectContinuation.resumeWithException(error)
         }
     }
 
@@ -322,12 +328,21 @@ public open class PersistentSocket<T>(
 
         val permanentError = isPermanentError(error)
         if (permanentError) {
+            val isErrorInConnectionPhase = continuationCompleted.not()
             // close the connection loop
             setPermanentFailureAndContinue(error)
             logger.e { "[handleError] Permanent error: $error" }
             // mark us permanently disconnected
             scope.launch {
-                errors.emit(error)
+                if (isErrorInConnectionPhase) {
+                    errors.emit(
+                        ConnectException(
+                            "Failed to establish WebSocket connection. Will try to reconnect. Cause: ${error.message}",
+                        ),
+                    )
+                } else {
+                    errors.emit(error)
+                }
             }
         } else {
             logger.w { "[handleError] Temporary error: $error" }
