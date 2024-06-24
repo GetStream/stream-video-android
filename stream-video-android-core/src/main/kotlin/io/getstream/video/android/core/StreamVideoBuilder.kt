@@ -38,6 +38,8 @@ import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.lang.RuntimeException
+import java.net.ConnectException
 
 /**
  * The [StreamVideoBuilder] is used to create a new instance of the [StreamVideo] client. This is the
@@ -50,28 +52,32 @@ import kotlinx.coroutines.launch
  *      geo = GEO.GlobalEdgeNetwork,
  *      user = user,
  *      token = token,
- *      loggingLevel = LoggingLevel.BODY
- *  )
+ *      loggingLevel = LoggingLevel.BODY,
+ *      // ...
+ * ).build()
  *```
  *
  * @property context Android [Context] to be used for initializing Android resources.
- * @property apiKey Your Stream API Key, you can find it in the dashboard.
- * @property geo Your GEO routing policy, supports geofencing for privacy concerns.
- * @property user The user object, can be a regular user, guest user or anonymous.
- * @property token The token for this user generated using your API secret on your server.
- * @property tokenProvider If a token is expired, the token provider makes a request to your backend for a new token.
+ * @property apiKey Your Stream API Key. You can find it in the dashboard.
+ * @property geo Your GEO routing policy. Supports geofencing for privacy concerns.
+ * @property user The user object. Can be an authenticated user, guest user or anonymous.
+ * @property token The token for this user, generated using your API secret on your server.
+ * @property tokenProvider Used to make a request to your backend for a new token when the token has expired.
  * @property loggingLevel Represents and wraps the HTTP logging level for our API service.
  * @property notificationConfig The configurations for handling push notification.
  * @property ringNotification Overwrite the default notification logic for incoming calls.
  * @property connectionTimeoutInMs Connection timeout in seconds.
- * @property ensureSingleInstance Verify that only 1 version of the video client exists, prevents integration mistakes.
+ * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
- * @property crashOnMissingPermission if [permissionCheck] returns false there will be an exception.
- * @property permissionCheck used to check for system permission based on call capabilities. See [StreamPermissionCheck].
- * @property audioUsage used to signal to the system how to treat the audio tracks (voip or media).
+ * @property crashOnMissingPermission If [permissionCheck] returns false there will be an exception.
+ * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
+ * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
+ *
+ * @see build method
+ *
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
@@ -97,18 +103,29 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
     val scope = CoroutineScope(DispatcherProvider.IO)
 
+    /**
+     * Builds the [StreamVideo] client.
+     *
+     * @return The [StreamVideo] client.
+     *
+     * @throws RuntimeException If an instance of the client already exists and [ensureSingleInstance] is set to true.
+     * @throws IllegalArgumentException If [apiKey] is blank.
+     * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and the [user] id is blank.
+     * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and both [token] and [tokenProvider] are empty.
+     * @throws ConnectException If the WebSocket connection fails.
+     */
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
         val existingInstance = StreamVideo.instanceOrNull()
         if (existingInstance != null && ensureSingleInstance) {
-            throw IllegalArgumentException(
+            throw RuntimeException(
                 "Creating 2 instance of the video client will cause bugs with call.state. Before creating a new client, please remove the old one. You can remove the old client using StreamVideo.removeClient()",
             )
         }
 
         if (apiKey.isBlank()) {
-            throw IllegalArgumentException("The API key can not be empty")
+            throw IllegalArgumentException("The API key cannot be blank")
         }
 
         if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
@@ -117,9 +134,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             )
         }
 
-        if (user.type == UserType.Authenticated && user.id.isEmpty()) {
+        if (user.type == UserType.Authenticated && user.id.isBlank()) {
             throw IllegalArgumentException(
-                "Please specify the user id for authenticated users",
+                "The user ID cannot be empty for authenticated users",
             )
         }
 
