@@ -186,11 +186,22 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // establish a ws connection with the coordinator (we don't support this for anonymous users)
         if (user.type != UserType.Anonymous) {
             scope.launch {
-                val result = client.connectAsync().await()
-                result.onSuccess {
-                    streamLog { "connection succeed! (duration: ${result.getOrNull()})" }
-                }.onError {
-                    streamLog { it.message }
+                val createConnectionFailedException = { cause: String ->
+                    ConnectException("Failed to establish a WebSocket connection: $cause")
+                }
+
+                try {
+                    val result = client.connectAsync().await()
+                    result.onSuccess {
+                        streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
+                    }.onError {
+                        streamLog { it.message }
+                        throw createConnectionFailedException(it.message)
+                    }
+                } catch (e: Exception) {
+                    // If the connect continuation was resumed with an exception, handle it here.
+                    streamLog { e.message.orEmpty() }
+                    throw createConnectionFailedException(e.message.orEmpty())
                 }
             }
         }
