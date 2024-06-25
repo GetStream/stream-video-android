@@ -76,7 +76,8 @@ import java.net.ConnectException
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  *
- * @see build method
+ * @see build
+ * @see ClientState.connection
  *
  */
 public class StreamVideoBuilder @JvmOverloads constructor(
