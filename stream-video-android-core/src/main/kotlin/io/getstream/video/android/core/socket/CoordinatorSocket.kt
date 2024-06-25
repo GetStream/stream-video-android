@@ -88,18 +88,10 @@ public class CoordinatorSocket(
             return
         }
 
-        val changedText = if (text.contains("banned")) {
-            text.replace("\"banned\":false,", "")
-        } else {
-            text
-        }
-
         scope.launch(singleThreadDispatcher) {
             try {
                 Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
-                    eventAdapter.fromJson(
-                        changedText,
-                    )?.let { parsedEvent -> processEvent(parsedEvent) }
+                    eventAdapter.fromJson(text)?.let { parsedEvent -> processEvent(parsedEvent) }
                 }
             } catch (e: Throwable) {
                 if (e.cause is UnsupportedVideoEventException) {
