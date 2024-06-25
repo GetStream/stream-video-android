@@ -59,7 +59,7 @@ import org.openapitools.client.infrastructure.Serializer
 data class UserResponse (
 
     @Json(name = "banned")
-    val banned: kotlin.Boolean,
+    val banned: kotlin.Boolean = false,
 
     /* Date/time of creation */
     @Json(name = "created_at")

@@ -197,7 +197,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         )
 
         socket.connect()
-        socket.connected.cancel()
+        socket.connectContinuation.cancel()
 
         // create a VideoEvent type that resembles a real one, but doesn't contain the necessary fields
         val testJson = "{\"type\":\"health.check\"}"
