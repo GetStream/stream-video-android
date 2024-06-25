@@ -24,31 +24,31 @@ public fun User.Companion.builtInUsers(): List<User> {
             id = "thierry",
             name = "Thierry",
             role = "user",
-            image = "https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp"
+            image = "https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp",
         ),
         User(
             id = "tommaso",
             name = "Tommaso",
             role = "user",
-            image = "https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp"
+            image = "https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp",
         ),
         User(
             id = "martin",
             name = "Martin",
             role = "user",
-            image = "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp"
+            image = "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp",
         ),
         User(
             id = "ilias",
             name = "Ilias",
             role = "user",
-            image = "https://getstream.io/static/62cdddcc7759dc8c3ba5b1f67153658c/802d2/ilias-pavlidakis.webp"
+            image = "https://getstream.io/static/62cdddcc7759dc8c3ba5b1f67153658c/802d2/ilias-pavlidakis.webp",
         ),
         User(
             id = "marcelo",
             name = "Marcelo",
             role = "user",
-            image = "https://getstream.io/static/aaf5fb17dcfd0a3dd885f62bd21b325a/802d2/marcelo-pires.webp"
+            image = "https://getstream.io/static/aaf5fb17dcfd0a3dd885f62bd21b325a/802d2/marcelo-pires.webp",
         ),
         User(
             id = "alex",
