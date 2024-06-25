@@ -121,6 +121,7 @@ import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
+import java.net.ConnectException
 import java.util.*
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resumeWithException
@@ -356,8 +357,12 @@ internal class StreamVideoImpl internal constructor(
         }
         scope.launch {
             connectionModule.coordinatorSocket.errors.collect { throwable ->
-                (throwable as? ErrorResponse)?.let {
-                    if (it.code == VideoErrorCode.TOKEN_EXPIRED.code) refreshToken(it)
+                if (throwable is ConnectException) {
+                    state.handleError(throwable)
+                } else {
+                    (throwable as? ErrorResponse)?.let {
+                        if (it.code == VideoErrorCode.TOKEN_EXPIRED.code) refreshToken(it)
+                    }
                 }
             }
         }
