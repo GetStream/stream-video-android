@@ -94,7 +94,7 @@ public open class PersistentSocket<T>(
     lateinit var connectContinuation: CancellableContinuation<T>
 
     // Controls when we can resume the continuation
-    private var continuationCompleted: Boolean = false
+    private var connectContinuationCompleted: Boolean = false
 
     internal var socket: WebSocket? = null
 
@@ -176,7 +176,7 @@ public open class PersistentSocket<T>(
             is DisconnectReason.PermanentError -> SocketState.DisconnectedPermanently(disconnectReason.error)
         }
 
-        continuationCompleted = false
+        connectContinuationCompleted = false
 
         disconnectSocket()
         healthMonitor.stop()
@@ -220,8 +220,12 @@ public open class PersistentSocket<T>(
 
         reconnectionAttempts++
 
-        continuationCompleted = false
+        tryConnect()
+    }
+
+    private suspend fun tryConnect() {
         try {
+            connectContinuationCompleted = false
             connect()
         } catch (e: Exception) {
             logger.e { "[reconnect] failed to reconnect: $e" }
@@ -280,18 +284,41 @@ public open class PersistentSocket<T>(
     protected fun setConnectedStateAndContinue(message: VideoEvent) {
         _connectionState.value = SocketState.Connected(message)
 
-        if (!continuationCompleted) {
-            continuationCompleted = true
+        if (!connectContinuationCompleted) {
+            connectContinuationCompleted = true
             connectContinuation.resume(message as T)
         }
     }
 
-    private fun setPermanentFailureAndContinue(error: Throwable) {
-        _connectionState.value = SocketState.DisconnectedPermanently(error)
+    internal fun handleError(error: Throwable) {
+        // onFailure, onClosed and the 2 onMessage can all generate errors
+        // temporary errors should be logged and retried
+        // permanent errors should be emitted so the app can decide how to handle it
+        if (destroyed) {
+            logger.d { "[handleError] Ignoring socket error - already closed $error" }
+            return
+        }
 
-        if (!continuationCompleted) {
-            continuationCompleted = true
-            connectContinuation.resumeWithException(error)
+        val permanentError = isPermanentError(error)
+        if (permanentError) {
+            logger.e { "[handleError] Permanent error: $error" }
+
+            _connectionState.value = SocketState.DisconnectedPermanently(error)
+
+            // If the connect continuation is not completed, it means the error happened during the connection phase.
+            connectContinuationCompleted.not().let { isConnectionPhaseError ->
+                if (isConnectionPhaseError) {
+                    emitError(error, isConnectionPhaseError = true)
+                    resumeConnectionPhaseWithException(error)
+                } else {
+                    emitError(error, isConnectionPhaseError = false)
+                }
+            }
+        } else {
+            logger.w { "[handleError] Temporary error: $error" }
+
+            _connectionState.value = SocketState.DisconnectedTemporarily(error)
+            scope.launch { reconnect(reconnectTimeout) }
         }
     }
 
@@ -317,38 +344,23 @@ public open class PersistentSocket<T>(
         return isPermanent
     }
 
-    internal fun handleError(error: Throwable) {
-        // onFailure, onClosed and the 2 onMessage can all generate errors
-        // temporary errors should be logged and retried
-        // permanent errors should be emitted so the app can decide how to handle it
-        if (destroyed) {
-            logger.d { "[handleError] Ignoring socket error - already closed $error" }
-            return
-        }
-
-        val permanentError = isPermanentError(error)
-        if (permanentError) {
-            val isErrorInConnectionPhase = continuationCompleted.not()
-            // close the connection loop
-            setPermanentFailureAndContinue(error)
-            logger.e { "[handleError] Permanent error: $error" }
-            // mark us permanently disconnected
-            scope.launch {
-                if (isErrorInConnectionPhase) {
-                    errors.emit(
-                        ConnectException(
-                            "Failed to establish WebSocket connection. Will try to reconnect. Cause: ${error.message}",
-                        ),
-                    )
-                } else {
-                    errors.emit(error)
-                }
+    private fun emitError(error: Throwable, isConnectionPhaseError: Boolean) {
+        scope.launch {
+            if (isConnectionPhaseError) {
+                errors.emit(
+                    ConnectException(
+                        "Failed to establish WebSocket connection. Will try to reconnect. Cause: ${error.message}",
+                    ),
+                )
+            } else {
+                errors.emit(error)
             }
-        } else {
-            logger.w { "[handleError] Temporary error: $error" }
-            _connectionState.value = SocketState.DisconnectedTemporarily(error)
-            scope.launch { reconnect(reconnectTimeout) }
         }
+    }
+
+    private fun resumeConnectionPhaseWithException(error: Throwable) {
+        connectContinuationCompleted = true
+        connectContinuation.resumeWithException(error)
     }
 
     /**
