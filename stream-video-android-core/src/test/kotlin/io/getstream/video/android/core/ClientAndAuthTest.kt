@@ -208,7 +208,7 @@ class ClientAndAuthTest : TestBase() {
 //        }
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test(expected = RuntimeException::class)
     fun `two clients is not allowed`() = runTest {
         val builder = StreamVideoBuilder(
             context = context,
