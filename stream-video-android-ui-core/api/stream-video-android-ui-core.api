@@ -58,8 +58,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;Lio/getstream/video/android/core/Call;)V
 	public fun onEnded (Lio/getstream/video/android/core/Call;)V
 	public fun onFailed (Ljava/lang/Exception;)V
-	public fun onIntentAction (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun onIntentAction$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public fun onIntentAction (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun onIntentAction$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun onLastParticipant (Lio/getstream/video/android/core/Call;)V
 	public final fun onPause ()V
 	public fun onPause (Lio/getstream/video/android/core/Call;)V
