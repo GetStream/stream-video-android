@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -55,18 +56,14 @@ class VideoCallActivity : ComposeStreamCallActivity() {
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity>
         get() = _internalDelegate
 
+    @OptIn(StreamCallActivityDelicateApi::class)
     override fun onCreate(
         savedInstanceState: Bundle?,
         persistentState: PersistableBundle?,
         call: Call,
     ) {
         super.onCreate(savedInstanceState, persistentState, call)
-        call.camera.setEnabled(true)
-    }
-
-    @StreamCallActivityDelicateApi
-    override fun isVideoCall(call: Call): Boolean {
-        return true
+        call.camera.setEnabled(isVideoCall(call))
     }
 
     // Custom delegate class to define specific UI behaviors and layouts for call states.
@@ -115,7 +112,7 @@ class VideoCallActivity : ComposeStreamCallActivity() {
                                 ),
                                 enabled = true,
                             ),
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxSize(),
                         )
                     }
                 },
