@@ -45,6 +45,7 @@ import org.openapitools.client.infrastructure.Serializer
  * @param createdAt
  * @param type The type of event: \"call.rejected\" in this case
  * @param user
+ * @param reason
  */
 
 
@@ -64,7 +65,10 @@ data class CallRejectedEvent (
     val type: kotlin.String = "call.rejected",
 
     @Json(name = "user")
-    val user: UserResponse
+    val user: UserResponse,
+
+    @Json(name = "reason")
+    val reason: kotlin.String? = null
 
 ) : VideoEvent(), WSCallEvent {
 
