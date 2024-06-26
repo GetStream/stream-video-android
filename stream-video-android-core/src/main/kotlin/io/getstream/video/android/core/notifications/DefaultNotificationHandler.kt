@@ -38,6 +38,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
@@ -66,7 +67,7 @@ public open class DefaultNotificationHandler(
 
     private val logger by taggedLogger("Call:NotificationHandler")
     private val intentResolver = DefaultStreamIntentResolver(application)
-    private val notificationManager: NotificationManagerCompat by lazy {
+    protected val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 it.createNotificationChannel(
@@ -91,14 +92,16 @@ public open class DefaultNotificationHandler(
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
         val notificationId = callId.hashCode()
-        intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
-            ?.let { notificationPendingIntent ->
-                showMissedCallNotification(
-                    notificationPendingIntent,
-                    callDisplayName,
-                    notificationId,
-                )
-            } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
+        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
+            ?: run {
+                logger.e { "Couldn't find any activity for $ACTION_MISSED_CALL" }
+                intentResolver.getDefaultPendingIntent()
+            }
+        showMissedCallNotification(
+            intent,
+            callDisplayName,
+            notificationId,
+        )
     }
 
     override fun getRingingCallNotification(
