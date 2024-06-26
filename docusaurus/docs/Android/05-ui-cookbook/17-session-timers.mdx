@@ -1,0 +1,50 @@
+---
+title: Session timers
+description: How to implement session timers and limited call duration
+---
+
+# Session Timers
+In some cases, you want to be able to limit the duration of a call. StreamVideo supports this use-case by allowing you to specify the duration of a call on creation. Additionally, it provides you a way to extend the duration during the call, if needed.
+
+## Low-level client capabilities
+First, let's see how we can create a call that has a limited duration.
+
+```kotlin
+val callSettings = CallSettingsRequest(
+    limits = LimitsSettingsRequest(maxDurationSeconds = 300)
+)
+val call = streamVideo.call(callType = "default", callId = "callId")
+call.create(settings = callSettings)
+```
+This code will create a call, which will have a duration of 300 seconds (5 minutes), as soon as the session is started (a participant joins the call).
+You can check the start date of a call with the following code:
+
+```kotlin
+val startedAt = call.state.session?.value?.startedAt
+```
+When the maxDuration of a call is specified, the call session also provides the `timerEndsAt` value, which provides the date when the call will end. When a call is ended, all the participants are removed from the call.
+
+```kotlin
+val timerEndsAt = call.state.session?.value?.timerEndsAt
+```
+## Extending the call duration
+You can also extend the duration of a call, both before or during the call. To do that, you should use the `call.update` method:
+
+```kotlin
+val extendDuration = 120 // Example extension duration in seconds
+val newDuration = (call.state.settings?.value?.limits?.maxDurationSeconds ?: 0) + extendDuration
+val newSettings = CallSettingsRequest(
+    limits = LimitsSettingsRequest(maxDurationSeconds = newDuration)
+)
+call.update(settingsOverride = newSettings)
+```
+When the call duration is extended, the `timerEndsAt` will be updated to reflect that change.
+
+## Example implementation
+Let's see how we can put these methods together in a sample session timer implementation.
+In this cookbook, we will show a popup that will notify the user that a call will end soon. It will also allow the creator of the call to extend its duration.
+
+Prerequisite for following along is a working StreamVideo integration and the ability to establish calls. To help with that, check our tutorials and getting started docs.
+
+## Session Timer example
+Let's create a new Kotlin file, and call it `SessionTimer.kt`. We will put the following contents in it:
