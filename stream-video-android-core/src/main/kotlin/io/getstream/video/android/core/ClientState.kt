@@ -28,6 +28,7 @@ import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
+import java.net.ConnectException
 
 @Stable
 public sealed interface ConnectionState {
@@ -36,7 +37,7 @@ public sealed interface ConnectionState {
     public data object Connected : ConnectionState
     public data object Reconnecting : ConnectionState
     public data object Disconnected : ConnectionState
-    public class Failed(error: Error) : ConnectionState
+    public class Failed(val error: Error) : ConnectionState
 }
 
 @Stable
@@ -57,11 +58,12 @@ class ClientState(client: StreamVideo) {
     private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
     public val user: StateFlow<User?> = _user
 
-    /**
-     * connectionState shows if we've established a connection with the coordinator
-     */
     private val _connection: MutableStateFlow<ConnectionState> =
         MutableStateFlow(ConnectionState.PreConnect)
+
+    /**
+     * Shows the Coordinator connection state
+     */
     public val connection: StateFlow<ConnectionState> = _connection
 
     /**
@@ -99,6 +101,12 @@ class ClientState(client: StreamVideo) {
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
             _ringingCall.value = call
+        }
+    }
+
+    internal fun handleError(error: Throwable) {
+        if (error is ConnectException) {
+            _connection.value = ConnectionState.Failed(error = Error(error))
         }
     }
 

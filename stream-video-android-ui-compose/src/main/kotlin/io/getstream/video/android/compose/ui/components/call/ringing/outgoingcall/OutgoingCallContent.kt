@@ -47,6 +47,7 @@ import io.getstream.video.android.mock.previewMemberListState
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
  * @param isShowingHeader Weather or not the app bar will be shown.
+ * @param backgroundContent Content shown for the call background.
  * @param headerContent Content shown for the call header.
  * @param detailsContent Content shown for call details, such as call participant information.
  * @param controlsContent Content shown for controlling call, such as accepting a call or declining a call.
@@ -59,6 +60,7 @@ public fun OutgoingCallContent(
     call: Call,
     isVideoType: Boolean,
     isShowingHeader: Boolean = true,
+    backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
@@ -78,6 +80,7 @@ public fun OutgoingCallContent(
         participants = participants,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
+        backgroundContent = backgroundContent,
         headerContent = headerContent,
         detailsContent = detailsContent,
         controlsContent = controlsContent,
@@ -107,6 +110,7 @@ public fun OutgoingCallContent(
     isVideoType: Boolean = true,
     participants: List<MemberState>,
     isShowingHeader: Boolean = true,
+    backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
         @Composable ColumnScope.(
@@ -131,6 +135,7 @@ public fun OutgoingCallContent(
 
     CallBackground(
         modifier = modifier,
+        backgroundContent = backgroundContent,
     ) {
         Column {
             if (isShowingHeader) {

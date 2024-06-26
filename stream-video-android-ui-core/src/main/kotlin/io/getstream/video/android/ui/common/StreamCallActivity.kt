@@ -83,6 +83,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
          * @param members list of members
          * @param action android action.
          * @param clazz the class of the Activity
+         * @param configuration the configuration object
+         * @param extraData extra data to pass to the activity
          */
         public fun <T : StreamCallActivity> callIntent(
             context: Context,
@@ -92,6 +94,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             action: String? = null,
             clazz: Class<T>,
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
+            extraData: Bundle? = null,
         ): Intent {
             return Intent(context, clazz).apply {
                 // Setup the outgoing call action
@@ -108,6 +111,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
                 val membersArrayList = ArrayList<String>()
                 members.forEach { membersArrayList.add(it) }
                 putStringArrayListExtra(EXTRA_MEMBERS_ARRAY, membersArrayList)
+                extraData?.also {
+                    putExtras(it)
+                }
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 logger.d { "Created [${clazz.simpleName}] intent. -> $this" }
             }
@@ -119,14 +125,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
-    private val onSuccessFinish: suspend (Call) -> Unit = { call ->
+    protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.w { "The call was successfully finished! Closing activity" }
         onEnded(call)
         if (configuration.closeScreenOnCallEnded) {
             finish()
         }
     }
-    private val onErrorFinish: suspend (Exception) -> Unit = { error ->
+    protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong, finishing the activity!" }
         onFailed(error)
         if (configuration.closeScreenOnError) {
@@ -179,8 +185,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
             null,
             onSuccess = { instanceState, persistentState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
-                onCreate(instanceState, persistentState, call)
-                onIntentAction(call, action, onError = onErrorFinish)
+                onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                    onCreate(instanceState, persistentState, successCall)
+                }
             },
             onError = {
                 // We are not calling onErrorFinish here on purpose
@@ -203,8 +210,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
             persistentState,
             onSuccess = { instanceState, persistedState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
-                onCreate(instanceState, persistedState, call)
-                onIntentAction(call, action, onError = onErrorFinish)
+                onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                    onCreate(instanceState, persistedState, successCall)
+                }
             },
             onError = {
                 // We are not calling onErrorFinish here on purpose
@@ -250,22 +258,23 @@ public abstract class StreamCallActivity : ComponentActivity() {
         call: Call,
         action: String?,
         onError: (suspend (Exception) -> Unit)? = onErrorFinish,
+        onSuccess: (suspend (Call) -> Unit)? = null,
     ) {
         logger.d { "[onIntentAction] #ringing; action: $action, call.cid: ${call.cid}" }
         when (action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 logger.v { "[onIntentAction] #ringing; Action ACCEPT_CALL, ${call.cid}" }
-                accept(call, onError = onError)
+                accept(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_REJECT_CALL -> {
                 logger.v { "[onIntentAction] #ringing; Action REJECT_CALL, ${call.cid}" }
-                reject(call, onError = onError)
+                reject(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_INCOMING_CALL -> {
                 logger.v { "[onIntentAction] #ringing; Action INCOMING_CALL, ${call.cid}" }
-                get(call, onError = onError)
+                get(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_OUTGOING_CALL -> {
@@ -276,6 +285,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
                     call,
                     members = members,
                     ring = true,
+                    onSuccess = onSuccess,
                     onError = onError,
                 )
             }
@@ -292,6 +302,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
                     ring = false,
                     onSuccess = {
                         join(call, onError = onError)
+                        onSuccess?.invoke(call)
                     },
                     onError = onError,
                 )

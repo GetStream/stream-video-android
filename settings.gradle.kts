@@ -42,6 +42,7 @@ include(":stream-video-android-bom")
 include(":tutorials:tutorial-video")
 include(":tutorials:tutorial-audio")
 include(":tutorials:tutorial-livestream")
+include(":tutorials:tutorial-ringing")
 
 buildCache {
     local {

@@ -168,8 +168,8 @@ object StreamVideoInitHelper {
 
         val chatUser = io.getstream.chat.android.models.User(
             id = user.id,
-            name = user.name,
-            image = user.image,
+            name = user.name.orEmpty(),
+            image = user.image.orEmpty(),
         )
 
         chatClient.connectUser(
@@ -199,7 +199,7 @@ object StreamVideoInitHelper {
                 ),
             ),
             tokenProvider = {
-                val email = user.custom["email"]
+                val email = user.custom?.get("email")
                 val authData = StreamService.instance.getAuthData(
                     environment = AppConfig.currentEnvironment.value!!.env,
                     userId = email,

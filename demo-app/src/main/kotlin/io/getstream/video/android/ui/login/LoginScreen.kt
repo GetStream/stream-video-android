@@ -426,7 +426,7 @@ private fun BuiltInUsersLoginDialog(
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
                             modifier = Modifier.align(Alignment.CenterVertically),
-                            text = user.name,
+                            text = user.name.orEmpty(),
                             color = VideoTheme.colors.basePrimary,
                             style = VideoTheme.typography.subtitleS,
                         )

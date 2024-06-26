@@ -23,11 +23,11 @@ import org.threeten.bp.OffsetDateTime
 internal fun User.toResponse(): UserResponse {
     return UserResponse(
         id = id,
-        role = role,
+        role = role ?: "user",
         name = name,
         image = image,
-        teams = teams,
-        custom = custom,
+        teams = teams ?: emptyList(),
+        custom = custom ?: emptyMap(),
         createdAt = createdAt ?: OffsetDateTime.now(),
         updatedAt = updatedAt ?: OffsetDateTime.now(),
         deletedAt = deletedAt,

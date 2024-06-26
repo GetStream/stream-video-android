@@ -85,6 +85,36 @@ internal class DefaultStreamIntentResolver(val context: Context) {
         )
 
     /**
+     * Search for an activity that can receive missed calls from Stream Server.
+     *
+     * @param callId The call id from the incoming call.
+     */
+    internal fun searchMissedCallPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int,
+    ): PendingIntent? =
+        searchActivityPendingIntent(
+            Intent(NotificationHandler.ACTION_MISSED_CALL),
+            callId,
+            notificationId,
+        )
+
+    internal fun getDefaultPendingIntent(): PendingIntent {
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            ?: Intent(Intent.ACTION_MAIN).apply {
+                setPackage(context.packageName)
+                addCategory(Intent.CATEGORY_LAUNCHER)
+            }
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        return PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    /**
      * Search for an activity that can receive live calls from Stream Server.
      *
      * @param callId The call id from the incoming call.
