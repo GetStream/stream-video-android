@@ -33,11 +33,13 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
  * Renders a call background that shows either a static image or user images based on the call state.
  *
  * @param modifier Modifier for styling.
+ * @param backgroundContent The background content to render.
  * @param content The content to render on top of the background.
  */
 @Composable
 public fun CallBackground(
     modifier: Modifier = Modifier,
+    backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
@@ -45,6 +47,7 @@ public fun CallBackground(
             .fillMaxSize()
             .background(color = VideoTheme.colors.baseSheetTertiary),
     ) {
+        backgroundContent?.invoke(this)
         content()
     }
 }
