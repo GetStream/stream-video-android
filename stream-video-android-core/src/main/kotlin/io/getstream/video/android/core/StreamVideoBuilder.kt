@@ -210,7 +210,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                     }.onError {
                         streamLog { it.message }
                     }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     // If the connect continuation was resumed with an exception, we catch it here.
                     streamLog { e.message.orEmpty() }
                 }
