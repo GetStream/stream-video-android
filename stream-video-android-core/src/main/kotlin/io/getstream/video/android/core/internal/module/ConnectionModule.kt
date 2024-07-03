@@ -60,6 +60,7 @@ internal class ConnectionModule(
     internal val videoDomain: String,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
+    private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
     private val user: User,
     internal val apiKey: ApiKey,
     internal val userToken: UserToken,
@@ -128,11 +129,13 @@ internal class ConnectionModule(
         val coordinatorUrl = "wss://$videoDomain/video/connect"
 
         return CoordinatorSocket(
-            coordinatorUrl,
-            user,
-            userToken,
-            scope,
-            okHttpClient,
+            url = coordinatorUrl,
+            user = user,
+            token = userToken,
+            tokenProvider = tokenProvider,
+            onRefreshToken = { updateToken(it) },
+            scope = scope,
+            httpClient = okHttpClient,
             networkStateProvider = networkStateProvider,
         )
     }

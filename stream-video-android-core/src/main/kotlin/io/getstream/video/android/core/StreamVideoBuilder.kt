@@ -157,6 +157,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             scope = scope,
             videoDomain = videoDomain,
             connectionTimeoutInMs = connectionTimeoutInMs,
+            tokenProvider = tokenProvider,
             loggingLevel = loggingLevel,
             user = user,
             apiKey = apiKey,

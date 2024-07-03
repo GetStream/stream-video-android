@@ -19,6 +19,7 @@ package io.getstream.video.android.core.socket
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CancellableContinuation
@@ -232,7 +233,7 @@ public open class PersistentSocket<T>(
         }
     }
 
-    open fun authenticate() { }
+    open fun authenticate() {}
 
     suspend fun onInternetConnected() {
         val state = connectionState.value
@@ -290,7 +291,11 @@ public open class PersistentSocket<T>(
         }
     }
 
-    internal fun handleError(error: Throwable) {
+    internal fun handleError(
+        error: Throwable,
+        tokenProvider: (suspend (error: Throwable?) -> String)? = null,
+        onRefreshToken: ((String) -> Unit)? = null,
+    ) {
         // onFailure, onClosed and the 2 onMessage can all generate errors
         // temporary errors should be logged and retried
         // permanent errors should be emitted so the app can decide how to handle it
@@ -318,7 +323,15 @@ public open class PersistentSocket<T>(
             logger.w { "[handleError] Temporary error: $error" }
 
             _connectionState.value = SocketState.DisconnectedTemporarily(error)
-            scope.launch { reconnect(reconnectTimeout) }
+            scope.launch {
+                if (error is ErrorResponse && error.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                    tokenProvider?.invoke(error)?.let { newToken ->
+                        onRefreshToken?.invoke(newToken)
+                    }
+                }
+
+                reconnect(reconnectTimeout)
+            }
         }
     }
 
@@ -326,20 +339,20 @@ public open class PersistentSocket<T>(
         // errors returned by the server can be permanent. IE an invalid API call
         // or an expired token (required a refresh)
         // or temporary
-        var isPermanent = true
-        if (error is ErrorResponse) {
-            val serverError = error as ErrorResponse
-        } else {
-            // there are several timeout & network errors that are all temporary
-            // code errors are permanent
-            isPermanent = when (error) {
-                is UnknownHostException -> false
-                is SocketTimeoutException -> false
-                is InterruptedIOException -> false
-                is IOException -> false
-                else -> true
+        val isPermanent: Boolean =
+            if (error is ErrorResponse && error.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                false
+            } else {
+                // there are several timeout & network errors that are all temporary
+                // code errors are permanent
+                when (error) {
+                    is UnknownHostException -> false
+                    is SocketTimeoutException -> false
+                    is InterruptedIOException -> false
+                    is IOException -> false
+                    else -> true
+                }
             }
-        }
 
         return isPermanent
     }

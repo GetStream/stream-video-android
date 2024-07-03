@@ -43,6 +43,8 @@ public class CoordinatorSocket(
     private val url: String,
     private val user: User,
     internal var token: String,
+    private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
+    private val onRefreshToken: ((String) -> Unit)? = null,
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider,
@@ -91,7 +93,13 @@ public class CoordinatorSocket(
         scope.launch(singleThreadDispatcher) {
             try {
                 Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
-                    eventAdapter.fromJson(text)?.let { parsedEvent -> processEvent(parsedEvent) }
+                    eventAdapter.fromJson(text)?.let { parsedEvent ->
+                        processEvent(
+                            parsedEvent = parsedEvent,
+                            tokenProvider = tokenProvider,
+                            onRefreshToken = onRefreshToken,
+                        )
+                    }
                 }
             } catch (e: Throwable) {
                 if (e.cause is UnsupportedVideoEventException) {
@@ -105,16 +113,22 @@ public class CoordinatorSocket(
         }
     }
 
-    private suspend fun processEvent(parsedEvent: VideoEvent) {
+    private suspend fun processEvent(
+        parsedEvent: VideoEvent,
+        tokenProvider: (suspend (error: Throwable?) -> String)?,
+        onRefreshToken: ((String) -> Unit)?,
+    ) {
         if (parsedEvent is ConnectionErrorEvent) {
             handleError(
-                ErrorResponse(
+                error = ErrorResponse(
                     code = parsedEvent.error?.code ?: -1,
                     message = parsedEvent.error?.message ?: "",
                     statusCode = parsedEvent.error?.statusCode ?: -1,
                     exceptionFields = parsedEvent.error?.exceptionFields ?: emptyMap(),
                     moreInfo = parsedEvent.error?.moreInfo ?: "",
                 ),
+                tokenProvider = tokenProvider,
+                onRefreshToken = onRefreshToken,
             )
             return
         }
