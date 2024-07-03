@@ -149,8 +149,6 @@ public open class PersistentSocket<T>(
         }
     }
 
-
-
     /**
      * Used for testing only - to bring down the socket connection immediately.
      */
@@ -304,7 +302,11 @@ public open class PersistentSocket<T>(
         val error = receivedError.let {
             // TODO Alex: This is a bad assumption, but necessary, needs to be checked against the backend
             if (it is EOFException) {
-                ErrorResponse(40, "Unknown error trying to refresh token and reconnect.", statusCode = 401)
+                ErrorResponse(
+                    40,
+                    "Unknown error trying to refresh token and reconnect.",
+                    statusCode = 401,
+                )
             } else {
                 it
             }
