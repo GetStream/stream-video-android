@@ -37,6 +37,7 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
+import java.io.EOFException
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.ConnectException
@@ -227,7 +228,7 @@ public open class PersistentSocket<T>(
         try {
             connectContinuationCompleted = false
             connect()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             logger.e { "[reconnect] failed to reconnect: $e" }
         }
     }
@@ -290,15 +291,26 @@ public open class PersistentSocket<T>(
         }
     }
 
-    internal fun handleError(error: Throwable) {
+    internal fun handleError(receivedError: Throwable) {
         // onFailure, onClosed and the 2 onMessage can all generate errors
         // temporary errors should be logged and retried
         // permanent errors should be emitted so the app can decide how to handle it
         if (destroyed) {
-            logger.d { "[handleError] Ignoring socket error - already closed $error" }
+            logger.d { "[handleError] Ignoring socket error - already closed $receivedError" }
             return
         }
-
+        val error = receivedError.let {
+            // TODO Alex: This is a bad assumption, but necessary, needs to be checked against the backend
+            if (it is EOFException) {
+                ErrorResponse(
+                    40,
+                    "Unknown error trying to refresh token and reconnect.",
+                    statusCode = 401,
+                )
+            } else {
+                it
+            }
+        }
         val permanentError = isPermanentError(error)
         if (permanentError) {
             logger.e { "[handleError] Permanent error: $error" }
