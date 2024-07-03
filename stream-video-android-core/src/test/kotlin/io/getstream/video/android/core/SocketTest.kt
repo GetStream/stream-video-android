@@ -68,12 +68,14 @@ class CoordinatorSocketTest : SocketTestBase() {
         val mockNetworkStateProvider = mockk<NetworkStateProvider>()
         every { mockNetworkStateProvider.isConnected() } returns true
         val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            authData?.token!!,
-            scope,
-            buildOkHttp(),
-            networkStateProvider,
+            url = coordinatorUrl,
+            user = testData.users["thierry"]!!,
+            token = authData?.token!!,
+            tokenProvider = null,
+            onRefreshToken = null,
+            scope = scope,
+            httpClient = buildOkHttp(),
+            networkStateProvider = networkStateProvider,
         )
         socket.connect()
 
@@ -88,12 +90,14 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Ignore
     fun `coordinator - an expired socket should be refreshed using the token provider`() = runTest {
         val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            testData.expiredToken,
-            scope,
-            buildOkHttp(),
-            networkStateProvider,
+            url = coordinatorUrl,
+            user = testData.users["thierry"]!!,
+            token = testData.expiredToken,
+            tokenProvider = null,
+            onRefreshToken = null,
+            scope = scope,
+            httpClient = buildOkHttp(),
+            networkStateProvider = networkStateProvider,
         )
         // token refresh should be handled at the StreamVideoImpl level
         try {
@@ -106,12 +110,14 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     fun `coordinator - a permanent error shouldn't be retried`() = runTest {
         val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            "invalid token",
-            scope,
-            buildOkHttp(),
-            networkStateProvider,
+            url = coordinatorUrl,
+            user = testData.users["thierry"]!!,
+            token = "invalid token",
+            tokenProvider = null,
+            onRefreshToken = null,
+            scope = scope,
+            httpClient = buildOkHttp(),
+            networkStateProvider = networkStateProvider,
         )
         try {
             socket.connect { it.cancel() }
@@ -133,12 +139,14 @@ class CoordinatorSocketTest : SocketTestBase() {
         val mockedNetworkStateProvider = mockk<NetworkStateProvider>(relaxed = true)
         every { mockedNetworkStateProvider.isConnected() } returns true
         val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            authData?.token!!,
-            scope,
-            buildOkHttp(),
-            mockedNetworkStateProvider,
+            url = coordinatorUrl,
+            user = testData.users["thierry"]!!,
+            token = authData?.token!!,
+            tokenProvider = null,
+            onRefreshToken = null,
+            scope = scope,
+            httpClient = buildOkHttp(),
+            networkStateProvider = mockedNetworkStateProvider,
         )
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
@@ -161,12 +169,14 @@ class CoordinatorSocketTest : SocketTestBase() {
     fun `going offline should temporarily disconnect`() = runTest {
         // mock the actual socket connection
         val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            testData.tokens["thierry"]!!,
-            scope,
-            buildOkHttp(),
-            networkStateProvider,
+            url = coordinatorUrl,
+            user = testData.users["thierry"]!!,
+            token = testData.tokens["thierry"]!!,
+            tokenProvider = null,
+            onRefreshToken = null,
+            scope = scope,
+            httpClient = buildOkHttp(),
+            networkStateProvider = networkStateProvider,
         )
         socket.mockSocket = mockedWebSocket
         socket.reconnectTimeout = 0
@@ -187,13 +197,15 @@ class CoordinatorSocketTest : SocketTestBase() {
     fun `wrong formatted VideoEventType is ignored`() = runTest {
         // mock the actual socket connection
         val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            authData?.token!!,
+            url = coordinatorUrl,
+            user = testData.users["thierry"]!!,
+            token = authData?.token!!,
+            tokenProvider = null,
+            onRefreshToken = null,
             // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
             scope = this,
-            buildOkHttp(),
-            networkStateProvider,
+            httpClient = buildOkHttp(),
+            networkStateProvider = networkStateProvider,
         )
 
         socket.connect()
@@ -209,13 +221,15 @@ class CoordinatorSocketTest : SocketTestBase() {
     fun `wrong formatted error in VideoEventType is ignored`() = runTest {
         // mock the actual socket connection
         val socket = CoordinatorSocket(
-            coordinatorUrl,
-            testData.users["thierry"]!!,
-            authData?.token!!,
+            url = coordinatorUrl,
+            user = testData.users["thierry"]!!,
+            token = authData?.token!!,
+            tokenProvider = null,
+            onRefreshToken = null,
             // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
             scope = this,
-            buildOkHttp(),
-            networkStateProvider,
+            httpClient = buildOkHttp(),
+            networkStateProvider = networkStateProvider,
         )
         socket.connect()
 
