@@ -287,7 +287,12 @@ public open class PersistentSocket<T>(
 
         if (!connectContinuationCompleted) {
             connectContinuationCompleted = true
-            connectContinuation.resume(message as T)
+            try {
+                connectContinuation.resume(message as T)
+            } catch (e: IllegalStateException) {
+                // Continuation is already resumed (possible in a race condition scenario)
+                logger.d { "[setConnectedStateAndContinue] continuation already resumed" }
+            }
         }
     }
 
@@ -372,7 +377,12 @@ public open class PersistentSocket<T>(
 
     private fun resumeConnectionPhaseWithException(error: Throwable) {
         connectContinuationCompleted = true
-        connectContinuation.resumeWithException(error)
+        try {
+            connectContinuation.resumeWithException(error)
+        } catch (e: IllegalStateException) {
+            // Continuation is already resumed (possible in a race condition scenario)
+            logger.d { "[resumeConnectionPhaseWithException] continuation already resumed" }
+        }
     }
 
     /**
