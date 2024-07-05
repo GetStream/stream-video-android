@@ -23,6 +23,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,8 +45,6 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.Executors
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * PersistentSocket architecture
@@ -282,16 +281,14 @@ public open class PersistentSocket<T>(
         healthMonitor.ack()
     }
 
+    @OptIn(InternalCoroutinesApi::class)
     protected fun setConnectedStateAndContinue(message: VideoEvent) {
         _connectionState.value = SocketState.Connected(message)
 
         if (!connectContinuationCompleted) {
             connectContinuationCompleted = true
-            try {
-                connectContinuation.resume(message as T)
-            } catch (e: IllegalStateException) {
-                // Continuation is already resumed (possible in a race condition scenario)
-                logger.d { "[setConnectedStateAndContinue] continuation already resumed" }
+            connectContinuation.tryResume(message as T)?.let {
+                connectContinuation.completeResume(it)
             }
         }
     }
@@ -375,13 +372,11 @@ public open class PersistentSocket<T>(
         }
     }
 
+    @OptIn(InternalCoroutinesApi::class)
     private fun resumeConnectionPhaseWithException(error: Throwable) {
         connectContinuationCompleted = true
-        try {
-            connectContinuation.resumeWithException(error)
-        } catch (e: IllegalStateException) {
-            // Continuation is already resumed (possible in a race condition scenario)
-            logger.d { "[resumeConnectionPhaseWithException] continuation already resumed" }
+        connectContinuation.tryResumeWithException(error)?.let {
+            connectContinuation.completeResume(it)
         }
     }
 
