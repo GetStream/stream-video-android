@@ -63,6 +63,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -124,7 +125,6 @@ import retrofit2.HttpException
 import java.net.ConnectException
 import java.util.*
 import kotlin.coroutines.Continuation
-import kotlin.coroutines.resumeWithException
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -1025,6 +1025,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
+    @OptIn(InternalCoroutinesApi::class)
     suspend fun _selectLocation(): Result<String> {
         return wrapAPICall {
             val url = "https://hint.stream-io-video.com/"
@@ -1033,7 +1034,9 @@ internal class StreamVideoImpl internal constructor(
             val response = suspendCancellableCoroutine { continuation ->
                 call.enqueue(object : Callback {
                     override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
-                        continuation.resumeWithException(e)
+                        continuation.tryResumeWithException(e)?.let {
+                            continuation.completeResume(it)
+                        }
                     }
 
                     override fun onResponse(call: okhttp3.Call, response: Response) {
