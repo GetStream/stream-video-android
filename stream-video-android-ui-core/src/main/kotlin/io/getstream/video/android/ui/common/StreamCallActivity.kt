@@ -28,7 +28,6 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
 import io.getstream.log.taggedLogger
-import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
@@ -476,17 +475,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             val instance = StreamVideo.instance()
-            try {
-                val result = call.create(
-                    // List of all users, containing the caller also
-                    memberIds = members + instance.userId,
-                    // If other users will get push notification.
-                    ring = ring,
-                )
-                result.onOutcome(call, onSuccess, onError)
-            } catch (e: Exception) {
-                onError?.invoke(e)
-            }
+            val result = call.create(
+                // List of all users, containing the caller also
+                memberIds = members + instance.userId,
+                // If other users will get push notification.
+                ring = ring,
+            )
+            result.onOutcome(call, onSuccess, onError)
         }
     }
 
@@ -524,11 +519,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     ) {
         acceptOrJoinNewCall(call, onSuccess, onError) {
             logger.d { "Join call, ${call.cid}" }
-            try {
-                it.join()
-            } catch (e: Exception) {
-                Result.Failure(Error.GenericError(e.message ?: "Something went wrong."))
-            }
+            it.join()
         }
     }
 
@@ -547,11 +538,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     ) {
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
-            try {
-                call.acceptThenJoin()
-            } catch (e: Exception) {
-                Result.Failure(Error.GenericError(e.message ?: "Something went wrong."))
-            }
+            call.acceptThenJoin()
         }
     }
 
