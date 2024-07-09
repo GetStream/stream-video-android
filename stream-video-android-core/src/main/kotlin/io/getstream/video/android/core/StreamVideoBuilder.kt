@@ -161,6 +161,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user,
             apiKey = apiKey,
             userToken = token,
+            lifecycle = lifecycle,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)

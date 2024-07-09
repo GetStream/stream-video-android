@@ -18,6 +18,7 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
+import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -63,6 +64,7 @@ internal class ConnectionModule(
     private val user: User,
     internal val apiKey: ApiKey,
     internal val userToken: UserToken,
+    internal val lifecycle: Lifecycle,
 ) {
     private val authInterceptor: CoordinatorAuthInterceptor by lazy {
         CoordinatorAuthInterceptor(apiKey, userToken)
@@ -71,6 +73,7 @@ internal class ConnectionModule(
     val okHttpClient: OkHttpClient by lazy { buildOkHttpClient() }
     val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
+            scope,
             connectivityManager = context
                 .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
         )

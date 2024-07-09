@@ -205,14 +205,14 @@ public class CallHealthMonitor(
 
     // monitor the network state since it's faster to detect recovered network sometimes
     internal val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
-        override fun onConnected() {
+        override suspend fun onConnected() {
             logger.i { "network connected, running check to see if we should reconnect" }
             scope.launch {
                 check()
             }
         }
 
-        override fun onDisconnected() {
+        override suspend fun onDisconnected() {
             val connectionState = call.state._connection.value
             logger.i {
                 "network disconnected. connection is $connectionState marking the connection as reconnecting"

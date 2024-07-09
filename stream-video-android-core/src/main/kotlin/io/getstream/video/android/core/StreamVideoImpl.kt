@@ -33,7 +33,7 @@ import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
-import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
+import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
@@ -319,34 +319,30 @@ internal class StreamVideoImpl internal constructor(
     /**
      * Observes the app lifecycle and attempts to reconnect/release the socket connection.
      */
-    private val lifecycleObserver = StreamLifecycleObserver(
-        lifecycle,
-        object : LifecycleHandler {
-            override fun started() {
-                scope.launch {
+    private val lifecycleObserver = StreamLifecycleObserver(scope, lifecycle)
+
+    init {
+
+        scope.launch(Dispatchers.Main.immediate) {
+            lifecycleObserver.observe(object : LifecycleHandler {
+                override suspend fun resume() {
                     // We should only connect if we were previously connected
                     if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
                         connectionModule.coordinatorSocket.connect()
                     }
                 }
-            }
 
-            override fun stopped() {
-                // We should only disconnect if we were previously connected
-                // Also don't disconnect the socket if we are in an active call
-                if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && state.activeCall.value == null) {
-                    connectionModule.coordinatorSocket.disconnect(
-                        PersistentSocket.DisconnectReason.ByRequest,
-                    )
+                override suspend fun stopped() {
+                    // We should only disconnect if we were previously connected
+                    // Also don't disconnect the socket if we are in an active call
+                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && state.activeCall.value == null) {
+                        connectionModule.coordinatorSocket.disconnect(
+                            PersistentSocket.DisconnectReason.ByRequest,
+                        )
+                    }
                 }
-            }
-        },
-    )
 
-    init {
-
-        scope.launch(Dispatchers.Main.immediate) {
-            lifecycleObserver.observe()
+            })
         }
 
         // listen to socket events and errors

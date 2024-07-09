@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *    https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.lifecycle
+package io.getstream.chat.android.client.socket
 
-internal interface LifecycleHandler {
-    fun started()
-    fun stopped()
+internal data class ErrorResponse(
+    val code: Int = -1,
+    var message: String = "",
+    var statusCode: Int = -1,
+    val exceptionFields: Map<String, String> = mapOf(),
+    var moreInfo: String = "",
+    val details: List<ErrorDetail> = emptyList(),
+) {
+    var duration: String = ""
 }

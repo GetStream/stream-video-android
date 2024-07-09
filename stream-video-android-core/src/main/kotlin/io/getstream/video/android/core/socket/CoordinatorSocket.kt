@@ -16,11 +16,18 @@
 
 package io.getstream.video.android.core.socket
 
+import androidx.lifecycle.Lifecycle
 import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.socket.common.VideoParser
+import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.utils.isWhitespaceOnly
+import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -40,49 +47,49 @@ import org.openapitools.client.models.WSAuthMessageRequest
  *
  */
 public class CoordinatorSocket(
+    private val apiKey: ApiKey,
     private val url: String,
     private val user: User,
     internal var token: String,
-    private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
+    private val scope: CoroutineScope = UserScope(ClientScope()),
     private val httpClient: OkHttpClient,
+    private val lifecycle: Lifecycle,
+    private val tokenProvider: TokenProvider,
     private val networkStateProvider: NetworkStateProvider,
-) : PersistentSocket<ConnectedEvent>(
+) : PersistentSocket(
+    apiKey = apiKey,
     url = url,
     httpClient = httpClient,
     scope = scope,
-    networkStateProvider = networkStateProvider,
-    onFastReconnected = { },
+    lifecycle = lifecycle,
+    tokenProvider = tokenProvider,
+    networkStateProvider = networkStateProvider
 ) {
-    override val logger by taggedLogger("PersistentCoordinatorSocket")
+    override val logger by taggedLogger("Video:CoordinatorWS")
 
-    override fun authenticate() {
+    override suspend fun authenticate() {
         logger.d { "[authenticateUser] user: $user" }
-
         if (token.isEmpty()) {
-            throw IllegalStateException("User token is empty")
+            logger.e { "[authenticateUser] Token is empty. Disconnecting." }
+            internalSocket.disconnect()
+        } else {
+            val authRequest = WSAuthMessageRequest(
+                token = token,
+                userDetails = ConnectUserDetailsRequest(
+                    id = user.id,
+                    name = user.name.takeUnless { it.isWhitespaceOnly() },
+                    image = user.image.takeUnless { it.isWhitespaceOnly() },
+                    custom = user.custom,
+                ),
+            )
+            logger.d { "[authenticateUser] Sending auth request: $authRequest" }
+            internalSocket.sendEvent(authRequest)
         }
-
-        val adapter: JsonAdapter<WSAuthMessageRequest> =
-            Serializer.moshi.adapter(WSAuthMessageRequest::class.java)
-
-        val authRequest = WSAuthMessageRequest(
-            token = token,
-            userDetails = ConnectUserDetailsRequest(
-                id = user.id,
-                name = user.name.takeUnless { it.isWhitespaceOnly() },
-                image = user.image.takeUnless { it.isWhitespaceOnly() },
-                custom = user.custom,
-            ),
-        )
-        val message = adapter.toJson(authRequest)
-
-        super.socket?.send(message)
     }
 
     /** Invoked when a text (type `0x1`) message has been received. */
     override fun onMessage(webSocket: WebSocket, text: String) {
-        logger.d { "[onMessage] text: $text " }
-
+        super.onMessage(webSocket, text)
         if (text.isEmpty() || text == "null") {
             logger.w { "[onMessage] Received empty socket message" }
             return
