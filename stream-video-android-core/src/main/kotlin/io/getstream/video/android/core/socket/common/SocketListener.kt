@@ -69,7 +69,7 @@ public open class SocketListener {
     /**
      * Invoked when we receive any successful event.
      *
-     * @param event parsed [ChatEvent] received in this web socket connection.
+     * @param event parsed [VideoEvent] received in this web socket connection.
      */
     public open fun onEvent(event: VideoEvent) {
     }

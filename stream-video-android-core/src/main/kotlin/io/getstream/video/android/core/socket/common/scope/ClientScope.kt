@@ -16,10 +16,14 @@
 
 package io.getstream.video.android.core.socket.common.scope
 
+import android.util.Log
 import io.getstream.result.call.SharedCalls
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 
 /**
  * A client aware implementation of [CoroutineScope].
@@ -39,3 +43,15 @@ private class ClientScopeImpl :
     CoroutineScope by CoroutineScope(
         SupervisorJob() + DispatcherProvider.IO + SharedCalls(),
     )
+
+/**
+ * Launches a coroutine and catches any exception. */
+fun CoroutineScope.safeLaunch(block: suspend () -> Unit) {
+    launch {
+        try {
+            block()
+        } catch (e: Throwable) {
+            Log.e("ClientScope", "Error in coroutine", e)
+        }
+    }
+}

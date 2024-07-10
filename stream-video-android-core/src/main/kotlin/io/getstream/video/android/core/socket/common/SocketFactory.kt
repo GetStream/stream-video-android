@@ -43,7 +43,8 @@ internal class SocketFactory(
     @Throws(UnsupportedEncodingException::class)
     private fun buildRequest(connectionConf: ConnectionConf): Request =
         Request.Builder()
-            .url(buildUrl(connectionConf))
+            .url(connectionConf.endpoint)
+            //.url(buildUrl(connectionConf))
             .build()
 
     @Suppress("TooGenericExceptionCaught")

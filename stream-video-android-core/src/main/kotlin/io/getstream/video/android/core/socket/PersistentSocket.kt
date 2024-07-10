@@ -21,9 +21,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
+import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.SocketFactory
+import io.getstream.video.android.core.socket.common.SocketListener
+import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.VideoSocket
 import io.getstream.video.android.core.socket.common.scope.ClientScope
@@ -33,11 +37,15 @@ import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.model.ApiKey
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
+import java.util.concurrent.Flow
 
 /**
  * PersistentSocket architecture
@@ -62,13 +70,15 @@ public open class PersistentSocket(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
-) : WebSocketListener() {
+) : SocketListener() {
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
     private val tokenManager = TokenManagerImpl()
 
     // Internal state
     internal open val logger by taggedLogger("Video:Socket")
+    internal val errors: Flow<StreamWebSocketEvent.Error>
+    internal val events: Flow<VideoEvent> = MutableSharedFlow<VideoEvent>()
     internal val internalSocket = VideoSocket(
         apiKey,
         url,
@@ -85,36 +95,32 @@ public open class PersistentSocket(
     // Init
     init {
         tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
+        internalSocket.addListener(this)
     }
 
-    // Listeners
-    @CallSuper
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        logger.d { "[onOpen] Socket opened" }
+    // Events
+    override fun onConnecting() {
+        super.onConnecting()
+        logger.d { "[onConnecting] Socket is connecting" }
     }
 
-    @CallSuper
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        logger.d { "[onMessage] Received message: $text" }
+    override fun onConnected(event: ConnectedEvent) {
+        super.onConnected(event)
+        logger.d { "[onConnected] Socket connected with event: $event" }
     }
 
-    @CallSuper
-    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-        logger.d { "[onMessage] Received binary message: $bytes" }
+    override fun onEvent(event: VideoEvent) {
+        super.onEvent(event)
+        logger.d { "[onEvent] Received event: $event" }
     }
 
-    @CallSuper
-    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-        logger.d { "[onClosing] Socket is closing. Code: $code, Reason: $reason" }
+    override fun onError(error: Error) {
+        super.onError(error)
+        logger.e { "[onError] Socket error: $error" }
     }
 
-    @CallSuper
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-        logger.d { "[onClosed] Socket closed. Code: $code, Reason: $reason" }
-    }
-
-    @CallSuper
-    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        logger.e(t) { "[onFailure] Socket failure. Response: $response" }
+    override fun onDisconnected(cause: DisconnectCause) {
+        super.onDisconnected(cause)
+        logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
     }
 }

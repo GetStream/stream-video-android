@@ -19,19 +19,25 @@ package io.getstream.video.android.core.socket
 import androidx.lifecycle.Lifecycle
 import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.VideoParser
+import io.getstream.video.android.core.socket.common.VideoSocketStateService
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.common.scope.safeLaunch
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.WebSocket
 import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectUserDetailsRequest
@@ -65,25 +71,73 @@ public class CoordinatorSocket(
     tokenProvider = tokenProvider,
     networkStateProvider = networkStateProvider
 ) {
+
+
     override val logger by taggedLogger("Video:CoordinatorWS")
 
-    override suspend fun authenticate() {
-        logger.d { "[authenticateUser] user: $user" }
-        if (token.isEmpty()) {
-            logger.e { "[authenticateUser] Token is empty. Disconnecting." }
-            internalSocket.disconnect()
-        } else {
-            val authRequest = WSAuthMessageRequest(
-                token = token,
-                userDetails = ConnectUserDetailsRequest(
-                    id = user.id,
-                    name = user.name.takeUnless { it.isWhitespaceOnly() },
-                    image = user.image.takeUnless { it.isWhitespaceOnly() },
-                    custom = user.custom,
-                ),
-            )
-            logger.d { "[authenticateUser] Sending auth request: $authRequest" }
-            internalSocket.sendEvent(authRequest)
+    init {
+        internalSocket.addListener(object : SocketListener() {
+            override fun onConnected(event: ConnectedEvent) {
+                super.onConnected(event)
+                setConnectedStateAndContinue(event)
+            }
+
+            override fun onError(error: Error) {
+                super.onError(error)
+            }
+
+            override fun onEvent(event: VideoEvent) {
+                super.onEvent(event)
+            }
+        })
+    }
+
+    override fun onConnected(event: ConnectedEvent) {
+        super.onConnected(event)
+        scope.safeLaunch {
+            logger.d { "[onOpen] user: $user" }
+            if (token.isEmpty()) {
+                logger.e { "[onOpen] Token is empty. Disconnecting." }
+                internalSocket.disconnect()
+            } else {
+                val authRequest = WSAuthMessageRequest(
+                    token = token,
+                    userDetails = ConnectUserDetailsRequest(
+                        id = user.id,
+                        name = user.name.takeUnless { it.isWhitespaceOnly() },
+                        image = user.image.takeUnless { it.isWhitespaceOnly() },
+                        custom = user.custom,
+                    ),
+                )
+                logger.d { "[authenticateUser] Sending auth request: $authRequest" }
+                internalSocket.sendEvent(authRequest)
+            }
+        }
+    }
+
+    override fun onEvent(event: VideoEvent) {
+        super.onEvent(event)
+    }
+    override fun onOpen(webSocket: WebSocket, response: Response) {
+        super.onOpen(webSocket, response)
+        scope.safeLaunch {
+            logger.d { "[onOpen] user: $user" }
+            if (token.isEmpty()) {
+                logger.e { "[onOpen] Token is empty. Disconnecting." }
+                internalSocket.disconnect()
+            } else {
+                val authRequest = WSAuthMessageRequest(
+                    token = token,
+                    userDetails = ConnectUserDetailsRequest(
+                        id = user.id,
+                        name = user.name.takeUnless { it.isWhitespaceOnly() },
+                        image = user.image.takeUnless { it.isWhitespaceOnly() },
+                        custom = user.custom,
+                    ),
+                )
+                logger.d { "[authenticateUser] Sending auth request: $authRequest" }
+                internalSocket.sendEvent(authRequest)
+            }
         }
     }
 
@@ -91,9 +145,10 @@ public class CoordinatorSocket(
     override fun onMessage(webSocket: WebSocket, text: String) {
         super.onMessage(webSocket, text)
         if (text.isEmpty() || text == "null") {
-            logger.w { "[onMessage] Received empty socket message" }
+            logger.w { "[onMessage] Received empty coordinator socket message." }
             return
         }
+
 
         scope.launch(singleThreadDispatcher) {
             try {
