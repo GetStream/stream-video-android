@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,10 +82,16 @@ class ClientState(client: StreamVideo) {
     internal val clientImpl = client as StreamVideoImpl
 
     /**
+     * Returns true if there is an active or ringing call
+     */
+    fun hasActiveOrRingingCall(): Boolean = safeCall(false) {
+        activeCall.value != null || ringingCall.value != null
+    }
+
+    /**
      * Handles the events for the client state.
      * Most event logic happens in the Call instead of the client
      */
-
     fun handleEvent(event: VideoEvent) {
         // mark connected
         if (event is ConnectedEvent) {

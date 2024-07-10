@@ -54,6 +54,8 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
+import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeSuspendingCall
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -310,8 +312,8 @@ internal class StreamVideoImpl internal constructor(
         return sub
     }
 
-    override suspend fun connectIfNotAlreadyConnected() {
-        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && connectionModule.coordinatorSocket.connectionState.value != SocketState.Connecting) {
+    override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
+        if (connectionModule.coordinatorSocket.canConnect()) {
             connectionModule.coordinatorSocket.connect()
         }
     }
@@ -324,20 +326,19 @@ internal class StreamVideoImpl internal constructor(
         object : LifecycleHandler {
             override fun started() {
                 scope.launch {
-                    // We should only connect if we were previously connected
-                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
-                        connectionModule.coordinatorSocket.connect()
-                    }
+                    connectIfNotAlreadyConnected()
                 }
             }
 
             override fun stopped() {
-                // We should only disconnect if we were previously connected
-                // Also don't disconnect the socket if we are in an active call
-                if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && state.activeCall.value == null) {
-                    connectionModule.coordinatorSocket.disconnect(
-                        PersistentSocket.DisconnectReason.ByRequest,
-                    )
+                safeCall {
+                    // We should only disconnect if we were previously connected
+                    // Also don't disconnect the socket if we are in an active call
+                    if (connectionModule.coordinatorSocket.canDisconnect() && state.hasActiveOrRingingCall()) {
+                        connectionModule.coordinatorSocket.disconnect(
+                            PersistentSocket.DisconnectReason.ByRequest,
+                        )
+                    }
                 }
             }
         },

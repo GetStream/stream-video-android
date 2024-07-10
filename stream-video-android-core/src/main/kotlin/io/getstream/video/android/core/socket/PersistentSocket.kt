@@ -21,6 +21,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
+import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -113,13 +115,13 @@ public open class PersistentSocket<T>(
      */
     open suspend fun connect(
         invocation: (CancellableContinuation<T>) -> Unit = {},
-    ): T? {
+    ): T? = safeSuspendingCall(null) {
         if (destroyed) {
             logger.d { "[connect] Can't connect socket - it was already destroyed" }
-            return null
+            null
         }
 
-        return suspendCancellableCoroutine { continuation ->
+        suspendCancellableCoroutine { continuation ->
             logger.i { "[connect]" }
             connectContinuation = continuation
 
@@ -167,7 +169,7 @@ public open class PersistentSocket<T>(
     /**
      * Disconnect the socket
      */
-    fun disconnect(disconnectReason: DisconnectReason) {
+    fun disconnect(disconnectReason: DisconnectReason) = safeCall {
         logger.i { "[disconnect]" }
 
         _connectionState.value = when (disconnectReason) {
@@ -409,6 +411,38 @@ public open class PersistentSocket<T>(
 
         val healthCheckRequest = HealthCheckRequest()
         socket?.send(healthCheckRequest.encodeByteString())
+    }
+
+    internal fun canConnect(): Boolean = safeCall(false) {
+        val connectionState = connectionState.value
+        logger.d { "[canConnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            is SocketState.Connected -> false
+            is SocketState.Connecting -> false
+            is SocketState.DisconnectedPermanently -> false
+            is SocketState.DisconnectedByRequest -> false
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> true
+            else -> true
+        }
+        logger.d { "[canConnect] Decision: $result" }
+        result
+    }
+
+    internal fun canDisconnect(): Boolean = safeCall(true) {
+        val connectionState = connectionState.value
+        logger.d { "[canDisconnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            is SocketState.Connected -> true
+            is SocketState.Connecting -> true
+            is SocketState.DisconnectedPermanently -> false
+            is SocketState.DisconnectedByRequest -> false
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> false
+            else -> true
+        }
+        logger.d { "[canDisconnect] Decision: $result" }
+        result
     }
 
     private val healthMonitor = HealthMonitor(
