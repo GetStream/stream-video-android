@@ -417,13 +417,15 @@ public open class PersistentSocket<T>(
         val connectionState = connectionState.value
         logger.d { "[canConnect] Current state: $connectionState" }
         val result = when (connectionState) {
+            // Can't connect if we are already connected.
             is SocketState.Connected -> false
             is SocketState.Connecting -> false
-            is SocketState.DisconnectedPermanently -> false
-            is SocketState.DisconnectedByRequest -> false
+            // We can connect if we are disconnected.
+            is SocketState.DisconnectedPermanently -> true
             is SocketState.DisconnectedTemporarily -> true
             is SocketState.NetworkDisconnected -> true
-            else -> true
+            is SocketState.DisconnectedByRequest -> true
+            is SocketState.NotConnected -> true
         }
         logger.d { "[canConnect] Decision: $result" }
         result
