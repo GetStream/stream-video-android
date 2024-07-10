@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.video.android.core.socket.common.fsm.FiniteStateMachine
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.socket.common.fsm.FiniteStateMachine
 import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.ConnectedEvent
 
@@ -34,7 +34,10 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
      *
      * @param connectionConf The [SocketFactory.ConnectionConf] to be used to reconnect.
      */
-    suspend fun onReconnect(connectionConf: SocketFactory.ConnectionConf, forceReconnection: Boolean) {
+    suspend fun onReconnect(
+        connectionConf: SocketFactory.ConnectionConf,
+        forceReconnection: Boolean,
+    ) {
         logger.v {
             "[onReconnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
         }
@@ -167,7 +170,11 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
                 onEvent<Event.ConnectionEstablished> { State.Connected(it.connectedEvent) }
                 onEvent<Event.WebSocketEventLost> { State.Disconnected.WebSocketEventLost }
                 onEvent<Event.NetworkNotAvailable> { State.Disconnected.NetworkDisconnected }
-                onEvent<Event.UnrecoverableError> { State.Disconnected.DisconnectedPermanently(it.error) }
+                onEvent<Event.UnrecoverableError> {
+                    State.Disconnected.DisconnectedPermanently(
+                        it.error,
+                    )
+                }
                 onEvent<Event.NetworkError> { State.Disconnected.DisconnectedTemporarily(it.error) }
                 onEvent<Event.RequiredDisconnection> { State.Disconnected.DisconnectedByRequest }
                 onEvent<Event.Stop> { State.Disconnected.Stopped }
@@ -178,7 +185,11 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
                 onEvent<Event.ConnectionEstablished> { State.Connected(it.connectedEvent) }
                 onEvent<Event.WebSocketEventLost> { State.Disconnected.WebSocketEventLost }
                 onEvent<Event.NetworkNotAvailable> { State.Disconnected.NetworkDisconnected }
-                onEvent<Event.UnrecoverableError> { State.Disconnected.DisconnectedPermanently(it.error) }
+                onEvent<Event.UnrecoverableError> {
+                    State.Disconnected.DisconnectedPermanently(
+                        it.error,
+                    )
+                }
                 onEvent<Event.NetworkError> { State.Disconnected.DisconnectedTemporarily(it.error) }
                 onEvent<Event.RequiredDisconnection> { State.Disconnected.DisconnectedByRequest }
                 onEvent<Event.Stop> { State.Disconnected.Stopped }
@@ -188,7 +199,11 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
                 onEvent<Event.ConnectionEstablished> { State.Connected(it.connectedEvent) }
                 onEvent<Event.WebSocketEventLost> { State.Disconnected.WebSocketEventLost }
                 onEvent<Event.NetworkNotAvailable> { State.Disconnected.NetworkDisconnected }
-                onEvent<Event.UnrecoverableError> { State.Disconnected.DisconnectedPermanently(it.error) }
+                onEvent<Event.UnrecoverableError> {
+                    State.Disconnected.DisconnectedPermanently(
+                        it.error,
+                    )
+                }
                 onEvent<Event.NetworkError> { State.Disconnected.DisconnectedTemporarily(it.error) }
                 onEvent<Event.RequiredDisconnection> { State.Disconnected.DisconnectedByRequest }
                 onEvent<Event.Stop> { State.Disconnected.Stopped }
@@ -203,18 +218,30 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
             state<State.Disconnected.NetworkDisconnected> {
                 onEvent<Event.Connect> { State.Connecting(it.connectionConf, it.connectionType) }
                 onEvent<Event.ConnectionEstablished> { State.Connected(it.connectedEvent) }
-                onEvent<Event.UnrecoverableError> { State.Disconnected.DisconnectedPermanently(it.error) }
+                onEvent<Event.UnrecoverableError> {
+                    State.Disconnected.DisconnectedPermanently(
+                        it.error,
+                    )
+                }
                 onEvent<Event.NetworkError> { State.Disconnected.DisconnectedTemporarily(it.error) }
                 onEvent<Event.RequiredDisconnection> { State.Disconnected.DisconnectedByRequest }
                 onEvent<Event.Stop> { State.Disconnected.Stopped }
-                onEvent<Event.NetworkAvailable> { State.RestartConnection(RestartReason.NETWORK_AVAILABLE) }
+                onEvent<Event.NetworkAvailable> {
+                    State.RestartConnection(
+                        RestartReason.NETWORK_AVAILABLE,
+                    )
+                }
             }
 
             state<State.Disconnected.WebSocketEventLost> {
                 onEvent<Event.Connect> { State.Connecting(it.connectionConf, it.connectionType) }
                 onEvent<Event.ConnectionEstablished> { State.Connected(it.connectedEvent) }
                 onEvent<Event.NetworkNotAvailable> { State.Disconnected.NetworkDisconnected }
-                onEvent<Event.UnrecoverableError> { State.Disconnected.DisconnectedPermanently(it.error) }
+                onEvent<Event.UnrecoverableError> {
+                    State.Disconnected.DisconnectedPermanently(
+                        it.error,
+                    )
+                }
                 onEvent<Event.NetworkError> { State.Disconnected.DisconnectedTemporarily(it.error) }
                 onEvent<Event.RequiredDisconnection> { State.Disconnected.DisconnectedByRequest }
                 onEvent<Event.Stop> { State.Disconnected.Stopped }
@@ -226,12 +253,12 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
                     when (it.connectionType) {
                         ConnectionType.INITIAL_CONNECTION -> State.Connecting(
                             it.connectionConf,
-                            it.connectionType
+                            it.connectionType,
                         )
                         ConnectionType.AUTOMATIC_RECONNECTION -> this
                         ConnectionType.FORCE_RECONNECTION -> State.Connecting(
                             it.connectionConf,
-                            it.connectionType
+                            it.connectionType,
                         )
                     }
                 }
@@ -242,7 +269,11 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
                 onEvent<Event.ConnectionEstablished> { State.Connected(it.connectedEvent) }
                 onEvent<Event.NetworkNotAvailable> { State.Disconnected.NetworkDisconnected }
                 onEvent<Event.WebSocketEventLost> { State.Disconnected.WebSocketEventLost }
-                onEvent<Event.UnrecoverableError> { State.Disconnected.DisconnectedPermanently(it.error) }
+                onEvent<Event.UnrecoverableError> {
+                    State.Disconnected.DisconnectedPermanently(
+                        it.error,
+                    )
+                }
                 onEvent<Event.NetworkError> { State.Disconnected.DisconnectedTemporarily(it.error) }
                 onEvent<Event.RequiredDisconnection> { State.Disconnected.DisconnectedByRequest }
                 onEvent<Event.Stop> { State.Disconnected.Stopped }
@@ -253,12 +284,12 @@ internal class VideoSocketStateService(initialState: State = State.Disconnected.
                     when (it.connectionType) {
                         ConnectionType.INITIAL_CONNECTION -> State.Connecting(
                             it.connectionConf,
-                            it.connectionType
+                            it.connectionType,
                         )
                         ConnectionType.AUTOMATIC_RECONNECTION -> this
                         ConnectionType.FORCE_RECONNECTION -> State.Connecting(
                             it.connectionConf,
-                            it.connectionType
+                            it.connectionType,
                         )
                     }
                 }

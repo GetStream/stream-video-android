@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,8 @@ internal class StreamWebSocket(
     private val parser: VideoParser,
     socketCreator: (WebSocketListener) -> WebSocket,
 ) {
-    private val eventFlow = MutableSharedFlow<StreamWebSocketEvent>(extraBufferCapacity = EVENTS_BUFFER_SIZE)
+    private val eventFlow =
+        MutableSharedFlow<StreamWebSocketEvent>(extraBufferCapacity = EVENTS_BUFFER_SIZE)
 
     private val webSocket = socketCreator(object : WebSocketListener() {
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -80,7 +81,12 @@ internal class StreamWebSocket(
             .map { StreamWebSocketEvent.Message(it) }
             .recover { parseChatError ->
                 val errorResponse =
-                    when (val chatErrorResult = parser.fromJsonOrError(text, SocketErrorMessage::class.java)) {
+                    when (
+                        val chatErrorResult = parser.fromJsonOrError(
+                            text,
+                            SocketErrorMessage::class.java,
+                        )
+                    ) {
                         is Result.Success -> {
                             chatErrorResult.value.error
                         }

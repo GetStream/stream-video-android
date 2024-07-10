@@ -16,10 +16,7 @@
 
 package io.getstream.video.android.core.socket
 
-import androidx.annotation.CallSuper
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
@@ -30,6 +27,7 @@ import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.VideoSocket
+import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
@@ -39,10 +37,6 @@ import io.getstream.video.android.model.ApiKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import okhttp3.OkHttpClient
-import okhttp3.Response
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
-import okio.ByteString
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 import java.util.concurrent.Flow
@@ -90,7 +84,8 @@ public open class PersistentSocket(
         ),
         scope as? UserScope ?: UserScope(ClientScope()),
         StreamLifecycleObserver(scope, lifecycle),
-        networkStateProvider)
+        networkStateProvider,
+    )
 
     // Init
     init {

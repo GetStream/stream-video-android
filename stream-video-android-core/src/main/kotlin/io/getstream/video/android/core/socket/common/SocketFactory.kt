@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo.Companion.buildSdkTrackingHeaders
+import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.model.User
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -44,7 +44,7 @@ internal class SocketFactory(
     private fun buildRequest(connectionConf: ConnectionConf): Request =
         Request.Builder()
             .url(connectionConf.endpoint)
-            //.url(buildUrl(connectionConf))
+            // .url(buildUrl(connectionConf))
             .build()
 
     @Suppress("TooGenericExceptionCaught")
@@ -84,7 +84,9 @@ internal class SocketFactory(
      *
      * @return A map of User's properties to update.
      */
-    private fun ConnectionConf.reduceUserDetails(): Map<String, Any> = mutableMapOf<String, Any>("id" to id)
+    private fun ConnectionConf.reduceUserDetails(): Map<String, Any> = mutableMapOf<String, Any>(
+        "id" to id,
+    )
         .apply {
             if (!isReconnection) {
                 try {

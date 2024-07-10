@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,8 @@ internal typealias StateFunction<S, E> = (S, E) -> S
 public class StateHandlerBuilder<STATE : Any, EVENT : Any, S : STATE> {
 
     @PublishedApi
-    internal val eventHandlers: MutableMap<KClass<out EVENT>, StateFunction<STATE, EVENT>> = mutableMapOf()
+    internal val eventHandlers: MutableMap<KClass<out EVENT>, StateFunction<STATE, EVENT>> =
+        mutableMapOf()
 
     @PublishedApi
     internal val onEnterListeners: MutableList<(STATE, EVENT) -> Unit> = mutableListOf()

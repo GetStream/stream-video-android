@@ -17,15 +17,10 @@
 package io.getstream.video.android.core.socket
 
 import androidx.lifecycle.Lifecycle
-import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.SocketListener
-import io.getstream.video.android.core.socket.common.VideoParser
-import io.getstream.video.android.core.socket.common.VideoSocketStateService
-import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.scope.safeLaunch
@@ -34,7 +29,6 @@ import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -69,9 +63,8 @@ public class CoordinatorSocket(
     scope = scope,
     lifecycle = lifecycle,
     tokenProvider = tokenProvider,
-    networkStateProvider = networkStateProvider
+    networkStateProvider = networkStateProvider,
 ) {
-
 
     override val logger by taggedLogger("Video:CoordinatorWS")
 
@@ -148,7 +141,6 @@ public class CoordinatorSocket(
             logger.w { "[onMessage] Received empty coordinator socket message." }
             return
         }
-
 
         scope.launch(singleThreadDispatcher) {
             try {

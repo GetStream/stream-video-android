@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2014-2022 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    https://github.com/GetStream/stream-chat-android/blob/main/LICENSE
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,6 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.VideoSocketStateService.State
-import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -27,6 +24,9 @@ import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
+import io.getstream.video.android.core.socket.common.VideoSocketStateService.State
+import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -58,7 +58,9 @@ internal open class VideoSocket(
     private var socketStateObserverJob: Job? = null
     private val healthMonitor = HealthMonitor(
         userScope = userScope,
-        checkCallback = { (videoSocketStateService.currentState as? State.Connected)?.event?.let(::sendEvent) },
+        checkCallback = {
+            (videoSocketStateService.currentState as? State.Connected)?.event?.let(::sendEvent)
+        },
         reconnectCallback = { videoSocketStateService.onWebSocketEventLost() },
     )
     private val lifecycleHandler = object : LifecycleHandler {
@@ -95,8 +97,10 @@ internal open class VideoSocket(
                         socketListenerJob = listen().onEach {
                             when (it) {
                                 is StreamWebSocketEvent.Error -> handleError(it.streamError)
-                                is StreamWebSocketEvent.Message -> when (val event =
-                                    it.videoEvent) {
+                                is StreamWebSocketEvent.Message -> when (
+                                    val event =
+                                        it.videoEvent
+                                ) {
                                     is ConnectionErrorEvent -> handleError(event.toNetworkError())
                                     else -> handleEvent(event)
                                 }
@@ -178,7 +182,7 @@ internal open class VideoSocket(
                                 connectionConf?.let {
                                     videoSocketStateService.onReconnect(
                                         it,
-                                        false
+                                        false,
                                     )
                                 }
                             }
@@ -344,7 +348,7 @@ internal open class VideoSocket(
 
             is State.Disconnected.NetworkDisconnected -> DisconnectCause.NetworkNotAvailable
             is State.Disconnected.DisconnectedPermanently -> DisconnectCause.UnrecoverableError(
-                error
+                error,
             )
 
             is State.Disconnected.DisconnectedTemporarily -> DisconnectCause.Error(error)
@@ -354,9 +358,11 @@ internal open class VideoSocket(
     private fun ConnectionErrorEvent.toNetworkError(): Error.NetworkError {
         return error?.let {
             return Error.NetworkError(
-                message = it.message + moreInfoTemplate(it.moreInfo) + buildDetailsTemplate(it.details.map { code ->
-                    VideoErrorDetail(code, listOf(""))
-                }),
+                message = it.message + moreInfoTemplate(it.moreInfo) + buildDetailsTemplate(
+                    it.details.map { code ->
+                        VideoErrorDetail(code, listOf(""))
+                    },
+                ),
                 serverErrorCode = it.code,
                 statusCode = it.statusCode,
             )

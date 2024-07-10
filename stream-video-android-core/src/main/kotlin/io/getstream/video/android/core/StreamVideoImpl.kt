@@ -341,7 +341,6 @@ internal class StreamVideoImpl internal constructor(
                         )
                     }
                 }
-
             })
         }
 
