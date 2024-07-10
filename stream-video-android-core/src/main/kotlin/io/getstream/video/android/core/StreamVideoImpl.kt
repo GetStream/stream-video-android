@@ -334,7 +334,7 @@ internal class StreamVideoImpl internal constructor(
                 safeCall {
                     // We should only disconnect if we were previously connected
                     // Also don't disconnect the socket if we are in an active call
-                    if (connectionModule.coordinatorSocket.canDisconnect() && state.hasActiveOrRingingCall()) {
+                    if (connectionModule.coordinatorSocket.canDisconnect() && !state.hasActiveOrRingingCall()) {
                         connectionModule.coordinatorSocket.disconnect(
                             PersistentSocket.DisconnectReason.ByRequest,
                         )
