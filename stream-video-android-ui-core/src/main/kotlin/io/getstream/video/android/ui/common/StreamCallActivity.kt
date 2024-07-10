@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallSessionParticipantLeftEvent
+import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
 
 @OptIn(StreamCallActivityDelicateApi::class)

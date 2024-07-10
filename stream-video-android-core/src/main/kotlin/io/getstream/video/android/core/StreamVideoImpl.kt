@@ -63,6 +63,7 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -159,7 +160,10 @@ internal class StreamVideoImpl internal constructor(
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
 
-    internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob())
+    val handler = CoroutineExceptionHandler { _, exception ->
+        logger.e(exception) { "[StreamVideo#Scope] Uncaught exception: $exception" }
+    }
+    internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob() + handler)
 
     /** if true we fail fast on errors instead of logging them */
     var developmentMode = true
@@ -343,7 +347,11 @@ internal class StreamVideoImpl internal constructor(
                 safeCall {
                     // We should only disconnect if we were previously connected
                     // Also don't disconnect the socket if we are in an active call
-                    if (connectionModule.coordinatorSocket.canDisconnect() && !state.hasActiveOrRingingCall()) {
+                    val socketDecision = connectionModule.coordinatorSocket.canDisconnect()
+                    val activeCallDecision = state.hasActiveOrRingingCall()
+                    val decision = socketDecision && !activeCallDecision
+                    logger.d { "[lifecycle#stopped] Decision to disconnect: $decision, caused by socket state: $socketDecision, active or ringing call: $activeCallDecision" }
+                    if (decision) {
                         Log.d(
                             "CrashDebug",
                             "[lifecycleObserver.stopped] Socket.connectionState != NotConnected && activeCall == null. Will call socket.disconnect",

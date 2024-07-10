@@ -47,6 +47,7 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.Executors
+import kotlin.math.log
 
 /**
  * PersistentSocket architecture
@@ -70,7 +71,8 @@ public open class PersistentSocket<T>(
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
 
-    internal val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    internal val singleThreadDispatcher =
+        Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     /** Mock the socket for testing */
     internal var mockSocket: WebSocket? = null
@@ -173,10 +175,17 @@ public open class PersistentSocket<T>(
      */
     fun disconnect(disconnectReason: DisconnectReason) = safeCall {
         logger.i { "[disconnect]" }
+        _connectionState.value = SocketState.NotConnected
 
         _connectionState.value = when (disconnectReason) {
-            DisconnectReason.ByRequest -> SocketState.DisconnectedByRequest
-            is DisconnectReason.PermanentError -> SocketState.DisconnectedPermanently(disconnectReason.error)
+            DisconnectReason.ByRequest -> {
+                SocketState.DisconnectedByRequest
+            }
+            is DisconnectReason.PermanentError -> {
+                SocketState.DisconnectedPermanently(
+                    disconnectReason.error
+                )
+            }
         }
 
         connectContinuationCompleted = false
@@ -235,7 +244,7 @@ public open class PersistentSocket<T>(
         }
     }
 
-    open fun authenticate() { }
+    open fun authenticate() {}
 
     suspend fun onInternetConnected() {
         val state = connectionState.value
@@ -316,9 +325,11 @@ public open class PersistentSocket<T>(
             // If the connect continuation is not completed, it means the error happened during the connection phase.
             connectContinuationCompleted.not().let { isConnectionPhaseError ->
                 if (isConnectionPhaseError) {
+                    logger.e { "[handleError] Connection phase error: $error" }
                     emitError(error, isConnectionPhaseError = true)
                     resumeConnectionPhaseWithException(error)
                 } else {
+                    logger.e { "[handleError] Emitting error: $error" }
                     emitError(error, isConnectionPhaseError = false)
                 }
             }
@@ -357,12 +368,14 @@ public open class PersistentSocket<T>(
     private fun emitError(error: Throwable, isConnectionPhaseError: Boolean) {
         scope.launch {
             if (isConnectionPhaseError) {
+                logger.e { "[emitError] Emitting connection phase error: $error" }
                 errors.emit(
                     ConnectException(
                         "Failed to establish WebSocket connection. Will try to reconnect. Cause: ${error.message}",
                     ),
                 )
             } else {
+                logger.e { "[emitError] Emitting error: $error" }
                 errors.emit(error)
             }
         }
@@ -411,12 +424,14 @@ public open class PersistentSocket<T>(
     }
 
     internal fun sendHealthCheck() {
-        logger.d { "sending health check" }
-
+        logger.d { "[sendHealthCheck] Sending..." }
         val healthCheckRequest = HealthCheckRequest()
         socket?.send(healthCheckRequest.encodeByteString())
     }
 
+    /**
+     * Check if the socket is in a state that can connect.
+     */
     internal fun canConnect(): Boolean = safeCall(false) {
         val connectionState = connectionState.value
         logger.d { "[canConnect] Current state: $connectionState" }
@@ -435,6 +450,29 @@ public open class PersistentSocket<T>(
         result
     }
 
+    /**
+     * Check if the socket is in a state that can reconnect.
+     */
+    internal fun canReconnect(): Boolean = safeCall(false) {
+        val connectionState = connectionState.value
+        logger.d { "[canReconnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            // Can't reconnect if we are already connected.
+            is SocketState.Connected -> false
+            is SocketState.Connecting -> false
+            is SocketState.DisconnectedPermanently -> false
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> false
+            is SocketState.DisconnectedByRequest -> false
+            is SocketState.NotConnected -> false
+        }
+        logger.d { "[canReconnect] Decision: $result" }
+        result
+    }
+
+    /**
+     * Check if the socket is in a state that can disconnect.
+     */
     internal fun canDisconnect(): Boolean = safeCall(true) {
         val connectionState = connectionState.value
         logger.d { "[canDisconnect] Current state: $connectionState" }
@@ -453,22 +491,27 @@ public open class PersistentSocket<T>(
 
     private val healthMonitor = HealthMonitor(
         object : HealthMonitor.HealthCallback {
-            override suspend fun reconnect() {
-                logger.i { "health monitor triggered a reconnect" }
 
+            override suspend fun reconnect() {
+                logger.i { "[HealthMonitor#reconnect] Health monitor triggered a reconnect" }
                 val state = connectionState.value
-                if (state is SocketState.DisconnectedTemporarily) {
+                logger.i { "[reconnect] Socket state: $state" }
+                if (canReconnect()) {
                     this@PersistentSocket.reconnect()
+                } else {
+                    logger.w { "[HealthMonitor#reconnect] Health monitor triggered a reconnect but state is $state" }
                 }
             }
 
             override fun check() {
+                logger.d { "[HealthMonitor#check]. Started a health check." }
                 val state = connectionState.value
+                logger.d { "[HealthMonitor#check]. Socket state: $state" }
 
-                logger.d { "health monitor ping. Socket state: $state" }
-
-                (state as? SocketState.Connected)?.let {
+                if (state is SocketState.Connected) {
                     sendHealthCheck()
+                } else {
+                    logger.d { "[HealthMonitor#check]. Skipping health check as the socket is not connected." }
                 }
             }
         },
