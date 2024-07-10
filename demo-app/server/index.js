@@ -4,9 +4,8 @@ import { StreamClient } from '@stream-io/node-sdk';
 const app = express();
 const PORT = 3000;
 
-// get the api & secret keys here: https://dashboard.getstream.io/app/1324119/video/overview 
-const apiKey = '-';
-const secret = '-';
+const apiKey = 'r84czeqz8639';
+const secret = 'shnnxx922p73myajya7ryj2mnc9cy3c462fqpxpx7ybgbwnfjexeurr5y3mvpnwb';
 const client = new StreamClient(apiKey, secret);
 
 app.get("/api/auth/create-token", (req, res) => {
