@@ -350,7 +350,9 @@ internal class StreamVideoImpl internal constructor(
                     val socketDecision = connectionModule.coordinatorSocket.canDisconnect()
                     val activeCallDecision = state.hasActiveOrRingingCall()
                     val decision = socketDecision && !activeCallDecision
-                    logger.d { "[lifecycle#stopped] Decision to disconnect: $decision, caused by socket state: $socketDecision, active or ringing call: $activeCallDecision" }
+                    logger.d {
+                        "[lifecycle#stopped] Decision to disconnect: $decision, caused by socket state: $socketDecision, active or ringing call: $activeCallDecision"
+                    }
                     if (decision) {
                         Log.d(
                             "CrashDebug",

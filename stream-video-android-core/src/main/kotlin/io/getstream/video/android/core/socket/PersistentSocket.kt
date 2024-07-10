@@ -47,7 +47,6 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.Executors
-import kotlin.math.log
 
 /**
  * PersistentSocket architecture
@@ -183,7 +182,7 @@ public open class PersistentSocket<T>(
             }
             is DisconnectReason.PermanentError -> {
                 SocketState.DisconnectedPermanently(
-                    disconnectReason.error
+                    disconnectReason.error,
                 )
             }
         }
