@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
@@ -276,6 +277,7 @@ public class Call(
         response.onSuccess {
             state.updateFromResponse(it)
             if (ring) {
+                Log.d("CrashDebug", "[call.create] Will call addRingingCall")
                 client.state.addRingingCall(this, RingingState.Outgoing())
             }
         }

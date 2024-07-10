@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.util.Log
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
 import io.getstream.log.taggedLogger
@@ -314,6 +315,10 @@ internal class StreamVideoImpl internal constructor(
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
         if (connectionModule.coordinatorSocket.canConnect()) {
+            Log.d(
+                "CrashDebug",
+                "[StreamVideoImpl.connectIfNotAlreadyConnected] Will call socket connect",
+            )
             connectionModule.coordinatorSocket.connect()
         }
     }
@@ -326,6 +331,10 @@ internal class StreamVideoImpl internal constructor(
         object : LifecycleHandler {
             override fun started() {
                 scope.launch {
+                    Log.d(
+                        "CrashDebug",
+                        "[lifecycleObserver.started] Socket.connectionState != NotConnected. Will call socket.connect",
+                    )
                     connectIfNotAlreadyConnected()
                 }
             }
@@ -335,6 +344,10 @@ internal class StreamVideoImpl internal constructor(
                     // We should only disconnect if we were previously connected
                     // Also don't disconnect the socket if we are in an active call
                     if (connectionModule.coordinatorSocket.canDisconnect() && !state.hasActiveOrRingingCall()) {
+                        Log.d(
+                            "CrashDebug",
+                            "[lifecycleObserver.stopped] Socket.connectionState != NotConnected && activeCall == null. Will call socket.disconnect",
+                        )
                         connectionModule.coordinatorSocket.disconnect(
                             PersistentSocket.DisconnectReason.ByRequest,
                         )

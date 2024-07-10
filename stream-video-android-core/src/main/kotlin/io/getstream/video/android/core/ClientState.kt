@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
@@ -139,6 +140,7 @@ class ClientState(client: StreamVideo) {
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
         if (ringingState is RingingState.Outgoing) {
+            Log.d("CrashDebug", "[addRingingCall] Will start fg service")
             maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
         }
 

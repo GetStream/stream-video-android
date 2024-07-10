@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.socket
 
+import android.util.Log
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -123,6 +124,7 @@ public open class PersistentSocket<T>(
 
         suspendCancellableCoroutine { continuation ->
             logger.i { "[connect]" }
+            Log.d("CrashDebug", "[PersistentSocket.connect] Will createSocket() and authenticate()")
             connectContinuation = continuation
 
             _connectionState.value = SocketState.Connecting
@@ -271,11 +273,13 @@ public open class PersistentSocket<T>(
             .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
             .build()
 
+        Log.d("CrashDebug", "[PersistentSocket.createSocket] Will return newWebSocket")
         return httpClient.newWebSocket(request, this)
     }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         logger.d { "[onOpen] response: $response" }
+        Log.d("CrashDebug", "[PersistentSocket.onOpen]")
     }
 
     protected fun ackHealthMonitor() {
