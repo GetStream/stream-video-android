@@ -24,23 +24,44 @@ import retrofit2.create
 import retrofit2.http.GET
 import retrofit2.http.Query
 
+//interface StreamService {
+//    @GET("api/auth/create-token")
+//    suspend fun getAuthData(
+//        @Query("environment") environment: String,
+//        @Query("user_id") userId: String?,
+//    ): GetAuthDataResponse
+//
+//    companion object {
+//        private const val BASE_URL = "https://pronto.getstream.io/"
+//
+//        private val json = Json { ignoreUnknownKeys = true }
+//
+//        private val retrofit = Retrofit.Builder()
+//            .baseUrl(BASE_URL)
+//            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+//            .build()
+//
+//        val instance = retrofit.create<StreamService>()
+//    }
+//}
+
 interface StreamService {
-    @GET("api/auth/create-token")
-    suspend fun getAuthData(
-        @Query("environment") environment: String,
-        @Query("user_id") userId: String?,
-    ): GetAuthDataResponse
+  @GET("api/auth/create-token")
+  suspend fun getAuthData(
+    @Query("environment") environment: String,
+    @Query("user_id") userId: String?,
+  ): GetAuthDataResponse
 
-    companion object {
-        private const val BASE_URL = "https://pronto.getstream.io/"
+  companion object {
+    private const val BASE_URL = "http://192.168.178.21:3000/"
 
-        private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json { ignoreUnknownKeys = true }
 
-        private val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
+    private val retrofit = Retrofit.Builder()
+      .baseUrl(BASE_URL)
+      .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+      .build()
 
-        val instance = retrofit.create<StreamService>()
-    }
+    val instance = retrofit.create<StreamService>()
+  }
 }

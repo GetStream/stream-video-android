@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@stream-io/node-sdk": "^0.3.0",
+    "express": "^4.19.2"
+  }
+}
