@@ -321,10 +321,6 @@ internal class StreamVideoImpl internal constructor(
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
         if (connectionModule.coordinatorSocket.canConnect()) {
-            Log.d(
-                "CrashDebug",
-                "[StreamVideoImpl.connectIfNotAlreadyConnected] Will call socket connect",
-            )
             connectionModule.coordinatorSocket.connect()
         }
     }
@@ -337,10 +333,6 @@ internal class StreamVideoImpl internal constructor(
         object : LifecycleHandler {
             override fun started() {
                 scope.launch(CoroutineName("lifecycleObserver.started")) {
-                    Log.d(
-                        "CrashDebug",
-                        "[lifecycleObserver.started] Socket.connectionState != NotConnected. Will call socket.connect",
-                    )
                     connectIfNotAlreadyConnected()
                 }
             }
@@ -356,10 +348,6 @@ internal class StreamVideoImpl internal constructor(
                         "[lifecycle#stopped] Decision to disconnect: $decision, caused by socket state: $socketDecision, active or ringing call: $activeCallDecision"
                     }
                     if (decision) {
-                        Log.d(
-                            "CrashDebug",
-                            "[lifecycleObserver.stopped] Socket.connectionState != NotConnected && activeCall == null. Will call socket.disconnect",
-                        )
                         connectionModule.coordinatorSocket.disconnect(
                             PersistentSocket.DisconnectReason.ByRequest,
                         )

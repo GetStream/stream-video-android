@@ -284,7 +284,6 @@ internal class CallService : Service() {
             stopService()
             return START_REDELIVER_INTENT
         } else {
-            Log.d("CrashDebug", "[CallService.onStartCommand] Will call initializeCallAndSocket()")
             initializeCallAndSocket(streamVideo!!, intentCallId!!)
 
             if (trigger == TRIGGER_INCOMING_CALL) {
@@ -342,10 +341,6 @@ internal class CallService : Service() {
 
         // Monitor coordinator socket
         serviceScope.launch {
-            Log.d(
-                "CrashDebug",
-                "[CallService.initializeCallAndSocket] Will call connectIfNotAlreadyConnected()",
-            )
             streamVideo.connectIfNotAlreadyConnected()
         }
     }
@@ -357,7 +352,6 @@ internal class CallService : Service() {
     ) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            Log.d("CrashDebug", "[CallService.updateRingingCall] Will call addRingingCall")
             streamVideo.state.addRingingCall(call, ringingState)
         }
     }

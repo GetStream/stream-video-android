@@ -277,7 +277,6 @@ public class Call(
         response.onSuccess {
             state.updateFromResponse(it)
             if (ring) {
-                Log.d("CrashDebug", "[call.create] Will call addRingingCall")
                 client.state.addRingingCall(this, RingingState.Outgoing())
             }
         }

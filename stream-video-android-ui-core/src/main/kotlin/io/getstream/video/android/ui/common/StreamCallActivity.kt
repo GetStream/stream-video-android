@@ -282,10 +282,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
                 logger.v { "[onIntentAction] #ringing; Action OUTGOING_CALL, ${call.cid}" }
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
-                Log.d(
-                    "CrashDebug",
-                    "[StreamCallActivity.onIntentAction] Will call StreamCallActivity.create()",
-                )
                 create(
                     call,
                     members = members,
@@ -301,10 +297,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
                 }
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 // If the call does not exist it will be created.
-                Log.d(
-                    "CrashDebug",
-                    "[StreamCallActivity.onIntentAction] Will call StreamCallActivity.create()",
-                )
                 create(
                     call,
                     members = members,
@@ -484,7 +476,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             val instance = StreamVideo.instance()
-            Log.d("CrashDebug", "[StreamCallActivity.create] Will call call.create")
             val result = call.create(
                 // List of all users, containing the caller also
                 memberIds = members + instance.userId,

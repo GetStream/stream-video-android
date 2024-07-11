@@ -125,7 +125,6 @@ public open class PersistentSocket<T>(
 
         suspendCancellableCoroutine { continuation ->
             logger.i { "[connect]" }
-            Log.d("CrashDebug", "[PersistentSocket.connect] Will createSocket() and authenticate()")
             connectContinuation = continuation
 
             _connectionState.value = SocketState.Connecting
@@ -281,13 +280,11 @@ public open class PersistentSocket<T>(
             .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
             .build()
 
-        Log.d("CrashDebug", "[PersistentSocket.createSocket] Will return newWebSocket")
         return httpClient.newWebSocket(request, this)
     }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         logger.d { "[onOpen] response: $response" }
-        Log.d("CrashDebug", "[PersistentSocket.onOpen]")
     }
 
     protected fun ackHealthMonitor() {

@@ -140,7 +140,6 @@ class ClientState(client: StreamVideo) {
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
         if (ringingState is RingingState.Outgoing) {
-            Log.d("CrashDebug", "[addRingingCall] Will start fg service")
             maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
         }
 
