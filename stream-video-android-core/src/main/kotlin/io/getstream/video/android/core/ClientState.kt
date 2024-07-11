@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger

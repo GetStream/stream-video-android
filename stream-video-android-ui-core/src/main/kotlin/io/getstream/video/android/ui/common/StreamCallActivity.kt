@@ -23,7 +23,6 @@ import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.util.Log
 import android.util.Rational
 import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper

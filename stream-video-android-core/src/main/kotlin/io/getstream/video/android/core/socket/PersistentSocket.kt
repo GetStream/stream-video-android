@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.socket
 
-import android.util.Log
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
