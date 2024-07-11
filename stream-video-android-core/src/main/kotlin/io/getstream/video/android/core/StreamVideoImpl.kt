@@ -160,11 +160,15 @@ internal class StreamVideoImpl internal constructor(
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
 
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
-        val coroutineName = coroutineContext[CoroutineName]?.name ?: "unknown"
-        logger.e(exception) { "[StreamVideo#Scope] Uncaught exception in coroutine $coroutineName: $exception" }
-    }
-    internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob() + coroutineExceptionHandler)
+    private val coroutineExceptionHandler =
+        CoroutineExceptionHandler { coroutineContext, exception ->
+            val coroutineName = coroutineContext[CoroutineName]?.name ?: "unknown"
+            logger.e(exception) {
+                "[StreamVideo#Scope] Uncaught exception in coroutine $coroutineName: $exception"
+            }
+        }
+    internal val scope =
+        CoroutineScope(_scope.coroutineContext + SupervisorJob() + coroutineExceptionHandler)
 
     /** if true we fail fast on errors instead of logging them */
     var developmentMode = true
@@ -1022,7 +1026,9 @@ internal class StreamVideoImpl internal constructor(
      * @see StreamVideo.logOut
      */
     override fun logOut() {
-        scope.launch(CoroutineName("logOut")) { streamNotificationManager.deviceTokenStorage.clear() }
+        scope.launch(
+            CoroutineName("logOut"),
+        ) { streamNotificationManager.deviceTokenStorage.clear() }
     }
 
     override fun call(type: String, id: String): Call {

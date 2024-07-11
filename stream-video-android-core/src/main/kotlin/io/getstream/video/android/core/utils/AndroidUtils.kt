@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-@file:OptIn(
-    ExperimentalContracts::class,
-    ExperimentalContracts::class,
-    ExperimentalContracts::class,
-)
+@file:OptIn(ExperimentalContracts::class)
 
 package io.getstream.video.android.core.utils
 
@@ -33,6 +29,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import io.getstream.log.StreamLog
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -99,7 +96,7 @@ internal fun <T> combineComparators(vararg comparators: Comparator<T>): Comparat
  *
  * @param block the suspending function to call.
  */
-suspend fun safeSuspendingCall(block: suspend () -> Unit) {
+internal suspend fun safeSuspendingCall(block: suspend () -> Unit) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -107,7 +104,7 @@ suspend fun safeSuspendingCall(block: suspend () -> Unit) {
         block()
     } catch (e: Exception) {
         // Handle or log the exception here
-        println("Exception occurred: ${e.message}")
+        StreamLog.e("SafeSuspendingCall", e) { "Exception occurred: ${e.message}" }
     }
 }
 
@@ -116,7 +113,7 @@ suspend fun safeSuspendingCall(block: suspend () -> Unit) {
  *
  * @param block the function to call.
  */
-fun safeCall(block: () -> Unit) {
+internal inline fun safeCall(block: () -> Unit) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -124,7 +121,7 @@ fun safeCall(block: () -> Unit) {
         block()
     } catch (e: Exception) {
         // Handle or log the exception here
-        println("Exception occurred: ${e.message}")
+        StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
     }
 }
 
@@ -134,7 +131,7 @@ fun safeCall(block: () -> Unit) {
  * @param default the default value to return in case of an exception.
  * @param block the suspending function to call.
  */
-suspend fun <T> safeSuspendingCall(default: T, block: suspend () -> T): T {
+internal suspend fun <T> safeSuspendingCall(default: T, block: suspend () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -142,7 +139,7 @@ suspend fun <T> safeSuspendingCall(default: T, block: suspend () -> T): T {
         block()
     } catch (e: Exception) {
         // Handle or log the exception here
-        println("Exception occurred: ${e.message}")
+        StreamLog.e("SafeSuspendingCall", e) { "Exception occurred: ${e.message}" }
         default
     }
 }
@@ -153,7 +150,7 @@ suspend fun <T> safeSuspendingCall(default: T, block: suspend () -> T): T {
  * @param default the default value to return in case of an exception.
  * @param block the function to call.
  */
-fun <T> safeCall(default: T, block: () -> T): T {
+inline fun <T> safeCall(default: T, block: () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -161,7 +158,7 @@ fun <T> safeCall(default: T, block: () -> T): T {
         block()
     } catch (e: Exception) {
         // Handle or log the exception here
-        println("Exception occurred: ${e.message}")
+        StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
         default
     }
 }

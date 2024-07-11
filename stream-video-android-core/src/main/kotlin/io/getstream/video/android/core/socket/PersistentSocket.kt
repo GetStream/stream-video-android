@@ -19,6 +19,7 @@ package io.getstream.video.android.core.socket
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import io.getstream.video.android.core.utils.safeCall
@@ -312,14 +313,23 @@ public open class PersistentSocket<T>(
         }
         val error = receivedError
         val permanentError = isPermanentError(error)
+        val isTokenAuthError = error is ErrorResponse && error.code == VideoErrorCode.TOKEN_EXPIRED.code
         if (permanentError) {
             logger.e { "[handleError] Permanent error: $error" }
-
-            _connectionState.value = SocketState.DisconnectedPermanently(error)
+            _connectionState.value = (error as? ErrorResponse)?.let {
+                logger.e { "[handleError] ErrorResponse: $it" }
+                if (it.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                    // token expired, we should reconnect
+                    logger.e { "[handleError] Token expired, reconnecting" }
+                    SocketState.DisconnectedTemporarily(it)
+                } else {
+                    null
+                }
+            } ?: SocketState.DisconnectedPermanently(error)
 
             // If the connect continuation is not completed, it means the error happened during the connection phase.
             connectContinuationCompleted.not().let { isConnectionPhaseError ->
-                if (isConnectionPhaseError) {
+                if (isConnectionPhaseError && !isTokenAuthError) {
                     logger.e { "[handleError] Connection phase error: $error" }
                     emitError(error, isConnectionPhaseError = true)
                     resumeConnectionPhaseWithException(error)
