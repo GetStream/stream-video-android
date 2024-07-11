@@ -266,16 +266,14 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun addRingingCall (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/RingingState;)V
 	public final fun getActiveCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getLogger ()Lio/getstream/log/TaggedLogger;
 	public final fun getRingingCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
+	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
 	public final fun removeRingingCall ()V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
-}
-
-public final class io/getstream/video/android/core/ClientStateKt {
-	public static final fun formatAsTitle (Lio/getstream/video/android/core/ConnectionState;Landroid/content/Context;)Ljava/lang/String;
 }
 
 public abstract interface class io/getstream/video/android/core/ConnectionState {
@@ -4460,6 +4458,7 @@ public final class io/getstream/video/android/core/sounds/Sounds {
 }
 
 public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
+	public static final fun safeCall (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static final fun shouldShowRequestPermissionsRationale (Landroid/app/Activity;[Ljava/lang/String;)Z
 }
 

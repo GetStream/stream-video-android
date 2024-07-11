@@ -19,8 +19,11 @@ package io.getstream.video.android.core.socket
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.internal.HealthMonitor
+import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -38,7 +41,6 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
-import java.io.EOFException
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.ConnectException
@@ -68,7 +70,8 @@ public open class PersistentSocket<T>(
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
 
-    internal val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    internal val singleThreadDispatcher =
+        Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     /** Mock the socket for testing */
     internal var mockSocket: WebSocket? = null
@@ -114,13 +117,13 @@ public open class PersistentSocket<T>(
      */
     open suspend fun connect(
         invocation: (CancellableContinuation<T>) -> Unit = {},
-    ): T? {
+    ): T? = safeSuspendingCall(null) {
         if (destroyed) {
             logger.d { "[connect] Can't connect socket - it was already destroyed" }
-            return null
+            null
         }
 
-        return suspendCancellableCoroutine { continuation ->
+        suspendCancellableCoroutine { continuation ->
             logger.i { "[connect]" }
             connectContinuation = continuation
 
@@ -168,12 +171,19 @@ public open class PersistentSocket<T>(
     /**
      * Disconnect the socket
      */
-    fun disconnect(disconnectReason: DisconnectReason) {
+    fun disconnect(disconnectReason: DisconnectReason) = safeCall {
         logger.i { "[disconnect]" }
+        _connectionState.value = SocketState.NotConnected
 
         _connectionState.value = when (disconnectReason) {
-            DisconnectReason.ByRequest -> SocketState.DisconnectedByRequest
-            is DisconnectReason.PermanentError -> SocketState.DisconnectedPermanently(disconnectReason.error)
+            DisconnectReason.ByRequest -> {
+                SocketState.DisconnectedByRequest
+            }
+            is DisconnectReason.PermanentError -> {
+                SocketState.DisconnectedPermanently(
+                    disconnectReason.error,
+                )
+            }
         }
 
         connectContinuationCompleted = false
@@ -232,7 +242,7 @@ public open class PersistentSocket<T>(
         }
     }
 
-    open fun authenticate() { }
+    open fun authenticate() {}
 
     suspend fun onInternetConnected() {
         val state = connectionState.value
@@ -301,30 +311,30 @@ public open class PersistentSocket<T>(
             logger.d { "[handleError] Ignoring socket error - already closed $receivedError" }
             return
         }
-        val error = receivedError.let {
-            // TODO Alex: This is a bad assumption, but necessary, needs to be checked against the backend
-            if (it is EOFException) {
-                ErrorResponse(
-                    40,
-                    "Unknown error trying to refresh token and reconnect.",
-                    statusCode = 401,
-                )
-            } else {
-                it
-            }
-        }
+        val error = receivedError
         val permanentError = isPermanentError(error)
+        val isTokenAuthError = error is ErrorResponse && error.code == VideoErrorCode.TOKEN_EXPIRED.code
         if (permanentError) {
             logger.e { "[handleError] Permanent error: $error" }
-
-            _connectionState.value = SocketState.DisconnectedPermanently(error)
+            _connectionState.value = (error as? ErrorResponse)?.let {
+                logger.e { "[handleError] ErrorResponse: $it" }
+                if (it.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                    // token expired, we should reconnect
+                    logger.e { "[handleError] Token expired, reconnecting" }
+                    SocketState.DisconnectedTemporarily(it)
+                } else {
+                    null
+                }
+            } ?: SocketState.DisconnectedPermanently(error)
 
             // If the connect continuation is not completed, it means the error happened during the connection phase.
             connectContinuationCompleted.not().let { isConnectionPhaseError ->
-                if (isConnectionPhaseError) {
+                if (isConnectionPhaseError && !isTokenAuthError) {
+                    logger.e { "[handleError] Connection phase error: $error" }
                     emitError(error, isConnectionPhaseError = true)
                     resumeConnectionPhaseWithException(error)
                 } else {
+                    logger.e { "[handleError] Emitting error: $error" }
                     emitError(error, isConnectionPhaseError = false)
                 }
             }
@@ -332,7 +342,9 @@ public open class PersistentSocket<T>(
             logger.w { "[handleError] Temporary error: $error" }
 
             _connectionState.value = SocketState.DisconnectedTemporarily(error)
-            scope.launch { reconnect(reconnectTimeout) }
+            scope.launch {
+                reconnect(reconnectTimeout)
+            }
         }
     }
 
@@ -361,12 +373,14 @@ public open class PersistentSocket<T>(
     private fun emitError(error: Throwable, isConnectionPhaseError: Boolean) {
         scope.launch {
             if (isConnectionPhaseError) {
+                logger.e { "[emitError] Emitting connection phase error: $error" }
                 errors.emit(
                     ConnectException(
                         "Failed to establish WebSocket connection. Will try to reconnect. Cause: ${error.message}",
                     ),
                 )
             } else {
+                logger.e { "[emitError] Emitting error: $error" }
                 errors.emit(error)
             }
         }
@@ -415,30 +429,94 @@ public open class PersistentSocket<T>(
     }
 
     internal fun sendHealthCheck() {
-        logger.d { "sending health check" }
-
+        logger.d { "[sendHealthCheck] Sending..." }
         val healthCheckRequest = HealthCheckRequest()
         socket?.send(healthCheckRequest.encodeByteString())
     }
 
+    /**
+     * Check if the socket is in a state that can connect.
+     */
+    internal fun canConnect(): Boolean = safeCall(false) {
+        val connectionState = connectionState.value
+        logger.d { "[canConnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            // Can't connect if we are already connected.
+            is SocketState.Connected -> false
+            is SocketState.Connecting -> false
+            // We can connect if we are disconnected.
+            is SocketState.DisconnectedPermanently -> true
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> true
+            is SocketState.DisconnectedByRequest -> true
+            is SocketState.NotConnected -> true
+        }
+        logger.d { "[canConnect] Decision: $result" }
+        result
+    }
+
+    /**
+     * Check if the socket is in a state that can reconnect.
+     */
+    internal fun canReconnect(): Boolean = safeCall(false) {
+        val connectionState = connectionState.value
+        logger.d { "[canReconnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            // Can't reconnect if we are already connected.
+            is SocketState.Connected -> false
+            is SocketState.Connecting -> false
+            is SocketState.DisconnectedPermanently -> false
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> false
+            is SocketState.DisconnectedByRequest -> false
+            is SocketState.NotConnected -> false
+        }
+        logger.d { "[canReconnect] Decision: $result" }
+        result
+    }
+
+    /**
+     * Check if the socket is in a state that can disconnect.
+     */
+    internal fun canDisconnect(): Boolean = safeCall(true) {
+        val connectionState = connectionState.value
+        logger.d { "[canDisconnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            is SocketState.Connected -> true
+            is SocketState.Connecting -> true
+            is SocketState.DisconnectedPermanently -> false
+            is SocketState.DisconnectedByRequest -> false
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> false
+            else -> true
+        }
+        logger.d { "[canDisconnect] Decision: $result" }
+        result
+    }
+
     private val healthMonitor = HealthMonitor(
         object : HealthMonitor.HealthCallback {
-            override suspend fun reconnect() {
-                logger.i { "health monitor triggered a reconnect" }
 
+            override suspend fun reconnect() {
+                logger.i { "[HealthMonitor#reconnect] Health monitor triggered a reconnect" }
                 val state = connectionState.value
-                if (state is SocketState.DisconnectedTemporarily) {
+                logger.i { "[reconnect] Socket state: $state" }
+                if (canReconnect()) {
                     this@PersistentSocket.reconnect()
+                } else {
+                    logger.w { "[HealthMonitor#reconnect] Health monitor triggered a reconnect but state is $state" }
                 }
             }
 
             override fun check() {
+                logger.d { "[HealthMonitor#check]. Started a health check." }
                 val state = connectionState.value
+                logger.d { "[HealthMonitor#check]. Socket state: $state" }
 
-                logger.d { "health monitor ping. Socket state: $state" }
-
-                (state as? SocketState.Connected)?.let {
+                if (state is SocketState.Connected) {
                     sendHealthCheck()
+                } else {
+                    logger.d { "[HealthMonitor#check]. Skipping health check as the socket is not connected." }
                 }
             }
         },

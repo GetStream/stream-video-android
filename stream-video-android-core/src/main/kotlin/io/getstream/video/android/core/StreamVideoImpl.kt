@@ -54,12 +54,16 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
+import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeSuspendingCall
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -156,7 +160,15 @@ internal class StreamVideoImpl internal constructor(
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
 
-    internal val scope = CoroutineScope(_scope.coroutineContext + SupervisorJob())
+    private val coroutineExceptionHandler =
+        CoroutineExceptionHandler { coroutineContext, exception ->
+            val coroutineName = coroutineContext[CoroutineName]?.name ?: "unknown"
+            logger.e(exception) {
+                "[StreamVideo#Scope] Uncaught exception in coroutine $coroutineName: $exception"
+            }
+        }
+    internal val scope =
+        CoroutineScope(_scope.coroutineContext + SupervisorJob() + coroutineExceptionHandler)
 
     /** if true we fail fast on errors instead of logging them */
     var developmentMode = true
@@ -310,8 +322,8 @@ internal class StreamVideoImpl internal constructor(
         return sub
     }
 
-    override suspend fun connectIfNotAlreadyConnected() {
-        if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && connectionModule.coordinatorSocket.connectionState.value != SocketState.Connecting) {
+    override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
+        if (connectionModule.coordinatorSocket.canConnect()) {
             connectionModule.coordinatorSocket.connect()
         }
     }
@@ -323,21 +335,26 @@ internal class StreamVideoImpl internal constructor(
         lifecycle,
         object : LifecycleHandler {
             override fun started() {
-                scope.launch {
-                    // We should only connect if we were previously connected
-                    if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected) {
-                        connectionModule.coordinatorSocket.connect()
-                    }
+                scope.launch(CoroutineName("lifecycleObserver.started")) {
+                    connectIfNotAlreadyConnected()
                 }
             }
 
             override fun stopped() {
-                // We should only disconnect if we were previously connected
-                // Also don't disconnect the socket if we are in an active call
-                if (connectionModule.coordinatorSocket.connectionState.value != SocketState.NotConnected && state.activeCall.value == null) {
-                    connectionModule.coordinatorSocket.disconnect(
-                        PersistentSocket.DisconnectReason.ByRequest,
-                    )
+                safeCall {
+                    // We should only disconnect if we were previously connected
+                    // Also don't disconnect the socket if we are in an active call
+                    val socketDecision = connectionModule.coordinatorSocket.canDisconnect()
+                    val activeCallDecision = state.hasActiveOrRingingCall()
+                    val decision = socketDecision && !activeCallDecision
+                    logger.d {
+                        "[lifecycle#stopped] Decision to disconnect: $decision, caused by socket state: $socketDecision, active or ringing call: $activeCallDecision"
+                    }
+                    if (decision) {
+                        connectionModule.coordinatorSocket.disconnect(
+                            PersistentSocket.DisconnectReason.ByRequest,
+                        )
+                    }
                 }
             }
         },
@@ -345,17 +362,17 @@ internal class StreamVideoImpl internal constructor(
 
     init {
 
-        scope.launch(Dispatchers.Main.immediate) {
+        scope.launch(Dispatchers.Main.immediate + CoroutineName("init#lifecycleObserver.observe")) {
             lifecycleObserver.observe()
         }
 
         // listen to socket events and errors
-        scope.launch {
+        scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
             connectionModule.coordinatorSocket.events.collect {
                 fireEvent(it)
             }
         }
-        scope.launch {
+        scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
             connectionModule.coordinatorSocket.errors.collect { throwable ->
                 if (throwable is ConnectException) {
                     state.handleError(throwable)
@@ -367,7 +384,7 @@ internal class StreamVideoImpl internal constructor(
             }
         }
 
-        scope.launch {
+        scope.launch(CoroutineName("init#coordinatorSocket.connectionState.collect")) {
             connectionModule.coordinatorSocket.connectionState.collect { it ->
                 // If the socket is reconnected then we have a new connection ID.
                 // We need to re-watch every watched call with the new connection ID
@@ -1009,7 +1026,9 @@ internal class StreamVideoImpl internal constructor(
      * @see StreamVideo.logOut
      */
     override fun logOut() {
-        scope.launch { streamNotificationManager.deviceTokenStorage.clear() }
+        scope.launch(
+            CoroutineName("logOut"),
+        ) { streamNotificationManager.deviceTokenStorage.clear() }
     }
 
     override fun call(type: String, id: String): Call {

@@ -426,9 +426,13 @@ public class Call(
         }
         timer.split("rtc session init")
 
-        session?.connect()
-
-        timer.split("rtc connect completed")
+        try {
+            session?.connect()
+        } catch (e: Exception) {
+            return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
+        } finally {
+            timer.split("rtc connect completed")
+        }
 
         scope.launch {
             // wait for the first stream to be added
