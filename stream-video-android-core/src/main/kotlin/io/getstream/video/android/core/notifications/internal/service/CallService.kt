@@ -178,6 +178,12 @@ internal class CallService : Service() {
         logger.i { "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger" }
 
         val started = if (intentCallId != null && streamVideo != null && trigger != null) {
+            // Promote early to foreground service
+            maybeCallStartForeground(
+                videoClient = streamVideo,
+                notificationId = INCOMING_CALL_NOTIFICATION_ID,
+            )
+
             val type = intentCallId.type
             val id = intentCallId.id
             val call = streamVideo.call(type, id)
@@ -294,6 +300,17 @@ internal class CallService : Service() {
             observeCallState(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
+        }
+    }
+
+    private fun maybeCallStartForeground(videoClient: StreamVideoImpl, notificationId: Int) {
+        val hasActiveCall = videoClient.state.activeCall.value != null
+
+        logger.d { "[maybeCallStartForeground] hasActiveCall: $hasActiveCall" }
+
+        if (!hasActiveCall) {
+            startForeground(notificationId, videoClient.getTemporaryNotification())
+            logger.d { "[maybeCallStartForeground] Called startForeground() early." }
         }
     }
 

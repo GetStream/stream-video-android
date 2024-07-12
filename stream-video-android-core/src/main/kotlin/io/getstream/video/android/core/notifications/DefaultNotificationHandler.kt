@@ -146,6 +146,27 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    override fun getTemporaryNotification(): Notification? {
+        val channelId = application.getString(
+            R.string.stream_video_ongoing_call_notification_channel_id,
+        )
+
+        maybeCreateChannel(channelId, application) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                description =
+                    application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
+            }
+        }
+
+        return getNotification {
+            setContentTitle("Setting up call")
+            setContentText("Setting up call...")
+            setChannelId(channelId)
+            setCategory(NotificationCompat.CATEGORY_CALL)
+            setOngoing(true)
+        }
+    }
+
     private fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
