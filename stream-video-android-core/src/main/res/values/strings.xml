@@ -37,4 +37,9 @@
     <string name="stream_video_ongoing_call_notification_channel_description">Ongoing call notifications</string>
     <string name="stream_video_ongoing_call_notification_title">Call in progress</string>
     <string name="stream_video_ongoing_call_notification_description">There is a call in progress, tap to go back to the call.</string>
+    <string name="stream_video_call_setup_notification_channel_id">call_setup</string>
+    <string name="stream_video_call_setup_notification_channel_title">Call Setup Temporary Notifications</string>
+    <string name="stream_video_call_setup_notification_channel_description">Temporary notifications used while setting up calls.</string>
+    <string name="stream_video_call_setup_notification_title">Setting up call</string>
+    <string name="stream_video_call_setup_notification_description">Please wait while we set up your call.</string>
 </resources>
