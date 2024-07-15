@@ -33,7 +33,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
         callDisplayName: String,
         shouldHaveContentIntent: Boolean = true,
     ): Notification?
-    fun getTemporaryNotification(): Notification?
+    fun getCallSetupNotification(): Notification?
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"

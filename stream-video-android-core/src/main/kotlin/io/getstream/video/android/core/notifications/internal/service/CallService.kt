@@ -179,7 +179,7 @@ internal class CallService : Service() {
 
         val started = if (intentCallId != null && streamVideo != null && trigger != null) {
             // Promote early to foreground service
-            maybeCallStartForeground(
+            maybePromoteToForegroundService(
                 videoClient = streamVideo,
                 notificationId = intentCallId.hashCode(),
             )
@@ -303,14 +303,14 @@ internal class CallService : Service() {
         }
     }
 
-    private fun maybeCallStartForeground(videoClient: StreamVideoImpl, notificationId: Int) {
+    private fun maybePromoteToForegroundService(videoClient: StreamVideoImpl, notificationId: Int) {
         val hasActiveCall = videoClient.state.activeCall.value != null
 
-        logger.d { "[maybeCallStartForeground] hasActiveCall: $hasActiveCall" }
+        logger.d { "[maybePromoteToForegroundService] hasActiveCall: $hasActiveCall" }
 
         if (!hasActiveCall) {
-            startForeground(notificationId, videoClient.getTemporaryNotification())
-            logger.d { "[maybeCallStartForeground] Called startForeground() early." }
+            startForeground(notificationId, videoClient.getCallSetupNotification())
+            logger.d { "[maybePromoteToForegroundService] Called startForeground() early." }
         }
     }
 
