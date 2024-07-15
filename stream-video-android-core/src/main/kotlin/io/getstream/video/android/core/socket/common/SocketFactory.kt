@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.socket.common
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideo.Companion.buildSdkTrackingHeaders
 import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.model.User
@@ -27,16 +28,14 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 internal class SocketFactory(
-    private val parser: VideoParser,
-    private val tokenManager: TokenManager,
-    private val httpClient: OkHttpClient = OkHttpClient(),
+    private val parser: VideoParser, private val httpClient: OkHttpClient = OkHttpClient(),
 ) {
-    private val logger by taggedLogger("Chat:SocketFactory")
+    private val logger by taggedLogger("Video:SocketFactory")
 
     @Throws(UnsupportedEncodingException::class)
     fun createSocket(connectionConf: ConnectionConf): StreamWebSocket {
         val request = buildRequest(connectionConf)
-        logger.i { "new web socket: ${request.url}" }
+        logger.i { "[createSocket] new web socket: ${request.url}" }
         return StreamWebSocket(parser) { httpClient.newWebSocket(request, it) }
     }
 
@@ -44,59 +43,10 @@ internal class SocketFactory(
     private fun buildRequest(connectionConf: ConnectionConf): Request =
         Request.Builder()
             .url(connectionConf.endpoint)
-            // .url(buildUrl(connectionConf))
+            .addHeader("Connection", "Upgrade")
+            .addHeader("Upgrade", "websocket")
+            .addHeader("X-Stream-Client", buildSdkTrackingHeaders())
             .build()
-
-    @Suppress("TooGenericExceptionCaught")
-    @Throws(UnsupportedEncodingException::class)
-    private fun buildUrl(connectionConf: ConnectionConf): String {
-        var json = buildUserDetailJson(connectionConf)
-        return try {
-            json = URLEncoder.encode(json, StandardCharsets.UTF_8.name())
-            val baseWsUrl = "${connectionConf.endpoint}connect?json=$json&api_key=${connectionConf.apiKey}"
-            when (connectionConf) {
-                is ConnectionConf.AnonymousConnectionConf -> "$baseWsUrl&stream-auth-type=anonymous"
-                is ConnectionConf.UserConnectionConf -> {
-                    val token = tokenManager.getToken()
-                        .takeUnless { connectionConf.isReconnection }
-                        ?: tokenManager.loadSync()
-                    "$baseWsUrl&authorization=$token&stream-auth-type=jwt"
-                }
-            }
-        } catch (_: UnsupportedEncodingException) {
-            throw UnsupportedEncodingException("Unable to encode user details json: $json")
-        }
-    }
-
-    private fun buildUserDetailJson(connectionConf: ConnectionConf): String {
-        val data = mapOf(
-            "user_details" to connectionConf.reduceUserDetails(),
-            "user_id" to connectionConf.id,
-            "server_determines_connection_id" to true,
-            "X-Stream-Client" to buildSdkTrackingHeaders(),
-        )
-        return parser.toJson(data)
-    }
-
-    /**
-     * Converts the [User] object to a map of properties updated while connecting the user.
-     * [User.name] and [User.image] will only be included if they are not blank.
-     *
-     * @return A map of User's properties to update.
-     */
-    private fun ConnectionConf.reduceUserDetails(): Map<String, Any> = mutableMapOf<String, Any>(
-        "id" to id,
-    )
-        .apply {
-            if (!isReconnection) {
-                try {
-                    if (user.role.isNullOrBlank()) put("role", user.role!!)
-                    if (user.name.isNullOrBlank()) put("name", user.name!!)
-                } catch (e: Throwable) {
-                    logger.e(e) { "Error while reducing user details" }
-                }
-            }
-        }
 
     internal sealed class ConnectionConf {
         var isReconnection: Boolean = false
@@ -121,7 +71,7 @@ internal class SocketFactory(
 
         internal val id: String
             get() = when (this) {
-                is AnonymousConnectionConf -> user.id.replace("!", "")
+                is AnonymousConnectionConf -> "!anon"
                 is UserConnectionConf -> user.id
             }
     }

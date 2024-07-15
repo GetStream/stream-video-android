@@ -34,12 +34,21 @@ import io.getstream.video.android.core.socket.common.token.CacheableTokenProvide
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.User.Companion.isAnonymous
+import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
-import java.util.concurrent.Flow
 
 /**
  * PersistentSocket architecture
@@ -64,36 +73,54 @@ public open class PersistentSocket(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
-) : SocketListener() {
+) : SocketListener<VideoEvent>() {
+    companion object {
+        internal const val DEFAULT_COORDINATOR_SOCKET_TIMEOUT: Long = 10000L
+    }
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
     private val tokenManager = TokenManagerImpl()
 
     // Internal state
     internal open val logger by taggedLogger("Video:Socket")
-    internal val errors: Flow<StreamWebSocketEvent.Error>
-    internal val events: Flow<VideoEvent> = MutableSharedFlow<VideoEvent>()
-    internal val internalSocket = VideoSocket(
+    private val errors: MutableSharedFlow<StreamWebSocketEvent.Error> = MutableSharedFlow(
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        replay = 1,
+        extraBufferCapacity = 100
+    )
+    private val events: MutableSharedFlow<VideoEvent> = MutableSharedFlow(
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        replay = 1,
+        extraBufferCapacity = 100
+    )
+    private val connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val state: MutableStateFlow<SocketState> = MutableStateFlow(SocketState.NotConnected)
+    private val internalSocket = VideoSocket(
         apiKey,
         url,
         tokenManager,
         SocketFactory(
             parser,
-            tokenManager,
             httpClient,
         ),
         scope as? UserScope ?: UserScope(ClientScope()),
         StreamLifecycleObserver(scope, lifecycle),
         networkStateProvider,
-    )
+    ).also {
+        it.addListener(this)
+    }
 
     // Init
     init {
         tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
-        internalSocket.addListener(this)
     }
 
-    // Events
+    // Extension opportunity for subclasses
+    override fun onCreated() {
+        super.onCreated()
+        logger.d { "[onCreated] Socket is created" }
+    }
+
     override fun onConnecting() {
         super.onConnecting()
         logger.d { "[onConnecting] Socket is connecting" }
@@ -101,17 +128,28 @@ public open class PersistentSocket(
 
     override fun onConnected(event: ConnectedEvent) {
         super.onConnected(event)
+        whenConnected {
+            connectionId.value = it
+        }
         logger.d { "[onConnected] Socket connected with event: $event" }
     }
 
     override fun onEvent(event: VideoEvent) {
         super.onEvent(event)
         logger.d { "[onEvent] Received event: $event" }
+        val emit = events.tryEmit(event)
+        if (!emit) {
+            logger.e { "[onEvent] Failed to emit event: $event" }
+        }
     }
 
     override fun onError(error: Error) {
         super.onError(error)
         logger.e { "[onError] Socket error: $error" }
+        val emit = errors.tryEmit(StreamWebSocketEvent.Error(error))
+        if (!emit) {
+            logger.e { "[onError] Failed to emit error: $error" }
+        }
     }
 
     override fun onDisconnected(cause: DisconnectCause) {
@@ -119,63 +157,61 @@ public open class PersistentSocket(
         logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
     }
 
+    // API
     /**
-     * Check if the socket is in a state that can connect.
+     * Connection ID as [Flow]
      */
-    internal fun canConnect(): Boolean = safeCall(false) {
-        val connectionState = connectionState.value
-        logger.d { "[canConnect] Current state: $connectionState" }
-        val result = when (connectionState) {
-            // Can't connect if we are already connected.
-            is SocketState.Connected -> false
-            is SocketState.Connecting -> false
-            // We can connect if we are disconnected.
-            is SocketState.DisconnectedPermanently -> true
-            is SocketState.DisconnectedTemporarily -> true
-            is SocketState.NetworkDisconnected -> true
-            is SocketState.DisconnectedByRequest -> true
-            is SocketState.NotConnected -> true
-        }
-        logger.d { "[canConnect] Decision: $result" }
-        result
+    public fun connectionId(): Flow<String> = connectionId.mapNotNull {
+        it
     }
 
     /**
-     * Check if the socket is in a state that can reconnect.
+     * Ensure that the token is connected before sending events.
      */
-    internal fun canReconnect(): Boolean = safeCall(false) {
-        val connectionState = connectionState.value
-        logger.d { "[canReconnect] Current state: $connectionState" }
-        val result = when (connectionState) {
-            // Can't reconnect if we are already connected.
-            is SocketState.Connected -> false
-            is SocketState.Connecting -> false
-            is SocketState.DisconnectedPermanently -> false
-            is SocketState.DisconnectedTemporarily -> true
-            is SocketState.NetworkDisconnected -> false
-            is SocketState.DisconnectedByRequest -> false
-            is SocketState.NotConnected -> false
+    public fun whenConnected(connectionTimeout: Long = DEFAULT_COORDINATOR_SOCKET_TIMEOUT, connected: suspend (connectionId: String) -> Unit) {
+        scope.launch {
+            internalSocket.awaitConnection(connectionTimeout)
+            internalSocket.connectionIdOrError().also {
+                connected(it)
+            }
         }
-        logger.d { "[canReconnect] Decision: $result" }
-        result
     }
+    /**
+     * State of the socket as [StateFlow]
+     */
+    public fun state(): StateFlow<SocketState> = state
 
     /**
-     * Check if the socket is in a state that can disconnect.
+     * Socket events as [Flow]
      */
-    internal fun canDisconnect(): Boolean = safeCall(true) {
-        val connectionState = connectionState.value
-        logger.d { "[canDisconnect] Current state: $connectionState" }
-        val result = when (connectionState) {
-            is SocketState.Connected -> true
-            is SocketState.Connecting -> true
-            is SocketState.DisconnectedPermanently -> false
-            is SocketState.DisconnectedByRequest -> false
-            is SocketState.DisconnectedTemporarily -> true
-            is SocketState.NetworkDisconnected -> false
-            else -> true
-        }
-        logger.d { "[canDisconnect] Decision: $result" }
-        result
+    public fun events(): Flow<VideoEvent> = events
+
+    /**
+     * Socket errors as [Flow]
+     */
+    public fun errors(): Flow<Error> = errors.map { it.streamError }
+
+    /**
+     * Send event to the socket.
+     */
+    public suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
+
+    public suspend fun connect(user: User) {
+        internalSocket.connectUser(user, user.isAnonymous())
+    }
+
+    public suspend fun reconnect(user: User, force: Boolean = false) {
+        internalSocket.reconnectUser(user, user.isAnonymous(), force)
+    }
+    /**
+     * Disconnect the socket.
+     */
+    public suspend fun disconnect() = internalSocket.disconnect()
+
+    /**
+     * Update the token from the outside.
+     */
+    public fun updateToken(token: UserToken) {
+        tokenManager.updateToken(token)
     }
 }

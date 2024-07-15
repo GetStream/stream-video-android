@@ -17,8 +17,11 @@
 package io.getstream.video.android.core.socket.common.scope
 
 import android.util.Log
+import io.getstream.log.StreamLog
 import io.getstream.result.call.SharedCalls
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -33,23 +36,19 @@ internal interface ClientScope : CoroutineScope
  */
 internal fun ClientScope(): ClientScope = ClientScopeImpl()
 
+internal val clientSCopeExceptionHandler =
+    CoroutineExceptionHandler { coroutineContext, exception ->
+        val coroutineName = coroutineContext[CoroutineName]?.name ?: "unknown"
+        StreamLog.e("ClientScope", exception) {
+            "[ClientScope] Uncaught exception in coroutine $coroutineName: $exception"
+        }
+    }
+
 /**
  * Represents SDK root [CoroutineScope].
  */
 private class ClientScopeImpl :
     ClientScope,
     CoroutineScope by CoroutineScope(
-        SupervisorJob() + DispatcherProvider.IO + SharedCalls(),
+        SupervisorJob() + DispatcherProvider.IO + SharedCalls() + clientSCopeExceptionHandler,
     )
-
-/**
- * Launches a coroutine and catches any exception. */
-fun CoroutineScope.safeLaunch(block: suspend () -> Unit) {
-    launch {
-        try {
-            block()
-        } catch (e: Throwable) {
-            Log.e("ClientScope", "Error in coroutine", e)
-        }
-    }
-}

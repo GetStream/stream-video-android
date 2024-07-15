@@ -18,14 +18,19 @@ package io.getstream.video.android.core.socket.common.token
 
 internal interface TokenManager {
     /**
+     * Update the current token.
+     */
+    fun updateToken(token: String)
+
+    /**
      * Ensure a token has been loaded.
      */
-    fun ensureTokenLoaded()
+    suspend fun ensureTokenLoaded()
 
     /**
      * Load a new token.
      */
-    fun loadSync(): String
+    suspend fun loadSync(): String
 
     /**
      * Expire the current token.

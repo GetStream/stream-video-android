@@ -31,7 +31,7 @@ public class NetworkStateProvider(
     private val connectivityManager: ConnectivityManager,
 ) {
 
-    private val logger by taggedLogger("Chat:NetworkStateProvider")
+    private val logger by taggedLogger("Video:NetworkStateProvider")
     private val lock: Any = Any()
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {

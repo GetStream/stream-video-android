@@ -24,7 +24,7 @@ import org.openapitools.client.models.VideoEvent
 /**
  * Listener which is invoked for WebSocket events.
  */
-public open class SocketListener {
+public open class SocketListener<T> {
 
     /**
      * The callbacks are by default delivered on the main thread. Changing this property to false will deliver
@@ -33,6 +33,12 @@ public open class SocketListener {
      * Set to false for faster callback delivery on the original thread (no unnecessary context switching).
      */
     public open val deliverOnMainThread: Boolean = true
+
+    /**
+     * Called when the socket is created.
+     */
+    public open fun onCreated() {
+    }
 
     /**
      * Invoked when the connection begins to establish and socket state changes to Connecting.
@@ -71,6 +77,6 @@ public open class SocketListener {
      *
      * @param event parsed [VideoEvent] received in this web socket connection.
      */
-    public open fun onEvent(event: VideoEvent) {
+    public open fun onEvent(event: T) {
     }
 }

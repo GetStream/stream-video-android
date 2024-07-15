@@ -50,7 +50,7 @@ internal class HealthMonitor(
     private var healthCheckJob: Job? = null
     private var reconnectJob: Job? = null
 
-    private val logger by taggedLogger("Chat:SocketMonitor")
+    private val logger by taggedLogger("Video:SocketMonitor")
 
     /**
      * Stop monitoring connection.

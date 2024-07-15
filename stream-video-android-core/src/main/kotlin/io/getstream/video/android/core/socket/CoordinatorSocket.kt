@@ -18,12 +18,9 @@ package io.getstream.video.android.core.socket
 
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
-import io.getstream.result.Error
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.scope.safeLaunch
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.model.ApiKey
@@ -31,14 +28,8 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import okhttp3.Response
-import okhttp3.WebSocket
-import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectUserDetailsRequest
 import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.ConnectionErrorEvent
-import org.openapitools.client.models.UnsupportedVideoEventException
-import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSAuthMessageRequest
 
 /**
@@ -50,7 +41,7 @@ public class CoordinatorSocket(
     private val apiKey: ApiKey,
     private val url: String,
     private val user: User,
-    internal var token: String,
+    private val token: String,
     private val scope: CoroutineScope = UserScope(ClientScope()),
     private val httpClient: OkHttpClient,
     private val lifecycle: Lifecycle,
@@ -68,30 +59,12 @@ public class CoordinatorSocket(
 
     override val logger by taggedLogger("Video:CoordinatorWS")
 
-    init {
-        internalSocket.addListener(object : SocketListener() {
-            override fun onConnected(event: ConnectedEvent) {
-                super.onConnected(event)
-                setConnectedStateAndContinue(event)
-            }
-
-            override fun onError(error: Error) {
-                super.onError(error)
-            }
-
-            override fun onEvent(event: VideoEvent) {
-                super.onEvent(event)
-            }
-        })
-    }
-
-    override fun onConnected(event: ConnectedEvent) {
-        super.onConnected(event)
-        scope.safeLaunch {
-            logger.d { "[onOpen] user: $user" }
+    override fun onCreated() {
+        scope.launch {
+            logger.d { "[onConnected] Video socket connected, user: $user" }
             if (token.isEmpty()) {
-                logger.e { "[onOpen] Token is empty. Disconnecting." }
-                internalSocket.disconnect()
+                logger.e { "[onConnected] Token is empty. Disconnecting." }
+                disconnect()
             } else {
                 val authRequest = WSAuthMessageRequest(
                     token = token,
@@ -102,83 +75,9 @@ public class CoordinatorSocket(
                         custom = user.custom,
                     ),
                 )
-                logger.d { "[authenticateUser] Sending auth request: $authRequest" }
-                internalSocket.sendEvent(authRequest)
+                logger.d { "[onConnected] Sending auth request: $authRequest" }
+                sendEvent(authRequest)
             }
         }
-    }
-
-    override fun onEvent(event: VideoEvent) {
-        super.onEvent(event)
-    }
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        super.onOpen(webSocket, response)
-        scope.safeLaunch {
-            logger.d { "[onOpen] user: $user" }
-            if (token.isEmpty()) {
-                logger.e { "[onOpen] Token is empty. Disconnecting." }
-                internalSocket.disconnect()
-            } else {
-                val authRequest = WSAuthMessageRequest(
-                    token = token,
-                    userDetails = ConnectUserDetailsRequest(
-                        id = user.id,
-                        name = user.name.takeUnless { it.isWhitespaceOnly() },
-                        image = user.image.takeUnless { it.isWhitespaceOnly() },
-                        custom = user.custom,
-                    ),
-                )
-                logger.d { "[authenticateUser] Sending auth request: $authRequest" }
-                internalSocket.sendEvent(authRequest)
-            }
-        }
-    }
-
-    /** Invoked when a text (type `0x1`) message has been received. */
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        super.onMessage(webSocket, text)
-        if (text.isEmpty() || text == "null") {
-            logger.w { "[onMessage] Received empty coordinator socket message." }
-            return
-        }
-
-        scope.launch(singleThreadDispatcher) {
-            try {
-                Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
-                    eventAdapter.fromJson(text)?.let { parsedEvent -> processEvent(parsedEvent) }
-                }
-            } catch (e: Throwable) {
-                if (e.cause is UnsupportedVideoEventException) {
-                    val ex = e.cause as UnsupportedVideoEventException
-                    logger.w { "[onMessage] Received unsupported VideoEvent type: ${ex.type}. Ignoring." }
-                } else {
-                    logger.w { "[onMessage] VideoEvent parsing error ${e.message}." }
-                    handleError(e)
-                }
-            }
-        }
-    }
-
-    private suspend fun processEvent(parsedEvent: VideoEvent) {
-        if (parsedEvent is ConnectionErrorEvent) {
-            handleError(
-                ErrorResponse(
-                    code = parsedEvent.error?.code ?: -1,
-                    message = parsedEvent.error?.message ?: "",
-                    statusCode = parsedEvent.error?.statusCode ?: -1,
-                    exceptionFields = parsedEvent.error?.exceptionFields ?: emptyMap(),
-                    moreInfo = parsedEvent.error?.moreInfo ?: "",
-                ),
-            )
-            return
-        }
-
-        if (parsedEvent is ConnectedEvent) {
-            _connectionId.value = parsedEvent.connectionId
-            setConnectedStateAndContinue(parsedEvent)
-        }
-
-        ackHealthMonitor()
-        events.emit(parsedEvent)
     }
 }

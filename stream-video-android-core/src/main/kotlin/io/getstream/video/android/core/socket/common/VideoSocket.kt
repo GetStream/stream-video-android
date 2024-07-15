@@ -53,7 +53,7 @@ internal open class VideoSocket(
     private var streamWebSocket: StreamWebSocket? = null
     open val logger by taggedLogger(TAG)
     private var connectionConf: SocketFactory.ConnectionConf? = null
-    private val listeners = mutableSetOf<SocketListener>()
+    private val listeners = mutableSetOf<SocketListener<VideoEvent>>()
     private val videoSocketStateService = VideoSocketStateService()
     private var socketStateObserverJob: Job? = null
     private val healthMonitor = HealthMonitor(
@@ -94,6 +94,8 @@ internal open class VideoSocket(
             when (networkStateProvider.isConnected()) {
                 true -> {
                     streamWebSocket = socketFactory.createSocket(connectionConf).apply {
+                        listeners.forEach { it.onCreated() }
+
                         socketListenerJob = listen().onEach {
                             when (it) {
                                 is StreamWebSocketEvent.Error -> handleError(it.streamError)
@@ -263,13 +265,13 @@ internal open class VideoSocket(
         }
     }
 
-    fun removeListener(listener: SocketListener) {
+    fun removeListener(listener: SocketListener<VideoEvent>) {
         synchronized(listeners) {
             listeners.remove(listener)
         }
     }
 
-    fun addListener(listener: SocketListener) {
+    fun addListener(listener: SocketListener<VideoEvent>) {
         synchronized(listeners) {
             listeners.add(listener)
         }
@@ -327,7 +329,7 @@ internal open class VideoSocket(
         )
     }
 
-    private fun callListeners(call: (SocketListener) -> Unit) {
+    private fun callListeners(call: (SocketListener<VideoEvent>) -> Unit) {
         synchronized(listeners) {
             listeners.forEach { listener ->
                 val context = if (listener.deliverOnMainThread) {
@@ -397,7 +399,7 @@ internal open class VideoSocket(
     )
 
     companion object {
-        private const val TAG = "Chat:Socket"
+        private const val TAG = "Video:Socket"
         private const val DEFAULT_CONNECTION_TIMEOUT = 60_000L
     }
 }

@@ -64,7 +64,7 @@ public class SfuSocket(
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider,
     private val onFastReconnected: suspend () -> Unit,
-) : PersistentSocket<JoinCallResponseEvent> (
+) : PersistentSocketOld<JoinCallResponseEvent> (
     url = url,
     httpClient = httpClient,
     scope = scope,

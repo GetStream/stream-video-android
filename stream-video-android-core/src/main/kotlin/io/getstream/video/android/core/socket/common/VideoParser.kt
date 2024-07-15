@@ -28,7 +28,7 @@ import retrofit2.Retrofit
 
 internal interface VideoParser {
 
-    private val tag: String get() = "Chat:ChatParser"
+    private val tag: String get() = "Video:ChatParser"
 
     fun toJson(any: Any): String
     fun <T : Any> fromJson(raw: String, clazz: Class<T>): T

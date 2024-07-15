@@ -43,7 +43,7 @@ internal class StreamWebSocket(
 
     private val webSocket = socketCreator(object : WebSocketListener() {
         override fun onMessage(webSocket: WebSocket, text: String) {
-            StreamLog.v("Chat:Events") { "[handleEvent] event: `$text`" }
+            StreamLog.v("Video:Events") { "[handleEvent] event: `$text`" }
             eventFlow.tryEmit(parseMessage(text))
         }
 

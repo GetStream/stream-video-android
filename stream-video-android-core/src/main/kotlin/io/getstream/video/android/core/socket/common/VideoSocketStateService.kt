@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.ConnectedEvent
 
 internal class VideoSocketStateService(initialState: State = State.Disconnected.Stopped) {
-    private val logger by taggedLogger("Chat:SocketState")
+    private val logger by taggedLogger("Video:SocketState")
 
     suspend fun observer(onNewState: suspend (State) -> Unit) {
         stateMachine.stateFlow.collect(onNewState)

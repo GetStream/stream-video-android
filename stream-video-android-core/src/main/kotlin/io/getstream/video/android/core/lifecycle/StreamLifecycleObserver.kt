@@ -31,7 +31,7 @@ internal class StreamLifecycleObserver(
     private val lifecycle: Lifecycle,
 ) : DefaultLifecycleObserver {
 
-    private val logger by taggedLogger("Chat:LifecycleObserver")
+    private val logger by taggedLogger("Video:LifecycleObserver")
     private var recurringResumeEvent = false
     private var handlers = setOf<LifecycleHandler>()
 

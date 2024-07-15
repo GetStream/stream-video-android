@@ -105,7 +105,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
         val subIce = subscriber?.connection?.iceConnectionState()
 
         val videoTrackState = call?.mediaManager?.videoTrack?.state()
-        val coordinatorSocket = client.socketImpl.connectionState.value.javaClass.name
+        val coordinatorSocket = client.socketImpl.state().value.javaClass.name
         val sfuSocket =
             call?.session?.sfuConnectionModule?.sfuSocket?.connectionState?.value?.javaClass?.name
 

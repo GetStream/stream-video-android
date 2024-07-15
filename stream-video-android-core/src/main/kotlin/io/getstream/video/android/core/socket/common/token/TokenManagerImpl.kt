@@ -21,13 +21,17 @@ internal class TokenManagerImpl : TokenManager {
     private var token: String = EMPTY_TOKEN
     private lateinit var provider: TokenProvider
 
-    override fun ensureTokenLoaded() {
+    override fun updateToken(token: String) {
+        this.token = token
+    }
+
+    override suspend fun ensureTokenLoaded() {
         if (!hasToken()) {
             loadSync()
         }
     }
 
-    override fun loadSync(): String {
+    override suspend fun loadSync(): String {
         return provider.loadToken().also {
             this.token = it
         }

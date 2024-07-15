@@ -26,6 +26,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -58,6 +59,7 @@ import java.util.concurrent.TimeUnit
 internal class ConnectionModule(
     context: Context,
     private val scope: CoroutineScope,
+    private val tokenProvider: TokenProvider,
     internal val videoDomain: String,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
@@ -131,12 +133,15 @@ internal class ConnectionModule(
         val coordinatorUrl = "wss://$videoDomain/video/connect"
 
         return CoordinatorSocket(
+            apiKey,
             coordinatorUrl,
             user,
             userToken,
             scope,
             okHttpClient,
-            networkStateProvider = networkStateProvider,
+            lifecycle,
+            tokenProvider,
+            networkStateProvider
         )
     }
 
@@ -162,7 +167,7 @@ internal class ConnectionModule(
 
     fun updateToken(newToken: String) {
         // the coordinator socket also needs to update the token
-        coordinatorSocket.token = newToken
+        coordinatorSocket.updateToken(newToken)
         // update the auth token as well
         authInterceptor.token = newToken
     }

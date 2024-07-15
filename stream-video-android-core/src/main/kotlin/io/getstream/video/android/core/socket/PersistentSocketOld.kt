@@ -301,18 +301,7 @@ public open class PersistentSocketOld<T>(
             logger.d { "[handleError] Ignoring socket error - already closed $receivedError" }
             return
         }
-        val error = receivedError.let {
-            // TODO Alex: This is a bad assumption, but necessary, needs to be checked against the backend
-            if (it is EOFException) {
-                ErrorResponse(
-                    40,
-                    "Unknown error trying to refresh token and reconnect.",
-                    statusCode = 401,
-                )
-            } else {
-                it
-            }
-        }
+        val error = receivedError
         val permanentError = isPermanentError(error)
         if (permanentError) {
             logger.e { "[handleError] Permanent error: $error" }

@@ -54,7 +54,7 @@ private class UserJobImpl(
     private val getUserId: () -> UserId?,
 ) : CompletableJob by delegate, UserJob {
 
-    private val logger by taggedLogger("Chat:UserJob")
+    private val logger by taggedLogger("Video:UserJob")
 
     /**
      * Wraps child job with [UserChildJob] and attaches it so that [UserJob] job becomes its parent.
