@@ -118,4 +118,64 @@ public open class PersistentSocket(
         super.onDisconnected(cause)
         logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
     }
+
+    /**
+     * Check if the socket is in a state that can connect.
+     */
+    internal fun canConnect(): Boolean = safeCall(false) {
+        val connectionState = connectionState.value
+        logger.d { "[canConnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            // Can't connect if we are already connected.
+            is SocketState.Connected -> false
+            is SocketState.Connecting -> false
+            // We can connect if we are disconnected.
+            is SocketState.DisconnectedPermanently -> true
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> true
+            is SocketState.DisconnectedByRequest -> true
+            is SocketState.NotConnected -> true
+        }
+        logger.d { "[canConnect] Decision: $result" }
+        result
+    }
+
+    /**
+     * Check if the socket is in a state that can reconnect.
+     */
+    internal fun canReconnect(): Boolean = safeCall(false) {
+        val connectionState = connectionState.value
+        logger.d { "[canReconnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            // Can't reconnect if we are already connected.
+            is SocketState.Connected -> false
+            is SocketState.Connecting -> false
+            is SocketState.DisconnectedPermanently -> false
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> false
+            is SocketState.DisconnectedByRequest -> false
+            is SocketState.NotConnected -> false
+        }
+        logger.d { "[canReconnect] Decision: $result" }
+        result
+    }
+
+    /**
+     * Check if the socket is in a state that can disconnect.
+     */
+    internal fun canDisconnect(): Boolean = safeCall(true) {
+        val connectionState = connectionState.value
+        logger.d { "[canDisconnect] Current state: $connectionState" }
+        val result = when (connectionState) {
+            is SocketState.Connected -> true
+            is SocketState.Connecting -> true
+            is SocketState.DisconnectedPermanently -> false
+            is SocketState.DisconnectedByRequest -> false
+            is SocketState.DisconnectedTemporarily -> true
+            is SocketState.NetworkDisconnected -> false
+            else -> true
+        }
+        logger.d { "[canDisconnect] Decision: $result" }
+        result
+    }
 }

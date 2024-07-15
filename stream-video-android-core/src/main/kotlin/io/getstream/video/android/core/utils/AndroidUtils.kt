@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalContracts::class)
+
 package io.getstream.video.android.core.utils
 
 import android.app.Activity
@@ -27,12 +29,16 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import io.getstream.log.StreamLog
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 @JvmSynthetic
 internal suspend fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent> {
@@ -82,5 +88,77 @@ public fun Activity.shouldShowRequestPermissionsRationale(permissions: Array<out
 internal fun <T> combineComparators(vararg comparators: Comparator<T>): Comparator<T> {
     return comparators.reduceRight { comparator, combined ->
         comparator.thenComparing(combined)
+    }
+}
+
+/**
+ * Safely call a suspending function and handle exceptions.
+ *
+ * @param block the suspending function to call.
+ */
+internal suspend fun safeSuspendingCall(block: suspend () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    try {
+        block()
+    } catch (e: Exception) {
+        // Handle or log the exception here
+        StreamLog.e("SafeSuspendingCall", e) { "Exception occurred: ${e.message}" }
+    }
+}
+
+/**
+ * Safely call a function and handle exceptions.
+ *
+ * @param block the function to call.
+ */
+internal inline fun safeCall(block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    try {
+        block()
+    } catch (e: Exception) {
+        // Handle or log the exception here
+        StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
+    }
+}
+
+/**
+ * Safely call a suspending function and handle exceptions.
+ *
+ * @param default the default value to return in case of an exception.
+ * @param block the suspending function to call.
+ */
+internal suspend fun <T> safeSuspendingCall(default: T, block: suspend () -> T): T {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    return try {
+        block()
+    } catch (e: Exception) {
+        // Handle or log the exception here
+        StreamLog.e("SafeSuspendingCall", e) { "Exception occurred: ${e.message}" }
+        default
+    }
+}
+
+/**
+ * Safely call a function and handle exceptions.
+ *
+ * @param default the default value to return in case of an exception.
+ * @param block the function to call.
+ */
+inline fun <T> safeCall(default: T, block: () -> T): T {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    return try {
+        block()
+    } catch (e: Exception) {
+        // Handle or log the exception here
+        StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
+        default
     }
 }

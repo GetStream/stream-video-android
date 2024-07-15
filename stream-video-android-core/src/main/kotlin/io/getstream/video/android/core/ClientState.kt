@@ -16,10 +16,11 @@
 
 package io.getstream.video.android.core
 
-import android.content.Context
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +53,9 @@ public sealed interface RingingState {
 
 @Stable
 class ClientState(client: StreamVideo) {
+
+    val logger by taggedLogger("ClientState")
+
     /**
      * Current user object
      */
@@ -81,10 +85,20 @@ class ClientState(client: StreamVideo) {
     internal val clientImpl = client as StreamVideoImpl
 
     /**
+     * Returns true if there is an active or ringing call
+     */
+    fun hasActiveOrRingingCall(): Boolean = safeCall(false) {
+        val hasActiveCall = _activeCall.value != null
+        val hasRingingCall = _ringingCall.value != null
+        val activeOrRingingCall = hasActiveCall || hasRingingCall
+        logger.d { "[hasActiveOrRingingCall] active: $hasActiveCall, ringing: $hasRingingCall" }
+        activeOrRingingCall
+    }
+
+    /**
      * Handles the events for the client state.
      * Most event logic happens in the Call instead of the client
      */
-
     fun handleEvent(event: VideoEvent) {
         // mark connected
         if (event is ConnectedEvent) {
@@ -161,13 +175,4 @@ class ClientState(client: StreamVideo) {
             context.stopService(serviceIntent)
         }
     }
-}
-
-public fun ConnectionState.formatAsTitle(context: Context): String = when (this) {
-    ConnectionState.PreConnect -> "Connecting.."
-    ConnectionState.Loading -> "Loading.."
-    ConnectionState.Connected -> "Connected"
-    ConnectionState.Reconnecting -> "Reconnecting.."
-    ConnectionState.Disconnected -> "Disconnected"
-    is ConnectionState.Failed -> "Failed"
 }
