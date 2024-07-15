@@ -181,7 +181,7 @@ internal class CallService : Service() {
             // Promote early to foreground service
             maybeCallStartForeground(
                 videoClient = streamVideo,
-                notificationId = INCOMING_CALL_NOTIFICATION_ID,
+                notificationId = intentCallId.hashCode(),
             )
 
             val type = intentCallId.type
