@@ -29,7 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import org.openapitools.client.models.ConnectUserDetailsRequest
-import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.WSAuthMessageRequest
 
 /**

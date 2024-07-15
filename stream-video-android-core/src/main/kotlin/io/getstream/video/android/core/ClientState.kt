@@ -120,7 +120,7 @@ class ClientState(client: StreamVideo) {
     }
 
     internal fun handleState(socketState: SocketState) {
-        when(socketState) {
+        when (socketState) {
             is SocketState.Connected -> ConnectionState.Connected
             SocketState.Connecting -> ConnectionState.Loading
             SocketState.DisconnectedByRequest -> ConnectionState.Disconnected

@@ -17,18 +17,15 @@
 package io.getstream.video.android.core.socket.common
 
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideo.Companion.buildSdkTrackingHeaders
-import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.model.User
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 internal class SocketFactory(
-    private val parser: VideoParser, private val httpClient: OkHttpClient = OkHttpClient(),
+    private val parser: VideoParser,
+    private val httpClient: OkHttpClient = OkHttpClient(),
 ) {
     private val logger by taggedLogger("Video:SocketFactory")
 

@@ -133,7 +133,11 @@ internal inline fun safeCall(block: () -> Unit) {
  * @param default the default value to return in case of an exception.
  * @param block the suspending function to call.
  */
-internal suspend fun <T> safeSuspendingCallWithDefault(default: T, defaultProvider: ((exception: Throwable) -> T)? = null, block: suspend () -> T): T {
+internal suspend fun <T> safeSuspendingCallWithDefault(
+    default: T,
+    defaultProvider: ((exception: Throwable) -> T)? = null,
+    block: suspend () -> T,
+): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -168,7 +172,7 @@ internal inline fun <T> safeCallWithDefault(default: T, block: () -> T): T {
 /**
  * Safely call a function and handle exceptions while returning a [Result].
  */
-internal inline fun <T: Any> safeCallWithResult(block: () -> T): Result<T> {
+internal inline fun <T : Any> safeCallWithResult(block: () -> T): Result<T> {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -184,7 +188,7 @@ internal inline fun <T: Any> safeCallWithResult(block: () -> T): Result<T> {
 /**
  * Safely call a function and handle exceptions while returning a [Result].
  */
-internal suspend fun <T: Any> safeSuspendingCallWithResult(block: suspend () -> T): Result<T> {
+internal suspend fun <T : Any> safeSuspendingCallWithResult(block: suspend () -> T): Result<T> {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }

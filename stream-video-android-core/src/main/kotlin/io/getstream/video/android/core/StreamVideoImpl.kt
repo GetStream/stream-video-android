@@ -25,10 +25,6 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.extractCause
-import io.getstream.result.flatMapSuspend
-import io.getstream.result.onErrorSuspend
-import io.getstream.result.recoverSuspend
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -36,8 +32,6 @@ import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.ConnectionModule
-import io.getstream.video.android.core.lifecycle.LifecycleHandler
-import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
@@ -52,7 +46,6 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
-import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
@@ -61,8 +54,6 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.safeCall
-import io.getstream.video.android.core.utils.safeSuspendingCallWithDefault
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import io.getstream.video.android.core.utils.toEdge
@@ -74,7 +65,6 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -84,7 +74,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
@@ -213,7 +202,9 @@ internal class StreamVideoImpl internal constructor(
     /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
      */
-    internal suspend fun <T: Any> wrapAPICall(apiCall: suspend () -> T): Result<T> = safeSuspendingCallWithResult {
+    internal suspend fun <T : Any> wrapAPICall(
+        apiCall: suspend () -> T,
+    ): Result<T> = safeSuspendingCallWithResult {
         try {
             apiCall()
         } catch (e: HttpException) {
@@ -229,7 +220,7 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    private fun HttpException.isAuthError() : Boolean {
+    private fun HttpException.isAuthError(): Boolean {
         val failure = parseError(this)
         val parsedError = failure.value as Error.NetworkError
         return parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code

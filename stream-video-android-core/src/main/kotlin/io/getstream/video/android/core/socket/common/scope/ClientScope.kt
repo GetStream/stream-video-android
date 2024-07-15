@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.socket.common.scope
 
-import android.util.Log
 import io.getstream.log.StreamLog
 import io.getstream.result.call.SharedCalls
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -24,7 +23,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 
 /**
  * A client aware implementation of [CoroutineScope].

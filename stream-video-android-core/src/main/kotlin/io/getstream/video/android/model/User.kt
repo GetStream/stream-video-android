@@ -87,14 +87,13 @@ public data class User(
         return id.isNotEmpty()
     }
 
-
-
     public val userNameOrId: String
         inline get() = name.takeUnless { it.isNullOrBlank() } ?: id
 
     companion object {
         /** Check if user is anonymous. */
         fun User.isAnonymous(): Boolean = id == "!anon"
+
         /** Get the anonymous user. */
         fun anonymous() = User(id = "!anon", type = UserType.Anonymous, role = "user")
     }

@@ -141,7 +141,7 @@ internal class ConnectionModule(
             okHttpClient,
             lifecycle,
             tokenProvider,
-            networkStateProvider
+            networkStateProvider,
         )
     }
 

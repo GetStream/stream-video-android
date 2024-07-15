@@ -77,6 +77,7 @@ public open class PersistentSocket(
     companion object {
         internal const val DEFAULT_COORDINATOR_SOCKET_TIMEOUT: Long = 10000L
     }
+
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
     private val tokenManager = TokenManagerImpl()
@@ -86,12 +87,12 @@ public open class PersistentSocket(
     private val errors: MutableSharedFlow<StreamWebSocketEvent.Error> = MutableSharedFlow(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
         replay = 1,
-        extraBufferCapacity = 100
+        extraBufferCapacity = 100,
     )
     private val events: MutableSharedFlow<VideoEvent> = MutableSharedFlow(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
         replay = 1,
-        extraBufferCapacity = 100
+        extraBufferCapacity = 100,
     )
     private val connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
     private val state: MutableStateFlow<SocketState> = MutableStateFlow(SocketState.NotConnected)
@@ -168,7 +169,10 @@ public open class PersistentSocket(
     /**
      * Ensure that the token is connected before sending events.
      */
-    public fun whenConnected(connectionTimeout: Long = DEFAULT_COORDINATOR_SOCKET_TIMEOUT, connected: suspend (connectionId: String) -> Unit) {
+    public fun whenConnected(
+        connectionTimeout: Long = DEFAULT_COORDINATOR_SOCKET_TIMEOUT,
+        connected: suspend (connectionId: String) -> Unit,
+    ) {
         scope.launch {
             internalSocket.awaitConnection(connectionTimeout)
             internalSocket.connectionIdOrError().also {
@@ -176,6 +180,7 @@ public open class PersistentSocket(
             }
         }
     }
+
     /**
      * State of the socket as [StateFlow]
      */
@@ -203,6 +208,7 @@ public open class PersistentSocket(
     public suspend fun reconnect(user: User, force: Boolean = false) {
         internalSocket.reconnectUser(user, user.isAnonymous(), force)
     }
+
     /**
      * Disconnect the socket.
      */
