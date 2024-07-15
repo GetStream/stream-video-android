@@ -305,13 +305,11 @@ internal class CallService : Service() {
 
     private fun maybePromoteToForegroundService(videoClient: StreamVideoImpl, notificationId: Int) {
         val hasActiveCall = videoClient.state.activeCall.value != null
+        val not = if (hasActiveCall) " not" else ""
 
-        logger.d { "[maybePromoteToForegroundService] hasActiveCall: $hasActiveCall" }
+        logger.d { "[maybePromoteToForegroundService] hasActiveCall: $hasActiveCall. Will$not call startForeground early." }
 
-        if (!hasActiveCall) {
-            startForeground(notificationId, videoClient.getCallSetupNotification())
-            logger.d { "[maybePromoteToForegroundService] Called startForeground() early." }
-        }
+        if (!hasActiveCall) startForeground(notificationId, videoClient.getCallSetupNotification())
     }
 
     @SuppressLint("MissingPermission")
