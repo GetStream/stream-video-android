@@ -163,7 +163,7 @@ public open class DefaultNotificationHandler(
                         R.string.stream_video_call_setup_notification_channel_description,
                     )
                 }
-            }
+            },
         )
 
         return getNotification {
@@ -226,7 +226,7 @@ public open class DefaultNotificationHandler(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     this.setAllowBubbles(true)
                 }
-            }
+            },
         )
 
         return getNotification {
@@ -349,7 +349,7 @@ public open class DefaultNotificationHandler(
                     description =
                         application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
                 }
-            }
+            },
         )
 
         if (endCallIntent == null) {
