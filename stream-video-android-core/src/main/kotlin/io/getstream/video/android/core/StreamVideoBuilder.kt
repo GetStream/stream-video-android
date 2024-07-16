@@ -72,8 +72,8 @@ import java.net.ConnectException
  * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
- * @property crashOnMissingPermission If [permissionCheck] returns false there will be an exception.
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
+ * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  *
  * @see build
@@ -96,7 +96,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val runForegroundServiceForCalls: Boolean = true,
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = Sounds(),
-    private val crashOnMissingPermission: Boolean = true,
+    private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
 ) {
@@ -190,6 +190,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
+            crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
         )
 
