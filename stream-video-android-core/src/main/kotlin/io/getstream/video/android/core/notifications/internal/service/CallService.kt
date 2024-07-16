@@ -192,7 +192,7 @@ internal class CallService : Service() {
                 if (streamVideo.crashOnMissingPermission) {
                     throw exception
                 } else {
-                    logger.e(exception) { "Ensure you have right permissions!" }
+                    logger.e(exception) { "Make sure all the required permissions are granted!" }
                 }
             }
 
