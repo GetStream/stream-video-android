@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Collections
 
 internal data class Timer(val name: String, val start: Long = System.currentTimeMillis()) {
     var end: Long = 0
@@ -58,7 +59,7 @@ internal class DebugInfo(val client: StreamVideoImpl) {
     private val logger by taggedLogger("DebugInfo")
 
     // timers to help track performance issues in prod
-    val timers = mutableListOf<Timer>()
+    val timers = Collections.synchronizedList(mutableListOf<Timer>())
     // last 20 events
 
     // phone type

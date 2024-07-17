@@ -31,7 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Main entry point for remote / local configuration
@@ -88,7 +87,7 @@ object AppConfig {
      * @param coroutineScope the scope used to run [onLoaded]
      */
     @OptIn(DelicateCoroutinesApi::class)
-    fun load(
+    suspend fun load(
         context: Context,
         coroutineScope: CoroutineScope = GlobalScope,
         onLoaded: suspend () -> Unit = {},
@@ -103,10 +102,7 @@ object AppConfig {
             }
             val which = selectedEnvironment ?: availableEnvironments[0]
             selectEnv(which)
-            currentEnvironment.value = which
-            coroutineScope.launch {
-                onLoaded()
-            }
+            onLoaded()
         } catch (e: Exception) {
             logger.e(e) { "Failed to parse  remote config. Deeplinks not working!" }
         }

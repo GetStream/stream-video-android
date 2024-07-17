@@ -17,6 +17,8 @@
 package io.getstream.video.android
 
 import android.content.Intent
+import android.os.Bundle
+import android.os.PersistableBundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,12 +30,16 @@ import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import io.getstream.video.android.util.FullScreenCircleProgressBar
+import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.runBlocking
 
 @OptIn(StreamCallActivityDelicateApi::class)
 class CallActivity : ComposeStreamCallActivity() {
@@ -41,6 +47,16 @@ class CallActivity : ComposeStreamCallActivity() {
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
     override val configuration: StreamCallActivityConfiguration =
         StreamCallActivityConfiguration(closeScreenOnCallEnded = false)
+
+    @StreamCallActivityDelicateApi
+    override fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        runBlocking {
+            if (!StreamVideo.isInstalled) {
+                runBlocking { StreamVideoInitHelper.reloadSdk(StreamUserDataStore.instance()) }
+            }
+        }
+        super.onPreCreate(savedInstanceState, persistentState)
+    }
 
     private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
 

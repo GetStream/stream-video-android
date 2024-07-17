@@ -42,6 +42,7 @@ import io.getstream.video.android.core.notifications.internal.receivers.ToggleCa
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -60,7 +61,10 @@ internal class CallService : Service() {
     private var callId: StreamCallId? = null
 
     // Service scope
-    private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    val handler = CoroutineExceptionHandler { _, exception ->
+        logger.e(exception) { "[CallService#Scope] Uncaught exception: $exception" }
+    }
+    private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO + handler)
 
     // Camera handling receiver
     private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver(serviceScope)
@@ -188,7 +192,7 @@ internal class CallService : Service() {
                 if (streamVideo.crashOnMissingPermission) {
                     throw exception
                 } else {
-                    logger.e(exception) { "Ensure you have right permissions!" }
+                    logger.e(exception) { "Make sure all the required permissions are granted!" }
                 }
             }
 
