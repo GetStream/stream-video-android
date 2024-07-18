@@ -146,7 +146,7 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    override fun getCallSetupNotification(): Notification? {
+    override fun getSettingUpCallNotification(): Notification? {
         val channelId = application.getString(
             R.string.stream_video_call_setup_notification_channel_id,
         )

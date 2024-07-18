@@ -311,7 +311,9 @@ internal class CallService : Service() {
             "[maybePromoteToForegroundService] hasActiveCall: $hasActiveCall. Will$not call startForeground early."
         }
 
-        if (!hasActiveCall) startForeground(notificationId, videoClient.getCallSetupNotification())
+        if (!hasActiveCall) {
+            startForeground(notificationId, videoClient.getSettingUpCallNotification())
+        }
     }
 
     @SuppressLint("MissingPermission")
