@@ -66,7 +66,7 @@ data class UserResponse (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?> = emptyMap(),
 
     @Json(name = "id")
     val id: kotlin.String,

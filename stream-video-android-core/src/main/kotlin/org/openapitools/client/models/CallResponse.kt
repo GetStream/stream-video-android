@@ -91,7 +91,7 @@ data class CallResponse (
 
     /* Custom data for this object */
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?> = emptyMap(),
 
     @Json(name = "egress")
     val egress: EgressResponse,
