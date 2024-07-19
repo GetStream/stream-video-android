@@ -97,7 +97,7 @@ internal fun UserResponse.toUser(): User {
         name = name,
         image = image,
         teams = teams,
-        custom = custom.mapValues { it.value.toString() },
+        custom = custom?.mapValues { it.value.toString() },
     )
 }
 

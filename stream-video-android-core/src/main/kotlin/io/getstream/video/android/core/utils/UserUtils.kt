@@ -27,7 +27,7 @@ internal fun User.toResponse(): UserResponse {
         name = name,
         image = image,
         teams = teams ?: emptyList(),
-        custom = custom ?: emptyMap(),
+        custom = custom,
         createdAt = createdAt ?: OffsetDateTime.now(),
         updatedAt = updatedAt ?: OffsetDateTime.now(),
         deletedAt = deletedAt,
