@@ -74,8 +74,8 @@ public data class User(
     val type: UserType = UserType.Authenticated,
     val name: String? = null,
     val image: String? = null,
-    val teams: List<String>? = emptyList(),
-    val custom: Map<String, String>? = emptyMap(),
+    val teams: List<String>? = null,
+    val custom: Map<String, String>? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
     val createdAt: OffsetDateTime? = null,
     @Serializable(with = OffsetDateTimeSerializer::class)
