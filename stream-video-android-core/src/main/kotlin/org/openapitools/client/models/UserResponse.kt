@@ -66,7 +66,7 @@ data class UserResponse (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?> = emptyMap(),
 
     @Json(name = "id")
     val id: kotlin.String,
@@ -81,7 +81,7 @@ data class UserResponse (
     val role: kotlin.String,
 
     @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>?,
+    val teams: kotlin.collections.List<kotlin.String>,
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
