@@ -81,7 +81,7 @@ data class UserResponse (
     val role: kotlin.String,
 
     @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>,
+    val teams: kotlin.collections.List<kotlin.String>?,
 
     /* Date/time of the last update */
     @Json(name = "updated_at")
