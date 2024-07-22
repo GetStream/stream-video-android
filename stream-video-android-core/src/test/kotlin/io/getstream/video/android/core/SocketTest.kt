@@ -234,7 +234,8 @@ class CoordinatorSocketTest : SocketTestBase() {
     }
 
     @Test
-    fun onMessage_validEventJson_processesEvent() = runTest {
+    fun onMessage_withValidEventJson_emitsEvent() = runTest {
+        val testJson = "{\"connection_id\": \"12345\", \"created_at\": \"2023-04-05T14:30:00Z\", \"type\": \"health.check\"}"
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
@@ -247,7 +248,6 @@ class CoordinatorSocketTest : SocketTestBase() {
         val spySocket = spyk(socket, recordPrivateCalls = true)
         spySocket.connect()
 
-        val testJson = "{\"connection_id\": \"12345\", \"created_at\": \"2023-04-05T14:30:00Z\", \"type\": \"health.check\"}"
         spySocket.onMessage(mockedWebSocket, testJson)
 
         coVerify(exactly = 1) { spySocket["processEvent"](ofType(HealthCheckEvent::class)) }
@@ -255,7 +255,8 @@ class CoordinatorSocketTest : SocketTestBase() {
     }
 
     @Test
-    fun onMessage_invalidEventJson_callsHandleError() = runTest {
+    fun onMessage_withInvalidEventJson_emitsError() = runTest {
+        val testJson = "{\"created_at\": \"2023-04-05T14:30:00Z\", \"type\": \"health.check\"}"
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
@@ -268,7 +269,6 @@ class CoordinatorSocketTest : SocketTestBase() {
         val spySocket = spyk(socket, recordPrivateCalls = true)
         spySocket.connect()
 
-        val testJson = "{\"created_at\": \"2023-04-05T14:30:00Z\", \"type\": \"health.check\"}"
         spySocket.onMessage(mockedWebSocket, testJson)
 
         verify(exactly = 1) {
@@ -280,7 +280,8 @@ class CoordinatorSocketTest : SocketTestBase() {
     }
 
     @Test
-    fun onMessage_unsupportedEventJson_callsHandleUnsupportedEvent() = runTest {
+    fun onMessage_withUnsupportedEventJson_skipsEventProcessingAndErrorEmission() = runTest {
+        val testJson = "{\"type\": \"unsupported.event\"}"
         val socket = CoordinatorSocket(
             coordinatorUrl,
             testData.users["thierry"]!!,
@@ -293,11 +294,10 @@ class CoordinatorSocketTest : SocketTestBase() {
         val spySocket = spyk(socket, recordPrivateCalls = true)
         spySocket.connect()
 
-        val testJson = "{\"type\": \"unsupported.event\"}"
         spySocket.onMessage(mockedWebSocket, testJson)
 
         verify(exactly = 1) {
-            spySocket["handleUnsupportedEvent"](ofType(UnsupportedVideoEventException::class))
+            spySocket["logUnsupportedEvent"](ofType(UnsupportedVideoEventException::class))
         }
         coVerify(exactly = 0) {
             spySocket["processEvent"](ofType(HealthCheckEvent::class))
