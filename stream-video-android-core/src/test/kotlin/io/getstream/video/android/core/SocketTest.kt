@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
+import com.squareup.moshi.JsonDataException
 import io.getstream.video.android.core.base.SocketTestBase
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.CoordinatorSocket
@@ -25,8 +26,11 @@ import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.socket.SocketState.Connected
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -34,6 +38,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.HealthCheckEvent
+import org.openapitools.client.models.UnsupportedVideoEventException
 import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
 
@@ -224,6 +231,80 @@ class CoordinatorSocketTest : SocketTestBase() {
         val testJson = "{\"someRandomField\":\"randomValue\"}"
         socket.onMessage(mockedWebSocket, testJson)
         // no exception is thrown
+    }
+
+    @Test
+    fun onMessage_validEventJson_processesEvent() = runTest {
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            authData?.token!!,
+            // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
+            scope = this,
+            buildOkHttp(),
+            networkStateProvider,
+        )
+        val spySocket = spyk(socket, recordPrivateCalls = true)
+        spySocket.connect()
+
+        val testJson = "{\"connection_id\": \"12345\", \"created_at\": \"2023-04-05T14:30:00Z\", \"type\": \"health.check\"}"
+        spySocket.onMessage(mockedWebSocket, testJson)
+
+        coVerify(exactly = 1) { spySocket["processEvent"](ofType(HealthCheckEvent::class)) }
+        verify(exactly = 0) { spySocket["handleError"](ofType(JsonDataException::class)) }
+    }
+
+    @Test
+    fun onMessage_invalidEventJson_callsHandleError() = runTest {
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            authData?.token!!,
+            // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
+            scope = this,
+            buildOkHttp(),
+            networkStateProvider,
+        )
+        val spySocket = spyk(socket, recordPrivateCalls = true)
+        spySocket.connect()
+
+        val testJson = "{\"created_at\": \"2023-04-05T14:30:00Z\", \"type\": \"health.check\"}"
+        spySocket.onMessage(mockedWebSocket, testJson)
+
+        verify(exactly = 1) {
+            spySocket invoke "handleError" withArguments listOf(ofType(JsonDataException::class))
+        }
+        coVerify(exactly = 0) {
+            spySocket["processEvent"](ofType(HealthCheckEvent::class))
+        }
+    }
+
+    @Test
+    fun onMessage_unsupportedEventJson_callsHandleUnsupportedEvent() = runTest {
+        val socket = CoordinatorSocket(
+            coordinatorUrl,
+            testData.users["thierry"]!!,
+            authData?.token!!,
+            // make sure to use the TestScope because the exceptions will be swallowed by regular CoroutineScope
+            scope = this,
+            buildOkHttp(),
+            networkStateProvider,
+        )
+        val spySocket = spyk(socket, recordPrivateCalls = true)
+        spySocket.connect()
+
+        val testJson = "{\"type\": \"unsupported.event\"}"
+        spySocket.onMessage(mockedWebSocket, testJson)
+
+        verify(exactly = 1) {
+            spySocket["handleUnsupportedEvent"](ofType(UnsupportedVideoEventException::class))
+        }
+        coVerify(exactly = 0) {
+            spySocket["processEvent"](ofType(HealthCheckEvent::class))
+        }
+        verify(exactly = 0) {
+            spySocket["handleError"](ofType(JsonDataException::class))
+        }
     }
 }
 

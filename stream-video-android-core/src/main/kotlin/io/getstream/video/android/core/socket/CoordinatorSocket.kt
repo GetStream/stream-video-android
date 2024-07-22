@@ -97,8 +97,7 @@ public class CoordinatorSocket(
                 }
             } catch (e: Throwable) {
                 if (e.cause is UnsupportedVideoEventException) {
-                    val ex = e.cause as UnsupportedVideoEventException
-                    logger.w { "[onMessage] Received unsupported VideoEvent type: ${ex.type}. Ignoring." }
+                    handleUnsupportedEvent(e.cause as UnsupportedVideoEventException)
                 } else {
                     val eventType = extractEventType(text)
                     val errorMessage = "Error when parsing VideoEvent with type: $eventType. Cause: ${e.message}."
@@ -131,6 +130,11 @@ public class CoordinatorSocket(
 
         ackHealthMonitor()
         events.emit(parsedEvent)
+    }
+
+    // TODO: Enough for testing this path?
+    private fun handleUnsupportedEvent(e: UnsupportedVideoEventException) {
+        logger.w { "[onMessage] Received unsupported VideoEvent type: ${e.type}. Ignoring." }
     }
 
     private fun extractEventType(json: String): String = safeCall("Unknown") {
