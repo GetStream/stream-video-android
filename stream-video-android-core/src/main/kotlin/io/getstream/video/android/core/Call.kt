@@ -42,6 +42,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -601,7 +602,7 @@ public class Call(
         leave(disconnectionReason = null)
     }
 
-    private fun leave(disconnectionReason: Throwable?) {
+    private fun leave(disconnectionReason: Throwable?) = safeCall {
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
@@ -616,7 +617,7 @@ public class Call(
             RealtimeConnection.Disconnected
         }
         stopScreenSharing()
-        client.state.removeActiveCall()
+        client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
         (client as StreamVideoImpl).onCallCleanUp(this)
         camera.disable()
