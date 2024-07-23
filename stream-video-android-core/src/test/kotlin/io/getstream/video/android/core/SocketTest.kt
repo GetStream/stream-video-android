@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.squareup.moshi.JsonDataException
@@ -32,9 +33,13 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,6 +48,7 @@ import org.openapitools.client.models.HealthCheckEvent
 import org.openapitools.client.models.UnsupportedVideoEventException
 import org.openapitools.client.models.VideoEvent
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Test coverage for the sockets
@@ -252,6 +258,9 @@ class CoordinatorSocketTest : SocketTestBase() {
 
         coVerify(exactly = 1) { spySocket["processEvent"](ofType(HealthCheckEvent::class)) }
         verify(exactly = 0) { spySocket["handleError"](ofType(JsonDataException::class)) }
+
+        val event = spySocket.events.drop(1).first() // Skip over ConnectedEvent
+        assertThat(event).isInstanceOf(HealthCheckEvent::class.java)
     }
 
     @Test
@@ -276,6 +285,9 @@ class CoordinatorSocketTest : SocketTestBase() {
         }
         coVerify(exactly = 0) {
             spySocket["processEvent"](ofType(HealthCheckEvent::class))
+        }
+        spySocket.errors.test {
+            assertThat(awaitItem()).isInstanceOf(JsonDataException::class.java)
         }
     }
 
@@ -305,6 +317,8 @@ class CoordinatorSocketTest : SocketTestBase() {
         verify(exactly = 0) {
             spySocket["handleError"](ofType(JsonDataException::class))
         }
+        val error = withTimeoutOrNull(2.seconds) { spySocket.errors.firstOrNull() }
+        assertThat(error).isNull()
     }
 }
 
