@@ -127,6 +127,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getErrors ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getIngress ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLive ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getLiveDuration ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLiveDurationInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLivestream ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/StateFlow;
