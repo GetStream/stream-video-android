@@ -18,6 +18,8 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.content.Context
+import android.os.Build
+import androidx.core.telecom.CallsManager
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
@@ -32,6 +34,7 @@ import io.getstream.video.android.core.notifications.internal.storage.DeviceToke
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.telecom.TelecomCallManager
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -192,6 +195,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
+            telecomCallManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // TODO-Telecom: Better "if supported" check everywhere needed
+                TelecomCallManager.getInstance(CallsManager(context))
+            } else {
+                null
+            },
         )
 
         if (user.type == UserType.Guest) {
