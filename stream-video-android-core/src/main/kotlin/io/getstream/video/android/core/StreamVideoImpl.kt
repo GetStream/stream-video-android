@@ -51,6 +51,7 @@ import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.telecom.TelecomCallManager
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
@@ -153,6 +154,7 @@ internal class StreamVideoImpl internal constructor(
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     internal val crashOnMissingPermission: Boolean = false,
     internal val audioUsage: Int = defaultAudioUsage,
+    internal val telecomCallManager: TelecomCallManager?,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
