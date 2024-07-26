@@ -23,6 +23,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallsManager
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
@@ -31,6 +32,8 @@ import org.openapitools.client.models.CallRejectedEvent
 
 @RequiresApi(Build.VERSION_CODES.O)
 internal class TelecomCallManager private constructor(private val callManager: CallsManager) {
+
+    private val logger by taggedLogger(TAG)
 
     companion object {
         @Volatile
@@ -45,6 +48,8 @@ internal class TelecomCallManager private constructor(private val callManager: C
     }
 
     init {
+        // TODO-Telecom: Handle exceptions in this class
+        logger.d { "[init]" }
         callManager.registerAppWithTelecom(
             capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
                 CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
@@ -52,9 +57,16 @@ internal class TelecomCallManager private constructor(private val callManager: C
     }
 
     suspend fun registerCall(call: SdkCall) {
+        with(call.telecomCallAttributes) {
+            logger.d {
+                "[registerCall] displayName: $displayName, direction: ${if (direction == 1) "incoming" else "outgoing"}, callType: ${if (callType == 1) "audio" else "video"}"
+            }
+        }
+
         val telecomToSdkEventMapper = TelecomToSdkEventMapper(call)
         val sdkToTelecomEventMapper = SdkToTelecomEventMapper(call)
 
+        // TODO-Telecom: read addCall inline docs
         callManager.addCall(
             callAttributes = call.telecomCallAttributes,
             onAnswer = telecomToSdkEventMapper::onAnswer,
@@ -72,37 +84,54 @@ private class TelecomToSdkEventMapper(private val call: SdkCall) {
     // TODO-Telecom: maybe turn into delegate and inject in TelecomCallManager with default value
     // TODO-Telecom: review what needs to be called here and take results into account
 
+    private val logger by taggedLogger(TAG)
+
     suspend fun onAnswer(callType: Int) {
+        logger.d { "[TelecomToSdkEventMapper#onAnswer]" }
         call.accept()
         call.join()
     }
 
     suspend fun onDisconnect(cause: DisconnectCause) {
+        logger.d { "[TelecomToSdkEventMapper#onDisconnect]" }
         call.leave()
     }
 
     suspend fun onSetActive() {
+        logger.d { "[TelecomToSdkEventMapper#onSetActive]" }
         call.join()
     }
 
     suspend fun onSetInactive() {
+        logger.d { "[TelecomToSdkEventMapper#onSetInactive]" }
         call.leave()
     }
 }
 
 private class SdkToTelecomEventMapper(private val call: SdkCall) {
 
+    private val logger by taggedLogger(TAG)
+
     fun onEvent(callControlScope: CallControlScope) {
         call.subscribe { event ->
+            logger.d { "[SdkToTelecomEventMapper#onEvent] Received event: ${event.getEventType()}" }
+
             with(callControlScope) {
                 launch {
                     when (event) {
-                        is CallAcceptedEvent -> answer(call.telecomCallType)
+                        is CallAcceptedEvent -> {
+                            logger.d { "[SdkToTelecomEventMapper#onEvent] Will call CallControlScope#answer" }
+                            answer(call.telecomCallType)
+                        }
                         // TODO-Telecom: Correct DisconnectCause below
-                        is CallRejectedEvent -> disconnect(
-                            DisconnectCause(DisconnectCause.REJECTED),
-                        )
-                        is CallEndedEvent -> disconnect(DisconnectCause(DisconnectCause.REMOTE))
+                        is CallRejectedEvent -> {
+                            logger.d { "[SdkToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
+                            disconnect(DisconnectCause(DisconnectCause.REJECTED))
+                        }
+                        is CallEndedEvent -> {
+                            logger.d { "[SdkToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
+                            disconnect(DisconnectCause(DisconnectCause.REMOTE))
+                        }
                     }
                 }
             }
@@ -127,3 +156,5 @@ private val SdkCall.telecomCallAttributes: CallAttributesCompat
         },
         callType = telecomCallType,
     )
+
+private const val TAG = "StreamVideo:Telecom"
