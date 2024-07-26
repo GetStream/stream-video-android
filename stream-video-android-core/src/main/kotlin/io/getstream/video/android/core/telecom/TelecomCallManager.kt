@@ -59,7 +59,7 @@ internal class TelecomCallManager private constructor(private val callManager: C
             callAttributes = call.telecomCallAttributes,
             onAnswer = telecomToSdkEventMapper::onAnswer,
             onDisconnect = telecomToSdkEventMapper::onDisconnect,
-            onSetActive = telecomToSdkEventMapper::onSetInactive,
+            onSetActive = telecomToSdkEventMapper::onSetActive,
             onSetInactive = telecomToSdkEventMapper::onSetInactive,
             block = { sdkToTelecomEventMapper.onEvent(callControlScope = this) },
         )
