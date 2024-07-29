@@ -40,7 +40,7 @@ internal class TelecomCallManager private constructor(private val callManager: C
         private var instance: TelecomCallManager? = null
 
         // TODO-Telecom: Should I pass the CallsManager to getInstance or use mockCallsManager internal property
-        fun getInstance(callManager: CallsManager): TelecomCallManager {
+        fun getInstance(context: Context): TelecomCallManager? {
             return instance ?: synchronized(this) {
                 instance ?: TelecomCallManager(callManager).also { instance = it }
             }
