@@ -195,12 +195,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
-            telecomCallManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // TODO-Telecom: Better "if supported" check everywhere needed
-                TelecomCallManager.getInstance(CallsManager(context))
-            } else {
-                null
-            },
+            telecomCallManager = TelecomCallManager.getInstance(context),
         )
 
         if (user.type == UserType.Guest) {
