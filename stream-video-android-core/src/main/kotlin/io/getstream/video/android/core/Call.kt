@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Build
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
@@ -279,10 +278,9 @@ public class Call(
             state.updateFromResponse(it)
             if (ring) {
                 client.state.addRingingCall(this, RingingState.Outgoing())
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    scope.launch { clientImpl.telecomCallManager?.registerCall(this@Call) }
-                }
+                scope.launch {
+                    clientImpl.telecomCallManager?.registerCall(this@Call)
+                } // TODO-Telecom: review "is supported" check again
             }
         }
         return response
