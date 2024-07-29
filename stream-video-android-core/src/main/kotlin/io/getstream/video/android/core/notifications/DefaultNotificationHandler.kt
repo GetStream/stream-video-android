@@ -43,7 +43,11 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 public open class DefaultNotificationHandler(
     private val application: Application,
@@ -86,6 +90,10 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            TelecomHandler.getInstance(application)?.registerCall(callId)
+        }
         CallService.showIncomingCall(application, callId, callDisplayName)
     }
 
