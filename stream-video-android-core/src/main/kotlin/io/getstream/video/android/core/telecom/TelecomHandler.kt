@@ -36,20 +36,20 @@ import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
 
 @TargetApi(Build.VERSION_CODES.O)
-internal class TelecomCallManager private constructor(private val callManager: CallsManager) {
+internal class TelecomHandler private constructor(private val callManager: CallsManager) {
 
     private val logger by taggedLogger(TAG)
 
     companion object {
         @Volatile
-        private var instance: TelecomCallManager? = null
+        private var instance: TelecomHandler? = null
 
-        fun getInstance(context: Context): TelecomCallManager? {
+        fun getInstance(context: Context): TelecomHandler? {
             return instance ?: synchronized(this) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                     context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
                 ) {
-                    instance ?: TelecomCallManager(CallsManager(context.applicationContext)).also {
+                    instance ?: TelecomHandler(CallsManager(context.applicationContext)).also {
                         instance = it
                     }
                 } else {
@@ -66,6 +66,12 @@ internal class TelecomCallManager private constructor(private val callManager: C
                 capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
                     CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
             )
+        }
+    }
+
+    suspend fun registerCall(callId: StreamCallId) {
+        StreamVideo.instanceOrNull()?.call(callId.type, callId.id)?.let { streamCall ->
+            registerCall(streamCall)
         }
     }
 
