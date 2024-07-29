@@ -133,7 +133,7 @@ public class CoordinatorSocket(
         events.emit(parsedEvent)
     }
 
-    private fun extractEventType(json: String): String = safeCall("Unknown") {
+    private fun extractEventType(json: String): String = safeCall(default = "Unknown") {
         val regex = """"type":"(.*?)"""".toRegex()
         val matchResult = regex.find(json)
         return matchResult?.groups?.get(1)?.value ?: "Unknown"
