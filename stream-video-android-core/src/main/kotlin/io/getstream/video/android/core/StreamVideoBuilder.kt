@@ -18,8 +18,6 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.content.Context
-import android.os.Build
-import androidx.core.telecom.CallsManager
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog

@@ -16,10 +16,11 @@
 
 package io.getstream.video.android.core.telecom
 
+import android.annotation.TargetApi
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
-import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallsManager
@@ -30,7 +31,7 @@ import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
 
-@RequiresApi(Build.VERSION_CODES.O)
+@TargetApi(Build.VERSION_CODES.O)
 internal class TelecomCallManager private constructor(private val callManager: CallsManager) {
 
     private val logger by taggedLogger(TAG)
@@ -42,7 +43,13 @@ internal class TelecomCallManager private constructor(private val callManager: C
         // TODO-Telecom: Should I pass the CallsManager to getInstance or use mockCallsManager internal property
         fun getInstance(context: Context): TelecomCallManager? {
             return instance ?: synchronized(this) {
-                instance ?: TelecomCallManager(callManager).also { instance = it }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    instance ?: TelecomCallManager(CallsManager(context.applicationContext)).also {
+                        instance = it
+                    }
+                } else {
+                    null
+                }
             }
         }
     }
