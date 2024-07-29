@@ -18,6 +18,7 @@ package io.getstream.video.android.core.telecom
 
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
@@ -43,7 +44,9 @@ internal class TelecomCallManager private constructor(private val callManager: C
         // TODO-Telecom: Should I pass the CallsManager to getInstance or use mockCallsManager internal property
         fun getInstance(context: Context): TelecomCallManager? {
             return instance ?: synchronized(this) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                    context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
+                ) {
                     instance ?: TelecomCallManager(CallsManager(context.applicationContext)).also {
                         instance = it
                     }
