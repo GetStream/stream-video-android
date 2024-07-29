@@ -27,6 +27,9 @@ import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
@@ -41,7 +44,6 @@ internal class TelecomCallManager private constructor(private val callManager: C
         @Volatile
         private var instance: TelecomCallManager? = null
 
-        // TODO-Telecom: Should I pass the CallsManager to getInstance or use mockCallsManager internal property
         fun getInstance(context: Context): TelecomCallManager? {
             return instance ?: synchronized(this) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
@@ -58,12 +60,13 @@ internal class TelecomCallManager private constructor(private val callManager: C
     }
 
     init {
-        // TODO-Telecom: Handle exceptions in this class
         logger.d { "[init]" }
-        callManager.registerAppWithTelecom(
-            capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
-                CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
-        )
+        safeCall(exceptionLogTag = TAG) {
+            callManager.registerAppWithTelecom(
+                capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
+                    CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
+            )
+        }
     }
 
     suspend fun registerCall(call: SdkCall) {
@@ -77,14 +80,16 @@ internal class TelecomCallManager private constructor(private val callManager: C
         val sdkToTelecomEventMapper = SdkToTelecomEventMapper(call)
 
         // TODO-Telecom: read addCall inline docs
-        callManager.addCall(
-            callAttributes = call.telecomCallAttributes,
-            onAnswer = telecomToSdkEventMapper::onAnswer,
-            onDisconnect = telecomToSdkEventMapper::onDisconnect,
-            onSetActive = telecomToSdkEventMapper::onSetActive,
-            onSetInactive = telecomToSdkEventMapper::onSetInactive,
-            block = { sdkToTelecomEventMapper.onEvent(callControlScope = this) },
-        )
+        safeCall(exceptionLogTag = TAG) {
+            callManager.addCall(
+                callAttributes = call.telecomCallAttributes,
+                onAnswer = telecomToSdkEventMapper::onAnswer,
+                onDisconnect = telecomToSdkEventMapper::onDisconnect,
+                onSetActive = telecomToSdkEventMapper::onSetActive,
+                onSetInactive = telecomToSdkEventMapper::onSetInactive,
+                block = { sdkToTelecomEventMapper.onEvent(callControlScope = this) },
+            )
+        }
     }
 }
 
@@ -123,7 +128,11 @@ private class SdkToTelecomEventMapper(private val call: SdkCall) {
     private val logger by taggedLogger(TAG)
 
     fun onEvent(callControlScope: CallControlScope) {
-        call.subscribe { event ->
+        call.subscribeFor(
+            CallAcceptedEvent::class.java,
+            CallRejectedEvent::class.java,
+            CallEndedEvent::class.java,
+        ) { event ->
             logger.d { "[SdkToTelecomEventMapper#onEvent] Received event: ${event.getEventType()}" }
 
             with(callControlScope) {
