@@ -111,6 +111,8 @@ internal class TelecomHandler private constructor(
         val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
         safeCall(exceptionLogTag = TAG) {
+            postNotification(call) // TODO-Telecom: handle permissions
+
             callManager.addCall(
                 callAttributes = call.telecomCallAttributes,
                 onAnswer = telecomToStreamEventBridge::onAnswer,
