@@ -89,61 +89,90 @@ internal class TelecomHandler private constructor(
         }
     }
 
-    suspend fun registerCall(call: SdkCall) {
+    suspend fun registerCall(call: StreamCall) {
         with(call.telecomCallAttributes) {
             logger.d {
                 "[registerCall] displayName: $displayName, direction: ${if (direction == 1) "incoming" else "outgoing"}, callType: ${if (callType == 1) "audio" else "video"}"
             }
         }
 
-        val telecomToSdkEventMapper = TelecomToSdkEventMapper(call)
-        val sdkToTelecomEventMapper = SdkToTelecomEventMapper(call)
+        val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
+        val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
         // TODO-Telecom: read addCall inline docs
         safeCall(exceptionLogTag = TAG) {
             callManager.addCall(
                 callAttributes = call.telecomCallAttributes,
-                onAnswer = telecomToSdkEventMapper::onAnswer,
-                onDisconnect = telecomToSdkEventMapper::onDisconnect,
-                onSetActive = telecomToSdkEventMapper::onSetActive,
-                onSetInactive = telecomToSdkEventMapper::onSetInactive,
-                block = { sdkToTelecomEventMapper.onEvent(callControlScope = this) },
+                onAnswer = telecomToStreamEventBridge::onAnswer,
+                onDisconnect = telecomToStreamEventBridge::onDisconnect,
+                onSetActive = telecomToStreamEventBridge::onSetActive,
+                onSetInactive = telecomToStreamEventBridge::onSetInactive,
+                block = { streamToTelecomEventBridge.onEvent(callControlScope = this) },
             )
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun postNotification(call: StreamCall) {
+        logger.d { "[postNotification] Ringing state: ${call.state.ringingState.value}" }
+
+        streamVideo?.let { streamVideo ->
+            logger.d { "[postNotification] streamVideo not null" }
+
+            if (call.state.ringingState.value is RingingState.Active) {
+                streamVideo.getOngoingCallNotification(
+                    callId = StreamCallId.fromCallCid(call.cid),
+                    callDisplayName = call.id,
+                )
+            } else {
+                streamVideo.getRingingCallNotification(
+                    ringingState = RingingState.Incoming(),
+                    callId = StreamCallId.fromCallCid(call.cid),
+                    callDisplayName = call.id,
+                    shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
+                )
+            }?.let { notification ->
+                logger.d { "[postNotification] notification not null" }
+
+                NotificationManagerCompat
+                    .from(context)
+                    .notify(call.cid.hashCode(), notification)
+            }
         }
     }
 }
 
-private typealias SdkCall = io.getstream.video.android.core.Call
+private typealias StreamCall = io.getstream.video.android.core.Call
 
-private class TelecomToSdkEventMapper(private val call: SdkCall) {
-    // TODO-Telecom: maybe turn into delegate and inject in TelecomCallManager with default value
+private class TelecomToStreamEventBridge(private val call: StreamCall) {
+    // TODO-Telecom: maybe turn into delegate and inject in TelecomHandler with default value
     // TODO-Telecom: review what needs to be called here and take results into account
 
     private val logger by taggedLogger(TAG)
 
     suspend fun onAnswer(callType: Int) {
-        logger.d { "[TelecomToSdkEventMapper#onAnswer]" }
+        logger.d { "[TelecomToStreamEventMapper#onAnswer]" }
         call.accept()
         call.join()
     }
 
     suspend fun onDisconnect(cause: DisconnectCause) {
-        logger.d { "[TelecomToSdkEventMapper#onDisconnect]" }
+        logger.d { "[TelecomToStreamEventMapper#onDisconnect]" }
         call.leave()
     }
 
     suspend fun onSetActive() {
-        logger.d { "[TelecomToSdkEventMapper#onSetActive]" }
+        logger.d { "[TelecomToStreamEventMapper#onSetActive]" }
         call.join()
     }
 
     suspend fun onSetInactive() {
-        logger.d { "[TelecomToSdkEventMapper#onSetInactive]" }
+        logger.d { "[TelecomToStreamEventMapper#onSetInactive]" }
         call.leave()
     }
 }
 
-private class SdkToTelecomEventMapper(private val call: SdkCall) {
+private class StreamToTelecomEventBridge(private val call: StreamCall) {
 
     private val logger by taggedLogger(TAG)
 
@@ -153,22 +182,22 @@ private class SdkToTelecomEventMapper(private val call: SdkCall) {
             CallRejectedEvent::class.java,
             CallEndedEvent::class.java,
         ) { event ->
-            logger.d { "[SdkToTelecomEventMapper#onEvent] Received event: ${event.getEventType()}" }
+            logger.d { "[StreamToTelecomEventMapper#onEvent] Received event: ${event.getEventType()}" }
 
             with(callControlScope) {
                 launch {
                     when (event) {
                         is CallAcceptedEvent -> {
-                            logger.d { "[SdkToTelecomEventMapper#onEvent] Will call CallControlScope#answer" }
+                            logger.d { "[StreamToTelecomEventMapper#onEvent] Will call CallControlScope#answer" }
                             answer(call.telecomCallType)
                         }
                         // TODO-Telecom: Correct DisconnectCause below
                         is CallRejectedEvent -> {
-                            logger.d { "[SdkToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
+                            logger.d { "[StreamToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
                             disconnect(DisconnectCause(DisconnectCause.REJECTED))
                         }
                         is CallEndedEvent -> {
-                            logger.d { "[SdkToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
+                            logger.d { "[StreamToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
                             disconnect(DisconnectCause(DisconnectCause.REMOTE))
                         }
                     }
@@ -178,13 +207,13 @@ private class SdkToTelecomEventMapper(private val call: SdkCall) {
     }
 }
 
-private val SdkCall.telecomCallType: Int
+private val StreamCall.telecomCallType: Int
     get() = when (type) {
         "default", "livestream" -> CallAttributesCompat.CALL_TYPE_VIDEO_CALL
         else -> CallAttributesCompat.CALL_TYPE_AUDIO_CALL
     }
 
-private val SdkCall.telecomCallAttributes: CallAttributesCompat
+private val StreamCall.telecomCallAttributes: CallAttributesCompat
     get() = CallAttributesCompat(
         displayName = id,
         address = Uri.parse("https://getstream.io/video/join/$cid"),
