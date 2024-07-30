@@ -154,7 +154,6 @@ internal class StreamVideoImpl internal constructor(
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     internal val crashOnMissingPermission: Boolean = false,
     internal val audioUsage: Int = defaultAudioUsage,
-    internal val telecomHandler: TelecomHandler?,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -191,6 +190,8 @@ internal class StreamVideoImpl internal constructor(
     private var calls = mutableMapOf<String, Call>()
 
     val socketImpl = connectionModule.coordinatorSocket
+
+    internal var telecomHandler: TelecomHandler? = null
 
     fun onCallCleanUp(call: Call) {
         calls.remove(call.cid)

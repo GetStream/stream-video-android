@@ -193,7 +193,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
-            telecomHandler = TelecomHandler.getInstance(context),
         )
 
         if (user.type == UserType.Guest) {
@@ -236,6 +235,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                 client.registerPushDevice()
             }
         }
+
+        client.telecomHandler = TelecomHandler.getInstance(context)
 
         return client
     }
