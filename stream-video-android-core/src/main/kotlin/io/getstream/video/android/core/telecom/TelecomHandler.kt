@@ -16,12 +16,14 @@
 
 package io.getstream.video.android.core.telecom
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallsManager
@@ -36,21 +38,30 @@ import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
 
 @TargetApi(Build.VERSION_CODES.O)
-internal class TelecomHandler private constructor(private val callManager: CallsManager) {
+internal class TelecomHandler private constructor(
+    private val context: Context,
+    private val callManager: CallsManager,
+) {
 
     private val logger by taggedLogger(TAG)
+    private var streamVideo: StreamVideo?
 
     companion object {
         @Volatile
-        private var instance: TelecomHandler? = null
+        private var instance: TelecomHandler? = null // TODO-Telecom: handle warning
 
         fun getInstance(context: Context): TelecomHandler? {
             return instance ?: synchronized(this) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                     context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
                 ) {
-                    instance ?: TelecomHandler(CallsManager(context.applicationContext)).also {
-                        instance = it
+                    context.applicationContext.let { applicationContext ->
+                        TelecomHandler(
+                            context = applicationContext,
+                            callManager = CallsManager(applicationContext),
+                        ).also { telecomHandler ->
+                            instance = telecomHandler
+                        }
                     }
                 } else {
                     null
@@ -61,16 +72,19 @@ internal class TelecomHandler private constructor(private val callManager: Calls
 
     init {
         logger.d { "[init]" }
+
         safeCall(exceptionLogTag = TAG) {
             callManager.registerAppWithTelecom(
                 capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
                     CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
             )
         }
+
+        streamVideo = StreamVideo.instanceOrNull()
     }
 
     suspend fun registerCall(callId: StreamCallId) {
-        StreamVideo.instanceOrNull()?.call(callId.type, callId.id)?.let { streamCall ->
+        streamVideo?.call(callId.type, callId.id)?.let { streamCall ->
             registerCall(streamCall)
         }
     }
