@@ -83,6 +83,17 @@ internal class TelecomHandler private constructor(
         streamVideo = StreamVideo.instanceOrNull()
     }
 
+    /*
+    TODO-Telecom:
+    1. Pass call direction to registerCall or find another way (collect ringingState flow - would it be in 5 secs)?
+    2. Dismiss incoming notification when accepting
+    3. Show ongoing notification as sticky (ongoing: true)
+    4. Analog for outgoing
+    5. Analog for non-ringing calls (see ClientState#setActiveCall)
+    6. Remove all service usages and test
+    7. Add deprecation instructions for service
+     */
+
     suspend fun registerCall(callId: StreamCallId) {
         streamVideo?.call(callId.type, callId.id)?.let { streamCall ->
             registerCall(streamCall)
@@ -99,7 +110,6 @@ internal class TelecomHandler private constructor(
         val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
         val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
-        // TODO-Telecom: read addCall inline docs
         safeCall(exceptionLogTag = TAG) {
             callManager.addCall(
                 callAttributes = call.telecomCallAttributes,
