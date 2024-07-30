@@ -280,7 +280,7 @@ public class Call(
                 client.state.addRingingCall(this, RingingState.Outgoing())
                 scope.launch {
                     clientImpl.telecomHandler?.registerCall(this@Call)
-                } // TODO-Telecom: review "is supported" check again
+                }
             }
         }
         return response
