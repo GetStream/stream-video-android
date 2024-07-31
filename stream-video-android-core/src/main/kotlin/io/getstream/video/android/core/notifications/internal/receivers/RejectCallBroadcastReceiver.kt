@@ -42,6 +42,10 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
             is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
         }
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
-        CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
+//        CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid)) // TODO-Telecom: Wrap with isSupported
+
+        CoroutineScope(Dispatchers.Main).launch {
+            TelecomHandler.getInstance(context)?.unregisterCall()
+        }
     }
 }

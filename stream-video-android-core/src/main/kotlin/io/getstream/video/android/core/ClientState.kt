@@ -130,6 +130,8 @@ class ClientState(client: StreamVideo) {
 
         removeRingingCall()
         registerTelecomCall(call)
+
+//        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL) // TODO-Telecom: Wrap with isSupported
     }
 
     fun removeActiveCall() {
@@ -137,12 +139,17 @@ class ClientState(client: StreamVideo) {
 
         removeRingingCall()
         unregisterTelecomCall()
+
+//        maybeStopForegroundService() // TODO-Telecom: Wrap with isSupported
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
 
-        if (ringingState is RingingState.Outgoing) registerTelecomCall(call)
+        if (ringingState is RingingState.Outgoing) {
+            registerTelecomCall(call)
+//            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL) // TODO-Telecom: Wrap with isSupported
+        }
     }
 
     fun removeRingingCall() {

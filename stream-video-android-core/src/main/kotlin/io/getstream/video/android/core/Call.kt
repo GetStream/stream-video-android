@@ -1029,7 +1029,7 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService()
+//        clientImpl.state.maybeStopForegroundService() // TODO-Telecom: Wrap with isSupported
         return clientImpl.accept(type, id)
     }
 
