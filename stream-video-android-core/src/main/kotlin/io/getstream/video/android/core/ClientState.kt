@@ -25,6 +25,7 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
@@ -125,28 +126,39 @@ class ClientState(client: StreamVideo) {
     }
 
     fun setActiveCall(call: Call) {
+        _activeCall.value = call
+
         removeRingingCall()
-        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
-        this._activeCall.value = call
+        registerTelecomCall(call)
     }
 
     fun removeActiveCall() {
-        this._activeCall.value = null
-        maybeStopForegroundService()
+        _activeCall.value = null
+
         removeRingingCall()
+        unregisterTelecomCall()
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
-        if (ringingState is RingingState.Outgoing) {
-            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
-        }
 
-        // TODO: behaviour if you are already in a call
+        if (ringingState is RingingState.Outgoing) registerTelecomCall(call)
     }
 
     fun removeRingingCall() {
         _ringingCall.value = null
+    }
+
+    private fun registerTelecomCall(call: Call) { // TODO-Telecom: What scope should be used. See scope cancelled exception on outgoing.
+        with(clientImpl.scope) {
+            launch { clientImpl.telecomHandler?.registerCall(call) }
+        }
+    }
+
+    private fun unregisterTelecomCall() {
+        with(clientImpl.scope) {
+            launch { clientImpl.telecomHandler?.unregisterCall() }
+        }
     }
 
     /**

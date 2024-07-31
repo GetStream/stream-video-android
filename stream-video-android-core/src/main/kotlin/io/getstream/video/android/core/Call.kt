@@ -276,12 +276,7 @@ public class Call(
 
         response.onSuccess {
             state.updateFromResponse(it)
-            if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
-                scope.launch {
-                    clientImpl.telecomHandler?.registerCall(this@Call)
-                }
-            }
+            if (ring) client.state.addRingingCall(this, RingingState.Outgoing())
         }
         return response
     }
