@@ -291,7 +291,7 @@ public open class DefaultNotificationHandler(
             setContentText(
                 application.getString(
                     R.string.stream_video_ongoing_call_notification_description,
-                )
+                ),
             )
             setChannelId(channelId)
             setOngoing(true)
@@ -487,14 +487,16 @@ public open class DefaultNotificationHandler(
     }
 
     private fun NotificationCompat.Builder.addHangupAction(
-        rejectCallPendingIntent: PendingIntent
+        rejectCallPendingIntent: PendingIntent,
     ): NotificationCompat.Builder = apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 CallStyle.forOngoingCall(
                     Person.Builder()
                         .setName(
-                            application.getString(R.string.stream_video_ongoing_call_notification_title)
+                            application.getString(
+                                R.string.stream_video_ongoing_call_notification_title,
+                            ),
                         )
                         .build(),
                     rejectCallPendingIntent,
