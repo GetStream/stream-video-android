@@ -94,6 +94,8 @@ public open class DefaultNotificationHandler(
         CoroutineScope(Dispatchers.Default).launch {
             TelecomHandler.getInstance(application)?.registerCall(callId)
         }
+
+//        CallService.showIncomingCall(application, callId, callDisplayName) // TODO-Telecom: Wrap with isSupported
     }
 
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {

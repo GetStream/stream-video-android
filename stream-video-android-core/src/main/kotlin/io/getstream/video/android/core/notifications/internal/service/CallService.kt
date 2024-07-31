@@ -355,7 +355,7 @@ internal class CallService : Service() {
     ) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            streamVideo.state.addRingingCall(call, ringingState)
+//            streamVideo.state.addRingingCall(call, ringingState) // TODO-Telecom: Wrap with isSupported
         }
     }
 
