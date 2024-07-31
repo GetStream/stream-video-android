@@ -204,10 +204,7 @@ internal class CallService : Service() {
 
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
-                    first = streamVideo.getOngoingCallNotification(
-                        callDisplayName = intentCallDisplayName,
-                        callId = intentCallId,
-                    ),
+                    first = streamVideo.getOngoingCallNotification(callId = intentCallId),
                     second = intentCallId.hashCode(),
                 )
 
@@ -215,7 +212,7 @@ internal class CallService : Service() {
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
                         callId = intentCallId,
-                        callDisplayName = intentCallDisplayName!!,
+                        incomingCallDisplayName = intentCallDisplayName!!,
                         shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID,
@@ -225,9 +222,6 @@ internal class CallService : Service() {
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Outgoing(),
                         callId = intentCallId,
-                        callDisplayName = getString(
-                            R.string.stream_video_ongoing_call_notification_description,
-                        ),
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
                 )

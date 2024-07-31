@@ -93,6 +93,7 @@ internal class TelecomHandler private constructor(
     5. Analog for non-ringing calls (see ClientState#setActiveCall)
     6. Remove all service usages and test
     7. Add deprecation instructions for service
+    8. Add sounds to notifications
      */
 
     suspend fun registerCall(callId: StreamCallId) {
@@ -141,32 +142,45 @@ internal class TelecomHandler private constructor(
 
     @SuppressLint("MissingPermission")
     private fun postNotification() = currentCall?.let { currentCall ->
-        logger.d { "[postNotification] Call ID: ${currentCall.id}, ringingState: ${currentCall.state.ringingState.value}" }
+        logger.d {
+            "[postNotification] Call ID: ${currentCall.id}, ringingState: ${currentCall.state.ringingState.value}"
+        }
 
         streamVideo?.let { streamVideo ->
             currentCall.state.ringingState.value.let { ringingState ->
-                if (ringingState is RingingState.Active) {
-                    logger.d { "[postNotification] Creating ongoing notification" }
+                val notification = when (ringingState) {
+                    is RingingState.Incoming -> {
+                        logger.d { "[postNotification] Creating incoming notification" }
 
-                    streamVideo.getOngoingCallNotification(
-                        callId = StreamCallId.fromCallCid(currentCall.cid),
-                        callDisplayName = currentCall.id,
-                    )
-                } else {
-                    logger.d { "[postNotification] Creating ringing notification" }
+                        streamVideo.getRingingCallNotification(
+                            ringingState = RingingState.Incoming(),
+                            callId = StreamCallId.fromCallCid(currentCall.cid),
+                            incomingCallDisplayName = currentCall.incomingCallDisplayName,
+                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
+                        )
+                    }
 
-                    streamVideo.getRingingCallNotification(
-                        ringingState = ringingState,
-                        callId = StreamCallId.fromCallCid(currentCall.cid),
-                        callDisplayName = "${currentCall.state.createdBy.value?.name} is calling you...",
-                        shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
-                    )
-                }?.let { notification ->
+                    is RingingState.Outgoing, is RingingState.Active -> {
+                        logger.d { "[postNotification] Creating ongoing notification" }
+
+                        streamVideo.getOngoingCallNotification(
+                            callId = StreamCallId.fromCallCid(currentCall.cid),
+                            isOutgoingCall = ringingState is RingingState.Outgoing,
+                        )
+                    }
+
+                    else -> {
+                        logger.d { "[postNotification] Not creating any notification" }
+                        null
+                    }
+                }
+
+                notification?.let {
                     logger.d { "[postNotification] Posting notification" }
 
                     NotificationManagerCompat
                         .from(context)
-                        .notify(currentCall.cid.hashCode(), notification)
+                        .notify(currentCall.cid.hashCode(), it)
                 }
             }
         }
@@ -267,5 +281,8 @@ private val StreamCall.telecomCallAttributes: CallAttributesCompat
         },
         callType = telecomCallType,
     )
+
+private val StreamCall.incomingCallDisplayName: String
+    get() = state.createdBy.value?.userNameOrId ?: "Unknown"
 
 private const val TAG = "StreamVideo:Telecom"
