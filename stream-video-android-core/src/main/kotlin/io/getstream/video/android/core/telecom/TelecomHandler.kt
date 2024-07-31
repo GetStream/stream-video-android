@@ -87,7 +87,6 @@ internal class TelecomHandler private constructor(
 
     /*
     TODO-Telecom:
-    1. Pass call direction to registerCall or find another way (collect ringingState flow - would it be in 5 secs)?
     2. Dismiss incoming notification when accepting
     3. Show ongoing notification as sticky (ongoing: true)
     4. Analog for outgoing
@@ -195,23 +194,23 @@ private class TelecomToStreamEventBridge(private val call: StreamCall) {
     private val logger by taggedLogger(TAG)
 
     suspend fun onAnswer(callType: Int) {
-        logger.d { "[TelecomToStreamEventMapper#onAnswer]" }
+        logger.d { "[TelecomToStreamEventBridge#onAnswer]" }
         call.accept()
         call.join()
     }
 
     suspend fun onDisconnect(cause: DisconnectCause) {
-        logger.d { "[TelecomToStreamEventMapper#onDisconnect]" }
+        logger.d { "[TelecomToStreamEventBridge#onDisconnect]" }
         call.leave()
     }
 
     suspend fun onSetActive() {
-        logger.d { "[TelecomToStreamEventMapper#onSetActive]" }
+        logger.d { "[TelecomToStreamEventBridge#onSetActive]" }
         call.join()
     }
 
     suspend fun onSetInactive() {
-        logger.d { "[TelecomToStreamEventMapper#onSetInactive]" }
+        logger.d { "[TelecomToStreamEventBridge#onSetInactive]" }
         call.leave()
     }
 }
@@ -232,16 +231,16 @@ private class StreamToTelecomEventBridge(private val call: StreamCall) {
                 launch {
                     when (event) {
                         is CallAcceptedEvent -> {
-                            logger.d { "[StreamToTelecomEventMapper#onEvent] Will call CallControlScope#answer" }
+                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#answer" }
                             answer(call.telecomCallType)
                         }
                         // TODO-Telecom: Correct DisconnectCause below
                         is CallRejectedEvent -> {
-                            logger.d { "[StreamToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
+                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
                             disconnect(DisconnectCause(DisconnectCause.REJECTED))
                         }
                         is CallEndedEvent -> {
-                            logger.d { "[StreamToTelecomEventMapper#onEvent] Will call CallControlScope#disconnect" }
+                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
                             disconnect(DisconnectCause(DisconnectCause.REMOTE))
                         }
                     }
