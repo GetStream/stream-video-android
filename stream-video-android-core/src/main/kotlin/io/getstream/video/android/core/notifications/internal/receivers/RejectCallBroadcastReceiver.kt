@@ -23,8 +23,10 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.core.telecom.TelecomHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this

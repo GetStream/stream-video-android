@@ -26,11 +26,11 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun onMissedCall(callId: StreamCallId, callDisplayName: String)
     fun onNotification(callId: StreamCallId, callDisplayName: String)
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
-    fun getOngoingCallNotification(callDisplayName: String?, callId: StreamCallId): Notification?
+    fun getOngoingCallNotification(callId: StreamCallId, isOutgoingCall: Boolean = false): Notification?
     fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String,
+        incomingCallDisplayName: String = "",
         shouldHaveContentIntent: Boolean = true,
     ): Notification?
     fun getSettingUpCallNotification(): Notification?
