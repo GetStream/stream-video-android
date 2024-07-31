@@ -44,7 +44,9 @@ internal class TelecomHandler private constructor(
 ) {
 
     private val logger by taggedLogger(TAG)
-    private var streamVideo: StreamVideo?
+    private var streamVideo: StreamVideo? = null
+    private var currentCall: StreamCall? = null
+    private var callControlScope: CallControlScope? = null
 
     companion object {
         @Volatile
@@ -101,56 +103,86 @@ internal class TelecomHandler private constructor(
     }
 
     suspend fun registerCall(call: StreamCall) {
+        call.get()
+
         with(call.telecomCallAttributes) {
             logger.d {
-                "[registerCall] displayName: $displayName, direction: ${if (direction == 1) "incoming" else "outgoing"}, callType: ${if (callType == 1) "audio" else "video"}"
+                "[registerCall] displayName: $displayName, ringingState: ${call.state.ringingState.value}, callType: ${if (callType == 1) "audio" else "video"}"
             }
         }
 
-        val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
-        val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
+        if (call.cid == currentCall?.cid) {
+            logger.d { "[registerCall] Updating existing call" }
 
-        safeCall(exceptionLogTag = TAG) {
-            postNotification(call) // TODO-Telecom: handle permissions
+            postNotification()
+        } else {
+            logger.d { "[registerCall] Registering new call" }
 
-            callManager.addCall(
-                callAttributes = call.telecomCallAttributes,
-                onAnswer = telecomToStreamEventBridge::onAnswer,
-                onDisconnect = telecomToStreamEventBridge::onDisconnect,
-                onSetActive = telecomToStreamEventBridge::onSetActive,
-                onSetInactive = telecomToStreamEventBridge::onSetInactive,
-                block = { streamToTelecomEventBridge.onEvent(callControlScope = this) },
-            )
+            currentCall = call
+            val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
+            val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
+
+            safeCall(exceptionLogTag = TAG) {
+                postNotification() // TODO-Telecom: handle permissions
+
+                callManager.addCall(
+                    callAttributes = call.telecomCallAttributes,
+                    onAnswer = telecomToStreamEventBridge::onAnswer,
+                    onDisconnect = telecomToStreamEventBridge::onDisconnect,
+                    onSetActive = telecomToStreamEventBridge::onSetActive,
+                    onSetInactive = telecomToStreamEventBridge::onSetInactive,
+                    block = {
+                        callControlScope = this
+                        streamToTelecomEventBridge.onEvent(this)
+                    },
+                )
+            }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun postNotification(call: StreamCall) {
-        logger.d { "[postNotification] Ringing state: ${call.state.ringingState.value}" }
+    private fun postNotification() = currentCall?.let { currentCall ->
+        logger.d { "[postNotification] Call ID: ${currentCall.id}, ringingState: ${currentCall.state.ringingState.value}" }
 
         streamVideo?.let { streamVideo ->
-            logger.d { "[postNotification] streamVideo not null" }
+            currentCall.state.ringingState.value.let { ringingState ->
+                if (ringingState is RingingState.Active) {
+                    logger.d { "[postNotification] Creating ongoing notification" }
 
-            if (call.state.ringingState.value is RingingState.Active) {
-                streamVideo.getOngoingCallNotification(
-                    callId = StreamCallId.fromCallCid(call.cid),
-                    callDisplayName = call.id,
-                )
-            } else {
-                streamVideo.getRingingCallNotification(
-                    ringingState = RingingState.Incoming(),
-                    callId = StreamCallId.fromCallCid(call.cid),
-                    callDisplayName = call.id,
-                    shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
-                )
-            }?.let { notification ->
-                logger.d { "[postNotification] notification not null" }
+                    streamVideo.getOngoingCallNotification(
+                        callId = StreamCallId.fromCallCid(currentCall.cid),
+                        callDisplayName = currentCall.id,
+                    )
+                } else {
+                    logger.d { "[postNotification] Creating ringing notification" }
 
-                NotificationManagerCompat
-                    .from(context)
-                    .notify(call.cid.hashCode(), notification)
+                    streamVideo.getRingingCallNotification(
+                        ringingState = ringingState,
+                        callId = StreamCallId.fromCallCid(currentCall.cid),
+                        callDisplayName = "${currentCall.state.createdBy.value?.name} is calling you...",
+                        shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
+                    )
+                }?.let { notification ->
+                    logger.d { "[postNotification] Posting notification" }
+
+                    NotificationManagerCompat
+                        .from(context)
+                        .notify(currentCall.cid.hashCode(), notification)
+                }
             }
         }
+    }
+
+    suspend fun unregisterCall() = safeCall(exceptionLogTag = TAG) {
+        cancelNotification()
+
+        callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
+            logger.d { "[unregisterCall] Disconnect result: $result" }
+        }
+    }
+
+    private fun cancelNotification() {
+        NotificationManagerCompat.from(context).cancel(currentCall?.cid?.hashCode() ?: 0)
     }
 }
 
