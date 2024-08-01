@@ -1038,7 +1038,7 @@ public class Call(
             state.removeRingingCall()
 
             if (TelecomHandler.isSupported(context)) {
-                scope.launch { telecomHandler?.unregisterCall() }
+                telecomHandler?.unregisterCall()
             } else {
                 state.maybeStopForegroundService()
             }

@@ -30,9 +30,13 @@ import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
@@ -46,6 +50,7 @@ internal class TelecomHandler private constructor(
     private val logger by taggedLogger(TAG)
     private var streamVideo: StreamVideo? = null
     private var currentCall: StreamCall? = null
+    private val coroutineScope = CoroutineScope(DispatcherProvider.Default)
     private var callControlScope: CallControlScope? = null
 
     companion object {
@@ -107,13 +112,13 @@ internal class TelecomHandler private constructor(
     8. Add sounds to notifications
      */
 
-    suspend fun registerCall(callId: StreamCallId) {
+    fun registerCall(callId: StreamCallId) {
         streamVideo?.call(callId.type, callId.id)?.let { streamCall ->
             registerCall(streamCall)
         }
     }
 
-    suspend fun registerCall(call: StreamCall) {
+    fun registerCall(call: StreamCall) = coroutineScope.launch {
         call.get()
 
         with(call.telecomCallAttributes) {
@@ -132,7 +137,7 @@ internal class TelecomHandler private constructor(
             val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
             val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
-            safeCall(exceptionLogTag = TAG) {
+            safeCall(exceptionLogTag = TAG) { // TODO-Telecom: or safeSuspendingCall?
                 postNotification() // TODO-Telecom: handle permissions
 
                 callManager.addCall(
@@ -166,16 +171,20 @@ internal class TelecomHandler private constructor(
                             ringingState = RingingState.Incoming(),
                             callId = StreamCallId.fromCallCid(currentCall.cid),
                             incomingCallDisplayName = currentCall.incomingCallDisplayName,
-                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
+                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null, // TODO-Telecom: Compare this to CallService
                         )
                     }
 
                     is RingingState.Outgoing, is RingingState.Active -> {
-                        logger.d { "[postNotification] Creating ongoing notification" }
+                        val isOutgoingCall = ringingState is RingingState.Outgoing
+
+                        logger.d {
+                            "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
+                        }
 
                         streamVideo.getOngoingCallNotification(
                             callId = StreamCallId.fromCallCid(currentCall.cid),
-                            isOutgoingCall = ringingState is RingingState.Outgoing,
+                            isOutgoingCall = isOutgoingCall,
                         )
                     }
 
@@ -196,17 +205,25 @@ internal class TelecomHandler private constructor(
         }
     }
 
-    suspend fun unregisterCall() = safeCall(exceptionLogTag = TAG) {
-        cancelNotification()
+    fun unregisterCall() = coroutineScope.launch {
+        safeCall(exceptionLogTag = TAG) {
+            cancelNotification()
 
-        callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-            logger.d { "[unregisterCall] Disconnect result: $result" }
+            callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
+                logger.d { "[unregisterCall] Disconnect result: $result" }
+            }
         }
     }
 
     private fun cancelNotification() {
         logger.d { "[cancelNotification]" }
         NotificationManagerCompat.from(context).cancel(currentCall?.cid?.hashCode() ?: 0)
+    }
+
+    fun cleanUp() = runBlocking {
+        unregisterCall()
+        coroutineScope.cancel()
+        instance = null
     }
 }
 

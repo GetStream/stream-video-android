@@ -208,6 +208,8 @@ internal class StreamVideoImpl internal constructor(
         // call cleanup on the active call
         val activeCall = state.activeCall.value
         activeCall?.leave()
+
+        telecomHandler?.cleanUp()
     }
 
     /**
