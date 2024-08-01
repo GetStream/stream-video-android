@@ -42,6 +42,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
@@ -89,12 +90,17 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
+        registerCall(application, callId, callDisplayName)
+    }
 
-        CoroutineScope(Dispatchers.Default).launch {
-            TelecomHandler.getInstance(application)?.registerCall(callId)
+    private fun registerCall(context: Context, callId: StreamCallId, callDisplayName: String) {
+        if (TelecomHandler.isSupported(context)) {
+            CoroutineScope(Dispatchers.Default).launch {
+                TelecomHandler.getInstance(context)?.registerCall(callId)
+            }
+        } else {
+            CallService.showIncomingCall(context, callId, callDisplayName)
         }
-
-//        CallService.showIncomingCall(application, callId, callDisplayName) // TODO-Telecom: Wrap with isSupported
     }
 
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
