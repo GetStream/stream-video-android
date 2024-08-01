@@ -26,7 +26,6 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
@@ -154,7 +153,7 @@ class ClientState(client: StreamVideo) {
     private fun registerCall(call: Call, trigger: String) { // TODO-Telecom: What scope should be used. See scope cancelled exception on outgoing & scopes in broadcasts
         with(clientImpl) {
             if (TelecomHandler.isSupported(context)) {
-                scope.launch { telecomHandler?.registerCall(call) }
+                telecomHandler?.registerCall(call)
             } else {
                 maybeStartForegroundService(call, trigger)
             }
@@ -164,7 +163,7 @@ class ClientState(client: StreamVideo) {
     private fun unregisterCall() {
         with(clientImpl) {
             if (TelecomHandler.isSupported(context)) {
-                scope.launch { telecomHandler?.unregisterCall() }
+                telecomHandler?.unregisterCall()
             } else {
                 maybeStopForegroundService()
             }

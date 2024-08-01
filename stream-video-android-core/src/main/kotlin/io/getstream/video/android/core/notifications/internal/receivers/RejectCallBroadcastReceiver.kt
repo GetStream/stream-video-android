@@ -26,9 +26,6 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.model.StreamCallId
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this
@@ -53,9 +50,7 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
 
     private fun unregisterCall(call: Call, context: Context) {
         if (TelecomHandler.isSupported(context)) {
-            CoroutineScope(Dispatchers.Default).launch {
-                TelecomHandler.getInstance(context)?.unregisterCall()
-            }
+            TelecomHandler.getInstance(context)?.unregisterCall()
         } else {
             CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
         }

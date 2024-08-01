@@ -45,9 +45,6 @@ import io.getstream.video.android.core.notifications.internal.DefaultStreamInten
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.model.StreamCallId
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 public open class DefaultNotificationHandler(
     private val application: Application,
@@ -95,9 +92,7 @@ public open class DefaultNotificationHandler(
 
     private fun registerCall(context: Context, callId: StreamCallId, callDisplayName: String) {
         if (TelecomHandler.isSupported(context)) {
-            CoroutineScope(Dispatchers.Default).launch {
-                TelecomHandler.getInstance(context)?.registerCall(callId)
-            }
+            TelecomHandler.getInstance(context)?.registerCall(callId)
         } else {
             CallService.showIncomingCall(context, callId, callDisplayName)
         }
