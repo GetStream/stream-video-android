@@ -218,9 +218,9 @@ internal class CallService : Service() {
                 )
 
                 TRIGGER_OUTGOING_CALL -> Pair(
-                    first = streamVideo.getRingingCallNotification(
-                        ringingState = RingingState.Outgoing(),
+                    first = streamVideo.getOngoingCallNotification(
                         callId = intentCallId,
+                        isOutgoingCall = true,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
                 )
