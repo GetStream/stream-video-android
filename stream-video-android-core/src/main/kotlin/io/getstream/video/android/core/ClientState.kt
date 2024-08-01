@@ -20,6 +20,7 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -129,26 +130,20 @@ class ClientState(client: StreamVideo) {
         _activeCall.value = call
 
         removeRingingCall()
-        registerTelecomCall(call)
-
-//        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL) // TODO-Telecom: Wrap with isSupported
+        registerCall(call, CallService.TRIGGER_ONGOING_CALL)
     }
 
     fun removeActiveCall() {
         _activeCall.value = null
 
         removeRingingCall()
-        unregisterTelecomCall()
-
-//        maybeStopForegroundService() // TODO-Telecom: Wrap with isSupported
+        unregisterCall()
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
-
         if (ringingState is RingingState.Outgoing) {
-            registerTelecomCall(call)
-//            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL) // TODO-Telecom: Wrap with isSupported
+            registerCall(call, CallService.TRIGGER_OUTGOING_CALL)
         }
     }
 
@@ -156,15 +151,23 @@ class ClientState(client: StreamVideo) {
         _ringingCall.value = null
     }
 
-    private fun registerTelecomCall(call: Call) { // TODO-Telecom: What scope should be used. See scope cancelled exception on outgoing.
-        with(clientImpl.scope) {
-            launch { clientImpl.telecomHandler?.registerCall(call) }
+    private fun registerCall(call: Call, trigger: String) { // TODO-Telecom: What scope should be used. See scope cancelled exception on outgoing & scopes in broadcasts
+        with(clientImpl) {
+            if (TelecomHandler.isSupported(context)) {
+                scope.launch { telecomHandler?.registerCall(call) }
+            } else {
+                maybeStartForegroundService(call, trigger)
+            }
         }
     }
 
-    private fun unregisterTelecomCall() {
-        with(clientImpl.scope) {
-            launch { clientImpl.telecomHandler?.unregisterCall() }
+    private fun unregisterCall() {
+        with(clientImpl) {
+            if (TelecomHandler.isSupported(context)) {
+                scope.launch { telecomHandler?.unregisterCall() }
+            } else {
+                maybeStopForegroundService()
+            }
         }
     }
 
