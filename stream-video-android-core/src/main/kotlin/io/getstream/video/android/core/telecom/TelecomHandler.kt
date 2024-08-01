@@ -54,9 +54,7 @@ internal class TelecomHandler private constructor(
 
         fun getInstance(context: Context): TelecomHandler? {
             return instance ?: synchronized(this) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                    context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
-                ) {
+                if (isSupported(context)) {
                     context.applicationContext.let { applicationContext ->
                         TelecomHandler(
                             context = applicationContext,
@@ -69,6 +67,19 @@ internal class TelecomHandler private constructor(
                     null
                 }
             }
+        }
+
+        fun isSupported(context: Context) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // For Android 14+, check the TELECOM feature directly
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // For API 26+ assume that Telecom is supported if the device supports SIM.
+            // According to the docs, most devices with a SIM card support Telecom.
+            // https://developer.android.com/develop/connectivity/telecom/voip-app#supported_telecom_device
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) &&
+                context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_GSM)
+        } else {
+            false
         }
     }
 
@@ -113,7 +124,6 @@ internal class TelecomHandler private constructor(
 
         if (call.cid == currentCall?.cid) {
             logger.d { "[registerCall] Updating existing call" }
-
             postNotification()
         } else {
             logger.d { "[registerCall] Registering new call" }
@@ -195,6 +205,7 @@ internal class TelecomHandler private constructor(
     }
 
     private fun cancelNotification() {
+        logger.d { "[cancelNotification]" }
         NotificationManagerCompat.from(context).cancel(currentCall?.cid?.hashCode() ?: 0)
     }
 }
