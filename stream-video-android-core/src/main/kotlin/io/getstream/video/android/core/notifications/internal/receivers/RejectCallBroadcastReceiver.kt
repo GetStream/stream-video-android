@@ -24,8 +24,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.telecom.TelecomHandler
-import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.core.telecom.TelecomCompat
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this
@@ -44,15 +43,10 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
             is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
             is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
         }
-
-        unregisterCall(call, context)
-    }
-
-    private fun unregisterCall(call: Call, context: Context) {
-        if (TelecomHandler.isSupported(context)) {
-            TelecomHandler.getInstance(context)?.unregisterCall()
-        } else {
-            CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
-        }
+        TelecomCompat.unregisterCall(
+            context,
+            CallService.TRIGGER_INCOMING_CALL,
+            call = call,
+        )
     }
 }

@@ -1028,8 +1028,8 @@ public class Call(
     suspend fun accept(): Result<AcceptCallResponse> {
         logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
-
-        unregisterCall()
+        clientImpl.state.removeRingingCall()
+//        unregisterCall()  // TODO-Telecom: unregister needed here?
         return clientImpl.accept(type, id)
     }
 

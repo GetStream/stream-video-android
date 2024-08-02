@@ -20,7 +20,7 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.telecom.TelecomHandler
+import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -129,45 +129,36 @@ class ClientState(client: StreamVideo) {
         _activeCall.value = call
 
         removeRingingCall()
-        registerCall(call, CallService.TRIGGER_ONGOING_CALL)
+        TelecomCompat.registerCall(
+            clientImpl.context,
+            CallService.TRIGGER_ONGOING_CALL,
+            call = call,
+        )
     }
 
     fun removeActiveCall() {
         _activeCall.value = null
 
         removeRingingCall()
-        unregisterCall()
+        TelecomCompat.unregisterCall(
+            clientImpl.context,
+            CallService.TRIGGER_ONGOING_CALL,
+        )
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
         if (ringingState is RingingState.Outgoing) {
-            registerCall(call, CallService.TRIGGER_OUTGOING_CALL)
+            TelecomCompat.registerCall(
+                clientImpl.context,
+                CallService.TRIGGER_OUTGOING_CALL,
+                call = call,
+            )
         }
     }
 
     fun removeRingingCall() {
         _ringingCall.value = null
-    }
-
-    private fun registerCall(call: Call, trigger: String) { // TODO-Telecom: What scope should be used. See scope cancelled exception on outgoing & scopes in broadcasts
-        with(clientImpl) {
-            if (TelecomHandler.isSupported(context)) {
-                telecomHandler?.registerCall(call)
-            } else {
-                maybeStartForegroundService(call, trigger)
-            }
-        }
-    }
-
-    private fun unregisterCall() {
-        with(clientImpl) {
-            if (TelecomHandler.isSupported(context)) {
-                telecomHandler?.unregisterCall()
-            } else {
-                maybeStopForegroundService()
-            }
-        }
     }
 
     /**
