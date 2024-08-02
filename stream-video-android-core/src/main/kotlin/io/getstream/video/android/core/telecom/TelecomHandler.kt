@@ -88,6 +88,8 @@ internal class TelecomHandler private constructor(
         } else {
             false
         }
+
+//        fun isSupported(context: Context) = false // TODO-Telecom: remove
     }
 
     init {
@@ -105,13 +107,15 @@ internal class TelecomHandler private constructor(
 
     /*
     TODO-Telecom:
-    2. Dismiss incoming notification when accepting
-    3. Show ongoing notification as sticky (ongoing: true)
-    4. Analog for outgoing
-    5. Analog for non-ringing calls (see ClientState#setActiveCall)
-    6. Remove all service usages and test
-    7. Add deprecation instructions for service
-    8. Add sounds to notifications
+    Add deprecation instructions for service
+    Add sounds to notifications
+    From incoming to ongoing notification -> slow
+    Test normal group call - works, but tweak notification title & contents?
+    Test call in background
+     - doesn't receive ringing event (which is normal, but postNotification goes into "No notification posted")
+     - add direction to registerCall?
+     - test if it receives other events when in bg while in call and if notifications are updated accordingly
+    Should check for audio/video permissions in registerCall, similar to CallService?
      */
 
     fun registerCall(call: StreamCall) = coroutineScope.launch {
@@ -134,7 +138,7 @@ internal class TelecomHandler private constructor(
             val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
             safeCall(exceptionLogTag = TELECOM_LOG_TAG) { // TODO-Telecom: or safeSuspendingCall?
-                postNotification() // TODO-Telecom: handle permissions
+                postNotification()
 
                 callManager.addCall(
                     callAttributes = call.telecomCallAttributes,
@@ -240,7 +244,7 @@ internal class TelecomHandler private constructor(
 }
 
 private class TelecomToStreamEventBridge(private val call: StreamCall) {
-    // TODO-Telecom: maybe turn into delegate and inject in TelecomHandler with default value
+    // TODO-Telecom: maybe turn into delegate and inject in TelecomHandler with default instance
     // TODO-Telecom: review what needs to be called here and take results into account
 
     private val logger by taggedLogger(TELECOM_LOG_TAG)
@@ -256,6 +260,7 @@ private class TelecomToStreamEventBridge(private val call: StreamCall) {
         call.leave()
     }
 
+    // TODO-Telecom: onhold support & missed calls?
     suspend fun onSetActive() {
         logger.d { "[TelecomToStreamEventBridge#onSetActive]" }
         call.join()

@@ -46,7 +46,7 @@ internal object TelecomCompat {
                         callDisplayName,
                     )
                 } else {
-                    // TODO-Telecom: Keep runForegroundService flag into account here and above?
+                    // TODO-Telecom: Take runForegroundService flag into account here and above?
                     ContextCompat.startForegroundService(
                         applicationContext,
                         CallService.buildStartIntent(
