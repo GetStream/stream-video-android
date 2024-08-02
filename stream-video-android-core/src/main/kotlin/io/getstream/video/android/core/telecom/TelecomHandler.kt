@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.telecom
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
@@ -24,6 +25,7 @@ import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallsManager
@@ -150,54 +152,68 @@ internal class TelecomHandler private constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun postNotification() = currentCall?.let { currentCall ->
-        logger.d {
-            "[postNotification] Call ID: ${currentCall.id}, ringingState: ${currentCall.state.ringingState.value}"
-        }
-
-        streamVideo?.let { streamVideo ->
-            currentCall.state.ringingState.value.let { ringingState ->
-                val notification = when (ringingState) {
-                    is RingingState.Incoming -> {
-                        logger.d { "[postNotification] Creating incoming notification" }
-
-                        streamVideo.getRingingCallNotification(
-                            ringingState = RingingState.Incoming(),
-                            callId = StreamCallId.fromCallCid(currentCall.cid),
-                            incomingCallDisplayName = currentCall.incomingCallDisplayName,
-                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null, // TODO-Telecom: Compare this to CallService
-                        )
-                    }
-
-                    is RingingState.Outgoing, is RingingState.Active -> {
-                        val isOutgoingCall = ringingState is RingingState.Outgoing
-
-                        logger.d {
-                            "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
-                        }
-
-                        streamVideo.getOngoingCallNotification(
-                            callId = StreamCallId.fromCallCid(currentCall.cid),
-                            isOutgoingCall = isOutgoingCall,
-                        )
-                    }
-
-                    else -> {
-                        logger.d { "[postNotification] Not creating any notification" }
-                        null
-                    }
+    private fun postNotification() {
+        if (!hasNotificationsPermission()) {
+            logger.e { "[postNotification] POST_NOTIFICATIONS permission missing" }
+            return
+        } else {
+            currentCall?.let { currentCall ->
+                logger.d {
+                    "[postNotification] Call ID: ${currentCall.id}, ringingState: ${currentCall.state.ringingState.value}"
                 }
 
-                notification?.let {
-                    logger.d { "[postNotification] Posting notification" }
+                streamVideo?.let { streamVideo ->
+                    currentCall.state.ringingState.value.let { ringingState ->
+                        val notification = when (ringingState) {
+                            is RingingState.Incoming -> {
+                                logger.d { "[postNotification] Creating incoming notification" }
 
-                    NotificationManagerCompat
-                        .from(context)
-                        .notify(currentCall.cid.hashCode(), it)
+                                streamVideo.getRingingCallNotification(
+                                    ringingState = RingingState.Incoming(),
+                                    callId = StreamCallId.fromCallCid(currentCall.cid),
+                                    incomingCallDisplayName = currentCall.incomingCallDisplayName,
+                                    shouldHaveContentIntent = streamVideo.state.activeCall.value == null, // TODO-Telecom: Compare this to CallService
+                                )
+                            }
+
+                            is RingingState.Outgoing, is RingingState.Active -> {
+                                val isOutgoingCall = ringingState is RingingState.Outgoing
+
+                                logger.d {
+                                    "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
+                                }
+
+                                streamVideo.getOngoingCallNotification(
+                                    callId = StreamCallId.fromCallCid(currentCall.cid),
+                                    isOutgoingCall = isOutgoingCall,
+                                )
+                            }
+
+                            else -> {
+                                logger.e { "[postNotification] Will not post any notification" }
+                                null
+                            }
+                        }
+
+                        notification?.let {
+                            logger.d { "[postNotification] Posting notification" }
+
+                            NotificationManagerCompat
+                                .from(context)
+                                .notify(currentCall.cid.hashCode(), it)
+                        }
+                    }
                 }
             }
         }
     }
+
+    private fun hasNotificationsPermission(): Boolean =
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            true
+        } else {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        }
 
     fun unregisterCall() = coroutineScope.launch {
         logger.d { "[unregisterCall]" }
