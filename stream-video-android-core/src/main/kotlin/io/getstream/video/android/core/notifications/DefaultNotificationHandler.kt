@@ -43,7 +43,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.telecom.TelecomHandler
+import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -87,15 +87,12 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        registerCall(application, callId, callDisplayName)
-    }
-
-    private fun registerCall(context: Context, callId: StreamCallId, callDisplayName: String) {
-        if (TelecomHandler.isSupported(context)) {
-            TelecomHandler.getInstance(context)?.registerCall(callId)
-        } else {
-            CallService.showIncomingCall(context, callId, callDisplayName)
-        }
+        TelecomCompat.registerCall(
+            application,
+            CallService.TRIGGER_INCOMING_CALL,
+            callDisplayName,
+            callId = callId,
+        )
     }
 
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
@@ -333,6 +330,7 @@ public open class DefaultNotificationHandler(
     }
 
     override fun getOngoingCallNotification(callId: StreamCallId, isOutgoingCall: Boolean): Notification? {
+        // TODO-Telecom: Remove avatar that says "C" on notification
         val notificationId = callId.hashCode()
 
         // Intents

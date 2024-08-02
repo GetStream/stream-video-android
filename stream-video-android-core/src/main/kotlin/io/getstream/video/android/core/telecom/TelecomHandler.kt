@@ -47,7 +47,7 @@ internal class TelecomHandler private constructor(
     private val callManager: CallsManager,
 ) {
 
-    private val logger by taggedLogger(TAG)
+    private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
     private var currentCall: StreamCall? = null
     private val coroutineScope = CoroutineScope(DispatcherProvider.Default)
@@ -91,7 +91,7 @@ internal class TelecomHandler private constructor(
     init {
         logger.d { "[init]" }
 
-        safeCall(exceptionLogTag = TAG) {
+        safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
             callManager.registerAppWithTelecom(
                 capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
                     CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
@@ -112,12 +112,6 @@ internal class TelecomHandler private constructor(
     8. Add sounds to notifications
      */
 
-    fun registerCall(callId: StreamCallId) {
-        streamVideo?.call(callId.type, callId.id)?.let { streamCall ->
-            registerCall(streamCall)
-        }
-    }
-
     fun registerCall(call: StreamCall) = coroutineScope.launch {
         call.get()
 
@@ -137,7 +131,7 @@ internal class TelecomHandler private constructor(
             val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
             val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
-            safeCall(exceptionLogTag = TAG) { // TODO-Telecom: or safeSuspendingCall?
+            safeCall(exceptionLogTag = TELECOM_LOG_TAG) { // TODO-Telecom: or safeSuspendingCall?
                 postNotification() // TODO-Telecom: handle permissions
 
                 callManager.addCall(
@@ -206,7 +200,9 @@ internal class TelecomHandler private constructor(
     }
 
     fun unregisterCall() = coroutineScope.launch {
-        safeCall(exceptionLogTag = TAG) {
+        logger.d { "[unregisterCall]" }
+
+        safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
             cancelNotification()
 
             callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
@@ -227,13 +223,11 @@ internal class TelecomHandler private constructor(
     }
 }
 
-private typealias StreamCall = io.getstream.video.android.core.Call
-
 private class TelecomToStreamEventBridge(private val call: StreamCall) {
     // TODO-Telecom: maybe turn into delegate and inject in TelecomHandler with default value
     // TODO-Telecom: review what needs to be called here and take results into account
 
-    private val logger by taggedLogger(TAG)
+    private val logger by taggedLogger(TELECOM_LOG_TAG)
 
     suspend fun onAnswer(callType: Int) {
         logger.d { "[TelecomToStreamEventBridge#onAnswer]" }
@@ -259,7 +253,7 @@ private class TelecomToStreamEventBridge(private val call: StreamCall) {
 
 private class StreamToTelecomEventBridge(private val call: StreamCall) {
 
-    private val logger by taggedLogger(TAG)
+    private val logger by taggedLogger(TELECOM_LOG_TAG)
 
     fun onEvent(callControlScope: CallControlScope) {
         call.subscribeFor(
@@ -312,5 +306,3 @@ private val StreamCall.telecomCallAttributes: CallAttributesCompat
 
 private val StreamCall.incomingCallDisplayName: String
     get() = state.createdBy.value?.userNameOrId ?: "Unknown"
-
-private const val TAG = "StreamVideo:Telecom"
