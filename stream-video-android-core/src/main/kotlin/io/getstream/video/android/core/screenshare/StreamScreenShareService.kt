@@ -28,7 +28,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.notifications.internal.receivers.StopScreenshareBroadcastReceiver
-import io.getstream.video.android.core.utils.customStartForeground
+import io.getstream.video.android.core.utils.startForegroundWithServiceType
 
 /**
  * Screen-sharing in Android requires a ForegroundService (with type foregroundServiceType set to "mediaProjection").
@@ -103,7 +103,7 @@ internal class StreamScreenShareService : Service() {
             )
         }
 
-        customStartForeground(NOTIFICATION_ID, builder.build(), TRIGGER_SHARE_SCREEN)
+        startForegroundWithServiceType(NOTIFICATION_ID, builder.build(), TRIGGER_SHARE_SCREEN)
         return super.onStartCommand(intent, flags, startId)
     }
 

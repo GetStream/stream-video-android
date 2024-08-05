@@ -36,7 +36,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
-import io.getstream.video.android.core.utils.customStartForeground
+import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
@@ -245,7 +245,7 @@ internal class CallService : Service() {
                     )
                 } else {
                     callId = intentCallId
-                    customStartForeground(intentCallId.hashCode(), notification, trigger)
+                    startForegroundWithServiceType(intentCallId.hashCode(), notification, trigger)
                 }
                 true
             } else {
@@ -297,7 +297,7 @@ internal class CallService : Service() {
 
         if (!hasActiveCall) {
             videoClient.getSettingUpCallNotification()?.let {
-                customStartForeground(notificationId, it, trigger)
+                startForegroundWithServiceType(notificationId, it, trigger)
             }
         }
     }
@@ -306,7 +306,7 @@ internal class CallService : Service() {
     private fun showIncomingCall(notificationId: Int, notification: Notification) {
         if (callId == null) { // If there isn't another call in progress (callId is set in onStartCommand())
             // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
-            customStartForeground(notificationId, notification, TRIGGER_INCOMING_CALL)
+            startForegroundWithServiceType(notificationId, notification, TRIGGER_INCOMING_CALL)
         } else {
             // Else, we show a simple notification (the service was already started as a foreground service).
             NotificationManagerCompat
