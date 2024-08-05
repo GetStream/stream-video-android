@@ -22,13 +22,10 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
-import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
@@ -39,6 +36,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
+import io.getstream.video.android.core.utils.customStartForeground
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
@@ -301,28 +299,6 @@ internal class CallService : Service() {
             videoClient.getSettingUpCallNotification()?.let {
                 customStartForeground(notificationId, it, trigger)
             }
-        }
-    }
-
-    private fun customStartForeground(
-        notificationId: Int,
-        notification: Notification,
-        trigger: String,
-    ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val foregroundServiceType = when (trigger) {
-                TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-                TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-            }
-            ServiceCompat.startForeground(
-                this@CallService,
-                notificationId,
-                notification,
-                foregroundServiceType,
-            )
-        } else {
-            startForeground(notificationId, notification)
         }
     }
 

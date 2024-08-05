@@ -19,17 +19,25 @@
 package io.getstream.video.android.core.utils
 
 import android.app.Activity
+import android.app.Notification
 import android.app.NotificationManager
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ServiceCompat
 import io.getstream.log.StreamLog
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
+import io.getstream.video.android.core.screenshare.StreamScreenShareService.Companion.TRIGGER_SHARE_SCREEN
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -160,5 +168,28 @@ inline fun <T> safeCall(default: T, block: () -> T): T {
         // Handle or log the exception here
         StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
         default
+    }
+}
+
+internal fun Service.customStartForeground(
+    notificationId: Int,
+    notification: Notification,
+    trigger: String,
+) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        val foregroundServiceType = when (trigger) {
+            TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+            TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+            TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+        }
+        ServiceCompat.startForeground(
+            this,
+            notificationId,
+            notification,
+            foregroundServiceType,
+        )
+    } else {
+        startForeground(notificationId, notification)
     }
 }
