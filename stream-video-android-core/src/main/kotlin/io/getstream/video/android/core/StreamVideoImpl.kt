@@ -145,8 +145,8 @@ internal class StreamVideoImpl internal constructor(
     internal val runForegroundService: Boolean = true,
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
-    internal val crashOnMissingPermission: Boolean = true,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    internal val crashOnMissingPermission: Boolean = false,
     internal val audioUsage: Int = defaultAudioUsage,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
@@ -189,7 +189,7 @@ internal class StreamVideoImpl internal constructor(
         // socketImpl.cleanup()
         // call cleanup on the active call
         val activeCall = state.activeCall.value
-        activeCall?.cleanup()
+        activeCall?.leave()
     }
 
     /**

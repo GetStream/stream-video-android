@@ -178,6 +178,12 @@ internal class CallService : Service() {
         logger.i { "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger" }
 
         val started = if (intentCallId != null && streamVideo != null && trigger != null) {
+            // Promote early to foreground service
+            maybePromoteToForegroundService(
+                videoClient = streamVideo,
+                notificationId = intentCallId.hashCode(),
+            )
+
             val type = intentCallId.type
             val id = intentCallId.id
             val call = streamVideo.call(type, id)
@@ -192,7 +198,7 @@ internal class CallService : Service() {
                 if (streamVideo.crashOnMissingPermission) {
                     throw exception
                 } else {
-                    logger.e(exception) { "Ensure you have right permissions!" }
+                    logger.e(exception) { "Make sure all the required permissions are granted!" }
                 }
             }
 
@@ -294,6 +300,19 @@ internal class CallService : Service() {
             observeCallState(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
+        }
+    }
+
+    private fun maybePromoteToForegroundService(videoClient: StreamVideoImpl, notificationId: Int) {
+        val hasActiveCall = videoClient.state.activeCall.value != null
+        val not = if (hasActiveCall) " not" else ""
+
+        logger.d {
+            "[maybePromoteToForegroundService] hasActiveCall: $hasActiveCall. Will$not call startForeground early."
+        }
+
+        if (!hasActiveCall) {
+            startForeground(notificationId, videoClient.getSettingUpCallNotification())
         }
     }
 
