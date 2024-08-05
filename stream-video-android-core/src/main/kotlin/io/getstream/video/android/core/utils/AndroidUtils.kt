@@ -171,7 +171,14 @@ inline fun <T> safeCall(default: T, block: () -> T): T {
     }
 }
 
-internal fun Service.customStartForeground(
+/**
+ * Start a foreground service with a service type to meet requirements introduced in Android 14.
+ *
+ * @param notificationId The notification ID
+ * @param notification The notification to show
+ * @param trigger The trigger that started the service: [TRIGGER_ONGOING_CALL], [TRIGGER_OUTGOING_CALL], [TRIGGER_INCOMING_CALL], [TRIGGER_SHARE_SCREEN]
+ */
+internal fun Service.startForegroundWithServiceType(
     notificationId: Int,
     notification: Notification,
     trigger: String,
