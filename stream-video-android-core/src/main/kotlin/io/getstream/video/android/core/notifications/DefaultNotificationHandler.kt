@@ -32,6 +32,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
@@ -330,7 +331,6 @@ public open class DefaultNotificationHandler(
     }
 
     override fun getOngoingCallNotification(callId: StreamCallId, isOutgoingCall: Boolean): Notification? {
-        // TODO-Telecom: Remove avatar that says "C" on notification
         val notificationId = callId.hashCode()
 
         // Intents
@@ -495,6 +495,12 @@ public open class DefaultNotificationHandler(
                         .setName(
                             application.getString(
                                 R.string.stream_video_ongoing_call_notification_title,
+                            ),
+                        )
+                        .setIcon(
+                            IconCompat.createWithResource(
+                                application,
+                                R.drawable.stream_video_ic_logo,
                             ),
                         )
                         .build(),
