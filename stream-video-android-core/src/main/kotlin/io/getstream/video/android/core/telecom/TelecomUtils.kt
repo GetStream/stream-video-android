@@ -16,9 +16,15 @@
 
 package io.getstream.video.android.core.telecom
 
+import android.annotation.TargetApi
 import android.content.Context
+import android.os.Build
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.audio.AudioHandler
+import io.getstream.video.android.core.audio.AudioSwitchHandler
+import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 
@@ -89,8 +95,48 @@ internal object TelecomCompat {
             }
         }
     }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    fun listenForDevices(context: Context, listener: AvailableDevicesListener): AudioHandler {
+        val applicationContext = context.applicationContext // TODO-Telecom: Abstract out in one place
+        val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
+        val telecomHandler = TelecomHandler.getInstance(applicationContext)
+
+        return if (isTelecomSupported) {
+            // Use Telecom
+            object : AudioHandler {
+                override fun start() {
+                    telecomHandler?.registerAvailableDevicesListener(listener)
+                }
+
+                override fun stop() {
+                }
+
+                override fun selectDevice(audioDevice: StreamAudioDevice?) {
+                    audioDevice?.telecomDevice?.let { telecomHandler?.selectDevice(it) }
+                }
+            }
+        } else {
+            // Use Twilio AudioSwitch
+            AudioSwitchHandler(
+                context = applicationContext,
+                preferSpeakerphone = true,
+                audioDeviceChangeListener = { devices, selected ->
+                    listener(
+                        devices.map { it.fromAudio() },
+                        selected?.fromAudio() ?: StreamAudioDevice.Earpiece(),
+                    )
+                },
+            )
+        }
+    }
+
+    fun selectDevice() {
+    }
 }
 
 internal typealias StreamCall = io.getstream.video.android.core.Call
+
+internal typealias AvailableDevicesListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit
 
 internal const val TELECOM_LOG_TAG = "StreamVideo:Telecom"

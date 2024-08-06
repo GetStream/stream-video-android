@@ -29,14 +29,14 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
+import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
@@ -418,7 +418,7 @@ class MicrophoneManager(
     fun select(device: StreamAudioDevice?) {
         enforceSetup {
             logger.i { "selecting device $device" }
-            ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+            ifAudioHandlerInitialized { it.selectDevice(device) }
             _selectedDevice.value = device
         }
     }
@@ -444,20 +444,34 @@ class MicrophoneManager(
             // Already setup, return
             return
         }
+
+        logger.i { "[setup]" }
+
         audioManager = mediaManager.context.getSystemService()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
 
         if (canHandleDeviceSwitch()) {
-            audioHandler =
-                AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
-                    logger.i { "audio devices. selected $selected, available devices are $devices" }
-                    _devices.value = devices.map { it.fromAudio() }
-                    _selectedDevice.value = selected?.fromAudio()
-                }
+            audioHandler = TelecomCompat.listenForDevices(
+                context = mediaManager.context,
+                listener = { devices, selected ->
+                    logger.i { "[setup] listenForDevices. Selected: $selected, available: $devices" }
 
-            audioHandler.start()
+                    _devices.value = devices
+                    _selectedDevice.value = selected
+                },
+            ).also {
+                it.start()
+            }
+
+//            audioHandler =
+//                AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
+//                    logger.i { "audio devices. selected $selected, available devices are $devices" }
+//                    _devices.value = devices.map { it.fromAudio() }
+//                    _selectedDevice.value = selected?.fromAudio()
+//                }
+//
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
@@ -469,9 +483,9 @@ class MicrophoneManager(
         return actual.invoke()
     }
 
-    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
+    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
-            then(this.audioHandler as AudioSwitchHandler)
+            then(this.audioHandler)
         } else {
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
         }
