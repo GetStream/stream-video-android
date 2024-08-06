@@ -28,15 +28,22 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
+import androidx.core.telecom.CallEndpointCompat
 import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.CallAcceptedEvent
@@ -54,6 +61,7 @@ internal class TelecomHandler private constructor(
     private var currentCall: StreamCall? = null
     private val coroutineScope = CoroutineScope(DispatcherProvider.Default)
     private var callControlScope: CallControlScope? = null
+    private var deviceListener: AvailableDevicesListener? = null
 
     companion object {
         @Volatile
@@ -97,6 +105,7 @@ internal class TelecomHandler private constructor(
 
         safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
             callManager.registerAppWithTelecom(
+                // TODO-Telecom: take audio_room and livestream (can be just audio) cases into account?
                 capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
                     CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
             )
@@ -115,10 +124,12 @@ internal class TelecomHandler private constructor(
      - doesn't receive ringing event (which is normal, but postNotification goes into "No notification posted")
      - add direction to registerCall?
      - test if it receives other events when in bg while in call and if notifications are updated accordingly
+     - should we connect socket in TelecomHandler?
     Should check for audio/video permissions in registerCall, similar to CallService?
      */
 
     fun registerCall(call: StreamCall) = coroutineScope.launch {
+        streamVideo?.connectIfNotAlreadyConnected()
         call.get()
 
         with(call.telecomCallAttributes) {
@@ -137,7 +148,7 @@ internal class TelecomHandler private constructor(
             val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
             val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
-            safeCall(exceptionLogTag = TELECOM_LOG_TAG) { // TODO-Telecom: or safeSuspendingCall?
+            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
                 postNotification()
 
                 callManager.addCall(
@@ -149,6 +160,15 @@ internal class TelecomHandler private constructor(
                     block = {
                         callControlScope = this
                         streamToTelecomEventBridge.onEvent(this)
+
+                        val availableEndpoints = callControlScope?.availableEndpoints
+                        val selectedEndpoint = callControlScope?.currentCallEndpoint
+
+                        availableEndpoints
+                            ?.map { endpointList -> endpointList.map { it.toStreamAudioDevice() } }
+                            ?.onEach { deviceListener?.invoke(it, null) }
+                            ?.distinctUntilChanged()
+                            ?.launchIn(this) // TODO-Telecom: manage 2 scopes?
                     },
                 )
             }
@@ -236,6 +256,18 @@ internal class TelecomHandler private constructor(
         NotificationManagerCompat.from(context).cancel(currentCall?.cid?.hashCode() ?: 0)
     }
 
+    fun registerAvailableDevicesListener(listener: AvailableDevicesListener) {
+        deviceListener = listener
+    }
+
+    fun selectDevice(device: CallEndpointCompat) {
+        logger.d { "[selectDevice] device: $device" }
+
+        callControlScope?.let {
+            it.launch { it.requestEndpointChange(device) }
+        }
+    }
+
     fun cleanUp() = runBlocking {
         unregisterCall()
         coroutineScope.cancel()
@@ -304,6 +336,11 @@ private class StreamToTelecomEventBridge(private val call: StreamCall) {
                 }
             }
         }
+
+        callControlScope.launch {
+            call.microphone.selectedDevice.collectLatest {
+            }
+        }
     }
 }
 
@@ -327,3 +364,12 @@ private val StreamCall.telecomCallAttributes: CallAttributesCompat
 
 private val StreamCall.incomingCallDisplayName: String
     get() = state.createdBy.value?.userNameOrId ?: "Unknown"
+
+@TargetApi(Build.VERSION_CODES.O)
+private fun CallEndpointCompat.toStreamAudioDevice(): StreamAudioDevice = when (this.type) {
+    CallEndpointCompat.TYPE_BLUETOOTH -> StreamAudioDevice.BluetoothHeadset(telecomDevice = this)
+    CallEndpointCompat.TYPE_EARPIECE -> StreamAudioDevice.Earpiece(telecomDevice = this)
+    CallEndpointCompat.TYPE_SPEAKER -> StreamAudioDevice.Speakerphone(telecomDevice = this)
+    CallEndpointCompat.TYPE_WIRED_HEADSET -> StreamAudioDevice.WiredHeadset(telecomDevice = this)
+    else -> StreamAudioDevice.Earpiece()
+}
