@@ -7,7 +7,6 @@ public final class io/getstream/video/android/mock/StreamPreviewDataUtils {
 }
 
 public final class io/getstream/video/android/mock/StreamPreviewDataUtilsKt {
-	public static final fun getMockVideoMediaTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 	public static final fun getPreviewCall ()Lio/getstream/video/android/core/Call;
 	public static final fun getPreviewMember ()Lio/getstream/video/android/core/MemberState;
 	public static final fun getPreviewMemberListState ()Ljava/util/List;
@@ -16,5 +15,6 @@ public final class io/getstream/video/android/mock/StreamPreviewDataUtilsKt {
 	public static final fun getPreviewThreeMembers ()Ljava/util/List;
 	public static final fun getPreviewTwoMembers ()Ljava/util/List;
 	public static final fun getPreviewUsers ()Ljava/util/List;
+	public static final fun getPreviewVideoMediaTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 }
 
