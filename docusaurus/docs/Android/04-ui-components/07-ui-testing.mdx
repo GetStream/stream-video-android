@@ -35,7 +35,7 @@ class ScreenTests {
         composable: @Composable () -> Unit
     ) {
         paparazzi.snapshot(name = name) {
-            StreamMockUtils.initializeStreamVideo(LocalContext.current)
+            StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
             CompositionLocalProvider(
                 LocalInspectionMode provides true,
                 LocalAvatarPreviewPlaceholder provides
@@ -70,7 +70,7 @@ Let's break the code down line by line.
 First, you should initialize Stream Video SDK with the `initializeStreamVideo()` method. You can learn more about our mock library on [UI Previews](07-ui-previews.mdx).
 
 ```kotlin
-StreamMockUtils.initializeStreamVideo(LocalContext.current)
+StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
 ```
 
 Next, you should enable `LocalInspectionMode` with the `CompositionLocalProvider` and allow Stream UI components to be rendered for the test environment.
