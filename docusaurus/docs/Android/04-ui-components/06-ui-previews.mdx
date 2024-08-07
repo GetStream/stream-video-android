@@ -33,11 +33,11 @@ Now, you can implement your preview composable like the example below:
 @Preview
 @Composable
 private fun CallContentPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallContent(
             modifier = Modifier.background(color = VideoTheme.colors.appBackground),
-            call = mockCall,
+            call = previewCall,
         )
     }
 }
@@ -49,17 +49,17 @@ After adding the above example to your project, you'll see the following preview
 
 You should follow the steps below to make your previews work well:
 
-1. Initialize a mock `StreamVideo` with the following method: `StreamMockUtils.initializeStreamVideo`.
+1. Initialize a mock `StreamVideo` with the following method: `StreamPreviewDataUtils.initializeStreamVideo`.
 2. Wrap your composable with the `VideoTheme`.
 3. Use the provided mock instances for Stream Video UI components.
 
 This library provides the following mocks:
 
-- **mockCall**: Mock a `Call` that contains few of mock users.
-- **mockParticipant**: Mock a `ParticipantState` instance.
-- **mockParticipantList**: Mock a list of `ParticipantState` instances.
-- **mockUsers**: Mock a list of `User` instances.
-- **mockVideoMediaTrack**: Mock a new `MediaTrack` instance.
+- **previewCall**: Mock a `Call` that contains few of mock users.
+- **previewParticipant**: Mock a `ParticipantState` instance.
+- **previewParticipantsList**: Mock a list of `ParticipantState` instances.
+- **previewUsers**: Mock a list of `User` instances.
+- **previewVideoMediaTrack**: Mock a new `MediaTrack` instance.
 
 For example, you can build a preview Composable for `ParticipantVideo` as in the example below:
 
@@ -67,11 +67,11 @@ For example, you can build a preview Composable for `ParticipantVideo` as in the
 @Preview
 @Composable
 private fun ParticipantVideoPreview() {
-    StreamMockUtils.initializeStreamVideo(LocalContext.current)
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantVideoRenderer(
-            call = mockCall,
-            participant = mockParticipant,
+            call = previewCall,
+            participant = previewParticipant,
         )
     }
 }
