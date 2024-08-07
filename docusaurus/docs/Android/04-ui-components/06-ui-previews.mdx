@@ -36,7 +36,6 @@ private fun CallContentPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallContent(
-            modifier = Modifier.background(color = VideoTheme.colors.appBackground),
             call = previewCall,
         )
     }

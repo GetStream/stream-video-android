@@ -49,7 +49,7 @@ class ScreenTests {
     @Test
     fun `snapshot CallContent component`() {
         snapshot(name = "CallContent") {
-            CallContent(call = mockCall)
+            CallContent(call = previewCall)
         }
     }
 
@@ -58,7 +58,7 @@ class ScreenTests {
         snapshot(name = "CallLobby") {
             CallLobby(
                 modifier = Modifier.fillMaxWidth(),
-                call = mockCall
+                call = previewCall
             )
         }
     }
@@ -90,7 +90,7 @@ Finally, snapshot Stream Video components or your own Composable functions that 
 @Test
 fun `snapshot CallContent component`() {
     snapshot(name = "CallContent") {
-        CallContent(call = mockCall)
+        CallContent(call = previewCall)
     }
 }
 ```
