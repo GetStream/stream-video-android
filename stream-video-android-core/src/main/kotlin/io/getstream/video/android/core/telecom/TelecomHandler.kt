@@ -40,9 +40,9 @@ import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -161,14 +161,15 @@ internal class TelecomHandler private constructor(
                         callControlScope = this
                         streamToTelecomEventBridge.onEvent(this)
 
-                        val availableEndpoints = callControlScope?.availableEndpoints
-                        val selectedEndpoint = callControlScope?.currentCallEndpoint
-
-                        availableEndpoints
-                            ?.map { endpointList -> endpointList.map { it.toStreamAudioDevice() } }
-                            ?.onEach { deviceListener?.invoke(it, null) }
-                            ?.distinctUntilChanged()
-                            ?.launchIn(this) // TODO-Telecom: manage 2 scopes?
+                        combine(availableEndpoints, currentCallEndpoint) { list, device ->
+                            Pair(
+                                list.map { it.toStreamAudioDevice() },
+                                device.toStreamAudioDevice(),
+                            )
+                        }
+                            .distinctUntilChanged()
+                            .onEach { deviceListener?.invoke(it.first, it.second) }
+                            .launchIn(this)
                     },
                 )
             }

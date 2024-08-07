@@ -97,7 +97,7 @@ internal object TelecomCompat {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun listenForDevices(context: Context, listener: AvailableDevicesListener): AudioHandler {
+    fun getAudioHandler(context: Context, listener: AvailableDevicesListener): AudioHandler {
         val applicationContext = context.applicationContext // TODO-Telecom: Abstract out in one place
         val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
         val telecomHandler = TelecomHandler.getInstance(applicationContext)
