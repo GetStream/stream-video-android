@@ -165,7 +165,7 @@ class ClientState(client: StreamVideo) {
         _ringingCall.value?.let { call ->
             TelecomCompat.unregisterCall(
                 clientImpl.context,
-                CallService.TRIGGER_OUTGOING_CALL,
+                CallService.TRIGGER_OUTGOING_CALL, // TODO-Telecom is this correct?
                 call,
             )
 

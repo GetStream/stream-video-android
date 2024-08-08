@@ -41,7 +41,6 @@ import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -62,12 +61,10 @@ internal class TelecomHandler private constructor(
 
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
-    private val coroutineScope = CoroutineScope(DispatcherProvider.Default + SupervisorJob())
+    private val telecomHandlerScope = CoroutineScope(DispatcherProvider.Default + SupervisorJob())
     private var callControlScope: CallControlScope? = null
-    private var deviceListener: AvailableDevicesListener? = null
 
     private val calls = mutableMapOf<String, TelecomCall>()
-    private val callsMap = mutableMapOf<StreamCall, CallControlScope>()
 
     companion object {
         @Volatile
@@ -136,7 +133,7 @@ internal class TelecomHandler private constructor(
 
     fun registerCall(call: StreamCall, wasTriggeredByIncomingNotification: Boolean = false) {
         logger.d {
-            "[registerCall] Call ID: ${call.id}, isTriggeredByNotification: $wasTriggeredByIncomingNotification"
+            "[registerCall] Call ID: ${call.id}, wasTriggeredByIncomingNotification: $wasTriggeredByIncomingNotification"
         }
 
         if (wasTriggeredByIncomingNotification) prepareIncomingCall(call)
@@ -148,7 +145,7 @@ internal class TelecomHandler private constructor(
                 streamCall = call,
                 state = TelecomCallState.IDLE,
                 notificationId = call.cid.hashCode(),
-                coroutineScope = coroutineScope,
+                parentScope = telecomHandlerScope,
             )
 
             logger.d { "[registerCall] New call registered" }
@@ -158,10 +155,11 @@ internal class TelecomHandler private constructor(
     private fun prepareIncomingCall(call: StreamCall) {
         logger.d { "[prepareIncomingCall]" }
 
-        coroutineScope.launch {
+        telecomHandlerScope.launch {
             streamVideo?.connectIfNotAlreadyConnected()
+            call.get()
+            streamVideo?.state?.addRingingCall(call, RingingState.Incoming())
         } // TODO-Telecom: reanalyze this in context of incoming call
-        streamVideo?.state?.addRingingCall(call, RingingState.Incoming())
     }
 
     fun changeCallState(call: StreamCall, newState: TelecomCallState) {
@@ -177,8 +175,10 @@ internal class TelecomHandler private constructor(
             val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
             val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
-            coroutineScope.launch {
+            telecomHandlerScope.launch {
                 safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+                    postNotification(telecomCall)
+
                     callManager.addCall(
                         callAttributes = call.telecomCallAttributes,
                         onAnswer = telecomToStreamEventBridge::onAnswer,
@@ -186,7 +186,6 @@ internal class TelecomHandler private constructor(
                         onSetActive = telecomToStreamEventBridge::onSetActive,
                         onSetInactive = telecomToStreamEventBridge::onSetInactive,
                         block = {
-                            postNotification(telecomCall)
                             telecomCall.callControlScope = this
                             streamToTelecomEventBridge.onEvent(this)
 
@@ -256,15 +255,13 @@ internal class TelecomHandler private constructor(
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         }
 
-    fun unregisterCall(call: StreamCall) = coroutineScope.launch {
+    fun unregisterCall(call: StreamCall) {
         logger.d { "[unregisterCall]" }
 
-        calls[call.cid]?.let { telecomCall ->
+        calls.remove(call.cid)?.let { telecomCall ->
             safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
                 cancelNotification(telecomCall.notificationId)
-//                telecomCall.callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-//                    logger.d { "[unregisterCall] Disconnect result: $result" }
-//                }
+                telecomCall.cleanUp()
             }
         }
     }
@@ -275,13 +272,8 @@ internal class TelecomHandler private constructor(
     }
 
     fun registerAvailableDevicesListener(call: StreamCall, listener: AvailableDevicesListener) {
-        coroutineScope.launch {
-            delay(9000)
-
-            logger.d { "[registerAvailableDevicesListener] Call ID: ${call.id}" }
-
-            calls[call.cid]?.deviceListener = listener
-        }
+        logger.d { "[registerAvailableDevicesListener] Call ID: ${call.id}" }
+        calls[call.cid]?.deviceListener = listener
     }
 
     fun selectDevice(device: CallEndpointCompat) {
@@ -294,7 +286,7 @@ internal class TelecomHandler private constructor(
 
     fun cleanUp() = runBlocking {
         calls.forEach { unregisterCall(it.value.streamCall) }
-        coroutineScope.cancel()
+//        telecomHandlerScope.cancel()
         instance = null
     }
 }
@@ -399,13 +391,13 @@ private fun CallEndpointCompat.toStreamAudioDevice(): StreamAudioDevice = when (
 }
 
 private data class TelecomCall(
-    var state: TelecomCallState,
     val streamCall: StreamCall,
+    var state: TelecomCallState,
     val notificationId: Int,
-    val coroutineScope: CoroutineScope,
+    val parentScope: CoroutineScope,
 ) {
-
-    private var devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
+    private val localScope = CoroutineScope(parentScope.coroutineContext)
+    private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 
     var callControlScope: CallControlScope? = null
         set(value) {
@@ -439,9 +431,9 @@ private data class TelecomCall(
     var deviceListener: AvailableDevicesListener? = null
         set(value) {
             value?.let { listener ->
-                StreamLog.d(
-                    TELECOM_LOG_TAG,
-                ) { "[TelecomCall#deviceListener] Setting deviceListener" }
+                StreamLog.d(TELECOM_LOG_TAG) {
+                    "[TelecomCall#deviceListener] Setting deviceListener"
+                }
 
                 field = value
 
@@ -455,9 +447,24 @@ private data class TelecomCall(
                             listener(it.first, it.second)
                         }
                     }
-                    .launchIn(coroutineScope)
+                    .launchIn(parentScope)
             }
         }
+
+    suspend fun disconnect() {
+        callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
+            StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#disconnect] Disconnect result: $result" }
+        }
+    }
+
+    fun cleanUp() {
+        StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#cleanUp]" }
+
+        runBlocking {
+            disconnect()
+            localScope.cancel()
+        }
+    }
 }
 
 internal enum class TelecomCallState {
