@@ -32,10 +32,9 @@ internal object TelecomCompat {
 
     fun registerCall(
         context: Context,
-        trigger: String,
-        callDisplayName: String = "",
         call: StreamCall? = null,
         callId: StreamCallId? = null,
+        isTriggeredByNotification: Boolean = false,
     ) {
         getCallObject(call, callId)?.let {
             val applicationContext = context.applicationContext
@@ -43,13 +42,25 @@ internal object TelecomCompat {
             val telecomHandler = TelecomHandler.getInstance(applicationContext)
 
             if (isTelecomSupported) {
-                telecomHandler?.registerCall(it)
+                telecomHandler?.registerCall(it, isTriggeredByNotification)
+            }
+        }
+    }
+
+    fun changeCallState(context: Context, newState: TelecomCallState, call: StreamCall? = null, callId: StreamCallId? = null) {
+        getCallObject(call, callId)?.let {
+            val applicationContext = context.applicationContext
+            val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
+            val telecomHandler = TelecomHandler.getInstance(applicationContext)
+
+            if (isTelecomSupported) {
+                telecomHandler?.changeCallState(it, newState)
             } else {
-                if (trigger == CallService.TRIGGER_INCOMING_CALL) {
+                if (newState == TelecomCallState.INCOMING) {
                     CallService.showIncomingCall(
                         applicationContext,
                         StreamCallId.fromCallCid(it.cid),
-                        callDisplayName,
+                        "",
                     )
                 } else {
                     // TODO-Telecom: Take runForegroundService flag into account here and above?
@@ -58,7 +69,11 @@ internal object TelecomCompat {
                         CallService.buildStartIntent(
                             applicationContext,
                             StreamCallId.fromCallCid(it.cid),
-                            trigger,
+                            if (newState == TelecomCallState.OUTGOING) {
+                                CallService.TRIGGER_OUTGOING_CALL
+                            } else {
+                                CallService.TRIGGER_ONGOING_CALL
+                            },
                         ),
                     )
                 }
@@ -77,19 +92,17 @@ internal object TelecomCompat {
     fun unregisterCall(
         context: Context,
         trigger: String,
-        call: StreamCall? = null,
+        call: StreamCall,
     ) {
         val applicationContext = context.applicationContext
         val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
         val telecomHandler = TelecomHandler.getInstance(applicationContext)
 
         if (isTelecomSupported) {
-            telecomHandler?.unregisterCall()
+            telecomHandler?.unregisterCall(call)
         } else {
             if (trigger == CallService.TRIGGER_INCOMING_CALL) {
-                call?.let {
-                    CallService.removeIncomingCall(context, StreamCallId.fromCallCid(it.cid))
-                }
+                CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
             } else {
                 context.stopService(CallService.buildStopIntent(applicationContext))
             }
@@ -97,7 +110,11 @@ internal object TelecomCompat {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun getAudioHandler(context: Context, listener: AvailableDevicesListener): AudioHandler {
+    fun getAudioHandler(
+        context: Context,
+        call: StreamCall,
+        listener: AvailableDevicesListener,
+    ): AudioHandler {
         val applicationContext = context.applicationContext // TODO-Telecom: Abstract out in one place
         val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
         val telecomHandler = TelecomHandler.getInstance(applicationContext)
@@ -106,7 +123,7 @@ internal object TelecomCompat {
             // Use Telecom
             object : AudioHandler {
                 override fun start() {
-                    telecomHandler?.registerAvailableDevicesListener(listener)
+                    telecomHandler?.registerAvailableDevicesListener(call, listener)
                 }
 
                 override fun stop() {
@@ -129,9 +146,6 @@ internal object TelecomCompat {
                 },
             )
         }
-    }
-
-    fun selectDevice() {
     }
 }
 

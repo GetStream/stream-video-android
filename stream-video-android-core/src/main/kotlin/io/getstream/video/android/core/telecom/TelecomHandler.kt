@@ -30,6 +30,7 @@ import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallEndpointCompat
 import androidx.core.telecom.CallsManager
+import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
@@ -38,7 +39,10 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -58,10 +62,12 @@ internal class TelecomHandler private constructor(
 
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
-    private var currentCall: StreamCall? = null
-    private val coroutineScope = CoroutineScope(DispatcherProvider.Default)
+    private val coroutineScope = CoroutineScope(DispatcherProvider.Default + SupervisorJob())
     private var callControlScope: CallControlScope? = null
     private var deviceListener: AvailableDevicesListener? = null
+
+    private val calls = mutableMapOf<String, TelecomCall>()
+    private val callsMap = mutableMapOf<StreamCall, CallControlScope>()
 
     companion object {
         @Volatile
@@ -128,106 +134,116 @@ internal class TelecomHandler private constructor(
     Should check for audio/video permissions in registerCall, similar to CallService?
      */
 
-    fun registerCall(call: StreamCall) = coroutineScope.launch {
-        streamVideo?.connectIfNotAlreadyConnected()
-        call.get()
-
-        with(call.telecomCallAttributes) {
-            logger.d {
-                "[registerCall] displayName: $displayName, ringingState: ${call.state.ringingState.value}, callType: ${if (callType == 1) "audio" else "video"}"
-            }
+    fun registerCall(call: StreamCall, wasTriggeredByIncomingNotification: Boolean = false) {
+        logger.d {
+            "[registerCall] Call ID: ${call.id}, isTriggeredByNotification: $wasTriggeredByIncomingNotification"
         }
 
-        if (call.cid == currentCall?.cid) {
-            logger.d { "[registerCall] Updating existing call" }
-            postNotification()
-        } else {
-            logger.d { "[registerCall] Registering new call" }
+        if (wasTriggeredByIncomingNotification) prepareIncomingCall(call)
 
-            currentCall = call
+        if (calls.contains(call.cid)) {
+            logger.d { "[registerCall] Call already registered, ignoring" }
+        } else {
+            calls[call.cid] = TelecomCall(
+                streamCall = call,
+                state = TelecomCallState.IDLE,
+                notificationId = call.cid.hashCode(),
+                coroutineScope = coroutineScope,
+            )
+
+            logger.d { "[registerCall] New call registered" }
+        }
+    }
+
+    private fun prepareIncomingCall(call: StreamCall) {
+        logger.d { "[prepareIncomingCall]" }
+
+        coroutineScope.launch {
+            streamVideo?.connectIfNotAlreadyConnected()
+        } // TODO-Telecom: reanalyze this in context of incoming call
+        streamVideo?.state?.addRingingCall(call, RingingState.Incoming())
+    }
+
+    fun changeCallState(call: StreamCall, newState: TelecomCallState) {
+        logger.d { "[changeCallState] newState: $newState" }
+
+        val telecomCall = calls[call.cid]
+
+        if (telecomCall == null) {
+            logger.e { "[changeCallState] Call must be registered first" }
+        } else {
+            telecomCall.state = newState
+
             val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
             val streamToTelecomEventBridge = StreamToTelecomEventBridge(call)
 
-            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
-                postNotification()
+            coroutineScope.launch {
+                safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+                    callManager.addCall(
+                        callAttributes = call.telecomCallAttributes,
+                        onAnswer = telecomToStreamEventBridge::onAnswer,
+                        onDisconnect = telecomToStreamEventBridge::onDisconnect,
+                        onSetActive = telecomToStreamEventBridge::onSetActive,
+                        onSetInactive = telecomToStreamEventBridge::onSetInactive,
+                        block = {
+                            postNotification(telecomCall)
+                            telecomCall.callControlScope = this
+                            streamToTelecomEventBridge.onEvent(this)
 
-                callManager.addCall(
-                    callAttributes = call.telecomCallAttributes,
-                    onAnswer = telecomToStreamEventBridge::onAnswer,
-                    onDisconnect = telecomToStreamEventBridge::onDisconnect,
-                    onSetActive = telecomToStreamEventBridge::onSetActive,
-                    onSetInactive = telecomToStreamEventBridge::onSetInactive,
-                    block = {
-                        callControlScope = this
-                        streamToTelecomEventBridge.onEvent(this)
-
-                        combine(availableEndpoints, currentCallEndpoint) { list, device ->
-                            Pair(
-                                list.map { it.toStreamAudioDevice() },
-                                device.toStreamAudioDevice(),
-                            )
-                        }
-                            .distinctUntilChanged()
-                            .onEach { deviceListener?.invoke(it.first, it.second) }
-                            .launchIn(this)
-                    },
-                )
+                            logger.d { "[changeCallState] Added call to Telecom" }
+                        },
+                    )
+                }
             }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun postNotification() {
+    private fun postNotification(telecomCall: TelecomCall) {
         if (!hasNotificationsPermission()) {
             logger.e { "[postNotification] POST_NOTIFICATIONS permission missing" }
             return
         } else {
-            currentCall?.let { currentCall ->
-                logger.d {
-                    "[postNotification] Call ID: ${currentCall.id}, ringingState: ${currentCall.state.ringingState.value}"
+            logger.d { "[postNotification] Call ID: ${telecomCall.streamCall.id}, state: ${telecomCall.state}" }
+
+            streamVideo?.let { streamVideo ->
+                val notification = when (telecomCall.state) {
+                    TelecomCallState.INCOMING -> {
+                        logger.d { "[postNotification] Creating incoming notification" }
+
+                        streamVideo.getRingingCallNotification(
+                            ringingState = RingingState.Incoming(),
+                            callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
+                            incomingCallDisplayName = telecomCall.streamCall.incomingCallDisplayName,
+                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null, // TODO-Telecom: Compare this to CallService
+                        )
+                    }
+
+                    TelecomCallState.OUTGOING, TelecomCallState.ONGOING -> {
+                        val isOutgoingCall = telecomCall.state == TelecomCallState.OUTGOING
+
+                        logger.d {
+                            "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
+                        }
+
+                        streamVideo.getOngoingCallNotification(
+                            callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
+                            isOutgoingCall = isOutgoingCall,
+                        )
+                    }
+
+                    else -> {
+                        logger.e { "[postNotification] Will not post any notification" }
+                        null
+                    }
                 }
 
-                streamVideo?.let { streamVideo ->
-                    currentCall.state.ringingState.value.let { ringingState ->
-                        val notification = when (ringingState) {
-                            is RingingState.Incoming -> {
-                                logger.d { "[postNotification] Creating incoming notification" }
+                notification?.let {
+                    logger.d { "[postNotification] Posting notification" }
 
-                                streamVideo.getRingingCallNotification(
-                                    ringingState = RingingState.Incoming(),
-                                    callId = StreamCallId.fromCallCid(currentCall.cid),
-                                    incomingCallDisplayName = currentCall.incomingCallDisplayName,
-                                    shouldHaveContentIntent = streamVideo.state.activeCall.value == null, // TODO-Telecom: Compare this to CallService
-                                )
-                            }
-
-                            is RingingState.Outgoing, is RingingState.Active -> {
-                                val isOutgoingCall = ringingState is RingingState.Outgoing
-
-                                logger.d {
-                                    "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
-                                }
-
-                                streamVideo.getOngoingCallNotification(
-                                    callId = StreamCallId.fromCallCid(currentCall.cid),
-                                    isOutgoingCall = isOutgoingCall,
-                                )
-                            }
-
-                            else -> {
-                                logger.e { "[postNotification] Will not post any notification" }
-                                null
-                            }
-                        }
-
-                        notification?.let {
-                            logger.d { "[postNotification] Posting notification" }
-
-                            NotificationManagerCompat
-                                .from(context)
-                                .notify(currentCall.cid.hashCode(), it)
-                        }
-                    }
+                    NotificationManagerCompat
+                        .from(context)
+                        .notify(telecomCall.notificationId, it)
                 }
             }
         }
@@ -240,25 +256,32 @@ internal class TelecomHandler private constructor(
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         }
 
-    fun unregisterCall() = coroutineScope.launch {
+    fun unregisterCall(call: StreamCall) = coroutineScope.launch {
         logger.d { "[unregisterCall]" }
 
-        safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
-            cancelNotification()
-
-            callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-                logger.d { "[unregisterCall] Disconnect result: $result" }
+        calls[call.cid]?.let { telecomCall ->
+            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+                cancelNotification(telecomCall.notificationId)
+//                telecomCall.callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
+//                    logger.d { "[unregisterCall] Disconnect result: $result" }
+//                }
             }
         }
     }
 
-    private fun cancelNotification() {
+    private fun cancelNotification(notificationId: Int) {
         logger.d { "[cancelNotification]" }
-        NotificationManagerCompat.from(context).cancel(currentCall?.cid?.hashCode() ?: 0)
+        NotificationManagerCompat.from(context).cancel(notificationId)
     }
 
-    fun registerAvailableDevicesListener(listener: AvailableDevicesListener) {
-        deviceListener = listener
+    fun registerAvailableDevicesListener(call: StreamCall, listener: AvailableDevicesListener) {
+        coroutineScope.launch {
+            delay(9000)
+
+            logger.d { "[registerAvailableDevicesListener] Call ID: ${call.id}" }
+
+            calls[call.cid]?.deviceListener = listener
+        }
     }
 
     fun selectDevice(device: CallEndpointCompat) {
@@ -270,7 +293,7 @@ internal class TelecomHandler private constructor(
     }
 
     fun cleanUp() = runBlocking {
-        unregisterCall()
+        calls.forEach { unregisterCall(it.value.streamCall) }
         coroutineScope.cancel()
         instance = null
     }
@@ -373,4 +396,73 @@ private fun CallEndpointCompat.toStreamAudioDevice(): StreamAudioDevice = when (
     CallEndpointCompat.TYPE_SPEAKER -> StreamAudioDevice.Speakerphone(telecomDevice = this)
     CallEndpointCompat.TYPE_WIRED_HEADSET -> StreamAudioDevice.WiredHeadset(telecomDevice = this)
     else -> StreamAudioDevice.Earpiece()
+}
+
+private data class TelecomCall(
+    var state: TelecomCallState,
+    val streamCall: StreamCall,
+    val notificationId: Int,
+    val coroutineScope: CoroutineScope,
+) {
+
+    private var devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
+
+    var callControlScope: CallControlScope? = null
+        set(value) {
+            if (value != null) {
+                field = value
+
+                with(value) {
+                    launch {
+                        val combinedEndpoints =
+                            combine(availableEndpoints, currentCallEndpoint) { list, device ->
+                                Pair(
+                                    list.map { it.toStreamAudioDevice() },
+                                    device.toStreamAudioDevice(),
+                                )
+                            }
+
+                        combinedEndpoints
+                            .distinctUntilChanged()
+                            .onEach {
+                                StreamLog.d(TELECOM_LOG_TAG) {
+                                    "[TelecomCall#callControlScope] Publishing devices: available devices: ${it.first.map { it.name }}, selected device: ${it.second.name}"
+                                }
+                                devices.value = it
+                            }
+                            .launchIn(this)
+                    }
+                }
+            }
+        }
+
+    var deviceListener: AvailableDevicesListener? = null
+        set(value) {
+            value?.let { listener ->
+                StreamLog.d(
+                    TELECOM_LOG_TAG,
+                ) { "[TelecomCall#deviceListener] Setting deviceListener" }
+
+                field = value
+
+                devices
+                    .onEach { deviceStatus ->
+                        deviceStatus?.let {
+                            StreamLog.d(TELECOM_LOG_TAG) {
+                                "[TelecomCall#deviceListener] Collecting devices & calling listener with: available devices: ${it.first.map { it.name }}, selected device: ${it.second.name}"
+                            }
+
+                            listener(it.first, it.second)
+                        }
+                    }
+                    .launchIn(coroutineScope)
+            }
+        }
+}
+
+internal enum class TelecomCallState {
+    IDLE,
+    INCOMING,
+    OUTGOING,
+    ONGOING,
 }

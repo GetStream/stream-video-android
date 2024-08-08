@@ -455,6 +455,7 @@ class MicrophoneManager(
         if (canHandleDeviceSwitch()) {
             audioHandler = TelecomCompat.getAudioHandler(
                 context = mediaManager.context,
+                call = mediaManager.call,
                 listener = { devices, selected ->
                     logger.i {
                         "[setup] listenForDevices. Selected: ${selected?.name}, available: ${devices.map { it.name }}"
