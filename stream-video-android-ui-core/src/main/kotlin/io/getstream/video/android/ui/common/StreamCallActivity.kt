@@ -384,8 +384,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
      */
     public open fun onStop(call: Call) {
         logger.d { "Default activity - stopped (call -> $call)" }
-        if (isVideoCall(call) && !isInPictureInPictureMode) {
-            logger.d { "Default activity - stopped: No PiP detected, will leave call. (call -> $call)" }
+        if (isVideoCall(call) && isInPictureInPictureMode) {
+            logger.d { "Default activity - stopped: PiP detected, will leave call. (call -> $call)" }
             leave(call) // Already finishing
         }
     }
