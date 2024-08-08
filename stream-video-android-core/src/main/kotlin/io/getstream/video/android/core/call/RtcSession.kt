@@ -321,7 +321,6 @@ public class RtcSession internal constructor(
 
     private val onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit = {
         when (it) {
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> TODO()
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
                 call.monitor.stopTimer()
                 call.monitor.reconnect(forceRestart = true)

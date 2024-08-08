@@ -164,8 +164,6 @@ public class SfuSocket(
                         session_id = sessionId,
                         token = token,
                         subscriber_sdp = sdp,
-                        fast_reconnect = false,
-                        migration = migration,
                         client_details = clientDetails,
                     )
                 }

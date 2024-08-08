@@ -193,8 +193,8 @@ public open class PersistentSocket<T>(
         networkStateProvider.unsubscribe(networkStateListener)
     }
 
-    private fun disconnectSocket() {
-        socket?.close(CODE_CLOSE_SOCKET_FROM_CLIENT, "Connection close by client")
+    private fun disconnectSocket(reason: Int = CODE_CLOSE_SOCKET_FROM_CLIENT) {
+        socket?.close(reason, "Connection close by client")
         socket = null
         _connectionId.value = null
     }
@@ -215,7 +215,7 @@ public open class PersistentSocket<T>(
         }
 
         // Don't disconnect if we are already disconnected
-        disconnectSocket()
+        disconnectSocket(CODE_CLOSE_SOCKET_RECONNECT)
 
         // Stop sending pings
         healthMonitor.stop()
@@ -525,5 +525,6 @@ public open class PersistentSocket<T>(
 
     internal companion object {
         internal const val CODE_CLOSE_SOCKET_FROM_CLIENT = 1000
+        internal const val CODE_CLOSE_SOCKET_RECONNECT = 4002
     }
 }
