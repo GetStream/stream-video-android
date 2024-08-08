@@ -496,7 +496,7 @@ public class Call(
         }
     }
 
-    private suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
+    internal suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
         // Prevent multiple starts of the reconnect flow. For the start call
         // first check if sfuSocketReconnectionTime isn't already set - if yes
         // then we are already doing a full reconnect

@@ -39,6 +39,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
+import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -142,7 +143,7 @@ internal class ConnectionModule(
         sessionId: String,
         sfuToken: String,
         getSubscriberSdp: suspend () -> String,
-        onFastReconnect: suspend () -> Unit,
+        onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit
     ): SfuConnectionModule {
         return SfuConnectionModule(
             sfuUrl = sfuUrl,
@@ -150,10 +151,10 @@ internal class ConnectionModule(
             sfuToken = sfuToken,
             apiKey = apiKey,
             getSubscriberSdp = getSubscriberSdp,
+            loggingLevel = loggingLevel,
             scope = scope,
             networkStateProvider = networkStateProvider,
-            loggingLevel = loggingLevel,
-            onFastReconnect = onFastReconnect,
+            onWebsocketReconnectStrategy = onWebsocketReconnectStrategy
         )
     }
 
@@ -188,7 +189,10 @@ internal class SfuConnectionModule(
     scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     /** Network monitoring */
     networkStateProvider: NetworkStateProvider,
-    onFastReconnect: suspend () -> Unit,
+    /**
+     * Rejoin strategy to be used when the websocket connection is lost.
+     */
+    onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit
 ) {
     internal var sfuSocket: SfuSocket
     private val updatedSignalUrl = if (sfuUrl.contains(Regex("https?://"))) {
@@ -243,7 +247,7 @@ internal class SfuConnectionModule(
             scope,
             okHttpClient,
             networkStateProvider,
-            onFastReconnected = onFastReconnect,
+            onWebSocketRejoinWithStrategy = onWebsocketReconnectStrategy
         )
     }
 }

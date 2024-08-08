@@ -22,9 +22,11 @@ import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantMigrationCompleteEvent
 import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.IceCandidate
@@ -49,6 +51,8 @@ import stream.video.sfu.models.OS
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.Sdk
 import stream.video.sfu.models.SdkType
+import stream.video.sfu.models.WebsocketReconnectStrategy
+import stream.video.sfu.models.WebsocketReconnectStrategy.*
 
 /**
  * The SFU socket is slightly different from the coordinator socket
@@ -63,20 +67,19 @@ public class SfuSocket(
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
     private val httpClient: OkHttpClient,
     private val networkStateProvider: NetworkStateProvider,
-    private val onFastReconnected: suspend () -> Unit,
+    private val onWebSocketRejoinWithStrategy: suspend (WebsocketReconnectStrategy?) -> Unit,
 ) : PersistentSocket<JoinCallResponseEvent> (
     url = url,
     httpClient = httpClient,
     scope = scope,
     networkStateProvider = networkStateProvider,
-    onFastReconnected = onFastReconnected,
 ) {
 
     override val logger by taggedLogger("PersistentSFUSocket")
 
     // How many milliseconds can pass since the last disconnect when a fast-reconnect
     // will still be attempted. After this time we do a full-reconnect directly.
-    private val maxReconnectWindowTime = if (BuildConfig.DEBUG) { 10000L } else { 3000L }
+    private var maxReconnectWindowTime = if (BuildConfig.DEBUG) { 10000L } else { 3000L }
     private var lastDisconnectTime: Long? = null
 
     // Only set during SFU migration
@@ -187,16 +190,41 @@ public class SfuSocket(
             try {
                 val rawEvent = SfuEvent.ADAPTER.decode(byteArray)
                 val message = RTCEventMapper.mapEvent(rawEvent)
-                if (message is ErrorEvent) {
-                    val errorEvent = message as ErrorEvent
-                    handleError(SfuSocketError(errorEvent.error))
-                }
                 ackHealthMonitor()
                 events.emit(message)
+
+                // Additional handling
+                if (message is ErrorEvent) {
+                    val errorEvent = message as ErrorEvent
+                    when (errorEvent.reconnectStrategy) {
+                        WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED -> {
+                            handleError(SfuSocketError(errorEvent.error))
+                        }
+                        WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
+                            handleError(SfuSocketError(errorEvent.error))
+                            disconnect(DisconnectReason.PermanentError(SfuSocketError(errorEvent.error)))
+                        }
+                        WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
+                            logger.d { "[onMessage] Fast-reconnect requested" }
+                            reconnect()
+                        }
+                        WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                            logger.d { "[onMessage] Rejoin requested" }
+                            onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_REJOIN)
+                        }
+                        WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                            logger.d { "[onMessage] Migration requested" }
+                            onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_MIGRATE)
+                        }
+                    }
+                }
                 if (message is JoinCallResponseEvent) {
+                    message.fastReconnectDeadlineSeconds.let {
+                        maxReconnectWindowTime = it * 1000L
+                    }
                     if (message.isReconnected) {
-                        logger.d { "[onMessage] Fast-reconnect possible - requesting ICE restarts" }
-                        onFastReconnected()
+                        logger.d { "[onMessage] Fast-reconncect possible - requesting ICE restarts" }
+                        onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_FAST)
                         setConnectedStateAndContinue(message)
                     } else if (reconnectionAttempts > 0) {
                         logger.d { "[onMessage] Fast-reconnect request but not possible - doing full-reconnect" }
@@ -210,6 +238,12 @@ public class SfuSocket(
                     }
                 } else if (message is ICETrickleEvent) {
                     handleIceTrickle(message)
+                } else if (message is CallEndedSfuEvent) {
+                    logger.d { "[onMessage] Call ended - disconnecting" }
+                    disconnect(DisconnectReason.ByRequest)
+                    onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT)
+                } else if (message is ParticipantMigrationCompleteEvent) {
+                    cleanup()
                 }
             } catch (error: Throwable) {
                 coroutineContext.ensureActive()

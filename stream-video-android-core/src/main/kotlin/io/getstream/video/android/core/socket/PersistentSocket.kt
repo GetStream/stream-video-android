@@ -41,6 +41,7 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
+import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.ConnectException
@@ -66,7 +67,6 @@ public open class PersistentSocket<T>(
     private val networkStateProvider: NetworkStateProvider,
     /** Set the scope everything should run in */
     private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
-    private val onFastReconnected: suspend () -> Unit,
 ) : WebSocketListener() {
     internal open val logger by taggedLogger("PersistentSocket")
 
@@ -159,6 +159,7 @@ public open class PersistentSocket<T>(
     }
 
     fun cleanup() {
+        logger.d { "Cleanup the socket" }
         destroyed = true
         disconnect(DisconnectReason.ByRequest)
     }

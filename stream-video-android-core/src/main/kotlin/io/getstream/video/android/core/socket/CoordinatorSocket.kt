@@ -53,7 +53,6 @@ public class CoordinatorSocket(
     httpClient = httpClient,
     scope = scope,
     networkStateProvider = networkStateProvider,
-    onFastReconnected = { },
 ) {
     override val logger by taggedLogger("PersistentCoordinatorSocket")
 

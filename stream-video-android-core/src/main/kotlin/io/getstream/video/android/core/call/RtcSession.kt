@@ -112,6 +112,8 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
 import stream.video.sfu.models.VideoQuality
+import stream.video.sfu.models.WebsocketReconnectStrategy
+import stream.video.sfu.models.WebsocketReconnectStrategy.*
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
@@ -318,6 +320,28 @@ public class RtcSession internal constructor(
         call.monitor.reconnect(forceRestart = true)
     }
 
+    private val onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit = {
+        when (it) {
+            WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> TODO()
+            WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
+                call.monitor.stopTimer()
+                call.monitor.reconnect(forceRestart = true)
+            }
+            WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                call.handleSignalChannelDisconnect(false)
+            }
+            WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                call.switchSfu()
+            }
+            else -> {// Do nothing }
+        }
+    }
+        }
+
+    private val sfuCallEnded: suspend () -> Unit = {
+        call.leave()
+    }
+
     init {
         if (!StreamVideo.isInstalled) {
             throw IllegalArgumentException(
@@ -340,7 +364,7 @@ public class RtcSession internal constructor(
                 sessionId,
                 sfuToken,
                 getSdp,
-                sfuFastReconnectListener,
+                onWebsocketReconnectStrategy
             )
         setSfuConnectionModule(sfuConnectionModule)
         listenToSocketEventsAndErrors()
@@ -1739,7 +1763,7 @@ public class RtcSession internal constructor(
                 sessionId,
                 sfuToken,
                 getSdp,
-                sfuFastReconnectListener,
+                onWebsocketReconnectStrategy
             )
 
         // Wait until the socket connects - if it fails to connect then return to "Reconnecting"
@@ -1754,7 +1778,8 @@ public class RtcSession internal constructor(
                         // Disconnect the old SFU and stop listening to SFU stateflows
                         eventJob?.cancel()
                         errorJob?.cancel()
-                        sfuConnectionModule.sfuSocket.cleanup()
+                        // Cleanup called after the migration is successful
+                        // sfuConnectionModule.sfuSocket.cleanup()
 
                         // Make the new SFU the currently used one
                         setSfuConnectionModule(sfuConnectionMigrationModule!!)
