@@ -52,7 +52,6 @@ import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.Sdk
 import stream.video.sfu.models.SdkType
 import stream.video.sfu.models.WebsocketReconnectStrategy
-import stream.video.sfu.models.WebsocketReconnectStrategy.*
 
 /**
  * The SFU socket is slightly different from the coordinator socket
@@ -197,24 +196,30 @@ public class SfuSocket(
                 if (message is ErrorEvent) {
                     val errorEvent = message as ErrorEvent
                     when (errorEvent.reconnectStrategy) {
-                        WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED -> {
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED -> {
                             handleError(SfuSocketError(errorEvent.error))
                         }
-                        WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
                             handleError(SfuSocketError(errorEvent.error))
-                            disconnect(DisconnectReason.PermanentError(SfuSocketError(errorEvent.error)))
+                            disconnect(
+                                DisconnectReason.PermanentError(SfuSocketError(errorEvent.error)),
+                            )
                         }
-                        WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
                             logger.d { "[onMessage] Fast-reconnect requested" }
                             reconnect()
                         }
-                        WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
                             logger.d { "[onMessage] Rejoin requested" }
-                            onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_REJOIN)
+                            onWebSocketRejoinWithStrategy(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                            )
                         }
-                        WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                             logger.d { "[onMessage] Migration requested" }
-                            onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_MIGRATE)
+                            onWebSocketRejoinWithStrategy(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+                            )
                         }
                     }
                 }
@@ -224,7 +229,9 @@ public class SfuSocket(
                     }
                     if (message.isReconnected) {
                         logger.d { "[onMessage] Fast-reconncect possible - requesting ICE restarts" }
-                        onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_FAST)
+                        onWebSocketRejoinWithStrategy(
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                        )
                         setConnectedStateAndContinue(message)
                     } else if (reconnectionAttempts > 0) {
                         logger.d { "[onMessage] Fast-reconnect request but not possible - doing full-reconnect" }
@@ -241,7 +248,9 @@ public class SfuSocket(
                 } else if (message is CallEndedSfuEvent) {
                     logger.d { "[onMessage] Call ended - disconnecting" }
                     disconnect(DisconnectReason.ByRequest)
-                    onWebSocketRejoinWithStrategy(WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT)
+                    onWebSocketRejoinWithStrategy(
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT,
+                    )
                 } else if (message is ParticipantMigrationCompleteEvent) {
                     cleanup()
                 }

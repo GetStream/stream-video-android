@@ -113,7 +113,6 @@ import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
 import stream.video.sfu.models.VideoQuality
 import stream.video.sfu.models.WebsocketReconnectStrategy
-import stream.video.sfu.models.WebsocketReconnectStrategy.*
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
@@ -322,21 +321,21 @@ public class RtcSession internal constructor(
 
     private val onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit = {
         when (it) {
-            WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> TODO()
-            WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> TODO()
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
                 call.monitor.stopTimer()
                 call.monitor.reconnect(forceRestart = true)
             }
-            WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
                 call.handleSignalChannelDisconnect(false)
             }
-            WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                 call.switchSfu()
             }
-            else -> {// Do nothing }
+            else -> { // Do nothing }
+            }
         }
     }
-        }
 
     private val sfuCallEnded: suspend () -> Unit = {
         call.leave()
@@ -364,7 +363,7 @@ public class RtcSession internal constructor(
                 sessionId,
                 sfuToken,
                 getSdp,
-                onWebsocketReconnectStrategy
+                onWebsocketReconnectStrategy,
             )
         setSfuConnectionModule(sfuConnectionModule)
         listenToSocketEventsAndErrors()
@@ -1763,7 +1762,7 @@ public class RtcSession internal constructor(
                 sessionId,
                 sfuToken,
                 getSdp,
-                onWebsocketReconnectStrategy
+                onWebsocketReconnectStrategy,
             )
 
         // Wait until the socket connects - if it fails to connect then return to "Reconnecting"

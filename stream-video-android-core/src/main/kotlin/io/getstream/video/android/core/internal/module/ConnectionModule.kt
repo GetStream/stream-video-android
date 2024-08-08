@@ -143,7 +143,7 @@ internal class ConnectionModule(
         sessionId: String,
         sfuToken: String,
         getSubscriberSdp: suspend () -> String,
-        onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit
+        onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit,
     ): SfuConnectionModule {
         return SfuConnectionModule(
             sfuUrl = sfuUrl,
@@ -154,7 +154,7 @@ internal class ConnectionModule(
             loggingLevel = loggingLevel,
             scope = scope,
             networkStateProvider = networkStateProvider,
-            onWebsocketReconnectStrategy = onWebsocketReconnectStrategy
+            onWebsocketReconnectStrategy = onWebsocketReconnectStrategy,
         )
     }
 
@@ -192,7 +192,7 @@ internal class SfuConnectionModule(
     /**
      * Rejoin strategy to be used when the websocket connection is lost.
      */
-    onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit
+    onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit,
 ) {
     internal var sfuSocket: SfuSocket
     private val updatedSignalUrl = if (sfuUrl.contains(Regex("https?://"))) {
@@ -247,7 +247,7 @@ internal class SfuConnectionModule(
             scope,
             okHttpClient,
             networkStateProvider,
-            onWebSocketRejoinWithStrategy = onWebsocketReconnectStrategy
+            onWebSocketRejoinWithStrategy = onWebsocketReconnectStrategy,
         )
     }
 }

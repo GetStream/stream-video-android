@@ -41,7 +41,6 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.HealthCheckRequest
-import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.ConnectException

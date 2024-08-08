@@ -118,7 +118,7 @@ public data class JoinCallResponseEvent(
 ) : SfuDataEvent()
 
 public data class CallEndedSfuEvent(
-    val reason: Int
+    val reason: Int,
 ) : SfuDataEvent()
 
 public data object ParticipantMigrationCompleteEvent : SfuDataEvent()
