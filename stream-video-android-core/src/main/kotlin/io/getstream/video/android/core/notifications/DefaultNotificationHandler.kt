@@ -43,7 +43,6 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
 
@@ -88,11 +87,11 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
+
         TelecomCompat.registerCall(
             application,
-            CallService.TRIGGER_INCOMING_CALL,
-            callDisplayName,
             callId = callId,
+            isTriggeredByNotification = true,
         )
     }
 

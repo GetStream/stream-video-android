@@ -20,6 +20,7 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.telecom.TelecomCallState
 import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -127,38 +128,49 @@ class ClientState(client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         _activeCall.value = call
+        removeRingingCall()
+    }
+
+    fun removeActiveCall() {
+        _activeCall.value?.let { call ->
+            TelecomCompat.unregisterCall(
+                clientImpl.context,
+                CallService.TRIGGER_ONGOING_CALL,
+                call,
+            )
+
+            _activeCall.value = null
+        }
 
         removeRingingCall()
-        TelecomCompat.registerCall(
+    }
+
+    fun addRingingCall(call: Call, ringingState: RingingState) {
+        logger.d { "[addRingingCall] call: $call, ringingState: $ringingState" }
+
+        _ringingCall.value = call
+
+        TelecomCompat.changeCallState(
             clientImpl.context,
-            CallService.TRIGGER_ONGOING_CALL,
+            if (ringingState is RingingState.Incoming) {
+                TelecomCallState.INCOMING
+            } else {
+                TelecomCallState.OUTGOING
+            },
             call = call,
         )
     }
 
-    fun removeActiveCall() {
-        _activeCall.value = null
-
-        removeRingingCall()
-        TelecomCompat.unregisterCall(
-            clientImpl.context,
-            CallService.TRIGGER_ONGOING_CALL,
-        )
-    }
-
-    fun addRingingCall(call: Call, ringingState: RingingState) {
-        _ringingCall.value = call
-        if (ringingState is RingingState.Outgoing) {
-            TelecomCompat.registerCall(
+    fun removeRingingCall() {
+        _ringingCall.value?.let { call ->
+            TelecomCompat.unregisterCall(
                 clientImpl.context,
                 CallService.TRIGGER_OUTGOING_CALL,
-                call = call,
+                call,
             )
-        }
-    }
 
-    fun removeRingingCall() {
-        _ringingCall.value = null
+            _ringingCall.value = null
+        }
     }
 
     /**
