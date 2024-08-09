@@ -32,6 +32,7 @@ import io.getstream.video.android.core.notifications.internal.storage.DeviceToke
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -234,6 +235,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                 client.registerPushDevice()
             }
         }
+
+        client.telecomHandler = TelecomHandler.getInstance(context)
 
         return client
     }

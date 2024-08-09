@@ -20,6 +20,8 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.telecom.TelecomCallState
+import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -125,28 +127,58 @@ class ClientState(client: StreamVideo) {
     }
 
     fun setActiveCall(call: Call) {
-        removeRingingCall()
-        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
-        this._activeCall.value = call
+        _activeCall.value = call
+        removeRingingCall(willTransitionToOngoing = true)
     }
 
     fun removeActiveCall() {
-        this._activeCall.value = null
-        maybeStopForegroundService()
-        removeRingingCall()
+        _activeCall.value?.let { call ->
+            TelecomCompat.unregisterCall(
+                clientImpl.context,
+                CallService.TRIGGER_ONGOING_CALL,
+                call,
+            )
+
+            _activeCall.value = null
+        }
+
+//        removeRingingCall() // TODO-Telecom: Remove?
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
-        _ringingCall.value = call
-        if (ringingState is RingingState.Outgoing) {
-            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
-        }
+        logger.d { "[addRingingCall] call: $call, ringingState: $ringingState" }
 
-        // TODO: behaviour if you are already in a call
+        _ringingCall.value = call
+
+        TelecomCompat.changeCallState(
+            clientImpl.context,
+            if (ringingState is RingingState.Incoming) {
+                TelecomCallState.INCOMING
+            } else {
+                TelecomCallState.OUTGOING
+            },
+            call = call,
+        )
     }
 
-    fun removeRingingCall() {
-        _ringingCall.value = null
+    fun removeRingingCall(willTransitionToOngoing: Boolean) {
+        _ringingCall.value?.let { call ->
+            if (willTransitionToOngoing) {
+                TelecomCompat.changeCallState(
+                    clientImpl.context,
+                    TelecomCallState.ONGOING,
+                    call = call,
+                )
+            } else {
+                TelecomCompat.unregisterCall(
+                    clientImpl.context,
+                    CallService.TRIGGER_OUTGOING_CALL, // TODO-Telecom is this correct?
+                    call,
+                )
+            }
+
+            _ringingCall.value = null
+        }
     }
 
     /**

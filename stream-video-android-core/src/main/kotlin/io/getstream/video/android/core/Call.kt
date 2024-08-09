@@ -41,6 +41,9 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.telecom.TelecomCallState
+import io.getstream.video.android.core.telecom.TelecomCompat
+import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -276,9 +279,7 @@ public class Call(
 
         response.onSuccess {
             state.updateFromResponse(it)
-            if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
-            }
+            if (ring) client.state.addRingingCall(this, RingingState.Outgoing())
         }
         return response
     }
@@ -445,6 +446,13 @@ public class Call(
 
         monitor.start()
         client.state.setActiveCall(this)
+
+        TelecomCompat.changeCallState(
+            clientImpl.context,
+            TelecomCallState.ONGOING,
+            this,
+        )
+
         startCallStatsReporting(result.value.statsOptions.reportingIntervalMs.toLong())
 
         // listen to Signal WS
@@ -618,7 +626,7 @@ public class Call(
         }
         stopScreenSharing()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+        client.state.removeRingingCall(willTransitionToOngoing = false)
         (client as StreamVideoImpl).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
@@ -1029,10 +1037,21 @@ public class Call(
     suspend fun accept(): Result<AcceptCallResponse> {
         logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
-
-        clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService()
+        clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
+//        unregisterCall()  // TODO-Telecom: unregister needed here?
         return clientImpl.accept(type, id)
+    }
+
+    private fun unregisterCall() {
+        with(clientImpl) {
+            state.removeRingingCall(willTransitionToOngoing = false)
+
+            if (TelecomHandler.isSupported(context)) {
+//                telecomHandler?.unregisterCall()
+            } else {
+                state.maybeStopForegroundService()
+            }
+        }
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {

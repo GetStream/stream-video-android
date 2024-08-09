@@ -32,6 +32,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
@@ -42,7 +43,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
 
 public open class DefaultNotificationHandler(
@@ -86,7 +87,12 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(application, callId, callDisplayName)
+
+        TelecomCompat.registerCall(
+            application,
+            callId = callId,
+            isTriggeredByNotification = true,
+        )
     }
 
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
@@ -107,7 +113,7 @@ public open class DefaultNotificationHandler(
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String,
+        incomingCallDisplayName: String,
         shouldHaveContentIntent: Boolean,
     ): Notification? {
         return if (ringingState is RingingState.Incoming) {
@@ -120,7 +126,7 @@ public open class DefaultNotificationHandler(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
-                    callDisplayName,
+                    incomingCallDisplayName,
                     shouldHaveContentIntent,
                 )
             } else {
@@ -135,7 +141,6 @@ public open class DefaultNotificationHandler(
                 getOutgoingCallNotification(
                     outgoingCallPendingIntent,
                     endCallPendingIntent,
-                    callDisplayName,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -231,12 +236,12 @@ public open class DefaultNotificationHandler(
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle(
+            setContentTitle(callDisplayName)
+            setContentText(
                 application.getString(R.string.stream_video_incoming_call_notification_title),
             )
-            setContentText(callDisplayName)
             setChannelId(channelId)
-            setOngoing(false)
+            setOngoing(true)
             setCategory(NotificationCompat.CATEGORY_CALL)
             setFullScreenIntent(fullScreenPendingIntent, true)
             if (shouldHaveContentIntent) {
@@ -258,7 +263,6 @@ public open class DefaultNotificationHandler(
     private fun getOutgoingCallNotification(
         outgoingCallPendingIntent: PendingIntent,
         endCallPendingIntent: PendingIntent,
-        callDisplayName: String,
     ): Notification {
         val channelId = application.getString(
             R.string.stream_video_outgoing_call_notification_channel_id,
@@ -282,7 +286,11 @@ public open class DefaultNotificationHandler(
             setContentTitle(
                 application.getString(R.string.stream_video_outgoing_call_notification_title),
             )
-            setContentText(callDisplayName)
+            setContentText(
+                application.getString(
+                    R.string.stream_video_ongoing_call_notification_description,
+                ),
+            )
             setChannelId(channelId)
             setOngoing(true)
             setContentIntent(outgoingCallPendingIntent)
@@ -321,18 +329,19 @@ public open class DefaultNotificationHandler(
             } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
     }
 
-    override fun getOngoingCallNotification(
-        callDisplayName: String?,
-        callId: StreamCallId,
-    ): Notification? {
-        val notificationId = callId.hashCode() // Notification ID
+    override fun getOngoingCallNotification(callId: StreamCallId, isOutgoingCall: Boolean): Notification? {
+        val notificationId = callId.hashCode()
 
         // Intents
         val ongoingCallIntent = intentResolver.searchOngoingCallPendingIntent(
             callId,
             notificationId,
         )
-        val endCallIntent = intentResolver.searchEndCallPendingIntent(callId = callId)
+        val hangUpIntent = if (isOutgoingCall) {
+            intentResolver.searchRejectCallPendingIntent(callId)
+        } else {
+            intentResolver.searchEndCallPendingIntent(callId)
+        }
 
         // Channel preparation
         val ongoingCallsChannelId = application.getString(
@@ -352,8 +361,8 @@ public open class DefaultNotificationHandler(
             },
         )
 
-        if (endCallIntent == null) {
-            logger.e { "End call intent is null, not showing notification!" }
+        if (hangUpIntent == null) {
+            logger.e { "Hang-up intent is null, not showing notification!" }
             return null
         }
 
@@ -364,8 +373,9 @@ public open class DefaultNotificationHandler(
                 // If the intent is configured, clicking the notification will return to the call
                 if (ongoingCallIntent != null) {
                     it.setContentIntent(ongoingCallIntent)
+                    it.setFullScreenIntent(ongoingCallIntent, false)
                 } else {
-                    logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
+                    logger.w { "Ongoing intent is null. Clicking on the ongoing call notification will not work." }
                 }
             }
             .setContentTitle(
@@ -376,7 +386,7 @@ public open class DefaultNotificationHandler(
             )
             .setAutoCancel(false)
             .setOngoing(true)
-            .addHangupAction(endCallIntent, callDisplayName ?: callId.toString())
+            .addHangupAction(hangUpIntent)
             .build()
     }
 
@@ -476,13 +486,22 @@ public open class DefaultNotificationHandler(
 
     private fun NotificationCompat.Builder.addHangupAction(
         rejectCallPendingIntent: PendingIntent,
-        callDisplayName: String,
     ): NotificationCompat.Builder = apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 CallStyle.forOngoingCall(
                     Person.Builder()
-                        .setName(callDisplayName)
+                        .setName(
+                            application.getString(
+                                R.string.stream_video_ongoing_call_notification_title,
+                            ),
+                        )
+                        .setIcon(
+                            IconCompat.createWithResource(
+                                application,
+                                R.drawable.stream_video_ic_logo,
+                            ),
+                        )
                         .build(),
                     rejectCallPendingIntent,
                 ),
@@ -501,13 +520,13 @@ public open class DefaultNotificationHandler(
     private fun NotificationCompat.Builder.addCallActions(
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callDisplayName: String,
+        personName: String,
     ): NotificationCompat.Builder = apply {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // TODO-Telecom: CallStyle notifications prior to S (needed for Telecom)
             setStyle(
                 CallStyle.forIncomingCall(
                     Person.Builder()
-                        .setName(callDisplayName)
+                        .setName(personName) // Used as contentTitle
                         .build(),
                     rejectCallPendingIntent,
                     acceptCallPendingIntent,
