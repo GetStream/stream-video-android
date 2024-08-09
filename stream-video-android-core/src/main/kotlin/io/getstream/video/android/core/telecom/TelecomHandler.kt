@@ -38,7 +38,9 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,13 +60,14 @@ internal class TelecomHandler private constructor(
     private val context: Context,
     private val callManager: CallsManager,
 ) {
-
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
-    private val telecomHandlerScope = CoroutineScope(DispatcherProvider.Default + SupervisorJob())
-    private var callControlScope: CallControlScope? = null
-
     private val calls = mutableMapOf<String, TelecomCall>()
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, ex -> logger.e(ex) { "[telecomHandlerScope]" } }
+    private val telecomHandlerScope =
+        CoroutineScope(DispatcherProvider.Default + SupervisorJob() + exceptionHandler)
+    private var callControlScope: CallControlScope? = null
 
     companion object {
         @Volatile
@@ -139,7 +142,7 @@ internal class TelecomHandler private constructor(
         if (wasTriggeredByIncomingNotification) prepareIncomingCall(call)
 
         if (calls.contains(call.cid)) {
-            logger.d { "[registerCall] Call already registered, ignoring" }
+            logger.i { "[registerCall] Call already registered, ignoring" }
         } else {
             calls[call.cid] = TelecomCall(
                 streamCall = call,
@@ -163,13 +166,17 @@ internal class TelecomHandler private constructor(
     }
 
     fun changeCallState(call: StreamCall, newState: TelecomCallState) {
-        logger.d { "[changeCallState] newState: $newState" }
-
         val telecomCall = calls[call.cid]
 
-        if (telecomCall == null) {
-            logger.e { "[changeCallState] Call must be registered first" }
+        logger.i { "[changeCallState] currentState: ${telecomCall?.state}, newState: $newState" }
+
+        if (telecomCall == null || telecomCall.state == newState) {
+            val cause = if (telecomCall == null) "call not registered" else "same state"
+            logger.i { "[changeCallState] Ignoring state change: $cause" }
         } else {
+            val wasAlreadyAdded = telecomCall.state.let {
+                it == TelecomCallState.INCOMING || it == TelecomCallState.OUTGOING
+            }
             telecomCall.state = newState
 
             val telecomToStreamEventBridge = TelecomToStreamEventBridge(call)
@@ -179,19 +186,23 @@ internal class TelecomHandler private constructor(
                 safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
                     postNotification(telecomCall)
 
-                    callManager.addCall(
-                        callAttributes = call.telecomCallAttributes,
-                        onAnswer = telecomToStreamEventBridge::onAnswer,
-                        onDisconnect = telecomToStreamEventBridge::onDisconnect,
-                        onSetActive = telecomToStreamEventBridge::onSetActive,
-                        onSetInactive = telecomToStreamEventBridge::onSetInactive,
-                        block = {
-                            telecomCall.callControlScope = this
-                            streamToTelecomEventBridge.onEvent(this)
+                    if (wasAlreadyAdded) {
+                        logger.i { "[changeCallState] Call was already added to Telecom, ignoring" }
+                    } else {
+                        callManager.addCall(
+                            callAttributes = call.telecomCallAttributes,
+                            onAnswer = telecomToStreamEventBridge::onAnswer,
+                            onDisconnect = telecomToStreamEventBridge::onDisconnect,
+                            onSetActive = telecomToStreamEventBridge::onSetActive,
+                            onSetInactive = telecomToStreamEventBridge::onSetInactive,
+                            block = {
+                                telecomCall.callControlScope = this
+                                streamToTelecomEventBridge.onEvent(this)
 
-                            logger.d { "[changeCallState] Added call to Telecom" }
-                        },
-                    )
+                                logger.i { "[changeCallState] Added call to Telecom" }
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -232,13 +243,13 @@ internal class TelecomHandler private constructor(
                     }
 
                     else -> {
-                        logger.e { "[postNotification] Will not post any notification" }
+                        logger.w { "[postNotification] Will not post any notification" }
                         null
                     }
                 }
 
                 notification?.let {
-                    logger.d { "[postNotification] Posting notification" }
+                    logger.i { "[postNotification] Posting ${telecomCall.state.toString().lowercase()} notification" }
 
                     NotificationManagerCompat
                         .from(context)
@@ -256,7 +267,7 @@ internal class TelecomHandler private constructor(
         }
 
     fun unregisterCall(call: StreamCall) {
-        logger.d { "[unregisterCall]" }
+        logger.i { "[unregisterCall]" }
 
         calls.remove(call.cid)?.let { telecomCall ->
             safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
@@ -285,8 +296,10 @@ internal class TelecomHandler private constructor(
     }
 
     fun cleanUp() = runBlocking {
+        logger.d { "[cleanUp]" }
+
         calls.forEach { unregisterCall(it.value.streamCall) }
-//        telecomHandlerScope.cancel()
+        telecomHandlerScope.cancel()
         instance = null
     }
 }
@@ -316,7 +329,7 @@ private class TelecomToStreamEventBridge(private val call: StreamCall) {
 
     suspend fun onSetInactive() {
         logger.d { "[TelecomToStreamEventBridge#onSetInactive]" }
-        call.leave()
+//        call.leave() // TODO-Telecom: uncomment and test
     }
 }
 
@@ -396,7 +409,7 @@ private data class TelecomCall(
     val notificationId: Int,
     val parentScope: CoroutineScope,
 ) {
-    private val localScope = CoroutineScope(parentScope.coroutineContext)
+    private val localScope = CoroutineScope(parentScope.coroutineContext + Job())
     private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 
     var callControlScope: CallControlScope? = null
@@ -447,7 +460,7 @@ private data class TelecomCall(
                             listener(it.first, it.second)
                         }
                     }
-                    .launchIn(parentScope)
+                    .launchIn(localScope)
             }
         }
 

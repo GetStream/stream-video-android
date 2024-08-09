@@ -273,7 +273,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
-	public final fun removeRingingCall ()V
+	public final fun removeRingingCall (Z)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
 }
 
