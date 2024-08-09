@@ -626,7 +626,7 @@ public class Call(
         }
         stopScreenSharing()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+        client.state.removeRingingCall(willTransitionToOngoing = false)
         (client as StreamVideoImpl).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
@@ -1037,14 +1037,14 @@ public class Call(
     suspend fun accept(): Result<AcceptCallResponse> {
         logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
-        clientImpl.state.removeRingingCall()
+        clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
 //        unregisterCall()  // TODO-Telecom: unregister needed here?
         return clientImpl.accept(type, id)
     }
 
     private fun unregisterCall() {
         with(clientImpl) {
-            state.removeRingingCall()
+            state.removeRingingCall(willTransitionToOngoing = false)
 
             if (TelecomHandler.isSupported(context)) {
 //                telecomHandler?.unregisterCall()
