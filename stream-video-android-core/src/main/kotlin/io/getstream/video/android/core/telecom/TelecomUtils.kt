@@ -20,6 +20,7 @@ import android.annotation.TargetApi
 import android.content.Context
 import android.os.Build
 import androidx.core.content.ContextCompat
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
@@ -27,6 +28,9 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 internal object TelecomCompat {
 
@@ -34,21 +38,30 @@ internal object TelecomCompat {
         context: Context,
         call: StreamCall? = null,
         callId: StreamCallId? = null,
+        callDisplayName: String = "Unknown",
         isTriggeredByNotification: Boolean = false,
     ) {
-        getCallObject(call, callId)?.let {
+        withCall(call, callId) {
             val applicationContext = context.applicationContext
             val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
             val telecomHandler = TelecomHandler.getInstance(applicationContext)
 
             if (isTelecomSupported) {
                 telecomHandler?.registerCall(it, isTriggeredByNotification)
+            } else {
+                if (isTriggeredByNotification) {
+                    CallService.showIncomingCall( // TODO-Telecom: Keep runForegroundService flag into account here and in other places?
+                        applicationContext,
+                        StreamCallId.fromCallCid(it.cid),
+                        callDisplayName,
+                    )
+                }
             }
         }
     }
 
     fun changeCallState(context: Context, newState: TelecomCallState, call: StreamCall? = null, callId: StreamCallId? = null) {
-        getCallObject(call, callId)?.let {
+        withCall(call, callId) {
             val applicationContext = context.applicationContext
             val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
             val telecomHandler = TelecomHandler.getInstance(applicationContext)
@@ -56,14 +69,7 @@ internal object TelecomCompat {
             if (isTelecomSupported) {
                 telecomHandler?.changeCallState(it, newState)
             } else {
-                if (newState == TelecomCallState.INCOMING) {
-                    CallService.showIncomingCall(
-                        applicationContext,
-                        StreamCallId.fromCallCid(it.cid),
-                        "",
-                    )
-                } else {
-                    // TODO-Telecom: Take runForegroundService flag into account here and above?
+                if (newState == TelecomCallState.OUTGOING || newState == TelecomCallState.ONGOING) {
                     ContextCompat.startForegroundService(
                         applicationContext,
                         CallService.buildStartIntent(
@@ -81,12 +87,23 @@ internal object TelecomCompat {
         }
     }
 
-    private fun getCallObject(call: StreamCall?, callId: StreamCallId?): StreamCall? = when {
-        call != null -> call
+    @OptIn(ExperimentalContracts::class)
+    private inline fun withCall(
+        call: StreamCall?,
+        callId: StreamCallId?,
+        doAction: (Call) -> Unit,
+    ) {
+        contract {
+            callsInPlace(doAction, InvocationKind.EXACTLY_ONCE)
+        }
 
-        callId != null -> StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
+        when {
+            call != null -> call
 
-        else -> null
+            callId != null -> StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
+
+            else -> null
+        }?.let { doAction(it) }
     }
 
     fun unregisterCall(

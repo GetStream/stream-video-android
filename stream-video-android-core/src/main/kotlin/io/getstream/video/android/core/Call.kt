@@ -41,8 +41,6 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.SocketState
-import io.getstream.video.android.core.telecom.TelecomCallState
-import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
@@ -446,12 +444,6 @@ public class Call(
 
         monitor.start()
         client.state.setActiveCall(this)
-
-        TelecomCompat.changeCallState(
-            clientImpl.context,
-            TelecomCallState.ONGOING,
-            this,
-        )
 
         startCallStatsReporting(result.value.statsOptions.reportingIntervalMs.toLong())
 

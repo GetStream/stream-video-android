@@ -403,11 +403,12 @@ internal class CallService : Service() {
                 logger.i { "Received event in service: $event" }
                 when (event) {
                     is CallAcceptedEvent -> {
-                        handleIncomingCallAcceptedByMeOnAnotherDevice(
-                            acceptedByUserId = event.user.id,
-                            myUserId = streamVideo.userId,
-                            callRingingState = call.state.ringingState.value,
-                        )
+                        // TODO-Telecom: Fix below
+//                        handleIncomingCallAcceptedByMeOnAnotherDevice(
+//                            acceptedByUserId = event.user.id,
+//                            myUserId = streamVideo.userId,
+//                            callRingingState = call.state.ringingState.value,
+//                        )
                     }
 
                     is CallRejectedEvent -> {

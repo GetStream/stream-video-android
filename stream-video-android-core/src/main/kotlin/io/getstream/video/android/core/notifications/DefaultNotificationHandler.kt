@@ -91,6 +91,7 @@ public open class DefaultNotificationHandler(
         TelecomCompat.registerCall(
             application,
             callId = callId,
+            callDisplayName = callDisplayName,
             isTriggeredByNotification = true,
         )
     }

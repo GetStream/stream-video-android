@@ -128,7 +128,16 @@ class ClientState(client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         _activeCall.value = call
-        removeRingingCall(willTransitionToOngoing = true)
+
+        if (ringingCall.value != null) {
+            removeRingingCall(willTransitionToOngoing = true)
+        } else {
+            TelecomCompat.changeCallState(
+                clientImpl.context,
+                TelecomCallState.ONGOING,
+                call,
+            )
+        }
     }
 
     fun removeActiveCall() {
@@ -163,6 +172,8 @@ class ClientState(client: StreamVideo) {
 
     fun removeRingingCall(willTransitionToOngoing: Boolean) {
         _ringingCall.value?.let { call ->
+            _ringingCall.value = null
+
             if (willTransitionToOngoing) {
                 TelecomCompat.changeCallState(
                     clientImpl.context,
@@ -176,8 +187,6 @@ class ClientState(client: StreamVideo) {
                     call,
                 )
             }
-
-            _ringingCall.value = null
         }
     }
 
