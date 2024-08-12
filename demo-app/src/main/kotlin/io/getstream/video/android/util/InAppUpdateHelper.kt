@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.util
 
+import android.app.Activity
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -87,11 +88,11 @@ class InAppUpdateHelper(private val activity: ComponentActivity) {
         when (resultCode) {
             // For immediate updates, you might not receive RESULT_OK because
             // the update should already be finished by the time control is given back to your app.
-            ComponentActivity.RESULT_OK -> {
+            Activity.RESULT_OK -> {
                 Log.d(IN_APP_UPDATE_LOG_TAG, "Update successful")
                 showToast(activity.getString(R.string.in_app_update_successful))
             }
-            ComponentActivity.RESULT_CANCELED -> {
+            Activity.RESULT_CANCELED -> {
                 Log.d(IN_APP_UPDATE_LOG_TAG, "Update canceled")
                 showToast(activity.getString(R.string.in_app_update_canceled))
             }

@@ -33,8 +33,8 @@ import org.openapitools.client.models.CallRecording
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
 import org.openapitools.client.models.MemberResponse
+import org.openapitools.client.models.QueryCallMembersResponse
 import org.openapitools.client.models.QueryCallsResponse
-import org.openapitools.client.models.QueryMembersResponse
 import org.openapitools.client.models.ReactionResponse
 import org.openapitools.client.models.UserResponse
 import stream.video.sfu.models.Participant
@@ -94,8 +94,8 @@ internal fun UserResponse.toUser(): User {
     return User(
         id = id,
         role = role,
-        name = name ?: "",
-        image = image ?: "",
+        name = name,
+        image = image,
         teams = teams,
         custom = custom.mapValues { it.value.toString() },
     )
@@ -111,7 +111,7 @@ internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
 }
 
 @JvmSynthetic
-internal fun QueryMembersResponse.toQueriedMembers(): QueriedMembers {
+internal fun QueryCallMembersResponse.toQueriedMembers(): QueriedMembers {
     return QueriedMembers(
         members = members.map { it.toMember() },
         next = next,
@@ -182,4 +182,4 @@ internal fun EdgeResponse.toEdge(): EdgeData {
 
 @JvmSynthetic
 @InternalStreamVideoApi
-fun CallUser.getNameOrId(): String = name.ifEmpty { id }
+fun CallUser.getNameOrId(): String = name.takeUnless { it.isNullOrBlank() } ?: id

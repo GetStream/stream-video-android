@@ -253,8 +253,37 @@ message CallGrants {
   bool can_screenshare = 3;
 }
 
+// GoAwayReason represents the reason for the SFU to
+// disconnect the client.
 enum GoAwayReason {
   GO_AWAY_REASON_UNSPECIFIED = 0;
   GO_AWAY_REASON_SHUTTING_DOWN = 1;
   GO_AWAY_REASON_REBALANCE = 2;
 }
+
+// CallEndedReason represents the reason for the call to end.
+enum CallEndedReason {
+  CALL_ENDED_REASON_UNSPECIFIED = 0;
+  CALL_ENDED_REASON_ENDED = 1;
+  CALL_ENDED_REASON_LIVE_ENDED = 2;
+  CALL_ENDED_REASON_KICKED = 3;
+  CALL_ENDED_REASON_SESSION_ENDED = 4;
+}
+
+// WebsocketReconnectStrategy defines the ws strategies available for handling reconnections.
+enum WebsocketReconnectStrategy {
+  WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED = 0;
+  // Sent after reaching the maximum reconnection attempts, leading to permanent disconnect.
+  WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT = 1;
+  // SDK should maintaining existing publisher/subscriber pc instances
+  // and establish a new WebSocket connection.
+  WEBSOCKET_RECONNECT_STRATEGY_FAST = 2;
+  // SDK should drop existing pc instances and creates a fresh WebSocket connection,
+  // ensuring a clean state for the reconnection.
+  WEBSOCKET_RECONNECT_STRATEGY_CLEAN = 3;
+  // SDK should obtain new credentials from the coordinator, drops existing pc instances, and initializes
+  // a completely new WebSocket connection, ensuring a comprehensive reset.
+  WEBSOCKET_RECONNECT_STRATEGY_FULL = 4;
+  // SDK should migrate to a new SFU instance
+  WEBSOCKET_RECONNECT_STRATEGY_MIGRATE = 5;
+};

@@ -136,4 +136,11 @@ internal class SortedParticipantsState(
      * Get last sorted participants.
      */
     fun lastSortOrder() = lastSortOrder
+
+    /**
+     * Update the sorter with a new comparator.
+     */
+    fun updateComparator(comparator: Comparator<ParticipantState>) {
+        this.comparator = comparator
+    }
 }

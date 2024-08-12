@@ -57,7 +57,7 @@ data class MemberResponse (
 
     /* Custom member response data */
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?> = emptyMap(),
 
     /* Date/time of the last update */
     @Json(name = "updated_at")

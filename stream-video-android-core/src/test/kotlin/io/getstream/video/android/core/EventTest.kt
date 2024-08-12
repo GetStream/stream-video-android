@@ -317,13 +317,17 @@ class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
 private fun io.getstream.video.android.model.User.toUserResponse(): UserResponse {
     return UserResponse(
         id = id,
-        role = role,
-        teams = teams,
+        role = role ?: "user",
+        teams = teams ?: emptyList(),
         image = image,
         name = name,
-        custom = custom,
+        custom = custom ?: emptyMap(),
         createdAt = OffsetDateTime.now(),
         updatedAt = OffsetDateTime.now(),
         deletedAt = OffsetDateTime.now(),
+        // TODO: implement these
+        banned = false,
+        language = "",
+        online = false,
     )
 }

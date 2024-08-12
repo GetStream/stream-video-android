@@ -23,14 +23,20 @@ import io.getstream.video.android.model.StreamCallId
 
 internal object NoOpNotificationHandler : NotificationHandler {
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
+    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
-    override fun getOngoingCallNotification(callId: StreamCallId): Notification? = null
+    override fun getOngoingCallNotification(
+        callDisplayName: String?,
+        callId: StreamCallId,
+    ): Notification? = null
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String,
+        shouldHaveContentIntent: Boolean,
     ): Notification? = null
+    override fun getSettingUpCallNotification(): Notification? = null
 
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }

@@ -10,6 +10,9 @@
 ## Moshi model classes
 -keep class org.openapitools.client.** { *; }
 
+## Kotlin serialized classes
+-keep @kotlinx.serialization.Serializable class * {*;}
+
 ## Retrofit (https://github.com/square/retrofit/blob/master/retrofit/src/main/resources/META-INF/proguard/retrofit2.pro)
 
 # Retrofit does reflection on generic parameters. InnerClasses is required to use Signature and
@@ -60,3 +63,9 @@
 
 # With R8 full mode generic signatures are stripped for classes that are not kept.
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
+
+# Prevent R8 from stripping notification-handling classes.
+-keep class io.getstream.video.android.core.notifications.internal.VideoPushDelegate { *; }
+-keep class io.getstream.android.push.delegate.PushDelegate { *; }
+-keep class io.getstream.android.push.delegate.PushDelegateProvider { *; }
+-keep class io.getstream.android.push.permissions.PushPermissionsInitializer { *; }

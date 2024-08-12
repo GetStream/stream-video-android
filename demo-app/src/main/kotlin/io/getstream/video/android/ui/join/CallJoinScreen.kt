@@ -43,6 +43,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
@@ -96,7 +98,6 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -136,6 +137,7 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             user = user,
+            showDirectCall = BuildConfig.FLAVOR == StreamFlavors.development,
             onAvatarLongClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {
@@ -224,9 +226,8 @@ private fun CallJoinHeader(
             ) {
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.componentHeightL),
-                    textSize = StyleSize.S,
-                    userName = it.userNameOrId,
                     userImage = it.image,
+                    userName = it.userNameOrId,
                 )
             }
 
@@ -236,7 +237,7 @@ private fun CallJoinHeader(
         Text(
             modifier = Modifier.weight(1f),
             color = Color.White,
-            text = user?.name?.ifBlank { user?.id }?.ifBlank { user!!.custom["email"] }.orEmpty(),
+            text = user?.userNameOrId.orEmpty(),
             maxLines = 1,
             fontSize = 16.sp,
         )
@@ -301,7 +302,7 @@ private fun CallJoinHeader(
                         if (!isProduction) {
                             StreamButton(
                                 modifier = Modifier.fillMaxWidth(),
-                                icon = Icons.Default.Logout,
+                                icon = Icons.AutoMirrored.Filled.Logout,
                                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                                 text = stringResource(id = R.string.sign_out),
                                 onClick = {
@@ -491,7 +492,7 @@ private fun JoinCallForm(
         )
 
         StreamButton(
-            icon = Icons.Default.Login,
+            icon = Icons.AutoMirrored.Filled.Login,
             style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier
                 .padding(start = 16.dp)

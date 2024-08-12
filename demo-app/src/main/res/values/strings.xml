@@ -24,6 +24,7 @@
     <string name="sign_in_google">Google Sign In</string>
     <string name="sign_in_email">Sign In with Email</string>
     <string name="random_user_sign_in">Random User Sign In</string>
+    <string name="builtin_user_sign_in">Built-in User Sign In</string>
     <string name="sign_in_contact">Having problems logging in?&#160;</string>
     <string name="sign_in_contact_us">Contact us</string>
     <string name="sign_out">Sign out</string>
@@ -42,6 +43,7 @@
     <string name="direct_call">Direct Call</string>
     <string name="select_direct_call_users">Select users and tap the call button below</string>
     <string name="enter_your_email_address">Enter your e-mail address</string>
+    <string name="select_user">Select a user to login with</string>
     <string name="google_sign_in_not_finalized">Google sign in not finalized, please try again</string>
     <string name="are_you_sure_sign_out">Are you sure you want to sign out?</string>
     <string name="cancel">Cancel</string>

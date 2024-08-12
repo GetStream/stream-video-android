@@ -17,9 +17,12 @@
 package io.getstream.video.android.core.socket
 
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.utils.isWhitespaceOnly
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -28,6 +31,8 @@ import okhttp3.WebSocket
 import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectUserDetailsRequest
 import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.ConnectionErrorEvent
+import org.openapitools.client.models.UnsupportedVideoEventException
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSAuthMessageRequest
 
@@ -66,8 +71,8 @@ public class CoordinatorSocket(
             token = token,
             userDetails = ConnectUserDetailsRequest(
                 id = user.id,
-                name = user.name,
-                image = user.image,
+                name = user.name.takeUnless { it.isWhitespaceOnly() },
+                image = user.image.takeUnless { it.isWhitespaceOnly() },
                 custom = user.custom,
             ),
         )
@@ -80,48 +85,57 @@ public class CoordinatorSocket(
     override fun onMessage(webSocket: WebSocket, text: String) {
         logger.d { "[onMessage] text: $text " }
 
+        if (text.isEmpty() || text == "null") {
+            logger.w { "[onMessage] Received empty socket message" }
+            return
+        }
+
         scope.launch(singleThreadDispatcher) {
-            // parse the message
-            val jsonAdapter: JsonAdapter<VideoEvent> =
-                Serializer.moshi.adapter(VideoEvent::class.java)
-            val processedEvent = try {
-                jsonAdapter.fromJson(text)
-            } catch (e: Throwable) {
-                logger.w { "[onMessage] VideoEvent parsing error ${e.message}" }
-                null
-            }
-
-            if (processedEvent is ConnectedEvent) {
-                _connectionId.value = processedEvent.connectionId
-                setConnectedStateAndContinue(processedEvent)
-            }
-
-            // handle errors
-            if (text.isNotEmpty() && processedEvent == null) {
-                val errorAdapter: JsonAdapter<SocketError> =
-                    Serializer.moshi.adapter(SocketError::class.java)
-
-                try {
-                    val parsedError = errorAdapter.fromJson(text)
-                    parsedError?.let {
-                        logger.w { "[onMessage] socketErrorEvent: ${parsedError.error}" }
-                        handleError(it.error)
-                    }
-                } catch (e: Throwable) {
-                    logger.w { "[onMessage] socketErrorEvent parsing error: ${e.message}" }
-                    handleError(e)
+            try {
+                Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
+                    eventAdapter.fromJson(text)?.let { parsedEvent -> processEvent(parsedEvent) }
                 }
-            } else {
-                logger.d { "parsed event $processedEvent" }
-
-                // emit the message
-                if (processedEvent == null) {
-                    logger.w { "[onMessage] failed to parse event: $text" }
+            } catch (e: Throwable) {
+                if (e.cause is UnsupportedVideoEventException) {
+                    val ex = e.cause as UnsupportedVideoEventException
+                    logger.w { "[onMessage] Received unsupported VideoEvent type: ${ex.type}. Ignoring." }
                 } else {
-                    ackHealthMonitor()
-                    events.emit(processedEvent)
+                    val eventType = extractEventType(text)
+                    val errorMessage = "Error when parsing VideoEvent with type: $eventType. Cause: ${e.message}."
+
+                    logger.e { "[onMessage] $errorMessage" }
+                    handleError(JsonDataException(errorMessage))
                 }
             }
         }
+    }
+
+    private suspend fun processEvent(parsedEvent: VideoEvent) {
+        if (parsedEvent is ConnectionErrorEvent) {
+            handleError(
+                ErrorResponse(
+                    code = parsedEvent.error?.code ?: -1,
+                    message = parsedEvent.error?.message ?: "",
+                    statusCode = parsedEvent.error?.statusCode ?: -1,
+                    exceptionFields = parsedEvent.error?.exceptionFields ?: emptyMap(),
+                    moreInfo = parsedEvent.error?.moreInfo ?: "",
+                ),
+            )
+            return
+        }
+
+        if (parsedEvent is ConnectedEvent) {
+            _connectionId.value = parsedEvent.connectionId
+            setConnectedStateAndContinue(parsedEvent)
+        }
+
+        ackHealthMonitor()
+        events.emit(parsedEvent)
+    }
+
+    private fun extractEventType(json: String): String = safeCall("Unknown") {
+        val regex = """"type":"(.*?)"""".toRegex()
+        val matchResult = regex.find(json)
+        return matchResult?.groups?.get(1)?.value ?: "Unknown"
     }
 }

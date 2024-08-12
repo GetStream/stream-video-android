@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.OwnCapability
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.temporal.ChronoUnit
 import org.webrtc.PeerConnection
@@ -117,13 +118,19 @@ public class CallHealthMonitor(
 
         val subscriberState = call.session?.subscriber?.state?.value
         val publisherState = call.session?.publisher?.state?.value
-        val healthyPeerConnections = subscriberState in goodStates && publisherState in goodStates
-
-        logger.d {
-            "checking call health: peers are healthy: $healthyPeerConnections publisher $publisherState subscriber $subscriberState"
+        val canPublish = call.state.ownCapabilities.value.any {
+            it == OwnCapability.SendAudio || it == OwnCapability.SendVideo
         }
 
-        if (healthyPeerConnections) {
+        val isSubConnectionHealthy = subscriberState in goodStates
+        val isPubConnectionHealthyOrNotNeeded = publisherState in goodStates || (publisherState == null && !canPublish)
+        val arePeerConnectionsHealthy = isSubConnectionHealthy && isPubConnectionHealthyOrNotNeeded
+
+        logger.d {
+            "checking call health: peers are healthy: $arePeerConnectionsHealthy publisher $publisherState subscriber $subscriberState"
+        }
+
+        if (arePeerConnectionsHealthy) {
             // don't reconnect if things are healthy
             timeoutJob?.cancel()
             timeoutJob = null

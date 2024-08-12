@@ -33,7 +33,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
-import org.openapitools.client.apis.DefaultApi
+import org.openapitools.client.apis.ProductvideoApi
 import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -83,16 +83,16 @@ internal class ConnectionModule(
             .client(okHttpClient)
             .build()
     }
-    val api: DefaultApi by lazy { retrofit.create(DefaultApi::class.java) }
+    val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
     val coordinatorSocket: CoordinatorSocket by lazy { createCoordinatorSocket() }
 
-    val localApi: DefaultApi by lazy {
+    val localApi: ProductvideoApi by lazy {
         Retrofit.Builder()
             .baseUrl("https://c187-2a02-a46d-1c8b-1-b5c3-c938-b354-c7b0.ngrok-free.app")
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             .client(okHttpClient)
-            .build().create(DefaultApi::class.java)
+            .build().create(ProductvideoApi::class.java)
     }
 
     /**

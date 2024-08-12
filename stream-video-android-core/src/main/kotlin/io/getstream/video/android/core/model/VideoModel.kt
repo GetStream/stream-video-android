@@ -27,10 +27,10 @@ import java.util.Date
 @Stable
 public data class CallUser(
     val id: String,
-    val name: String,
-    val role: String,
-    val imageUrl: String,
-    val teams: List<String>,
+    val name: String? = null,
+    val role: String? = null,
+    val imageUrl: String? = null,
+    val teams: List<String>? = null,
     val state: CallUserState?,
     val createdAt: Date?,
     val updatedAt: Date?,
@@ -133,13 +133,13 @@ public infix fun CallUser.merge(that: CallUser?): CallUser = when (that) {
     null -> this
     else -> copy(
         id = that.id.ifEmpty { this.id },
-        name = that.name.ifEmpty { this.name },
-        role = that.role.ifEmpty { this.role },
-        imageUrl = that.imageUrl.ifEmpty { this.imageUrl },
+        name = that.name.takeUnless { it.isNullOrBlank() } ?: this.name,
+        role = that.role.takeUnless { it.isNullOrBlank() } ?: this.role,
+        imageUrl = that.imageUrl.takeUnless { it.isNullOrBlank() } ?: this.imageUrl,
         state = that.state merge this.state,
         createdAt = that.createdAt ?: this.createdAt,
         updatedAt = that.updatedAt ?: this.updatedAt,
-        teams = (that.teams + this.teams).distinct(),
+        teams = (that.teams.orEmpty() + this.teams.orEmpty()).distinct(),
     )
 }
 

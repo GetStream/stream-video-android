@@ -32,7 +32,9 @@
 
         <activity
             android:name=".MainActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="true"
+            android:supportsPictureInPicture="true"
             android:theme="@style/Theme.TutorialAudio">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

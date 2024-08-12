@@ -28,13 +28,9 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +44,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.model.User
@@ -56,46 +53,38 @@ import kotlinx.coroutines.launch
 @Composable
 fun LiveHost() {
     val context = LocalContext.current
+    val userId = "Darth_Krayt"
+    val userToken = StreamVideo.devToken(userId)
+    val callId = "dE8AsD5Qxqrt"
 
-    var call: Call? by remember { mutableStateOf(null) }
+    // step1 - create a user.
+    val user = User(
+        id = userId, // any string
+        name = "Tutorial", // name and image are used in the UI
+        role = "admin",
+    )
 
-    LaunchedEffect(key1 = Unit) {
-        val userToken =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiRGFydGhfS3JheXQiLCJpc3MiOiJwcm9udG8iLCJzdWIiOiJ1c2VyL0RhcnRoX0tyYXl0IiwiaWF0IjoxNjk2OTgzMjk1LCJleHAiOjE2OTc1ODgxMDB9.g5K76Vv5D-uCoBfAfDpI3pyQIpoFMx8J9Eus0VkHk-M"
-        val userId = "Darth_Krayt"
-        val callId = "dE8AsD5Qxqrt"
+    // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
+    val client = StreamVideoBuilder(
+        context = context,
+        apiKey = "k436tyde94hj", // demo API key
+        geo = GEO.GlobalEdgeNetwork,
+        user = user,
+        token = userToken,
+        ensureSingleInstance = false,
+        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+    ).build()
 
-        // step1 - create a user.
-        val user = User(
-            id = userId, // any string
-            name = "Tutorial", // name and image are used in the UI
-            role = "guest",
-        )
+    // step3 - join a call, which type is `default` and id is `123`.
+    val call = client.call("livestream", callId)
 
-        // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
-        val client = StreamVideoBuilder(
-            context = context,
-            apiKey = "hd8szvscpxvd", // demo API key
-            geo = GEO.GlobalEdgeNetwork,
-            user = user,
-            token = userToken,
-            ensureSingleInstance = false,
-            loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-        ).build()
-
-        // step3 - join a call, which type is `default` and id is `123`.
-        call = client.call("livestream", callId)
-
-        // join the call
-        val result = call?.join(create = true)
-        result?.onError {
+    LaunchCallPermissions(call = call) {
+        val result = call.join(create = true)
+        result.onError {
             Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
         }
     }
-
-    if (call != null) {
-        LiveHostContent(call!!)
-    }
+    LiveHostContent(call)
 }
 
 @Composable

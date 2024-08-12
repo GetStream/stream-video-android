@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 
 internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver() {
 
-    private val logger by taggedLogger("ActionableStreamReceiver")
+    private val logger by taggedLogger("Call:ActionableReceiver")
     private val scope = CoroutineScope(Dispatchers.IO)
 
     /**
@@ -39,7 +39,7 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
     internal abstract val action: String
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        logger.v { "[onReceive] context: $context, intent: $intent" }
+        logger.v { "[onReceive] #ringing; context: $context, intent: $intent" }
         if (context != null && intent != null && intent.action != null) {
             val intentAction = intent.action!!
             if (action != intentAction) {
@@ -85,7 +85,7 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
                 logger.w(createMessage(intentAction, "Stream call ID is not provided."))
             }
         } else {
-            logger.w { "Context or Intent or Action is null." }
+            logger.w { "[onReceive] #ringing; Context or Intent or Action is null." }
         }
     }
 

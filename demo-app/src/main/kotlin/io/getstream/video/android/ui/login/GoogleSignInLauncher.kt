@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.ui.login
 
+import android.app.Activity
 import android.content.Intent
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -39,7 +39,7 @@ fun rememberLauncherForGoogleSignInActivityResult(
     ) { result ->
         Log.d("Google Sign In", "Checking activity result")
 
-        if (result.resultCode != ComponentActivity.RESULT_OK) {
+        if (result.resultCode != Activity.RESULT_OK) {
             Log.d("Google Sign In", "Failed with result not OK: ${result.resultCode}")
             onSignInFailed()
         } else {

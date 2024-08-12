@@ -24,11 +24,9 @@ import android.content.pm.ResolveInfo
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ACCEPT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ONGOING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.model.StreamCallId
 
@@ -87,6 +85,36 @@ internal class DefaultStreamIntentResolver(val context: Context) {
         )
 
     /**
+     * Search for an activity that can receive missed calls from Stream Server.
+     *
+     * @param callId The call id from the incoming call.
+     */
+    internal fun searchMissedCallPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int,
+    ): PendingIntent? =
+        searchActivityPendingIntent(
+            Intent(NotificationHandler.ACTION_MISSED_CALL),
+            callId,
+            notificationId,
+        )
+
+    internal fun getDefaultPendingIntent(): PendingIntent {
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            ?: Intent(Intent.ACTION_MAIN).apply {
+                setPackage(context.packageName)
+                addCategory(Intent.CATEGORY_LAUNCHER)
+            }
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        return PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    /**
      * Search for an activity that can receive live calls from Stream Server.
      *
      * @param callId The call id from the incoming call.
@@ -96,7 +124,7 @@ internal class DefaultStreamIntentResolver(val context: Context) {
         notificationId: Int,
     ): PendingIntent? =
         searchActivityPendingIntent(
-            Intent(ACTION_LIVE_CALL),
+            Intent(NotificationHandler.ACTION_LIVE_CALL),
             callId,
             notificationId,
         )
@@ -109,32 +137,13 @@ internal class DefaultStreamIntentResolver(val context: Context) {
      */
     internal fun searchAcceptCallPendingIntent(
         callId: StreamCallId,
-    ): PendingIntent? = searchDismissNotificationPendingIntent(
-        callId,
+        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+    ): PendingIntent? =
         searchActivityPendingIntent(
-            Intent(ACTION_ACCEPT_CALL),
+            Intent(NotificationHandler.ACTION_ACCEPT_CALL),
             callId,
-            INCOMING_CALL_NOTIFICATION_ID,
-        ),
-    )
-
-    /**
-     * Search for a broadcast that will dismiss a notification and will then proceed to call the [nextIntent].
-     *
-     * @param callId the callID
-     * @param nextIntent the next action intent.
-     */
-    internal fun searchDismissNotificationPendingIntent(
-        callId: StreamCallId,
-        nextIntent: PendingIntent? = null,
-    ): PendingIntent? {
-        val baseIntent = Intent(NotificationHandler.ACTION_DISMISS_NOTIFICATION)
-        baseIntent.putExtra(NotificationHandler.INTENT_EXTRA_NEXT_ACTION, nextIntent)
-        return searchBroadcastPendingIntent(
-            baseIntent,
-            callId,
+            notificationId,
         )
-    }
 
     /**
      * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
@@ -267,17 +276,16 @@ internal class DefaultStreamIntentResolver(val context: Context) {
         baseIntent: Intent,
         resolveInfo: ResolveInfo,
         callId: StreamCallId,
-        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
     ): Intent {
         return Intent(baseIntent).apply {
             component = ComponentName(
                 resolveInfo.activityInfo.applicationInfo.packageName,
                 resolveInfo.activityInfo.name,
             )
-            putExtra(INTENT_EXTRA_CALL_CID, callId)
+            putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, callId)
             putExtra(
                 NotificationHandler.INTENT_EXTRA_NOTIFICATION_ID,
-                notificationId,
+                NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
             )
         }
     }

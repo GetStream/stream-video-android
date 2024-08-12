@@ -41,14 +41,14 @@ import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import org.openapitools.client.apis.DefaultApi
+import org.openapitools.client.apis.ProductvideoApi
 import org.openapitools.client.models.CreateDeviceRequest
 
 internal class StreamNotificationManager private constructor(
     private val context: Context,
     private val scope: CoroutineScope,
     private val notificationConfig: NotificationConfig,
-    private val api: DefaultApi,
+    private val api: ProductvideoApi,
     internal val deviceTokenStorage: DeviceTokenStorage,
     private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
@@ -144,7 +144,7 @@ internal class StreamNotificationManager private constructor(
             context: Context,
             scope: CoroutineScope,
             notificationConfig: NotificationConfig,
-            api: DefaultApi,
+            api: ProductvideoApi,
             deviceTokenStorage: DeviceTokenStorage,
         ): StreamNotificationManager {
             synchronized(this) {

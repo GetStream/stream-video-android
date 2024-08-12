@@ -37,7 +37,7 @@ import com.squareup.moshi.ToJson
 /**
  * All possibility of string to use
  *
- * Values: blockUsers,createCall,createReaction,endCall,joinBackstage,joinCall,joinEndedCall,muteUsers,pinForEveryone,readCall,removeCallMember,screenshare,sendAudio,sendVideo,startBroadcastCall,startRecordCall,startTranscriptionCall,stopBroadcastCall,stopRecordCall,stopTranscriptionCall,updateCall,updateCallMember,updateCallPermissions,updateCallSettings
+ * Values: blockUsers,changeMaxDuration,createCall,createReaction,enableNoiseCancellation,endCall,joinBackstage,joinCall,joinEndedCall,muteUsers,pinForEveryone,readCall,removeCallMember,screenshare,sendAudio,sendVideo,startBroadcastCall,startRecordCall,startTranscriptionCall,stopBroadcastCall,stopRecordCall,stopTranscriptionCall,updateCall,updateCallMember,updateCallPermissions,updateCallSettings
  */
 
 sealed class OwnCapability(val value: kotlin.String) {
@@ -46,8 +46,10 @@ sealed class OwnCapability(val value: kotlin.String) {
     companion object {
         fun fromString(s: kotlin.String): OwnCapability = when (s) {
             "block-users" -> BlockUsers
+            "change-max-duration" -> ChangeMaxDuration
             "create-call" -> CreateCall
             "create-reaction" -> CreateReaction
+            "enable-noise-cancellation" -> EnableNoiseCancellation
             "end-call" -> EndCall
             "join-backstage" -> JoinBackstage
             "join-call" -> JoinCall
@@ -74,8 +76,10 @@ sealed class OwnCapability(val value: kotlin.String) {
     }
 
     object BlockUsers : OwnCapability("block-users")
+    object ChangeMaxDuration : OwnCapability("change-max-duration")
     object CreateCall : OwnCapability("create-call")
     object CreateReaction : OwnCapability("create-reaction")
+    object EnableNoiseCancellation : OwnCapability("enable-noise-cancellation")
     object EndCall : OwnCapability("end-call")
     object JoinBackstage : OwnCapability("join-backstage")
     object JoinCall : OwnCapability("join-call")

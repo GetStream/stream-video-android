@@ -36,8 +36,9 @@
 
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application>
@@ -76,16 +77,9 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".notifications.internal.receivers.DismissNotificationBroadcastReceiver"
-            android:exported="false">
-            <intent-filter android:priority="-1">
-                <action android:name="io.getstream.video.android.action.DISMISS_NOTIFICATION" />
-            </intent-filter>
-        </receiver>
-
 
         <service android:name=".notifications.internal.service.CallService"
-            android:foregroundServiceType="shortService|microphone"/>
+            android:foregroundServiceType="shortService|phoneCall"/>
 
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>

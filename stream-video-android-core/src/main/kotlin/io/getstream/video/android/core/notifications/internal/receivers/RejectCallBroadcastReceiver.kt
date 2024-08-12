@@ -18,13 +18,13 @@ package io.getstream.video.android.core.notifications.internal.receivers
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.model.StreamCallId
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this
@@ -33,20 +33,15 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
  */
 internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver() {
 
-    val logger by taggedLogger("RejectCallBroadcastReceiver")
+    val logger by taggedLogger("Call:RejectReceiver")
     override val action = ACTION_REJECT_CALL
 
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
-        when (val rejectResult = call.reject()) {
+        when (val rejectResult = call.reject(RejectReason.Decline)) {
             is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
             is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
         }
-        val serviceIntent = CallService.buildStopIntent(context)
-        context.stopService(serviceIntent)
-
-        // As a second precaution cancel also the notification
-        NotificationManagerCompat.from(
-            context,
-        ).cancel(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
+        logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
+        CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
     }
 }

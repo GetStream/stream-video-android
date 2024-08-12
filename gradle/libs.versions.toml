@@ -1,10 +1,10 @@
 [versions]
-androidGradlePlugin = "8.2.2"
+androidGradlePlugin = "8.4.2"
 cameraCamera2 = "1.3.0"
 spotless = "6.21.0"
 nexusPlugin = "1.3.0"
-kotlin = "1.9.23"
-ksp = "1.9.23-1.0.19"
+kotlin = "2.0.0"
+ksp = "2.0.0-1.0.22"
 kotlinSerialization = "1.6.3"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.8.0"
@@ -18,19 +18,18 @@ androidxCore = "1.12.0"
 androidxAnnotation = "1.7.1"
 androidxLifecycle = "2.7.0"
 androidxStartup = "1.1.1"
-androidxActivity = "1.8.2"
+androidxActivity = "1.9.0"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2024.03.00"
-androidxComposeCompiler = "1.5.11"
+androidxComposeBom = "2024.06.00"
 androidxComposeTracing = "1.0.0-beta01"
 androidxHiltNavigation = "1.2.0"
 androidxComposeNavigation = "2.7.7"
-composeStableMarker = "1.0.2"
+composeStableMarker = "1.0.5"
 
 coil = "2.6.0"
-landscapist = "2.3.2"
+landscapist = "2.3.5"
 accompanist = "0.32.0"
 telephoto = "0.3.0"
 audioswitch = "1.1.8"
@@ -64,7 +63,7 @@ junit = "4.13.2"
 truth = "1.1.3"
 mockk = "1.13.4"
 kotlinTestJunit = "1.8.20"
-firebaseBom = "32.5.0"
+firebaseBom = "33.1.0"
 firebaseCrashlytics = "2.9.5"
 
 installReferrer = "2.2"
@@ -199,6 +198,7 @@ google-mlkit-selfie-segmentation = { group = "com.google.mlkit", name = "segment
 # Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version = "1.3.0" }
 play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version = "18.3.0" }
@@ -214,6 +214,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatabilityValidator" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "kotlinDokka" }
 nexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPlugin" }

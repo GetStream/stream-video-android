@@ -33,11 +33,11 @@ import io.getstream.video.android.compose.ui.components.call.renderer.RegularVid
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitVideoRenderer
+import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantListAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoActions
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
-import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.ScreenSharingSession

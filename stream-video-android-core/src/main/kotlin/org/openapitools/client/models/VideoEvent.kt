@@ -26,8 +26,6 @@ package org.openapitools.client.models
 import org.openapitools.client.models.APIError
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallBroadcastingStartedEvent
-import org.openapitools.client.models.CallBroadcastingStoppedEvent
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallLiveStartedEvent
@@ -51,7 +49,7 @@ import org.openapitools.client.models.CallSessionParticipantJoinedEvent
 import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallUpdatedEvent
-import org.openapitools.client.models.CallUserMuted
+import org.openapitools.client.models.CallUserMutedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.ConnectionErrorEvent
 import org.openapitools.client.models.CustomVideoEvent
@@ -119,15 +117,19 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
         return when (type) {
             "call.accepted" -> CallAcceptedEvent::class.java
             "call.blocked_user" -> BlockedUserEvent::class.java
-            "call.broadcasting_started" -> CallBroadcastingStartedEvent::class.java
-            "call.broadcasting_stopped" -> CallBroadcastingStoppedEvent::class.java
+            "call.closed_caption" -> ClosedCaptionEvent::class.java
             "call.created" -> CallCreatedEvent::class.java
+            "call.deleted" -> CallDeletedEvent::class.java
             "call.ended" -> CallEndedEvent::class.java
+            "call.hls_broadcasting_failed" -> CallHLSBroadcastingFailedEvent::class.java
+            "call.hls_broadcasting_started" -> CallHLSBroadcastingStartedEvent::class.java
+            "call.hls_broadcasting_stopped" -> CallHLSBroadcastingStoppedEvent::class.java
             "call.live_started" -> CallLiveStartedEvent::class.java
             "call.member_added" -> CallMemberAddedEvent::class.java
             "call.member_removed" -> CallMemberRemovedEvent::class.java
             "call.member_updated" -> CallMemberUpdatedEvent::class.java
             "call.member_updated_permission" -> CallMemberUpdatedPermissionEvent::class.java
+            "call.missed" -> CallMissedEvent::class.java
             "call.notification" -> CallNotificationEvent::class.java
             "call.permission_request" -> PermissionRequestEvent::class.java
             "call.permissions_updated" -> UpdatedCallPermissionsEvent::class.java
@@ -144,12 +146,26 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.session_started" -> CallSessionStartedEvent::class.java
             "call.unblocked_user" -> UnblockedUserEvent::class.java
             "call.updated" -> CallUpdatedEvent::class.java
-            "call.user_muted" -> CallUserMuted::class.java
+            "call.user_muted" -> CallUserMutedEvent::class.java
+            "call.transcription_started" -> CallTranscriptionStartedEvent::class.java
+            "call.transcription_stopped" -> CallTranscriptionStoppedEvent::class.java
+            "call.transcription_ready" -> CallTranscriptionReadyEvent::class.java
+            "call.transcription_failed" -> CallTranscriptionFailedEvent::class.java
             "connection.error" -> ConnectionErrorEvent::class.java
             "connection.ok" -> ConnectedEvent::class.java
             "custom" -> CustomVideoEvent::class.java
             "health.check" -> HealthCheckEvent::class.java
-            else -> throw IllegalArgumentException("Unknown type: $type")
+            "user.banned" -> UserBannedEvent::class.java
+            "user.deactivated" -> UserDeactivatedEvent::class.java
+            "user.deleted" -> UserDeletedEvent::class.java
+            "user.muted" -> UserMutedEvent::class.java
+            "user.presence.changed" -> UserPresenceChangedEvent::class.java
+            "user.reactivated" -> UserReactivatedEvent::class.java
+            "user.unbanned" -> UserUnbannedEvent::class.java
+            "user.updated" -> UserUpdatedEvent::class.java
+            else -> throw UnsupportedVideoEventException(type)
         }
     }
 }
+
+class UnsupportedVideoEventException(val type: String) : Exception()

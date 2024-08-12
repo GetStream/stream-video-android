@@ -36,6 +36,7 @@ import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,15 +53,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.mock.previewUsers
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
-import io.getstream.video.android.models.GoogleAccount
+import java.util.UUID
 
 @Composable
 fun DirectCallJoinScreen(
     viewModel: DirectCallJoinViewModel = hiltViewModel(),
-    navigateToDirectCall: (memberList: String) -> Unit,
+    navigateToDirectCall: (cid: StreamCallId, memberList: String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -96,10 +97,9 @@ private fun Header(user: User?) {
         Row {
             user?.let {
                 UserAvatar(
-                    textSize = StyleSize.XS,
                     modifier = Modifier.size(24.dp),
-                    userName = it.userNameOrId,
                     userImage = it.image,
+                    userName = it.userNameOrId,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
@@ -107,7 +107,7 @@ private fun Header(user: User?) {
             Text(
                 modifier = Modifier.weight(1f),
                 color = Color.White,
-                text = user?.name?.ifBlank { user.id }?.ifBlank { user.custom["email"] }.orEmpty(),
+                text = user?.userNameOrId ?: "",
                 maxLines = 1,
                 fontSize = 16.sp,
             )
@@ -127,7 +127,7 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    onStartCallClick: (membersList: String) -> Unit,
+    onStartCallClick: (cid: StreamCallId, membersList: String) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -142,28 +142,58 @@ private fun Body(
                 color = VideoTheme.colors.brandPrimary,
             )
         } else {
-            uiState.googleAccounts?.let { users ->
+            uiState.otherUsers?.let { users ->
                 UserList(
                     entries = users,
                     onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
                 )
-                StreamButton(
-                    // Floating button
-                    modifier = Modifier
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 10.dp),
-                    enabled = users.any { it.isSelected },
-                    icon = Icons.Default.Call,
-                    text = "Start call",
-                    style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
-                    onClick = {
-                        onStartCallClick(
-                            users
-                                .filter { it.isSelected }
-                                .joinToString(separator = ",") { it.account.id ?: "" },
-                        )
-                    },
-                )
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    StreamButton(
+                        // Floating button
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(bottom = 10.dp),
+                        enabled = users.any { it.isSelected },
+                        icon = Icons.Default.Call,
+                        text = "Audio call",
+                        style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                        onClick = {
+                            onStartCallClick(
+                                // StreamCallId("audio_call", UUID.randomUUID().toString()),
+                                StreamCallId("default", UUID.randomUUID().toString()),
+                                users
+                                    .filter { it.isSelected }
+                                    .joinToString(separator = ",") { it.user.id ?: "" },
+                            )
+                        },
+                    )
+
+                    StreamButton(
+                        // Floating button
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(bottom = 10.dp),
+                        enabled = users.any { it.isSelected },
+                        icon = Icons.Default.VideoCall,
+                        text = "Video call",
+                        style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                        onClick = {
+                            onStartCallClick(
+                                StreamCallId("default", UUID.randomUUID().toString()),
+                                users
+                                    .filter { it.isSelected }
+                                    .joinToString(separator = ",") { it.user.id ?: "" },
+                            )
+                        },
+                    )
+                }
             } ?: Text(
                 text = stringResource(io.getstream.video.android.R.string.cannot_load_google_account_list),
                 modifier = Modifier
@@ -179,14 +209,14 @@ private fun Body(
 }
 
 @Composable
-private fun UserList(entries: List<GoogleAccountUiState>, onUserClick: (Int) -> Unit) {
+private fun UserList(entries: List<UserUiState>, onUserClick: (Int) -> Unit) {
     LazyColumn {
         items(entries.size) { index ->
             with(entries[index]) {
                 UserRow(
                     index = index,
-                    name = account.name ?: "",
-                    avatarUrl = account.photoUrl,
+                    name = user.name.orEmpty(),
+                    avatarUrl = user.image,
                     isSelected = isSelected,
                     onClick = { onUserClick(index) },
                 )
@@ -213,10 +243,9 @@ private fun UserRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             UserAvatar(
-                textSize = StyleSize.M,
                 modifier = Modifier.size(50.dp),
-                userName = name,
                 userImage = avatarUrl,
+                userName = name,
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
@@ -244,22 +273,19 @@ private fun HeaderPreview() {
         Header(user = User(name = "Very very very long user name here"))
         Body(
             uiState = DirectCallUiState(
-                googleAccounts =
+                otherUsers =
                 previewUsers.map {
-                    GoogleAccountUiState(
+                    UserUiState(
                         isSelected = false,
-                        account = GoogleAccount(
-                            it.id,
-                            it.id,
-                            it.name,
-                            null,
-                            false,
+                        user = User(
+                            id = it.id,
+                            name = it.name,
                         ),
                     )
                 },
             ),
             toggleUserSelection = {},
-        ) {
+        ) { _, _ ->
         }
     }
 }

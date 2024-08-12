@@ -40,7 +40,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.ui.call.CallActivity
+import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.config.AppConfig
@@ -110,16 +110,17 @@ class DeeplinkingActivity : ComponentActivity() {
                         joinCall(data, callId)
                     } else {
                         // first ask for push notification permission
-                        val manager = NotificationPermissionManager.createNotificationPermissionsManager(
-                            application = app,
-                            requestPermissionOnAppLaunch = { true },
-                            onPermissionStatus = {
-                                // we don't care about the result for demo purposes
-                                if (it != NotificationPermissionStatus.REQUESTED) {
-                                    joinCall(data, callId)
-                                }
-                            },
-                        )
+                        val manager =
+                            NotificationPermissionManager.createNotificationPermissionsManager(
+                                application = app,
+                                requestPermissionOnAppLaunch = { true },
+                                onPermissionStatus = {
+                                    // we don't care about the result for demo purposes
+                                    if (it != NotificationPermissionStatus.REQUESTED) {
+                                        joinCall(data, callId)
+                                    }
+                                },
+                            )
                         manager.start()
                     }
                 } else {
@@ -179,13 +180,10 @@ class DeeplinkingActivity : ComponentActivity() {
                 if (it == InitializedState.FINISHED || it == InitializedState.FAILED) {
                     if (StreamVideo.isInstalled) {
                         val callId = StreamCallId(type = "default", id = cid)
-                        val intent = CallActivity.createIntent(
+                        val intent = StreamCallActivity.callIntent(
                             context = this@DeeplinkingActivity,
-                            callId = callId,
-                            disableMicOverride = intent.getBooleanExtra(
-                                EXTRA_DISABLE_MIC_OVERRIDE,
-                                false,
-                            ),
+                            cid = callId,
+                            clazz = CallActivity::class.java,
                         ).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         }

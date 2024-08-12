@@ -56,7 +56,7 @@ public val previewCall: Call = Call(
 ).apply {
     val participants = previewUsers.take(2).map { user ->
         val sessionId = if (user == previewUsers.first()) {
-            sessionId ?: UUID.randomUUID().toString()
+            sessionId
         } else {
             UUID.randomUUID().toString()
         }
@@ -70,7 +70,7 @@ public val previewCall: Call = Call(
 }
 
 /** Mock a new [MediaTrack]. */
-public val mockVideoMediaTrack: MediaTrack
+public val previewVideoMediaTrack: MediaTrack
     inline get() = io.getstream.video.android.core.model.VideoTrack(
         UUID.randomUUID().toString(),
         VideoTrack(123),
@@ -146,7 +146,7 @@ public val previewMemberListState: List<MemberState>
         previewCall.state.clearParticipants()
         previewUsers.forEach { user ->
             val sessionId = if (user == previewUsers.first()) {
-                previewCall.sessionId ?: UUID.randomUUID().toString()
+                previewCall.sessionId
             } else {
                 UUID.randomUUID().toString()
             }
@@ -170,3 +170,9 @@ public val previewParticipant: ParticipantState
 /** Preview a new [MemberState]. */
 public val previewMember: MemberState
     inline get() = previewMemberListState[0]
+
+public val previewTwoMembers: List<MemberState>
+    inline get() = previewMemberListState.take(2)
+
+public val previewThreeMembers: List<MemberState>
+    inline get() = previewMemberListState.take(3)
