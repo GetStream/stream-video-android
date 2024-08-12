@@ -18,7 +18,6 @@ package io.getstream.video.android.ui.menu
 
 import android.media.MediaCodecInfo
 import android.os.Build
-import android.os.CancellationSignal
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MobileScreenShare
 import androidx.compose.material.icons.automirrored.filled.ReadMore

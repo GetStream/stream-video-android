@@ -25,7 +25,6 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
-import java.nio.ByteBuffer
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -42,6 +41,7 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import java.nio.ByteBuffer
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -53,7 +53,7 @@ import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 public class StreamPeerConnectionFactory(
     private val context: Context,
     private val audioUsage: Int = defaultAudioUsage,
-    private var audioFilter: AudioFilter? = null
+    private var audioFilter: AudioFilter? = null,
 ) {
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
@@ -365,7 +365,6 @@ public class StreamPeerConnectionFactory(
         source: AudioSource,
         trackId: String,
     ): AudioTrack = factory.createAudioTrack(trackId, source)
-
 
     /**
      * True if the audio processing is enabled, false otherwise.
