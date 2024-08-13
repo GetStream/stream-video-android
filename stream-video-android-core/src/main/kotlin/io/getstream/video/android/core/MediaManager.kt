@@ -453,7 +453,7 @@ class MicrophoneManager(
         }
 
         if (canHandleDeviceSwitch()) {
-            audioHandler = TelecomCompat.getAudioHandler(
+            audioHandler = TelecomCompat.setDeviceListener(
                 context = mediaManager.context,
                 call = mediaManager.call,
                 listener = { devices, selected ->

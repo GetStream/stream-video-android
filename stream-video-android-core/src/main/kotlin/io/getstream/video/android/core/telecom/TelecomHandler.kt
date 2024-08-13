@@ -44,7 +44,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -281,8 +280,8 @@ internal class TelecomHandler private constructor(
         NotificationManagerCompat.from(applicationContext).cancel(notificationId)
     }
 
-    fun registerAvailableDevicesListener(call: StreamCall, listener: AvailableDevicesListener) {
-        logger.d { "[registerAvailableDevicesListener] Call ID: ${call.id}" }
+    fun setDeviceListener(call: StreamCall, listener: DeviceListener) {
+        logger.d { "[setDeviceListener] Call ID: ${call.id}" }
         calls[call.cid]?.deviceListener = listener
     }
 
@@ -363,11 +362,6 @@ private class StreamToTelecomEventBridge(private val call: StreamCall) {
                 }
             }
         }
-
-        callControlScope.launch {
-            call.microphone.selectedDevice.collectLatest {
-            }
-        }
     }
 }
 
@@ -412,55 +406,50 @@ private data class TelecomCall(
 
     var callControlScope: CallControlScope? = null
         set(value) {
-            if (value != null) {
-                field = value
-
-                with(value) {
-                    launch {
-                        val combinedEndpoints =
-                            combine(availableEndpoints, currentCallEndpoint) { list, device ->
-                                Pair(
-                                    list.map { it.toStreamAudioDevice() },
-                                    device.toStreamAudioDevice(),
-                                )
-                            }
-
-                        combinedEndpoints
-                            .distinctUntilChanged()
-                            .onEach {
-                                StreamLog.d(TELECOM_LOG_TAG) {
-                                    "[TelecomCall#callControlScope] Publishing devices: available devices: ${it.first.map { it.name }}, selected device: ${it.second.name}"
-                                }
-                                devices.value = it
-                            }
-                            .launchIn(this)
-                    }
-                }
-            }
+            field = value
+            value?.let(::publishDevices)
         }
 
-    var deviceListener: AvailableDevicesListener? = null
+    var deviceListener: DeviceListener? = null
         set(value) {
-            value?.let { listener ->
-                StreamLog.d(TELECOM_LOG_TAG) {
-                    "[TelecomCall#deviceListener] Setting deviceListener"
-                }
+            field = value
+            value?.let(::collectDevices)
+        }
 
-                field = value
+    private fun publishDevices(callControlScope: CallControlScope) {
+        with(callControlScope) {
+            combine(availableEndpoints, currentCallEndpoint) { available, current ->
+                Pair(available.map { it.toStreamAudioDevice() }, current.toStreamAudioDevice())
+            }
+                .distinctUntilChanged()
+                .onEach { devicePair ->
+                    devices.value = devicePair
 
-                devices
-                    .onEach { deviceStatus ->
-                        deviceStatus?.let {
-                            StreamLog.d(TELECOM_LOG_TAG) {
-                                "[TelecomCall#deviceListener] Collecting devices & calling listener with: available devices: ${it.first.map { it.name }}, selected device: ${it.second.name}"
-                            }
-
-                            listener(it.first, it.second)
+                    StreamLog.d(TELECOM_LOG_TAG) {
+                        with(devicePair) {
+                            "[TelecomCall#publishDevices] Published devices. Available: ${first.map { it.name }}, selected: ${second.name}"
                         }
                     }
-                    .launchIn(localScope)
-            }
+                }
+                .launchIn(this)
         }
+    }
+
+    private fun collectDevices(listener: DeviceListener) {
+        devices
+            .onEach { devicePair ->
+                devicePair?.let { pair ->
+                    with(pair) {
+                        listener(first, second)
+
+                        StreamLog.d(TELECOM_LOG_TAG) {
+                            "[TelecomCall#collectDevices] Collected devices. Available: ${first.map { it.name }}, selected: ${second.name}"
+                        }
+                    }
+                }
+            }
+            .launchIn(localScope)
+    }
 
     suspend fun disconnect() {
         callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->

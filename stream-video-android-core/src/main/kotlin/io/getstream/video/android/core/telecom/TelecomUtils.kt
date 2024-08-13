@@ -26,7 +26,6 @@ import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 import kotlin.contracts.ExperimentalContracts
@@ -169,21 +168,20 @@ internal object TelecomCompat {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun getAudioHandler(
+    fun setDeviceListener(
         context: Context,
         call: StreamCall,
-        listener: AvailableDevicesListener,
+        listener: DeviceListener,
     ): AudioHandler = checkTelecomSupport(
         context = context,
         onSupported = { telecomHandler ->
             // Use Telecom
             object : AudioHandler {
                 override fun start() {
-                    telecomHandler.registerAvailableDevicesListener(call, listener)
+                    telecomHandler.setDeviceListener(call, listener)
                 }
 
-                override fun stop() {
-                }
+                override fun stop() {}
 
                 override fun selectDevice(audioDevice: StreamAudioDevice?) {
                     audioDevice?.telecomDevice?.let { telecomHandler.selectDevice(it) }
@@ -195,12 +193,7 @@ internal object TelecomCompat {
             AudioSwitchHandler(
                 context = context.applicationContext,
                 preferSpeakerphone = true,
-                audioDeviceChangeListener = { devices, selected ->
-                    listener(
-                        devices.map { it.fromAudio() },
-                        selected?.fromAudio() ?: StreamAudioDevice.Earpiece(),
-                    )
-                },
+                deviceListener = listener,
             )
         },
     )
@@ -208,6 +201,6 @@ internal object TelecomCompat {
 
 internal typealias StreamCall = Call
 
-internal typealias AvailableDevicesListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit
+internal typealias DeviceListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit
 
 internal const val TELECOM_LOG_TAG = "StreamVideo:Telecom"

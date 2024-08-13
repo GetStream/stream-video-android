@@ -868,10 +868,10 @@ public abstract interface class io/getstream/video/android/core/audio/AudioHandl
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
 	public fun <init> (Landroid/content/Context;ZLkotlin/jvm/functions/Function2;)V
-	public final fun getAudioDeviceChangeListener ()Lkotlin/jvm/functions/Function2;
+	public final fun getDeviceListener ()Lkotlin/jvm/functions/Function2;
 	public final fun getPreferSpeakerphone ()Z
 	public fun selectDevice (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
-	public final fun setAudioDeviceChangeListener (Lkotlin/jvm/functions/Function2;)V
+	public final fun setDeviceListener (Lkotlin/jvm/functions/Function2;)V
 	public fun start ()V
 	public fun stop ()V
 }

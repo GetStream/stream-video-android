@@ -21,11 +21,12 @@ import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import com.twilio.audioswitch.AudioDevice
-import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
+import io.getstream.video.android.core.telecom.DeviceListener
 
 public interface AudioHandler {
     /**
@@ -41,13 +42,10 @@ public interface AudioHandler {
     public fun selectDevice(audioDevice: StreamAudioDevice?)
 }
 
-/**
- * TODO: this class should be merged into the Microphone Manager
- */
 public class AudioSwitchHandler constructor(
     private val context: Context,
     val preferSpeakerphone: Boolean,
-    var audioDeviceChangeListener: AudioDeviceChangeListener,
+    var deviceListener: DeviceListener,
 ) : AudioHandler {
 
     private val logger by taggedLogger(TAG)
@@ -81,11 +79,13 @@ public class AudioSwitchHandler constructor(
                     audioFocusChangeListener = onAudioFocusChangeListener,
                     preferredDeviceList = devices,
                 )
-                // TODO: AudioSwitch logging is disabled by default and it doesn't allow
-                // to specify a custom logger. At some point we may need to fork the library
-                // and add custom logger support.
                 audioSwitch = switch
-                switch.start(audioDeviceChangeListener)
+                switch.start { devices, selected ->
+                    deviceListener(
+                        devices.map { it.fromAudio() },
+                        selected?.fromAudio() ?: StreamAudioDevice.Earpiece(),
+                    )
+                }
                 switch.activate()
             }
         }
