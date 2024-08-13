@@ -22,6 +22,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
@@ -32,6 +33,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+@OptIn(ExperimentalContracts::class)
 internal object TelecomCompat {
 
     fun registerCall(
@@ -39,62 +41,38 @@ internal object TelecomCompat {
         call: StreamCall? = null,
         callId: StreamCallId? = null,
         callDisplayName: String = "Unknown",
-        isTriggeredByNotification: Boolean = false,
+        isIncomingCall: Boolean = false,
     ) {
-        withCall(call, callId) {
-            val applicationContext = context.applicationContext
-            val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
-            val telecomHandler = TelecomHandler.getInstance(applicationContext)
-
-            if (isTelecomSupported) {
-                telecomHandler?.registerCall(it, isTriggeredByNotification)
-            } else {
-                if (isTriggeredByNotification) {
-                    CallService.showIncomingCall( // TODO-Telecom: Keep runForegroundService flag into account here and in other places?
-                        applicationContext,
-                        StreamCallId.fromCallCid(it.cid),
-                        callDisplayName,
-                    )
-                }
-            }
-        }
-    }
-
-    fun changeCallState(context: Context, newState: TelecomCallState, call: StreamCall? = null, callId: StreamCallId? = null) {
-        withCall(call, callId) {
-            val applicationContext = context.applicationContext
-            val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
-            val telecomHandler = TelecomHandler.getInstance(applicationContext)
-
-            if (isTelecomSupported) {
-                telecomHandler?.changeCallState(it, newState)
-            } else {
-                if (newState == TelecomCallState.OUTGOING || newState == TelecomCallState.ONGOING) {
-                    ContextCompat.startForegroundService(
-                        applicationContext,
-                        CallService.buildStartIntent(
-                            applicationContext,
-                            StreamCallId.fromCallCid(it.cid),
-                            if (newState == TelecomCallState.OUTGOING) {
-                                CallService.TRIGGER_OUTGOING_CALL
-                            } else {
-                                CallService.TRIGGER_ONGOING_CALL
+        withCall(call, callId) { streamCall ->
+            checkTelecomSupport(
+                context = context,
+                onSupported = { telecomHandler ->
+                    telecomHandler.registerCall(streamCall, isIncomingCall)
+                },
+                onNotSupported = {
+                    if (isIncomingCall) {
+                        checkForegroundServiceEnabled(
+                            onEnabled = {
+                                CallService.showIncomingCall(
+                                    context.applicationContext,
+                                    StreamCallId.fromCallCid(streamCall.cid),
+                                    callDisplayName,
+                                )
                             },
-                        ),
-                    )
-                }
-            }
+                        )
+                    }
+                },
+            )
         }
     }
 
-    @OptIn(ExperimentalContracts::class)
     private inline fun withCall(
         call: StreamCall?,
         callId: StreamCallId?,
         doAction: (Call) -> Unit,
     ) {
         contract {
-            callsInPlace(doAction, InvocationKind.EXACTLY_ONCE)
+            callsInPlace(doAction, InvocationKind.AT_MOST_ONCE)
         }
 
         when {
@@ -106,24 +84,88 @@ internal object TelecomCompat {
         }?.let { doAction(it) }
     }
 
+    private inline fun <T> checkTelecomSupport(
+        context: Context,
+        onSupported: (TelecomHandler) -> T,
+        onNotSupported: () -> T,
+    ): T {
+        contract {
+            callsInPlace(onSupported, InvocationKind.AT_MOST_ONCE)
+            callsInPlace(onNotSupported, InvocationKind.AT_MOST_ONCE)
+        }
+
+        // getInstance() returns null if the device doesn't support Telecom
+        return TelecomHandler.getInstance(context)?.let(onSupported) ?: onNotSupported()
+    }
+
+    private inline fun checkForegroundServiceEnabled(onEnabled: () -> Unit) {
+        contract {
+            callsInPlace(onEnabled, InvocationKind.AT_MOST_ONCE)
+        }
+
+        (StreamVideo.instanceOrNull() as? StreamVideoImpl)?.let { streamVideoImpl ->
+            if (streamVideoImpl.runForegroundService) onEnabled()
+        }
+    }
+
+    fun changeCallState(context: Context, newState: TelecomCallState, call: StreamCall? = null, callId: StreamCallId? = null) {
+        withCall(call, callId) { streamCall ->
+            checkTelecomSupport(
+                context = context,
+                onSupported = { telecomHandler ->
+                    telecomHandler.changeCallState(streamCall, newState)
+                },
+                onNotSupported = {
+                    if (newState == TelecomCallState.OUTGOING || newState == TelecomCallState.ONGOING) {
+                        checkForegroundServiceEnabled(
+                            onEnabled = {
+                                ContextCompat.startForegroundService(
+                                    context,
+                                    CallService.buildStartIntent(
+                                        context,
+                                        StreamCallId.fromCallCid(streamCall.cid),
+                                        if (newState == TelecomCallState.OUTGOING) {
+                                            CallService.TRIGGER_OUTGOING_CALL
+                                        } else {
+                                            CallService.TRIGGER_ONGOING_CALL
+                                        },
+                                    ),
+                                )
+                            },
+                        )
+                    }
+                },
+            )
+        }
+    }
+
     fun unregisterCall(
         context: Context,
-        trigger: String,
         call: StreamCall,
+        isIncomingCall: Boolean = false,
     ) {
-        val applicationContext = context.applicationContext
-        val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
-        val telecomHandler = TelecomHandler.getInstance(applicationContext)
-
-        if (isTelecomSupported) {
-            telecomHandler?.unregisterCall(call)
-        } else {
-            if (trigger == CallService.TRIGGER_INCOMING_CALL) {
-                CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
-            } else {
-                context.stopService(CallService.buildStopIntent(applicationContext))
-            }
-        }
+        checkTelecomSupport(
+            context = context,
+            onSupported = { telecomHandler ->
+                telecomHandler.unregisterCall(call)
+            },
+            onNotSupported = {
+                checkForegroundServiceEnabled(
+                    onEnabled = {
+                        if (isIncomingCall) {
+                            CallService.removeIncomingCall(
+                                context,
+                                StreamCallId.fromCallCid(call.cid),
+                            )
+                        } else {
+                            context.stopService(
+                                CallService.buildStopIntent(context.applicationContext),
+                            )
+                        }
+                    },
+                )
+            },
+        )
     }
 
     @TargetApi(Build.VERSION_CODES.O)
@@ -131,29 +173,27 @@ internal object TelecomCompat {
         context: Context,
         call: StreamCall,
         listener: AvailableDevicesListener,
-    ): AudioHandler {
-        val applicationContext = context.applicationContext // TODO-Telecom: Abstract out in one place
-        val isTelecomSupported = TelecomHandler.isSupported(applicationContext)
-        val telecomHandler = TelecomHandler.getInstance(applicationContext)
-
-        return if (isTelecomSupported) {
+    ): AudioHandler = checkTelecomSupport(
+        context = context,
+        onSupported = { telecomHandler ->
             // Use Telecom
             object : AudioHandler {
                 override fun start() {
-                    telecomHandler?.registerAvailableDevicesListener(call, listener)
+                    telecomHandler.registerAvailableDevicesListener(call, listener)
                 }
 
                 override fun stop() {
                 }
 
                 override fun selectDevice(audioDevice: StreamAudioDevice?) {
-                    audioDevice?.telecomDevice?.let { telecomHandler?.selectDevice(it) }
+                    audioDevice?.telecomDevice?.let { telecomHandler.selectDevice(it) }
                 }
             }
-        } else {
+        },
+        onNotSupported = {
             // Use Twilio AudioSwitch
             AudioSwitchHandler(
-                context = applicationContext,
+                context = context.applicationContext,
                 preferSpeakerphone = true,
                 audioDeviceChangeListener = { devices, selected ->
                     listener(
@@ -162,11 +202,11 @@ internal object TelecomCompat {
                     )
                 },
             )
-        }
-    }
+        },
+    )
 }
 
-internal typealias StreamCall = io.getstream.video.android.core.Call
+internal typealias StreamCall = Call
 
 internal typealias AvailableDevicesListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit
 

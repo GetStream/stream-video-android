@@ -41,7 +41,6 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.SocketState
-import io.getstream.video.android.core.telecom.TelecomHandler
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -1030,20 +1029,7 @@ public class Call(
         logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
         clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
-//        unregisterCall()  // TODO-Telecom: unregister needed here?
         return clientImpl.accept(type, id)
-    }
-
-    private fun unregisterCall() {
-        with(clientImpl) {
-            state.removeRingingCall(willTransitionToOngoing = false)
-
-            if (TelecomHandler.isSupported(context)) {
-//                telecomHandler?.unregisterCall()
-            } else {
-                state.maybeStopForegroundService()
-            }
-        }
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {

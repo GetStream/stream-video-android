@@ -57,40 +57,42 @@ import org.openapitools.client.models.CallRejectedEvent
 
 @TargetApi(Build.VERSION_CODES.O)
 internal class TelecomHandler private constructor(
-    private val context: Context,
+    private val applicationContext: Context,
     private val callManager: CallsManager,
 ) {
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
     private val calls = mutableMapOf<String, TelecomCall>()
-    private val exceptionHandler =
-        CoroutineExceptionHandler { _, ex -> logger.e(ex) { "[telecomHandlerScope]" } }
-    private val telecomHandlerScope =
-        CoroutineScope(DispatcherProvider.Default + SupervisorJob() + exceptionHandler)
+    private val exceptionHandler = CoroutineExceptionHandler { _, ex ->
+        logger.e(ex) { "[telecomHandlerScope]" }
+    }
+    private val telecomHandlerScope = CoroutineScope(
+        DispatcherProvider.Default + SupervisorJob() + exceptionHandler,
+    )
     private var callControlScope: CallControlScope? = null
 
     companion object {
         @Volatile
-        private var instance: TelecomHandler? = null // TODO-Telecom: handle warning
+        private var instance: TelecomHandler? = null
 
         fun getInstance(context: Context): TelecomHandler? {
             return instance ?: synchronized(this) {
-                if (isSupported(context)) {
-                    context.applicationContext.let { applicationContext ->
+                context.applicationContext.let { applicationContext ->
+                    if (isSupported(applicationContext)) {
                         TelecomHandler(
-                            context = applicationContext,
+                            applicationContext = applicationContext,
                             callManager = CallsManager(applicationContext),
                         ).also { telecomHandler ->
                             instance = telecomHandler
                         }
+                    } else {
+                        null
                     }
-                } else {
-                    null
                 }
             }
         }
 
-        fun isSupported(context: Context) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        private fun isSupported(context: Context) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // For Android 14+, check the TELECOM feature directly
             context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELECOM)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -123,15 +125,10 @@ internal class TelecomHandler private constructor(
     /*
     TODO-Telecom:
     Add deprecation instructions for service
-    Add sounds to notifications
-    From incoming to ongoing notification -> slow
-    Test normal group call - works, but tweak notification title & contents?
-    Test call in background
-     - doesn't receive ringing event (which is normal, but postNotification goes into "No notification posted")
-     - add direction to registerCall?
-     - test if it receives other events when in bg while in call and if notifications are updated accordingly
-     - should we connect socket in TelecomHandler?
+    Add sounds to notifications & check all sounds that are heard
     Should check for audio/video permissions in registerCall, similar to CallService?
+    Do we need telecomHandler in StreamVideoImpl or just TelecomCompat?
+    Have a look at SpeakerManager
      */
 
     fun registerCall(call: StreamCall, wasTriggeredByIncomingNotification: Boolean = false) {
@@ -162,7 +159,7 @@ internal class TelecomHandler private constructor(
             streamVideo?.connectIfNotAlreadyConnected()
             call.get()
             streamVideo?.state?.addRingingCall(call, RingingState.Incoming())
-        } // TODO-Telecom: reanalyze this in context of incoming call
+        }
     }
 
     fun changeCallState(call: StreamCall, newState: TelecomCallState) {
@@ -172,7 +169,7 @@ internal class TelecomHandler private constructor(
 
         if (telecomCall == null || telecomCall.state == newState) {
             val cause = if (telecomCall == null) "call not registered" else "same state"
-            logger.i { "[changeCallState] Ignoring state change: $cause" }
+            logger.i { "[changeCallState] Ignoring method call: $cause" }
         } else {
             val wasAlreadyAdded = telecomCall.state.let {
                 it == TelecomCallState.INCOMING || it == TelecomCallState.OUTGOING
@@ -225,7 +222,7 @@ internal class TelecomHandler private constructor(
                             ringingState = RingingState.Incoming(),
                             callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
                             incomingCallDisplayName = telecomCall.streamCall.incomingCallDisplayName,
-                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null, // TODO-Telecom: Compare this to CallService
+                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                         )
                     }
 
@@ -252,7 +249,7 @@ internal class TelecomHandler private constructor(
                     logger.i { "[postNotification] Posting ${telecomCall.state.toString().lowercase()} notification" }
 
                     NotificationManagerCompat
-                        .from(context)
+                        .from(applicationContext)
                         .notify(telecomCall.notificationId, it)
                 }
             }
@@ -263,7 +260,9 @@ internal class TelecomHandler private constructor(
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             true
         } else {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(
+                applicationContext, Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
         }
 
     fun unregisterCall(call: StreamCall) {
@@ -279,7 +278,7 @@ internal class TelecomHandler private constructor(
 
     private fun cancelNotification(notificationId: Int) {
         logger.d { "[cancelNotification]" }
-        NotificationManagerCompat.from(context).cancel(notificationId)
+        NotificationManagerCompat.from(applicationContext).cancel(notificationId)
     }
 
     fun registerAvailableDevicesListener(call: StreamCall, listener: AvailableDevicesListener) {
@@ -305,7 +304,6 @@ internal class TelecomHandler private constructor(
 }
 
 private class TelecomToStreamEventBridge(private val call: StreamCall) {
-    // TODO-Telecom: maybe turn into delegate and inject in TelecomHandler with default instance
     // TODO-Telecom: review what needs to be called here and take results into account
 
     private val logger by taggedLogger(TELECOM_LOG_TAG)

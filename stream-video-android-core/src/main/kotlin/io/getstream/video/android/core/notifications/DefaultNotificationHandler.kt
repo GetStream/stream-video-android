@@ -92,7 +92,7 @@ public open class DefaultNotificationHandler(
             application,
             callId = callId,
             callDisplayName = callDisplayName,
-            isTriggeredByNotification = true,
+            isIncomingCall = true,
         )
     }
 
@@ -243,6 +243,7 @@ public open class DefaultNotificationHandler(
             )
             setChannelId(channelId)
             setOngoing(true)
+            setAutoCancel(false)
             setCategory(NotificationCompat.CATEGORY_CALL)
             setFullScreenIntent(fullScreenPendingIntent, true)
             if (shouldHaveContentIntent) {
@@ -255,7 +256,6 @@ public open class DefaultNotificationHandler(
                     PendingIntent.FLAG_IMMUTABLE,
                 )
                 setContentIntent(emptyIntent)
-                setAutoCancel(false)
             }
             addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
         }
