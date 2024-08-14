@@ -24,6 +24,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.telecom.CallAttributesCompat
@@ -36,6 +37,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -121,18 +123,6 @@ internal class TelecomHandler private constructor(
         streamVideo = StreamVideo.instanceOrNull()
     }
 
-    /*
-    TODO-Telecom:
-    Add deprecation instructions for service
-    Add sounds to notifications & check all sounds that are heard
-    Should check for audio/video permissions in registerCall, similar to CallService?
-    Do we need telecomHandler in StreamVideoImpl or just TelecomCompat?
-    Telecom selects earpiece and AudioSwitch selects speakerphone by default?
-    Test call.speaker on/off (in livestream for e.g.)
-    Test other type of calls (audio_room and livestreaming)
-    Test if there is a difference between earpiece and speaker in a call
-     */
-
     fun registerCall(call: StreamCall, wasTriggeredByIncomingNotification: Boolean = false) {
         logger.d {
             "[registerCall] Call ID: ${call.id}, wasTriggeredByIncomingNotification: $wasTriggeredByIncomingNotification"
@@ -172,20 +162,22 @@ internal class TelecomHandler private constructor(
             val cause = if (telecomCall == null) "call not registered" else "same state"
             logger.i { "[changeCallState] Ignoring method call: $cause" }
         } else {
-            val wasAlreadyAdded = telecomCall.state.let {
-                it == TelecomCallState.INCOMING || it == TelecomCallState.OUTGOING
+            val wasPreviouslyAdded: Boolean
+
+            telecomCall.apply {
+                wasPreviouslyAdded = state == TelecomCallState.INCOMING || state == TelecomCallState.OUTGOING
+                state = newState
+            }.also {
+                postNotification(it)
             }
-            telecomCall.state = newState
 
             val telecomToStreamEventBridge = TelecomToStreamEventBridge(telecomCall)
             val streamToTelecomEventBridge = StreamToTelecomEventBridge(telecomCall)
 
             telecomHandlerScope.launch {
                 safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
-                    postNotification(telecomCall)
-
-                    if (wasAlreadyAdded) {
-                        logger.i { "[changeCallState] Call was already added to Telecom, ignoring" }
+                    if (wasPreviouslyAdded) {
+                        logger.i { "[changeCallState] Call was already added to Telecom, skipping CallsManager#addCall()" }
                     } else {
                         callManager.addCall(
                             callAttributes = telecomCall.attributes,
@@ -304,6 +296,7 @@ internal class TelecomHandler private constructor(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 private class TelecomCall(
     val streamCall: StreamCall,
     var state: TelecomCallState,
@@ -404,7 +397,7 @@ internal enum class TelecomCallState {
     ONGOING,
 }
 
-@TargetApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.O)
 private fun CallEndpointCompat.toStreamAudioDevice(): StreamAudioDevice = when (this.type) {
     CallEndpointCompat.TYPE_BLUETOOTH -> StreamAudioDevice.BluetoothHeadset(telecomDevice = this)
     CallEndpointCompat.TYPE_EARPIECE -> StreamAudioDevice.Earpiece(telecomDevice = this)
@@ -413,8 +406,9 @@ private fun CallEndpointCompat.toStreamAudioDevice(): StreamAudioDevice = when (
     else -> StreamAudioDevice.Earpiece()
 }
 
-private class TelecomToStreamEventBridge(private val telecomCall: TelecomCall) {
-    // TODO-Telecom: review what needs to be called here and take results into account
+@RequiresApi(Build.VERSION_CODES.O)
+private class TelecomToStreamEventBridge(telecomCall: TelecomCall) {
+    // TODO-Telecom: review SDK methods that are called here and take results into account
 
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private val streamCall = telecomCall.streamCall
@@ -430,7 +424,6 @@ private class TelecomToStreamEventBridge(private val telecomCall: TelecomCall) {
         streamCall.leave()
     }
 
-    // TODO-Telecom: onhold support & missed calls?
     suspend fun onSetActive() {
         logger.d { "[TelecomToStreamEventBridge#onSetActive]" }
         streamCall.join()
@@ -438,10 +431,11 @@ private class TelecomToStreamEventBridge(private val telecomCall: TelecomCall) {
 
     suspend fun onSetInactive() {
         logger.d { "[TelecomToStreamEventBridge#onSetInactive]" }
-//        call.leave() // TODO-Telecom: uncomment and test
+        streamCall.leave()
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 private class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) {
     private val logger by taggedLogger(TELECOM_LOG_TAG)
 
@@ -461,14 +455,22 @@ private class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) {
                             logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#answer" }
                             answer(telecomCall.mediaType)
                         }
-                        // TODO-Telecom: Correct DisconnectCause below
                         is CallRejectedEvent -> {
                             logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
-                            disconnect(DisconnectCause(DisconnectCause.REJECTED))
+                            disconnect(
+                                DisconnectCause(
+                                    when (event.reason) {
+                                        RejectReason.Cancel.alias -> DisconnectCause.LOCAL
+                                        RejectReason.Decline.alias -> DisconnectCause.REJECTED
+                                        else -> DisconnectCause.REMOTE
+                                    },
+                                ),
+                            )
+                            event.reason
                         }
                         is CallEndedEvent -> {
                             logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
-                            disconnect(DisconnectCause(DisconnectCause.REMOTE))
+                            disconnect(DisconnectCause(DisconnectCause.LOCAL))
                         }
                     }
                 }

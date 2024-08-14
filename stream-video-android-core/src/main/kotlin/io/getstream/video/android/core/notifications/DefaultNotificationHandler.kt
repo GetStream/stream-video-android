@@ -523,7 +523,7 @@ public open class DefaultNotificationHandler(
         rejectCallPendingIntent: PendingIntent,
         personName: String,
     ): NotificationCompat.Builder = apply {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // TODO-Telecom: CallStyle notifications prior to S (needed for Telecom)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 CallStyle.forIncomingCall(
                     Person.Builder()
