@@ -42,6 +42,7 @@ moshi = "1.15.1"
 threetenAbp = "1.4.7"
 tink = "1.9.0"
 turbine = "0.13.0"
+itu = "1.7.3"
 
 streamWebRTC = "1.1.2"
 streamResult = "1.1.0"
@@ -139,10 +140,13 @@ moshi-adapters = { group = "com.squareup.moshi", name = "moshi-adapters", versio
 threentenabp2 = { group = "com.jakewharton.threetenabp", name = "threetenabp", version.ref = "threetenAbp" }
 tink = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+ituDate = { group = "com.ethlo.time", name = "itu", version.ref = "itu" }
 
 stream-webrtc = { group = "io.getstream", name = "stream-webrtc-android", version.ref = "streamWebRTC" }
 stream-webrtc-ui = { group = "io.getstream", name = "stream-webrtc-android-ui", version.ref = "streamWebRTC" }
 stream-result = { group = "io.getstream", name = "stream-result", version.ref = "streamResult" }
+stream-result-call = { group = "io.getstream", name = "stream-result-call", version.ref = "streamResult" }
+
 stream-log = { group = "io.getstream", name = "stream-log", version.ref = "streamLog" }
 stream-log-android = { group = "io.getstream", name = "stream-log-android", version.ref = "streamLog" }
 stream-push = { group = "io.getstream", name = "stream-android-push", version.ref = "streamPush" }

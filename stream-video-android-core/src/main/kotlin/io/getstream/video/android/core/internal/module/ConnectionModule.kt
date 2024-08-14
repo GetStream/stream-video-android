@@ -18,6 +18,7 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
+import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -25,6 +26,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -58,12 +60,14 @@ import java.util.concurrent.TimeUnit
 internal class ConnectionModule(
     context: Context,
     private val scope: CoroutineScope,
+    private val tokenProvider: TokenProvider,
     internal val videoDomain: String,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
     private val user: User,
     internal val apiKey: ApiKey,
     internal val userToken: UserToken,
+    internal val lifecycle: Lifecycle,
 ) {
     private val authInterceptor: CoordinatorAuthInterceptor by lazy {
         CoordinatorAuthInterceptor(apiKey, userToken)
@@ -72,6 +76,7 @@ internal class ConnectionModule(
     val okHttpClient: OkHttpClient by lazy { buildOkHttpClient() }
     val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
+            scope,
             connectivityManager = context
                 .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
         )
@@ -129,12 +134,15 @@ internal class ConnectionModule(
         val coordinatorUrl = "wss://$videoDomain/video/connect"
 
         return CoordinatorSocket(
+            apiKey,
             coordinatorUrl,
             user,
             userToken,
             scope,
             okHttpClient,
-            networkStateProvider = networkStateProvider,
+            lifecycle,
+            tokenProvider,
+            networkStateProvider,
         )
     }
 
@@ -160,7 +168,7 @@ internal class ConnectionModule(
 
     fun updateToken(newToken: String) {
         // the coordinator socket also needs to update the token
-        coordinatorSocket.token = newToken
+        coordinatorSocket.updateToken(newToken)
         // update the auth token as well
         authInterceptor.token = newToken
     }

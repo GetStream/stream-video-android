@@ -23,7 +23,6 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -31,12 +30,15 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.RuntimeException
 import java.net.ConnectException
@@ -86,7 +88,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val geo: GEO = GEO.GlobalEdgeNetwork,
     private var user: User = User.anonymous(),
     private val token: UserToken = "",
-    private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
+    private val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
@@ -101,7 +103,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val audioUsage: Int = defaultAudioUsage,
 ) {
     private val context: Context = context.applicationContext
-    private val scope = CoroutineScope(DispatcherProvider.IO)
+    private val scope = UserScope(ClientScope())
 
     /**
      * Builds the [StreamVideo] client.
@@ -128,10 +130,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException("The API key cannot be blank")
         }
 
-        if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
-            throw IllegalArgumentException(
-                "Either a user token or a token provider must be provided",
-            )
+        if (token.isBlank()) {
+            throw IllegalStateException("The token cannot be blank")
         }
 
         if (user.type == UserType.Authenticated && user.id.isBlank()) {
@@ -161,6 +161,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user,
             apiKey = apiKey,
             userToken = token,
+            tokenProvider = tokenProvider,
+            lifecycle = lifecycle,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -177,7 +179,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // Create the client
         val client = StreamVideoImpl(
             context = context,
-            _scope = scope,
+            scope = scope,
             user = user,
             apiKey = apiKey,
             token = token,

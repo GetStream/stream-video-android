@@ -20,30 +20,25 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.os.Build
+import io.getstream.log.taggedLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
-/**
- * Handler which monitors connectivity and provides network state.
- *
- * @property connectivityManager Android manager which provides information about the current
- * connection state.
- */
-public class NetworkStateProvider(private val connectivityManager: ConnectivityManager) {
+public class NetworkStateProvider(
+    private val scope: CoroutineScope,
+    private val connectivityManager: ConnectivityManager,
+) {
 
+    private val logger by taggedLogger("Video:NetworkStateProvider")
     private val lock: Any = Any()
-
-    /**
-     * Handler which is triggered whenever the network state changes.
-     */
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             notifyListenersIfNetworkStateChanged()
         }
 
-        override fun onCapabilitiesChanged(
-            network: Network,
-            networkCapabilities: NetworkCapabilities,
-        ) {
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
             notifyListenersIfNetworkStateChanged()
         }
 
@@ -63,36 +58,44 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
     private fun notifyListenersIfNetworkStateChanged() {
         val isNowConnected = isConnected()
         if (!isConnected && isNowConnected) {
+            logger.i { "Network connected." }
             isConnected = true
-            listeners.forEach { it.onConnected() }
+            listeners.onConnected()
         } else if (isConnected && !isNowConnected) {
+            logger.i { "Network disconnected." }
             isConnected = false
-            listeners.forEach { it.onDisconnected() }
+            listeners.onDisconnected()
         }
     }
 
-    /**
-     * Checks if the current device is connected to the Internet, based on the API level.
-     *
-     * @return If the device is connected or not.
-     */
-    public fun isConnected(): Boolean {
-        return runCatching {
-            connectivityManager.run {
-                getNetworkCapabilities(activeNetwork)?.run {
-                    hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                        hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-                }
-            }
-        }.getOrNull() ?: false
+    private fun Set<NetworkStateListener>.onConnected() {
+        scope.launch {
+            forEach { it.onConnected() }
+        }
     }
 
-    /**
-     * Subscribes to network state changes through a listener.
-     *
-     * @param listener Handler which receives connection change events.
-     */
-    public fun subscribe(listener: NetworkStateListener) {
+    private fun Set<NetworkStateListener>.onDisconnected() {
+        scope.launch {
+            forEach { it.onDisconnected() }
+        }
+    }
+
+    fun isConnected(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            runCatching {
+                connectivityManager.run {
+                    getNetworkCapabilities(activeNetwork)?.run {
+                        hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                            hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                    }
+                }
+            }.getOrNull() ?: false
+        } else {
+            connectivityManager.activeNetworkInfo?.isConnected ?: false
+        }
+    }
+
+    fun subscribe(listener: NetworkStateListener) {
         synchronized(lock) {
             listeners = listeners + listener
             if (isRegistered.compareAndSet(false, true)) {
@@ -104,12 +107,7 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
         }
     }
 
-    /**
-     * Removes a listener for network state changes.
-     *
-     * @param listener Handler to be removed.
-     */
-    public fun unsubscribe(listener: NetworkStateListener) {
+    fun unsubscribe(listener: NetworkStateListener) {
         synchronized(lock) {
             listeners = (listeners - listener).also {
                 if (it.isEmpty() && isRegistered.compareAndSet(true, false)) {
@@ -119,12 +117,9 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
         }
     }
 
-    /**
-     * Listener which is used to listen and react to network state changes.
-     */
-    public interface NetworkStateListener {
-        public fun onConnected()
+    interface NetworkStateListener {
+        suspend fun onConnected()
 
-        public fun onDisconnected()
+        suspend fun onDisconnected()
     }
 }

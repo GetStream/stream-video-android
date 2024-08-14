@@ -19,8 +19,10 @@ package io.getstream.video.android.core
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +31,6 @@ import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
-import java.net.ConnectException
 
 @Stable
 public sealed interface ConnectionState {
@@ -87,7 +88,7 @@ class ClientState(client: StreamVideo) {
     /**
      * Returns true if there is an active or ringing call
      */
-    fun hasActiveOrRingingCall(): Boolean = safeCall(false) {
+    fun hasActiveOrRingingCall(): Boolean = safeCallWithDefault(false) {
         val hasActiveCall = _activeCall.value != null
         val hasRingingCall = _ringingCall.value != null
         val activeOrRingingCall = hasActiveCall || hasRingingCall
@@ -118,10 +119,20 @@ class ClientState(client: StreamVideo) {
         }
     }
 
-    internal fun handleError(error: Throwable) {
-        if (error is ConnectException) {
-            _connection.value = ConnectionState.Failed(error = Error(error))
+    internal fun handleState(socketState: SocketState) {
+        when (socketState) {
+            is SocketState.Connected -> ConnectionState.Connected
+            SocketState.Connecting -> ConnectionState.Loading
+            SocketState.DisconnectedByRequest -> ConnectionState.Disconnected
+            is SocketState.DisconnectedPermanently -> ConnectionState.Disconnected
+            is SocketState.DisconnectedTemporarily -> ConnectionState.Reconnecting
+            SocketState.NetworkDisconnected -> ConnectionState.Disconnected
+            SocketState.NotConnected -> ConnectionState.PreConnect
         }
+    }
+
+    fun handleError(error: Error) {
+        _connection.value = ConnectionState.Failed(error)
     }
 
     fun setActiveCall(call: Call) {

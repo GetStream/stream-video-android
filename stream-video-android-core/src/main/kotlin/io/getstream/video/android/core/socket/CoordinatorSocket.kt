@@ -16,24 +16,19 @@
 
 package io.getstream.video.android.core.socket
 
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonDataException
+import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.utils.isWhitespaceOnly
-import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import okhttp3.WebSocket
-import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectUserDetailsRequest
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.ConnectionErrorEvent
-import org.openapitools.client.models.UnsupportedVideoEventException
-import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSAuthMessageRequest
 
 /**
@@ -42,99 +37,46 @@ import org.openapitools.client.models.WSAuthMessageRequest
  *
  */
 public class CoordinatorSocket(
+    private val apiKey: ApiKey,
     private val url: String,
     private val user: User,
-    internal var token: String,
-    private val scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
+    private val token: String,
+    private val scope: CoroutineScope = UserScope(ClientScope()),
     private val httpClient: OkHttpClient,
+    private val lifecycle: Lifecycle,
+    private val tokenProvider: TokenProvider,
     private val networkStateProvider: NetworkStateProvider,
-) : PersistentSocket<ConnectedEvent>(
+) : PersistentSocket(
+    apiKey = apiKey,
     url = url,
     httpClient = httpClient,
     scope = scope,
+    lifecycle = lifecycle,
+    tokenProvider = tokenProvider,
     networkStateProvider = networkStateProvider,
 ) {
-    override val logger by taggedLogger("PersistentCoordinatorSocket")
 
-    override fun authenticate() {
-        logger.d { "[authenticateUser] user: $user" }
+    override val logger by taggedLogger("Video:CoordinatorWS")
 
-        if (token.isEmpty()) {
-            throw IllegalStateException("User token is empty")
-        }
-
-        val adapter: JsonAdapter<WSAuthMessageRequest> =
-            Serializer.moshi.adapter(WSAuthMessageRequest::class.java)
-
-        val authRequest = WSAuthMessageRequest(
-            token = token,
-            userDetails = ConnectUserDetailsRequest(
-                id = user.id,
-                name = user.name.takeUnless { it.isWhitespaceOnly() },
-                image = user.image.takeUnless { it.isWhitespaceOnly() },
-                custom = user.custom,
-            ),
-        )
-        val message = adapter.toJson(authRequest)
-
-        super.socket?.send(message)
-    }
-
-    /** Invoked when a text (type `0x1`) message has been received. */
-    override fun onMessage(webSocket: WebSocket, text: String) {
-        logger.d { "[onMessage] text: $text " }
-
-        if (text.isEmpty() || text == "null") {
-            logger.w { "[onMessage] Received empty socket message" }
-            return
-        }
-
-        scope.launch(singleThreadDispatcher) {
-            try {
-                Serializer.moshi.adapter(VideoEvent::class.java).let { eventAdapter ->
-                    eventAdapter.fromJson(text)?.let { parsedEvent -> processEvent(parsedEvent) }
-                }
-            } catch (e: Throwable) {
-                if (e.cause is UnsupportedVideoEventException) {
-                    val ex = e.cause as UnsupportedVideoEventException
-                    logger.w { "[onMessage] Received unsupported VideoEvent type: ${ex.type}. Ignoring." }
-                } else {
-                    val eventType = extractEventType(text)
-                    val errorMessage = "Error when parsing VideoEvent with type: $eventType. Cause: ${e.message}."
-
-                    logger.e { "[onMessage] $errorMessage" }
-                    handleError(JsonDataException(errorMessage))
-                }
+    override fun onCreated() {
+        scope.launch {
+            logger.d { "[onConnected] Video socket connected, user: $user" }
+            if (token.isEmpty()) {
+                logger.e { "[onConnected] Token is empty. Disconnecting." }
+                disconnect()
+            } else {
+                val authRequest = WSAuthMessageRequest(
+                    token = token,
+                    userDetails = ConnectUserDetailsRequest(
+                        id = user.id,
+                        name = user.name.takeUnless { it.isWhitespaceOnly() },
+                        image = user.image.takeUnless { it.isWhitespaceOnly() },
+                        custom = user.custom,
+                    ),
+                )
+                logger.d { "[onConnected] Sending auth request: $authRequest" }
+                sendEvent(authRequest)
             }
         }
-    }
-
-    private suspend fun processEvent(parsedEvent: VideoEvent) {
-        if (parsedEvent is ConnectionErrorEvent) {
-            handleError(
-                ErrorResponse(
-                    code = parsedEvent.error?.code ?: -1,
-                    message = parsedEvent.error?.message ?: "",
-                    statusCode = parsedEvent.error?.statusCode ?: -1,
-                    exceptionFields = parsedEvent.error?.exceptionFields ?: emptyMap(),
-                    moreInfo = parsedEvent.error?.moreInfo ?: "",
-                ),
-            )
-            return
-        }
-
-        if (parsedEvent is ConnectedEvent) {
-            _connectionId.value = parsedEvent.connectionId
-            setConnectedStateAndContinue(parsedEvent)
-        }
-
-        ackHealthMonitor()
-        events.emit(parsedEvent)
-    }
-
-    private fun extractEventType(json: String): String = safeCall("Unknown") {
-        val regex = """"type":"(.*?)"""".toRegex()
-        val matchResult = regex.find(json)
-        return matchResult?.groups?.get(1)?.value ?: "Unknown"
     }
 }

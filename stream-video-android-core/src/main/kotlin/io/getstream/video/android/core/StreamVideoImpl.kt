@@ -32,8 +32,6 @@ import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.ConnectionModule
-import io.getstream.video.android.core.lifecycle.LifecycleHandler
-import io.getstream.video.android.core.lifecycle.internal.StreamLifecycleObserver
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
@@ -48,27 +46,26 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
-import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeSuspendingCall
+import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
@@ -77,7 +74,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
@@ -126,7 +122,6 @@ import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import retrofit2.HttpException
-import java.net.ConnectException
 import java.util.*
 import kotlin.coroutines.Continuation
 
@@ -138,14 +133,14 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
  */
 internal class StreamVideoImpl internal constructor(
     override val context: Context,
-    internal val _scope: CoroutineScope,
+    internal val scope: CoroutineScope = ClientScope(),
     override val user: User,
     internal val apiKey: ApiKey,
     internal var token: String,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
     internal val connectionModule: ConnectionModule,
-    internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
+    internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
     internal val runForegroundService: Boolean = true,
     internal val testSfuAddress: String? = null,
@@ -159,16 +154,6 @@ internal class StreamVideoImpl internal constructor(
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
-
-    private val coroutineExceptionHandler =
-        CoroutineExceptionHandler { coroutineContext, exception ->
-            val coroutineName = coroutineContext[CoroutineName]?.name ?: "unknown"
-            logger.e(exception) {
-                "[StreamVideo#Scope] Uncaught exception in coroutine $coroutineName: $exception"
-            }
-        }
-    internal val scope =
-        CoroutineScope(_scope.coroutineContext + SupervisorJob() + coroutineExceptionHandler)
 
     /** if true we fail fast on errors instead of logging them */
     var developmentMode = true
@@ -201,7 +186,7 @@ internal class StreamVideoImpl internal constructor(
         // stop all running coroutines
         scope.cancel()
         // stop the socket
-        socketImpl.cleanup()
+        // socketImpl.cleanup()
         // call cleanup on the active call
         val activeCall = state.activeCall.value
         activeCall?.leave()
@@ -217,40 +202,28 @@ internal class StreamVideoImpl internal constructor(
     /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
      */
-    internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> {
-        return withContext(scope.coroutineContext) {
-            try {
-                Success(apiCall())
-            } catch (e: HttpException) {
-                val failure = parseError(e)
-                val parsedError = failure.value as Error.NetworkError
-                if (parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
-                    if (tokenProvider != null) {
-                        // TODO - handle this better, error structure is not great right now
-                        val newToken = tokenProvider.invoke(null)
-                        token = newToken
-                        connectionModule.updateToken(newToken)
-                    }
-                    // retry the API call once
-                    try {
-                        Success(apiCall())
-                    } catch (e: HttpException) {
-                        parseError(e)
-                    } catch (e: Throwable) {
-                        // rethrow exception (will be handled by outer-catch)
-                        throw e
-                    }
-
-                    // set the token, repeat API call
-                    // keep track of retry count
-                } else {
-                    failure
-                }
-            } catch (e: Throwable) {
-                // Other issues. For example UnknownHostException.
-                Failure(Error.ThrowableError(e.message ?: "", e))
+    internal suspend fun <T : Any> wrapAPICall(
+        apiCall: suspend () -> T,
+    ): Result<T> = safeSuspendingCallWithResult {
+        try {
+            apiCall()
+        } catch (e: HttpException) {
+            // Retry once with a new token if the token is expired
+            if (e.isAuthError()) {
+                val newToken = tokenProvider.loadToken()
+                token = newToken
+                connectionModule.updateToken(newToken)
+                apiCall()
+            } else {
+                throw e
             }
         }
+    }
+
+    private fun HttpException.isAuthError(): Boolean {
+        val failure = parseError(this)
+        val parsedError = failure.value as Error.NetworkError
+        return parsedError.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code
     }
 
     /**
@@ -323,69 +296,31 @@ internal class StreamVideoImpl internal constructor(
     }
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
-        if (connectionModule.coordinatorSocket.canConnect()) {
-            connectionModule.coordinatorSocket.connect()
-        }
+        connectionModule.coordinatorSocket.connect(user)
     }
-
-    /**
-     * Observes the app lifecycle and attempts to reconnect/release the socket connection.
-     */
-    private val lifecycleObserver = StreamLifecycleObserver(
-        lifecycle,
-        object : LifecycleHandler {
-            override fun started() {
-                scope.launch(CoroutineName("lifecycleObserver.started")) {
-                    connectIfNotAlreadyConnected()
-                }
-            }
-
-            override fun stopped() {
-                safeCall {
-                    // We should only disconnect if we were previously connected
-                    // Also don't disconnect the socket if we are in an active call
-                    val socketDecision = connectionModule.coordinatorSocket.canDisconnect()
-                    val activeCallDecision = state.hasActiveOrRingingCall()
-                    val decision = socketDecision && !activeCallDecision
-                    logger.d {
-                        "[lifecycle#stopped] Decision to disconnect: $decision, caused by socket state: $socketDecision, active or ringing call: $activeCallDecision"
-                    }
-                    if (decision) {
-                        connectionModule.coordinatorSocket.disconnect(
-                            PersistentSocket.DisconnectReason.ByRequest,
-                        )
-                    }
-                }
-            }
-        },
-    )
 
     init {
 
-        scope.launch(Dispatchers.Main.immediate + CoroutineName("init#lifecycleObserver.observe")) {
-            lifecycleObserver.observe()
-        }
-
         // listen to socket events and errors
         scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
-            connectionModule.coordinatorSocket.events.collect {
+            connectionModule.coordinatorSocket.events().collect {
                 fireEvent(it)
             }
         }
+        scope.launch {
+            connectionModule.coordinatorSocket.state().collect {
+                state.handleState(it)
+            }
+        }
+
         scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
-            connectionModule.coordinatorSocket.errors.collect { throwable ->
-                if (throwable is ConnectException) {
-                    state.handleError(throwable)
-                } else {
-                    (throwable as? ErrorResponse)?.let {
-                        if (it.code == VideoErrorCode.TOKEN_EXPIRED.code) refreshToken(it)
-                    }
-                }
+            connectionModule.coordinatorSocket.errors().collect { error ->
+                state.handleError(error)
             }
         }
 
         scope.launch(CoroutineName("init#coordinatorSocket.connectionState.collect")) {
-            connectionModule.coordinatorSocket.connectionState.collect { it ->
+            connectionModule.coordinatorSocket.state().collect { it ->
                 // If the socket is reconnected then we have a new connection ID.
                 // We need to re-watch every watched call with the new connection ID
                 // (otherwise the WS events will stop)
@@ -446,7 +381,7 @@ internal class StreamVideoImpl internal constructor(
             guestUserJob?.await()
             try {
                 val timer = debugInfo.trackTime("coordinator connect")
-                socketImpl.connect()
+                socketImpl.connect(user)
                 timer.finish()
                 Success(timer.duration)
             } catch (e: ErrorResponse) {
@@ -462,12 +397,12 @@ internal class StreamVideoImpl internal constructor(
 
     private suspend fun refreshToken(error: Throwable) {
         tokenProvider?.let {
-            val newToken = tokenProvider.invoke(error)
+            val newToken = tokenProvider.loadToken()
             connectionModule.updateToken(newToken)
 
             logger.d { "[refreshToken] Token has been refreshed with: $newToken" }
 
-            socketImpl.reconnect(0)
+            socketImpl.reconnect(user, true)
         }
     }
 
@@ -648,19 +583,13 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    private suspend fun waitForConnectionId(): String? =
+    private suspend fun waitForConnectionId(): String {
         // The Coordinator WS connection can take a moment to set up - this can be an issue
         // if we jump right into the call from a deep link and we connect the call quickly.
         // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
-        withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
-            val value = connectionModule.coordinatorSocket.connectionId.first { it != null }
-            value
-        }.also {
-            if (it == null) {
-                logger.w { "[waitForConnectionId] connectionId timeout - returning null" }
-            }
-        }
+        return connectionModule.coordinatorSocket.connectionId().first()
+    }
 
     internal suspend fun inviteUsers(
         type: String,

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.lifecycle
+package io.getstream.video.android.core.socket.common
 
-internal interface LifecycleHandler {
-    fun started()
-    fun stopped()
-}
+import io.getstream.chat.android.client.socket.ErrorResponse
+
+internal data class SocketErrorMessage(val error: ErrorResponse? = null)
