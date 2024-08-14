@@ -202,5 +202,3 @@ internal object TelecomCompat {
 internal typealias StreamCall = Call
 
 internal typealias DeviceListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit
-
-internal const val TELECOM_LOG_TAG = "StreamVideo:Telecom"
