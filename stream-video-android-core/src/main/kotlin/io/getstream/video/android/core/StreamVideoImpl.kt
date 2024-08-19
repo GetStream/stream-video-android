@@ -204,7 +204,7 @@ internal class StreamVideoImpl internal constructor(
         socketImpl.cleanup()
         // call cleanup on the active call
         val activeCall = state.activeCall.value
-        activeCall?.cleanup()
+        activeCall?.leave()
     }
 
     /**

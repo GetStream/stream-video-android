@@ -146,6 +146,39 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    override fun getSettingUpCallNotification(): Notification? {
+        val channelId = application.getString(
+            R.string.stream_video_call_setup_notification_channel_id,
+        )
+
+        maybeCreateChannel(
+            channelId = channelId,
+            context = application,
+            configure = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    name = application.getString(
+                        R.string.stream_video_call_setup_notification_channel_title,
+                    )
+                    description = application.getString(
+                        R.string.stream_video_call_setup_notification_channel_description,
+                    )
+                }
+            },
+        )
+
+        return getNotification {
+            setContentTitle(
+                application.getString(R.string.stream_video_call_setup_notification_title),
+            )
+            setContentText(
+                application.getString(R.string.stream_video_call_setup_notification_description),
+            )
+            setChannelId(channelId)
+            setCategory(NotificationCompat.CATEGORY_CALL)
+            setOngoing(true)
+        }
+    }
+
     private fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
@@ -166,27 +199,36 @@ public open class DefaultNotificationHandler(
                 R.string.stream_video_incoming_call_low_priority_notification_channel_id
             },
         )
-        maybeCreateChannel(channelId, application) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                description = application.getString(
-                    if (showAsHighPriority) {
-                        R.string.stream_video_incoming_call_notification_channel_description
+
+        maybeCreateChannel(
+            channelId = channelId,
+            context = application,
+            configure = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    name = application.getString(
+                        R.string.stream_video_incoming_call_notification_channel_title,
+                    )
+                    description = application.getString(
+                        if (showAsHighPriority) {
+                            R.string.stream_video_incoming_call_notification_channel_description
+                        } else {
+                            R.string.stream_video_incoming_call_low_priority_notification_channel_description
+                        },
+                    )
+                    importance = if (showAsHighPriority) {
+                        NotificationManager.IMPORTANCE_HIGH
                     } else {
-                        R.string.stream_video_incoming_call_low_priority_notification_channel_description
-                    },
-                )
-                importance = if (showAsHighPriority) {
-                    NotificationManager.IMPORTANCE_HIGH
-                } else {
-                    NotificationManager.IMPORTANCE_LOW
+                        NotificationManager.IMPORTANCE_LOW
+                    }
+                    this.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    this.setShowBadge(true)
                 }
-                this.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                this.setShowBadge(true)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                this.setAllowBubbles(true)
-            }
-        }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    this.setAllowBubbles(true)
+                }
+            },
+        )
+
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
             setContentTitle(
@@ -219,15 +261,18 @@ public open class DefaultNotificationHandler(
         callDisplayName: String,
     ): Notification {
         val channelId = application.getString(
-            R.string.stream_video_ongoing_call_notification_channel_id,
+            R.string.stream_video_outgoing_call_notification_channel_id,
         )
         maybeCreateChannel(
             channelId = channelId,
             context = application,
             configure = {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    name = application.getString(
+                        R.string.stream_video_outgoing_call_notification_channel_title,
+                    )
                     description = application.getString(
-                        R.string.stream_video_ongoing_call_notification_channel_description,
+                        R.string.stream_video_outgoing_call_notification_channel_description,
                     )
                 }
             },
@@ -293,12 +338,19 @@ public open class DefaultNotificationHandler(
         val ongoingCallsChannelId = application.getString(
             R.string.stream_video_ongoing_call_notification_channel_id,
         )
-        maybeCreateChannel(ongoingCallsChannelId, application) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                description =
-                    application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
-            }
-        }
+        maybeCreateChannel(
+            channelId = ongoingCallsChannelId,
+            context = application,
+            configure = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    name = application.getString(
+                        R.string.stream_video_ongoing_call_notification_channel_title,
+                    )
+                    description =
+                        application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
+                }
+            },
+        )
 
         if (endCallIntent == null) {
             logger.e { "End call intent is null, not showing notification!" }

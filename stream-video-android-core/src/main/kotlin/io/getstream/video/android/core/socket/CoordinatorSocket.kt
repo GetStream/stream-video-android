@@ -17,10 +17,12 @@
 package io.getstream.video.android.core.socket
 
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.utils.isWhitespaceOnly
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -98,8 +100,11 @@ public class CoordinatorSocket(
                     val ex = e.cause as UnsupportedVideoEventException
                     logger.w { "[onMessage] Received unsupported VideoEvent type: ${ex.type}. Ignoring." }
                 } else {
-                    logger.w { "[onMessage] VideoEvent parsing error ${e.message}." }
-                    handleError(e)
+                    val eventType = extractEventType(text)
+                    val errorMessage = "Error when parsing VideoEvent with type: $eventType. Cause: ${e.message}."
+
+                    logger.e { "[onMessage] $errorMessage" }
+                    handleError(JsonDataException(errorMessage))
                 }
             }
         }
@@ -126,5 +131,11 @@ public class CoordinatorSocket(
 
         ackHealthMonitor()
         events.emit(parsedEvent)
+    }
+
+    private fun extractEventType(json: String): String = safeCall("Unknown") {
+        val regex = """"type":"(.*?)"""".toRegex()
+        val matchResult = regex.find(json)
+        return matchResult?.groups?.get(1)?.value ?: "Unknown"
     }
 }
