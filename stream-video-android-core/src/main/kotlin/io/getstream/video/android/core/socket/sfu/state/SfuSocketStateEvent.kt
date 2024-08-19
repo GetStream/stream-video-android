@@ -14,7 +14,7 @@ public sealed class SfuSocketStateEvent {
      * Event to start a new connection.
      */
     data class Connect(
-        val connectionConf: ConnectionConf,
+        val connectionConf: ConnectionConf.SfuConnectionConf,
         val connectionType: VideoSocketConnectionType,
     ) : SfuSocketStateEvent()
 
