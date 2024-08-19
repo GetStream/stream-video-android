@@ -383,11 +383,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call the call
      */
     public open fun onStop(call: Call) {
+        // Extension point only.
         logger.d { "Default activity - stopped (call -> $call)" }
-        if (isVideoCall(call) && isInPictureInPictureMode) {
-            logger.d { "Default activity - stopped: PiP detected, will leave call. (call -> $call)" }
-            leave(call) // Already finishing
-        }
     }
 
     /**
