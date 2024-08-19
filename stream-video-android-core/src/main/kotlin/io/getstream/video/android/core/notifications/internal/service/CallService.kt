@@ -22,13 +22,10 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
-import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
@@ -39,6 +36,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
+import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
@@ -182,6 +180,7 @@ internal class CallService : Service() {
             maybePromoteToForegroundService(
                 videoClient = streamVideo,
                 notificationId = intentCallId.hashCode(),
+                trigger,
             )
 
             val type = intentCallId.type
@@ -241,27 +240,12 @@ internal class CallService : Service() {
             if (notification != null) {
                 if (trigger == TRIGGER_INCOMING_CALL) {
                     showIncomingCall(
-                        notification = notification,
                         notificationId = notificationData.second,
+                        notification = notification,
                     )
                 } else {
                     callId = intentCallId
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                        val foregroundServiceType = when (trigger) {
-                            TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-                            TRIGGER_OUTGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                            else -> ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-                        }
-                        ServiceCompat.startForeground(
-                            this@CallService,
-                            intentCallId.hashCode(),
-                            notification,
-                            foregroundServiceType,
-                        )
-                    } else {
-                        startForeground(intentCallId.hashCode(), notification)
-                    }
+                    startForegroundWithServiceType(intentCallId.hashCode(), notification, trigger)
                 }
                 true
             } else {
@@ -303,7 +287,7 @@ internal class CallService : Service() {
         }
     }
 
-    private fun maybePromoteToForegroundService(videoClient: StreamVideoImpl, notificationId: Int) {
+    private fun maybePromoteToForegroundService(videoClient: StreamVideoImpl, notificationId: Int, trigger: String) {
         val hasActiveCall = videoClient.state.activeCall.value != null
         val not = if (hasActiveCall) " not" else ""
 
@@ -312,19 +296,20 @@ internal class CallService : Service() {
         }
 
         if (!hasActiveCall) {
-            startForeground(notificationId, videoClient.getSettingUpCallNotification())
+            videoClient.getSettingUpCallNotification()?.let {
+                startForegroundWithServiceType(notificationId, it, trigger)
+            }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun showIncomingCall(notification: Notification, notificationId: Int) {
+    private fun showIncomingCall(notificationId: Int, notification: Notification) {
         if (callId == null) { // If there isn't another call in progress (callId is set in onStartCommand())
-            startForeground(
-                notificationId,
-                notification,
-            ) // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
+            // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
+            startForegroundWithServiceType(notificationId, notification, TRIGGER_INCOMING_CALL)
         } else {
-            NotificationManagerCompat // Else, we show a simple notification (the service was already started as a foreground service).
+            // Else, we show a simple notification (the service was already started as a foreground service).
+            NotificationManagerCompat
                 .from(this)
                 .notify(notificationId, notification)
         }
