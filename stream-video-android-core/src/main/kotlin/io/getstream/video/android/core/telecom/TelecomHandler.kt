@@ -71,7 +71,6 @@ internal class TelecomHandler private constructor(
     private val telecomHandlerScope = CoroutineScope(
         DispatcherProvider.Default + SupervisorJob() + exceptionHandler,
     )
-    private var callControlScope: CallControlScope? = null
 
     companion object {
         @Volatile
@@ -279,11 +278,15 @@ internal class TelecomHandler private constructor(
         calls[call.cid]?.deviceListener = listener
     }
 
-    fun selectDevice(device: CallEndpointCompat) {
-        logger.d { "[selectDevice] device: $device" }
-
-        callControlScope?.let {
-            it.launch { it.requestEndpointChange(device) }
+    fun selectDevice(call: StreamCall, device: CallEndpointCompat) {
+        calls[call.cid]?.callControlScope?.let {
+            with(it) {
+                launch {
+                    requestEndpointChange(device).let { result ->
+                        logger.d { "[selectDevice] To device: ${device.name}, requestEndpointChange result: $result" }
+                    }
+                }
+            }
         }
     }
 

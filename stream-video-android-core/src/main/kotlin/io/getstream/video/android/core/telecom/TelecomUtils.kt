@@ -184,7 +184,7 @@ internal object TelecomCompat {
                 override fun stop() {}
 
                 override fun selectDevice(audioDevice: StreamAudioDevice?) {
-                    audioDevice?.telecomDevice?.let { telecomHandler.selectDevice(it) }
+                    audioDevice?.telecomDevice?.let { telecomHandler.selectDevice(call, it) }
                 }
             }
         },
