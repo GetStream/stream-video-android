@@ -40,7 +40,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.socket.SocketState
+Refaimport io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -451,7 +451,7 @@ public class Call(
         scope.launch {
             session?.let {
                 it.sfuSocketState.collect { sfuSocketState ->
-                    if (sfuSocketState is SocketState.DisconnectedPermanently) {
+                    if (sfuSocketState is SfuSocketState.DisconnectedPermanently) {
                         handleSignalChannelDisconnect(isRetry = false)
                     }
                 }

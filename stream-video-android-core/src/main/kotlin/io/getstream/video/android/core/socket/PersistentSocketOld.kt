@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.internal.HealthMonitor
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
@@ -80,10 +81,10 @@ public open class PersistentSocketOld<T>(
     /** flow with temporary and permanent errors */
     val errors = MutableSharedFlow<Throwable>()
 
-    private val _connectionState = MutableStateFlow<SocketState>(SocketState.NotConnected)
+    private val _connectionState = MutableStateFlow<SfuSocketState>(SfuSocketState.NotConnected)
 
     /** the current connection state of the socket */
-    val connectionState: StateFlow<SocketState> = _connectionState
+    val connectionState: StateFlow<SfuSocketState> = _connectionState
 
     /** the connection id */
     internal val _connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -123,7 +124,7 @@ public open class PersistentSocketOld<T>(
             logger.i { "[connect]" }
             connectContinuation = continuation
 
-            _connectionState.value = SocketState.Connecting
+            _connectionState.value = SfuSocketState.Connecting
 
             // step 1 create the socket
             socket = mockSocket ?: createSocket()
@@ -171,8 +172,8 @@ public open class PersistentSocketOld<T>(
         logger.i { "[disconnect]" }
 
         _connectionState.value = when (disconnectReason) {
-            DisconnectReason.ByRequest -> SocketState.DisconnectedByRequest
-            is DisconnectReason.PermanentError -> SocketState.DisconnectedPermanently(disconnectReason.error)
+            DisconnectReason.ByRequest -> SfuSocketState.DisconnectedByRequest
+            is DisconnectReason.PermanentError -> SfuSocketState.DisconnectedPermanently(disconnectReason.error)
         }
 
         connectContinuationCompleted = false
@@ -198,7 +199,7 @@ public open class PersistentSocketOld<T>(
             return
         }
 
-        if (connectionState.value == SocketState.Connecting) {
+        if (connectionState.value == SfuSocketState.Connecting) {
             logger.i { "[reconnect] already connecting" }
             return
         }
@@ -236,7 +237,7 @@ public open class PersistentSocketOld<T>(
     suspend fun onInternetConnected() {
         val state = connectionState.value
         logger.i { "[onNetworkConnected] state: $state" }
-        if (state is SocketState.DisconnectedTemporarily || state == SocketState.NetworkDisconnected) {
+        if (state is SfuSocketState.DisconnectedTemporarily || state == SfuSocketState.NetworkDisconnected) {
             // reconnect instantly when the internet is back
             reconnect(0)
         }
@@ -244,8 +245,8 @@ public open class PersistentSocketOld<T>(
 
     suspend fun onInternetDisconnected() {
         logger.i { "[onNetworkDisconnected] state: $connectionState.value" }
-        if (connectionState.value is SocketState.Connected || connectionState.value is SocketState.Connecting) {
-            _connectionState.value = SocketState.NetworkDisconnected
+        if (connectionState.value is SfuSocketState.Connected || connectionState.value is SfuSocketState.Connecting) {
+            _connectionState.value = SfuSocketState.NetworkDisconnected
         }
     }
 
@@ -282,7 +283,7 @@ public open class PersistentSocketOld<T>(
 
     @OptIn(InternalCoroutinesApi::class)
     protected fun setConnectedStateAndContinue(message: VideoEvent) {
-        _connectionState.value = SocketState.Connected(message)
+        _connectionState.value = SfuSocketState.Connected(message)
 
         if (!connectContinuationCompleted) {
             connectContinuationCompleted = true
@@ -305,7 +306,7 @@ public open class PersistentSocketOld<T>(
         if (permanentError) {
             logger.e { "[handleError] Permanent error: $error" }
 
-            _connectionState.value = SocketState.DisconnectedPermanently(error)
+            _connectionState.value = SfuSocketState.DisconnectedPermanently(error)
 
             // If the connect continuation is not completed, it means the error happened during the connection phase.
             connectContinuationCompleted.not().let { isConnectionPhaseError ->
@@ -319,7 +320,7 @@ public open class PersistentSocketOld<T>(
         } else {
             logger.w { "[handleError] Temporary error: $error" }
 
-            _connectionState.value = SocketState.DisconnectedTemporarily(error)
+            _connectionState.value = SfuSocketState.DisconnectedTemporarily(error)
             scope.launch { reconnect(reconnectTimeout) }
         }
     }
@@ -415,7 +416,7 @@ public open class PersistentSocketOld<T>(
                 logger.i { "health monitor triggered a reconnect" }
 
                 val state = connectionState.value
-                if (state is SocketState.DisconnectedTemporarily) {
+                if (state is SfuSocketState.DisconnectedTemporarily) {
                     this@PersistentSocketOld.reconnect()
                 }
             }
@@ -425,7 +426,7 @@ public open class PersistentSocketOld<T>(
 
                 logger.d { "health monitor ping. Socket state: $state" }
 
-                (state as? SocketState.Connected)?.let {
+                (state as? SfuSocketState.Connected)?.let {
                     sendHealthCheck()
                 }
             }

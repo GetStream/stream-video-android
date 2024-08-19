@@ -53,7 +53,7 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
-import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.buildAudioConstraints
@@ -309,8 +309,8 @@ public class RtcSession internal constructor(
      */
     private var sfuConnectionMigrationModule: SfuConnectionModule? = null
 
-    private val _sfuSocketState = MutableStateFlow<SocketState>(SocketState.NotConnected)
-    val sfuSocketState = _sfuSocketState.asStateFlow()
+    private val _sfuSfuSocketState = MutableStateFlow<SfuSocketState>(SfuSocketState.NotConnected)
+    val sfuSocketState = _sfuSfuSocketState.asStateFlow()
 
     private val sfuFastReconnectListener: suspend () -> Unit = {
         // SFU socket has done a fast-reconnect. We need to an ICE restart immediately and not wait
@@ -485,14 +485,14 @@ public class RtcSession internal constructor(
         // Start listening to connection state on new SFU connection
         sfuSocketStateJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
-                _sfuSocketState.value = sfuSocketState
+                _sfuSfuSocketState.value = sfuSocketState
 
                 // make sure we stop handling ICE candidates when a new SFU socket
                 // connection is being established. We need to wait until a SubscriberOffer
                 // is received again and then we start listening to the ICE candidate queue
-                if (sfuSocketState == SocketState.Connecting ||
-                    sfuSocketState is SocketState.DisconnectedTemporarily ||
-                    sfuSocketState is SocketState.DisconnectedByRequest
+                if (sfuSocketState == SfuSocketState.Connecting ||
+                    sfuSocketState is SfuSocketState.DisconnectedTemporarily ||
+                    sfuSocketState is SfuSocketState.DisconnectedByRequest
                 ) {
                     syncSubscriberCandidates?.cancel()
                     syncSubscriberCandidates?.cancel()
@@ -1769,7 +1769,7 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             sfuConnectionMigrationModule!!.sfuSocket.connectionState.collect { it ->
                 when (it) {
-                    is SocketState.Connected -> {
+                    is SfuSocketState.Connected -> {
                         logger.d { "[switchSfu] Migration SFU socket state changed to Connected" }
                         timer.split("SFU socket connected")
 
@@ -1841,13 +1841,13 @@ public class RtcSession internal constructor(
                         cancel()
                     }
 
-                    is SocketState.DisconnectedPermanently -> {
+                    is SfuSocketState.DisconnectedPermanently -> {
                         logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected permanently ${it.error}" }
                         failedToSwitch()
                         cancel()
                     }
 
-                    is SocketState.DisconnectedTemporarily -> {
+                    is SfuSocketState.DisconnectedTemporarily -> {
                         logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected temporarily ${it.error}" }
                         // We don't wait for the socket to retry during migration
                         // In this case we will fall back to full-reconnect

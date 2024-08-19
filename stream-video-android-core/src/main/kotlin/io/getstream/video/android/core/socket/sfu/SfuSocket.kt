@@ -1,32 +1,35 @@
-/*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
- *
- * Licensed under the Stream License;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package io.getstream.video.android.core.socket.common
+package io.getstream.video.android.core.socket.sfu
 
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
+import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
+import io.getstream.video.android.core.events.SfuDataEvent
+import io.getstream.video.android.core.events.SfuDataRequest
+import io.getstream.video.android.core.events.SfuSocketError
+import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
-import io.getstream.video.android.core.socket.common.VideoSocketStateService.State
+import io.getstream.video.android.core.socket.common.ConnectionConf
+import io.getstream.video.android.core.socket.common.HealthMonitor
+import io.getstream.video.android.core.socket.common.SfuParser
+import io.getstream.video.android.core.socket.common.SocketFactory
+import io.getstream.video.android.core.socket.common.SocketListener
+import io.getstream.video.android.core.socket.common.StreamWebSocket
+import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
+import io.getstream.video.android.core.socket.common.VideoErrorDetail
+import io.getstream.video.android.core.socket.common.fromVideoErrorCode
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenManager
+import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.utils.safeCallWithResult
+import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -34,32 +37,32 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.ConnectionErrorEvent
-import org.openapitools.client.models.HealthCheckEvent
-import org.openapitools.client.models.VideoEvent
+import stream.video.sfu.models.WebsocketReconnectStrategy
+import java.util.UUID
 import kotlin.coroutines.EmptyCoroutineContext
 
-@Suppress("TooManyFunctions", "LongParameterList")
-internal open class VideoSocket(
-    private val apiKey: String,
+internal open class SfuSocket(
     private val wssUrl: String,
+    private val apiKey: ApiKey,
     private val tokenManager: TokenManager,
-    private val socketFactory: SocketFactory,
+    private val socketFactory: SocketFactory<SfuDataRequest, SfuParser, ConnectionConf.SfuConnectionConf>,
     private val userScope: UserScope,
     private val lifecycleObserver: StreamLifecycleObserver,
     private val networkStateProvider: NetworkStateProvider,
 ) {
-    private var streamWebSocket: StreamWebSocket? = null
+    private var streamWebSocket: StreamWebSocket<SfuDataRequest, SfuParser>? = null
     open val logger by taggedLogger(TAG)
-    private var connectionConf: SocketFactory.ConnectionConf? = null
-    private val listeners = mutableSetOf<SocketListener<VideoEvent>>()
-    private val videoSocketStateService = VideoSocketStateService()
+    private val socketId = safeCallWithResult { UUID.randomUUID().toString() }
+    private var connectionConf: ConnectionConf.SfuConnectionConf? = null
+    private val listeners = mutableSetOf<SocketListener<SfuDataEvent, JoinCallResponseEvent>>()
+    private val videoSocketStateService = SfuSocketStateService()
     private var socketStateObserverJob: Job? = null
     private val healthMonitor = HealthMonitor(
         userScope = userScope,
         checkCallback = {
-            (videoSocketStateService.currentState as? State.Connected)?.event?.let(::sendEvent)
+            (videoSocketStateService.currentState as? SfuSocketState.Connected)?.event.let {
+
+            }
         },
         reconnectCallback = { videoSocketStateService.onWebSocketEventLost() },
     )
@@ -69,9 +72,10 @@ internal open class VideoSocket(
         }
 
         override suspend fun stopped() {
-            videoSocketStateService.onStop()
+            logger.d { "[stopped] lifecycle stopped" }
         }
     }
+
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             videoSocketStateService.onNetworkAvailable()
@@ -86,26 +90,24 @@ internal open class VideoSocket(
     private fun observeSocketStateService(): Job {
         var socketListenerJob: Job? = null
 
-        suspend fun connectUser(connectionConf: SocketFactory.ConnectionConf) {
+        suspend fun connectUser(connectionConf: ConnectionConf.SfuConnectionConf) {
             logger.d { "[connectUser] connectionConf: $connectionConf" }
             userScope.launch { startObservers() }
             this.connectionConf = connectionConf
             socketListenerJob?.cancel()
             when (networkStateProvider.isConnected()) {
                 true -> {
-                    streamWebSocket = socketFactory.createSocket(connectionConf).apply {
+                    streamWebSocket = socketFactory.createSocket<SfuDataEvent>(connectionConf).apply {
                         listeners.forEach { it.onCreated() }
 
                         socketListenerJob = listen().onEach {
                             when (it) {
-                                is StreamWebSocketEvent.Error -> handleError(it.streamError)
-                                is StreamWebSocketEvent.Message -> when (
-                                    val event =
-                                        it.videoEvent
-                                ) {
-                                    is ConnectionErrorEvent -> handleError(event.toNetworkError())
+                                is StreamWebSocketEvent.Error -> handleError(it)
+                                is StreamWebSocketEvent.SfuMessage -> when (val event = it.sfuEvent) {
+                                    is ErrorEvent -> handleError(event.toNetworkError())
                                     else -> handleEvent(event)
                                 }
+                                else -> {handleEvent(UnknownEvent(it))}
                             }
                         }.launchIn(userScope)
                     }
@@ -115,71 +117,62 @@ internal open class VideoSocket(
             }
         }
 
-        suspend fun reconnect(connectionConf: SocketFactory.ConnectionConf) {
+        suspend fun reconnect(connectionConf: ConnectionConf.SfuConnectionConf) {
             logger.d { "[reconnect] connectionConf: $connectionConf" }
-            connectUser(connectionConf.asReconnectionConf())
+            connectUser(connectionConf)
         }
 
         return userScope.launch {
             videoSocketStateService.observer { state ->
                 logger.i { "[onSocketStateChanged] state: $state" }
                 when (state) {
-                    is State.RestartConnection -> {
+                    is SfuSocketState.RestartConnection -> {
                         connectionConf?.let { videoSocketStateService.onReconnect(it, false) }
                             ?: run {
                                 logger.e { "[onSocketStateChanged] #reconnect; connectionConf is null" }
                             }
                     }
 
-                    is State.Connected -> {
+                    is SfuSocketState.Connected -> {
                         healthMonitor.ack()
                         callListeners { listener -> listener.onConnected(state.event) }
                     }
 
-                    is State.Connecting -> {
+                    is SfuSocketState.Connecting -> {
                         callListeners { listener -> listener.onConnecting() }
-                        when (state.connectionType) {
-                            VideoSocketStateService.ConnectionType.INITIAL_CONNECTION ->
-                                connectUser(state.connectionConf)
-
-                            VideoSocketStateService.ConnectionType.AUTOMATIC_RECONNECTION ->
-                                reconnect(state.connectionConf.asReconnectionConf())
-
-                            VideoSocketStateService.ConnectionType.FORCE_RECONNECTION ->
-                                reconnect(state.connectionConf.asReconnectionConf())
-                        }
+                        connectUser(state.connectionConf)
                     }
 
-                    is State.Disconnected -> {
+                    is SfuSocketState.Disconnected -> {
                         when (state) {
-                            is State.Disconnected.DisconnectedByRequest -> {
+                            is SfuSocketState.Disconnected.DisconnectedByRequest -> {
                                 streamWebSocket?.close()
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
 
-                            is State.Disconnected.NetworkDisconnected -> {
+                            is SfuSocketState.Disconnected.NetworkDisconnected -> {
                                 streamWebSocket?.close()
                                 healthMonitor.stop()
                             }
 
-                            is State.Disconnected.Stopped -> {
+                            is SfuSocketState.Disconnected.Stopped -> {
                                 streamWebSocket?.close()
                                 healthMonitor.stop()
                                 disposeNetworkStateObserver()
                             }
 
-                            is State.Disconnected.DisconnectedPermanently -> {
+                            is SfuSocketState.Disconnected.DisconnectedPermanently -> {
                                 streamWebSocket?.close()
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
 
-                            is State.Disconnected.DisconnectedTemporarily -> {
+                            is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
                                 healthMonitor.onDisconnected()
                             }
 
-                            is State.Disconnected.WebSocketEventLost -> {
+                            is SfuSocketState.Disconnected.WebSocketEventLost -> {
                                 streamWebSocket?.close()
                                 connectionConf?.let {
                                     videoSocketStateService.onReconnect(
@@ -196,15 +189,12 @@ internal open class VideoSocket(
         }
     }
 
-    suspend fun connectUser(user: User, isAnonymous: Boolean) {
-        logger.d { "[connectUser] user.id: ${user.id}, isAnonymous: $isAnonymous" }
+    suspend fun connect(user: User) {
+        logger.d { "[connect] user.id: ${user.id}" }
         socketStateObserverJob?.cancel()
         socketStateObserverJob = observeSocketStateService()
         videoSocketStateService.onConnect(
-            when (isAnonymous) {
-                true -> SocketFactory.ConnectionConf.AnonymousConnectionConf(wssUrl, apiKey, user)
-                false -> SocketFactory.ConnectionConf.UserConnectionConf(wssUrl, apiKey, user)
-            },
+            ConnectionConf.SfuConnectionConf(wssUrl, apiKey, user, tokenManager.getToken())
         )
     }
 
@@ -214,11 +204,13 @@ internal open class VideoSocket(
         videoSocketStateService.onRequiredDisconnect()
     }
 
-    private suspend fun handleEvent(chatEvent: VideoEvent) {
-        when (chatEvent) {
-            is ConnectedEvent -> videoSocketStateService.onConnectionEstablished(chatEvent)
-            is HealthCheckEvent -> healthMonitor.ack()
-            else -> callListeners { listener -> listener.onEvent(chatEvent) }
+    private suspend fun handleEvent(sfuEvent: SfuDataEvent) {
+        when (sfuEvent) {
+            is JoinCallResponseEvent -> videoSocketStateService.onConnectionEstablished(sfuEvent)
+            is SFUHealthCheckEvent -> {
+                healthMonitor.ack()
+            }
+            else -> callListeners { listener -> listener.onEvent(sfuEvent) }
         }
     }
 
@@ -236,15 +228,15 @@ internal open class VideoSocket(
         networkStateProvider.unsubscribe(networkStateListener)
     }
 
-    private suspend fun handleError(error: Error) {
+    private suspend fun handleError(error: StreamWebSocketEvent.Error) {
         logger.e { "[handleError] error: $error" }
-        when (error) {
-            is Error.NetworkError -> onVideoNetworkError(error)
+        when (error.streamError) {
+            is Error.NetworkError -> onVideoNetworkError(error.streamError, error.reconnectStrategy)
             else -> callListeners { it.onError(error) }
         }
     }
 
-    private suspend fun onVideoNetworkError(error: Error.NetworkError) {
+    private suspend fun onVideoNetworkError(error: Error.NetworkError, reconnectStrategy: WebsocketReconnectStrategy?) {
         if (VideoErrorCode.isAuthenticationError(error.serverErrorCode)) {
             tokenManager.expireToken()
         }
@@ -261,21 +253,23 @@ internal open class VideoSocket(
                 videoSocketStateService.onUnrecoverableError(error)
             }
 
-            else -> videoSocketStateService.onNetworkError(error)
+            else -> videoSocketStateService.onNetworkError(error, reconnectStrategy ?: WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED)
         }
     }
 
-    fun removeListener(listener: SocketListener<VideoEvent>) {
+    fun removeListener(listener: SocketListener<SfuDataEvent, JoinCallResponseEvent>) {
         synchronized(listeners) {
             listeners.remove(listener)
         }
     }
 
-    fun addListener(listener: SocketListener<VideoEvent>) {
+    fun addListener(listener: SocketListener<SfuDataEvent, JoinCallResponseEvent>) {
         synchronized(listeners) {
             listeners.add(listener)
         }
     }
+
+    fun state() = videoSocketStateService.currentStateFlow
 
     /**
      * Attempt to send [event] to the web socket connection.
@@ -283,25 +277,41 @@ internal open class VideoSocket(
      *
      * @see [okhttp3.WebSocket.send]
      */
-    internal fun sendEvent(event: VideoEvent): Boolean = streamWebSocket?.send(event) ?: false
+    /**
+     * Attempt to send [event] to the web socket connection.
+     * Returns true only if socket is connected and [okhttp3.WebSocket.send] returns true, otherwise false
+     *
+     * @see [okhttp3.WebSocket.send]
+     */
+    internal fun sendEvent(event: SfuDataRequest): Boolean = streamWebSocket?.send(event) ?: false
 
-    internal fun isConnected(): Boolean = videoSocketStateService.currentState is State.Connected
+    internal fun isConnected(): Boolean = videoSocketStateService.currentState is SfuSocketState.Connected
 
     /**
-     * Awaits until [State.Connected] is set.
+     * Awaits until [VideoSocketState.Connected] is set.
+     *
+     * @param timeoutInMillis Timeout time in milliseconds.
+     */
+    /**
+     * Awaits until [VideoSocketState.Connected] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     internal suspend fun awaitConnection(timeoutInMillis: Long = DEFAULT_CONNECTION_TIMEOUT) {
-        awaitState<State.Connected>(timeoutInMillis)
+        awaitState<VideoSocketState.Connected>(timeoutInMillis)
     }
 
     /**
-     * Awaits until specified [State] is set.
+     * Awaits until specified [VideoSocketState] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
-    internal suspend inline fun <reified T : State> awaitState(timeoutInMillis: Long) {
+    /**
+     * Awaits until specified [VideoSocketState] is set.
+     *
+     * @param timeoutInMillis Timeout time in milliseconds.
+     */
+    internal suspend inline fun <reified T : VideoSocketState> awaitState(timeoutInMillis: Long) {
         withTimeout(timeoutInMillis) {
             videoSocketStateService.currentStateFlow.first { it is T }
         }
@@ -310,9 +320,12 @@ internal open class VideoSocket(
     /**
      * Get connection id of this connection.
      */
+    /**
+     * Get connection id of this connection.
+     */
     internal fun connectionIdOrError(): String =
         when (val state = videoSocketStateService.currentState) {
-            is State.Connected -> state.event.connectionId
+            is SfuSocketState.Connected -> socketId.getOrNull() ?: "st-aee7a458-7452-4b1d-9eef-3d4309167d1c"
             else -> error("This state doesn't contain connectionId")
         }
 
@@ -321,15 +334,12 @@ internal open class VideoSocket(
             "[reconnectUser] user.id: ${user.id}, isAnonymous: $isAnonymous, forceReconnection: $forceReconnection"
         }
         videoSocketStateService.onReconnect(
-            when (isAnonymous) {
-                true -> SocketFactory.ConnectionConf.AnonymousConnectionConf(wssUrl, apiKey, user)
-                false -> SocketFactory.ConnectionConf.UserConnectionConf(wssUrl, apiKey, user)
-            },
-            forceReconnection,
+            ConnectionConf.SfuConnectionConf(wssUrl, apiKey, user, tokenManager.getToken()),
+            forceReconnection
         )
     }
 
-    private fun callListeners(call: (SocketListener<VideoEvent>) -> Unit) {
+    private fun callListeners(call: (SocketListener<SfuDataEvent, JoinCallResponseEvent>) -> Unit) {
         synchronized(listeners) {
             listeners.forEach { listener ->
                 val context = if (listener.deliverOnMainThread) {
@@ -342,61 +352,31 @@ internal open class VideoSocket(
         }
     }
 
-    private val State.Disconnected.cause
+    private val SfuSocketState.Disconnected.cause
         get() = when (this) {
-            is State.Disconnected.DisconnectedByRequest,
-            is State.Disconnected.Stopped,
+            is SfuSocketState.Disconnected.DisconnectedByRequest,
+            is SfuSocketState.Disconnected.Stopped,
             -> DisconnectCause.ConnectionReleased
 
-            is State.Disconnected.NetworkDisconnected -> DisconnectCause.NetworkNotAvailable
-            is State.Disconnected.DisconnectedPermanently -> DisconnectCause.UnrecoverableError(
+            is SfuSocketState.Disconnected.NetworkDisconnected -> DisconnectCause.NetworkNotAvailable
+            is SfuSocketState.Disconnected.DisconnectedPermanently -> DisconnectCause.UnrecoverableError(
                 error,
             )
 
-            is State.Disconnected.DisconnectedTemporarily -> DisconnectCause.Error(error)
-            is State.Disconnected.WebSocketEventLost -> DisconnectCause.WebSocketNotAvailable
+            is SfuSocketState.Disconnected.DisconnectedTemporarily -> DisconnectCause.Error(error)
+            is SfuSocketState.Disconnected.WebSocketEventLost -> DisconnectCause.WebSocketNotAvailable
         }
 
-    private fun ConnectionErrorEvent.toNetworkError(): Error.NetworkError {
-        return error?.let {
-            return Error.NetworkError(
-                message = it.message + moreInfoTemplate(it.moreInfo) + buildDetailsTemplate(
-                    it.details.map { code ->
-                        VideoErrorDetail(code, listOf(""))
-                    },
-                ),
-                serverErrorCode = it.code,
-                statusCode = it.statusCode,
+    private fun ErrorEvent.toNetworkError(): StreamWebSocketEvent.Error {
+        val error = error?.let {
+            Error.NetworkError(
+                message = it.message,
+                serverErrorCode = it.code.value,
+                statusCode = it.code.value,
             )
         } ?: Error.NetworkError.fromVideoErrorCode(VideoErrorCode.NO_ERROR_BODY, cause = null)
+        return StreamWebSocketEvent.Error(error, reconnectStrategy)
     }
-
-    private fun moreInfoTemplate(moreInfo: String): String {
-        return if (moreInfo.isNotBlank()) {
-            "\nMore information available at $moreInfo"
-        } else {
-            ""
-        }
-    }
-
-    private fun buildDetailsTemplate(details: List<VideoErrorDetail>): String {
-        return if (details.isNotEmpty()) {
-            "\nError details: $details"
-        } else {
-            ""
-        }
-    }
-
-    /**
-     * The error detail.
-     *
-     * @property code The error code.
-     * @property messages The error messages.
-     */
-    public data class VideoErrorDetail(
-        public val code: Int,
-        public val messages: List<String>,
-    )
 
     companion object {
         private const val TAG = "Video:Socket"

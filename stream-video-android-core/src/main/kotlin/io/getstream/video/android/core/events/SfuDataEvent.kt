@@ -20,6 +20,7 @@ import io.getstream.video.android.model.UserAudioLevel
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
+import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.CallGrants
 import stream.video.sfu.models.CallState
 import stream.video.sfu.models.Error
@@ -32,6 +33,12 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 public sealed class SfuDataEvent : VideoEvent() {
     override fun getEventType(): String {
         return "SfuDataEvent"
+    }
+}
+
+public data class SfuDataRequest(val sfuRequest: SfuRequest) : SfuDataEvent() {
+    override fun getEventType(): String {
+        return "SfuDataRequest"
     }
 }
 
@@ -131,7 +138,8 @@ public data class PinUpdate(val userId: String, val sessionId: String)
 
 public data class UnknownEvent(val event: Any?) : SfuDataEvent()
 
-public data class ErrorEvent(val error: Error?, val reconnectStrategy: WebsocketReconnectStrategy) : SfuDataEvent()
+public data class ErrorEvent(val error: Error?, val reconnectStrategy: WebsocketReconnectStrategy) :
+    SfuDataEvent()
 
 public class SfuSocketError(val error: Error?) : Throwable() {
     override val message: String?

@@ -18,26 +18,26 @@ package io.getstream.video.android.core.socket.common
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo.Companion.buildSdkTrackingHeaders
-import io.getstream.video.android.model.User
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.openapitools.client.models.VideoEvent
 import java.io.UnsupportedEncodingException
 
-internal class SocketFactory(
-    private val parser: VideoParser,
+internal class SocketFactory<V, P : GenericParser<V>, C: ConnectionConf>(
+    private val parser: P,
     private val httpClient: OkHttpClient = OkHttpClient(),
 ) {
     private val logger by taggedLogger("Video:SocketFactory")
 
     @Throws(UnsupportedEncodingException::class)
-    fun createSocket(connectionConf: ConnectionConf): StreamWebSocket {
+    fun <T: VideoEvent> createSocket(connectionConf: C): StreamWebSocket<V, P> {
         val request = buildRequest(connectionConf)
         logger.i { "[createSocket] new web socket: ${request.url}" }
         return StreamWebSocket(parser) { httpClient.newWebSocket(request, it) }
     }
 
     @Throws(UnsupportedEncodingException::class)
-    private fun buildRequest(connectionConf: ConnectionConf): Request =
+    private fun buildRequest(connectionConf: C): Request =
         Request.Builder()
             .url(connectionConf.endpoint)
             .addHeader("Connection", "Upgrade")
@@ -45,31 +45,4 @@ internal class SocketFactory(
             .addHeader("X-Stream-Client", buildSdkTrackingHeaders())
             .build()
 
-    internal sealed class ConnectionConf {
-        var isReconnection: Boolean = false
-            private set
-        abstract val endpoint: String
-        abstract val apiKey: String
-        abstract val user: User
-
-        data class AnonymousConnectionConf(
-            override val endpoint: String,
-            override val apiKey: String,
-            override val user: User,
-        ) : ConnectionConf()
-
-        data class UserConnectionConf(
-            override val endpoint: String,
-            override val apiKey: String,
-            override val user: User,
-        ) : ConnectionConf()
-
-        internal fun asReconnectionConf(): ConnectionConf = this.also { isReconnection = true }
-
-        internal val id: String
-            get() = when (this) {
-                is AnonymousConnectionConf -> "!anon"
-                is UserConnectionConf -> user.id
-            }
-    }
 }

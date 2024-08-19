@@ -46,7 +46,7 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
-import io.getstream.video.android.core.socket.SocketState
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
@@ -173,7 +173,7 @@ internal class StreamVideoImpl internal constructor(
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
 
-    val socketImpl = connectionModule.coordinatorSocket
+    val socketImpl = connectionModule.coordinatorSocketConnection
 
     fun onCallCleanUp(call: Call) {
         calls.remove(call.cid)
@@ -296,36 +296,36 @@ internal class StreamVideoImpl internal constructor(
     }
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
-        connectionModule.coordinatorSocket.connect(user)
+        connectionModule.coordinatorSocketConnection.connect(user)
     }
 
     init {
 
         // listen to socket events and errors
         scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
-            connectionModule.coordinatorSocket.events().collect {
+            connectionModule.coordinatorSocketConnection.events().collect {
                 fireEvent(it)
             }
         }
         scope.launch {
-            connectionModule.coordinatorSocket.state().collect {
+            connectionModule.coordinatorSocketConnection.state().collect {
                 state.handleState(it)
             }
         }
 
         scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
-            connectionModule.coordinatorSocket.errors().collect { error ->
+            connectionModule.coordinatorSocketConnection.errors().collect { error ->
                 state.handleError(error)
             }
         }
 
         scope.launch(CoroutineName("init#coordinatorSocket.connectionState.collect")) {
-            connectionModule.coordinatorSocket.state().collect { it ->
+            connectionModule.coordinatorSocketConnection.state().collect { it ->
                 // If the socket is reconnected then we have a new connection ID.
                 // We need to re-watch every watched call with the new connection ID
                 // (otherwise the WS events will stop)
                 val watchedCalls = calls
-                if (it is SocketState.Connected && watchedCalls.isNotEmpty()) {
+                if (it is SfuSocketState.Connected && watchedCalls.isNotEmpty()) {
                     val filter = Filters.`in`("cid", watchedCalls.values.map { it.cid }).toMap()
                     queryCalls(filters = filter, watch = true).also {
                         if (it is Failure) {
@@ -588,7 +588,7 @@ internal class StreamVideoImpl internal constructor(
         // if we jump right into the call from a deep link and we connect the call quickly.
         // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
-        return connectionModule.coordinatorSocket.connectionId().first()
+        return connectionModule.coordinatorSocketConnection.connectionId().first()
     }
 
     internal suspend fun inviteUsers(

@@ -45,10 +45,10 @@ turbine = "0.13.0"
 itu = "1.7.3"
 
 streamWebRTC = "1.1.2"
-streamResult = "1.1.0"
+streamResult = "1.2.0"
 streamChat = "6.0.13"
 streamLog = "1.1.4"
-streamPush = "1.1.7"
+streamPush = "1.1.8"
 
 androidxTest = "1.5.2"
 androidxTestCore = "1.5.0"

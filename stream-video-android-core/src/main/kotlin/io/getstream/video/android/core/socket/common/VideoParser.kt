@@ -21,14 +21,120 @@ import io.getstream.chat.android.client.socket.ErrorResponse
 import io.getstream.log.StreamLog
 import io.getstream.result.Error
 import io.getstream.result.Result
+import io.getstream.result.extractCause
+import io.getstream.result.recover
+import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.errors.VideoErrorCode
+import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.SfuDataEvent
+import io.getstream.video.android.core.events.SfuDataRequest
 import okhttp3.Response
 import okhttp3.ResponseBody
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import org.openapitools.client.models.VideoEvent
 import retrofit2.Retrofit
+import stream.video.sfu.event.SfuEvent
+import stream.video.sfu.event.SfuRequest
+import stream.video.sfu.models.WebsocketReconnectStrategy
 
-internal interface VideoParser {
+internal interface GenericParser<E> {
+    /** Encodes the given object into a ByteString. */
+    fun encode(event: E) : ByteString
 
-    private val tag: String get() = "Video:ChatParser"
+    /** Decodes the given [raw] [ByteArray] into an object of type [T]. */
+    fun decodeOrError(raw: ByteArray): Result<StreamWebSocketEvent>
+}
+
+internal interface SfuParser: GenericParser<SfuDataRequest> {
+
+    private val tag: String get() = "Video:SfuParser"
+    override fun encode(event: SfuDataRequest): ByteString {
+        return event.sfuRequest.encodeByteString()
+    }
+
+    override fun decodeOrError(raw: ByteArray): Result<StreamWebSocketEvent> {
+        try {
+            val event = SfuEvent.ADAPTER.decode(raw)
+            if (event.error != null) {
+                val errorEvent = RTCEventMapper.mapEvent(event)
+                return toError(errorEvent as ErrorEvent)
+            }
+            return Result.Success(StreamWebSocketEvent.SfuMessage(RTCEventMapper.mapEvent(event)))
+        } catch (e: Exception) {
+            val error = Error.NetworkError.fromVideoErrorCode(
+                VideoErrorCode.UNABLE_TO_PARSE_SOCKET_EVENT,
+                cause = e
+            )
+            return Result.Failure(error)
+        }
+    }
+
+    fun toError(errorEvent: ErrorEvent?): Result<StreamWebSocketEvent> {
+        if (errorEvent != null) {
+            val serverError = errorEvent.error
+            val streamError = serverError?.let {
+                Error.NetworkError(
+                    message = it.message,
+                    statusCode = it.code.value,
+                    serverErrorCode = it.code.value,
+                )
+            } ?: let {
+                Error.NetworkError.fromVideoErrorCode(VideoErrorCode.UNABLE_TO_PARSE_SOCKET_EVENT)
+            }
+            val reconnectStrategy = errorEvent.reconnectStrategy
+            return Result.Success(StreamWebSocketEvent.Error(streamError, reconnectStrategy))
+        } else {
+            StreamLog.e(tag) { "[toError] failed" }
+            val error = Error.NetworkError.fromVideoErrorCode(VideoErrorCode.CANT_PARSE_EVENT)
+            return Result.Success(StreamWebSocketEvent.Error(error, WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED))
+        }
+    }
+}
+
+
+internal interface VideoParser : GenericParser<VideoEvent> {
+
+    private val tag: String get() = "Video:VideoParser"
+
+    override fun encode(event: VideoEvent): ByteString {
+        val json = toJson(event)
+        return json.encodeToByteArray().toByteString()
+    }
+
+    override fun decodeOrError(raw: ByteArray): Result<StreamWebSocketEvent> {
+        val text = raw.toString()
+        val event = fromJsonOrError(text, VideoEvent::class.java)
+            .map { StreamWebSocketEvent.VideoMessage(it) }
+            .recover { parseChatError ->
+                val errorResponse =
+                    when (
+                        val chatErrorResult = fromJsonOrError(
+                            text,
+                            SocketErrorMessage::class.java,
+                        )
+                    ) {
+                        is Result.Success -> {
+                            chatErrorResult.value.error
+                        }
+                        is Result.Failure -> null
+                    }
+                StreamWebSocketEvent.Error(
+                    errorResponse?.let {
+                        Error.NetworkError(
+                            message = it.message,
+                            statusCode = it.statusCode,
+                            serverErrorCode = it.code,
+                        )
+                    } ?: Error.NetworkError.fromVideoErrorCode(
+                        videoErrorCode = VideoErrorCode.CANT_PARSE_EVENT,
+                        cause = parseChatError.extractCause(),
+                    ),
+                )
+            }.value
+
+        return Result.Success(event)
+    }
 
     fun toJson(any: Any): String
     fun <T : Any> fromJson(raw: String, clazz: Class<T>): T
@@ -78,26 +184,6 @@ internal interface VideoParser {
                 videoErrorCode = VideoErrorCode.NETWORK_FAILED,
                 cause = expected,
                 statusCode = statusCode,
-            )
-        }
-    }
-
-    fun toError(errorResponseBody: ResponseBody): Error.NetworkError {
-        return try {
-            val errorResponse: ErrorResponse =
-                fromJson(errorResponseBody.string(), ErrorResponse::class.java)
-            val (code, message, statusCode, _, moreInfo) = errorResponse
-
-            Error.NetworkError(
-                serverErrorCode = code,
-                message = message + moreInfoTemplate(moreInfo),
-                statusCode = statusCode,
-            )
-        } catch (expected: Throwable) {
-            StreamLog.e(tag, expected) { "[toError] failed" }
-            Error.NetworkError.fromVideoErrorCode(
-                videoErrorCode = VideoErrorCode.NETWORK_FAILED,
-                cause = expected,
             )
         }
     }

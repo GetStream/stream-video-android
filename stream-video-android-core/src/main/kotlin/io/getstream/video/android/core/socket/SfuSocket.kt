@@ -28,6 +28,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.IceCandidate
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -108,11 +109,11 @@ public class SfuSocket(
     init {
         scope.launch {
             connectionState.collect {
-                if (it is SocketState.Connected) {
+                if (it is SfuSocketState.Connected) {
                     lastDisconnectTime = null
-                } else if (it is SocketState.DisconnectedTemporarily ||
-                    it is SocketState.DisconnectedByRequest ||
-                    it is SocketState.DisconnectedPermanently
+                } else if (it is SfuSocketState.DisconnectedTemporarily ||
+                    it is SfuSocketState.DisconnectedByRequest ||
+                    it is SfuSocketState.DisconnectedPermanently
                 ) {
                     lastDisconnectTime = System.currentTimeMillis()
                 }

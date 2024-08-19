@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.socket
+package io.getstream.video.android.core.socket.coordinator
 
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
-import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
@@ -26,13 +25,14 @@ import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.VideoParser
-import io.getstream.video.android.core.socket.common.VideoSocket
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
+import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.User.Companion.isAnonymous
@@ -47,8 +47,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import org.openapitools.client.models.ConnectUserDetailsRequest
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.WSAuthMessageRequest
 
 /**
  * PersistentSocket architecture
@@ -59,10 +61,14 @@ import org.openapitools.client.models.VideoEvent
  * - Flow to avoid concurrency related bugs
  * - Ability to wait till the socket is connected (important to prevent race conditions)
  */
-public open class PersistentSocket(
+public open class CoordinatorSocketConnection(
     private val apiKey: ApiKey,
     /** The URL to connect to */
     private val url: String,
+    /** The  user to connect. */
+    private val user: User,
+    /** The initial token. */
+    private val token: String,
     /** Inject your http client */
     private val httpClient: OkHttpClient,
     /** Inject your network state provider */
@@ -73,7 +79,7 @@ public open class PersistentSocket(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
-) : SocketListener<VideoEvent>() {
+) : SocketListener<VideoEvent, ConnectedEvent>() {
     companion object {
         internal const val DEFAULT_COORDINATOR_SOCKET_TIMEOUT: Long = 10000L
     }
@@ -83,7 +89,7 @@ public open class PersistentSocket(
     private val tokenManager = TokenManagerImpl()
 
     // Internal state
-    internal open val logger by taggedLogger("Video:Socket")
+    private val logger by taggedLogger("Video:Socket")
     private val errors: MutableSharedFlow<StreamWebSocketEvent.Error> = MutableSharedFlow(
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
         replay = 1,
@@ -95,8 +101,7 @@ public open class PersistentSocket(
         extraBufferCapacity = 100,
     )
     private val connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val state: MutableStateFlow<SocketState> = MutableStateFlow(SocketState.NotConnected)
-    private val internalSocket = VideoSocket(
+    private val internalSocket = CoordinatorSocket(
         apiKey,
         url,
         tokenManager,
@@ -111,6 +116,8 @@ public open class PersistentSocket(
         it.addListener(this)
     }
 
+    private val state: StateFlow<VideoSocketState> = internalSocket.state()
+
     // Init
     init {
         tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
@@ -120,6 +127,25 @@ public open class PersistentSocket(
     override fun onCreated() {
         super.onCreated()
         logger.d { "[onCreated] Socket is created" }
+        scope.launch {
+            logger.d { "[onConnected] Video socket connected, user: $user" }
+            if (token.isEmpty()) {
+                logger.e { "[onConnected] Token is empty. Disconnecting." }
+                disconnect()
+            } else {
+                val authRequest = WSAuthMessageRequest(
+                    token = token,
+                    userDetails = ConnectUserDetailsRequest(
+                        id = user.id,
+                        name = user.name.takeUnless { it.isWhitespaceOnly() },
+                        image = user.image.takeUnless { it.isWhitespaceOnly() },
+                        custom = user.custom,
+                    ),
+                )
+                logger.d { "[onConnected] Sending auth request: $authRequest" }
+                sendEvent(authRequest)
+            }
+        }
     }
 
     override fun onConnecting() {
@@ -144,10 +170,10 @@ public open class PersistentSocket(
         }
     }
 
-    override fun onError(error: Error) {
+    override fun onError(error: StreamWebSocketEvent.Error) {
         super.onError(error)
         logger.e { "[onError] Socket error: $error" }
-        val emit = errors.tryEmit(StreamWebSocketEvent.Error(error))
+        val emit = errors.tryEmit(error)
         if (!emit) {
             logger.e { "[onError] Failed to emit error: $error" }
         }
@@ -184,7 +210,7 @@ public open class PersistentSocket(
     /**
      * State of the socket as [StateFlow]
      */
-    public fun state(): StateFlow<SocketState> = state
+    public fun state(): StateFlow<VideoSocketState> = state
 
     /**
      * Socket events as [Flow]
@@ -194,17 +220,23 @@ public open class PersistentSocket(
     /**
      * Socket errors as [Flow]
      */
-    public fun errors(): Flow<Error> = errors.map { it.streamError }
+    public fun errors(): Flow<StreamWebSocketEvent.Error> = errors
 
     /**
      * Send event to the socket.
      */
     public suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
+    /**
+     * Connect the user.
+     */
     public suspend fun connect(user: User) {
         internalSocket.connectUser(user, user.isAnonymous())
     }
 
+    /**
+     * Reconnect the user to the socket.
+     */
     public suspend fun reconnect(user: User, force: Boolean = false) {
         internalSocket.reconnectUser(user, user.isAnonymous(), force)
     }

@@ -20,11 +20,10 @@ import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.SocketTestBase
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.CoordinatorSocket
-import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SfuSocket
-import io.getstream.video.android.core.socket.SocketState
-import io.getstream.video.android.core.socket.SocketState.Connected
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState.Connected
+import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
@@ -40,8 +39,8 @@ import org.robolectric.RobolectricTestRunner
 /**
  * Test coverage for the sockets
  *
- * @see PersistentSocket
- * @see CoordinatorSocket
+ * @see CoordinatorSocketConnection
+ * @see CoordinatorSocketConnection
  * @see SfuSocket
  *
  * The socket does a few things
@@ -61,13 +60,13 @@ import org.robolectric.RobolectricTestRunner
  */
 
 @RunWith(RobolectricTestRunner::class)
-class CoordinatorSocketTest : SocketTestBase() {
+class CoordinatorSocketConnectionTest : SocketTestBase() {
 
     @Test
     fun `coordinator - connect the socket`() = runTest {
         val mockNetworkStateProvider = mockk<NetworkStateProvider>()
         every { mockNetworkStateProvider.isConnected() } returns true
-        val socket = CoordinatorSocket(
+        val socket = CoordinatorSocketConnection(
             coordinatorUrl,
             testData.users["thierry"]!!,
             authData?.token!!,
@@ -87,7 +86,7 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     @Ignore
     fun `coordinator - an expired socket should be refreshed using the token provider`() = runTest {
-        val socket = CoordinatorSocket(
+        val socket = CoordinatorSocketConnection(
             coordinatorUrl,
             testData.users["thierry"]!!,
             testData.expiredToken,
@@ -105,7 +104,7 @@ class CoordinatorSocketTest : SocketTestBase() {
 
     @Test
     fun `coordinator - a permanent error shouldn't be retried`() = runTest {
-        val socket = CoordinatorSocket(
+        val socket = CoordinatorSocketConnection(
             coordinatorUrl,
             testData.users["thierry"]!!,
             "invalid token",
@@ -123,7 +122,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         val connectionStateItem = connectionState.awaitItem()
 
         assertThat(socket.reconnectionAttempts).isEqualTo(0)
-        assertThat(connectionStateItem).isInstanceOf(SocketState.Connecting::class.java)
+        assertThat(connectionStateItem).isInstanceOf(SfuSocketState.Connecting::class.java)
     }
 
     @Test
@@ -132,7 +131,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         // mock the actual socket connection
         val mockedNetworkStateProvider = mockk<NetworkStateProvider>(relaxed = true)
         every { mockedNetworkStateProvider.isConnected() } returns true
-        val socket = CoordinatorSocket(
+        val socket = CoordinatorSocketConnection(
             coordinatorUrl,
             testData.users["thierry"]!!,
             authData?.token!!,
@@ -152,7 +151,7 @@ class CoordinatorSocketTest : SocketTestBase() {
         job2.join()
         // complete the connection (which should fail)
         delay(10) // timeout is 500ms by default
-        socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
+        socket.disconnect(CoordinatorSocketConnection.DisconnectReason.ByRequest)
 
         assertThat(socket.reconnectionAttempts).isEqualTo(1)
     }
@@ -160,7 +159,7 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     fun `going offline should temporarily disconnect`() = runTest {
         // mock the actual socket connection
-        val socket = CoordinatorSocket(
+        val socket = CoordinatorSocketConnection(
             coordinatorUrl,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
@@ -186,7 +185,7 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     fun `wrong formatted VideoEventType is ignored`() = runTest {
         // mock the actual socket connection
-        val socket = CoordinatorSocket(
+        val socket = CoordinatorSocketConnection(
             coordinatorUrl,
             testData.users["thierry"]!!,
             authData?.token!!,
@@ -208,7 +207,7 @@ class CoordinatorSocketTest : SocketTestBase() {
     @Test
     fun `wrong formatted error in VideoEventType is ignored`() = runTest {
         // mock the actual socket connection
-        val socket = CoordinatorSocket(
+        val socket = CoordinatorSocketConnection(
             coordinatorUrl,
             testData.users["thierry"]!!,
             authData?.token!!,
@@ -247,7 +246,7 @@ class SfuSocketTest : SocketTestBase() {
             }
 
             delay(1000)
-            socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
+            socket.disconnect(CoordinatorSocketConnection.DisconnectReason.ByRequest)
             job.cancel()
             job2.cancel()
         }
@@ -321,6 +320,6 @@ class SfuSocketTest : SocketTestBase() {
         assertThat(socket.reconnectionAttempts).isEqualTo(0)
         assertThat(
             connectionStateItem,
-        ).isInstanceOf(SocketState.DisconnectedPermanently::class.java)
+        ).isInstanceOf(SfuSocketState.DisconnectedPermanently::class.java)
     }
 }

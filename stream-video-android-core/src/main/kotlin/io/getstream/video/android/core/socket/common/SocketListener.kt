@@ -20,11 +20,12 @@ import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
+import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
  * Listener which is invoked for WebSocket events.
  */
-public open class SocketListener<T> {
+public open class SocketListener<T, C> {
 
     /**
      * The callbacks are by default delivered on the main thread. Changing this property to false will deliver
@@ -53,7 +54,7 @@ public open class SocketListener<T> {
      *
      * @param event [ConnectedEvent] sent by server as first event once the connection is established.
      */
-    public open fun onConnected(event: ConnectedEvent) {
+    public open fun onConnected(event: C) {
     }
 
     /**
@@ -69,7 +70,7 @@ public open class SocketListener<T> {
      *
      * @param error [Error] object with the error details.
      */
-    public open fun onError(error: Error) {
+    public open fun onError(error: StreamWebSocketEvent.Error) {
     }
 
     /**

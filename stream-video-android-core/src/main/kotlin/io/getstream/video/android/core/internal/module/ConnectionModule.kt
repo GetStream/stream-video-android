@@ -24,9 +24,9 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.socket.CoordinatorSocket
 import io.getstream.video.android.core.socket.SfuSocket
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -90,7 +90,7 @@ internal class ConnectionModule(
             .build()
     }
     val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
-    val coordinatorSocket: CoordinatorSocket by lazy { createCoordinatorSocket() }
+    val coordinatorSocketConnection: CoordinatorSocketConnection by lazy { createCoordinatorSocket() }
 
     val localApi: ProductvideoApi by lazy {
         Retrofit.Builder()
@@ -130,10 +130,10 @@ internal class ConnectionModule(
     /**
      * @return The WebSocket handler that is used to connect to different calls.
      */
-    private fun createCoordinatorSocket(): CoordinatorSocket {
+    private fun createCoordinatorSocket(): CoordinatorSocketConnection {
         val coordinatorUrl = "wss://$videoDomain/video/connect"
 
-        return CoordinatorSocket(
+        return CoordinatorSocketConnection(
             apiKey,
             coordinatorUrl,
             user,
@@ -168,7 +168,7 @@ internal class ConnectionModule(
 
     fun updateToken(newToken: String) {
         // the coordinator socket also needs to update the token
-        coordinatorSocket.updateToken(newToken)
+        coordinatorSocketConnection.updateToken(newToken)
         // update the auth token as well
         authInterceptor.token = newToken
     }
@@ -255,7 +255,7 @@ internal class SfuConnectionModule(
             scope,
             okHttpClient,
             networkStateProvider,
-            onWebSocketRejoinWithStrategy = onWebsocketReconnectStrategy,
+            onWebsocketReconnectStrategy,
         )
     }
 }

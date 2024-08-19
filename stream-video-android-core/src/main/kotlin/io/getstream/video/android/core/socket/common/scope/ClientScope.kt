@@ -32,9 +32,10 @@ internal interface ClientScope : CoroutineScope
 /**
  * Creates a client aware [CoroutineScope].
  */
-internal fun ClientScope(): ClientScope = ClientScopeImpl()
+internal fun ClientScope(exceptionHandler: CoroutineExceptionHandler? = null): ClientScope =
+    ClientScopeImpl(exceptionHandler ?: defaultClientExceptionHandler)
 
-internal val clientSCopeExceptionHandler =
+internal val defaultClientExceptionHandler =
     CoroutineExceptionHandler { coroutineContext, exception ->
         val coroutineName = coroutineContext[CoroutineName]?.name ?: "unknown"
         StreamLog.e("ClientScope", exception) {
@@ -45,8 +46,8 @@ internal val clientSCopeExceptionHandler =
 /**
  * Represents SDK root [CoroutineScope].
  */
-private class ClientScopeImpl :
+private class ClientScopeImpl(exceptionHandler: CoroutineExceptionHandler) :
     ClientScope,
     CoroutineScope by CoroutineScope(
-        SupervisorJob() + DispatcherProvider.IO + SharedCalls() + clientSCopeExceptionHandler,
+        SupervisorJob() + DispatcherProvider.IO + SharedCalls() + exceptionHandler,
     )

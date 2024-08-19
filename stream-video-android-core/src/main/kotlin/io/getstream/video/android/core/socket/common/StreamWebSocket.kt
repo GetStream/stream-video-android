@@ -16,11 +16,8 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.result.Error
-import io.getstream.result.Result
-import io.getstream.result.extractCause
-import io.getstream.result.recover
 import io.getstream.video.android.core.errors.VideoErrorCode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,23 +25,42 @@ import kotlinx.coroutines.flow.asSharedFlow
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import org.openapitools.client.models.VideoEvent
+import okio.ByteString
 
 private const val EVENTS_BUFFER_SIZE = 100
 private const val CLOSE_SOCKET_CODE = 1000
 private const val CLOSE_SOCKET_REASON = "Connection close by client"
 
-internal class StreamWebSocket(
-    private val parser: VideoParser,
+internal class StreamWebSocket<V, T: GenericParser<V>>(
+    private val parser: T,
     socketCreator: (WebSocketListener) -> WebSocket,
 ) {
+    private val logger by taggedLogger("Video:Events")
     private val eventFlow =
         MutableSharedFlow<StreamWebSocketEvent>(extraBufferCapacity = EVENTS_BUFFER_SIZE)
 
     private val webSocket = socketCreator(object : WebSocketListener() {
+
+        override fun onOpen(webSocket: WebSocket, response: Response) {
+            super.onOpen(webSocket, response)
+        }
+
+        override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+            val event = parser.decodeOrError(bytes.toByteArray()).onSuccess {
+                eventFlow.tryEmit(it)
+            }.onError {
+                eventFlow.tryEmit(StreamWebSocketEvent.Error(it))
+            }
+            logger.v { "[handleEvent] event: `$event`" }
+        }
+
         override fun onMessage(webSocket: WebSocket, text: String) {
-            StreamLog.v("Video:Events") { "[handleEvent] event: `$text`" }
-            eventFlow.tryEmit(parseMessage(text))
+            val event = parser.decodeOrError(text.toByteArray()).onSuccess {
+                eventFlow.tryEmit(it)
+            }.onError {
+                eventFlow.tryEmit(StreamWebSocketEvent.Error(it))
+            }
+            logger.v { "[handleEvent] event: `$event`" }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -72,42 +88,13 @@ internal class StreamWebSocket(
         }
     })
 
-    fun send(chatEvent: VideoEvent): Boolean = webSocket.send(parser.toJson(chatEvent))
+    fun send(event: V): Boolean {
+        val parsedEvent = parser.encode(event)
+        return webSocket.send(parsedEvent)
+    }
     fun close(): Boolean = webSocket.close(CLOSE_SOCKET_CODE, CLOSE_SOCKET_REASON)
     fun listen(): Flow<StreamWebSocketEvent> = eventFlow.asSharedFlow()
-
-    private fun parseMessage(text: String): StreamWebSocketEvent =
-        parser.fromJsonOrError(text, VideoEvent::class.java)
-            .map { StreamWebSocketEvent.Message(it) }
-            .recover { parseChatError ->
-                val errorResponse =
-                    when (
-                        val chatErrorResult = parser.fromJsonOrError(
-                            text,
-                            SocketErrorMessage::class.java,
-                        )
-                    ) {
-                        is Result.Success -> {
-                            chatErrorResult.value.error
-                        }
-                        is Result.Failure -> null
-                    }
-                StreamWebSocketEvent.Error(
-                    errorResponse?.let {
-                        Error.NetworkError(
-                            message = it.message,
-                            statusCode = it.statusCode,
-                            serverErrorCode = it.code,
-                        )
-                    } ?: Error.NetworkError.fromVideoErrorCode(
-                        videoErrorCode = VideoErrorCode.CANT_PARSE_EVENT,
-                        cause = parseChatError.extractCause(),
-                    ),
-                )
-            }.value
 }
 
-internal sealed class StreamWebSocketEvent {
-    data class Error(val streamError: io.getstream.result.Error) : StreamWebSocketEvent()
-    data class Message(val videoEvent: VideoEvent) : StreamWebSocketEvent()
-}
+
+

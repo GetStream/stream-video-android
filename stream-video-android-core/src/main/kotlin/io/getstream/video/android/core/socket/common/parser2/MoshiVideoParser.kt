@@ -17,10 +17,13 @@
 package io.getstream.video.android.core.socket.common.parser2
 
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.adapters.DateAdapter
+import io.getstream.video.android.core.socket.common.VideoParser
 import org.openapitools.client.infrastructure.BigDecimalAdapter
 import org.openapitools.client.infrastructure.BigIntegerAdapter
 import org.openapitools.client.infrastructure.ByteArrayAdapter
@@ -36,57 +39,92 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 internal class MoshiVideoParser : VideoParser {
 
     private val moshi: Moshi by lazy {
-        Moshi.Builder()
-            .add(OffsetDateTimeAdapter())
-            .add(LocalDateTimeAdapter())
-            .add(LocalDateAdapter())
-            .add(UUIDAdapter())
-            .add(ByteArrayAdapter())
-            .add(URIAdapter())
-            .addLast(KotlinJsonAdapterFactory())
-            .add(VideoEventAdapter())
-            .add(
-                org.openapitools.client.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter(),
-            )
-            .add(
-                org.openapitools.client.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter(),
-            )
-            .add(org.openapitools.client.models.BlockListOptions.Behavior.BehaviorAdapter())
-            .add(org.openapitools.client.models.ChannelConfigWithInfo.Automod.AutomodAdapter())
-            .add(
-                org.openapitools.client.models.ChannelConfigWithInfo.AutomodBehavior.AutomodBehaviorAdapter(),
-            )
-            .add(
-                org.openapitools.client.models.ChannelConfigWithInfo.BlocklistBehavior.BlocklistBehaviorAdapter(),
-            )
-            .add(
-                org.openapitools.client.models.CreateDeviceRequest.PushProvider.PushProviderAdapter(),
-            )
-            .add(org.openapitools.client.models.NoiseCancellationSettings.Mode.ModeAdapter())
-            .add(org.openapitools.client.models.OwnCapability.OwnCapabilityAdapter())
-            .add(org.openapitools.client.models.RecordSettingsRequest.Mode.ModeAdapter())
-            .add(org.openapitools.client.models.RecordSettingsRequest.Quality.QualityAdapter())
-            .add(org.openapitools.client.models.TranscriptionSettingsRequest.Mode.ModeAdapter())
-            .add(org.openapitools.client.models.TranscriptionSettingsResponse.Mode.ModeAdapter())
-            .add(
-                org.openapitools.client.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter(),
-            )
-            .add(
-                org.openapitools.client.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter(),
-            )
-            .add(BigDecimalAdapter())
+        Builder()
+            // Infrastructure @ToJson @FromJson
+            .add(OffsetDateTimeAdapter()).add(LocalDateTimeAdapter()).add(LocalDateAdapter())
+            .add(UUIDAdapter()).add(ByteArrayAdapter()).add(URIAdapter()).add(BigDecimalAdapter())
             .add(BigIntegerAdapter())
-            .addAdapter(DateAdapter())
-            .build()
+            // JsonAdapter
+            .addAdapter(lenientAdapter(DateAdapter()))
+            .add(lenientAdapter(VideoEventAdapter())).add(
+                lenientAdapter(
+                    org.openapitools.client.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.BlockListOptions.Behavior.BehaviorAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.ChannelConfigWithInfo.Automod.AutomodAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.ChannelConfigWithInfo.AutomodBehavior.AutomodBehaviorAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.ChannelConfigWithInfo.BlocklistBehavior.BlocklistBehaviorAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.CreateDeviceRequest.PushProvider.PushProviderAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.NoiseCancellationSettings.Mode.ModeAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(org.openapitools.client.models.OwnCapability.OwnCapabilityAdapter()),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.RecordSettingsRequest.Mode.ModeAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.RecordSettingsRequest.Quality.QualityAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.TranscriptionSettingsRequest.Mode.ModeAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.TranscriptionSettingsResponse.Mode.ModeAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    org.openapitools.client.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter(),
+                ),
+            )
+            // Factories
+            .addLast(KotlinJsonAdapterFactory()).build()
     }
 
     private inline fun <reified T> Moshi.Builder.addAdapter(adapter: JsonAdapter<T>) = apply {
-        this.add(T::class.java, adapter)
+        this.add(T::class.java, lenientAdapter(adapter))
     }
 
     override fun configRetrofit(builder: Retrofit.Builder): Retrofit.Builder {
-        return builder
-            .addConverterFactory(MoshiConverterFactory.create(moshi).withErrorLogging())
+        return builder.addConverterFactory(MoshiConverterFactory.create(moshi).withErrorLogging())
     }
 
     override fun toJson(any: Any): String = when {
@@ -102,5 +140,25 @@ internal class MoshiVideoParser : VideoParser {
 
     override fun <T : Any> fromJson(raw: String, clazz: Class<T>): T {
         return moshi.adapter(clazz).fromJson(raw)!!
+    }
+
+
+
+
+}
+
+// Make any adapter lenient
+inline fun <reified T> lenientAdapter(adapter: JsonAdapter<T>): JsonAdapter<T> {
+    return object : JsonAdapter<T>() {
+
+        override fun toJson(writer: JsonWriter, value: T?) {
+            writer.isLenient = true
+            adapter.toJson(writer, value)
+        }
+
+        override fun fromJson(reader: JsonReader): T? {
+            reader.isLenient = true
+            return adapter.fromJson(reader)
+        }
     }
 }

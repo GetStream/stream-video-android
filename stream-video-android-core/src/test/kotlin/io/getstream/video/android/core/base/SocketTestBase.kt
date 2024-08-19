@@ -20,8 +20,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.CoordinatorSocket
-import io.getstream.video.android.core.socket.PersistentSocket
+import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -70,7 +69,7 @@ open class SocketTestBase : TestBase() {
             .build()
     }
 
-    fun collectEvents(socket: CoordinatorSocket): Pair<List<VideoEvent>, List<Throwable>> {
+    fun collectEvents(socket: CoordinatorSocketConnection): Pair<List<VideoEvent>, List<Throwable>> {
         val events = mutableListOf<VideoEvent>()
         val errors = mutableListOf<Throwable>()
 
@@ -88,7 +87,7 @@ open class SocketTestBase : TestBase() {
             }
 
             delay(1000)
-            socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
+            socket.disconnect(CoordinatorSocketConnection.DisconnectReason.ByRequest)
             job.cancel()
             job2.cancel()
         }
