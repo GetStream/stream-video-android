@@ -283,7 +283,7 @@ internal class TelecomHandler private constructor(
             with(it) {
                 launch {
                     requestEndpointChange(device).let { result ->
-                        logger.d { "[selectDevice] To device: ${device.name}, requestEndpointChange result: $result" }
+                        logger.d { "[selectDevice] New device: ${device.name}, requestEndpointChange result: $result" }
                     }
                 }
             }

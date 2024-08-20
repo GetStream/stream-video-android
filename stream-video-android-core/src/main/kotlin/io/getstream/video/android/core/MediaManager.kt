@@ -94,8 +94,6 @@ class SpeakerManager(
     private val _speakerPhoneEnabled = MutableStateFlow(true)
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
-    internal var selectedBeforeSpeaker: StreamAudioDevice? = null
-
     internal fun enable(fromUser: Boolean = true) {
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
@@ -139,9 +137,9 @@ class SpeakerManager(
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
         microphoneManager.setup()
         val devices = devices.value
+        val selectedBeforeSpeaker = selectedDevice.value
         if (enable) {
             val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-            selectedBeforeSpeaker = selectedDevice.value
             _speakerPhoneEnabled.value = true
             microphoneManager.select(speaker)
         } else {
