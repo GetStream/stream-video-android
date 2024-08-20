@@ -21,9 +21,11 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
+import androidx.annotation.RawRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -35,6 +37,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoImpl
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.RejectReason
@@ -71,6 +74,7 @@ internal class TelecomHandler private constructor(
     private val telecomHandlerScope = CoroutineScope(
         DispatcherProvider.Default + SupervisorJob() + exceptionHandler,
     )
+    private var mediaPlayer: MediaPlayer? = null
 
     companion object {
         @Volatile
@@ -205,10 +209,12 @@ internal class TelecomHandler private constructor(
         } else {
             logger.d { "[postNotification] Call ID: ${telecomCall.streamCall.id}, state: ${telecomCall.state}" }
 
-            streamVideo?.let { streamVideo ->
+            (streamVideo as? StreamVideoImpl)?.let { streamVideo ->
                 val notification = when (telecomCall.state) {
                     TelecomCallState.INCOMING -> {
                         logger.d { "[postNotification] Creating incoming notification" }
+
+                        playCallSound(streamVideo.sounds.incomingCallSound)
 
                         streamVideo.getRingingCallNotification(
                             ringingState = RingingState.Incoming(),
@@ -223,6 +229,12 @@ internal class TelecomHandler private constructor(
 
                         logger.d {
                             "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
+                        }
+
+                        if (isOutgoingCall) {
+                            playCallSound(streamVideo.sounds.outgoingCallSound)
+                        } else {
+                            stopCallSound()
                         }
 
                         streamVideo.getOngoingCallNotification(
@@ -257,11 +269,46 @@ internal class TelecomHandler private constructor(
             ) == PackageManager.PERMISSION_GRANTED
         }
 
+    private fun playCallSound(@RawRes sound: Int?) {
+        if (mediaPlayer == null) mediaPlayer = MediaPlayer()
+
+        sound?.let {
+            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+                mediaPlayer?.let {
+                    if (!it.isPlaying) {
+                        setMediaPlayerDataSource(it, sound)
+                        it.start()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, @RawRes resId: Int) {
+        mediaPlayer.reset()
+        val afd = applicationContext.resources.openRawResourceFd(resId)
+        if (afd != null) {
+            mediaPlayer.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            afd.close()
+        }
+        mediaPlayer.isLooping = true
+        mediaPlayer.prepare()
+    }
+
+    private fun stopCallSound() {
+        safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+            if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
+        }
+    }
+
     fun unregisterCall(call: StreamCall) {
         logger.i { "[unregisterCall]" }
 
         calls.remove(call.cid)?.let { telecomCall ->
             safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+                stopCallSound()
                 cancelNotification(telecomCall.notificationId)
                 telecomCall.cleanUp()
             }
