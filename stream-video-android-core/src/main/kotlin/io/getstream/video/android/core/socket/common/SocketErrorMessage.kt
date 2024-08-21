@@ -16,6 +16,4 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.chat.android.client.socket.ErrorResponse
-
 internal data class SocketErrorMessage(val error: ErrorResponse? = null)

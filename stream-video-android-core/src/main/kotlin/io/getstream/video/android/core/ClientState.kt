@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -119,15 +120,15 @@ class ClientState(client: StreamVideo) {
         }
     }
 
-    internal fun handleState(sfuSocketState: SfuSocketState) {
-        when (sfuSocketState) {
-            is SfuSocketState.Connected -> ConnectionState.Connected
-            SfuSocketState.Connecting -> ConnectionState.Loading
-            SfuSocketState.DisconnectedByRequest -> ConnectionState.Disconnected
-            is SfuSocketState.DisconnectedPermanently -> ConnectionState.Disconnected
-            is SfuSocketState.DisconnectedTemporarily -> ConnectionState.Reconnecting
-            SfuSocketState.NetworkDisconnected -> ConnectionState.Disconnected
-            SfuSocketState.NotConnected -> ConnectionState.PreConnect
+    internal fun handleState(socketState: VideoSocketState) {
+        when (socketState) {
+            is VideoSocketState.Connected -> ConnectionState.Connected
+            VideoSocketState.Connecting -> ConnectionState.Loading
+            VideoSocketState.DisconnectedByRequest -> ConnectionState.Disconnected
+            is VideoSocketState.DisconnectedPermanently -> ConnectionState.Disconnected
+            is VideoSocketState.DisconnectedTemporarily -> ConnectionState.Reconnecting
+            VideoSocketState.NetworkDisconnected -> ConnectionState.Disconnected
+            VideoSocketState.NotConnected -> ConnectionState.PreConnect
         }
     }
 

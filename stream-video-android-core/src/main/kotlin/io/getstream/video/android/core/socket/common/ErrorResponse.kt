@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.chat.android.client.socket
+package io.getstream.video.android.core.socket.common
+
 
 internal data class ErrorResponse(
     val code: Int = -1,

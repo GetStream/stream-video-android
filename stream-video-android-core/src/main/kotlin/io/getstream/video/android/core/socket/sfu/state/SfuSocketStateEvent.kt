@@ -15,7 +15,7 @@ public sealed class SfuSocketStateEvent {
      */
     data class Connect(
         val connectionConf: ConnectionConf.SfuConnectionConf,
-        val connectionType: VideoSocketConnectionType,
+        val connectionType: WebsocketReconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
     ) : SfuSocketStateEvent()
 
     /**

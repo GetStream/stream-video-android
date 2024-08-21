@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.chat.android.client.socket.ErrorDetail
-import io.getstream.chat.android.client.socket.ErrorResponse
 import io.getstream.log.StreamLog
 import io.getstream.result.Error
 import io.getstream.result.Result
@@ -26,16 +24,13 @@ import io.getstream.result.recover
 import io.getstream.video.android.core.call.signal.socket.RTCEventMapper
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.ErrorEvent
-import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
 import okhttp3.Response
-import okhttp3.ResponseBody
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.openapitools.client.models.VideoEvent
 import retrofit2.Retrofit
 import stream.video.sfu.event.SfuEvent
-import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 internal interface GenericParser<E> {

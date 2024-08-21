@@ -19,7 +19,6 @@ package io.getstream.video.android.core.internal.module
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -31,9 +30,7 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.openapitools.client.apis.ProductvideoApi
 import org.openapitools.client.infrastructure.Serializer
@@ -42,7 +39,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.models.WebsocketReconnectStrategy
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -260,52 +256,3 @@ internal class SfuConnectionModule(
     }
 }
 
-/**
- * CoordinatorAuthInterceptor adds the token authentication to the API calls
- */
-internal class CoordinatorAuthInterceptor(
-    var apiKey: String,
-    var token: String,
-    var authType: String = "jwt",
-) : Interceptor {
-
-    @Throws(IOException::class)
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val original = chain.request()
-
-        val updatedUrl = if (original.url.toString().contains("video")) {
-            original.url.newBuilder()
-                .addQueryParameter(API_KEY, apiKey)
-                .build()
-        } else {
-            original.url
-        }
-
-        val updated = original.newBuilder()
-            .url(updatedUrl)
-            .addHeader(HEADER_AUTHORIZATION, token)
-            .header(STREAM_AUTH_TYPE, authType)
-            .build()
-
-        return chain.proceed(updated)
-    }
-
-    private companion object {
-        /**
-         * Query key used to authenticate to the API.
-         */
-        private const val API_KEY = "api_key"
-        private const val STREAM_AUTH_TYPE = "stream-auth-type"
-        private const val HEADER_AUTHORIZATION = "Authorization"
-    }
-}
-
-internal class HeadersInterceptor : Interceptor {
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
-            .newBuilder()
-            .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
-            .build()
-        return chain.proceed(request)
-    }
-}

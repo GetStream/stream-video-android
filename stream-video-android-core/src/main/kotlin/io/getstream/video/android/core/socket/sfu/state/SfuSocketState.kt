@@ -19,7 +19,7 @@ public sealed class SfuSocketState {
      */
     data class Connecting(
         val connectionConf: ConnectionConf.SfuConnectionConf,
-        val connectionType: SfuSocketConnectionType,
+        val connectionType: WebsocketReconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
     ) : SfuSocketState()
 
     /**

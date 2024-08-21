@@ -30,19 +30,14 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
      * @param connectionConf The [SocketFactory.ConnectionConf] to be used to reconnect.
      */
     suspend fun onReconnect(
-        connectionConf: ConnectionConf,
-        forceReconnection: Boolean,
+        connectionConf: ConnectionConf.SfuConnectionConf,
     ) {
         logger.v {
             "[onReconnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
         }
         stateMachine.sendEvent(
             SfuSocketStateEvent.Connect(
-                connectionConf,
-                when (forceReconnection) {
-                    true -> VideoSocketConnectionType.FORCE_RECONNECTION
-                    false -> VideoSocketConnectionType.AUTOMATIC_RECONNECTION
-                },
+                connectionConf
             ),
         )
     }
@@ -52,11 +47,11 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
      *
      * @param connectionConf The [VideoSocketFactory.ConnectionConf] to be used on the new connection.
      */
-    suspend fun onConnect(connectionConf: ConnectionConf) {
+    suspend fun onConnect(connectionConf: ConnectionConf.SfuConnectionConf) {
         logger.v {
             "[onConnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
         }
-        stateMachine.sendEvent(SfuSocketStateEvent.Connect(connectionConf, VideoSocketConnectionType.INITIAL_CONNECTION))
+        stateMachine.sendEvent(SfuSocketStateEvent.Connect(connectionConf, WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED))
     }
 
     /**
@@ -240,17 +235,9 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
             state<SfuSocketState.Disconnected.DisconnectedByRequest> {
                 onEvent<SfuSocketStateEvent.RequiredDisconnection> { currentState }
                 onEvent<SfuSocketStateEvent.Connect> {
-                    when (it.connectionType) {
-                        VideoSocketConnectionType.INITIAL_CONNECTION -> SfuSocketState.Connecting(
-                            it.connectionConf,
-                            it.connectionType,
-                        )
-                        VideoSocketConnectionType.AUTOMATIC_RECONNECTION -> this
-                        VideoSocketConnectionType.FORCE_RECONNECTION -> SfuSocketState.Connecting(
-                            it.connectionConf,
-                            it.connectionType,
-                        )
-                    }
+                    SfuSocketState.Connecting(
+                        it.connectionConf,
+                        it.connectionType)
                 }
             }
 
@@ -271,17 +258,7 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
 
             state<SfuSocketState.Disconnected.DisconnectedPermanently> {
                 onEvent<SfuSocketStateEvent.Connect> {
-                    when (it.connectionType) {
-                        VideoSocketConnectionType.INITIAL_CONNECTION -> SfuSocketState.Connecting(
-                            it.connectionConf,
-                            it.connectionType,
-                        )
-                        VideoSocketConnectionType.AUTOMATIC_RECONNECTION -> this
-                        VideoSocketConnectionType.FORCE_RECONNECTION -> SfuSocketState.Connecting(
-                            it.connectionConf,
-                            it.connectionType,
-                        )
-                    }
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
                 }
                 onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
             }

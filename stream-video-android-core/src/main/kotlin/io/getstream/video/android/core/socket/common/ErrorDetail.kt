@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.chat.android.client.socket
+package io.getstream.video.android.core.socket.common
 
 public data class ErrorDetail(
     public val code: Int,
