@@ -28,6 +28,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.notifications.internal.receivers.StopScreenshareBroadcastReceiver
+import io.getstream.video.android.core.utils.startForegroundWithServiceType
 
 /**
  * Screen-sharing in Android requires a ForegroundService (with type foregroundServiceType set to "mediaProjection").
@@ -102,7 +103,7 @@ internal class StreamScreenShareService : Service() {
             )
         }
 
-        startForeground(NOTIFICATION_ID, builder.build())
+        startForegroundWithServiceType(NOTIFICATION_ID, builder.build(), TRIGGER_SHARE_SCREEN)
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -111,6 +112,7 @@ internal class StreamScreenShareService : Service() {
         internal const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
         internal const val BROADCAST_CANCEL_ACTION = "io.getstream.video.android.action.CANCEL_SCREEN_SHARE"
         internal const val INTENT_EXTRA_CALL_ID = "io.getstream.video.android.intent-extra.call_cid"
+        internal const val TRIGGER_SHARE_SCREEN = "share_screen"
 
         fun createIntent(context: Context, callId: String) =
             Intent(context, StreamScreenShareService::class.java).apply {
