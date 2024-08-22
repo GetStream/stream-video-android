@@ -25,11 +25,13 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import java.nio.ByteBuffer
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
+import org.webrtc.ExternalAudioProcessingFactory
 import org.webrtc.Logging
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -41,7 +43,6 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
-import java.nio.ByteBuffer
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -157,11 +158,15 @@ public class StreamPeerConnectionFactory(
         )
 
         PeerConnectionFactory.builder()
-            .also { builder ->
-                audioFilter?.delegate?.also {
-                    builder.setAudioProcessingFactory(it)
-                }
-            }
+//            .also { builder ->
+//                audioFilter?.delegate?.also {
+//                    builder.setAudioProcessingFactory(it)
+//                }
+//            }
+//            .setAudioProcessingFactory(ExternalAudioProcessingFactory.builder()
+//                .setExternalAudioProcessorFactory(KrispAudioProcessorFactory())
+//                .build())
+            .setAudioProcessingFactory(ExternalAudioProcessingFactory("libnoise_cancellation.so"))
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
             .setAudioDeviceModule(
