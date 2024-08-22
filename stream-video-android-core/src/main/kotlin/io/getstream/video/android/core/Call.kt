@@ -276,9 +276,7 @@ public class Call(
 
         response.onSuccess {
             state.updateFromResponse(it)
-            if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
-            }
+            if (ring) client.state.addRingingCall(this, RingingState.Outgoing())
         }
         return response
     }
@@ -445,6 +443,7 @@ public class Call(
 
         monitor.start()
         client.state.setActiveCall(this)
+
         startCallStatsReporting(result.value.statsOptions.reportingIntervalMs.toLong())
 
         // listen to Signal WS
@@ -618,7 +617,7 @@ public class Call(
         }
         stopScreenSharing()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+        client.state.removeRingingCall(willTransitionToOngoing = false)
         (client as StreamVideoImpl).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
@@ -1029,9 +1028,7 @@ public class Call(
     suspend fun accept(): Result<AcceptCallResponse> {
         logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
-
-        clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService()
+        clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
         return clientImpl.accept(type, id)
     }
 

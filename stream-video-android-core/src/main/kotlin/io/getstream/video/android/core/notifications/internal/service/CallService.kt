@@ -28,7 +28,6 @@ import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoImpl
@@ -203,10 +202,7 @@ internal class CallService : Service() {
 
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
-                    first = streamVideo.getOngoingCallNotification(
-                        callDisplayName = intentCallDisplayName,
-                        callId = intentCallId,
-                    ),
+                    first = streamVideo.getOngoingCallNotification(callId = intentCallId),
                     second = intentCallId.hashCode(),
                 )
 
@@ -214,19 +210,16 @@ internal class CallService : Service() {
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
                         callId = intentCallId,
-                        callDisplayName = intentCallDisplayName!!,
+                        incomingCallDisplayName = intentCallDisplayName!!,
                         shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID,
                 )
 
                 TRIGGER_OUTGOING_CALL -> Pair(
-                    first = streamVideo.getRingingCallNotification(
-                        ringingState = RingingState.Outgoing(),
+                    first = streamVideo.getOngoingCallNotification(
                         callId = intentCallId,
-                        callDisplayName = getString(
-                            R.string.stream_video_ongoing_call_notification_description,
-                        ),
+                        isOutgoingCall = true,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
                 )
