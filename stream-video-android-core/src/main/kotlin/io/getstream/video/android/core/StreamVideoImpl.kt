@@ -208,8 +208,10 @@ internal class StreamVideoImpl internal constructor(
         activeCall?.leave()
         // Stop the call service if it was running
         if (runForegroundService) {
-            val serviceIntent = CallService.buildStopIntent(context)
-            context.stopService(serviceIntent)
+            safeCall {
+                val serviceIntent = CallService.buildStopIntent(context)
+                context.stopService(serviceIntent)
+            }
         }
     }
 
