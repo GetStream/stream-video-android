@@ -1070,7 +1070,6 @@ public class RtcSession internal constructor(
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is JoinCallResponseEvent) {
             logger.i { "[rtc handleEvent] unlocking joinEventReceivedMutex" }
-
             joinEventReceivedMutex.unlock()
         }
         if (event is SfuDataEvent) {

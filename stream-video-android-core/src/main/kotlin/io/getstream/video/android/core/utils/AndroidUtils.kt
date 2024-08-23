@@ -182,6 +182,7 @@ internal fun Service.startForegroundWithServiceType(
     notificationId: Int,
     notification: Notification,
     trigger: String,
+    foregroundServiceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
 ) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         startForeground(notificationId, notification)
@@ -189,7 +190,7 @@ internal fun Service.startForegroundWithServiceType(
         val beforeOrAfterAndroid14Type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
         } else {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+            foregroundServiceType
         }
 
         ServiceCompat.startForeground(
@@ -197,7 +198,7 @@ internal fun Service.startForegroundWithServiceType(
             notificationId,
             notification,
             when (trigger) {
-                TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                TRIGGER_ONGOING_CALL -> foregroundServiceType
                 TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> beforeOrAfterAndroid14Type
                 TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
                 else -> beforeOrAfterAndroid14Type
