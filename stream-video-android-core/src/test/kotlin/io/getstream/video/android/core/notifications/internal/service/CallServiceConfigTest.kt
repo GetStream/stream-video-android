@@ -121,7 +121,7 @@ class CallServiceConfigTest {
         assertEquals(true, runInForeground)
         assertEquals(2, servicePerTypeSize)
         assertEquals(CallService::class.java, hostServiceClass)
-        assertEquals(LivestreamMemberCallService::class.java, livestreamServiceClass)
+        assertEquals(LivestreamViewerService::class.java, livestreamServiceClass)
         assertEquals(AudioAttributes.USAGE_MEDIA, audioUsage)
     }
 }

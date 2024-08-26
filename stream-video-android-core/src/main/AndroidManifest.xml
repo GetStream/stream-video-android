@@ -104,7 +104,7 @@
             android:exported="false" />
 
         <service
-            android:name=".notifications.internal.service.LivestreamMemberCallService"
+            android:name=".notifications.internal.service.LivestreamViewerService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
     </application>

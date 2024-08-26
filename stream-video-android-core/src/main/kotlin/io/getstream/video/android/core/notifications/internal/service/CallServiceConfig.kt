@@ -71,7 +71,7 @@ public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
         audioUsage = AudioAttributes.USAGE_MEDIA,
         callServicePerType = mapOf(
             Pair(ANY_MARKER, CallService::class.java),
-            Pair("livestream", LivestreamMemberCallService::class.java),
+            Pair("livestream", LivestreamViewerService::class.java),
         ),
     )
 }
