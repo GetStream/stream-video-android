@@ -106,7 +106,6 @@ internal open class CallService : Service() {
             StreamLog.i(TAG) { "Resolved service class: $serviceClass" }
             val serviceIntent = Intent(context, serviceClass)
             serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, callId)
-            serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, callId)
 
             when (trigger) {
                 TRIGGER_INCOMING_CALL -> {
