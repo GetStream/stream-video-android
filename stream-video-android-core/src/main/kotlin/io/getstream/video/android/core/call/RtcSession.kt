@@ -907,9 +907,10 @@ public class RtcSession internal constructor(
             return@synchronized
         }
 
-        val enabledRids = event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate {
-            it.name to it.active
-        }
+        val enabledRids =
+            event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate {
+                it.name to it.active
+            }
         dynascaleLogger.i { "enabled rids: $enabledRids}" }
         val params = sender.parameters
         val updatedEncodings: MutableList<Encoding> = mutableListOf()
@@ -1069,9 +1070,10 @@ public class RtcSession internal constructor(
     fun handleEvent(event: VideoEvent) {
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is JoinCallResponseEvent) {
-            logger.i { "[rtc handleEvent] unlocking joinEventReceivedMutex" }
-
-            joinEventReceivedMutex.unlock()
+            if (joinEventReceivedMutex.isLocked) {
+                logger.i { "[rtc handleEvent] unlocking joinEventReceivedMutex" }
+                joinEventReceivedMutex.unlock()
+            }
         }
         if (event is SfuDataEvent) {
             coroutineScope.launch {
@@ -1410,7 +1412,13 @@ public class RtcSession internal constructor(
                 track_id = track.id(),
                 track_type = trackType,
                 layers = layers,
-                mid = transceiver.mid ?: extractMid(sdp, track, screenShareTrack, trackType, transceivers),
+                mid = transceiver.mid ?: extractMid(
+                    sdp,
+                    track,
+                    screenShareTrack,
+                    trackType,
+                    transceivers,
+                ),
             )
         }
         return tracks
@@ -1429,6 +1437,7 @@ public class RtcSession internal constructor(
                     TrackType.TRACK_TYPE_VIDEO
                 }
             }
+
             else -> TrackType.TRACK_TYPE_UNSPECIFIED
         }
 
@@ -1475,7 +1484,10 @@ public class RtcSession internal constructor(
         return media.mid.toString()
     }
 
-    private fun createVideoLayers(transceiver: RtpTransceiver, captureResolution: CaptureFormat): List<VideoLayer> {
+    private fun createVideoLayers(
+        transceiver: RtpTransceiver,
+        captureResolution: CaptureFormat,
+    ): List<VideoLayer> {
         // we tell the Sfu which resolutions we're sending
         return transceiver.sender.parameters.encodings.map {
             val scaleBy = it.scaleResolutionDownBy ?: 1.0
@@ -1715,7 +1727,13 @@ public class RtcSession internal constructor(
         }
     }
 
-    suspend fun switchSfu(sfuName: String, sfuUrl: String, sfuToken: String, remoteIceServers: List<IceServer>, failedToSwitch: () -> Unit) {
+    suspend fun switchSfu(
+        sfuName: String,
+        sfuUrl: String,
+        sfuToken: String,
+        remoteIceServers: List<IceServer>,
+        failedToSwitch: () -> Unit,
+    ) {
         logger.i { "[switchSfu] from ${this.sfuUrl} to $sfuUrl" }
         val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
 

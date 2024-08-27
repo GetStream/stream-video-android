@@ -36,6 +36,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
         callDisplayName: String,
         shouldHaveContentIntent: Boolean,
     ): Notification? = null
+    override fun getSettingUpCallNotification(): Notification? = null
 
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }

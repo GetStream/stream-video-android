@@ -63,8 +63,8 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
@@ -125,6 +125,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
+import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -282,6 +283,26 @@ public class CallState(
 
         // TODO: could optimize performance by subscribing only to relevant events
         call.subscribe {
+            if (it is TrackPublishedEvent) {
+                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+
+                if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = true
+                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = true
+                }
+            }
+
+            if (it is TrackUnpublishedEvent) {
+                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+
+                if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = false
+                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = false
+                }
+            }
+
             emitLivestreamVideo()
         }
 
@@ -372,7 +393,7 @@ public class CallState(
     }
 
     /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
-    public val duration: StateFlow<kotlin.time.Duration?> =
+    public val duration: StateFlow<Duration?> =
         _durationInMs.transform { emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS)) }
             .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
@@ -422,17 +443,35 @@ public class CallState(
     /** the opposite of backstage, if we are live or not */
     val live: StateFlow<Boolean> = _backstage.mapState { !it }
 
-    /** how many milliseconds the call has been running, null if the call didn't start yet */
-    public val liveDurationInMs: StateFlow<Long?> =
-        _durationInMs
-            .map {
-                if (live.value) {
-                    it
-                } else {
-                    null
-                }
+    /**
+     * How long the call has been live for, in milliseconds, or null if the call hasn't been live yet.
+     * Keeps its value when live ends and resets when live starts again.
+     *
+     * @see [liveDuration]
+     */
+    public val liveDurationInMs = flow {
+        while (currentCoroutineContext().isActive) {
+            delay(1000)
+
+            val liveStartedAt = _session.value?.liveStartedAt
+            val liveEndedAt = _session.value?.liveEndedAt ?: OffsetDateTime.now()
+
+            liveStartedAt?.let {
+                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant().toEpochMilli()
+                emit(duration)
             }
-            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+        }
+    }.distinctUntilChanged().stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+
+    /**
+     * How long the call has been live for, represented as [Duration], or null if the call hasn't been live yet.
+     * Keeps its value when live ends and resets when live starts again.
+     *
+     * @see [liveDurationInMs]
+     */
+    public val liveDuration = liveDurationInMs.mapState { durationInMs ->
+        durationInMs?.takeIf { it >= 1000 }?.let { (it / 1000).toDuration(DurationUnit.SECONDS) }
+    }
 
     private val _egress: MutableStateFlow<EgressResponse?> = MutableStateFlow(null)
     val egress: StateFlow<EgressResponse?> = _egress
