@@ -63,6 +63,19 @@ public fun livestreamCallServiceConfig(): CallServiceConfig {
 }
 
 /**
+ * Return a default configuration for the call service configuration for livestream which has no camera
+ */
+public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
+    return CallServiceConfig(
+        runCallServiceInForeground = true,
+        callServicePerType = mapOf(
+            Pair(ANY_MARKER, CallService::class.java),
+            Pair("livestream", LivestreamAudioCallService::class.java),
+        ),
+    )
+}
+
+/**
  * Return a default configuration for the call service configuration.
  */
 public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
