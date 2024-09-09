@@ -1,59 +1,62 @@
 ---
-title: Recording & Broadcasting
-description: Recording & Broadcasting
+title: Recording
+description: Recording Calls
 ---
 
-### Recording
+In certain situations, you may need to record a call and share the recording with the participants. The Stream Video SDK supports this functionality via the `Call` recording API.
 
-The example below shows how to start and stop recording a call
+### Start and Stop Recording
+
+To start recording, we simply invoke `call.startRecording()`. To stop recording, we use `call.stopRecording()`.
 
 ```kotlin
 call.startRecording()
 call.stopRecording()
 ```
 
-You can retrieve recordings:
+The `call.state.recording` property of type `StateFlow<Boolean>` will be updated when call recording starts/stops.
+
+```kotlin
+val isRecording by call.state.recording.collectAsStateWithLifecycle() // Use to update the UI
+```
+
+### Get a List of Recordings
+
+You can retrieve recordings by using `call.listRecordings()`. If the query is successful, `result` will contain a list of recordings, each containing information about the filename, URL and the start and end times. You can use the URL to show the recording in a video player.
 
 ```kotlin
 val result = call.listRecordings()
+
+result
+    .onSuccess { response: ListRecordingsResponse ->
+        response.recordings.forEach { recording: CallRecording ->
+            Log.d(TAG, recording.filename)
+            Log.d(TAG, recording.url)
+            Log.d(TAG, recording.startTime.toString())
+            Log.d(TAG, recording.endTime.toString())
+        }
+    }
+    .onError { error: Error ->
+        Log.e(TAG, "Failure: ${error.message}")
+    }
 ```
 
-There are several layout options... TODO
+### Listening to Recording Events
 
-### Broadcasting to HLS
-
-You can broadcast your call to HLS
+You can listen to recording-related events and change to UI accordingly.
 
 ```kotlin
-call.startBroadcasting()
-call.stopBroadcasting()
+val sub = call.subscribeFor(
+    CallRecordingStartedEvent::class.java,
+    CallRecordingStoppedEvent::class.java,
+    CallRecordingReadyEvent::class.java,
+    CallRecordingFailedEvent::class.java
+) {
+    Log.e(TAG, "Event type: ${it.getEventType()}")
+}
+
+// stop listening
+sub.dispose()
 ```
 
-The HLS url is available in the call state
-
-```kotlin
-
-```
-
-### RTMP-in
-
-You can also add RTMPs stream's to your call.
-
-```kotlin
-val url = call.state.ingress.value?.rtmp?.address
-// TODO: streaming key
-```
-
-We plan to add support for other livestreaming protocols in the future. If something is missing be sure to let us know.
-
-### Displaying HLS
-
-On android you can display HLS using ExoPlayer
-
-```kotlin
-implementation "androidx.media3:media3-exoplayer:1.0.2"
-implementation "androidx.media3:media3-ui:1.0.2"
-implementation "androidx.media3:media3-exoplayer-hls:1.0.2"
-```
-
-This article explains how to use (ExoPlayer with compose)[https://proandroiddev.com/learn-with-code-jetpack-compose-playing-media-part-3-3792bdfbe1ea].
+Read more about subscribing to events on the [events](08-events.mdx) page.
