@@ -18,7 +18,6 @@ package io.getstream.video.android.ui.call
 
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -100,7 +99,6 @@ fun ParticipantsList(call: Call) {
     ParticipantsListContent(call, clipboardManager, participants)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ParticipantsListContent(
     call: Call,

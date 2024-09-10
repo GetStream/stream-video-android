@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +47,6 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LandscapeControls(call: Call, onDismiss: () -> Unit) {
     val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
