@@ -24,12 +24,19 @@ import android.os.Build
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import io.getstream.log.StreamLog
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * Handler which monitors connectivity and provides network state.
+ *
+ * @property connectivityManager Android manager which provides information about the current
+ * connection state.
+ */
 public class NetworkStateProvider(
     private val scope: CoroutineScope,
-    private val connectivityManager: ConnectivityManager,
-) {
+    private val connectivityManager: ConnectivityManager) {
+
 
     private val logger by taggedLogger("Video:NetworkStateProvider")
     private val lock: Any = Any()
@@ -80,7 +87,7 @@ public class NetworkStateProvider(
         }
     }
 
-    fun isConnected(): Boolean {
+    public fun isConnected(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             runCatching {
                 connectivityManager.run {
@@ -95,31 +102,76 @@ public class NetworkStateProvider(
         }
     }
 
-    fun subscribe(listener: NetworkStateListener) {
+    /**
+     * Subscribes to network state changes through a listener.
+     *
+     * @param listener Handler which receives connection change events.
+     */
+    public fun subscribe(listener: NetworkStateListener) {
         synchronized(lock) {
             listeners = listeners + listener
             if (isRegistered.compareAndSet(false, true)) {
-                connectivityManager.registerNetworkCallback(
-                    NetworkRequest.Builder().build(),
-                    callback,
-                )
+                safelyRegisterNetworkCallback(NetworkRequest.Builder().build(), callback)
             }
         }
     }
 
-    fun unsubscribe(listener: NetworkStateListener) {
+    /**
+     * Calls [ConnectivityManager.registerNetworkCallback] and catches potential [SecurityException].
+     * This is a known [bug](https://android-review.googlesource.com/c/platform/frameworks/base/+/1758029) on Android 11.
+     */
+    private fun safelyRegisterNetworkCallback(
+        networkRequest: NetworkRequest,
+        callback: ConnectivityManager.NetworkCallback,
+    ) {
+        connectivityManager.callWithSecurityExceptionHandling {
+            registerNetworkCallback(networkRequest, callback)
+        }
+    }
+
+    /**
+     * Removes a listener for network state changes.
+     *
+     * @param listener Handler to be removed.
+     */
+    public fun unsubscribe(listener: NetworkStateListener) {
         synchronized(lock) {
             listeners = (listeners - listener).also {
                 if (it.isEmpty() && isRegistered.compareAndSet(true, false)) {
-                    connectivityManager.unregisterNetworkCallback(callback)
+                    safelyUnregisterNetworkCallback(callback)
                 }
             }
         }
     }
 
-    interface NetworkStateListener {
-        suspend fun onConnected()
+    /**
+     * Calls [ConnectivityManager.unregisterNetworkCallback] and catches potential [SecurityException].
+     * This is a known [bug](https://android-review.googlesource.com/c/platform/frameworks/base/+/1758029) on Android 11.
+     */
+    private fun safelyUnregisterNetworkCallback(callback: ConnectivityManager.NetworkCallback) {
+        connectivityManager.callWithSecurityExceptionHandling {
+            unregisterNetworkCallback(
+                callback,
+            )
+        }
+    }
 
-        suspend fun onDisconnected()
+    /**
+     * Listener which is used to listen and react to network state changes.
+     */
+    public interface NetworkStateListener {
+        public suspend fun onConnected()
+
+        public suspend fun onDisconnected()
+    }
+}
+
+private fun ConnectivityManager.callWithSecurityExceptionHandling(method: ConnectivityManager.() -> Unit) {
+    try {
+        method()
+    } catch (e: SecurityException) {
+        StreamLog.e("ConnectivityManager", e) {
+            "SecurityException occurred. This is a known bug on Android 11. We log and prevent the app from crashing. Cause: ${e.message}"
+        }
     }
 }

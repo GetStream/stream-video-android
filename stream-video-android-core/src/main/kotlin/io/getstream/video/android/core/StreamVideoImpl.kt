@@ -43,6 +43,9 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -142,7 +145,7 @@ internal class StreamVideoImpl internal constructor(
     internal val connectionModule: ConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
-    internal val runForegroundService: Boolean = true,
+    internal val callServiceConfig: CallServiceConfig = callServiceConfig(),
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
@@ -190,6 +193,13 @@ internal class StreamVideoImpl internal constructor(
         // call cleanup on the active call
         val activeCall = state.activeCall.value
         activeCall?.leave()
+        // Stop the call service if it was running
+        if (callServiceConfig.runCallServiceInForeground) {
+            safeCall {
+                val serviceIntent = CallService.buildStopIntent(context, callServiceConfig)
+                context.stopService(serviceIntent)
+            }
+        }
     }
 
     /**

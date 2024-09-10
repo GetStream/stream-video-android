@@ -133,10 +133,10 @@ public class Call(
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
-    val camera by lazy { mediaManager.camera }
-    val microphone by lazy { mediaManager.microphone }
-    val speaker by lazy { mediaManager.speaker }
-    val screenShare by lazy { mediaManager.screenShare }
+    val camera by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.camera }
+    val microphone by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.microphone }
+    val speaker by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.speaker }
+    val screenShare by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.screenShare }
 
     /** The cid is type:id */
     val cid = "$type:$id"

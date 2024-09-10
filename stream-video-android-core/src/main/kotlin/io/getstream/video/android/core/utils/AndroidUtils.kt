@@ -19,17 +19,25 @@
 package io.getstream.video.android.core.utils
 
 import android.app.Activity
+import android.app.Notification
 import android.app.NotificationManager
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ServiceCompat
 import io.getstream.log.StreamLog
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
+import io.getstream.video.android.core.screenshare.StreamScreenShareService.Companion.TRIGGER_SHARE_SCREEN
 import io.getstream.result.Error
 import io.getstream.result.Result
 import kotlinx.coroutines.channels.Channel
@@ -166,6 +174,42 @@ internal inline fun <T> safeCallWithDefault(default: T, block: () -> T): T {
         // Handle or log the exception here
         StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
         default
+    }
+}
+
+/**
+ * Start a foreground service with a service type to meet requirements introduced in Android 14.
+ *
+ * @param notificationId The notification ID
+ * @param notification The notification to show
+ * @param trigger The trigger that started the service: [TRIGGER_ONGOING_CALL], [TRIGGER_OUTGOING_CALL], [TRIGGER_INCOMING_CALL], [TRIGGER_SHARE_SCREEN]
+ */
+internal fun Service.startForegroundWithServiceType(
+    notificationId: Int,
+    notification: Notification,
+    trigger: String,
+    foregroundServiceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        startForeground(notificationId, notification)
+    } else {
+        val beforeOrAfterAndroid14Type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+        } else {
+            foregroundServiceType
+        }
+
+        ServiceCompat.startForeground(
+            this,
+            notificationId,
+            notification,
+            when (trigger) {
+                TRIGGER_ONGOING_CALL -> foregroundServiceType
+                TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> beforeOrAfterAndroid14Type
+                TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                else -> beforeOrAfterAndroid14Type
+            },
+        )
     }
 }
 

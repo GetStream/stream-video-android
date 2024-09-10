@@ -27,6 +27,8 @@ import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -96,6 +98,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     private val runForegroundServiceForCalls: Boolean = true,
+    private val callServiceConfig: CallServiceConfig? = null,
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = Sounds(),
     private val crashOnMissingPermission: Boolean = false,
@@ -188,7 +191,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             connectionModule = connectionModule,
             streamNotificationManager = streamNotificationManager,
-            runForegroundService = runForegroundServiceForCalls,
+            callServiceConfig = callServiceConfig
+                ?: callServiceConfig().copy(
+                    runCallServiceInForeground = runForegroundServiceForCalls,
+                    audioUsage = audioUsage,
+                ),
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
