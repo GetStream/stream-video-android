@@ -99,7 +99,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val runForegroundServiceForCalls: Boolean = true,
     private val callServiceConfig: CallServiceConfig? = null,
     private val localSfuAddress: String? = null,
-    private val sounds: Sounds = Sounds(),
+    private val sounds: Sounds = Sounds(context),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,

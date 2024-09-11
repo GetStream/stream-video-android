@@ -16,16 +16,51 @@
 
 package io.getstream.video.android.core.sounds
 
+import android.content.Context
+import android.media.RingtoneManager
+import android.net.Uri
 import androidx.annotation.RawRes
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 
 /**
  * Contains all the sounds that the SDK uses.
  *
- * @param incomingCallSound Resource used as a ringtone for incoming calls.
- * @param outgoingCallSound Resource used as a ringing tone for outgoing calls.
+ * @param incomingCallSoundResId Resource to be used as a ringtone for incoming calls. Set to [DEVICE_INCOMING_RINGTONE] to use the device ringtone.
+ * @param outgoingCallSoundResId Resource to be used as a ringing tone for outgoing calls.
  */
-data class Sounds(
-    @RawRes val incomingCallSound: Int? = R.raw.call_incoming_sound,
-    @RawRes val outgoingCallSound: Int? = R.raw.call_outgoing_sound,
-)
+class Sounds(
+    private val context: Context,
+    @RawRes private val incomingCallSoundResId: Int? = DEVICE_INCOMING_RINGTONE,
+    @RawRes private val outgoingCallSoundResId: Int? = R.raw.call_outgoing_sound,
+) {
+    private val logger by taggedLogger("StreamVideo:Sounds")
+
+    internal val incomingCallSoundUri: Uri?
+        get() = if (incomingCallSoundResId == DEVICE_INCOMING_RINGTONE) {
+            RingtoneManager.getActualDefaultRingtoneUri(context, RingtoneManager.TYPE_RINGTONE) ?: run {
+                logger.w { "Device ringtone was null. Falling back to default incoming call sound." }
+                parseSoundUri(R.raw.call_incoming_sound)
+            }
+        } else {
+            parseSoundUri(incomingCallSoundResId)
+        }
+
+    internal val outgoingCallSoundUri: Uri?
+        get() = if (outgoingCallSoundResId == DEVICE_INCOMING_RINGTONE) {
+            logger.w {
+                "Cannot assign DEVICE_INCOMING_RINGTONE to Sounds#outgoingCallSoundResId. Falling back to default outgoing call sound."
+            }
+            parseSoundUri(R.raw.call_outgoing_sound)
+        } else {
+            parseSoundUri(outgoingCallSoundResId)
+        }
+
+    private fun parseSoundUri(@RawRes soundResId: Int?) = soundResId?.let {
+        Uri.parse("android.resource://${context.packageName}/$soundResId")
+    }
+
+    companion object {
+        @RawRes const val DEVICE_INCOMING_RINGTONE = -1
+    }
+}

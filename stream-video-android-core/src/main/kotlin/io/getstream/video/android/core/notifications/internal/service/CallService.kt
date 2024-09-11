@@ -25,8 +25,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.IBinder
-import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.StreamLog
@@ -424,7 +424,7 @@ internal open class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
-                            playCallSound(streamVideo.sounds.incomingCallSound)
+                            playCallSound(streamVideo.sounds.incomingCallSoundUri, mediaPlayer)
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
@@ -432,7 +432,7 @@ internal open class CallService : Service() {
 
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
-                            playCallSound(streamVideo.sounds.outgoingCallSound)
+                            playCallSound(streamVideo.sounds.outgoingCallSoundUri, mediaPlayer)
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
@@ -490,13 +490,13 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun playCallSound(@RawRes sound: Int?) {
-        sound?.let {
+    private fun playCallSound(soundUri: Uri?, mediaPlayer: MediaPlayer?) {
+        if (soundUri != null && mediaPlayer != null) {
             try {
-                mediaPlayer?.let {
-                    if (!it.isPlaying) {
-                        setMediaPlayerDataSource(it, sound)
-                        it.start()
+                with(mediaPlayer) {
+                    if (!isPlaying) {
+                        setMediaPlayerDataSource(this, soundUri)
+                        start()
                     }
                 }
             } catch (e: IllegalStateException) {
@@ -505,13 +505,9 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, @RawRes resId: Int) {
+    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, uri: Uri) {
         mediaPlayer.reset()
-        val afd = resources.openRawResourceFd(resId)
-        if (afd != null) {
-            mediaPlayer.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-            afd.close()
-        }
+        mediaPlayer.setDataSource(applicationContext, uri)
         mediaPlayer.isLooping = true
         mediaPlayer.prepare()
     }
