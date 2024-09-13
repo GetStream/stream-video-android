@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.socket
 
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -277,7 +276,6 @@ public open class PersistentSocket<T>(
             .url(url)
             .addHeader("Connection", "Upgrade")
             .addHeader("Upgrade", "websocket")
-            .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
             .build()
 
         return httpClient.newWebSocket(request, this)
