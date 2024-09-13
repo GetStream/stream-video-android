@@ -213,12 +213,15 @@ public interface StreamVideo : NotificationHandler {
             val apiVersion = "|api_version=${Build.VERSION.SDK_INT}"
             val deviceVendor = "|device_vendor=${Build.MANUFACTURER}"
             val deviceModel = "|device_model=${Build.MODEL}"
-
-            val streamVideoImpl = internalStreamVideo as? StreamVideoImpl
-            val appName = streamVideoImpl?.appName?.let { "|app_name=$it" }.orEmpty()
+            val appName = buildAppName()
 
             return streamVideoVersion + os + apiVersion + deviceVendor + deviceModel + appName
         }
+
+        private fun buildAppName(): String =
+            (internalStreamVideo as? StreamVideoImpl)?.let { streamVideoImpl ->
+                "|app_name=" + (streamVideoImpl.appName ?: streamVideoImpl.context.packageName)
+            } ?: ""
 
         /**
          * Uninstall a previous [StreamVideo] instance.
