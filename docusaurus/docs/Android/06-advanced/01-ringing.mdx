@@ -116,3 +116,13 @@ For this you need to leave the call by using:
 call.leave()
 ```
 
+### Sounds
+
+The SDK plays sounds for incoming and outgoing calls. You can customize these sounds by passing your own instance of the `Sounds` class to the `StreamVideoBuilder` `sounds` constructor parameter.
+
+`Sounds` has two resource properties, `incomingCallSoundResId` and `outgoingCallSoundResId`. These properties can have the following values:
+- By default, their values are the device ringtone for incoming and a default ringing tone provided by the SDK for outgoing.
+- You can pass raw resource identifiers that correspond to audio files in your project's `res/raw` directory.
+- To disable (mute) one of the sounds, pass `null` to the corresponding property.
+- You can pass the `Sounds.DEVICE_INCOMING_RINGTONE` special value to `incomingCallSoundResId` to use the device ringtone.
+- Special cases: if the device ringtone is evaluated to `null` or the outgoing sound is set to `DEVICE_INCOMING_RINGTONE`, a corresponding default sound will be used.

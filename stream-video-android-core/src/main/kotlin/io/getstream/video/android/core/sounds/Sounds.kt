@@ -26,6 +26,7 @@ import io.getstream.video.android.core.R
 /**
  * Contains all the sounds that the SDK uses.
  *
+ * @param context Context to be used for retrieving the sounds.
  * @param incomingCallSoundResId Resource to be used as a ringtone for incoming calls. Set to [DEVICE_INCOMING_RINGTONE] to use the device ringtone.
  * @param outgoingCallSoundResId Resource to be used as a ringing tone for outgoing calls.
  */
