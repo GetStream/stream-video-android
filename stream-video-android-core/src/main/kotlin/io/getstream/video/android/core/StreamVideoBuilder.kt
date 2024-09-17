@@ -34,6 +34,7 @@ import io.getstream.video.android.core.notifications.internal.storage.DeviceToke
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.sounds.deviceRingtoneSoundConfig
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -99,7 +100,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val runForegroundServiceForCalls: Boolean = true,
     private val callServiceConfig: CallServiceConfig? = null,
     private val localSfuAddress: String? = null,
-    private val sounds: Sounds = Sounds(),
+    private val sounds: Sounds = Sounds(deviceRingtoneSoundConfig(context)),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
