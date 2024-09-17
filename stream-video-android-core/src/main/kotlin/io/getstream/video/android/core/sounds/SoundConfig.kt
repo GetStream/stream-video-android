@@ -21,6 +21,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import androidx.annotation.RawRes
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.utils.safeCall
 
 /**
  * Returns a sound config that uses the device ringtone for incoming calls and the SDK default ringing tone for outgoing calls.
@@ -34,10 +35,12 @@ fun deviceRingtoneSoundConfig(context: Context): SoundConfig = DeviceRingtoneSou
  */
 open class DeviceRingtoneSoundConfig(val context: Context) : StreamResSoundConfig(context) {
     override val incomingCallSoundUri: Uri?
-        get() = RingtoneManager.getActualDefaultRingtoneUri(
-            context,
-            RingtoneManager.TYPE_RINGTONE,
-        ) ?: super.incomingCallSoundUri
+        get() = safeCall(default = null) {
+            RingtoneManager.getActualDefaultRingtoneUri(
+                context,
+                RingtoneManager.TYPE_RINGTONE,
+            )
+        } ?: super.incomingCallSoundUri
 }
 
 /**
