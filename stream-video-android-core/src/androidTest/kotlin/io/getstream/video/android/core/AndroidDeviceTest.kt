@@ -295,7 +295,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         delay(1000)
 
-
         // leave and cleanup the joining call
         call.leave()
         call.cleanup()

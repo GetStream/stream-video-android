@@ -433,7 +433,7 @@ public class Call(
             // wait for the first stream to be added
             session?.let { rtcSession ->
                 val mainRtcSession = rtcSession.lastVideoStreamAdded.filter { it != null }.first()
-                logger.d {  "stream added, rtc completed, ready to display video $mainRtcSession" }
+                logger.d { "stream added, rtc completed, ready to display video $mainRtcSession" }
             }
         }
 
