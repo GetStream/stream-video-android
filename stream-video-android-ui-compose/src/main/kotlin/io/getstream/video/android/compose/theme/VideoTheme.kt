@@ -20,8 +20,9 @@ package io.getstream.video.android.compose.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalRippleConfiguration
+import androidx.compose.material.RippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -72,18 +73,19 @@ private val LocalStyles = compositionLocalOf<CompositeStyleProvider> {
  * @param dimens The set of dimens we provide, wrapped in [StreamDimens].
  * @param typography The set of typography styles we provide, wrapped in [StreamTypography].
  * @param shapes The set of shapes we provide, wrapped in [StreamShapes].
- * @param rippleTheme Defines the appearance for ripples.
+ * @param rippleConfiguration Defines the appearance for ripples.
  * @param reactionMapper Defines a mapper of the emoji code from the reaction events.
  * @param content The content shown within the theme wrapper.
  */
 @Composable
+@OptIn(ExperimentalMaterialApi::class)
 public fun VideoTheme(
     isInDarkMode: Boolean = isSystemInDarkTheme(),
     colors: StreamColors = StreamColors.defaultColors(),
     dimens: StreamDimens = StreamDimens.defaultDimens(),
     typography: StreamTypography = StreamTypography.defaultTypography(colors, dimens),
     shapes: StreamShapes = StreamShapes.defaultShapes(dimens),
-    rippleTheme: RippleTheme = StreamRippleTheme,
+    rippleConfiguration: StreamRippleConfiguration = StreamRippleConfiguration,
     reactionMapper: ReactionMapper = ReactionMapper.defaultReactionMapper(),
     allowUIAutomationTest: Boolean = true,
     styles: CompositeStyleProvider = CompositeStyleProvider(),
@@ -94,7 +96,7 @@ public fun VideoTheme(
         LocalDimens provides dimens,
         LocalTypography provides typography,
         LocalShapes provides shapes,
-        LocalRippleTheme provides rippleTheme,
+        LocalRippleConfiguration provides rippleConfiguration.default(),
         LocalReactionMapper provides reactionMapper,
         LocalStyles provides styles,
     ) {
@@ -108,6 +110,7 @@ public fun VideoTheme(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 public interface StreamTheme {
     /**
      * Retrieves the current [StreamColors] at the call site's position in the hierarchy.
@@ -138,11 +141,11 @@ public interface StreamTheme {
         get() = LocalShapes.current
 
     /**
-     * Retrieves the current [RippleTheme] at the call site's position in the hierarchy.
+     * Retrieves the current [RippleConfiguration] at the call site's position in the hierarchy.
      */
-    public val rippleTheme: RippleTheme
+    public val rippleConfiguration: RippleConfiguration?
         @Composable @ReadOnlyComposable
-        get() = LocalRippleTheme.current
+        get() = StreamRippleConfiguration.default()
 
     /**
      * Retrieves the current [ReactionMapper] at the call site's position in the hierarchy.

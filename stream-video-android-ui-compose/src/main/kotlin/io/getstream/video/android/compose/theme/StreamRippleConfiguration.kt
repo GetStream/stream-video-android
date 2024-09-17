@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package io.getstream.video.android.compose.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.LocalRippleConfiguration
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material.RippleConfiguration
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.ReadOnlyComposable
 
 /**
- * A modified version of the default [RippleTheme] from [MaterialTheme] which
+ * A modified version of the default [RippleConfiguration] from [MaterialTheme] which
  * works in case the [MaterialTheme] is not initialized.
  */
-@Immutable
-internal object StreamRippleTheme : RippleTheme {
-    @Composable
-    override fun defaultColor(): Color {
-        return RippleTheme.defaultRippleColor(
-            contentColor = LocalContentColor.current,
-            lightTheme = !isSystemInDarkTheme(),
-        )
-    }
+public object StreamRippleConfiguration {
 
     @Composable
-    override fun rippleAlpha(): RippleAlpha {
-        return RippleTheme.defaultRippleAlpha(
-            contentColor = LocalContentColor.current,
-            lightTheme = !isSystemInDarkTheme(),
-        )
+    @ReadOnlyComposable
+    public fun default(): RippleConfiguration {
+        val rippleConfiguration = LocalRippleConfiguration.current
+        if (rippleConfiguration != null) return rippleConfiguration
+
+        val contentColor = LocalContentColor.current
+        return RippleConfiguration(color = contentColor)
     }
 }

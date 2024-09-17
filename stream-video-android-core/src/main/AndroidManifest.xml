@@ -104,6 +104,11 @@
             android:exported="false" />
 
         <service
+            android:name=".notifications.internal.service.LivestreamAudioCallService"
+            android:foregroundServiceType="microphone"
+            android:exported="false" />
+
+        <service
             android:name=".notifications.internal.service.LivestreamViewerService"
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />

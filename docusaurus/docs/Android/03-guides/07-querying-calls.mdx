@@ -25,6 +25,16 @@ val sort = listOf(SortField.Asc("starts_at"))
 val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
 ```
 
+**Calls that are ongoing / currently have participants**
+
+```kotlin
+client.queryCalls(mapOf("ongoing" to true)).let { result ->
+    result
+        .onSuccess { calls: QueriedCalls -> Log.d(TAG, "Query success: $calls") }
+        .onError { error: Error -> Log.e(TAG, "Query failure: ${error.message}") }
+}
+```
+
 **Calls filters on a custom property**
 
 ```kotlin
@@ -36,6 +46,7 @@ val result = client.queryCalls(filters=filters, sort=sort, limit=10, watch=true)
 ```
 
 **Pagination**
+
 The query response is paginated and the maximum count of items is defined by the `limit` parameter.
 Use the `prev` and `next` parameters from the last response as parameters for requesting the next page.
 
@@ -52,12 +63,6 @@ val resultPage2 = client.queryCalls(
     prev = resultPage1.value.prev,
     next = resultPage1.value.next
 )
-```
-
-**Calls that live/ currently have participants**
-
-```kotlin
-TODO
 ```
 
 ### Fields for Query Calls
@@ -78,15 +83,15 @@ You can filter on the following fields
 | `members` | Check if you are a member of this call |
 | `custom` | You can query custom data using the "custom.myfield" syntax |
 
-Sorting is supported on these fields below:
+Sorting is supported on the fields below:
 
-* starts_at
-* created_at
-* updated_at
-* ended_at
-* type
-* id
-* cid
+* `starts_at`
+* `created_at`
+* `updated_at`
+* `ended_at`
+* `type`
+* `id`
+* `cid`
 
 If you specify `watch` the SDK will automatically keep the data about these calls updated.
 This allows you to show a live preview of who's in the call.
