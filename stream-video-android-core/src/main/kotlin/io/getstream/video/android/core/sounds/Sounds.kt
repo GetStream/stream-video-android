@@ -16,8 +16,11 @@
 
 package io.getstream.video.android.core.sounds
 
+import android.content.Context
+import android.net.Uri
 import androidx.annotation.RawRes
 import io.getstream.video.android.core.R
+import org.jetbrains.annotations.ApiStatus
 
 /**
  * Contains all the sounds that the SDK uses.
@@ -25,7 +28,50 @@ import io.getstream.video.android.core.R
  * @param incomingCallSound Resource used as a ringtone for incoming calls.
  * @param outgoingCallSound Resource used as a ringing tone for outgoing calls.
  */
-data class Sounds(
+data class Sounds
+@Deprecated(
+    message = "Deprecated. Use constructor with SoundConfig parameter instead.",
+    replaceWith = ReplaceWith("Sounds(soundConfig: SoundConfig)"),
+    level = DeprecationLevel.WARNING,
+)
+@ApiStatus.ScheduledForRemoval(inVersion = "1.0.16")
+constructor(
     @RawRes val incomingCallSound: Int? = R.raw.call_incoming_sound,
     @RawRes val outgoingCallSound: Int? = R.raw.call_outgoing_sound,
-)
+) {
+
+    private var soundConfig: SoundConfig? = null
+        private set
+
+    /**
+     * Configure sounds by passing a [SoundConfig].
+     *
+     * @see deviceRingtoneSoundConfig
+     * @see streamResourcesSoundConfig
+     * @see mutedSoundConfig
+     * @see SoundConfig
+     */
+    constructor(soundConfig: SoundConfig) : this() {
+        this.soundConfig = soundConfig
+    }
+
+    internal fun getIncomingCallSoundUri(context: Context): Uri? = soundConfig.let { soundConfig ->
+        if (soundConfig != null) {
+            soundConfig.incomingCallSoundUri
+        } else {
+            incomingCallSound?.let {
+                Uri.parse("android.resource://${context.packageName}/$it")
+            }
+        }
+    }
+
+    internal fun getOutgoingCallSoundUri(context: Context): Uri? = soundConfig.let { soundConfig ->
+        if (soundConfig != null) {
+            soundConfig.outgoingCallSoundUri
+        } else {
+            outgoingCallSound?.let {
+                Uri.parse("android.resource://${context.packageName}/$it")
+            }
+        }
+    }
+}

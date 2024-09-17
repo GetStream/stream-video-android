@@ -4471,14 +4471,69 @@ public final class io/getstream/video/android/core/socket/SocketState$NotConnect
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/sounds/Sounds {
-	public static final field Companion Lio/getstream/video/android/core/sounds/Sounds$Companion;
-	public static final field DEVICE_INCOMING_RINGTONE I
-	public fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+public class io/getstream/video/android/core/sounds/DeviceRingtoneSoundConfig : io/getstream/video/android/core/sounds/StreamResSoundConfig {
+	public fun <init> (Landroid/content/Context;)V
+	public final fun getContext ()Landroid/content/Context;
+	public fun getIncomingCallSoundUri ()Landroid/net/Uri;
 }
 
-public final class io/getstream/video/android/core/sounds/Sounds$Companion {
+public class io/getstream/video/android/core/sounds/MutedSoundConfig : io/getstream/video/android/core/sounds/SoundConfig {
+	public fun <init> ()V
+	public fun getIncomingCallSoundUri ()Landroid/net/Uri;
+	public fun getOutgoingCallSoundUri ()Landroid/net/Uri;
+}
+
+public class io/getstream/video/android/core/sounds/ResSoundConfig : io/getstream/video/android/core/sounds/SoundConfig {
+	public fun <init> (Landroid/content/Context;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public fun getIncomingCallSoundUri ()Landroid/net/Uri;
+	public fun getOutgoingCallSoundUri ()Landroid/net/Uri;
+	protected final fun parseSoundUri (Landroid/content/Context;Ljava/lang/Integer;)Landroid/net/Uri;
+}
+
+public abstract interface class io/getstream/video/android/core/sounds/SoundConfig {
+	public abstract fun getIncomingCallSoundUri ()Landroid/net/Uri;
+	public abstract fun getOutgoingCallSoundUri ()Landroid/net/Uri;
+}
+
+public final class io/getstream/video/android/core/sounds/SoundConfigKt {
+	public static final fun deviceRingtoneSoundConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/SoundConfig;
+	public static final fun mutedSoundConfig ()Lio/getstream/video/android/core/sounds/SoundConfig;
+	public static final fun streamResourcesSoundConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/SoundConfig;
+}
+
+public final class io/getstream/video/android/core/sounds/Sounds {
+	public fun <init> ()V
+	public fun <init> (Lio/getstream/video/android/core/sounds/SoundConfig;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Integer;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/video/android/core/sounds/Sounds;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIncomingCallSound ()Ljava/lang/Integer;
+	public final fun getOutgoingCallSound ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class io/getstream/video/android/core/sounds/StreamResSoundConfig : io/getstream/video/android/core/sounds/ResSoundConfig {
+	public fun <init> (Landroid/content/Context;)V
+}
+
+public final class io/getstream/video/android/core/sounds/UriSoundConfig : io/getstream/video/android/core/sounds/SoundConfig {
+	public fun <init> (Landroid/net/Uri;Landroid/net/Uri;)V
+	public final fun component1 ()Landroid/net/Uri;
+	public final fun component2 ()Landroid/net/Uri;
+	public final fun copy (Landroid/net/Uri;Landroid/net/Uri;)Lio/getstream/video/android/core/sounds/UriSoundConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/UriSoundConfig;Landroid/net/Uri;Landroid/net/Uri;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/UriSoundConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIncomingCallSoundUri ()Landroid/net/Uri;
+	public final fun getIncomingCallSoundUriValue ()Landroid/net/Uri;
+	public fun getOutgoingCallSoundUri ()Landroid/net/Uri;
+	public final fun getOutgoingCallSoundUriValue ()Landroid/net/Uri;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
