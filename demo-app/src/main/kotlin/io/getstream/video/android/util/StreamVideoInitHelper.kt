@@ -18,7 +18,6 @@ package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
@@ -32,10 +31,6 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.core.sounds.DeviceRingtoneSoundConfig
-import io.getstream.video.android.core.sounds.SoundConfig
-import io.getstream.video.android.core.sounds.Sounds
-import io.getstream.video.android.core.sounds.deviceRingtoneSoundConfig
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -213,11 +208,5 @@ object StreamVideoInitHelper {
             ensureSingleInstance = false,
             appName = "Stream Video Demo App",
         ).build()
-    }
-
-    private fun customSoundConfig(context: Context): SoundConfig {
-        return object : DeviceRingtoneSoundConfig(context) {
-            override val outgoingCallSoundUri: Uri? = null
-        }
     }
 }
