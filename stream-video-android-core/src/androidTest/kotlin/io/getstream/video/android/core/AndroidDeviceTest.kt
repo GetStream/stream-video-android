@@ -295,7 +295,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         delay(1000)
 
-        clientImpl.debugInfo.log()
 
         // leave and cleanup the joining call
         call.leave()
@@ -471,7 +470,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // log debug info
         logger.d { networkOut.toString() }
-        clientImpl.debugInfo.log()
 
         // leave and clean up a call
         call.leave()
