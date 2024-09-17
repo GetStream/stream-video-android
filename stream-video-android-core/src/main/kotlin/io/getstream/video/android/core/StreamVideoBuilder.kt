@@ -79,6 +79,7 @@ import java.net.ConnectException
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
+ * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
  *
  * @see build
  * @see ClientState.connection
@@ -104,6 +105,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
+    private val appName: String? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -201,6 +203,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
+            appName = appName,
         )
 
         if (user.type == UserType.Guest) {

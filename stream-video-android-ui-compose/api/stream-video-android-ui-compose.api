@@ -260,6 +260,12 @@ public final class io/getstream/video/android/compose/theme/StreamDimens$Compani
 	public final fun defaultDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
 }
 
+public final class io/getstream/video/android/compose/theme/StreamRippleConfiguration {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/compose/theme/StreamRippleConfiguration;
+	public final fun default (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/RippleConfiguration;
+}
+
 public final class io/getstream/video/android/compose/theme/StreamShapes {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamShapes$Companion;
@@ -295,7 +301,7 @@ public abstract interface class io/getstream/video/android/compose/theme/StreamT
 	public fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamColors;
 	public fun getDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
 	public fun getReactionMapper (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/core/mapper/ReactionMapper;
-	public fun getRippleTheme (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/ripple/RippleTheme;
+	public fun getRippleConfiguration (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/RippleConfiguration;
 	public fun getShapes (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamShapes;
 	public fun getStyles (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;
 	public fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamTypography;
@@ -350,7 +356,7 @@ public final class io/getstream/video/android/compose/theme/VideoTheme : io/gets
 }
 
 public final class io/getstream/video/android/compose/theme/VideoThemeKt {
-	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Lio/getstream/video/android/compose/theme/StreamRippleConfiguration;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {
