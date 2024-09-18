@@ -24,23 +24,43 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.utils.safeCall
 
 /**
+ * Base sound configuration.
+ *
+ * @see deviceRingtoneSoundConfig
+ * @see streamResourcesSoundConfig
+ * @see mutedSoundConfig
+ * @see ResSoundConfig
+ * @see UriSoundConfig
+ */
+interface SoundConfig {
+
+    val incomingCallSoundUri: Uri?
+    val outgoingCallSoundUri: Uri?
+
+    fun parseSoundUri(context: Context, soundResId: Int?): Uri? = soundResId?.let {
+        Uri.parse("android.resource://${context.packageName}/$soundResId")
+    }
+}
+
+
+/**
  * Returns a sound config that uses the device ringtone for incoming calls and the SDK default ringing tone for outgoing calls.
  *
  * @param context Context used for retrieving the sounds.
  */
-fun deviceRingtoneSoundConfig(context: Context): SoundConfig = DeviceRingtoneSoundConfig(context)
+fun deviceRingtoneSoundConfig(context: Context): SoundConfig = object : SoundConfig {
 
-/**
- * Sound config that uses the device ringtone for incoming calls and the SDK default ringing tone for outgoing calls.
- */
-open class DeviceRingtoneSoundConfig(val context: Context) : StreamResSoundConfig(context) {
+    private val streamResSoundConfig = streamResourcesSoundConfig(context)
+
     override val incomingCallSoundUri: Uri?
         get() = safeCall(default = null) {
             RingtoneManager.getActualDefaultRingtoneUri(
                 context,
                 RingtoneManager.TYPE_RINGTONE,
             )
-        } ?: super.incomingCallSoundUri
+        } ?: streamResSoundConfig.incomingCallSoundUri
+
+    override val outgoingCallSoundUri: Uri? = streamResSoundConfig.outgoingCallSoundUri
 }
 
 /**
@@ -50,26 +70,17 @@ open class DeviceRingtoneSoundConfig(val context: Context) : StreamResSoundConfi
  */
 fun streamResourcesSoundConfig(
     context: Context,
-): SoundConfig = StreamResSoundConfig(context = context)
+): SoundConfig = object : SoundConfig {
 
-/**
- * Sound config that uses the SDK default sound resources for incoming and outgoing calls.
- */
-open class StreamResSoundConfig(context: Context) : ResSoundConfig(
-    context = context,
-    incomingCallSoundResId = R.raw.call_incoming_sound,
-    outgoingCallSoundResId = R.raw.call_outgoing_sound,
-)
+    override val incomingCallSoundUri: Uri? = parseSoundUri(context, R.raw.call_incoming_sound)
+    override val outgoingCallSoundUri: Uri? = parseSoundUri(context, R.raw.call_outgoing_sound)
+}
 
 /**
  * Returns a sound config that mutes (disables) all sounds.
  */
-fun mutedSoundConfig(): SoundConfig = MutedSoundConfig()
+fun mutedSoundConfig(): SoundConfig = object : SoundConfig {
 
-/**
- * Sound config that mutes (disables) all sounds.
- */
-open class MutedSoundConfig : SoundConfig {
     override val incomingCallSoundUri: Uri? = null
     override val outgoingCallSoundUri: Uri? = null
 }
@@ -77,7 +88,7 @@ open class MutedSoundConfig : SoundConfig {
 /**
  * A class that represents a sound config that uses raw resources to specify the sounds.
  */
-open class ResSoundConfig(
+class ResSoundConfig(
     context: Context,
     @RawRes incomingCallSoundResId: Int?,
     @RawRes outgoingCallSoundResId: Int?,
@@ -85,10 +96,6 @@ open class ResSoundConfig(
 
     override val incomingCallSoundUri: Uri? = parseSoundUri(context, incomingCallSoundResId)
     override val outgoingCallSoundUri: Uri? = parseSoundUri(context, outgoingCallSoundResId)
-
-    protected fun parseSoundUri(context: Context, soundResId: Int?): Uri? = soundResId?.let {
-        Uri.parse("android.resource://${context.packageName}/$soundResId")
-    }
 }
 
 /**
@@ -101,20 +108,4 @@ data class UriSoundConfig(
 
     override val incomingCallSoundUri: Uri? = incomingCallSoundUriValue
     override val outgoingCallSoundUri: Uri? = outgoingCallSoundUriValue
-}
-
-/**
- * Generic sound configuration.
- *
- * @see deviceRingtoneSoundConfig
- * @see streamResourcesSoundConfig
- * @see mutedSoundConfig
- * @see DeviceRingtoneSoundConfig
- * @see StreamResSoundConfig
- * @see ResSoundConfig
- * @see UriSoundConfig
- */
-interface SoundConfig {
-    val incomingCallSoundUri: Uri?
-    val outgoingCallSoundUri: Uri?
 }
