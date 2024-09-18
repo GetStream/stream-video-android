@@ -415,7 +415,12 @@ internal open class CallService : Service() {
     }
 
     private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
-        // Ringing state
+        observeRingingState(callId, streamVideo)
+        observeCallEvents(callId, streamVideo)
+        observeRemoteParticipants(callId, streamVideo)
+    }
+
+    private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             call.state.ringingState.collect {
@@ -457,8 +462,43 @@ internal open class CallService : Service() {
                 }
             }
         }
+    }
 
-        // Call state
+    private fun playCallSound(@RawRes sound: Int?) {
+        sound?.let {
+            try {
+                mediaPlayer?.let {
+                    if (!it.isPlaying) {
+                        setMediaPlayerDataSource(it, sound)
+                        it.start()
+                    }
+                }
+            } catch (e: IllegalStateException) {
+                logger.d { "Error playing call sound." }
+            }
+        }
+    }
+
+    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, @RawRes resId: Int) {
+        mediaPlayer.reset()
+        val afd = resources.openRawResourceFd(resId)
+        if (afd != null) {
+            mediaPlayer.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+            afd.close()
+        }
+        mediaPlayer.isLooping = true
+        mediaPlayer.prepare()
+    }
+
+    private fun stopCallSound() {
+        try {
+            if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
+        } catch (e: IllegalStateException) {
+            logger.d { "Error stopping call sound. MediaPlayer might have already been released." }
+        }
+    }
+
+    private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             call.subscribe { event ->
@@ -488,8 +528,28 @@ internal open class CallService : Service() {
                 }
             }
         }
+    }
 
-        // Remote participants
+    private fun handleIncomingCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
+        // If accepted event was received, with event user being me, but current device is still ringing, it means the call was accepted on another device
+        if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
+            // So stop ringing on this device
+            stopService()
+        }
+    }
+
+    private fun handleIncomingCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?, activeCallExists: Boolean) {
+        // If rejected event was received (even from another device), with event user being me OR the caller, remove incoming call / stop service.
+        if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
+            if (activeCallExists) {
+                removeIncomingCall(INCOMING_CALL_NOTIFICATION_ID)
+            } else {
+                stopService()
+            }
+        }
+    }
+
+    private fun observeRemoteParticipants(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             var latestRemoteParticipantCount = 0
@@ -535,59 +595,6 @@ internal open class CallService : Service() {
                         )
                     }
                 }
-            }
-        }
-    }
-
-    private fun playCallSound(@RawRes sound: Int?) {
-        sound?.let {
-            try {
-                mediaPlayer?.let {
-                    if (!it.isPlaying) {
-                        setMediaPlayerDataSource(it, sound)
-                        it.start()
-                    }
-                }
-            } catch (e: IllegalStateException) {
-                logger.d { "Error playing call sound." }
-            }
-        }
-    }
-
-    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, @RawRes resId: Int) {
-        mediaPlayer.reset()
-        val afd = resources.openRawResourceFd(resId)
-        if (afd != null) {
-            mediaPlayer.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-            afd.close()
-        }
-        mediaPlayer.isLooping = true
-        mediaPlayer.prepare()
-    }
-
-    private fun stopCallSound() {
-        try {
-            if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
-        } catch (e: IllegalStateException) {
-            logger.d { "Error stopping call sound. MediaPlayer might have already been released." }
-        }
-    }
-
-    private fun handleIncomingCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
-        // If accepted event was received, with event user being me, but current device is still ringing, it means the call was accepted on another device
-        if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
-            // So stop ringing on this device
-            stopService()
-        }
-    }
-
-    private fun handleIncomingCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?, activeCallExists: Boolean) {
-        // If rejected event was received (even from another device), with event user being me OR the caller, remove incoming call / stop service.
-        if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
-            if (activeCallExists) {
-                removeIncomingCall(INCOMING_CALL_NOTIFICATION_ID)
-            } else {
-                stopService()
             }
         }
     }
