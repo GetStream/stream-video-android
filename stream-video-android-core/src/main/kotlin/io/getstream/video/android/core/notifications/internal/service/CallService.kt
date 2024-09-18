@@ -488,6 +488,55 @@ internal open class CallService : Service() {
                 }
             }
         }
+
+        // Remote participants
+        serviceScope.launch {
+            val call = streamVideo.call(callId.type, callId.id)
+            var latestRemoteParticipantCount = 0
+
+            call.state.remoteParticipants.collect { remoteParticipants ->
+                if (remoteParticipants.size != latestRemoteParticipantCount) {
+                    // If number of remote participants increased or decreased
+                    latestRemoteParticipantCount = remoteParticipants.size
+
+                    val callDisplayName = if (remoteParticipants.isEmpty()) {
+                        // If no remote participants, get simple call notification title
+                        applicationContext.getString(
+                            R.string.stream_video_ongoing_call_notification_title,
+                        )
+                    } else {
+                        if (remoteParticipants.size > 1) {
+                            // If more than 1 remote participant, get group call notification title
+                            applicationContext.getString(
+                                R.string.stream_video_ongoing_group_call_notification_title,
+                            )
+                        } else {
+                            // If 1 remote participant, get the name of the remote participant
+                            val remoteParticipantName = remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+
+                            applicationContext.getString(
+                                R.string.stream_video_ongoing_one_on_one_call_notification_title,
+                                remoteParticipantName,
+                            )
+                        }
+                    }
+
+                    val notification = streamVideo.getOngoingCallNotification(
+                        callDisplayName = callDisplayName, // Use title in notification
+                        callId = callId,
+                    )
+
+                    notification?.let {
+                        startForegroundWithServiceType(
+                            callId.hashCode(),
+                            it,
+                            TRIGGER_ONGOING_CALL,
+                            serviceType,
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun playCallSound(@RawRes sound: Int?) {
