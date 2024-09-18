@@ -46,9 +46,10 @@ constructor(
     /**
      * Configure sounds by passing a [SoundConfig].
      *
-     * @see deviceRingtoneSoundConfig
-     * @see streamResourcesSoundConfig
-     * @see mutedSoundConfig
+     * @see SoundConfig.createDeviceRingtoneSoundConfig
+     * @see SoundConfig.createStreamResourcesSoundConfig
+     * @see SoundConfig.createEmptySoundConfig
+     * @see SoundConfig.createCustomSoundConfig
      * @see SoundConfig
      */
     constructor(soundConfig: SoundConfig) : this() {
