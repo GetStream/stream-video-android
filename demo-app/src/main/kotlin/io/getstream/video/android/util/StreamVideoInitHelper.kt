@@ -191,6 +191,13 @@ object StreamVideoInitHelper {
             apiKey = apiKey,
             user = user,
             token = token,
+            loggingLevel = loggingLevel,
+            ensureSingleInstance = false,
+            notificationConfig = NotificationConfig(
+                pushDeviceGenerators = listOf(
+                    FirebasePushDeviceGenerator(providerName = "firebase"),
+                ),
+            ),
             tokenProvider = {
                 val email = user.custom?.get("email")
                 val authData = StreamService.instance.getAuthData(
@@ -199,13 +206,6 @@ object StreamVideoInitHelper {
                 )
                 authData.token
             },
-            loggingLevel = loggingLevel,
-            notificationConfig = NotificationConfig(
-                pushDeviceGenerators = listOf(
-                    FirebasePushDeviceGenerator(providerName = "firebase"),
-                ),
-            ),
-            ensureSingleInstance = false,
             appName = "Stream Video Demo App",
         ).build()
     }

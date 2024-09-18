@@ -120,9 +120,67 @@ call.leave()
 
 The SDK plays sounds for incoming and outgoing calls. You can customize these sounds by passing your own instance of the `Sounds` class to the `StreamVideoBuilder` `sounds` constructor parameter.
 
-`Sounds` has two resource properties, `incomingCallSoundResId` and `outgoingCallSoundResId`. These properties can have the following values:
-- By default, their values are the device ringtone for incoming and a default ringing tone provided by the SDK for outgoing.
-- You can pass raw resource identifiers that correspond to audio files in your project's `res/raw` directory.
-- To disable (mute) one of the sounds, pass `null` to the corresponding property.
-- You can pass the `Sounds.DEVICE_INCOMING_RINGTONE` special value to `incomingCallSoundResId` to use the device ringtone.
-- Special cases: if the device ringtone is evaluated to `null` or the outgoing sound is set to `DEVICE_INCOMING_RINGTONE`, a corresponding default sound will be used.
+#### Deprecated method for customizing sounds
+
+`Sounds` has two properties, `incomingCallSound` and `outgoingCallSound`. You need to assign raw resource identifiers to these properties. These identifiers correspond to audio files in your project's `res/raw` directory.
+
+To disable sounds, pass `null` to `incomingCallSound` or `outgoingCallSound`.
+
+:::caution
+This constructor of the `Sounds` class is deprecated. It should be replaced with the `Sounds(SoundConfig)` constructor. See the recommended method below.
+:::
+
+#### Recommended method for customizing sounds
+
+`Sounds` has one property, `soundConfig` of type `SoundConfig`. 
+
+The `SoundConfig` interface defines two properties:
+- `incomingCallSoundUri`: The URI for the incoming call sound.
+- `outgoingCallSoundUri`: The URI for the outgoing call sound.
+
+Also, `SoundConfig` provides several static factory methods to create sound configurations:
+- `createDeviceRingtoneSoundConfig` - This method returns a `SoundConfig` that uses the device ringtone for incoming calls and the SDK default ringing tone for outgoing calls.
+- `createStreamResourcesSoundConfig` - This method returns a `SoundConfig` that uses the SDK's default sounds for both incoming and outgoing calls.
+- `createEmptySoundConfig` - Returns a `SoundConfig` that mutes (disables) all sounds.
+- `createCustomSoundConfig` - This method allows you to specify custom sounds for incoming and outgoing calls. The sounds can be either `URI`s or resource ID `Int`s. If you use resource IDs, you **must** provide a context.
+
+:::note
+By default, if you don't pass anything to the `sounds` builder parameter, the `createDeviceRingtoneSoundConfig` configuration is used.
+:::
+
+##### Usage examples
+
+```kotlin
+val soundConfig = SoundConfig.createCustomSoundConfig(
+    incomingCallSound = R.raw.custom_sound,
+    outgoingCallSound = customSoundUri,
+    context = context
+)
+
+StreamVideoBuilder(
+    // ...
+    sounds = Sounds(soundConfig),
+    // ...
+)
+```
+
+```kotlin
+val baseSoundConfig = SoundConfig.createDeviceRingtoneSoundConfig(context)
+
+val mixedSoundConfig1 = SoundConfig.createCustomSoundConfig(
+    // Use device ringtone for incoming calls
+    incomingCallSound = baseSoundConfig.incomingCallSoundUri,
+    // Use custom sound for outgoing calls
+    outgoingCallSound = R.raw.call_busy_sound,
+    // Context needed as we're using a res ID
+    context = context
+)
+
+val mixedSoundConfig2 = SoundConfig.createCustomSoundConfig(
+    // Use device ringtone for incoming calls
+    incomingCallSound = baseSoundConfig.incomingCallSoundUri,
+    // Mute the outgoing call sound
+    outgoingCallSound = null,
+    // Context not needed as we're not using any res ID
+)
+```

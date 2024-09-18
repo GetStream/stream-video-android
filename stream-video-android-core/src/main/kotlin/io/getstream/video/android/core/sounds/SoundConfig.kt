@@ -23,7 +23,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.utils.safeCall
 
 /**
- * Base sound configuration.
+ * Interface representing a sound configuration.
  *
  * @see createDeviceRingtoneSoundConfig
  * @see createStreamResourcesSoundConfig
@@ -70,6 +70,11 @@ interface SoundConfig {
                 getSoundUriFromRes(context, R.raw.call_outgoing_sound)
         }
 
+        /**
+         * Utility method that returns a sound URI from a resource ID.
+         *
+         * @return The sound URI or null if the resource ID is null or an exception occurred.
+         */
         fun getSoundUriFromRes(context: Context, soundResId: Int?): Uri? = soundResId?.let {
             safeCall(default = null) {
                 Uri.parse("android.resource://${context.packageName}/$soundResId")

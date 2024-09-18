@@ -41,7 +41,6 @@ constructor(
 ) {
 
     private var soundConfig: SoundConfig? = null
-        private set
 
     /**
      * Configure sounds by passing a [SoundConfig].
@@ -60,9 +59,7 @@ constructor(
         if (soundConfig != null) {
             soundConfig.incomingCallSoundUri
         } else {
-            incomingCallSound?.let {
-                Uri.parse("android.resource://${context.packageName}/$it")
-            }
+            incomingCallSound?.let { SoundConfig.getSoundUriFromRes(context, it) }
         }
     }
 
@@ -70,9 +67,7 @@ constructor(
         if (soundConfig != null) {
             soundConfig.outgoingCallSoundUri
         } else {
-            outgoingCallSound?.let {
-                Uri.parse("android.resource://${context.packageName}/$it")
-            }
+            outgoingCallSound?.let { SoundConfig.getSoundUriFromRes(context, it) }
         }
     }
 }
