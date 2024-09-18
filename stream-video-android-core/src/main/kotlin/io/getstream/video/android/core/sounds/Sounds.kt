@@ -34,7 +34,7 @@ data class Sounds
     replaceWith = ReplaceWith("Sounds(soundConfig: SoundConfig)"),
     level = DeprecationLevel.WARNING,
 )
-@ApiStatus.ScheduledForRemoval(inVersion = "1.0.16")
+@ApiStatus.ScheduledForRemoval(inVersion = "1.0.18")
 constructor(
     @RawRes val incomingCallSound: Int? = R.raw.call_incoming_sound,
     @RawRes val outgoingCallSound: Int? = R.raw.call_outgoing_sound,
