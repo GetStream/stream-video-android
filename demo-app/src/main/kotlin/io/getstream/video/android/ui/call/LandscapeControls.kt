@@ -21,11 +21,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CallEnd
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,6 +41,7 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -48,7 +52,12 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
 
 @Composable
-fun LandscapeControls(call: Call, onDismiss: () -> Unit) {
+fun LandscapeControls(
+    call: Call,
+    onChat: () -> Unit,
+    onSettings: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
     val toggleCamera = {
@@ -76,6 +85,8 @@ fun LandscapeControls(call: Call, onDismiss: () -> Unit) {
             camera = toggleCamera,
             mic = toggleMicrophone,
             onClick = onClick,
+            onChat = onChat,
+            onSettings = onSettings,
         ) {
             onDismiss()
         }
@@ -87,6 +98,8 @@ fun LandscapeControlsContent(
     isCameraEnabled: Boolean,
     isMicEnabled: Boolean,
     call: Call,
+    onChat: () -> Unit,
+    onSettings: () -> Unit,
     camera: () -> Unit,
     mic: () -> Unit,
     onClick: () -> Unit,
@@ -107,21 +120,36 @@ fun LandscapeControlsContent(
             ReactionsMenu(call = call, reactionMapper = ReactionMapper.defaultReactionMapper()) {
                 onDismiss()
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                ToggleCameraAction(isCameraEnabled = isCameraEnabled) {
-                    camera()
-                }
-                ToggleMicrophoneAction(isMicrophoneEnabled = isMicEnabled) {
-                    mic()
-                }
-                FlipCameraAction {
-                    call.camera.flip()
-                }
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    ToggleCameraAction(isCameraEnabled = isCameraEnabled) {
+                        camera()
+                    }
+                    ToggleMicrophoneAction(isMicrophoneEnabled = isMicEnabled) {
+                        mic()
+                    }
+                    FlipCameraAction {
+                        call.camera.flip()
+                    }
 
+                    ChatDialogAction(
+                        messageCount = 0,
+                        onCallAction = { onChat() },
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 StreamButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
+                    icon = Icons.Default.Settings,
+                    text = "Settings",
+                    onClick = onSettings,
+                )
+                StreamButton(
+                    modifier = Modifier.fillMaxWidth(),
                     style = VideoTheme.styles.buttonStyles.alertButtonStyle(),
                     icon = Icons.Default.CallEnd,
                     text = "Leave call",
@@ -141,6 +169,8 @@ fun LandscapeControlsPreview() {
             true,
             false,
             previewCall,
+            {},
+            {},
             {},
             {},
             {},

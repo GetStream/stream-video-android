@@ -18,9 +18,11 @@
 
 package io.getstream.video.android.ui.call
 
+import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -411,27 +413,32 @@ fun CallScreen(
             },
         )
 
-        if (participantsSize.size == 1 && !chatState.isVisible && orientation == Configuration.ORIENTATION_PORTRAIT) {
-            val context = LocalContext.current
-            val clipboardManager = remember(context) {
-                context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-            }
-            val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
-            Popup(
-                alignment = Alignment.BottomCenter,
-                offset = IntOffset(
-                    0,
-                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
-                        .toInt(),
-                ),
+        val isPictureInPictureMode = isInPictureInPictureMode()
+        if (!isPictureInPictureMode) {
+            if (participantsSize.size == 1 &&
+                !chatState.isVisible &&
+                orientation == Configuration.ORIENTATION_PORTRAIT
             ) {
-                ShareCallWithOthers(
-                    modifier = Modifier.fillMaxWidth(),
-                    call = call,
-                    clipboardManager = clipboardManager,
-                    env = env,
-                    context = context,
-                )
+                val clipboardManager = remember(context) {
+                    context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                }
+                val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+                Popup(
+                    alignment = Alignment.BottomCenter,
+                    offset = IntOffset(
+                        0,
+                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
+                            .toInt(),
+                    ),
+                ) {
+                    ShareCallWithOthers(
+                        modifier = Modifier.fillMaxWidth(),
+                        call = call,
+                        clipboardManager = clipboardManager,
+                        env = env,
+                        context = context,
+                    )
+                }
             }
         }
 
@@ -440,7 +447,13 @@ fun CallScreen(
         }
 
         if (showingLandscapeControls && orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            LandscapeControls(call) {
+            LandscapeControls(call, onChat = {
+                showingLandscapeControls = false
+                scope.launch { chatState.show() }
+            }, onSettings = {
+                showingLandscapeControls = false
+                isShowingSettingMenu = true
+            }) {
                 showingLandscapeControls = !showingLandscapeControls
             }
         }
@@ -552,6 +565,18 @@ fun CallScreen(
                     showEndRecordingDialog = false
                 },
             )
+        }
+    }
+}
+
+@Composable
+fun isInPictureInPictureMode(): Boolean {
+    val context = LocalContext.current
+    return remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            (context as? Activity)?.isInPictureInPictureMode ?: false
+        } else {
+            false
         }
     }
 }
