@@ -44,7 +44,7 @@ import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberMicrophonePermissionState
 import io.getstream.video.android.compose.pip.enterPictureInPicture
-import io.getstream.video.android.compose.pip.isInPictureInPictureMode
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -122,7 +122,7 @@ public fun AudioRoomContent(
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
-    val isInPictureInPicture = context.isInPictureInPictureMode
+    val isInPictureInPicture = rememberIsInPipMode()
 
     DefaultPermissionHandler(videoPermission = permissions)
 

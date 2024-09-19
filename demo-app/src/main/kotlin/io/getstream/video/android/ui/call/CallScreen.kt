@@ -18,11 +18,9 @@
 
 package io.getstream.video.android.ui.call
 
-import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -72,6 +70,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
@@ -413,7 +412,7 @@ fun CallScreen(
             },
         )
 
-        val isPictureInPictureMode = isInPictureInPictureMode()
+        val isPictureInPictureMode = rememberIsInPipMode()
         if (!isPictureInPictureMode) {
             if (participantsSize.size == 1 &&
                 !chatState.isVisible &&
@@ -565,18 +564,6 @@ fun CallScreen(
                     showEndRecordingDialog = false
                 },
             )
-        }
-    }
-}
-
-@Composable
-fun isInPictureInPictureMode(): Boolean {
-    val context = LocalContext.current
-    return remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            (context as? Activity)?.isInPictureInPictureMode ?: false
-        } else {
-            false
         }
     }
 }
