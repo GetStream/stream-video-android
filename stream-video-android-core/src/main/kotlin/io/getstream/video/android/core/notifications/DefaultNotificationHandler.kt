@@ -132,10 +132,10 @@ public open class DefaultNotificationHandler(
             val endCallPendingIntent = intentResolver.searchEndCallPendingIntent(callId)
 
             if (outgoingCallPendingIntent != null && endCallPendingIntent != null) {
-                getOutgoingCallNotification(
-                    outgoingCallPendingIntent,
-                    endCallPendingIntent,
+                getOngoingCallNotification(
+                    callId,
                     callDisplayName,
+                    isOutgoingCall = true,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -236,7 +236,7 @@ public open class DefaultNotificationHandler(
                 application.getString(R.string.stream_video_incoming_call_notification_title),
             )
             setChannelId(channelId)
-            setOngoing(false)
+            setOngoing(true)
             setCategory(NotificationCompat.CATEGORY_CALL)
             setFullScreenIntent(fullScreenPendingIntent, true)
             if (shouldHaveContentIntent) {
@@ -252,48 +252,6 @@ public open class DefaultNotificationHandler(
                 setAutoCancel(false)
             }
             addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
-        }
-    }
-
-    private fun getOutgoingCallNotification(
-        outgoingCallPendingIntent: PendingIntent,
-        endCallPendingIntent: PendingIntent,
-        callDisplayName: String,
-    ): Notification {
-        val channelId = application.getString(
-            R.string.stream_video_outgoing_call_notification_channel_id,
-        )
-        maybeCreateChannel(
-            channelId = channelId,
-            context = application,
-            configure = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    name = application.getString(
-                        R.string.stream_video_outgoing_call_notification_channel_title,
-                    )
-                    description = application.getString(
-                        R.string.stream_video_outgoing_call_notification_channel_description,
-                    )
-                }
-            },
-        )
-
-        return getNotification {
-            setContentTitle(
-                application.getString(R.string.stream_video_outgoing_call_notification_title),
-            )
-            setContentText(callDisplayName)
-            setChannelId(channelId)
-            setOngoing(true)
-            setContentIntent(outgoingCallPendingIntent)
-            setCategory(NotificationCompat.CATEGORY_CALL)
-            addAction(
-                NotificationCompat.Action.Builder(
-                    android.R.drawable.ic_menu_close_clear_cancel,
-                    application.getString(R.string.stream_video_call_notification_action_cancel),
-                    endCallPendingIntent,
-                ).build(),
-            )
         }
     }
 
@@ -325,6 +283,7 @@ public open class DefaultNotificationHandler(
         callId: StreamCallId,
         callDisplayName: String?,
         remoteParticipantCount: Int,
+        isOutgoingCall: Boolean,
     ): Notification? {
         val notificationId = callId.hashCode() // Notification ID
 
@@ -333,7 +292,11 @@ public open class DefaultNotificationHandler(
             callId,
             notificationId,
         )
-        val endCallIntent = intentResolver.searchEndCallPendingIntent(callId = callId)
+        val hangUpIntent = if (isOutgoingCall) {
+            intentResolver.searchRejectCallPendingIntent(callId)
+        } else {
+            intentResolver.searchEndCallPendingIntent(callId)
+        }
 
         // Channel preparation
         val ongoingCallsChannelId = application.getString(
@@ -353,7 +316,7 @@ public open class DefaultNotificationHandler(
             },
         )
 
-        if (endCallIntent == null) {
+        if (hangUpIntent == null) {
             logger.e { "End call intent is null, not showing notification!" }
             return null
         }
@@ -370,7 +333,11 @@ public open class DefaultNotificationHandler(
                 }
             }
             .setContentTitle(
-                application.getString(R.string.stream_video_ongoing_call_notification_title),
+                if (isOutgoingCall) {
+                    application.getString(R.string.stream_video_outgoing_call_notification_title)
+                } else {
+                    application.getString(R.string.stream_video_ongoing_call_notification_title)
+                },
             )
             .setContentText(
                 application.getString(R.string.stream_video_ongoing_call_notification_description),
@@ -378,7 +345,7 @@ public open class DefaultNotificationHandler(
             .setAutoCancel(false)
             .setOngoing(true)
             .addHangupAction(
-                endCallIntent,
+                hangUpIntent,
                 callDisplayName ?: callId.toString(),
                 remoteParticipantCount,
             )

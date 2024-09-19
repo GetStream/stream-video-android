@@ -30,6 +30,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
         callId: StreamCallId,
         callDisplayName: String?,
         remoteParticipantCount: Int,
+        isOutgoingCall: Boolean,
     ): Notification? = null
     override fun getRingingCallNotification(
         ringingState: RingingState,

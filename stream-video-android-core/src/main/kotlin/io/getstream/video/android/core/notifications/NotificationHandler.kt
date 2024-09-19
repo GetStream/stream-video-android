@@ -30,6 +30,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
         callId: StreamCallId,
         callDisplayName: String?,
         remoteParticipantCount: Int = 0,
+        isOutgoingCall: Boolean = false,
     ): Notification?
     fun getRingingCallNotification(
         ringingState: RingingState,

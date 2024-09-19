@@ -273,7 +273,7 @@ internal open class CallService : Service() {
                         ringingState = RingingState.Outgoing(),
                         callId = intentCallId,
                         callDisplayName = getString(
-                            R.string.stream_video_ongoing_call_notification_description,
+                            R.string.stream_video_outgoing_call_notification_title,
                         ),
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
@@ -335,7 +335,7 @@ internal open class CallService : Service() {
             } else if (trigger == TRIGGER_OUTGOING_CALL) {
                 if (mediaPlayer == null) mediaPlayer = MediaPlayer()
             }
-            observeCallState(intentCallId, streamVideo)
+            observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
         }
@@ -418,10 +418,10 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+    private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
-        observeRemoteParticipants(callId, streamVideo)
+        observeParticipants(callId, streamVideo)
     }
 
     private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
@@ -553,7 +553,7 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun observeRemoteParticipants(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+    private fun observeParticipants(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             var latestRemoteParticipantCount = -1
@@ -561,18 +561,47 @@ internal open class CallService : Service() {
             // Monitor call state and remote participants
             combine(
                 call.state.ringingState,
+                call.state.members,
                 call.state.remoteParticipants,
-            ) { ringingState, remoteParticipants ->
-                Pair(ringingState, remoteParticipants)
+            ) { ringingState, members, remoteParticipants ->
+                Triple(ringingState, members, remoteParticipants)
             }
                 .distinctUntilChanged()
-                .filter { it.first is RingingState.Active }
+                .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
                 .collectLatest {
                     val ringingState = it.first
-                    val remoteParticipants = it.second
+                    val members = it.second
+                    val remoteParticipants = it.third
 
-                    // If we have an active call (not incoming, not outgoing etc.)
-                    if (ringingState is RingingState.Active) {
+                    if (ringingState is RingingState.Outgoing) {
+                        val remoteMembersCount = members.size - 1
+
+                        val callDisplayName = if (remoteMembersCount != 1) {
+                            applicationContext.getString(
+                                R.string.stream_video_outgoing_call_notification_title,
+                            )
+                        } else {
+                            members.firstOrNull { member ->
+                                member.user.id != streamVideo.userId
+                            }?.user?.name ?: "Unknown"
+                        }
+
+                        val notification = streamVideo.getOngoingCallNotification(
+                            callId = callId,
+                            callDisplayName = callDisplayName,
+                            remoteParticipantCount = remoteMembersCount,
+                            isOutgoingCall = true,
+                        )
+
+                        notification?.let {
+                            startForegroundWithServiceType(
+                                callId.hashCode(),
+                                notification,
+                                TRIGGER_ONGOING_CALL,
+                                serviceType,
+                            )
+                        }
+                    } else if (ringingState is RingingState.Active) {
                         // If number of remote participants increased or decreased
                         if (remoteParticipants.size != latestRemoteParticipantCount) {
                             latestRemoteParticipantCount = remoteParticipants.size
@@ -611,7 +640,7 @@ internal open class CallService : Service() {
                             }
                         }
                     }
-            }
+                }
         }
     }
 
