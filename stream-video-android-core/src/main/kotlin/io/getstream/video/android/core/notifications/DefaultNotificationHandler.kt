@@ -32,6 +32,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
@@ -40,7 +41,6 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
@@ -183,7 +183,7 @@ public open class DefaultNotificationHandler(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callDisplayName: String,
+        callerName: String,
         shouldHaveContentIntent: Boolean,
     ): Notification {
         // if the app is in foreground then don't interrupt the user with a high priority
@@ -231,10 +231,10 @@ public open class DefaultNotificationHandler(
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle(
+            setContentTitle(callerName)
+            setContentText(
                 application.getString(R.string.stream_video_incoming_call_notification_title),
             )
-            setContentText(callDisplayName)
             setChannelId(channelId)
             setOngoing(false)
             setCategory(NotificationCompat.CATEGORY_CALL)
@@ -251,7 +251,7 @@ public open class DefaultNotificationHandler(
                 setContentIntent(emptyIntent)
                 setAutoCancel(false)
             }
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
+            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
         }
     }
 
@@ -322,8 +322,9 @@ public open class DefaultNotificationHandler(
     }
 
     override fun getOngoingCallNotification(
-        callDisplayName: String?,
         callId: StreamCallId,
+        callDisplayName: String?,
+        remoteParticipantCount: Int,
     ): Notification? {
         val notificationId = callId.hashCode() // Notification ID
 
@@ -376,7 +377,11 @@ public open class DefaultNotificationHandler(
             )
             .setAutoCancel(false)
             .setOngoing(true)
-            .addHangupAction(endCallIntent, callDisplayName ?: callId.toString())
+            .addHangupAction(
+                endCallIntent,
+                callDisplayName ?: callId.toString(),
+                remoteParticipantCount,
+            )
             .build()
     }
 
@@ -436,25 +441,6 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    private fun showIncomingCallNotification(
-        fullScreenPendingIntent: PendingIntent,
-        acceptCallPendingIntent: PendingIntent,
-        rejectCallPendingIntent: PendingIntent,
-        callDisplayName: String,
-        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
-    ) {
-        showNotification(notificationId) {
-            priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle("Incoming call")
-            setContentText(callDisplayName)
-            setOngoing(false)
-            setContentIntent(fullScreenPendingIntent)
-            setFullScreenIntent(fullScreenPendingIntent, true)
-            setCategory(NotificationCompat.CATEGORY_CALL)
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
-        }
-    }
-
     @SuppressLint("MissingPermission")
     private fun showNotification(
         notificationId: Int,
@@ -477,12 +463,32 @@ public open class DefaultNotificationHandler(
     private fun NotificationCompat.Builder.addHangupAction(
         rejectCallPendingIntent: PendingIntent,
         callDisplayName: String,
+        remoteParticipantCount: Int,
     ): NotificationCompat.Builder = apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 CallStyle.forOngoingCall(
                     Person.Builder()
                         .setName(callDisplayName)
+                        .apply {
+                            if (remoteParticipantCount == 0) {
+                                // Just one user in the call
+                                setIcon(
+                                    IconCompat.createWithResource(
+                                        application,
+                                        R.drawable.stream_video_ic_user,
+                                    ),
+                                )
+                            } else if (remoteParticipantCount > 1) {
+                                // More than one user in the call
+                                setIcon(
+                                    IconCompat.createWithResource(
+                                        application,
+                                        R.drawable.stream_video_ic_user_group,
+                                    ),
+                                )
+                            }
+                        }
                         .build(),
                     rejectCallPendingIntent,
                 ),

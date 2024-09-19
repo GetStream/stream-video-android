@@ -4139,7 +4139,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationIconRes ()I
 	protected final fun getNotificationManager ()Landroidx/core/app/NotificationManagerCompat;
-	public fun getOngoingCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
+	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;I)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public fun getSettingUpCallNotification ()Landroid/app/Notification;
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
@@ -4189,7 +4189,8 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_CALL_DISPLAY_NAME Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
-	public abstract fun getOngoingCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
+	public abstract fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;I)Landroid/app/Notification;
+	public static synthetic fun getOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;IILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getSettingUpCallNotification ()Landroid/app/Notification;

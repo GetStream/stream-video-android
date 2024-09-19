@@ -27,8 +27,9 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun getOngoingCallNotification(
-        callDisplayName: String?,
         callId: StreamCallId,
+        callDisplayName: String?,
+        remoteParticipantCount: Int,
     ): Notification? = null
     override fun getRingingCallNotification(
         ringingState: RingingState,

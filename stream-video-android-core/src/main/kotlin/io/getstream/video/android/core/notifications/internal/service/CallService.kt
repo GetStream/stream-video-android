@@ -48,6 +48,10 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
@@ -248,8 +252,8 @@ internal open class CallService : Service() {
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
                     first = streamVideo.getOngoingCallNotification(
-                        callDisplayName = intentCallDisplayName,
                         callId = intentCallId,
+                        callDisplayName = intentCallDisplayName,
                     ),
                     second = intentCallId.hashCode(),
                 )
@@ -552,49 +556,61 @@ internal open class CallService : Service() {
     private fun observeRemoteParticipants(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            var latestRemoteParticipantCount = 0
+            var latestRemoteParticipantCount = -1
 
-            call.state.remoteParticipants.collect { remoteParticipants ->
-                if (remoteParticipants.size != latestRemoteParticipantCount) {
-                    // If number of remote participants increased or decreased
-                    latestRemoteParticipantCount = remoteParticipants.size
+            // Monitor call state and remote participants
+            combine(
+                call.state.ringingState,
+                call.state.remoteParticipants,
+            ) { ringingState, remoteParticipants ->
+                Pair(ringingState, remoteParticipants)
+            }
+                .distinctUntilChanged()
+                .filter { it.first is RingingState.Active }
+                .collectLatest {
+                    val ringingState = it.first
+                    val remoteParticipants = it.second
 
-                    val callDisplayName = if (remoteParticipants.isEmpty()) {
-                        // If no remote participants, get simple call notification title
-                        applicationContext.getString(
-                            R.string.stream_video_ongoing_call_notification_title,
-                        )
-                    } else {
-                        if (remoteParticipants.size > 1) {
-                            // If more than 1 remote participant, get group call notification title
-                            applicationContext.getString(
-                                R.string.stream_video_ongoing_group_call_notification_title,
+                    // If we have an active call (not incoming, not outgoing etc.)
+                    if (ringingState is RingingState.Active) {
+                        // If number of remote participants increased or decreased
+                        if (remoteParticipants.size != latestRemoteParticipantCount) {
+                            latestRemoteParticipantCount = remoteParticipants.size
+
+                            val callDisplayName = if (remoteParticipants.isEmpty()) {
+                                // If no remote participants, get simple call notification title
+                                applicationContext.getString(
+                                    R.string.stream_video_ongoing_call_notification_title,
+                                )
+                            } else {
+                                if (remoteParticipants.size > 1) {
+                                    // If more than 1 remote participant, get group call notification title
+                                    applicationContext.getString(
+                                        R.string.stream_video_ongoing_group_call_notification_title,
+                                    )
+                                } else {
+                                    // If 1 remote participant, get the name of the remote participant
+                                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+                                }
+                            }
+
+                            // Use latest call display name in notification
+                            val notification = streamVideo.getOngoingCallNotification(
+                                callId = callId,
+                                callDisplayName = callDisplayName,
+                                remoteParticipantCount = remoteParticipants.size,
                             )
-                        } else {
-                            // If 1 remote participant, get the name of the remote participant
-                            val remoteParticipantName = remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
 
-                            applicationContext.getString(
-                                R.string.stream_video_ongoing_one_on_one_call_notification_title,
-                                remoteParticipantName,
-                            )
+                            notification?.let {
+                                startForegroundWithServiceType(
+                                    callId.hashCode(),
+                                    notification,
+                                    TRIGGER_ONGOING_CALL,
+                                    serviceType,
+                                )
+                            }
                         }
                     }
-
-                    val notification = streamVideo.getOngoingCallNotification(
-                        callDisplayName = callDisplayName, // Use title in notification
-                        callId = callId,
-                    )
-
-                    notification?.let {
-                        startForegroundWithServiceType(
-                            callId.hashCode(),
-                            it,
-                            TRIGGER_ONGOING_CALL,
-                            serviceType,
-                        )
-                    }
-                }
             }
         }
     }
