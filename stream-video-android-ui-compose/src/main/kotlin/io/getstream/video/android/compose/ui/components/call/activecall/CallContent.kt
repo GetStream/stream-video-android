@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -254,19 +255,36 @@ internal fun DefaultPictureInPictureContent(call: Call) {
             video = video?.value,
         )
     } else {
-        val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()
         val me by call.state.me.collectAsStateWithLifecycle()
+        val participants by call.state.participants.collectAsStateWithLifecycle()
+        val notMeOfTwo by remember {
+            // Special case where there are only two participants to take always the other participant,
+            // regardless of video track.
+            derivedStateOf {
+                participants.takeIf {
+                    it.size == 2
+                }?.firstOrNull { it.sessionId != me?.sessionId }
+            }
+        }
+        val activeSpeakers by call.state.activeSpeakers.collectAsStateWithLifecycle()
+        val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
+        val notMeActiveOrDominant by remember {
+            derivedStateOf {
+                val activeNotMe = activeSpeakers.firstOrNull {
+                    it.sessionId != me?.sessionId
+                }
+                val dominantNotMe = dominantSpeaker?.takeUnless {
+                    it.sessionId == me?.sessionId
+                }
 
-        if (activeSpeakers.isNotEmpty()) {
+                activeNotMe ?: dominantNotMe
+            }
+        }
+        val participantToShow = notMeOfTwo ?: notMeActiveOrDominant ?: me
+        if (participantToShow != null) {
             ParticipantVideo(
                 call = call,
-                participant = activeSpeakers.first(),
-                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
-            )
-        } else if (me != null) {
-            ParticipantVideo(
-                call = call,
-                participant = me!!,
+                participant = participantToShow,
                 style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
             )
         }
