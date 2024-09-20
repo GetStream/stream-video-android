@@ -42,6 +42,11 @@ public abstract interface class io/getstream/video/android/compose/permission/Vi
 	public abstract fun launchPermissionRequest ()V
 }
 
+public final class io/getstream/video/android/compose/pip/PictureInPictureKt {
+	public static final fun isInPictureInPictureMode (Landroid/content/Context;)Z
+	public static final fun rememberIsInPipMode (Landroidx/compose/runtime/Composer;I)Z
+}
+
 public abstract interface class io/getstream/video/android/compose/state/ui/internal/CallParticipantInfoMode {
 }
 

@@ -55,7 +55,7 @@ import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.pip.enterPictureInPicture
-import io.getstream.video.android.compose.pip.isInPictureInPictureMode
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
@@ -151,7 +151,7 @@ public fun CallContent(
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
-    val isInPictureInPicture = context.isInPictureInPictureMode
+    val isInPictureInPicture = rememberIsInPipMode()
 
     DefaultPermissionHandler(videoPermission = permissions)
 
