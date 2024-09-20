@@ -48,10 +48,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
@@ -262,7 +258,7 @@ internal open class CallService : Service() {
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
                         callId = intentCallId,
-                        callDisplayName = intentCallDisplayName!!,
+                        callDisplayName = intentCallDisplayName,
                         shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID,
@@ -421,7 +417,7 @@ internal open class CallService : Service() {
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
-        observeParticipants(callId, streamVideo)
+        observeNotificationUpdates(callId, streamVideo)
     }
 
     private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
@@ -553,94 +549,18 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun observeParticipants(callId: StreamCallId, streamVideo: StreamVideoImpl) {
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
-            var latestRemoteParticipantCount = -1
-
-            // Monitor call state and remote participants
-            combine(
-                call.state.ringingState,
-                call.state.members,
-                call.state.remoteParticipants,
-            ) { ringingState, members, remoteParticipants ->
-                Triple(ringingState, members, remoteParticipants)
-            }
-                .distinctUntilChanged()
-                .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
-                .collectLatest {
-                    val ringingState = it.first
-                    val members = it.second
-                    val remoteParticipants = it.third
-
-                    if (ringingState is RingingState.Outgoing) {
-                        val remoteMembersCount = members.size - 1
-
-                        val callDisplayName = if (remoteMembersCount != 1) {
-                            applicationContext.getString(
-                                R.string.stream_video_outgoing_call_notification_title,
-                            )
-                        } else {
-                            members.firstOrNull { member ->
-                                member.user.id != streamVideo.userId
-                            }?.user?.name ?: "Unknown"
-                        }
-
-                        val notification = streamVideo.getOngoingCallNotification(
-                            callId = callId,
-                            callDisplayName = callDisplayName,
-                            remoteParticipantCount = remoteMembersCount,
-                            isOutgoingCall = true,
-                        )
-
-                        notification?.let {
-                            startForegroundWithServiceType(
-                                callId.hashCode(),
-                                notification,
-                                TRIGGER_ONGOING_CALL,
-                                serviceType,
-                            )
-                        }
-                    } else if (ringingState is RingingState.Active) {
-                        // If number of remote participants increased or decreased
-                        if (remoteParticipants.size != latestRemoteParticipantCount) {
-                            latestRemoteParticipantCount = remoteParticipants.size
-
-                            val callDisplayName = if (remoteParticipants.isEmpty()) {
-                                // If no remote participants, get simple call notification title
-                                applicationContext.getString(
-                                    R.string.stream_video_ongoing_call_notification_title,
-                                )
-                            } else {
-                                if (remoteParticipants.size > 1) {
-                                    // If more than 1 remote participant, get group call notification title
-                                    applicationContext.getString(
-                                        R.string.stream_video_ongoing_group_call_notification_title,
-                                    )
-                                } else {
-                                    // If 1 remote participant, get the name of the remote participant
-                                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
-                                }
-                            }
-
-                            // Use latest call display name in notification
-                            val notification = streamVideo.getOngoingCallNotification(
-                                callId = callId,
-                                callDisplayName = callDisplayName,
-                                remoteParticipantCount = remoteParticipants.size,
-                            )
-
-                            notification?.let {
-                                startForegroundWithServiceType(
-                                    callId.hashCode(),
-                                    notification,
-                                    TRIGGER_ONGOING_CALL,
-                                    serviceType,
-                                )
-                            }
-                        }
-                    }
-                }
+    private fun observeNotificationUpdates(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+        streamVideo.getNotificationUpdates(
+            serviceScope,
+            streamVideo.call(callId.type, callId.id),
+            streamVideo.user,
+        ) { notification ->
+            startForegroundWithServiceType(
+                callId.hashCode(),
+                notification,
+                TRIGGER_ONGOING_CALL,
+                serviceType,
+            )
         }
     }
 

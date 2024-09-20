@@ -17,9 +17,12 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineScope
 
 internal object NoOpNotificationHandler : NotificationHandler {
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
@@ -29,16 +32,22 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun getOngoingCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,
-        remoteParticipantCount: Int,
         isOutgoingCall: Boolean,
+        remoteParticipantCount: Int,
     ): Notification? = null
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String,
+        callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? = null
     override fun getSettingUpCallNotification(): Notification? = null
+    override fun getNotificationUpdates(
+        coroutineScope: CoroutineScope,
+        call: Call,
+        localUser: User,
+        onUpdate: (Notification) -> Unit,
+    ) { /* NoOp */ }
 
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }

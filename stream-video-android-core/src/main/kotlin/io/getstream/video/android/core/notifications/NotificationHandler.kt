@@ -18,8 +18,11 @@ package io.getstream.video.android.core.notifications
 
 import android.app.Notification
 import io.getstream.android.push.permissions.NotificationPermissionHandler
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineScope
 
 public interface NotificationHandler : NotificationPermissionHandler {
     fun onRingingCall(callId: StreamCallId, callDisplayName: String)
@@ -29,16 +32,22 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun getOngoingCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,
-        remoteParticipantCount: Int = 0,
         isOutgoingCall: Boolean = false,
+        remoteParticipantCount: Int = 0,
     ): Notification?
     fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String,
+        callDisplayName: String?,
         shouldHaveContentIntent: Boolean = true,
     ): Notification?
     fun getSettingUpCallNotification(): Notification?
+    fun getNotificationUpdates(
+        coroutineScope: CoroutineScope,
+        call: Call,
+        localUser: User,
+        onUpdate: (Notification) -> Unit,
+    )
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
