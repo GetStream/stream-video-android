@@ -42,6 +42,16 @@ public interface NotificationHandler : NotificationPermissionHandler {
         shouldHaveContentIntent: Boolean = true,
     ): Notification?
     fun getSettingUpCallNotification(): Notification?
+
+    /**
+     * Get subsequent updates to notifications.
+     * Initially, notifications are posted by one of the other methods, and then this method can be used to re-post them with updated content.
+     *
+     * @param coroutineScope Coroutine scope used for the updates.
+     * @param call The Stream call object.
+     * @param localUser The local Stream user.
+     * @param onUpdate Callback to be called when the notification is updated.
+     */
     fun getNotificationUpdates(
         coroutineScope: CoroutineScope,
         call: Call,
