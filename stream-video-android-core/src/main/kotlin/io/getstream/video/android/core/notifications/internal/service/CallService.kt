@@ -24,8 +24,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -77,6 +81,8 @@ internal open class CallService : Service() {
 
     // Call sounds
     private var mediaPlayer: MediaPlayer? = null
+    private var audioManager: AudioManager? = null
+    private var audioFocusRequest: AudioFocusRequest? = null
 
     internal companion object {
         private const val TAG = "CallServiceCompanion"
@@ -498,17 +504,54 @@ internal open class CallService : Service() {
 
     private fun playCallSound(soundUri: Uri?, mediaPlayer: MediaPlayer?) {
         if (soundUri != null && mediaPlayer != null) {
-            try {
-                with(mediaPlayer) {
-                    if (!isPlaying) {
-                        setMediaPlayerDataSource(this, soundUri)
-                        start()
+            requestAudioFocus(
+                context = applicationContext,
+                onGranted = {
+                    try {
+                        with(mediaPlayer) {
+                            if (!isPlaying) {
+                                setMediaPlayerDataSource(this, soundUri)
+                                start()
+                            }
+                        }
+                    } catch (e: IllegalStateException) {
+                        logger.d { "Error playing call sound." }
                     }
-                }
-            } catch (e: IllegalStateException) {
-                logger.d { "Error playing call sound." }
-            }
+                },
+            )
         }
+    }
+
+    private fun requestAudioFocus(context: Context, onGranted: () -> Unit) {
+        if (audioManager == null) {
+            audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        }
+
+        val isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (audioFocusRequest == null) {
+                audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build(),
+                    )
+                    .setAcceptsDelayedFocusGain(false)
+                    .build()
+            }
+
+            audioFocusRequest?.let {
+                audioManager?.requestAudioFocus(it) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+            } ?: false
+        } else {
+            audioManager?.requestAudioFocus(
+                null,
+                AudioManager.STREAM_RING,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
+            ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        }
+
+        if (isGranted) onGranted()
     }
 
     private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, uri: Uri) {
@@ -523,6 +566,18 @@ internal open class CallService : Service() {
             if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
         } catch (e: IllegalStateException) {
             logger.d { "Error stopping call sound. MediaPlayer might have already been released." }
+        } finally {
+            abandonAudioFocus()
+        }
+    }
+
+    private fun abandonAudioFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let {
+                audioManager?.abandonAudioFocusRequest(it)
+            }
+        } else {
+            audioManager?.abandonAudioFocus(null)
         }
     }
 
@@ -656,7 +711,7 @@ internal open class CallService : Service() {
         unregisterToggleCameraBroadcastReceiver()
 
         // Call sounds
-        clearMediaPlayer()
+        releaseAudioResources()
 
         // Stop any jobs
         serviceScope.cancel()
@@ -665,9 +720,12 @@ internal open class CallService : Service() {
         stopSelf()
     }
 
-    private fun clearMediaPlayer() {
+    private fun releaseAudioResources() {
         mediaPlayer?.release()
         mediaPlayer = null
+
+        audioManager = null
+        audioFocusRequest = null
     }
 
     // This service does not return a Binder
