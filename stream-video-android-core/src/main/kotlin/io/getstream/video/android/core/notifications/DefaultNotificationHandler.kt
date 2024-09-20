@@ -296,10 +296,17 @@ public open class DefaultNotificationHandler(
         val notificationId = callId.hashCode() // Notification ID
 
         // Intents
-        val ongoingCallIntent = intentResolver.searchOngoingCallPendingIntent(
-            callId,
-            notificationId,
-        )
+        val onClickIntent = if (isOutgoingCall) {
+            intentResolver.searchOutgoingCallPendingIntent(
+                callId,
+                notificationId,
+            )
+        } else {
+            intentResolver.searchOngoingCallPendingIntent(
+                callId,
+                notificationId,
+            )
+        }
         val hangUpIntent = if (isOutgoingCall) {
             intentResolver.searchRejectCallPendingIntent(callId)
         } else {
@@ -334,8 +341,8 @@ public open class DefaultNotificationHandler(
             .setSmallIcon(notificationIconRes)
             .also {
                 // If the intent is configured, clicking the notification will return to the call
-                if (ongoingCallIntent != null) {
-                    it.setContentIntent(ongoingCallIntent)
+                if (onClickIntent != null) {
+                    it.setContentIntent(onClickIntent)
                 } else {
                     logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
                 }
@@ -519,7 +526,7 @@ public open class DefaultNotificationHandler(
     }
 
     private fun NotificationCompat.Builder.addHangUpAction(
-        rejectCallPendingIntent: PendingIntent,
+        hangUpIntent: PendingIntent,
         callDisplayName: String,
         remoteParticipantCount: Int,
     ): NotificationCompat.Builder = apply {
@@ -548,7 +555,7 @@ public open class DefaultNotificationHandler(
                             }
                         }
                         .build(),
-                    rejectCallPendingIntent,
+                    hangUpIntent,
                 ),
             )
         } else {
@@ -556,7 +563,7 @@ public open class DefaultNotificationHandler(
                 NotificationCompat.Action.Builder(
                     null,
                     application.getString(R.string.stream_video_call_notification_action_leave),
-                    rejectCallPendingIntent,
+                    hangUpIntent,
                 ).build(),
             )
         }
