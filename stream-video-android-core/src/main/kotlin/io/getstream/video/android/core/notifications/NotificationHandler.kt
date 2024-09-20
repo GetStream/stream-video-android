@@ -31,14 +31,14 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
     fun getOngoingCallNotification(
         callId: StreamCallId,
-        callDisplayName: String?,
+        callDisplayName: String? = null,
         isOutgoingCall: Boolean = false,
         remoteParticipantCount: Int = 0,
     ): Notification?
     fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String?,
+        callDisplayName: String? = null,
         shouldHaveContentIntent: Boolean = true,
     ): Notification?
     fun getSettingUpCallNotification(): Notification?
