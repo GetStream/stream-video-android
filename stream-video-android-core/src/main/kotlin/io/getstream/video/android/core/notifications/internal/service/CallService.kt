@@ -440,7 +440,7 @@ internal open class CallService : Service() {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
                             playCallSound(
-                                streamVideo.sounds.getIncomingCallSoundUri(applicationContext),
+                                streamVideo.sounds.ringingConfig.incomingCallSoundUri,
                             )
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
@@ -450,7 +450,7 @@ internal open class CallService : Service() {
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
                             playCallSound(
-                                streamVideo.sounds.getOutgoingCallSoundUri(applicationContext),
+                                streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
                             )
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
