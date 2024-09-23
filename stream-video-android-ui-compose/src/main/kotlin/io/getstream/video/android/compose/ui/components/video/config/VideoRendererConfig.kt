@@ -25,7 +25,7 @@ import io.getstream.video.android.core.Call
 
 @Immutable
 public data class VideoRendererConfig(
-    var mirrorStream: Boolean = false,
+    val mirrorStream: Boolean = false,
     val scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     val fallbackContent: @Composable (Call) -> Unit = {},
 )
