@@ -28,9 +28,12 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.StreamLog
@@ -83,6 +86,7 @@ internal open class CallService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
+    private var ringtone: Ringtone? = null
 
     internal companion object {
         private const val TAG = "CallServiceCompanion"
@@ -432,7 +436,6 @@ internal open class CallService : Service() {
                         if (!it.acceptedByMe) {
                             playCallSound(
                                 streamVideo.sounds.getIncomingCallSoundUri(applicationContext),
-                                mediaPlayer,
                             )
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
@@ -443,7 +446,6 @@ internal open class CallService : Service() {
                         if (!it.acceptedByCallee) {
                             playCallSound(
                                 streamVideo.sounds.getOutgoingCallSoundUri(applicationContext),
-                                mediaPlayer,
                             )
                         } else {
                             stopCallSound() // Stops sound sooner than Active. More responsive.
@@ -502,23 +504,20 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun playCallSound(soundUri: Uri?, mediaPlayer: MediaPlayer?) {
-        if (soundUri != null && mediaPlayer != null) {
+    private fun playCallSound(soundUri: Uri?) {
+        try {
             requestAudioFocus(
                 context = applicationContext,
                 onGranted = {
-                    try {
-                        with(mediaPlayer) {
-                            if (!isPlaying) {
-                                setMediaPlayerDataSource(this, soundUri)
-                                start()
-                            }
-                        }
-                    } catch (e: IllegalStateException) {
-                        logger.d { "Error playing call sound." }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        playWithRingtone(soundUri)
+                    } else {
+                        playWithMediaPlayer(soundUri)
                     }
                 },
             )
+        } catch (e: Exception) {
+            logger.d { "[Sounds] Error playing call sound: ${e.message}" }
         }
     }
 
@@ -529,7 +528,8 @@ internal open class CallService : Service() {
 
         val isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (audioFocusRequest == null) {
-                audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+                audioFocusRequest = AudioFocusRequest
+                    .Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
                     .setAudioAttributes(
                         AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
@@ -551,7 +551,35 @@ internal open class CallService : Service() {
             ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         }
 
+        logger.d { "[Sounds] Audio focus " + if (isGranted) "granted" else "not granted" }
         if (isGranted) onGranted()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    private fun playWithRingtone(soundUri: Uri?) {
+        soundUri?.let {
+            if (ringtone?.isPlaying == true) ringtone?.stop()
+            ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
+            if (ringtone?.isPlaying == false) {
+                ringtone?.isLooping = true
+                ringtone?.play()
+
+                logger.d { "[Sounds] Sound playing with Ringtone" }
+            }
+        }
+    }
+
+    private fun playWithMediaPlayer(soundUri: Uri?) {
+        soundUri?.let {
+            mediaPlayer?.let { mediaPlayer ->
+                if (!mediaPlayer.isPlaying) {
+                    setMediaPlayerDataSource(mediaPlayer, soundUri)
+                    mediaPlayer.start()
+
+                    logger.d { "[Sounds] Sound playing with MediaPlayer" }
+                }
+            }
+        }
     }
 
     private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, uri: Uri) {
@@ -563,9 +591,15 @@ internal open class CallService : Service() {
 
     private fun stopCallSound() {
         try {
-            if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
-        } catch (e: IllegalStateException) {
-            logger.d { "Error stopping call sound. MediaPlayer might have already been released." }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                logger.d { "[Sounds] Stopping Ringtone sound" }
+                if (ringtone?.isPlaying == true) ringtone?.stop()
+            } else {
+                logger.d { "[Sounds] Stopping MediaPlayer sound" }
+                if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
+            }
+        } catch (e: Exception) {
+            logger.d { "[Sounds] Error stopping call sound: ${e.message}" }
         } finally {
             abandonAudioFocus()
         }
@@ -711,7 +745,7 @@ internal open class CallService : Service() {
         unregisterToggleCameraBroadcastReceiver()
 
         // Call sounds
-        releaseAudioResources()
+        cleanAudioResources()
 
         // Stop any jobs
         serviceScope.cancel()
@@ -720,7 +754,12 @@ internal open class CallService : Service() {
         stopSelf()
     }
 
-    private fun releaseAudioResources() {
+    private fun cleanAudioResources() {
+        logger.d { "[Sounds] Cleaning audio resources" }
+
+        if (ringtone?.isPlaying == true) ringtone?.stop()
+        ringtone = null
+
         mediaPlayer?.release()
         mediaPlayer = null
 
