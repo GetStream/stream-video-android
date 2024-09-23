@@ -1903,7 +1903,6 @@ public final class io/getstream/video/android/compose/ui/components/video/config
 	public final fun getMirrorStream ()Z
 	public final fun getScalingType ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 	public fun hashCode ()I
-	public final fun setMirrorStream (Z)V
 	public fun toString ()Ljava/lang/String;
 }
 
