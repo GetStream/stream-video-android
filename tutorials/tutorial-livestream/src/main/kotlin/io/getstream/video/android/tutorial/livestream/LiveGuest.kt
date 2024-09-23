@@ -22,21 +22,23 @@ import androidx.compose.ui.platform.LocalContext
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.GEO
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.notifications.internal.service.livestreamGuestCallServiceConfig
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 
 @Composable
 fun LiveAudience() {
-    val userId = "!anon-Ben_Skywalker"
+    val userId = "Ben_Skywalker"
     val callId = "dE8AsD5Qxqrt"
 
     // step1 - create a user.
     val user = User(
-        type = UserType.Anonymous,
+        type = UserType.Authenticated,
         id = userId, // any string
         name = "Tutorial", // name and image are used in the UI
-        role = "guest",
+        role = "user",
     )
 
     // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
@@ -46,7 +48,8 @@ fun LiveAudience() {
         apiKey = "k436tyde94hj", // demo API key
         geo = GEO.GlobalEdgeNetwork,
         user = user,
-        token = "",
+        token = StreamVideo.devToken(userId),
+        callServiceConfig = livestreamGuestCallServiceConfig(),
         ensureSingleInstance = false,
     ).build()
 

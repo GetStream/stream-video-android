@@ -46,13 +46,15 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.PersistentSocket
 import io.getstream.video.android.core.socket.SocketState
 import io.getstream.video.android.core.sounds.Sounds
-import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeCall
@@ -148,12 +150,13 @@ internal class StreamVideoImpl internal constructor(
     internal val connectionModule: ConnectionModule,
     internal val tokenProvider: (suspend (error: Throwable?) -> String)?,
     internal val streamNotificationManager: StreamNotificationManager,
-    internal val runForegroundService: Boolean = true,
+    internal val callServiceConfig: CallServiceConfig = callServiceConfig(),
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     internal val crashOnMissingPermission: Boolean = false,
     internal val audioUsage: Int = defaultAudioUsage,
+    internal val appName: String? = null,
     internal val audioFilter: AudioFilter? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
@@ -173,8 +176,6 @@ internal class StreamVideoImpl internal constructor(
         CoroutineScope(_scope.coroutineContext + SupervisorJob() + coroutineExceptionHandler)
 
     /** if true we fail fast on errors instead of logging them */
-    var developmentMode = true
-    val debugInfo = DebugInfo(this)
 
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()
@@ -200,7 +201,6 @@ internal class StreamVideoImpl internal constructor(
     override fun cleanup() {
         // remove all cached calls
         calls.clear()
-        debugInfo.stop()
         // stop all running coroutines
         scope.cancel()
         // stop the socket
@@ -208,6 +208,13 @@ internal class StreamVideoImpl internal constructor(
         // call cleanup on the active call
         val activeCall = state.activeCall.value
         activeCall?.leave()
+        // Stop the call service if it was running
+        if (callServiceConfig.runCallServiceInForeground) {
+            safeCall {
+                val serviceIntent = CallService.buildStopIntent(context, callServiceConfig)
+                context.stopService(serviceIntent)
+            }
+        }
     }
 
     /**
@@ -403,8 +410,6 @@ internal class StreamVideoImpl internal constructor(
                 }
             }
         }
-
-        debugInfo.start()
     }
 
     var location: String? = null
@@ -448,10 +453,10 @@ internal class StreamVideoImpl internal constructor(
             // wait for the guest user setup if we're using guest users
             guestUserJob?.await()
             try {
-                val timer = debugInfo.trackTime("coordinator connect")
+                val startTime = System.currentTimeMillis()
                 socketImpl.connect()
-                timer.finish()
-                Success(timer.duration)
+                val duration = System.currentTimeMillis() - startTime
+                Success(duration)
             } catch (e: ErrorResponse) {
                 if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
                     refreshToken(e)

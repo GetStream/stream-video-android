@@ -133,10 +133,10 @@ public class Call(
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
-    val camera by lazy { mediaManager.camera }
-    val microphone by lazy { mediaManager.microphone }
-    val speaker by lazy { mediaManager.speaker }
-    val screenShare by lazy { mediaManager.screenShare }
+    val camera by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.camera }
+    val microphone by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.microphone }
+    val speaker by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.speaker }
+    val screenShare by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.screenShare }
 
     /** The cid is type:id */
     val cid = "$type:$id"
@@ -380,14 +380,12 @@ public class Call(
         }
 
         // step 1. call the join endpoint to get a list of SFUs
-        val timer = clientImpl.debugInfo.trackTime("call.join")
 
         val locationResult = clientImpl.getCachedLocation()
         if (locationResult !is Success) {
             return locationResult as Failure
         }
         location = locationResult.value
-        timer.split("location found")
 
         val options = createOptions
             ?: if (create) {
@@ -403,7 +401,6 @@ public class Call(
         val sfuToken = result.value.credentials.token
         val sfuUrl = clientImpl.testSfuAddress ?: result.value.credentials.server.url
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        timer.split("join request completed")
 
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
@@ -425,21 +422,18 @@ public class Call(
         session?.let {
             state._connection.value = RealtimeConnection.Joined(it)
         }
-        timer.split("rtc session init")
 
         try {
             session?.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
-        } finally {
-            timer.split("rtc connect completed")
         }
 
         scope.launch {
             // wait for the first stream to be added
             session?.let { rtcSession ->
                 val mainRtcSession = rtcSession.lastVideoStreamAdded.filter { it != null }.first()
-                timer.finish("stream added, rtc completed, ready to display video $mainRtcSession")
+                logger.d { "stream added, rtc completed, ready to display video $mainRtcSession" }
             }
         }
 
@@ -457,8 +451,6 @@ public class Call(
                 }
             }
         }
-
-        timer.finish()
 
         return Success(value = session!!)
     }

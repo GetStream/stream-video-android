@@ -120,13 +120,13 @@ jobs:
           ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
 
       - name: Unit tests core results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: unit-tests-core-results
           path: stream-video-android-core/build/reports/tests/testDebugUnitTest/index.html
 
       - name: Unit tests compose results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: unit-tests-compose-results
           path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html

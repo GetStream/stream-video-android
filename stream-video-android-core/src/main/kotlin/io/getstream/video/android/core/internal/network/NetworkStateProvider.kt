@@ -20,6 +20,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import io.getstream.log.StreamLog
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -96,11 +97,21 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
         synchronized(lock) {
             listeners = listeners + listener
             if (isRegistered.compareAndSet(false, true)) {
-                connectivityManager.registerNetworkCallback(
-                    NetworkRequest.Builder().build(),
-                    callback,
-                )
+                safelyRegisterNetworkCallback(NetworkRequest.Builder().build(), callback)
             }
+        }
+    }
+
+    /**
+     * Calls [ConnectivityManager.registerNetworkCallback] and catches potential [SecurityException].
+     * This is a known [bug](https://android-review.googlesource.com/c/platform/frameworks/base/+/1758029) on Android 11.
+     */
+    private fun safelyRegisterNetworkCallback(
+        networkRequest: NetworkRequest,
+        callback: ConnectivityManager.NetworkCallback,
+    ) {
+        connectivityManager.callWithSecurityExceptionHandling {
+            registerNetworkCallback(networkRequest, callback)
         }
     }
 
@@ -113,9 +124,21 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
         synchronized(lock) {
             listeners = (listeners - listener).also {
                 if (it.isEmpty() && isRegistered.compareAndSet(true, false)) {
-                    connectivityManager.unregisterNetworkCallback(callback)
+                    safelyUnregisterNetworkCallback(callback)
                 }
             }
+        }
+    }
+
+    /**
+     * Calls [ConnectivityManager.unregisterNetworkCallback] and catches potential [SecurityException].
+     * This is a known [bug](https://android-review.googlesource.com/c/platform/frameworks/base/+/1758029) on Android 11.
+     */
+    private fun safelyUnregisterNetworkCallback(callback: ConnectivityManager.NetworkCallback) {
+        connectivityManager.callWithSecurityExceptionHandling {
+            unregisterNetworkCallback(
+                callback,
+            )
         }
     }
 
@@ -126,5 +149,15 @@ public class NetworkStateProvider(private val connectivityManager: ConnectivityM
         public fun onConnected()
 
         public fun onDisconnected()
+    }
+}
+
+private fun ConnectivityManager.callWithSecurityExceptionHandling(method: ConnectivityManager.() -> Unit) {
+    try {
+        method()
+    } catch (e: SecurityException) {
+        StreamLog.e("ConnectivityManager", e) {
+            "SecurityException occurred. This is a known bug on Android 11. We log and prevent the app from crashing. Cause: ${e.message}"
+        }
     }
 }
