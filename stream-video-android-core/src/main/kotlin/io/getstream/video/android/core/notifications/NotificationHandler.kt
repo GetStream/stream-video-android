@@ -18,22 +18,46 @@ package io.getstream.video.android.core.notifications
 
 import android.app.Notification
 import io.getstream.android.push.permissions.NotificationPermissionHandler
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineScope
 
 public interface NotificationHandler : NotificationPermissionHandler {
     fun onRingingCall(callId: StreamCallId, callDisplayName: String)
     fun onMissedCall(callId: StreamCallId, callDisplayName: String)
     fun onNotification(callId: StreamCallId, callDisplayName: String)
     fun onLiveCall(callId: StreamCallId, callDisplayName: String)
-    fun getOngoingCallNotification(callDisplayName: String?, callId: StreamCallId): Notification?
+    fun getOngoingCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String? = null,
+        isOutgoingCall: Boolean = false,
+        remoteParticipantCount: Int = 0,
+    ): Notification?
     fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String,
+        callDisplayName: String? = null,
         shouldHaveContentIntent: Boolean = true,
     ): Notification?
     fun getSettingUpCallNotification(): Notification?
+
+    /**
+     * Get subsequent updates to notifications.
+     * Initially, notifications are posted by one of the other methods, and then this method can be used to re-post them with updated content.
+     *
+     * @param coroutineScope Coroutine scope used for the updates.
+     * @param call The Stream call object.
+     * @param localUser The local Stream user.
+     * @param onUpdate Callback to be called when the notification is updated.
+     */
+    fun getNotificationUpdates(
+        coroutineScope: CoroutineScope,
+        call: Call,
+        localUser: User,
+        onUpdate: (Notification) -> Unit,
+    )
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
