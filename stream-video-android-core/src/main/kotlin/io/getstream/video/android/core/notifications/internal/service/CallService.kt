@@ -258,8 +258,8 @@ internal open class CallService : Service() {
             val notificationData: Pair<Notification?, Int> = when (trigger) {
                 TRIGGER_ONGOING_CALL -> Pair(
                     first = streamVideo.getOngoingCallNotification(
-                        callDisplayName = intentCallDisplayName,
                         callId = intentCallId,
+                        callDisplayName = intentCallDisplayName,
                     ),
                     second = intentCallId.hashCode(),
                 )
@@ -268,7 +268,7 @@ internal open class CallService : Service() {
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
                         callId = intentCallId,
-                        callDisplayName = intentCallDisplayName!!,
+                        callDisplayName = intentCallDisplayName,
                         shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID,
@@ -279,7 +279,7 @@ internal open class CallService : Service() {
                         ringingState = RingingState.Outgoing(),
                         callId = intentCallId,
                         callDisplayName = getString(
-                            R.string.stream_video_ongoing_call_notification_description,
+                            R.string.stream_video_outgoing_call_notification_title,
                         ),
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
@@ -341,7 +341,7 @@ internal open class CallService : Service() {
             } else if (trigger == TRIGGER_OUTGOING_CALL) {
                 if (mediaPlayer == null) mediaPlayer = MediaPlayer()
             }
-            observeCallState(intentCallId, streamVideo)
+            observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
         }
@@ -424,8 +424,13 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun observeCallState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
-        // Ringing state
+    private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+        observeRingingState(callId, streamVideo)
+        observeCallEvents(callId, streamVideo)
+        observeNotificationUpdates(callId, streamVideo)
+    }
+
+    private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             call.state.ringingState.collect {
@@ -467,37 +472,6 @@ internal open class CallService : Service() {
 
                     else -> {
                         // Do nothing
-                    }
-                }
-            }
-        }
-
-        // Call state
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
-            call.subscribe { event ->
-                logger.i { "Received event in service: $event" }
-                when (event) {
-                    is CallAcceptedEvent -> {
-                        handleIncomingCallAcceptedByMeOnAnotherDevice(
-                            acceptedByUserId = event.user.id,
-                            myUserId = streamVideo.userId,
-                            callRingingState = call.state.ringingState.value,
-                        )
-                    }
-
-                    is CallRejectedEvent -> {
-                        handleIncomingCallRejectedByMeOrCaller(
-                            rejectedByUserId = event.user.id,
-                            myUserId = streamVideo.userId,
-                            createdByUserId = call.state.createdBy.value?.id,
-                            activeCallExists = streamVideo.state.activeCall.value != null,
-                        )
-                    }
-
-                    is CallEndedEvent -> {
-                        // When call ends for any reason
-                        stopService()
                     }
                 }
             }
@@ -615,6 +589,38 @@ internal open class CallService : Service() {
         }
     }
 
+    private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+        serviceScope.launch {
+            val call = streamVideo.call(callId.type, callId.id)
+            call.subscribe { event ->
+                logger.i { "Received event in service: $event" }
+                when (event) {
+                    is CallAcceptedEvent -> {
+                        handleIncomingCallAcceptedByMeOnAnotherDevice(
+                            acceptedByUserId = event.user.id,
+                            myUserId = streamVideo.userId,
+                            callRingingState = call.state.ringingState.value,
+                        )
+                    }
+
+                    is CallRejectedEvent -> {
+                        handleIncomingCallRejectedByMeOrCaller(
+                            rejectedByUserId = event.user.id,
+                            myUserId = streamVideo.userId,
+                            createdByUserId = call.state.createdBy.value?.id,
+                            activeCallExists = streamVideo.state.activeCall.value != null,
+                        )
+                    }
+
+                    is CallEndedEvent -> {
+                        // When call ends for any reason
+                        stopService()
+                    }
+                }
+            }
+        }
+    }
+
     private fun handleIncomingCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
         // If accepted event was received, with event user being me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
@@ -631,6 +637,21 @@ internal open class CallService : Service() {
             } else {
                 stopService()
             }
+        }
+    }
+
+    private fun observeNotificationUpdates(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+        streamVideo.getNotificationUpdates(
+            serviceScope,
+            streamVideo.call(callId.type, callId.id),
+            streamVideo.user,
+        ) { notification ->
+            startForegroundWithServiceType(
+                callId.hashCode(),
+                notification,
+                TRIGGER_ONGOING_CALL,
+                serviceType,
+            )
         }
     }
 
