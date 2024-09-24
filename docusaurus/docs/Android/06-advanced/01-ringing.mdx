@@ -155,8 +155,7 @@ call.leave()
 
 ## Ringing sounds
 
-The SDK plays sounds for incoming and outgoing calls. The SDK bundles two sounds for this
-purpose.
+The SDK plays sounds for incoming and outgoing calls. It bundles two sounds for this purpose.
 
 ### Customizing the ringing sounds
 
@@ -174,14 +173,8 @@ You can place your own `call_incoming_sound.mp3` and `call_outgoing_sound.mp3` f
 You can customize the sounds by creating a `RingingConfig`.
 
 :::note
-Currently the SDK accepts a `Sounds` object in the builder, so once you have a `RingingConfig`, you can
+Currently, the SDK accepts a `Sounds` object in the builder, so once you have a `RingingConfig`, you can
 create a `Sounds` object via `ringingConfig.toSounds()` and pass it to the `StreamVideoBuilder`.
-:::
-
-:::caution
-The `Sounds` class is deprecated and will entirely be replaced by `RingingConfig` in the future.
-The current `Sounds` constructor which accepts two integers will always return an `emptyRingingConfig()`
-with muted sounds.
 :::
 
 The `RingingConfig` interface defines two properties:
@@ -190,10 +183,26 @@ The `RingingConfig` interface defines two properties:
 - `outgoingCallSoundUri`: The URI for the outgoing call sound.
 
 You can implement this interface and provide your own values for the properties (e.g. a user chosen
-URI). After that, create a `Sounds` object using the `RingingConfig` instance (e.g. `Sounds(ringingConfig)`) and pass the `Sounds` object to the SDK builder.
-If one of the `Uri`s is null the SDK will simply not play that sound and log this fact instead.
+URI). After that, create a `Sounds` object (e.g. `ringingConfig.toSounds()` or `Sounds(ringingConfig)`) and pass it to the SDK builder.
+If one of the `Uri`s is null the SDK will simply not play that sound and log an error.
 
-For example, to create a `RingingConfig` that only includes an incoming sound you can extend it as shown below, setting `outgoingCallSoundUri` is `null`:
+:::caution
+The `Sounds` class is deprecated and will entirely be replaced by `RingingConfig` in the future.
+The current `Sounds` constructor that accepts two integers will always return an `emptyRingingConfig()`
+with muted sounds.
+:::
+
+`RingingConfig` can also be created via several factory methods:
+
+- `defaultResourcesRingingConfig` - This method returns a `RingingConfig` that uses the SDK's
+  default sounds for both incoming and outgoing calls
+- `resRingingConfig` - This method returns a `RingingConfig` that uses a resource identifier for both incoming and outgoing calls.
+- `uriRingingConfig(Uri, Uri)` - Returns a `RingingConfig` that is configured with two `Uri` objects for the corresponding sounds.
+- `emptyRingingConfig` - The SDK will not play any sounds for incoming and outgoing calls.
+
+#### Customization examples
+
+For example, to create a sound config that only includes an incoming sound and no outgoing sound, you can extend `RingingConfig` as shown below, setting `outgoingCallSoundUri` to `null`:
 
 ```kotlin
 class IncomingOnlyRingingConfig : RingingConfig {
@@ -204,18 +213,8 @@ class IncomingOnlyRingingConfig : RingingConfig {
 }
 ```
 
-`RingingConfig` can also be created via several factory methods:
+Another use case may include a user-chosen sound or a custom sound that is not bundled:
 
-- `defaultResourcesRingingConfig` - This method returns a `RingingConfig` that uses the SDK's
-  default sounds for both incoming and outgoing calls
-- `resRingingConfig` - This method returns a `RingingConfig` that uses a resource identifier for both incoming and outgoing calls.
-- `uriRingingConfig(Uri, Uri)` - Returns a `RingingConfig` that is configured with two `Uri` objects for the corresponding sounds.
-- `emptyRingingConfig` - The SDK will not play any sounds for incoming and outgoing calls.
-
-For further customization its best to provide your own `RingingConfig` implementation.
-Such use cases may include a user setting to choose a sound or a custom sound that is not bundled.
-
-For example:
 ```kotlin
 data class UserRingingConfig(
     val incomingCallSoundUri: Uri,
