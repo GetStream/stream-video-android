@@ -29,8 +29,8 @@ import org.jetbrains.annotations.ApiStatus
 /**
  * Interface representing a ringing configuration.
  *
- * @see deviceRingtoneRingingConfig
  * @see defaultResourcesRingingConfig
+ * @see deviceRingtoneRingingConfig
  * @see emptyRingingConfig
  * @see resRingingConfig
  * @see uriRingingConfig
@@ -90,27 +90,26 @@ public fun deviceRingtoneRingingConfig(context: Context): RingingConfig = object
 }
 
 /**
- * Returns a ringing config that uses custom sounds for incoming and outgoing calls.
+ * Returns a ringing config that uses custom resources for incoming and outgoing call sounds.
  *
- * @param context Context used for retrieving the sounds. Mandatory when one of the sound parameters is a resource ID.
- * @param incomingCallSound The incoming call sound. Can be a resource ID or a URI.
- * @param outgoingCallSound The outgoing call sound. Can be a resource ID or a URI.
- *
- * @return A ringing config with the provided sounds.
- *
- * @throws IllegalArgumentException If one of the sound parameters is a resource ID and the context is not provided.
+ * @param context Context used for retrieving the sounds.
+ * @param incomingCallSoundResId The resource ID for the incoming call sound.
+ * @param outgoingCallSoundResId The resource ID for the outgoing call sound.
  */
 public fun resRingingConfig(
     context: Context,
-    incomingCallSound: Int,
-    outgoingCallSound: Int,
+    @RawRes incomingCallSoundResId: Int,
+    @RawRes outgoingCallSoundResId: Int,
 ) = object : RingingConfig {
-    override val incomingCallSoundUri: Uri? = incomingCallSound.toUriOrNUll(context)
-    override val outgoingCallSoundUri: Uri? = outgoingCallSound.toUriOrNUll(context)
+    override val incomingCallSoundUri: Uri? = incomingCallSoundResId.toUriOrNUll(context)
+    override val outgoingCallSoundUri: Uri? = outgoingCallSoundResId.toUriOrNUll(context)
 }
 
 /**
- * Returns a ringing config that uses custom URIs for incoming and outgoing calls.
+ * Returns a ringing config that uses custom URIs for incoming and outgoing call sounds.
+ *
+ * @param incomingCallSoundUri The URI for the incoming call sound.
+ * @param outgoingCallSoundUri The URI for the outgoing call sound.
  */
 public fun uriRingingConfig(
     incomingCallSoundUri: Uri,
@@ -121,7 +120,7 @@ public fun uriRingingConfig(
 }
 
 /**
- * Returns a ringing config that mutes (disables) all sounds.
+ * Returns a ringing config that mutes (disables) incoming and outgoing call sounds.
  */
 public fun emptyRingingConfig(): RingingConfig = object : RingingConfig {
     override val incomingCallSoundUri: Uri? = null

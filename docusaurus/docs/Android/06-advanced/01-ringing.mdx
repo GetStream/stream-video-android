@@ -153,31 +153,34 @@ For this you need to leave the call by using:
 call.leave()
 ```
 
-### Ringing sound
+## Ringing sounds
 
-The SDK plays sounds for incoming and outgoing calls. The SDK has bundled two sounds for this
+The SDK plays sounds for incoming and outgoing calls. The SDK bundles two sounds for this
 purpose.
 
-### Customizing the ringing sound
+### Customizing the ringing sounds
 
-The ringing sound that is played can be customized in two ways.
-
+The ringing sounds can be customized in two ways:
 1. Override the bundled resources inside your application.
 2. Provide your own `RingingConfig` to the `StreamVideoBuilder`.
 
 #### Override the bundled resources
 
 The resources are: `/raw/call_incoming_sound.mp3` and `/raw/call_outgoing_sound.mp3`.
+You can place your own `call_incoming_sound.mp3` and `call_outgoing_sound.mp3` files in the `res/raw` directory of your app.
 
 #### Provide your own `RingingConfig`
 
-You can customize this by configuring a `RingingConfig`.
-Currently the SDK accepts a `Sounds` object instead so once you have a `RingingConfig` you can
+You can customize the sounds by creating a `RingingConfig`.
+
+:::note
+Currently the SDK accepts a `Sounds` object in the builder, so once you have a `RingingConfig`, you can
 create a `Sounds` object via `ringingConfig.toSounds()` and pass it to the `StreamVideoBuilder`.
+:::
 
 :::caution
-The `Sounds` class is deprecated and will entirely be replaced by the `RingingConfig` in the future.
-Current `Sounds` constructor which accepts two integers will always return an `emptyRingingConfig()`
+The `Sounds` class is deprecated and will entirely be replaced by `RingingConfig` in the future.
+The current `Sounds` constructor which accepts two integers will always return an `emptyRingingConfig()`
 with muted sounds.
 :::
 
@@ -186,28 +189,26 @@ The `RingingConfig` interface defines two properties:
 - `incomingCallSoundUri`: The URI for the incoming call sound.
 - `outgoingCallSoundUri`: The URI for the outgoing call sound.
 
-You can implement this interface and provide your own values for the properties. (e.g. a user chosen
-URIs).
-After which you need to provide it to a `Sounds` constructor (e.g. Sounds(ringingConfig)) and then
-pass that object to the builder.
-If one of the Uri's is null the SDK will simply not play that sound and log this fact instead.
+You can implement this interface and provide your own values for the properties (e.g. a user chosen
+URI). After that, create a `Sounds` object using the `RingingConfig` instance (e.g. `Sounds(ringingConfig)`) and pass the `Sounds` object to the SDK builder.
+If one of the `Uri`s is null the SDK will simply not play that sound and log this fact instead.
 
-To create a `RingingConfig` with only an incoming sound you can extend it in a following manner
-where the `outgoingCallSoundUri` is `null`:
+For example, to create a `RingingConfig` that only includes an incoming sound you can extend it as shown below, setting `outgoingCallSoundUri` is `null`:
 
 ```kotlin
 class IncomingOnlyRingingConfig : RingingConfig {
     override val incomingCallSoundUri: Uri =
         Uri.parse("android.resource://$packageName/${R.raw.custom_incoming_sound}")
-    override val outgoingCallSoundUri: Uri? = null
+    
+    override val outgoingCallSoundUri: Uri? = null // Outgoing sound will be muted
 }
 ```
 
 `RingingConfig` can also be created via several factory methods:
 
 - `defaultResourcesRingingConfig` - This method returns a `RingingConfig` that uses the SDK's
-  default sounds bundled with the SDK for both incoming and outgoing calls
-- `resRingingConfig` - This method returns a `RingingConfig` that specifies a resource identifier for both incoming and outgoing calls.
+  default sounds for both incoming and outgoing calls
+- `resRingingConfig` - This method returns a `RingingConfig` that uses a resource identifier for both incoming and outgoing calls.
 - `uriRingingConfig(Uri, Uri)` - Returns a `RingingConfig` that is configured with two `Uri` objects for the corresponding sounds.
 - `emptyRingingConfig` - The SDK will not play any sounds for incoming and outgoing calls.
 
