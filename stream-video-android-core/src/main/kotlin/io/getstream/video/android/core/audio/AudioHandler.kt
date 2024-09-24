@@ -43,8 +43,8 @@ public interface AudioHandler {
  */
 public class AudioSwitchHandler constructor(
     private val context: Context,
-    val preferSpeakerphone: Boolean,
-    var audioDeviceChangeListener: AudioDeviceChangeListener,
+    private val preferSpeakerphone: Boolean,
+    private var audioDeviceChangeListener: AudioDeviceChangeListener,
 ) :
     AudioHandler {
 

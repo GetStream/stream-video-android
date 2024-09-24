@@ -858,7 +858,7 @@ class MediaManagerImpl(
     )
 
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this, preferSpeakerphone = true, audioUsage)
+    internal val microphone = MicrophoneManager(this, preferSpeakerphone = false, audioUsage)
     internal val speaker = SpeakerManager(this, microphone)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
