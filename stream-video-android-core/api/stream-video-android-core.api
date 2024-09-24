@@ -4485,8 +4485,7 @@ public final class io/getstream/video/android/core/sounds/RingingConfigKt {
 	public static final fun defaultResourcesRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun deviceRingtoneRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun emptyRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
-	public static final fun resRingingConfig (IILandroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
-	public static synthetic fun resRingingConfig$default (IILandroid/content/Context;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun resRingingConfig (Landroid/content/Context;II)Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun toSounds (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
 	public static final fun uriRingingConfig (Landroid/net/Uri;Landroid/net/Uri;)Lio/getstream/video/android/core/sounds/RingingConfig;
 }

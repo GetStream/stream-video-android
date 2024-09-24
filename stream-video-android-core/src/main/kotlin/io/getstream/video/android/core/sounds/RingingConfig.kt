@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.RingtoneManager
 import android.net.Uri
 import androidx.annotation.RawRes
+import io.getstream.log.StreamLog
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.utils.safeCall
 import org.jetbrains.annotations.ApiStatus
@@ -43,21 +44,21 @@ public interface RingingConfig {
  * Contains all the sounds that the SDK uses.
  */
 @Deprecated(
-    message = "Sounds will be deprecated in the future and replaced with RingingConfig.",
+    message = "Sounds will be deprecated in the future and replaced with RingingConfig. It is recommended to use one of the factory methods along with toSounds() to create the Sounds object.",
     replaceWith = ReplaceWith("SoundConfig"),
     level = DeprecationLevel.WARNING,
 )
 public data class Sounds(val ringingConfig: RingingConfig) {
     @ApiStatus.ScheduledForRemoval(inVersion = "1.0.18")
     @Deprecated(
-        message = "Deprecated. Use constructor with SoundConfig parameter instead.",
+        message = "Deprecated. This Constructor will now return a sound configuration with no sounds. Use constructor with SoundConfig parameter instead.",
         replaceWith = ReplaceWith("defaultResourcesRingingConfig(context).toSounds()"),
         level = DeprecationLevel.ERROR,
     )
     constructor(
         @RawRes incomingCallSound: Int = R.raw.call_incoming_sound,
         @RawRes outgoingCallSound: Int = R.raw.call_outgoing_sound,
-    ) : this(resRingingConfig(incomingCallSound, outgoingCallSound))
+    ) : this(emptyRingingConfig())
 }
 
 // Factories
@@ -91,18 +92,18 @@ public fun deviceRingtoneRingingConfig(context: Context): RingingConfig = object
 /**
  * Returns a ringing config that uses custom sounds for incoming and outgoing calls.
  *
+ * @param context Context used for retrieving the sounds. Mandatory when one of the sound parameters is a resource ID.
  * @param incomingCallSound The incoming call sound. Can be a resource ID or a URI.
  * @param outgoingCallSound The outgoing call sound. Can be a resource ID or a URI.
- * @param context Context used for retrieving the sounds. Mandatory when one of the sound parameters is a resource ID.
  *
  * @return A ringing config with the provided sounds.
  *
  * @throws IllegalArgumentException If one of the sound parameters is a resource ID and the context is not provided.
  */
 public fun resRingingConfig(
+    context: Context,
     incomingCallSound: Int,
     outgoingCallSound: Int,
-    context: Context? = null,
 ) = object : RingingConfig {
     override val incomingCallSoundUri: Uri? = incomingCallSound.toUriOrNUll(context)
     override val outgoingCallSoundUri: Uri? = outgoingCallSound.toUriOrNUll(context)
@@ -133,11 +134,12 @@ public fun emptyRingingConfig(): RingingConfig = object : RingingConfig {
 public fun RingingConfig.toSounds() = Sounds(this)
 
 // Internal utilities
-private fun Int?.toUriOrNUll(context: Context?): Uri? =
+private fun Int?.toUriOrNUll(context: Context): Uri? =
     safeCall(default = null) {
-        if (this != null && context != null) {
+        if (this != null) {
             Uri.parse("android.resource://${context.packageName}/$this")
         } else {
+            StreamLog.w("RingingConfig") { "Resource ID is null. Returning null URI." }
             null
         }
     }
