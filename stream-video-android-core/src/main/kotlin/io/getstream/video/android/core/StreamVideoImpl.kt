@@ -56,6 +56,7 @@ import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import io.getstream.video.android.core.utils.toEdge

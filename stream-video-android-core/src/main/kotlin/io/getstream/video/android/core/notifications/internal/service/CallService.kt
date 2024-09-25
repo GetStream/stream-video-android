@@ -47,6 +47,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
@@ -152,7 +153,7 @@ internal open class CallService : Service() {
         fun buildStopIntent(
             context: Context,
             callServiceConfiguration: CallServiceConfig = callServiceConfig(),
-        ) = safeCall(Intent(context, CallService::class.java)) {
+        ) = safeCallWithDefault(Intent(context, CallService::class.java)) {
             val intent = callServiceConfiguration.callServicePerType.firstNotNullOfOrNull {
                 val serviceClass = it.value
                 if (isServiceRunning(context, serviceClass)) {
@@ -202,7 +203,7 @@ internal open class CallService : Service() {
             )
         }
 
-        private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean = safeCall(
+        private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean = safeCallWithDefault(
             true,
         ) {
             val activityManager = context.getSystemService(
