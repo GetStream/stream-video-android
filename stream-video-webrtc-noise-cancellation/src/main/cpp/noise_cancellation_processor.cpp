@@ -144,14 +144,14 @@ namespace noise_cancellation {
             return false;
         }
 
-        /*auto setModelFunc = reinterpret_cast<krisp::SetModelFuncType>(krispAudioSetModelPtr);
+        auto setModelFunc = reinterpret_cast<krisp::SetModelFuncType>(krispAudioSetModelPtr);
 
         const char *model = "c6.f.s.ced125.kw";
-        int setModelResult = setModelFunc(convertMBString2WString(model).c_str(), "default");
+        int setModelResult = setModelFunc(krisp::convertMBString2WString(model).c_str(), "default");
         if (setModelResult != 0) {
             syslog(LOG_ERR, "KrispNc: #Create; Failed to set wt file: %s", model);
             return false;
-        }*/
+        }
 
 
         return false;

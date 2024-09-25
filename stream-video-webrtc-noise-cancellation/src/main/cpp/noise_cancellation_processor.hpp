@@ -44,10 +44,11 @@ namespace noise_cancellation {
         void* m_handle = nullptr;
         std::array<void *, kFunctionCount> m_functionPointers = {};
 
-        void* m_session;
+        bool m_enabled;
         int m_sample_rate_hz;
         int m_num_channels;
         long m_last_time_stamp;
+        void* m_session;
 
         static NoiseCancellationProcessor* m_instance;
 

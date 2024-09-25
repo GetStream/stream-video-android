@@ -1,4 +1,4 @@
-package org.webrtc
+package io.getstream.webrtc.noise.cancellation
 
 class NoiseCancellation {
 
