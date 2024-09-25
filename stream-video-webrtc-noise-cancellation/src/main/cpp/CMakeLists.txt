@@ -32,10 +32,9 @@ include_directories(src/main/cpp/include)
 add_library(${CMAKE_PROJECT_NAME} SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         external_processor.cpp
+        noise_cancellation_jni.cpp
         noise_cancellation_processor.hpp
         noise_cancellation_processor.cpp
-        dynamic_audio_processor.hpp
-        dynamic_audio_processor.cpp
         )
 
 # Specifies libraries CMake should link to your target library. You

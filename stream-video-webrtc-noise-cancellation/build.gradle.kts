@@ -87,6 +87,8 @@ dependencies {
         exclude(group = "io.getstream", module = "stream-webrtc-android")
     }
 
+    implementation(libs.stream.log)
+
     // androidx
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)

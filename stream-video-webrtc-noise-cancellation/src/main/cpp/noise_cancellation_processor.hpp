@@ -41,6 +41,8 @@ namespace noise_cancellation {
     private:
         NoiseCancellationProcessor();
 
+        std::string m_model_path;
+
         void* m_handle = nullptr;
         std::array<void *, kFunctionCount> m_functionPointers = {};
 
