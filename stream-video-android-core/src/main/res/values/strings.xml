@@ -30,17 +30,18 @@
     <string name="stream_video_incoming_call_low_priority_notification_channel_id" translatable="false">incoming_calls_low_priority</string>
     <string name="stream_video_incoming_call_low_priority_notification_channel_description">Incoming audio and video call alerts</string>
     <string name="stream_video_incoming_call_notification_channel_description">Incoming audio and video call alerts</string>
-    <string name="stream_video_incoming_call_notification_title">Incoming call</string>
+    <string name="stream_video_incoming_call_notification_description">Incoming call</string>
     <string name="stream_video_outgoing_call_notification_channel_id" translatable="false">outgoing_calls</string>
     <string name="stream_video_outgoing_call_notification_channel_title">Outgoing Calls</string>
     <string name="stream_video_outgoing_call_notification_channel_description">Outgoing call notifications</string>
     <string name="stream_video_outgoing_call_notification_title" tools:ignore="TypographyEllipsis">Calling...</string>
-    <string name="stream_video_outgoing_call_notification_description">There is a call in progress, tap to go back to the call</string>
+    <string name="stream_video_outgoing_call_notification_description">Tap to go back to the call</string>
     <string name="stream_video_ongoing_call_notification_channel_id" translatable="false">ongoing_calls</string>
     <string name="stream_video_ongoing_call_notification_channel_title">Ongoing Calls</string>
     <string name="stream_video_ongoing_call_notification_channel_description">Ongoing call notifications</string>
-    <string name="stream_video_ongoing_call_notification_title">Call in progress</string>
-    <string name="stream_video_ongoing_call_notification_description">There is a call in progress, tap to go back to the call</string>
+    <string name="stream_video_ongoing_call_notification_title">Call in Progress</string>
+    <string name="stream_video_ongoing_group_call_notification_title">Group Call in Progress</string>
+    <string name="stream_video_ongoing_call_notification_description">Tap to go back to the call</string>
     <string name="stream_video_call_setup_notification_channel_id" translatable="false">call_setup</string>
     <string name="stream_video_call_setup_notification_channel_title">Call Setup</string>
     <string name="stream_video_call_setup_notification_channel_description">Temporary notifications used while setting up calls</string>

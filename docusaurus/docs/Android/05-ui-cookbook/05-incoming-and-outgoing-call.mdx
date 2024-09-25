@@ -87,8 +87,5 @@ fun MyRingingCallScreen() {
 So you'll be able to render your own composable or navigate to a different screen depending on the call state.
 
 ## Sounds
-The SDK plays default sounds for incoming and outgoing calls. You can customize the sounds by passing your own instance of the `Sounds` class to `StreamVideoBuilder`.
 
-`Sounds` has two properties, `incomingCallSound` and `outgoingCallSound`. You need to assign raw resource identifiers to these properties. These identifiers correspond to audio files in your project's `res/raw` directory.
-
-To disable sounds, pass `null` to `incomingCallSound` or `outgoingCallSound`.
+The SDK plays sounds for incoming and outgoing calls. Read [here](../06-advanced/01-ringing.mdx#sounds) for more details.

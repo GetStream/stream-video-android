@@ -54,7 +54,6 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
-import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeSuspendingCall
@@ -160,8 +159,6 @@ internal class StreamVideoImpl internal constructor(
     override val state = ClientState(this)
 
     /** if true we fail fast on errors instead of logging them */
-    var developmentMode = true
-    val debugInfo = DebugInfo(this)
 
     /** session id is generated client side */
     public val sessionId = UUID.randomUUID().toString()
@@ -186,7 +183,6 @@ internal class StreamVideoImpl internal constructor(
     override fun cleanup() {
         // remove all cached calls
         calls.clear()
-        debugInfo.stop()
         // stop all running coroutines
         scope.cancel()
         // stop the socket
@@ -346,8 +342,6 @@ internal class StreamVideoImpl internal constructor(
                 }
             }
         }
-
-        debugInfo.start()
     }
 
     var location: String? = null
@@ -391,10 +385,10 @@ internal class StreamVideoImpl internal constructor(
             // wait for the guest user setup if we're using guest users
             guestUserJob?.await()
             try {
-                val timer = debugInfo.trackTime("coordinator connect")
+                val startTime = System.currentTimeMillis()
                 socketImpl.connect(user)
-                timer.finish()
-                Success(timer.duration)
+                val duration = System.currentTimeMillis() - startTime
+                Success(duration)
             } catch (e: ErrorResponse) {
                 if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
                     refreshToken(e)

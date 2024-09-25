@@ -2,49 +2,70 @@
 title: Ringing
 description: How to ring the call and notify all members
 ---
+
 The `Call` object provides several options to ring and notify users about a call.
+
 ### Create and start a ringing call
 
-To create a ring call, we need to set the `ring` flag to `true` and provide the list of members we want to call. It is important to note that the caller should also be included in the list of members.
+To create a ring call, we need to set the `ring` flag to `true` and provide the list of members we
+want to call. It is important to note that the caller should also be included in the list of
+members.
 For this, you can use the `create` method from the `Call` object.
+
 ```kotlin
 val call = client.call("default", "123")
 call.create(ring = true, members = listOf("caller-id", "receiver-1", "receiver-2"))
 ```
-When ring is `true`, a push notification will be sent to the members, provided you have the required setup for push notifications.
-For more details around push notifications, please check [this page](./02-push-notifications/01-overview.mdx).
+
+When ring is `true`, a push notification will be sent to the members, provided you have the required
+setup for push notifications.
+For more details around push notifications, please
+check [this page](./02-push-notifications/01-overview.mdx).
 If ring is `false`, no push notification will be sent.
 
 ### Ring an existing call
+
 If you are sure that a call exists, you can use the `get` method instead:
+
 ```kotlin
 val call = client.call("default", "123")
 call.get()
 call.ring()
 ```
-The `get()` - `ring()` combination is better used for when calls are created and managed externally via another system.
+
+The `get()` - `ring()` combination is better used for when calls are created and managed externally
+via another system.
 
 ### Monitor the outgoing call state
+
 The state of the ringing call is available via the `StreamVideo` client.
+
 ```kotlin
 val client = StreamVideo.instance()
 val ringingCall = client.state.ringingCall
 ```
+
 This will give you a `StateFlow` which can be monitored.
+
 ```kotlin
 ringingCall.collectLatest { call ->
-  // There is a ringing call
+    // There is a ringing call
 }
 ```
+
 or simply just get a current value.
+
 ```kotlin
 val call = ringingCall.value
 ```
+
 ### Canceling an outgoing call
+
 To cancel an outgoing call you can simply `reject` the call from the caller side.
 The `reject()` method will notify the endpoint that the call is being rejected and corresponding
 events will be sent. In order to cleanup on the caller side, a call to `leave()` is required.
-These two usually go together, unless there is a specific reason to keep the channel open for further
+These two usually go together, unless there is a specific reason to keep the channel open for
+further
 events.
 
 ```kotlin
@@ -60,42 +81,56 @@ will receive a push notification about an incoming call.
 By default the SDK will show the push notification (with a call style) with an option to either
 accept or decline the call.
 
-When the user clicks on a push notification. There is an intent fired `ACTION_REJECT_CALL` or `ACTION_ACCEPT_CALL`.
+When the user clicks on a push notification. There is an intent fired `ACTION_REJECT_CALL`
+or `ACTION_ACCEPT_CALL`.
 The
 
-You can learn more about how to setup [push notifications in the docs](./02-push-notifications/01-overview.mdx).
+You can learn more about how to
+setup [push notifications in the docs](./02-push-notifications/01-overview.mdx).
 The docs also explain how to customize the notifications.
 
 ### Accept an incoming call
 
 The compose SDK provides built-in components to render and handle an incoming call.
 
-One of them is `StreamCallActivity`. This abstract activity handles everything that is needed for a call.
-Stream also provides a default compose implementation of this activity called `ComposeStreamCallActivity`.
+One of them is `StreamCallActivity`. This abstract activity handles everything that is needed for a
+call.
+Stream also provides a default compose implementation of this activity
+called `ComposeStreamCallActivity`.
 
-These components are already predefined and registered in the SDK. If you want to customize them you can easily extend them as any other activity in Android.
+These components are already predefined and registered in the SDK. If you want to customize them you
+can easily extend them as any other activity in Android.
 
 For more details check:
-* [UI Component docs for incoming calls](../04-ui-components/04-call/04-ringing-call.mdx)
-* UI Cookbook how to build [your own incoming call UI](../05-ui-cookbook/05-incoming-and-outgoing-call.mdx)
 
-The Stream SDK provides a way to accept a call within the code so if you are building a new UI, you can do this via the SDK API.
+* [UI Component docs for incoming calls](../04-ui-components/04-call/04-ringing-call.mdx)
+* UI Cookbook how to
+  build [your own incoming call UI](../05-ui-cookbook/05-incoming-and-outgoing-call.mdx)
+
+The Stream SDK provides a way to accept a call within the code so if you are building a new UI, you
+can do this via the SDK API.
+
 ```kotlin
 call.accept()
 call.join()
 ```
+
 The above calls are all you need to accept and join a call.
 
 Its important to note that if there is already an ongoing call you first have to leave that call.
+
 ```kotlin
 val client = StreamVideo.instance()
 val activeCall = client.start.activeCall.value
 if (activeCall != null) {
-  activeCall.leave()
+    activeCall.leave()
 }
 ```
+
 All this needs to be done with a component that handles the accept action.
+
 ```xml
+
 <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
 ```
 
@@ -105,6 +140,7 @@ Clicking the notification will automatically reject the call.
 There are certain instances that you might want to do this manually in your code.
 
 Stream offers a simple API to do this.
+
 ```kotlin
 call.reject()
 ```
@@ -112,7 +148,81 @@ call.reject()
 Note that rejecting the call will notify the caller and other members that the participant rejected
 the call. However it will not clean up the local `call` state.
 For this you need to leave the call by using:
+
 ```kotlin
 call.leave()
 ```
 
+## Ringing sounds
+
+The SDK plays sounds for incoming and outgoing calls. It bundles two sounds for this purpose.
+
+### Customizing the ringing sounds
+
+The ringing sounds can be customized in two ways:
+1. Override the bundled resources inside your application.
+2. Provide your own `RingingConfig` to the `StreamVideoBuilder`.
+
+#### Override the bundled resources
+
+The resources are: `/raw/call_incoming_sound.mp3` and `/raw/call_outgoing_sound.mp3`.
+You can place your own `call_incoming_sound.mp3` and `call_outgoing_sound.mp3` files in the `res/raw` directory of your app.
+
+#### Provide your own `RingingConfig`
+
+You can customize the sounds by creating a `RingingConfig`.
+
+:::note
+Currently, the SDK accepts a `Sounds` object in the builder, so once you have a `RingingConfig`, you can
+create a `Sounds` object via `ringingConfig.toSounds()` and pass it to the `StreamVideoBuilder`.
+:::
+
+The `RingingConfig` interface defines two properties:
+
+- `incomingCallSoundUri`: The URI for the incoming call sound.
+- `outgoingCallSoundUri`: The URI for the outgoing call sound.
+
+You can implement this interface and provide your own values for the properties (e.g. a user chosen
+URI). After that, create a `Sounds` object (e.g. `ringingConfig.toSounds()` or `Sounds(ringingConfig)`) and pass it to the SDK builder.
+If one of the `Uri`s is null the SDK will simply not play that sound and log an error.
+
+:::caution
+The `Sounds` class is deprecated and will entirely be replaced by `RingingConfig` in the future.
+The current `Sounds` constructor that accepts two integers will always return an `emptyRingingConfig()`
+with muted sounds.
+:::
+
+`RingingConfig` can also be created via several factory methods:
+
+- `defaultResourcesRingingConfig` - This method returns a `RingingConfig` that uses the SDK's
+  default sounds for both incoming and outgoing calls
+- `resRingingConfig` - This method returns a `RingingConfig` that uses a resource identifier for both incoming and outgoing calls.
+- `uriRingingConfig(Uri, Uri)` - Returns a `RingingConfig` that is configured with two `Uri` objects for the corresponding sounds.
+- `emptyRingingConfig` - The SDK will not play any sounds for incoming and outgoing calls.
+
+#### Customization examples
+
+For example, to create a sound config that only includes an incoming sound and no outgoing sound, you can extend `RingingConfig` as shown below, setting `outgoingCallSoundUri` to `null`:
+
+```kotlin
+class IncomingOnlyRingingConfig : RingingConfig {
+    override val incomingCallSoundUri: Uri =
+        Uri.parse("android.resource://$packageName/${R.raw.custom_incoming_sound}")
+    
+    override val outgoingCallSoundUri: Uri? = null // Outgoing sound will be muted
+}
+```
+
+Another use case may include a user-chosen sound or a custom sound that is not bundled:
+
+```kotlin
+data class UserRingingConfig(
+    val incomingCallSoundUri: Uri,
+    val outgoingCallSoundUri: Uri
+) : RingingConfig
+```
+
+:::note
+If the sound resources cannot be found (Uri or resource ID) the SDK will simply not play any sound and
+log the error.
+:::

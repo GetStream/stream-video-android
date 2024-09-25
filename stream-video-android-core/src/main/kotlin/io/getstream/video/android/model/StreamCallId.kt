@@ -79,4 +79,4 @@ public data class StreamCallId constructor(
 public fun Intent.streamCallId(key: String): StreamCallId? =
     IntentCompat.getParcelableExtra(this, key, StreamCallId::class.java)
 
-public fun Intent.streamCallDisplayName(key: String): String = this.getStringExtra(key) ?: "."
+public fun Intent.streamCallDisplayName(key: String): String? = this.getStringExtra(key)
