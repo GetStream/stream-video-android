@@ -26,6 +26,7 @@ namespace noise_cancellation {
             return m_instance;
         }
 
+        void setModelPath(const char* model_path);
 
         bool Create() override;
 
@@ -41,7 +42,7 @@ namespace noise_cancellation {
     private:
         NoiseCancellationProcessor();
 
-        std::string m_model_path;
+        const char* m_model_path = nullptr;
 
         void* m_handle = nullptr;
         std::array<void *, kFunctionCount> m_functionPointers = {};

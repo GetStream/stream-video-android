@@ -1,9 +1,10 @@
 #include <dlfcn.h>
 #include <syslog.h>
 #include <cstdarg>
+#include <cstdlib>
 #include <array>
 #include <string>
-
+#include <utility>
 
 #include "noise_cancellation_processor.hpp"
 
@@ -146,8 +147,13 @@ namespace noise_cancellation {
 
         auto setModelFunc = reinterpret_cast<krisp::SetModelFuncType>(krispAudioSetModelPtr);
 
-        const char *model = "c6.f.s.ced125.kw";
-        int setModelResult = setModelFunc(krisp::convertMBString2WString(model).c_str(), "default");
+        const char *model = "/data/user/0/io.getstream.video.android.dogfooding.debug/files/krisp/c6.f.s.ced125.kw";
+        auto final_model = krisp::convertMBString2WString(m_model_path);
+        syslog(LOG_INFO, "KrispNc: #Create; m_model_path: %s", m_model_path);
+
+        syslog(LOG_INFO, "KrispNc: #Create; final_model: %s", final_model.c_str());
+
+        int setModelResult = setModelFunc(final_model.c_str(), "default");
         if (setModelResult != 0) {
             syslog(LOG_ERR, "KrispNc: #Create; Failed to set wt file: %s", model);
             return false;
@@ -212,6 +218,10 @@ namespace noise_cancellation {
         auto krisp_rate = krisp::GetSampleRate(rate);
         auto krisp_duration = krisp::GetFrameDuration(10);
         //m_session = krispAudioNcCreateSession(krisp_rate, krisp_rate, krisp_duration, "default");
+    }
+
+    void NoiseCancellationProcessor::setModelPath(const char* model_path) {
+        m_model_path = model_path;
     }
 
 }
