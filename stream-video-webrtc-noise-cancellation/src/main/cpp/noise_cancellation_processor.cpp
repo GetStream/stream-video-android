@@ -138,6 +138,11 @@ namespace noise_cancellation {
 
         //=========================================================================================================
 
+        if (m_model_path == nullptr) {
+            syslog(LOG_ERR, "KrispNc: #Create; m_model_path is not set");
+            return false;
+        }
+
         void *krispAudioSetModelPtr = m_functionPointers[krisp::FunctionId::krispAudioSetModel];
 
         if (krispAudioSetModelPtr == nullptr) {
@@ -148,8 +153,15 @@ namespace noise_cancellation {
         auto setModelFunc = reinterpret_cast<krisp::SetModelFuncType>(krispAudioSetModelPtr);
 
         const char *model = "/data/user/0/io.getstream.video.android.dogfooding.debug/files/krisp/c6.f.s.ced125.kw";
-        auto final_model = krisp::convertMBString2WString(m_model_path);
+
+        if (std::strcmp(model, m_model_path) != 0) {
+            syslog(LOG_ERR, "KrispNc: #Create; model and m_model_path are not equal; expected model: %s, m_model_path: %s",
+                   model, m_model_path);
+            return false;
+        }
+
         syslog(LOG_INFO, "KrispNc: #Create; m_model_path: %s", m_model_path);
+        auto final_model = krisp::convertMBString2WString(m_model_path);
 
         syslog(LOG_INFO, "KrispNc: #Create; final_model: %s", final_model.c_str());
 
