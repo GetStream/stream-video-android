@@ -12,6 +12,8 @@ namespace string_utils {
 
     std::wstring convertMBString2WString(const std::string &str);
 
+    std::string convertMBString2String(const std::string &str);
+
     std::string convertWStringToString(const std::wstring& wstr);
 
 

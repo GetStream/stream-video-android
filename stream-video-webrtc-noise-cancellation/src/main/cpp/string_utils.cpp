@@ -12,6 +12,12 @@ namespace string_utils {
         return w;
     }
 
+    // Convert multibyte std::string to std::string
+    std::string convertMBString2String(const std::string &str) {
+        std::string result(str.begin(), str.end());
+        return result;
+    }
+
     // Convert std::wstring to UTF-8 std::string for logging
     std::string convertWStringToString(const std::wstring& wstr) {
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
