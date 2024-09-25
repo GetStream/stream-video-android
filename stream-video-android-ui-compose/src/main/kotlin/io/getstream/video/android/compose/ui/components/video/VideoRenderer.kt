@@ -120,7 +120,10 @@ public fun VideoRenderer(
                             view = this
                         }
                     },
-                    update = { v -> setupVideo(mediaTrack, v) },
+                    update = { v ->
+                        v.setMirror(videoRendererConfig.mirrorStream)
+                        setupVideo(mediaTrack, v)
+                    },
                     modifier = modifier.testTag("video_renderer"),
                 )
             }
@@ -180,6 +183,7 @@ private fun cleanTrack(
         }
     }
 }
+
 private fun setupVideo(
     mediaTrack: MediaTrack?,
     renderer: VideoTextureViewRenderer,
