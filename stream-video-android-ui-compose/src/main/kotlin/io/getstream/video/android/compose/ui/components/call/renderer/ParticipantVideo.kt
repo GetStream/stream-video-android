@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -250,18 +251,19 @@ public fun ParticipantVideoRenderer(
     val video by participant.video.collectAsStateWithLifecycle()
     val cameraDirection by call.camera.direction.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsStateWithLifecycle()
-    val mirror by remember {
-        derivedStateOf {
-            participant.sessionId == me?.sessionId && cameraDirection == CameraDirection.Front
+    val mirror by remember(cameraDirection) {
+        mutableStateOf(cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId)
+    }
+    val videoRendererConfig = remember(mirror, videoFallbackContent) {
+        videoRenderConfig {
+            mirrorStream = mirror
+            this.fallbackContent = videoFallbackContent
         }
     }
     VideoRenderer(
         call = call,
         video = video,
-        videoRendererConfig = videoRenderConfig {
-            mirrorStream = mirror
-            this.fallbackContent = videoFallbackContent
-        },
+        videoRendererConfig = videoRendererConfig,
     )
 }
 
