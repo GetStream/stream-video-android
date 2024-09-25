@@ -138,8 +138,6 @@ namespace noise_cancellation {
             syslog(LOG_ERR, "KrispNc: #Create; m_model_path is empty");
             return false;
         }
-        auto model_path = m_model_path;
-        syslog(LOG_INFO, "KrispNc: #Create; model_path: %ls", model_path.c_str());
 
         void *krispAudioSetModelPtr = m_functionPointers[krisp::FunctionId::krispAudioSetModel];
 
@@ -149,30 +147,13 @@ namespace noise_cancellation {
         }
 
         auto setModelFunc = reinterpret_cast<krisp::SetModelFuncType>(krispAudioSetModelPtr);
-
-        const char *model = "/data/user/0/io.getstream.video.android.dogfooding.debug/files/krisp/c6.f.s.ced125.kw";
-
-        auto c_model_path = string_utils::convertWStringToString(model_path);
-        if (std::strcmp(model, c_model_path.c_str()) != 0) {
-            syslog(LOG_ERR, "KrispNc: #Create; model and m_model_path are not equal; expected model: %s, m_model_path: %s",
-                   model, c_model_path.c_str());
-            //return false;
-        }
-
-        syslog(LOG_INFO, "KrispNc: #Create; m_model_path: %s", c_model_path.c_str());
-        auto final_model = string_utils::convertMBStringToWString(model);
-
-        auto log_model = string_utils::convertWStringToString(final_model);
-        syslog(LOG_INFO, "KrispNc: #Create; final_model: %s", log_model.c_str());
-
-        int setModelResult = setModelFunc(final_model.c_str(), "default");
+        int setModelResult = setModelFunc(m_model_path.c_str(), "default");
         if (setModelResult != 0) {
-            syslog(LOG_ERR, "KrispNc: #Create; Failed to set wt file: %s", model);
+            auto model_path = string_utils::convertWStringToString(m_model_path);
+            syslog(LOG_ERR, "KrispNc: #Create; Failed to set wt file: %s", model_path.c_str());
             return false;
         }
-
-
-        return false;
+        return true;
     }
 
     bool NoiseCancellationProcessor::Destroy() {
@@ -233,10 +214,8 @@ namespace noise_cancellation {
     }
 
     void NoiseCancellationProcessor::setModelPath(const std::wstring& model_path) {
-        ::syslog(LOG_INFO, "KrispNc: #setModelPath; model_path: %s", model_path.c_str());
+        ::syslog(LOG_INFO, "KrispNc: #setModelPath; model_path: %s", string_utils::convertWStringToString(model_path).c_str());
         m_model_path = model_path;
-
-        ::syslog(LOG_INFO, "KrispNc: #setModelPath; m_model_path: %s", m_model_path.c_str());
     }
 
 }
