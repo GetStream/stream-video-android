@@ -29,6 +29,8 @@ namespace krisp {
     using GlobalInitFuncType = int (*)(const wchar_t*);
     using GlobalDestroyFuncType = int (*)();
     using SetModelFuncType = int (*)(const wchar_t*, const char*);
+    using CreateSessionType = KrispAudioSessionID (*)(KrispAudioSamplingRate, KrispAudioSamplingRate,
+                                                      KrispAudioFrameDuration, const char*);
 
 
     KrispAudioFrameDuration GetFrameDuration(size_t duration) {
@@ -193,7 +195,7 @@ namespace noise_cancellation {
         m_sample_rate_hz = sample_rate_hz;
         m_num_channels = num_channels;
         if (m_session == nullptr) {
-            createSession(sample_rate_hz);
+            m_session = createSession(sample_rate_hz);
         }
         return true;
     }
@@ -207,10 +209,20 @@ namespace noise_cancellation {
         return true;
     }
 
-    void NoiseCancellationProcessor::createSession(int rate) {
+    void* NoiseCancellationProcessor::createSession(int rate) {
         auto krisp_rate = krisp::GetSampleRate(rate);
         auto krisp_duration = krisp::GetFrameDuration(10);
-        //m_session = krispAudioNcCreateSession(krisp_rate, krisp_rate, krisp_duration, "default");
+        syslog(LOG_INFO, "KrispNc: #createSession; krisp_rate: %i, krisp_duration: %i", krisp_rate, krisp_duration);
+
+        void *krispAudioNcCreateSessionPtr = m_functionPointers[krisp::FunctionId::krispAudioNcCreateSession];
+
+        if (krispAudioNcCreateSessionPtr == nullptr) {
+            syslog(LOG_ERR, "KrispNc: #Create; Failed to get the krispAudioNcCreateSession function");
+            return nullptr;
+        }
+
+        auto createSessionFunc = reinterpret_cast<krisp::CreateSessionType>(krispAudioNcCreateSessionPtr);
+        return createSessionFunc(krisp_rate, krisp_rate, krisp_duration, "default");
     }
 
     void NoiseCancellationProcessor::setModelPath(const std::wstring& model_path) {

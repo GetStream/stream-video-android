@@ -53,11 +53,11 @@ namespace noise_cancellation {
         int m_sample_rate_hz;
         int m_num_channels;
         long m_last_time_stamp;
-        void* m_session;
+        void* m_session = nullptr;
 
         static NoiseCancellationProcessor* m_instance;
 
-        void createSession(int rate);
+        void* createSession(int rate);
     };
 
 }  // namespace noise_cancellation
