@@ -41,6 +41,8 @@ namespace noise_cancellation {
                          size_t num_bands,
                          size_t num_channels) override;
 
+        void Reset(int new_rate);
+
     private:
         NoiseCancellationProcessor();
 
@@ -58,6 +60,8 @@ namespace noise_cancellation {
         static NoiseCancellationProcessor* m_instance;
 
         void* createSession(int rate);
+
+        void closeSession(void* session);
     };
 
 }  // namespace noise_cancellation

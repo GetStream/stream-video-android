@@ -11,8 +11,11 @@
 #include "inc/krisp-audio-sdk.hpp"
 #include "inc/krisp-audio-sdk-nc.hpp"
 #include "string_utils.h"
+#include "time_utils.h"
 
 namespace krisp {
+
+    constexpr size_t kNsFrameSize = 160;
 
     struct FunctionId {
         static constexpr unsigned int krispAudioGlobalInit = 0;
@@ -31,6 +34,8 @@ namespace krisp {
     using SetModelFuncType = int (*)(const wchar_t*, const char*);
     using CreateSessionType = KrispAudioSessionID (*)(KrispAudioSamplingRate, KrispAudioSamplingRate,
                                                       KrispAudioFrameDuration, const char*);
+    using CloseSessionType = int (*)(KrispAudioSessionID);
+    using CleanAmbientNoiseFloatType = int (*)(KrispAudioSessionID, const float*, unsigned int, float*, unsigned int);
 
 
     KrispAudioFrameDuration GetFrameDuration(size_t duration) {
@@ -206,7 +211,82 @@ namespace noise_cancellation {
         syslog(LOG_INFO, "KrispNc: #ProcessFrame; num_frames: %zu, num_bands: %zu, num_channels: %zu",
                num_frames, num_bands, num_channels);
 
+        constexpr long k_stats_interval = 10000;
+
+        auto now = time_utils::TimeMillis();
+        int rate = num_frames * 1000;
+
+        if (now - m_last_time_stamp > k_stats_interval) {
+            ::syslog(LOG_INFO,"KRISP-CIT: Num Frames: %zu\
+             num Bands: %zu  Num Channels: %zu ", num_frames, num_bands, num_channels);
+
+            m_last_time_stamp = now;
+        }
+        if(rate != m_sample_rate_hz) {
+            Reset(rate);
+        }
+
+        if (m_session == nullptr) {
+            ::syslog(LOG_INFO, "KRISP-CIT: Session creation failed");
+            return false;
+        }
+
+        std::vector<float> bufferIn;
+        std::vector<float> bufferOut;
+        auto num_bands_ = num_bands;
+
+        auto kNsFrameSize = krisp::kNsFrameSize;
+        bufferIn.resize(kNsFrameSize * num_bands_);
+        bufferOut.resize(kNsFrameSize * num_bands_);
+
+        for (size_t jj = 0; jj < kNsFrameSize*num_bands_; ++jj) {
+            bufferIn[jj] = channels[0][jj] / 32768.f;
+        }
+
+        // Get ptr fpr krispAudioNcCleanAmbientNoiseFloat and invoke
+        void* krispAudioNcCleanAmbientNoiseFloatPtr = m_functionPointers[krisp::FunctionId::krispAudioNcCleanAmbientNoiseFloat];
+        if (krispAudioNcCleanAmbientNoiseFloatPtr == nullptr) {
+            ::syslog(LOG_INFO, "KRISP-CIT: Failed to get the krispAudioNcCleanAmbientNoiseFloat function");
+            return false;
+        }
+        auto cleanAmbientNoise = reinterpret_cast<krisp::CleanAmbientNoiseFloatType>(krispAudioNcCleanAmbientNoiseFloatPtr);
+
+        const auto ret_val = cleanAmbientNoise(
+                m_session, bufferIn.data(), num_bands_ * kNsFrameSize,
+                bufferOut.data(), num_bands_ * kNsFrameSize);
+        if (ret_val != 0) {
+            ::syslog(LOG_INFO, "KRISP-CIT: Krisp noise cleanup error");
+            return false;
+        }
+
+        for (size_t jj = 0; jj < kNsFrameSize*num_bands_; ++jj) {
+            channels[0][jj] = bufferOut[jj] * 32768.f;
+        }
+
         return true;
+    }
+
+    void NoiseCancellationProcessor::Reset(int new_rate) {
+        syslog(LOG_INFO, "KrispNc: #Reset; new_rate: %i", new_rate);
+        closeSession(m_session);
+        m_sample_rate_hz = new_rate;
+        m_session = createSession(new_rate);
+    }
+
+    void NoiseCancellationProcessor::closeSession(void* session) {
+        if (session == nullptr) {
+            syslog(LOG_INFO, "KrispNc: #closeSession; session is null");
+            return;
+        }
+        void* krispAudioNcCloseSessionPtr = m_functionPointers[krisp::FunctionId::krispAudioNcCloseSession];
+        if (krispAudioNcCloseSessionPtr) {
+            auto closeSessionFunc = reinterpret_cast<krisp::CloseSessionType>(krispAudioNcCloseSessionPtr);
+            auto closeSessionResult = closeSessionFunc(session);
+            if (closeSessionResult != 0) {
+                syslog(LOG_ERR, "KrispNc: #closeSession; Failed to close the session");
+                return;
+            }
+        }
     }
 
     void* NoiseCancellationProcessor::createSession(int rate) {

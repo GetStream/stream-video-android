@@ -31,6 +31,8 @@ include_directories(src/main/cpp/include)
 # used in the AndroidManifest.xml file.
 add_library(${CMAKE_PROJECT_NAME} SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
+        time_utils.h
+        time_utils.cpp
         string_utils.h
         string_utils.cpp
         external_processor.cpp
