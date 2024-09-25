@@ -152,14 +152,15 @@ namespace noise_cancellation {
 
         const char *model = "/data/user/0/io.getstream.video.android.dogfooding.debug/files/krisp/c6.f.s.ced125.kw";
 
-        if (std::strcmp(model, model_path.c_str()) != 0) {
+        auto c_model_path = string_utils::convertWStringToString(model_path);
+        if (std::strcmp(model, c_model_path.c_str()) != 0) {
             syslog(LOG_ERR, "KrispNc: #Create; model and m_model_path are not equal; expected model: %s, m_model_path: %s",
-                   model, model_path.c_str());
+                   model, c_model_path.c_str());
             //return false;
         }
 
-        syslog(LOG_INFO, "KrispNc: #Create; m_model_path: %s", model_path.c_str());
-        auto final_model = string_utils::convertMBString2WString(model);
+        syslog(LOG_INFO, "KrispNc: #Create; m_model_path: %s", c_model_path.c_str());
+        auto final_model = string_utils::convertMBStringToWString(model);
 
         auto log_model = string_utils::convertWStringToString(final_model);
         syslog(LOG_INFO, "KrispNc: #Create; final_model: %s", log_model.c_str());
@@ -231,7 +232,7 @@ namespace noise_cancellation {
         //m_session = krispAudioNcCreateSession(krisp_rate, krisp_rate, krisp_duration, "default");
     }
 
-    void NoiseCancellationProcessor::setModelPath(const std::string& model_path) {
+    void NoiseCancellationProcessor::setModelPath(const std::wstring& model_path) {
         ::syslog(LOG_INFO, "KrispNc: #setModelPath; model_path: %s", model_path.c_str());
         m_model_path = model_path;
 

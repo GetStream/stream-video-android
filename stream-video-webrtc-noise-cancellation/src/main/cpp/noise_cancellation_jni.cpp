@@ -18,10 +18,13 @@ Java_io_getstream_webrtc_noise_cancellation_NoiseCancellationFactory_initModel(
     // Log the path
     ::syslog(LOG_INFO, "KrispNc: #initModel; model_path: %s", nativePath);
 
-    auto modelPath = string_utils::convertMBString2String(nativePath);
+    auto modelPath = string_utils::convertMBStringToWString(nativePath);
+
+    // Convert the wstring modelPath to std::string for logging
+    std::string finalModelPath = string_utils::convertWStringToString(modelPath);
 
     // Log the final model path (converted back to UTF-8 string)
-    ::syslog(LOG_INFO, "KrispNc: #initModel; final_model_path: %s", modelPath.c_str());
+    ::syslog(LOG_INFO, "KrispNc: #initModel; final_model_path: %s", finalModelPath.c_str());
 
     // Set the model path using the setter method
     noise_cancellation::NoiseCancellationProcessor::getInstance()->setModelPath(modelPath);

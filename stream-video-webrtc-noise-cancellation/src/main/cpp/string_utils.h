@@ -10,11 +10,13 @@
 
 namespace string_utils {
 
-    std::wstring convertMBString2WString(const std::string &str);
+    std::wstring convertMBStringToWString(const std::string &str);
 
-    std::string convertMBString2String(const std::string &str);
+    std::string convertMBStringToString(const std::string &str);
 
     std::string convertWStringToString(const std::wstring& wstr);
+
+    std::wstring convertStringToWString(const std::string& str);
 
 
 } // utils
