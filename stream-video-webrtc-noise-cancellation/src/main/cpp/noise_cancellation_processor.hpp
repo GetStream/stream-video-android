@@ -1,6 +1,8 @@
 #ifndef NOISE_CANCELLATION_PROCESSOR_HPP
 #define NOISE_CANCELLATION_PROCESSOR_HPP
 
+#include <string>
+
 #include "include/external_processor.hpp"
 
 namespace noise_cancellation {
@@ -26,7 +28,7 @@ namespace noise_cancellation {
             return m_instance;
         }
 
-        void setModelPath(const char* model_path);
+        void setModelPath(const std::string& model_path);
 
         bool Create() override;
 
@@ -42,7 +44,7 @@ namespace noise_cancellation {
     private:
         NoiseCancellationProcessor();
 
-        const char* m_model_path = nullptr;
+        std::string m_model_path;
 
         void* m_handle = nullptr;
         std::array<void *, kFunctionCount> m_functionPointers = {};
