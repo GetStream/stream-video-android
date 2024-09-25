@@ -1,28 +1,9 @@
 #include <jni.h>
 #include <syslog.h>
-#include <cstdarg>
-#include <array>
 #include <string>
-#include <locale>
-#include <codecvt>
 
-#include "utils.h"
+#include "string_utils.h"
 #include "noise_cancellation_processor.hpp"
-
-namespace utils {
-
-    // Convert multibyte std::string to std::wstring
-    std::wstring convertMBString2WString(const std::string &str) {
-        std::wstring w(str.begin(), str.end());
-        return w;
-    }
-
-    // Convert std::wstring to UTF-8 std::string for logging
-    std::string convertWStringToString(const std::wstring& wstr) {
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        return converter.to_bytes(wstr);
-    }
-}
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -42,7 +23,7 @@ Java_io_getstream_webrtc_noise_cancellation_NoiseCancellationFactory_initModel(
     auto modelPathPtr = &modelPath;
 
     // Convert the wstring modelPath to std::string for logging
-    std::string finalModelPath = utils::convertWStringToString(*modelPathPtr);
+    std::string finalModelPath = string_utils::convertWStringToString(*modelPathPtr);
 
     // Log the final model path (converted back to UTF-8 string)
     ::syslog(LOG_INFO, "KrispNc: #initModel; final_model_path: %s", finalModelPath.c_str());
@@ -50,7 +31,7 @@ Java_io_getstream_webrtc_noise_cancellation_NoiseCancellationFactory_initModel(
 
 
     // Set the model path using the setter method
-    noise_cancellation::NoiseCancellationProcessor::getInstance()->setModelPath(nativePath);
+    noise_cancellation::NoiseCancellationProcessor::getInstance()->setModelPath(finalModelPath.c_str());
 
     // Release the memory used by nativePath
     env->ReleaseStringUTFChars(path, nativePath);

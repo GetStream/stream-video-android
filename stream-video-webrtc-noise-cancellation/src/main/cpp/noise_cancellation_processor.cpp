@@ -10,13 +10,9 @@
 
 #include "inc/krisp-audio-sdk.hpp"
 #include "inc/krisp-audio-sdk-nc.hpp"
+#include "string_utils.h"
 
 namespace krisp {
-
-    std::wstring convertMBString2WString(const std::string& str) {
-        std::wstring w(str.begin(), str.end());
-        return w;
-    }
 
     struct FunctionId {
         static constexpr unsigned int krispAudioGlobalInit = 0;
@@ -157,13 +153,14 @@ namespace noise_cancellation {
         if (std::strcmp(model, m_model_path) != 0) {
             syslog(LOG_ERR, "KrispNc: #Create; model and m_model_path are not equal; expected model: %s, m_model_path: %s",
                    model, m_model_path);
-            return false;
+            //return false;
         }
 
         syslog(LOG_INFO, "KrispNc: #Create; m_model_path: %s", m_model_path);
-        auto final_model = krisp::convertMBString2WString(m_model_path);
+        auto final_model = string_utils::convertMBString2WString(m_model_path);
 
-        syslog(LOG_INFO, "KrispNc: #Create; final_model: %s", final_model.c_str());
+        auto log_model = string_utils::convertWStringToString(final_model);
+        syslog(LOG_INFO, "KrispNc: #Create; final_model: %s", log_model.c_str());
 
         int setModelResult = setModelFunc(final_model.c_str(), "default");
         if (setModelResult != 0) {
@@ -233,7 +230,9 @@ namespace noise_cancellation {
     }
 
     void NoiseCancellationProcessor::setModelPath(const char* model_path) {
+        ::syslog(LOG_INFO, "KrispNc: #setModelPath; model_path: %s", model_path);
         m_model_path = model_path;
+        ::syslog(LOG_INFO, "KrispNc: #setModelPath; m_model_path: %s", m_model_path);
     }
 
 }

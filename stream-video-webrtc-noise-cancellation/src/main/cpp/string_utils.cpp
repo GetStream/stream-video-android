@@ -2,7 +2,7 @@
 // Created by Kanat Kiialbaev on 2024-09-25.
 //
 
-#include "utils.h"
+#include "string_utils.h"
 
 namespace string_utils {
 
