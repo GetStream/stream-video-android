@@ -139,9 +139,9 @@ class SpeakerManager(
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
         microphoneManager.setup()
         val devices = devices.value
+        val selectedBeforeSpeaker = selectedDevice.value
         if (enable) {
             val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-            selectedBeforeSpeaker = selectedDevice.value
             _speakerPhoneEnabled.value = true
             microphoneManager.select(speaker)
         } else {
@@ -328,7 +328,6 @@ class ScreenShareManager(
  */
 class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
-    val preferSpeakerphone: Boolean,
     val audioUsage: Int,
 ) {
     // Internal data
@@ -451,7 +450,7 @@ class MicrophoneManager(
 
         if (canHandleDeviceSwitch()) {
             audioHandler =
-                AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
+                AudioSwitchHandler(mediaManager.context) { devices, selected ->
                     logger.i { "audio devices. selected $selected, available devices are $devices" }
                     _devices.value = devices.map { it.fromAudio() }
                     _selectedDevice.value = selected?.fromAudio()
@@ -858,7 +857,7 @@ class MediaManagerImpl(
     )
 
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this, preferSpeakerphone = true, audioUsage)
+    internal val microphone = MicrophoneManager(this, audioUsage)
     internal val speaker = SpeakerManager(this, microphone)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
