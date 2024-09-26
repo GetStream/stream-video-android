@@ -209,6 +209,7 @@ object StreamVideoInitHelper {
                     return authData.token
                 }
             },
+            appName = "Stream Video Demo App",
         ).build()
     }
 }

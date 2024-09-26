@@ -283,6 +283,26 @@ public class CallState(
 
         // TODO: could optimize performance by subscribing only to relevant events
         call.subscribe {
+            if (it is TrackPublishedEvent) {
+                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+
+                if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = true
+                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = true
+                }
+            }
+
+            if (it is TrackUnpublishedEvent) {
+                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+
+                if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
+                    participant._videoEnabled.value = false
+                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = false
+                }
+            }
+
             emitLivestreamVideo()
         }
 

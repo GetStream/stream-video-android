@@ -46,6 +46,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
+import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.MediaTrack
@@ -55,28 +57,12 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 
-/**
- * Renders a single video track based on the call state.
- *
- * @param call The call state that contains all the tracks and participants.
- * @param video A media contains a video track or an audio track to be rendered.
- * @param modifier Modifier for styling.
- * @param videoScalingType Setup the video scale type of this renderer.
- * @param videoFallbackContent Content is shown the video track is failed to load or not available.
- * @param onRendered An interface that will be invoked when the video is rendered.
- */
 @Composable
 public fun VideoRenderer(
+    modifier: Modifier = Modifier,
     call: Call,
     video: ParticipantState.Media?,
-    modifier: Modifier = Modifier,
-    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
-    videoFallbackContent: @Composable (Call) -> Unit = {
-        DefaultMediaTrackFallbackContent(
-            modifier,
-            call,
-        )
-    },
+    videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     onRendered: (VideoTextureViewRenderer) -> Unit = {},
 ) {
     if (LocalInspectionMode.current) {
@@ -94,7 +80,7 @@ public fun VideoRenderer(
     }
 
     // Show avatar always behind the video.
-    videoFallbackContent.invoke(call)
+    videoRendererConfig.fallbackContent.invoke(call)
 
     if (video?.enabled == true) {
         val mediaTrack = video.track
@@ -125,18 +111,61 @@ public fun VideoRenderer(
                                 trackType = trackType,
                                 onRendered = onRendered,
                             )
-                            setScalingType(scalingType = videoScalingType.toCommonScalingType())
+                            setMirror(videoRendererConfig.mirrorStream)
+                            setScalingType(
+                                scalingType = videoRendererConfig.scalingType.toCommonScalingType(),
+                            )
                             setupVideo(mediaTrack, this)
 
                             view = this
                         }
                     },
-                    update = { v -> setupVideo(mediaTrack, v) },
+                    update = { v ->
+                        v.setMirror(videoRendererConfig.mirrorStream)
+                        setupVideo(mediaTrack, v)
+                    },
                     modifier = modifier.testTag("video_renderer"),
                 )
             }
         }
     }
+}
+
+/**
+ * Renders a single video track based on the call state.
+ *
+ * @param call The call state that contains all the tracks and participants.
+ * @param video A media contains a video track or an audio track to be rendered.
+ * @param modifier Modifier for styling.
+ * @param videoScalingType Setup the video scale type of this renderer.
+ * @param videoFallbackContent Content is shown the video track is failed to load or not available.
+ * @param onRendered An interface that will be invoked when the video is rendered.
+ */
+@Deprecated("Use VideoRenderer which accepts `videoConfig` instead.")
+@Composable
+public fun VideoRenderer(
+    call: Call,
+    video: ParticipantState.Media?,
+    modifier: Modifier = Modifier,
+    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    videoFallbackContent: @Composable (Call) -> Unit = {
+        DefaultMediaTrackFallbackContent(
+            modifier,
+            call,
+        )
+    },
+    onRendered: (VideoTextureViewRenderer) -> Unit = {},
+) {
+    VideoRenderer(
+        call = call,
+        video = video,
+        modifier = modifier,
+        videoRendererConfig = videoRenderConfig {
+            this.videoScalingType = videoScalingType
+            this.fallbackContent = videoFallbackContent
+        },
+        onRendered = onRendered,
+    )
 }
 
 private fun cleanTrack(
@@ -171,7 +200,7 @@ private fun setupVideo(
 }
 
 @Composable
-private fun DefaultMediaTrackFallbackContent(
+internal fun DefaultMediaTrackFallbackContent(
     modifier: Modifier,
     call: Call,
 ) {

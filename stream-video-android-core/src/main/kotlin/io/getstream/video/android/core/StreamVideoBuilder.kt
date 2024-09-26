@@ -27,6 +27,8 @@ import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -35,6 +37,8 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
+import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -77,6 +81,7 @@ import java.net.ConnectException
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
+ * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
  *
  * @see build
  * @see ClientState.connection
@@ -96,11 +101,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     private val runForegroundServiceForCalls: Boolean = true,
+    private val callServiceConfig: CallServiceConfig? = null,
     private val localSfuAddress: String? = null,
-    private val sounds: Sounds = Sounds(),
+    private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
+    private val appName: String? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -188,12 +195,17 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             connectionModule = connectionModule,
             streamNotificationManager = streamNotificationManager,
-            runForegroundService = runForegroundServiceForCalls,
+            callServiceConfig = callServiceConfig
+                ?: callServiceConfig().copy(
+                    runCallServiceInForeground = runForegroundServiceForCalls,
+                    audioUsage = audioUsage,
+                ),
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
+            appName = appName,
         )
 
         if (user.type == UserType.Guest) {

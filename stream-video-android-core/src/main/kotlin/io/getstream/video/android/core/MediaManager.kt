@@ -611,25 +611,30 @@ public class CameraManager(
                 CameraDirection.Back -> CameraDirection.Front
             }
             val device = devices.firstOrNull { it.direction == newDirection }
-            device?.let { select(it.id, false) }
+            device?.let { select(it.id, triggeredByFlip = true) }
 
             videoCapturer.switchCamera(null)
         }
     }
 
-    fun select(deviceId: String, startCapture: Boolean = false) {
+    fun select(deviceId: String, triggeredByFlip: Boolean = false) {
+        if (!triggeredByFlip) {
+            stopCapture()
+            if (!::devices.isInitialized) initDeviceList()
+        }
+
         val selectedDevice = devices.firstOrNull { it.id == deviceId }
         if (selectedDevice != null) {
             _direction.value = selectedDevice.direction ?: CameraDirection.Back
             _selectedDevice.value = selectedDevice
-            _availableResolutions.value =
-                selectedDevice.supportedFormats?.toList() ?: emptyList()
+            _availableResolutions.value = selectedDevice.supportedFormats?.toList() ?: emptyList()
             _resolution.value = selectDesiredResolution(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
 
-            if (startCapture) {
+            if (!triggeredByFlip) {
+                setup(force = true)
                 startCapture()
             }
         }
@@ -681,14 +686,13 @@ public class CameraManager(
      * Handle the setup of the camera manager and enumerator
      * You should only call this once the permissions have been granted
      */
-    internal fun setup() {
-        if (setupCompleted) {
+    internal fun setup(force: Boolean = false) {
+        if (setupCompleted && !force) {
             return
         }
-        cameraManager = mediaManager.context.getSystemService()
-        enumerator = Camera2Enumerator(mediaManager.context)
-        val cameraIds = cameraManager?.cameraIdList ?: emptyArray()
-        devices = sortDevices(cameraIds, cameraManager, enumerator)
+
+        initDeviceList()
+
         val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
         val selectedDevice = devicesMatchingDirection.firstOrNull()
         if (selectedDevice != null) {
@@ -705,6 +709,13 @@ public class CameraManager(
             )
             setupCompleted = true
         }
+    }
+
+    private fun initDeviceList() {
+        cameraManager = mediaManager.context.getSystemService()
+        enumerator = Camera2Enumerator(mediaManager.context)
+        val cameraIds = cameraManager?.cameraIdList ?: emptyArray()
+        devices = sortDevices(cameraIds, cameraManager, enumerator)
     }
 
     /**

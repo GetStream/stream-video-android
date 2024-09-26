@@ -47,6 +47,7 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.internal.service.livestreamCallServiceConfig
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.launch
 
@@ -72,6 +73,7 @@ fun LiveHost() {
         user = user,
         token = userToken,
         ensureSingleInstance = false,
+        callServiceConfig = livestreamCallServiceConfig(),
         loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
     ).build()
 

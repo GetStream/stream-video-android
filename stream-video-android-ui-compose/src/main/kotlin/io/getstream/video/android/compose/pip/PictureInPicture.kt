@@ -24,6 +24,16 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Rational
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.PictureInPictureModeChangedInfo
+import androidx.core.util.Consumer
 import io.getstream.video.android.core.Call
 
 @Suppress("DEPRECATION")
@@ -58,11 +68,47 @@ internal fun enterPictureInPicture(context: Context, call: Call) {
     }
 }
 
-internal val Context.isInPictureInPictureMode: Boolean
+/**
+ * Remember if the current activity is in Picture-in-Picture mode.
+ * To be used in compose to  decide weather the current mode is PiP or not.
+ */
+@Composable
+public fun rememberIsInPipMode(): Boolean {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val activity = LocalContext.current.findComponentActivity()
+        var pipMode by remember { mutableStateOf(activity?.isInPictureInPictureMode) }
+        DisposableEffect(activity) {
+            val observer = Consumer<PictureInPictureModeChangedInfo> { info ->
+                pipMode = info.isInPictureInPictureMode
+            }
+            activity?.addOnPictureInPictureModeChangedListener(
+                observer,
+            )
+            onDispose { activity?.removeOnPictureInPictureModeChangedListener(observer) }
+        }
+        return pipMode ?: false
+    } else {
+        return false
+    }
+}
+
+/**
+ * Used in other parts of the app to check if the current context is in Picture-in-Picture mode.
+ */
+public val Context.isInPictureInPictureMode: Boolean
     get() {
         val currentActivity = findActivity()
         return currentActivity?.isInPictureInPictureMode == true
     }
+
+internal fun Context.findComponentActivity(): ComponentActivity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is ComponentActivity) return context
+        context = context.baseContext
+    }
+    return null
+}
 
 internal fun Context.findActivity(): Activity? {
     var context = this

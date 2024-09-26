@@ -1,16 +1,3 @@
-public final class io/getstream/chat/android/client/socket/ErrorDetail {
-	public fun <init> (ILjava/util/List;)V
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (ILjava/util/List;)Lio/getstream/chat/android/client/socket/ErrorDetail;
-	public static synthetic fun copy$default (Lio/getstream/chat/android/client/socket/ErrorDetail;ILjava/util/List;ILjava/lang/Object;)Lio/getstream/chat/android/client/socket/ErrorDetail;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCode ()I
-	public final fun getMessages ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/core/Call {
 	public static final field Companion Lio/getstream/video/android/core/Call$Companion;
 	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
@@ -283,7 +270,6 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun getLogger ()Lio/getstream/log/TaggedLogger;
 	public final fun getRingingCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun handleError (Lio/getstream/result/Error;)V
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
@@ -309,8 +295,8 @@ public final class io/getstream/video/android/core/ConnectionState$Disconnected 
 }
 
 public final class io/getstream/video/android/core/ConnectionState$Failed : io/getstream/video/android/core/ConnectionState {
-	public fun <init> (Lio/getstream/result/Error;)V
-	public final fun getError ()Lio/getstream/result/Error;
+	public fun <init> (Ljava/lang/Error;)V
+	public final fun getError ()Ljava/lang/Error;
 }
 
 public final class io/getstream/video/android/core/ConnectionState$Loading : io/getstream/video/android/core/ConnectionState {
@@ -823,20 +809,22 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;J)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZ)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;Z)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Z)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;)V
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;I)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLjava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;J)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZ)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;Z)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Z)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;I)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 }
 
@@ -2909,11 +2897,6 @@ public final class io/getstream/video/android/core/errors/DisconnectCause$Unreco
 	public final fun getError ()Lio/getstream/result/Error$NetworkError;
 }
 
-public final class io/getstream/video/android/core/errors/DisconnectCause$WebSocketNotAvailable : io/getstream/video/android/core/errors/DisconnectCause {
-	public static final field INSTANCE Lio/getstream/video/android/core/errors/DisconnectCause$WebSocketNotAvailable;
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/core/errors/MicrophoneException : java/lang/Exception {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
@@ -3460,15 +3443,15 @@ public abstract interface annotation class io/getstream/video/android/core/inter
 }
 
 public final class io/getstream/video/android/core/internal/network/NetworkStateProvider {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Landroid/net/ConnectivityManager;)V
+	public fun <init> (Landroid/net/ConnectivityManager;)V
 	public final fun isConnected ()Z
 	public final fun subscribe (Lio/getstream/video/android/core/internal/network/NetworkStateProvider$NetworkStateListener;)V
 	public final fun unsubscribe (Lio/getstream/video/android/core/internal/network/NetworkStateProvider$NetworkStateListener;)V
 }
 
 public abstract interface class io/getstream/video/android/core/internal/network/NetworkStateProvider$NetworkStateListener {
-	public abstract fun onConnected (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onDisconnected (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onConnected ()V
+	public abstract fun onDisconnected ()V
 }
 
 public final class io/getstream/video/android/core/logging/HttpLoggingLevel : java/lang/Enum {
@@ -4156,7 +4139,8 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationIconRes ()I
 	protected final fun getNotificationManager ()Landroidx/core/app/NotificationManagerCompat;
-	public fun getOngoingCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
+	public fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)V
+	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZI)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public fun getSettingUpCallNotification ()Landroid/app/Notification;
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
@@ -4174,19 +4158,21 @@ public final class io/getstream/video/android/core/notifications/DefaultNotifica
 
 public final class io/getstream/video/android/core/notifications/NotificationConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Z)V
-	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;Z)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lio/getstream/video/android/core/notifications/NotificationHandler;
-	public final fun component4 ()Z
-	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Z)Lio/getstream/video/android/core/notifications/NotificationConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public final fun component4 ()Lkotlin/jvm/functions/Function0;
+	public final fun component5 ()Z
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;Z)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationHandler ()Lio/getstream/video/android/core/notifications/NotificationHandler;
 	public final fun getPushDeviceGenerators ()Ljava/util/List;
 	public final fun getRequestPermissionOnAppLaunch ()Lkotlin/jvm/functions/Function0;
+	public final fun getRequestPermissionOnDeviceRegistration ()Lkotlin/jvm/functions/Function0;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4206,7 +4192,9 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_CALL_DISPLAY_NAME Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
-	public abstract fun getOngoingCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
+	public abstract fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZI)Landroid/app/Notification;
+	public static synthetic fun getOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZIILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getSettingUpCallNotification ()Landroid/app/Notification;
@@ -4235,6 +4223,30 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 public final class io/getstream/video/android/core/notifications/internal/receivers/ToggleCameraBroadcastReceiver : android/content/BroadcastReceiver {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
 	public fun onReceive (Landroid/content/Context;Landroid/content/Intent;)V
+}
+
+public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfig {
+	public fun <init> ()V
+	public fun <init> (ZILjava/util/Map;)V
+	public synthetic fun <init> (ZILjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/util/Map;
+	public final fun copy (ZILjava/util/Map;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioUsage ()I
+	public final fun getCallServicePerType ()Ljava/util/Map;
+	public final fun getRunCallServiceInForeground ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfigKt {
+	public static final fun callServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static final fun livestreamAudioCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static final fun livestreamCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static final fun livestreamGuestCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 }
 
 public final class io/getstream/video/android/core/permission/PermissionRequest {
@@ -4269,9 +4281,10 @@ public abstract interface class io/getstream/video/android/core/permission/andro
 }
 
 public final class io/getstream/video/android/core/socket/CoordinatorSocket : io/getstream/video/android/core/socket/PersistentSocket {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun onCreated ()V
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun authenticate ()V
+	public fun onMessage (Lokhttp3/WebSocket;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/core/socket/ErrorResponse : java/lang/Throwable {
@@ -4319,35 +4332,7 @@ public final class io/getstream/video/android/core/socket/ErrorResponse$Companio
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public class io/getstream/video/android/core/socket/PersistentSocket : io/getstream/video/android/core/socket/common/SocketListener {
-	public static final field Companion Lio/getstream/video/android/core/socket/PersistentSocket$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun connect (Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun connectionId ()Lkotlinx/coroutines/flow/Flow;
-	public final fun disconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun errors ()Lkotlinx/coroutines/flow/Flow;
-	public final fun events ()Lkotlinx/coroutines/flow/Flow;
-	public fun onConnected (Lorg/openapitools/client/models/ConnectedEvent;)V
-	public fun onConnecting ()V
-	public fun onCreated ()V
-	public fun onDisconnected (Lio/getstream/video/android/core/errors/DisconnectCause;)V
-	public fun onError (Lio/getstream/result/Error;)V
-	public synthetic fun onEvent (Ljava/lang/Object;)V
-	public fun onEvent (Lorg/openapitools/client/models/VideoEvent;)V
-	public final fun reconnect (Lio/getstream/video/android/model/User;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun reconnect$default (Lio/getstream/video/android/core/socket/PersistentSocket;Lio/getstream/video/android/model/User;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun sendEvent (Lorg/openapitools/client/models/VideoEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun state ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun updateToken (Ljava/lang/String;)V
-	public final fun whenConnected (JLkotlin/jvm/functions/Function2;)V
-	public static synthetic fun whenConnected$default (Lio/getstream/video/android/core/socket/PersistentSocket;JLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-}
-
-public final class io/getstream/video/android/core/socket/PersistentSocket$Companion {
-}
-
-public class io/getstream/video/android/core/socket/PersistentSocketOld : okhttp3/WebSocketListener {
+public class io/getstream/video/android/core/socket/PersistentSocket : okhttp3/WebSocketListener {
 	public field connectContinuation Lkotlinx/coroutines/CancellableContinuation;
 	public fun <init> (Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -4355,8 +4340,8 @@ public class io/getstream/video/android/core/socket/PersistentSocketOld : okhttp
 	public fun authenticate ()V
 	public final fun cleanup ()V
 	public fun connect (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun connect$default (Lio/getstream/video/android/core/socket/PersistentSocketOld;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun disconnect (Lio/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason;)V
+	public static synthetic fun connect$default (Lio/getstream/video/android/core/socket/PersistentSocket;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun disconnect (Lio/getstream/video/android/core/socket/PersistentSocket$DisconnectReason;)V
 	public final fun getConnectContinuation ()Lkotlinx/coroutines/CancellableContinuation;
 	public final fun getConnectionId ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getConnectionState ()Lkotlinx/coroutines/flow/StateFlow;
@@ -4371,35 +4356,35 @@ public class io/getstream/video/android/core/socket/PersistentSocketOld : okhttp
 	public final fun onInternetDisconnected (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onOpen (Lokhttp3/WebSocket;Lokhttp3/Response;)V
 	public final fun reconnect (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun reconnect$default (Lio/getstream/video/android/core/socket/PersistentSocketOld;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun reconnect$default (Lio/getstream/video/android/core/socket/PersistentSocket;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setConnectContinuation (Lkotlinx/coroutines/CancellableContinuation;)V
 	protected final fun setConnectedStateAndContinue (Lorg/openapitools/client/models/VideoEvent;)V
 	protected final fun setDestroyed (Z)V
 	public final fun setReconnectTimeout (J)V
 }
 
-public abstract class io/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason {
+public abstract class io/getstream/video/android/core/socket/PersistentSocket$DisconnectReason {
 }
 
-public final class io/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason$ByRequest : io/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason {
-	public static final field INSTANCE Lio/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason$ByRequest;
+public final class io/getstream/video/android/core/socket/PersistentSocket$DisconnectReason$ByRequest : io/getstream/video/android/core/socket/PersistentSocket$DisconnectReason {
+	public static final field INSTANCE Lio/getstream/video/android/core/socket/PersistentSocket$DisconnectReason$ByRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason$PermanentError : io/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason {
+public final class io/getstream/video/android/core/socket/PersistentSocket$DisconnectReason$PermanentError : io/getstream/video/android/core/socket/PersistentSocket$DisconnectReason {
 	public fun <init> (Ljava/lang/Throwable;)V
 	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lio/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason$PermanentError;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason$PermanentError;Ljava/lang/Throwable;ILjava/lang/Object;)Lio/getstream/video/android/core/socket/PersistentSocketOld$DisconnectReason$PermanentError;
+	public final fun copy (Ljava/lang/Throwable;)Lio/getstream/video/android/core/socket/PersistentSocket$DisconnectReason$PermanentError;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/socket/PersistentSocket$DisconnectReason$PermanentError;Ljava/lang/Throwable;ILjava/lang/Object;)Lio/getstream/video/android/core/socket/PersistentSocket$DisconnectReason$PermanentError;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/socket/SfuSocket : io/getstream/video/android/core/socket/PersistentSocketOld {
+public final class io/getstream/video/android/core/socket/SfuSocket : io/getstream/video/android/core/socket/PersistentSocket {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlinx/coroutines/CoroutineScope;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun authenticate ()V
@@ -4491,98 +4476,35 @@ public final class io/getstream/video/android/core/socket/SocketState$NotConnect
 	public fun toString ()Ljava/lang/String;
 }
 
-public class io/getstream/video/android/core/socket/common/SocketListener {
-	public fun <init> ()V
-	public fun getDeliverOnMainThread ()Z
-	public fun onConnected (Lorg/openapitools/client/models/ConnectedEvent;)V
-	public fun onConnecting ()V
-	public fun onCreated ()V
-	public fun onDisconnected (Lio/getstream/video/android/core/errors/DisconnectCause;)V
-	public fun onError (Lio/getstream/result/Error;)V
-	public fun onEvent (Ljava/lang/Object;)V
+public abstract interface class io/getstream/video/android/core/sounds/RingingConfig {
+	public abstract fun getIncomingCallSoundUri ()Landroid/net/Uri;
+	public abstract fun getOutgoingCallSoundUri ()Landroid/net/Uri;
 }
 
-public final class io/getstream/video/android/core/socket/common/TimeProvider {
-	public static final field INSTANCE Lio/getstream/video/android/core/socket/common/TimeProvider;
-	public final fun provideCurrentTimeInMilliseconds ()J
-	public final fun provideCurrentTimeInSeconds ()J
-}
-
-public final class io/getstream/video/android/core/socket/common/VideoParserKt {
-	public static final fun fromVideoErrorCode (Lio/getstream/result/Error$NetworkError$Companion;Lio/getstream/video/android/core/errors/VideoErrorCode;ILjava/lang/Throwable;)Lio/getstream/result/Error$NetworkError;
-	public static synthetic fun fromVideoErrorCode$default (Lio/getstream/result/Error$NetworkError$Companion;Lio/getstream/video/android/core/errors/VideoErrorCode;ILjava/lang/Throwable;ILjava/lang/Object;)Lio/getstream/result/Error$NetworkError;
-}
-
-public final class io/getstream/video/android/core/socket/common/fsm/FiniteStateMachine {
-	public static final field Companion Lio/getstream/video/android/core/socket/common/fsm/FiniteStateMachine$Companion;
-	public fun <init> (Ljava/lang/Object;Ljava/util/Map;Lkotlin/jvm/functions/Function2;)V
-	public final fun getState ()Ljava/lang/Object;
-	public final fun getStateFlow ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun sendEvent (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun stay ()Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/socket/common/fsm/FiniteStateMachine$Companion {
-	public final fun invoke (Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/core/socket/common/fsm/FiniteStateMachine;
-}
-
-public final class io/getstream/video/android/core/socket/common/fsm/builder/FSMBuilder {
-	public fun <init> ()V
-	public final fun defaultHandler (Lkotlin/jvm/functions/Function2;)V
-	public final fun getStateFunctions ()Ljava/util/Map;
-	public final fun initialState (Ljava/lang/Object;)V
-}
-
-public abstract interface annotation class io/getstream/video/android/core/socket/common/fsm/builder/FSMBuilderMarker : java/lang/annotation/Annotation {
-}
-
-public final class io/getstream/video/android/core/socket/common/fsm/builder/StateHandlerBuilder {
-	public fun <init> ()V
-	public final fun get ()Ljava/util/Map;
-	public final fun getEnterListeners ()Ljava/util/List;
-	public final fun getEventHandlers ()Ljava/util/Map;
-	public final fun getOnEnterListeners ()Ljava/util/List;
-	public final fun onEnter (Lkotlin/jvm/functions/Function2;)V
-}
-
-public final class io/getstream/video/android/core/socket/common/parser2/adapters/DateAdapter : com/squareup/moshi/JsonAdapter {
-	public fun <init> ()V
-	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
-	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/util/Date;
-	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
-	public fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/util/Date;)V
-}
-
-public final class io/getstream/video/android/core/socket/common/parser2/adapters/internal/StreamDateFormatter {
-	public static final field DATE_FORMAT Ljava/lang/String;
-	public static final field DATE_FORMAT_WITHOUT_NANOSECONDS Ljava/lang/String;
-	public static final field STATS Z
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Z)V
-	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun format (Ljava/util/Date;)Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/core/socket/common/token/TokenProvider {
-	public abstract fun loadToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+public final class io/getstream/video/android/core/sounds/RingingConfigKt {
+	public static final fun defaultResourcesRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun deviceRingtoneRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun emptyRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun resRingingConfig (Landroid/content/Context;II)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun toSounds (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
+	public static final fun uriRingingConfig (Landroid/net/Uri;Landroid/net/Uri;)Lio/getstream/video/android/core/sounds/RingingConfig;
 }
 
 public final class io/getstream/video/android/core/sounds/Sounds {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Integer;
-	public final fun component2 ()Ljava/lang/Integer;
-	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/video/android/core/sounds/Sounds;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
+	public fun <init> (II)V
+	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/core/sounds/RingingConfig;)V
+	public final fun component1 ()Lio/getstream/video/android/core/sounds/RingingConfig;
+	public final fun copy (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getIncomingCallSound ()Ljava/lang/Integer;
-	public final fun getOutgoingCallSound ()Ljava/lang/Integer;
+	public final fun getRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
+	public static final fun safeCall (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static final fun shouldShowRequestPermissionsRationale (Landroid/app/Activity;[Ljava/lang/String;)Z
 }
 
@@ -6089,7 +6011,6 @@ public synthetic class io/getstream/video/android/model/User$$serializer : kotli
 
 public final class io/getstream/video/android/model/User$Companion {
 	public final fun anonymous ()Lio/getstream/video/android/model/User;
-	public final fun isAnonymous (Lio/getstream/video/android/model/User;)Z
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -10951,14 +10872,13 @@ public final class org/openapitools/client/models/WSAuthMessage {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/openapitools/client/models/WSAuthMessageRequest : org/openapitools/client/models/VideoEvent {
+public final class org/openapitools/client/models/WSAuthMessageRequest {
 	public fun <init> (Ljava/lang/String;Lorg/openapitools/client/models/ConnectUserDetailsRequest;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/openapitools/client/models/ConnectUserDetailsRequest;
 	public final fun copy (Ljava/lang/String;Lorg/openapitools/client/models/ConnectUserDetailsRequest;)Lorg/openapitools/client/models/WSAuthMessageRequest;
 	public static synthetic fun copy$default (Lorg/openapitools/client/models/WSAuthMessageRequest;Ljava/lang/String;Lorg/openapitools/client/models/ConnectUserDetailsRequest;ILjava/lang/Object;)Lorg/openapitools/client/models/WSAuthMessageRequest;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getEventType ()Ljava/lang/String;
 	public final fun getToken ()Ljava/lang/String;
 	public final fun getUserDetails ()Lorg/openapitools/client/models/ConnectUserDetailsRequest;
 	public fun hashCode ()I

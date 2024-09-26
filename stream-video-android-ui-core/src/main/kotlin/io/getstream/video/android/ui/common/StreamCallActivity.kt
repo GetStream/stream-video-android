@@ -24,6 +24,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Rational
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
@@ -71,7 +72,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         private const val EXTRA_MEMBERS_ARRAY: String = "members_extra"
 
         // Extra default values
-        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = true
+        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = false
         private val defaultExtraMembers = emptyList<String>()
         private val logger by taggedLogger("DefaultCallActivity")
 
@@ -344,7 +345,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call
      */
     public open fun onResume(call: Call) {
-        // No - op
+        if (configuration.canKeepScreenOn) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
         logger.d { "DefaultCallActivity - Resumed (call -> $call)" }
     }
 
@@ -354,7 +357,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call the call
      */
     public open fun onPause(call: Call) {
-        if (isVideoCall(call) && !isInPictureInPictureMode) {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // Default PiP behavior
+        if (isConnected(call) &&
+            !isChangingConfigurations &&
+            isVideoCall(call) &&
+            !isInPictureInPictureMode
+        ) {
             enterPictureInPicture()
         }
         logger.d { "DefaultCallActivity - Paused (call -> $call)" }
@@ -383,11 +392,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call the call
      */
     public open fun onStop(call: Call) {
+        // No-op
         logger.d { "Default activity - stopped (call -> $call)" }
-        if (isVideoCall(call) && isInPictureInPictureMode) {
-            logger.d { "Default activity - stopped: PiP detected, will leave call. (call -> $call)" }
-            leave(call) // Already finishing
-        }
     }
 
     /**
@@ -741,6 +747,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
                     onSuccessFinish.invoke(call)
                 }
             }
+
             is RealtimeConnection.Failed -> {
                 lifecycleScope.launch {
                     val conn = state as? RealtimeConnection.Failed
@@ -749,6 +756,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
                     onErrorFinish.invoke(throwable)
                 }
             }
+
             else -> {
                 // No-op
             }
@@ -848,6 +856,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun isConnected(call: Call): Boolean =
+        when (call.state.connection.value) {
+            RealtimeConnection.Disconnected -> false
+            RealtimeConnection.PreJoin -> false
+            is RealtimeConnection.Failed -> false
+            else -> true
+        }
 
     private suspend fun <A : Any> Result<A>.onOutcome(
         call: Call,
