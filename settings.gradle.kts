@@ -39,7 +39,7 @@ include(":stream-video-android-previewdata")
 include(":stream-video-android-bom")
 
 // Noise Cancellation
-include(":stream-video-webrtc-noise-cancellation")
+include(":stream-video-android-noise-cancellation")
 
 // Tutorials
 include(":tutorials:tutorial-video")

@@ -27,14 +27,14 @@ plugins {
 
 rootProject.extra.apply {
     set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
-    set("PUBLISH_ARTIFACT_ID", "stream-video-webrtc-noise-cancellation")
+    set("PUBLISH_ARTIFACT_ID", "stream-video-android-noise-cancellation")
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
 apply(from = "${rootDir}/scripts/publish-module.gradle")
 
 android {
-    namespace = "io.getstream.webrtc.noise.cancellation"
+    namespace = "io.getstream.video.android.noise.cancellation"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {

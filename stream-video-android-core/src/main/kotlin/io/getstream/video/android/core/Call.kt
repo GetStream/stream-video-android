@@ -1075,12 +1075,12 @@ public class Call(
         return state.ownCapabilities.value.containsAll(elements)
     }
 
-    fun isAudioFilterEnabled(): Boolean {
-        return clientImpl.isAudioFilterEnabled()
+    fun isAudioProcessingEnabled(): Boolean {
+        return clientImpl.isAudioProcessingEnabled()
     }
 
-    fun toggleAudioFilter(): Boolean {
-        return clientImpl.toggleAudioFilter()
+    fun toggleAudioProcessing(): Boolean {
+        return clientImpl.toggleAudioProcessing()
     }
 
     @InternalStreamVideoApi

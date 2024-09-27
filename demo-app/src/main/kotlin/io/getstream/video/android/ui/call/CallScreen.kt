@@ -459,7 +459,7 @@ fun CallScreen(
 
         if (isShowingSettingMenu) {
             var isNoiseCancellationEnabled by remember {
-                mutableStateOf(call.isAudioFilterEnabled())
+                mutableStateOf(call.isAudioProcessingEnabled())
             }
             SettingsMenu(
                 call = call,
@@ -487,7 +487,7 @@ fun CallScreen(
                     isShowingFeedbackDialog = true
                 },
                 onNoiseCancellation = {
-                    isNoiseCancellationEnabled = call.toggleAudioFilter()
+                    isNoiseCancellationEnabled = call.toggleAudioProcessing()
                 },
             ) {
                 isShowingStats = true

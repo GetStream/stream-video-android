@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.webrtc.noise.cancellation
+package io.getstream.video.android.noise.cancellation
 
 import android.content.Context
 import io.getstream.log.StreamLog
@@ -30,8 +30,18 @@ import java.io.FileOutputStream
 
 public class NoiseCancellation(
     private val context: Context,
-    private val model: NoiseCancellationModel = NoiseCancellationModel.FullBand,
+    private val model: Model = Model.FullBand,
 ) : AudioProcessingFactory, AudioProcessor {
+
+    public enum class Model(
+        internal val filename: String,
+    ) {
+
+        FullBand(filename = "c6.f.s.ced125.kw"),
+        WideBand(filename = "c5.s.w.c9ac8f.kw"),
+        NarrowBand(filename = "c5.n.s.20949d.kw"),
+        VAD(filename = "VAD_model.kw"),
+    }
 
     private val scope = CoroutineScope(Dispatchers.Default)
     private val krispDir = File(context.filesDir, KRISP)
@@ -66,7 +76,7 @@ public class NoiseCancellation(
 
     private external fun isEnabledNative(): Boolean
 
-    public companion object {
+    private companion object {
         private const val TAG = "NoiseCancellation"
         private const val KRISP = "krisp"
         private const val LIBNAME = "noise_cancellation"
@@ -79,7 +89,7 @@ public class NoiseCancellation(
         }
 
         private fun Context.copyKrispModelFromAssetsTo(
-            model: NoiseCancellationModel,
+            model: Model,
             dest: File,
         ) {
             logger.d { "[copyKrispModelsFromAssets] model: $model, dest: $dest" }

@@ -7,7 +7,7 @@
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_initModelNative(
+Java_io_getstream_video_android_noise_cancellation_NoiseCancellation_initModelNative(
         JNIEnv *env,
         jobject thiz,
         jstring path
@@ -29,8 +29,9 @@ Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_initModelNative(
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_setEnabled(
-        JNIEnv *env, jobject thiz,
+Java_io_getstream_video_android_noise_cancellation_NoiseCancellation_setEnabledNative(
+        JNIEnv *env,
+        jobject thiz,
         jboolean enabled
 ) {
     bool cppEnabled = (enabled == JNI_TRUE);
@@ -39,26 +40,7 @@ Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_setEnabled(
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_isEnabled(
-        JNIEnv *env,
-        jobject thiz
-) {
-    bool isEnabled = noise_cancellation::NoiseCancellationProcessor::getInstance()->IsEnabled();
-    return isEnabled ? JNI_TRUE : JNI_FALSE;
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_setEnabledNative(JNIEnv *env,
-                                                                               jobject thiz,
-                                                                               jboolean enabled) {
-    bool cppEnabled = (enabled == JNI_TRUE);
-    noise_cancellation::NoiseCancellationProcessor::getInstance()->SetEnabled(cppEnabled);
-}
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_isEnabledNative(
+Java_io_getstream_video_android_noise_cancellation_NoiseCancellation_isEnabledNative(
         JNIEnv *env,
         jobject thiz
 ) {

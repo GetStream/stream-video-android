@@ -79,6 +79,7 @@ import java.net.ConnectException
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
+ * @property audioProcessor The audio processor used for custom modifications to audio data within WebRTC.
  *
  * @see build
  * @see ClientState.connection

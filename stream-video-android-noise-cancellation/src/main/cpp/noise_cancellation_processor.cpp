@@ -226,7 +226,7 @@ namespace noise_cancellation {
                                                   size_t num_bands, size_t num_channels) {
 
         if(!m_enabled) {
-            ::syslog(LOG_WARNING, "KrispNc: #ProcessFrame; Noise cancellation is disabled");
+            ::syslog(LOG_DEBUG, "KrispNc: #ProcessFrame; Noise cancellation is disabled");
             return false;
         }
 
@@ -290,9 +290,6 @@ namespace noise_cancellation {
     int NoiseCancellationProcessor::cleanAmbientNoise(void *session, const float *pFrameIn,
                                                       unsigned int frameInSize, float *pFrameOut,
                                                       unsigned int frameOutSize) {
-
-        syslog(LOG_DEBUG, "KrispNc: #cleanAmbientNoise; no args");
-
         void* krispAudioNcCleanAmbientNoiseFloatPtr = m_functionPointers[krisp::FunctionId::krispAudioNcCleanAmbientNoiseFloat];
         if (krispAudioNcCleanAmbientNoiseFloatPtr == nullptr) {
             syslog(LOG_ERR, "KrispNc: #cleanAmbientNoise; Failed to get the krispAudioNcCleanAmbientNoiseFloat function");

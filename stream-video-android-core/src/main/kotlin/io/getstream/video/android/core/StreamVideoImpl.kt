@@ -1110,11 +1110,11 @@ internal class StreamVideoImpl internal constructor(
         }
     }
 
-    internal fun isAudioFilterEnabled(): Boolean {
+    internal fun isAudioProcessingEnabled(): Boolean {
         return peerConnectionFactory.isAudioProcessingEnabled()
     }
 
-    internal fun toggleAudioFilter(): Boolean {
+    internal fun toggleAudioProcessing(): Boolean {
         return peerConnectionFactory.toggleAudioProcessing()
     }
 }
