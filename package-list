@@ -44,6 +44,7 @@ io.getstream.video.android.mock
 module:stream-video-android-ui-compose
 io.getstream.video.android.compose.lifecycle
 io.getstream.video.android.compose.permission
+io.getstream.video.android.compose.pip
 io.getstream.video.android.compose.state.ui.internal
 io.getstream.video.android.compose.state.ui.participants
 io.getstream.video.android.compose.theme
@@ -70,6 +71,7 @@ io.getstream.video.android.compose.ui.components.livestream
 io.getstream.video.android.compose.ui.components.participants
 io.getstream.video.android.compose.ui.components.participants.internal
 io.getstream.video.android.compose.ui.components.video
+io.getstream.video.android.compose.ui.components.video.config
 module:stream-video-android-ui-core
 io.getstream.video.android.ui.common
 io.getstream.video.android.ui.common.notification
