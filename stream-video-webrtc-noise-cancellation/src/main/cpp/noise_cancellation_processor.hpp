@@ -51,17 +51,27 @@ namespace noise_cancellation {
         void* m_handle = nullptr;
         std::array<void *, kFunctionCount> m_functionPointers = {};
 
-        bool m_enabled;
-        int m_sample_rate_hz;
-        int m_num_channels;
-        long m_last_time_stamp;
+        bool m_enabled = false;
+        int m_sample_rate_hz = 16000;
+        int m_num_channels = 1;
+        long m_last_time_stamp = 0;
         void* m_session = nullptr;
 
         static NoiseCancellationProcessor* m_instance;
 
         void* createSession(int rate);
 
-        void closeSession(void* session);
+        bool closeSession(void* session);
+
+        bool globalDestroy();
+
+        bool removeModel(const char* modelName);
+
+        int cleanAmbientNoise(void *session,
+                              const float *pFrameIn,
+                              unsigned int frameInSize,
+                              float *pFrameOut,
+                              unsigned int frameOutSize);
     };
 
 }  // namespace noise_cancellation

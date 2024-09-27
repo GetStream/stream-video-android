@@ -32,11 +32,11 @@ namespace krisp {
     using GlobalInitFuncType = int (*)(const wchar_t*);
     using GlobalDestroyFuncType = int (*)();
     using SetModelFuncType = int (*)(const wchar_t*, const char*);
+    using RemoveModelFuncType = int (*)(const char*);
     using CreateSessionType = KrispAudioSessionID (*)(KrispAudioSamplingRate, KrispAudioSamplingRate,
                                                       KrispAudioFrameDuration, const char*);
     using CloseSessionType = int (*)(KrispAudioSessionID);
     using CleanAmbientNoiseFloatType = int (*)(KrispAudioSessionID, const float*, unsigned int, float*, unsigned int);
-
 
     KrispAudioFrameDuration GetFrameDuration(size_t duration) {
         switch (duration) {
@@ -89,26 +89,31 @@ namespace krisp {
 
 namespace noise_cancellation {
 
+    static constexpr const char* kKrispFilename = "libkrisp-audio-sdk.so";
+    static constexpr const char* kKrispModelName = "default";
+
     NoiseCancellationProcessor* NoiseCancellationProcessor::m_instance = nullptr;
 
 
-    NoiseCancellationProcessor::NoiseCancellationProcessor() {
-
-    }
+    NoiseCancellationProcessor::NoiseCancellationProcessor() = default;
 
     NoiseCancellationProcessor::~NoiseCancellationProcessor() {
+        syslog(LOG_INFO, "KrispNc: #Destructor; no args");
 
+        if (m_instance) {
+            delete m_instance;
+            m_instance = nullptr;
+        }
     }
 
     bool NoiseCancellationProcessor::Create() {
-        auto krispDllPath = "libkrisp-audio-sdk.so";
         dlerror();
-        m_handle = dlopen(krispDllPath, RTLD_LAZY);
+        m_handle = dlopen(kKrispFilename, RTLD_LAZY);
         if (!m_handle) {
-            syslog(LOG_ERR, "KrispNc: #Create; Failed to load the library = %s\n", krispDllPath);
+            syslog(LOG_ERR, "KrispNc: #Create; Failed to load the library = %s\n", kKrispFilename);
             return false;
         }
-        syslog(LOG_INFO, "KrispNc: #Create; Loaded: %s", krispDllPath);
+        syslog(LOG_INFO, "KrispNc: #Create; Loaded: %s", kKrispFilename);
 
         dlerror();
         for (size_t functionId = 0; functionId < kFunctionCount; ++functionId) {
@@ -154,7 +159,7 @@ namespace noise_cancellation {
         }
 
         auto setModelFunc = reinterpret_cast<krisp::SetModelFuncType>(krispAudioSetModelPtr);
-        int setModelResult = setModelFunc(m_model_path.c_str(), "default");
+        int setModelResult = setModelFunc(m_model_path.c_str(), kKrispModelName);
         if (setModelResult != 0) {
             auto model_path = string_utils::convertWStringToString(m_model_path);
             syslog(LOG_ERR, "KrispNc: #Create; Failed to set wt file: %s", model_path.c_str());
@@ -165,23 +170,20 @@ namespace noise_cancellation {
 
     bool NoiseCancellationProcessor::Destroy() {
         syslog(LOG_INFO, "KrispNc: #Destroy; no args");
-        if (m_functionPointers.size() <=
-            static_cast<size_t>(krisp::FunctionId::krispAudioGlobalDestroy)) {
-            ::syslog(LOG_ERR,
-                     "KrispNc: #Destroy; m_functionPointers is not large enough");
-            return false;
+        if (!removeModel(kKrispModelName)) {
+            syslog(LOG_WARNING, "KrispNc: #Destroy; Failed to remove model: %s", kKrispModelName);
         }
 
-        void* krispAudioGlobalDestroyPtr = m_functionPointers[krisp::FunctionId::krispAudioGlobalDestroy];
-        if (krispAudioGlobalDestroyPtr) {
-            ::syslog(LOG_INFO,"KrispNc: #Destroy; Invoke krispAudioGlobalDestroy function");
-
-            auto destroyFunc = reinterpret_cast<krisp::GlobalDestroyFuncType>(krispAudioGlobalDestroyPtr);
-            if (destroyFunc()) {
-                ::syslog(LOG_INFO,
-                         "KrispNc: #Destroy; Invoked krispAudioGlobalDestroy successfully");
-            }
+        if (!closeSession(m_session)) {
+            syslog(LOG_WARNING, "KrispNc: #Destroy; Failed to close session");
         }
+        m_session = nullptr;
+
+        if (!globalDestroy()) {
+            syslog(LOG_WARNING, "KrispNc: #Destroy; Failed to destroy Krisp globals");
+        }
+
+        // Reset all function pointers
         for (auto& functionPtr : m_functionPointers) {
             functionPtr = nullptr;
         }
@@ -243,14 +245,6 @@ namespace noise_cancellation {
             bufferIn[jj] = channels[0][jj] / 32768.f;
         }
 
-        // Get ptr fpr krispAudioNcCleanAmbientNoiseFloat and invoke
-        void* krispAudioNcCleanAmbientNoiseFloatPtr = m_functionPointers[krisp::FunctionId::krispAudioNcCleanAmbientNoiseFloat];
-        if (krispAudioNcCleanAmbientNoiseFloatPtr == nullptr) {
-            ::syslog(LOG_INFO, "KRISP-CIT: Failed to get the krispAudioNcCleanAmbientNoiseFloat function");
-            return false;
-        }
-        auto cleanAmbientNoise = reinterpret_cast<krisp::CleanAmbientNoiseFloatType>(krispAudioNcCleanAmbientNoiseFloatPtr);
-
         const auto ret_val = cleanAmbientNoise(
                 m_session, bufferIn.data(), num_bands_ * kNsFrameSize,
                 bufferOut.data(), num_bands_ * kNsFrameSize);
@@ -273,20 +267,77 @@ namespace noise_cancellation {
         m_session = createSession(new_rate);
     }
 
-    void NoiseCancellationProcessor::closeSession(void* session) {
+    int NoiseCancellationProcessor::cleanAmbientNoise(void *session, const float *pFrameIn,
+                                                      unsigned int frameInSize, float *pFrameOut,
+                                                      unsigned int frameOutSize) {
+
+        syslog(LOG_DEBUG, "KrispNc: #cleanAmbientNoise; no args");
+
+        void* krispAudioNcCleanAmbientNoiseFloatPtr = m_functionPointers[krisp::FunctionId::krispAudioNcCleanAmbientNoiseFloat];
+        if (krispAudioNcCleanAmbientNoiseFloatPtr == nullptr) {
+            syslog(LOG_ERR, "KrispNc: #cleanAmbientNoise; Failed to get the krispAudioNcCleanAmbientNoiseFloat function");
+            return -1;
+        }
+
+        auto cleanAmbientNoiseFunc = reinterpret_cast<krisp::CleanAmbientNoiseFloatType>(krispAudioNcCleanAmbientNoiseFloatPtr);
+
+        return cleanAmbientNoiseFunc(session, pFrameIn, frameInSize, pFrameOut, frameOutSize);
+    }
+
+    bool NoiseCancellationProcessor::globalDestroy() {
+        syslog(LOG_INFO, "KrispNc: #globalDestroy; no args");
+        void* krispAudioGlobalDestroyPtr = m_functionPointers[krisp::FunctionId::krispAudioGlobalDestroy];
+        if (krispAudioGlobalDestroyPtr == nullptr) {
+            syslog(LOG_ERR, "KrispNc: #globalDestroy; Failed to get the krispAudioGlobalDestroy function");
+            return false;
+        }
+        auto destroyFunc = reinterpret_cast<krisp::GlobalDestroyFuncType>(krispAudioGlobalDestroyPtr);
+        if (destroyFunc() != 0) {
+            syslog(LOG_ERR, "KrispNc: #globalDestroy; Failed to destroy Krisp globals");
+            return false;
+        }
+        ::syslog(LOG_INFO, "KrispNc: #globalDestroy; Invoked krispAudioGlobalDestroy successfully");
+        return true;
+    }
+
+    bool NoiseCancellationProcessor::removeModel(const char* modelName) {
+        syslog(LOG_INFO, "KrispNc: #removeModel; modelName: %s", modelName);
+        if (m_model_path.empty()) {
+            syslog(LOG_ERR, "KrispNc: #removeModel; m_model_path is empty");
+            return false;
+        }
+
+        void *krispAudioRemoveModelPtr = m_functionPointers[krisp::FunctionId::krispAudioRemoveModel];
+        if (krispAudioRemoveModelPtr == nullptr) {
+            syslog(LOG_ERR, "KrispNc: #removeModel; Failed to get the krispAudioRemoveModel function");
+            return false;
+        }
+
+        auto removeModelFunc = reinterpret_cast<krisp::RemoveModelFuncType>(krispAudioRemoveModelPtr);
+        if (removeModelFunc(modelName) != 0) {
+            syslog(LOG_ERR, "KrispNc: #removeModel; Failed to remove model: %s", modelName);
+            return false;
+        }
+        return true;
+    }
+
+    bool NoiseCancellationProcessor::closeSession(void* session) {
         if (session == nullptr) {
             syslog(LOG_INFO, "KrispNc: #closeSession; session is null");
-            return;
+            return false;
         }
         void* krispAudioNcCloseSessionPtr = m_functionPointers[krisp::FunctionId::krispAudioNcCloseSession];
-        if (krispAudioNcCloseSessionPtr) {
-            auto closeSessionFunc = reinterpret_cast<krisp::CloseSessionType>(krispAudioNcCloseSessionPtr);
-            auto closeSessionResult = closeSessionFunc(session);
-            if (closeSessionResult != 0) {
-                syslog(LOG_ERR, "KrispNc: #closeSession; Failed to close the session");
-                return;
-            }
+        if (krispAudioNcCloseSessionPtr == nullptr) {
+            syslog(LOG_ERR, "KrispNc: #closeSession; Failed to get the krispAudioNcCloseSession function");
+            return false;
         }
+        auto closeSessionFunc = reinterpret_cast<krisp::CloseSessionType>(krispAudioNcCloseSessionPtr);
+        auto closeSessionResult = closeSessionFunc(session);
+        if (closeSessionResult != 0) {
+            syslog(LOG_ERR, "KrispNc: #closeSession; Failed to close the session");
+            return false;
+        }
+        return true;
     }
 
     void* NoiseCancellationProcessor::createSession(int rate) {
@@ -302,7 +353,7 @@ namespace noise_cancellation {
         }
 
         auto createSessionFunc = reinterpret_cast<krisp::CreateSessionType>(krispAudioNcCreateSessionPtr);
-        return createSessionFunc(krisp_rate, krisp_rate, krisp_duration, "default");
+        return createSessionFunc(krisp_rate, krisp_rate, krisp_duration, kKrispModelName);
     }
 
     void NoiseCancellationProcessor::setModelPath(const std::wstring& model_path) {
