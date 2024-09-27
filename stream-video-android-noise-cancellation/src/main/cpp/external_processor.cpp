@@ -17,10 +17,7 @@ namespace external {
             syslog(LOG_ERR, "ExternalProcessorImpl: #Create; processor_ptr is nullptr");
             return false;
         }
-
-        processor_ptr->Create();
-
-        return true;
+        return processor_ptr->Create();
     }
 
     extern "C" bool ExternalProcessorInitialize(int sample_rate_hz,
@@ -31,8 +28,7 @@ namespace external {
         }
         syslog(LOG_INFO, "ExternalProcessorImpl: #Init; sample_rate_hz: %i, num_channels: %i",
                sample_rate_hz, num_channels);
-        processor_ptr->Initialize(sample_rate_hz, num_channels);
-        return true;
+        return processor_ptr->Initialize(sample_rate_hz, num_channels);
     }
 
     extern "C" bool ExternalProcessorProcessFrame(float *const *channels,
@@ -45,11 +41,7 @@ namespace external {
             syslog(LOG_ERR, "ExternalProcessorImpl: #ProcessFrame; processor_ptr is nullptr");
             return false;
         }
-        syslog(LOG_INFO, "ExternalProcessorImpl: #ProcessFrame; num_frames: %zu, num_bands: %zu, num_channels: %zu",
-               num_frames, num_bands, num_channels);
-        processor_ptr->ProcessFrame(channels, num_frames, num_bands, num_channels);
-
-        return true;
+        return processor_ptr->ProcessFrame(channels, num_frames, num_bands, num_channels);
     }
 
     extern "C" bool ExternalProcessorDestroy() {
@@ -58,8 +50,7 @@ namespace external {
             return false;
         }
         syslog(LOG_INFO, "ExternalProcessorImpl: #Destroy; no args");
-        processor_ptr->Destroy();
-        return true;
+        return processor_ptr->Destroy();
     }
 
 }
