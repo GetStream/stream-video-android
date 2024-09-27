@@ -43,8 +43,7 @@ namespace krisp {
             case 10:
                 return KRISP_AUDIO_FRAME_DURATION_10MS;
             default:
-                ::syslog(LOG_INFO, "KRISP-CIT: Frame duration: %zu \
-                is not supported. Switching to default 10ms", duration);
+                ::syslog(LOG_INFO, "KrispNc: #GetFrameDuration; Frame duration %zu is not supported. Switching to default 10ms", duration);
                 return KRISP_AUDIO_FRAME_DURATION_10MS;
         }
     }
@@ -68,8 +67,7 @@ namespace krisp {
             case 96000:
                 return KRISP_AUDIO_SAMPLING_RATE_96000HZ;
             default:
-                ::syslog(LOG_INFO, "KRISP-CIT: The input sampling rate: %zu \
-             is not supported. Using default 48khz.", rate);
+                ::syslog(LOG_INFO, "KrispNc: #GetSampleRate; The input sampling rate %zu is not supported. Using default 48khz.", rate);
                 return KRISP_AUDIO_SAMPLING_RATE_48000HZ;
         }
     }
@@ -222,34 +220,38 @@ namespace noise_cancellation {
         return true;
     }
 
-    bool NoiseCancellationProcessor::ProcessFrame(float *const *channels, size_t num_frames,
-                                                  size_t num_bands, size_t num_channels) {
+    bool NoiseCancellationProcessor::ProcessFrame(
+            float *const *channels,
+            size_t num_frames,
+            size_t num_bands,
+            size_t num_channels
+    ) {
+
+        auto now = time_utils::TimeMillis();
+        constexpr const long k_logs_interval = 10000;
+        constexpr const long k_stats_interval = 10000;
 
         if(!m_enabled) {
-            ::syslog(LOG_DEBUG, "KrispNc: #ProcessFrame; Noise cancellation is disabled");
+            if (now - m_last_logs_ts > k_logs_interval) {
+                ::syslog(LOG_DEBUG, "KrispNc: #ProcessFrame; Noise cancellation is disabled");
+                m_last_logs_ts = now;
+            }
             return false;
         }
 
-        syslog(LOG_INFO, "KrispNc: #ProcessFrame; num_frames: %zu, num_bands: %zu, num_channels: %zu",
-               num_frames, num_bands, num_channels);
-
-        constexpr long k_stats_interval = 10000;
-
-        auto now = time_utils::TimeMillis();
         int rate = num_frames * 1000;
+        if (now - m_last_stats_ts > k_stats_interval) {
+            ::syslog(LOG_INFO, "KrispNc: #ProcessFrame; num_frames: %zu, num_bands: %zu, num_channels: %zu, rate: %i",
+                     num_frames, num_bands, num_channels, rate);
 
-        if (now - m_last_time_stamp > k_stats_interval) {
-            ::syslog(LOG_INFO,"KRISP-CIT: Num Frames: %zu\
-             num Bands: %zu  Num Channels: %zu ", num_frames, num_bands, num_channels);
-
-            m_last_time_stamp = now;
+            m_last_stats_ts = now;
         }
         if(rate != m_sample_rate_hz) {
             Reset(rate);
         }
 
         if (m_session == nullptr) {
-            ::syslog(LOG_INFO, "KRISP-CIT: Session creation failed");
+            ::syslog(LOG_INFO, "KrispNc: #ProcessFrame; Session creation failed");
             return false;
         }
 
@@ -269,7 +271,7 @@ namespace noise_cancellation {
                 m_session, bufferIn.data(), num_bands_ * kNsFrameSize,
                 bufferOut.data(), num_bands_ * kNsFrameSize);
         if (ret_val != 0) {
-            ::syslog(LOG_INFO, "KRISP-CIT: Krisp noise cleanup error");
+            ::syslog(LOG_INFO, "KrispNc: #ProcessFrame; Krisp noise cleanup error");
             return false;
         }
 

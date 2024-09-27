@@ -58,7 +58,8 @@ namespace noise_cancellation {
         bool m_enabled = false;
         int m_sample_rate_hz = 16000;
         int m_num_channels = 1;
-        long m_last_time_stamp = 0;
+        long m_last_stats_ts = 0;
+        long m_last_logs_ts = 0;
         void* m_session = nullptr;
 
         static NoiseCancellationProcessor* m_instance;
