@@ -26,7 +26,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.audio.AudioFilter
+import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -147,9 +147,9 @@ public class Call(
     var videoFilter: VideoFilter? = null
 
     /**
-     * Set a custom [AudioFilter] that will be applied to the audio stream recorded on your device.
+     * Set a custom [InputAudioFilter] that will be applied to the audio stream recorded on your device.
      */
-    var audioFilter: AudioFilter? = null
+    var audioFilter: InputAudioFilter? = null
 
     /**
      * Called by the [CallHealthMonitor] when the ICE restarts failed after

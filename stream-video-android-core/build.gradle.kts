@@ -148,7 +148,6 @@ dependencies {
     api(libs.stream.webrtc.ui) {
         exclude(group = "io.getstream", module = "stream-webrtc-android")
     }
-    api(project(":stream-video-webrtc-noise-cancellation"))
 
     implementation(libs.audioswitch)
 

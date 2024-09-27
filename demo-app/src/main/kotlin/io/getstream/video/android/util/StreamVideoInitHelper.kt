@@ -37,6 +37,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.util.config.AppConfig
+import io.getstream.webrtc.noise.cancellation.NoiseCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -207,6 +208,7 @@ object StreamVideoInitHelper {
                 authData.token
             },
             appName = "Stream Video Demo App",
+            audioProcessor = NoiseCancellation(context),
         ).build()
     }
 }

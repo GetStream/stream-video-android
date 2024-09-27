@@ -23,7 +23,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
-import io.getstream.video.android.core.audio.AudioFilter
+import io.getstream.video.android.core.call.audio.AudioProcessor
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -105,7 +105,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
-    private val audioFilter: AudioFilter? = null,
+    private val audioProcessor: AudioProcessor? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = CoroutineScope(DispatcherProvider.IO)
@@ -204,7 +204,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
             appName = appName,
-            audioFilter = audioFilter,
+            audioProcessor = audioProcessor,
         )
 
         if (user.type == UserType.Guest) {

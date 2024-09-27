@@ -25,7 +25,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.audio.AudioFilter
+import io.getstream.video.android.core.call.audio.AudioProcessor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -157,7 +157,7 @@ internal class StreamVideoImpl internal constructor(
     internal val crashOnMissingPermission: Boolean = false,
     internal val audioUsage: Int = defaultAudioUsage,
     internal val appName: String? = null,
-    internal val audioFilter: AudioFilter? = null,
+    internal val audioProcessor: AudioProcessor? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -184,7 +184,7 @@ internal class StreamVideoImpl internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage, audioFilter)
+    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage, audioProcessor)
 
     public override val userId = user.id
 
@@ -1111,11 +1111,11 @@ internal class StreamVideoImpl internal constructor(
     }
 
     internal fun isAudioFilterEnabled(): Boolean {
-        return peerConnectionFactory.isAudioFilterEnabled()
+        return peerConnectionFactory.isAudioProcessingEnabled()
     }
 
     internal fun toggleAudioFilter(): Boolean {
-        return peerConnectionFactory.toggleAudioFilter()
+        return peerConnectionFactory.toggleAudioProcessing()
     }
 }
 

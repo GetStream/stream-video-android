@@ -20,12 +20,12 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.os.Build
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.audio.AudioFilter
+import io.getstream.video.android.core.call.audio.AudioProcessor
+import io.getstream.video.android.core.call.audio.toggle
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
-import io.getstream.webrtc.noise.cancellation.NoiseCancellationFactory
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -54,7 +54,7 @@ import java.nio.ByteBuffer
 public class StreamPeerConnectionFactory(
     private val context: Context,
     private val audioUsage: Int = defaultAudioUsage,
-    private var audioFilter: AudioFilter? = null,
+    private var audioProcessor: AudioProcessor? = null,
 ) {
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
@@ -90,8 +90,8 @@ public class StreamPeerConnectionFactory(
         audioRecordDataCallback = callback
     }
 
-    public fun setAudioFilter(audioFilter: AudioFilter?) {
-        this.audioFilter = audioFilter
+    public fun setAudioFilter(audioFilter: AudioProcessor?) {
+        this.audioProcessor = audioFilter
     }
 
     /**
@@ -158,16 +158,18 @@ public class StreamPeerConnectionFactory(
         )
 
         PeerConnectionFactory.builder()
-//            .also { builder ->
-//                audioFilter?.delegate?.also {
-//                    builder.setAudioProcessingFactory(it)
-//                }
-//            }
+            .also { builder ->
+                audioProcessor?.also {
+                    builder.setAudioProcessingFactory {
+                        it.createNative()
+                    }
+                }
+            }
 //            .setAudioProcessingFactory(ExternalAudioProcessingFactory.builder()
 //                .setExternalAudioProcessorFactory(KrispAudioProcessorFactory())
 //                .build())
             // .setAudioProcessingFactory(ExternalAudioProcessingFactory("libnoise_cancellation.so"))
-            .setAudioProcessingFactory(NoiseCancellationFactory(context))
+            //.setAudioProcessingFactory(NoiseCancellationFactory(context))
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
             .setAudioDeviceModule(
@@ -375,14 +377,14 @@ public class StreamPeerConnectionFactory(
     /**
      * True if the audio processing is enabled, false otherwise.
      */
-    public fun isAudioFilterEnabled(): Boolean {
-        return audioFilter?.isEnabled ?: false
+    public fun isAudioProcessingEnabled(): Boolean {
+        return audioProcessor?.isEnabled ?: false
     }
 
     /**
      * Toggles the audio processing on and off.
      */
-    public fun toggleAudioFilter(): Boolean {
-        return audioFilter?.toggle() ?: false
+    public fun toggleAudioProcessing(): Boolean {
+        return audioProcessor?.toggle() ?: false
     }
 }

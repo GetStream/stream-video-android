@@ -14,29 +14,37 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.audio
-
-import org.webrtc.AudioProcessingFactory
+package io.getstream.video.android.core.call.audio
 
 /**
  * Interface for audio processing.
  */
-interface AudioFilter {
+public interface AudioProcessor {
 
     /**
      * True if the audio processing is enabled, false otherwise.
      */
-    var isEnabled: Boolean
+    public var isEnabled: Boolean
 
     /**
-     * Toggles the audio processing on or off.
+     * Creates the audio processor.
      *
-     * @return True if the audio processing is enabled, false otherwise.
+     * @return The native pointer to the audio processor.
      */
-    fun toggle(): Boolean
+    public fun createNative(): Long
 
     /**
-     * The [AudioProcessingFactory] that can be used to process audio.
+     * Destroys the audio processor.
      */
-    val delegate: AudioProcessingFactory
+    public fun destroyNative()
+}
+
+/**
+ * Toggles the audio processing on or off.
+ *
+ * @return True if the audio processing is enabled, false otherwise.
+ */
+internal fun AudioProcessor.toggle(): Boolean {
+    isEnabled = !isEnabled
+    return isEnabled
 }
