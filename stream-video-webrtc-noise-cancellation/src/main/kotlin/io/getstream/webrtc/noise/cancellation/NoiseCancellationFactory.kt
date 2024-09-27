@@ -51,7 +51,7 @@ public class NoiseCancellationFactory(
 
     private external fun initModel(path: String)
 
-    private companion object {
+    public companion object {
         private const val TAG = "NoiseCancellation"
         private const val KRISP = "krisp"
         private const val LIBNAME = "noise_cancellation"

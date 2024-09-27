@@ -28,7 +28,11 @@ namespace noise_cancellation {
             return m_instance;
         }
 
-        void setModelPath(const std::wstring& model_path);
+        void SetModelPath(const std::wstring& model_path);
+
+        void SetEnabled(bool enabled);
+
+        [[nodiscard]] bool IsEnabled() const;
 
         bool Create() override;
 

@@ -21,9 +21,28 @@ Java_io_getstream_webrtc_noise_cancellation_NoiseCancellationFactory_initModel(
     auto modelPath = string_utils::convertMBStringToWString(nativePath);
 
     // Set the model path using the setter method
-    noise_cancellation::NoiseCancellationProcessor::getInstance()->setModelPath(modelPath);
+    noise_cancellation::NoiseCancellationProcessor::getInstance()->SetModelPath(modelPath);
 
     // Release the memory used by nativePath
     env->ReleaseStringUTFChars(path, nativePath);
 }
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_setEnabled(
+        JNIEnv *env, jobject thiz,
+        jboolean enabled
+) {
+    bool cppEnabled = (enabled == JNI_TRUE);
+    noise_cancellation::NoiseCancellationProcessor::getInstance()->SetEnabled(cppEnabled);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_io_getstream_webrtc_noise_cancellation_NoiseCancellation_isEnabled(
+        JNIEnv *env,
+        jobject thiz
+) {
+    bool isEnabled = noise_cancellation::NoiseCancellationProcessor::getInstance()->IsEnabled();
+    return isEnabled ? JNI_TRUE : JNI_FALSE;
+}

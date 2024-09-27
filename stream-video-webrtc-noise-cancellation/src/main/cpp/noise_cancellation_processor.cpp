@@ -106,6 +106,21 @@ namespace noise_cancellation {
         }
     }
 
+    void NoiseCancellationProcessor::SetModelPath(const std::wstring& model_path) {
+        ::syslog(LOG_INFO, "KrispNc: #SetModelPath; model_path: %s", string_utils::convertWStringToString(model_path).c_str());
+        m_model_path = model_path;
+    }
+
+    void NoiseCancellationProcessor::SetEnabled(bool enabled) {
+        ::syslog(LOG_INFO, "KrispNc: #SetEnabled; enabled: %s", enabled ? "true" : "false");
+        m_enabled = enabled;
+    }
+
+    [[nodiscard]] bool NoiseCancellationProcessor::IsEnabled() const {
+        ::syslog(LOG_INFO, "KrispNc: #IsEnabled; no args");
+        return m_enabled;
+    }
+
     bool NoiseCancellationProcessor::Create() {
         dlerror();
         m_handle = dlopen(kKrispFilename, RTLD_LAZY);
@@ -209,6 +224,11 @@ namespace noise_cancellation {
 
     bool NoiseCancellationProcessor::ProcessFrame(float *const *channels, size_t num_frames,
                                                   size_t num_bands, size_t num_channels) {
+
+        if(!m_enabled) {
+            ::syslog(LOG_WARNING, "KrispNc: #ProcessFrame; Noise cancellation is disabled");
+            return false;
+        }
 
         syslog(LOG_INFO, "KrispNc: #ProcessFrame; num_frames: %zu, num_bands: %zu, num_channels: %zu",
                num_frames, num_bands, num_channels);
@@ -354,11 +374,6 @@ namespace noise_cancellation {
 
         auto createSessionFunc = reinterpret_cast<krisp::CreateSessionType>(krispAudioNcCreateSessionPtr);
         return createSessionFunc(krisp_rate, krisp_rate, krisp_duration, kKrispModelName);
-    }
-
-    void NoiseCancellationProcessor::setModelPath(const std::wstring& model_path) {
-        ::syslog(LOG_INFO, "KrispNc: #setModelPath; model_path: %s", string_utils::convertWStringToString(model_path).c_str());
-        m_model_path = model_path;
     }
 
 }
