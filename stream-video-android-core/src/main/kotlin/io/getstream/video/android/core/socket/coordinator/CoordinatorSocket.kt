@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.ConnectionErrorEvent
+import org.openapitools.client.models.CreateDeviceRequest
 import org.openapitools.client.models.HealthCheckEvent
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy
@@ -71,9 +72,12 @@ internal open class CoordinatorSocket(
     private val healthMonitor = HealthMonitor(
         userScope = userScope,
         checkCallback = {
-            (coordinatorSocketStateService.currentState as? SfuSocketState.Connected)?.event?.let(::sendEvent)
+            val connected = coordinatorSocketStateService.currentState as? VideoSocketState.Connected
+            connected?.event?.let(::sendEvent)
         },
-        reconnectCallback = { coordinatorSocketStateService.onWebSocketEventLost() },
+        reconnectCallback = {
+            coordinatorSocketStateService.onWebSocketEventLost()
+        },
     )
     private val lifecycleHandler = object : LifecycleHandler {
         override suspend fun resume() {

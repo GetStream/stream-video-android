@@ -133,7 +133,7 @@ class ClientAndAuthTest : TestBase() {
             token = authData!!.token,
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
-        val clientImpl = client as StreamVideoImpl
+        val clientImpl = client as StreamVideoClient
 
         val connectResultDeferred = clientImpl.connectAsync()
 
@@ -232,7 +232,7 @@ class ClientAndAuthTest : TestBase() {
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         ).build()
-        val clientImpl = client as StreamVideoImpl
+        val clientImpl = client as StreamVideoClient
         client.subscribe {
         }
         val deferred = clientImpl.connectAsync()

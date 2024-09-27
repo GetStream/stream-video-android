@@ -23,9 +23,12 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.socket.SfuSocket
+import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
+import io.getstream.video.android.core.socket.sfu.SfuSocket
+import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -55,92 +58,57 @@ import java.util.concurrent.TimeUnit
  */
 internal class ConnectionModule(
     context: Context,
+    tokenProvider: TokenProvider,
+    user: User,
     private val scope: CoroutineScope,
-    private val tokenProvider: TokenProvider,
     internal val videoDomain: String,
     internal val connectionTimeoutInMs: Long,
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
-    private val user: User,
     internal val apiKey: ApiKey,
     internal val userToken: UserToken,
     internal val lifecycle: Lifecycle,
 ) {
-    private val authInterceptor: CoordinatorAuthInterceptor by lazy {
-        CoordinatorAuthInterceptor(apiKey, userToken)
+    // Internals
+    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
+    private val retrofit: Retrofit by lazy {
+        Retrofit.Builder().baseUrl("https://$videoDomain")
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
+            .client(okHttpClient).build()
     }
-    private val headersInterceptor: HeadersInterceptor by lazy { HeadersInterceptor() }
-    val okHttpClient: OkHttpClient by lazy { buildOkHttpClient() }
+    // API
+    /**
+     * The OkHttpClient used for all network requests
+     */
+    val okHttpClient: OkHttpClient = OkHttpClient.Builder().addInterceptor(HeadersInterceptor())
+        .addInterceptor(authInterceptor).addInterceptor(
+            HttpLoggingInterceptor().apply {
+                level = loggingLevel.httpLoggingLevel.level
+            },
+        ).retryOnConnectionFailure(true)
+        .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
+
     val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
-            connectivityManager = context
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
+            connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
         )
-    }
-    private val retrofit: Retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl("https://$videoDomain")
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
-            .client(okHttpClient)
-            .build()
     }
     val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
-    val coordinatorSocketConnection: CoordinatorSocketConnection by lazy { createCoordinatorSocket() }
-
-    val localApi: ProductvideoApi by lazy {
-        Retrofit.Builder()
-            .baseUrl("https://c187-2a02-a46d-1c8b-1-b5c3-c938-b354-c7b0.ngrok-free.app")
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
-            .client(okHttpClient)
-            .build().create(ProductvideoApi::class.java)
-    }
-
-    /**
-     * Key used to prove authorization to the API.
-     */
-
-    private fun buildOkHttpClient(): OkHttpClient {
-        // create a new OkHTTP client and set timeouts
-        return OkHttpClient.Builder()
-            .addInterceptor(headersInterceptor)
-            .addInterceptor(authInterceptor)
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = loggingLevel.httpLoggingLevel.level
-                },
-            )
-            .retryOnConnectionFailure(true)
-            .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .build()
-    }
-
-    /**
-     * Provider that handles connectivity and listens to state changes, exposing them to listeners.
-     */
-
-    /**
-     * @return The WebSocket handler that is used to connect to different calls.
-     */
-    private fun createCoordinatorSocket(): CoordinatorSocketConnection {
-        val coordinatorUrl = "wss://$videoDomain/video/connect"
-
-        return CoordinatorSocketConnection(
-            apiKey,
-            coordinatorUrl,
-            user,
-            userToken,
-            scope,
-            okHttpClient,
-            lifecycle,
-            tokenProvider,
-            networkStateProvider,
-        )
-    }
+    val coordinatorSocketConnection: CoordinatorSocketConnection = CoordinatorSocketConnection(
+        apiKey = apiKey,
+        url = "wss://$videoDomain/video/connect",
+        user = user,
+        token = userToken,
+        httpClient = okHttpClient,
+        networkStateProvider = networkStateProvider,
+        scope = scope,
+        lifecycle = lifecycle,
+        tokenProvider = tokenProvider,
+    )
 
     internal fun createSFUConnectionModule(
         sfuUrl: String,
@@ -163,9 +131,7 @@ internal class ConnectionModule(
     }
 
     fun updateToken(newToken: String) {
-        // the coordinator socket also needs to update the token
         coordinatorSocketConnection.updateToken(newToken)
-        // update the auth token as well
         authInterceptor.token = newToken
     }
 
@@ -180,14 +146,14 @@ internal class ConnectionModule(
 internal class SfuConnectionModule(
     /** The url of the SFU */
     sfuUrl: String,
-    /** the session id, generated when we join/ client side */
-    sessionId: String,
+    /** The user */
+    user: User,
     /** A token which gives you access to the sfu */
     private val sfuToken: String,
     /** A token which gives you access to the sfu */
     private val apiKey: String,
     /** Function that gives a fresh SDP */
-    getSubscriberSdp: suspend () -> String,
+    private val subscriberSDPProvider: SessionDescriptionProvider,
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     /** The scope to use for the socket */
     scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
@@ -198,7 +164,13 @@ internal class SfuConnectionModule(
      */
     onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit,
 ) {
-    internal var sfuSocket: SfuSocket
+    internal var sfuSocket: SfuSocketConnection = SfuSocketConnection(
+        url = sfuUrl,
+        apiKey = apiKey,
+        scope = scope,
+        tokenProvider = ConstantTokenProvider(sfuToken),
+        networkStateProvider = networkStateProvider
+    )
     private val updatedSignalUrl = if (sfuUrl.contains(Regex("https?://"))) {
         sfuUrl
     } else {
@@ -209,50 +181,26 @@ internal class SfuConnectionModule(
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
         val authInterceptor = CoordinatorAuthInterceptor(apiKey, sfuToken)
-        return OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .addInterceptor(
+        return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = loggingLevel.httpLoggingLevel.level
                 },
-            )
-            .retryOnConnectionFailure(true)
+            ).retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .build()
+            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
     }
 
     val okHttpClient = buildSfuOkHttpClient()
 
     private val signalRetrofitClient: Retrofit by lazy {
-        Retrofit.Builder()
-            .client(okHttpClient)
-            .addConverterFactory(WireConverterFactory.create())
-            .baseUrl(updatedSignalUrl)
-            .build()
+        Retrofit.Builder().client(okHttpClient).addConverterFactory(WireConverterFactory.create())
+            .baseUrl(updatedSignalUrl).build()
     }
 
     internal val signalService: SignalServerService by lazy {
         signalRetrofitClient.create(SignalServerService::class.java)
-    }
-
-    init {
-        val socketUrl = "$updatedSignalUrl/ws"
-            .replace("https", "wss")
-            .replace("http", "ws")
-
-        sfuSocket = SfuSocket(
-            socketUrl,
-            sessionId,
-            sfuToken,
-            getSubscriberSdp,
-            scope,
-            okHttpClient,
-            networkStateProvider,
-            onWebsocketReconnectStrategy,
-        )
     }
 }
 

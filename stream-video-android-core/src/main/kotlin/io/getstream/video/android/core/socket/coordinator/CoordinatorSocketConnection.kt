@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -55,7 +54,7 @@ import org.openapitools.client.models.WSAuthMessageRequest
 /**
  * PersistentSocket architecture
  *
- * - Healthmonitor that sends a ping every 30 seconds
+ * - Health monitor that sends a ping every 30 seconds
  * - Automatically reconnects if it encounters a temp failure
  * - Raises the error if there is a permanent failure
  * - Flow to avoid concurrency related bugs
@@ -182,6 +181,13 @@ public open class CoordinatorSocketConnection(
     override fun onDisconnected(cause: DisconnectCause) {
         super.onDisconnected(cause)
         logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
+        when (cause) {
+            DisconnectCause.ConnectionReleased -> TODO()
+            is DisconnectCause.Error -> TODO()
+            DisconnectCause.NetworkNotAvailable -> TODO()
+            is DisconnectCause.UnrecoverableError -> TODO()
+            DisconnectCause.WebSocketNotAvailable -> TODO()
+        }
     }
 
     // API

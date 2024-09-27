@@ -40,7 +40,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
-Refaimport io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -118,7 +118,7 @@ public class Call(
     private var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
-    internal val clientImpl = client as StreamVideoImpl
+    internal val clientImpl = client as StreamVideoClient
 
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
@@ -410,7 +410,7 @@ public class Call(
                 call = this,
                 sfuUrl = sfuUrl,
                 sfuToken = sfuToken,
-                connectionModule = (client as StreamVideoImpl).connectionModule,
+                connectionModule = (client as StreamVideoClient).connectionModule,
                 remoteIceServers = iceServers,
                 onMigrationCompleted = {
                     state._connection.value = RealtimeConnection.Connected
@@ -445,7 +445,7 @@ public class Call(
         scope.launch {
             session?.let {
                 it.sfuSocketState.collect { sfuSocketState ->
-                    if (sfuSocketState is SfuSocketState.DisconnectedPermanently) {
+                    if (sfuSocketState is SfuSocketState.Disconnected.DisconnectedPermanently) {
                         handleSignalChannelDisconnect(isRetry = false)
                     }
                 }
@@ -611,7 +611,7 @@ public class Call(
         stopScreenSharing()
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
-        (client as StreamVideoImpl).onCallCleanUp(this)
+        (client as StreamVideoClient).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
         cleanup()
@@ -1082,7 +1082,7 @@ public class Call(
     public class Debug(val call: Call) {
 
         public fun doFullReconnection() {
-            call.session?.sfuConnectionModule?.sfuSocket?.cancel()
+            call.session?.sfuConnectionModule?.sfuSocket?.dis
         }
 
         public fun restartSubscriberIce() {

@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.VideoEvent
 
 /**
- * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
+ * The main interface to control the Video calls. [StreamVideoClient] implements this interface.
  */
 @Stable
 public interface StreamVideo : NotificationHandler {
@@ -219,7 +219,7 @@ public interface StreamVideo : NotificationHandler {
         }
 
         private fun buildAppName(): String =
-            (internalStreamVideo as? StreamVideoImpl)?.let { streamVideoImpl ->
+            (internalStreamVideo as? StreamVideoClient)?.let { streamVideoImpl ->
                 "|app_name=" + (streamVideoImpl.appName ?: streamVideoImpl.context.packageName)
             } ?: ""
 

@@ -2,10 +2,7 @@ package io.getstream.video.android.core.socket.sfu.state
 
 import io.getstream.result.Error
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.socket.common.ConnectionConf
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConnectionType
-import org.openapitools.client.models.ConnectedEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 public sealed class SfuSocketStateEvent {

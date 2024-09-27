@@ -49,10 +49,10 @@ import io.getstream.video.android.core.notifications.internal.service.callServic
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
-import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
@@ -134,7 +134,7 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
  */
-internal class StreamVideoImpl internal constructor(
+internal class StreamVideoClient internal constructor(
     override val context: Context,
     internal val scope: CoroutineScope = ClientScope(),
     override val user: User,
@@ -308,7 +308,6 @@ internal class StreamVideoImpl internal constructor(
     }
 
     init {
-
         // listen to socket events and errors
         scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
             connectionModule.coordinatorSocketConnection.events().collect {
@@ -323,7 +322,7 @@ internal class StreamVideoImpl internal constructor(
 
         scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
             connectionModule.coordinatorSocketConnection.errors().collect { error ->
-                state.handleError(error)
+                state.handleError(error.streamError)
             }
         }
 
@@ -333,7 +332,7 @@ internal class StreamVideoImpl internal constructor(
                 // We need to re-watch every watched call with the new connection ID
                 // (otherwise the WS events will stop)
                 val watchedCalls = calls
-                if (it is SfuSocketState.Connected && watchedCalls.isNotEmpty()) {
+                if (it is VideoSocketState.Connected && watchedCalls.isNotEmpty()) {
                     val filter = Filters.`in`("cid", watchedCalls.values.map { it.cid }).toMap()
                     queryCalls(filters = filter, watch = true).also {
                         if (it is Failure) {

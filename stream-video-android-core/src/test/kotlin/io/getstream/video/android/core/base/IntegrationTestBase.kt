@@ -23,7 +23,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.mockk.MockKAnnotations
@@ -71,7 +71,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
     lateinit var client: StreamVideo
 
     /** Implementation of the client for more access to interals */
-    internal lateinit var clientImpl: StreamVideoImpl
+    internal lateinit var clientImpl: StreamVideoClient
 
     /** Tracks all events received by the client during a test */
     lateinit var events: MutableList<VideoEvent>
@@ -102,7 +102,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
 
         if (IntegrationTestState.client == null) {
             client = builder.build()
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
             // always mock the peer connection factory, it can't work in unit tests
             clientImpl.peerConnectionFactory = mockedPCFactory
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
@@ -121,7 +121,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             IntegrationTestState.client = client
         } else {
             client = IntegrationTestState.client!!
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
         }
 
         // monitor for events

@@ -10,7 +10,6 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
-import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.LifecycleHandler
@@ -22,7 +21,6 @@ import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocket
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
-import io.getstream.video.android.core.socket.common.VideoErrorDetail
 import io.getstream.video.android.core.socket.common.fromVideoErrorCode
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenManager
@@ -55,20 +53,18 @@ internal open class SfuSocket(
     private val socketId = safeCallWithResult { UUID.randomUUID().toString() }
     private var connectionConf: ConnectionConf.SfuConnectionConf? = null
     private val listeners = mutableSetOf<SocketListener<SfuDataEvent, JoinCallResponseEvent>>()
-    private val videoSocketStateService = SfuSocketStateService()
+    private val sfuSocketStateService = SfuSocketStateService()
     private var socketStateObserverJob: Job? = null
     private val healthMonitor = HealthMonitor(
         userScope = userScope,
         checkCallback = {
-            (videoSocketStateService.currentState as? SfuSocketState.Connected)?.event.let {
-
-            }
+            //  Do nothing
         },
-        reconnectCallback = { videoSocketStateService.onWebSocketEventLost() },
+        reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
     )
     private val lifecycleHandler = object : LifecycleHandler {
         override suspend fun resume() {
-            videoSocketStateService.onResume()
+            sfuSocketStateService.onResume()
         }
 
         override suspend fun stopped() {
@@ -78,11 +74,11 @@ internal open class SfuSocket(
 
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
-            videoSocketStateService.onNetworkAvailable()
+            sfuSocketStateService.onNetworkAvailable()
         }
 
         override suspend fun onDisconnected() {
-            videoSocketStateService.onNetworkNotAvailable()
+            sfuSocketStateService.onNetworkNotAvailable()
         }
     }
 
@@ -118,7 +114,7 @@ internal open class SfuSocket(
                         }
                 }
 
-                false -> videoSocketStateService.onNetworkNotAvailable()
+                false -> sfuSocketStateService.onNetworkNotAvailable()
             }
         }
 
@@ -128,11 +124,11 @@ internal open class SfuSocket(
         }
 
         return userScope.launch {
-            videoSocketStateService.observer { state ->
+            sfuSocketStateService.observer { state ->
                 logger.i { "[onSocketStateChanged] state: $state" }
                 when (state) {
                     is SfuSocketState.RestartConnection -> {
-                        connectionConf?.let { videoSocketStateService.onReconnect(it) }
+                        connectionConf?.let { sfuSocketStateService.onReconnect(it) }
                             ?: run {
                                 logger.e { "[onSocketStateChanged] #reconnect; connectionConf is null" }
                             }
@@ -180,7 +176,7 @@ internal open class SfuSocket(
                             is SfuSocketState.Disconnected.WebSocketEventLost -> {
                                 streamWebSocket?.close()
                                 connectionConf?.let {
-                                    videoSocketStateService.onReconnect(
+                                    sfuSocketStateService.onReconnect(
                                         it
                                     )
                                 }
@@ -197,7 +193,7 @@ internal open class SfuSocket(
         logger.d { "[connect] user.id: ${user.id}" }
         socketStateObserverJob?.cancel()
         socketStateObserverJob = observeSocketStateService()
-        videoSocketStateService.onConnect(
+        sfuSocketStateService.onConnect(
             ConnectionConf.SfuConnectionConf(wssUrl, apiKey, user, tokenManager.getToken())
         )
     }
@@ -205,12 +201,12 @@ internal open class SfuSocket(
     suspend fun disconnect() {
         logger.d { "[disconnect] no args" }
         connectionConf = null
-        videoSocketStateService.onRequiredDisconnect()
+        sfuSocketStateService.onRequiredDisconnect()
     }
 
     private suspend fun handleEvent(sfuEvent: SfuDataEvent) {
         when (sfuEvent) {
-            is JoinCallResponseEvent -> videoSocketStateService.onConnectionEstablished(sfuEvent)
+            is JoinCallResponseEvent -> sfuSocketStateService.onConnectionEstablished(sfuEvent)
             is SFUHealthCheckEvent -> {
                 healthMonitor.ack()
             }
@@ -258,10 +254,10 @@ internal open class SfuSocket(
                 logger.d {
                     "One unrecoverable error happened. Error: $error. Error code: ${error.serverErrorCode}"
                 }
-                videoSocketStateService.onUnrecoverableError(error)
+                sfuSocketStateService.onUnrecoverableError(error)
             }
 
-            else -> videoSocketStateService.onNetworkError(
+            else -> sfuSocketStateService.onNetworkError(
                 error,
                 reconnectStrategy
                     ?: WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED
@@ -281,7 +277,7 @@ internal open class SfuSocket(
         }
     }
 
-    fun state() = videoSocketStateService.currentStateFlow
+    fun state() = sfuSocketStateService.currentStateFlow
 
     /**
      * Attempt to send [event] to the web socket connection.
@@ -298,7 +294,7 @@ internal open class SfuSocket(
     internal fun sendEvent(event: SfuDataRequest): Boolean = streamWebSocket?.send(event) ?: false
 
     internal fun isConnected(): Boolean =
-        videoSocketStateService.currentState is SfuSocketState.Connected
+        sfuSocketStateService.currentState is SfuSocketState.Connected
 
     /**
      * Awaits until [VideoSocketState.Connected] is set.
@@ -311,7 +307,7 @@ internal open class SfuSocket(
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     internal suspend fun awaitConnection(timeoutInMillis: Long = DEFAULT_CONNECTION_TIMEOUT) {
-        awaitState<VideoSocketState.Connected>(timeoutInMillis)
+        awaitState<SfuSocketState.Connected>(timeoutInMillis)
     }
 
     /**
@@ -324,9 +320,9 @@ internal open class SfuSocket(
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
-    internal suspend inline fun <reified T : VideoSocketState> awaitState(timeoutInMillis: Long) {
+    internal suspend inline fun <reified T : SfuSocketState> awaitState(timeoutInMillis: Long) {
         withTimeout(timeoutInMillis) {
-            videoSocketStateService.currentStateFlow.first { it is T }
+            sfuSocketStateService.currentStateFlow.first { it is T }
         }
     }
 
@@ -337,21 +333,12 @@ internal open class SfuSocket(
      * Get connection id of this connection.
      */
     internal fun connectionIdOrError(): String =
-        when (val state = videoSocketStateService.currentState) {
+        when (val state = sfuSocketStateService.currentState) {
             is SfuSocketState.Connected -> socketId.getOrNull()
                 ?: "st-aee7a458-7452-4b1d-9eef-3d4309167d1c"
 
             else -> error("This state doesn't contain connectionId")
         }
-
-    suspend fun reconnectUser(user: User, isAnonymous: Boolean, forceReconnection: Boolean) {
-        logger.d {
-            "[reconnectUser] user.id: ${user.id}, isAnonymous: $isAnonymous, forceReconnection: $forceReconnection"
-        }
-        videoSocketStateService.onReconnect(
-            ConnectionConf.SfuConnectionConf(wssUrl, apiKey, user, tokenManager.getToken())
-        )
-    }
 
     private fun callListeners(call: (SocketListener<SfuDataEvent, JoinCallResponseEvent>) -> Unit) {
         synchronized(listeners) {

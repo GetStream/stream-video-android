@@ -18,14 +18,12 @@ package io.getstream.video.android.core.socket.common
 
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
-import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
-import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
  * Listener which is invoked for WebSocket events.
  */
-public open class SocketListener<T, C> {
+public open class SocketListener<EventType, ConnectedEventType> {
 
     /**
      * The callbacks are by default delivered on the main thread. Changing this property to false will deliver
@@ -48,13 +46,13 @@ public open class SocketListener<T, C> {
     }
 
     /**
-     * Invoked when we receive the first [ConnectedEvent] in this connection.
+     * Invoked when we receive the first [ConnectedEventType] in this connection.
      *
-     * Note: This is not invoked when the ws connection is opened but when the [ConnectedEvent] is received.
+     * Note: This is not invoked when the ws connection is opened but when the [ConnectedEventType] is received.
      *
-     * @param event [ConnectedEvent] sent by server as first event once the connection is established.
+     * @param event [ConnectedEventType] sent by server as first event once the connection is established.
      */
-    public open fun onConnected(event: C) {
+    public open fun onConnected(event: ConnectedEventType) {
     }
 
     /**
@@ -78,6 +76,6 @@ public open class SocketListener<T, C> {
      *
      * @param event parsed [VideoEvent] received in this web socket connection.
      */
-    public open fun onEvent(event: T) {
+    public open fun onEvent(event: EventType) {
     }
 }

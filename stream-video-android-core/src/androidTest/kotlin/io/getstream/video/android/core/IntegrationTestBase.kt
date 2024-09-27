@@ -132,7 +132,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     val client: StreamVideo
 
     /** Implementation of the client for more access to interals */
-    internal val clientImpl: StreamVideoImpl
+    internal val clientImpl: StreamVideoClient
 
     /** Tracks all events received by the client during a test */
     var events: MutableList<VideoEvent>
@@ -158,7 +158,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
         if (IntegrationTestState.client == null) {
             client = builder.build()
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
             // Connect to the WS if needed
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests
@@ -172,7 +172,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             IntegrationTestState.client = client
         } else {
             client = IntegrationTestState.client!!
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
         }
 
         // monitor for events

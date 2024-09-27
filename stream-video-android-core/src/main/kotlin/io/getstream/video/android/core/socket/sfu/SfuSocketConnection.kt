@@ -49,10 +49,6 @@ class SfuSocketConnection(
     private val apiKey: ApiKey,
     /** The URL to connect to */
     private val url: String,
-    /** The  user to connect. */
-    private val user: User,
-    /** The initial token. */
-    private val token: String,
     /** Inject your http client */
     private val httpClient: OkHttpClient,
     /** Inject your network state provider */

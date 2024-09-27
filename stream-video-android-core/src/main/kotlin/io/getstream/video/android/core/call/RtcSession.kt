@@ -29,7 +29,7 @@ import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ScreenShareManager
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.stringify
@@ -201,7 +201,7 @@ public class RtcSession internal constructor(
 
     private val logger by taggedLogger("Call:RtcSession")
     private val dynascaleLogger by taggedLogger("Call:RtcSession:Dynascale")
-    private val clientImpl = client as StreamVideoImpl
+    private val clientImpl = client as StreamVideoClient
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
