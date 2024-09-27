@@ -64,7 +64,9 @@ internal class StreamNotificationManager private constructor(
                     logger.d { "[registerPushDevice] pushDevice gnerated: $generatedDevice" }
                     scope.launch { createDevice(generatedDevice) }
                 }
-                notificationPermissionManager?.start()
+                if (notificationConfig.requestPermissionOnDeviceRegistration()) {
+                    notificationPermissionManager?.start()
+                }
             }
     }
 

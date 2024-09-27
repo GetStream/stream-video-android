@@ -41,10 +41,9 @@ public interface AudioHandler {
 /**
  * TODO: this class should be merged into the Microphone Manager
  */
-public class AudioSwitchHandler constructor(
+public class AudioSwitchHandler(
     private val context: Context,
-    val preferSpeakerphone: Boolean,
-    var audioDeviceChangeListener: AudioDeviceChangeListener,
+    private var audioDeviceChangeListener: AudioDeviceChangeListener,
 ) :
     AudioHandler {
 
@@ -65,13 +64,8 @@ public class AudioSwitchHandler constructor(
                 AudioDevice.BluetoothHeadset::class.java,
             )
 
-            if (preferSpeakerphone) {
-                devices.add(AudioDevice.Speakerphone::class.java)
-                devices.add(AudioDevice.Earpiece::class.java)
-            } else {
-                devices.add(AudioDevice.Earpiece::class.java)
-                devices.add(AudioDevice.Speakerphone::class.java)
-            }
+            devices.add(AudioDevice.Earpiece::class.java)
+            devices.add(AudioDevice.Speakerphone::class.java)
 
             handler.post {
                 val switch = AudioSwitch(

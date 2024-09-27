@@ -23,6 +23,7 @@ public data class NotificationConfig(
     val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
     val requestPermissionOnAppLaunch: () -> Boolean = { true },
     val notificationHandler: NotificationHandler = NoOpNotificationHandler,
+    val requestPermissionOnDeviceRegistration: () -> Boolean = { true },
     /**
      * Set this to true if you want to make the ringing notifications as low-priority
      * in case the application is in foreground. This will prevent the notification from

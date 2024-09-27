@@ -478,7 +478,7 @@ public final class io/getstream/video/android/core/MemberState {
 }
 
 public final class io/getstream/video/android/core/MicrophoneManager {
-	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;ZI)V
+	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;I)V
 	public final fun canHandleDeviceSwitch ()Z
 	public final fun cleanup ()V
 	public final fun disable (Z)V
@@ -486,7 +486,6 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getAudioUsage ()I
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
-	public final fun getPreferSpeakerphone ()Z
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
@@ -868,11 +867,8 @@ public abstract interface class io/getstream/video/android/core/audio/AudioHandl
 
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
-	public fun <init> (Landroid/content/Context;ZLkotlin/jvm/functions/Function2;)V
-	public final fun getAudioDeviceChangeListener ()Lkotlin/jvm/functions/Function2;
-	public final fun getPreferSpeakerphone ()Z
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function2;)V
 	public final fun selectDevice (Lcom/twilio/audioswitch/AudioDevice;)V
-	public final fun setAudioDeviceChangeListener (Lkotlin/jvm/functions/Function2;)V
 	public fun start ()V
 	public fun stop ()V
 }
@@ -4139,7 +4135,8 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationIconRes ()I
 	protected final fun getNotificationManager ()Landroidx/core/app/NotificationManagerCompat;
-	public fun getOngoingCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
+	public fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)V
+	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZI)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public fun getSettingUpCallNotification ()Landroid/app/Notification;
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
@@ -4157,19 +4154,21 @@ public final class io/getstream/video/android/core/notifications/DefaultNotifica
 
 public final class io/getstream/video/android/core/notifications/NotificationConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Z)V
-	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;Z)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lio/getstream/video/android/core/notifications/NotificationHandler;
-	public final fun component4 ()Z
-	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Z)Lio/getstream/video/android/core/notifications/NotificationConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public final fun component4 ()Lkotlin/jvm/functions/Function0;
+	public final fun component5 ()Z
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;Z)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationHandler ()Lio/getstream/video/android/core/notifications/NotificationHandler;
 	public final fun getPushDeviceGenerators ()Ljava/util/List;
 	public final fun getRequestPermissionOnAppLaunch ()Lkotlin/jvm/functions/Function0;
+	public final fun getRequestPermissionOnDeviceRegistration ()Lkotlin/jvm/functions/Function0;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4189,7 +4188,9 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field INTENT_EXTRA_CALL_CID Ljava/lang/String;
 	public static final field INTENT_EXTRA_CALL_DISPLAY_NAME Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
-	public abstract fun getOngoingCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
+	public abstract fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZI)Landroid/app/Notification;
+	public static synthetic fun getOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZIILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getSettingUpCallNotification ()Landroid/app/Notification;
@@ -4471,17 +4472,29 @@ public final class io/getstream/video/android/core/socket/SocketState$NotConnect
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class io/getstream/video/android/core/sounds/RingingConfig {
+	public abstract fun getIncomingCallSoundUri ()Landroid/net/Uri;
+	public abstract fun getOutgoingCallSoundUri ()Landroid/net/Uri;
+}
+
+public final class io/getstream/video/android/core/sounds/RingingConfigKt {
+	public static final fun defaultResourcesRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun deviceRingtoneRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun emptyRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun resRingingConfig (Landroid/content/Context;II)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun toSounds (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
+	public static final fun uriRingingConfig (Landroid/net/Uri;Landroid/net/Uri;)Lio/getstream/video/android/core/sounds/RingingConfig;
+}
+
 public final class io/getstream/video/android/core/sounds/Sounds {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Integer;
-	public final fun component2 ()Ljava/lang/Integer;
-	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/video/android/core/sounds/Sounds;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
+	public fun <init> (II)V
+	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/core/sounds/RingingConfig;)V
+	public final fun component1 ()Lio/getstream/video/android/core/sounds/RingingConfig;
+	public final fun copy (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getIncomingCallSound ()Ljava/lang/Integer;
-	public final fun getOutgoingCallSound ()Ljava/lang/Integer;
+	public final fun getRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

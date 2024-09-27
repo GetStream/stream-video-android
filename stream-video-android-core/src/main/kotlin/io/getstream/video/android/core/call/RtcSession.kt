@@ -380,9 +380,6 @@ public class RtcSession internal constructor(
         errorJob = coroutineScope.launch {
             sfuConnectionModule.sfuSocket.errors.collect {
                 logger.e(it) { "permanent failure on socket connection" }
-                if (clientImpl.developmentMode) {
-                    throw it
-                }
             }
         }
     }
@@ -422,10 +419,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect() {
-        val timer = clientImpl.debugInfo.trackTime("sfu ws")
         sfuConnectionModule.sfuSocket.connect()
-        timer.finish()
-
         // ensure that the join event has been handled before starting RTC
         try {
             withTimeout(2000L) {
@@ -605,7 +599,6 @@ public class RtcSession internal constructor(
 
     private suspend fun connectRtc() {
         val settings = call.state.settings.value
-        val timer = clientImpl.debugInfo.trackTime("connectRtc")
 
         // turn of the speaker if needed
         if (settings?.audio?.speakerDefaultOn == false) {
@@ -620,14 +613,12 @@ public class RtcSession internal constructor(
 
         if (canPublish) {
             publisher = createPublisher()
-            timer.split("createPublisher")
         } else {
             // enable the publisher if you receive the send audio or send video capability
             coroutineScope.launch {
                 call.state.ownCapabilities.collect {
                     if (it.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }) {
                         publisher = createPublisher()
-                        timer.split("createPublisher")
                     }
                 }
             }
@@ -653,7 +644,6 @@ public class RtcSession internal constructor(
                 // step 2 ensure all tracks are setup correctly
                 // start capturing the video
 
-                timer.split("media enabled")
                 // step 4 add the audio track to the publisher
                 setLocalTrack(
                     TrackType.TRACK_TYPE_AUDIO,
@@ -687,7 +677,6 @@ public class RtcSession internal constructor(
         }
 
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
-        timer.finish()
         listenToMediaChanges()
 
         // subscribe to the tracks of other participants
@@ -1735,7 +1724,6 @@ public class RtcSession internal constructor(
         failedToSwitch: () -> Unit,
     ) {
         logger.i { "[switchSfu] from ${this.sfuUrl} to $sfuUrl" }
-        val timer = clientImpl.debugInfo.trackTime("call.switchSfu")
 
         // Prepare SDP
         val getSdp = suspend {
@@ -1767,7 +1755,6 @@ public class RtcSession internal constructor(
                 when (it) {
                     is SocketState.Connected -> {
                         logger.d { "[switchSfu] Migration SFU socket state changed to Connected" }
-                        timer.split("SFU socket connected")
 
                         // Disconnect the old SFU and stop listening to SFU stateflows
                         eventJob?.cancel()
@@ -1807,7 +1794,6 @@ public class RtcSession internal constructor(
                             subscriber?.state?.collect {
                                 if (it == PeerConnectionState.CONNECTED) {
                                     logger.d { "[switchSfu] Migration subscriber state changed to Connected" }
-                                    timer.split("Subscriber connected")
                                     tempSubscriber?.let { tempSubscriberValue ->
                                         tempSubscriberValue.connection.close()
                                         tempSubscriber = null
@@ -1815,7 +1801,6 @@ public class RtcSession internal constructor(
 
                                     onMigrationCompleted.invoke()
 
-                                    timer.finish()
                                     cancel()
                                 } else if (it == PeerConnectionState.CLOSED ||
                                     it == PeerConnectionState.DISCONNECTED ||

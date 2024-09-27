@@ -82,7 +82,9 @@ import io.getstream.video.android.compose.ui.components.indicator.GenericIndicat
 import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
@@ -246,11 +248,23 @@ public fun ParticipantVideoRenderer(
     }
 
     val video by participant.video.collectAsStateWithLifecycle()
-
+    val cameraDirection by call.camera.direction.collectAsStateWithLifecycle()
+    val me by call.state.me.collectAsStateWithLifecycle()
+    val mirror by remember(cameraDirection) {
+        mutableStateOf(
+            cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId,
+        )
+    }
+    val videoRendererConfig = remember(mirror, videoFallbackContent) {
+        videoRenderConfig {
+            mirrorStream = mirror
+            this.fallbackContent = videoFallbackContent
+        }
+    }
     VideoRenderer(
         call = call,
         video = video,
-        videoFallbackContent = videoFallbackContent,
+        videoRendererConfig = videoRendererConfig,
     )
 }
 

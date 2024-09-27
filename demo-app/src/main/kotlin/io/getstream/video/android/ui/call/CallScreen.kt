@@ -70,6 +70,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
@@ -411,27 +412,32 @@ fun CallScreen(
             },
         )
 
-        if (participantsSize.size == 1 && !chatState.isVisible && orientation == Configuration.ORIENTATION_PORTRAIT) {
-            val context = LocalContext.current
-            val clipboardManager = remember(context) {
-                context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-            }
-            val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
-            Popup(
-                alignment = Alignment.BottomCenter,
-                offset = IntOffset(
-                    0,
-                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
-                        .toInt(),
-                ),
+        val isPictureInPictureMode = rememberIsInPipMode()
+        if (!isPictureInPictureMode) {
+            if (participantsSize.size == 1 &&
+                !chatState.isVisible &&
+                orientation == Configuration.ORIENTATION_PORTRAIT
             ) {
-                ShareCallWithOthers(
-                    modifier = Modifier.fillMaxWidth(),
-                    call = call,
-                    clipboardManager = clipboardManager,
-                    env = env,
-                    context = context,
-                )
+                val clipboardManager = remember(context) {
+                    context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                }
+                val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+                Popup(
+                    alignment = Alignment.BottomCenter,
+                    offset = IntOffset(
+                        0,
+                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
+                            .toInt(),
+                    ),
+                ) {
+                    ShareCallWithOthers(
+                        modifier = Modifier.fillMaxWidth(),
+                        call = call,
+                        clipboardManager = clipboardManager,
+                        env = env,
+                        context = context,
+                    )
+                }
             }
         }
 
@@ -440,7 +446,13 @@ fun CallScreen(
         }
 
         if (showingLandscapeControls && orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            LandscapeControls(call) {
+            LandscapeControls(call, onChat = {
+                showingLandscapeControls = false
+                scope.launch { chatState.show() }
+            }, onSettings = {
+                showingLandscapeControls = false
+                isShowingSettingMenu = true
+            }) {
                 showingLandscapeControls = !showingLandscapeControls
             }
         }
