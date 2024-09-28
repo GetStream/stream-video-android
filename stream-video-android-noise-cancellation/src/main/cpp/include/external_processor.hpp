@@ -20,8 +20,6 @@ namespace external {
                                  size_t num_frames,
                                  size_t num_bands,
                                  size_t num_channels) = 0;
-
-        virtual ~ExternalProcessor() {}
     };
 
     extern "C" bool ExternalProcessorCreate();

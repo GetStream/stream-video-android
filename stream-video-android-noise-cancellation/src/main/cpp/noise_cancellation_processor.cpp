@@ -97,6 +97,7 @@ namespace noise_cancellation {
 
     NoiseCancellationProcessor::~NoiseCancellationProcessor() {
         syslog(LOG_INFO, "KrispNc: #Destructor; no args");
+        destroyAll();
 
         if (m_instance) {
             delete m_instance;
@@ -156,9 +157,6 @@ namespace noise_cancellation {
 
         syslog(LOG_INFO, "KrispNc: #Create; Successfully initialized Krisp globals!");
 
-
-        //=========================================================================================================
-
         if (m_model_path.empty()) {
             syslog(LOG_ERR, "KrispNc: #Create; m_model_path is empty");
             return false;
@@ -178,22 +176,31 @@ namespace noise_cancellation {
             syslog(LOG_ERR, "KrispNc: #Create; Failed to set wt file: %s", model_path.c_str());
             return false;
         }
+        syslog(LOG_INFO, "KrispNc: #Create; Successfully set model: %s", kKrispModelName);
         return true;
     }
 
     bool NoiseCancellationProcessor::Destroy() {
         syslog(LOG_INFO, "KrispNc: #Destroy; no args");
+        destroyAll();
+
+        syslog(LOG_INFO, "KrispNc: #Destroy; Destroyed successfully");
+
+        return true;
+    }
+
+    bool NoiseCancellationProcessor::destroyAll() {
         if (!removeModel(kKrispModelName)) {
-            syslog(LOG_WARNING, "KrispNc: #Destroy; Failed to remove model: %s", kKrispModelName);
+            syslog(LOG_WARNING, "KrispNc: #destroyAll; Failed to remove model: %s", kKrispModelName);
         }
 
         if (!closeSession(m_session)) {
-            syslog(LOG_WARNING, "KrispNc: #Destroy; Failed to close session");
+            syslog(LOG_WARNING, "KrispNc: #destroyAll; Failed to close session");
         }
         m_session = nullptr;
 
         if (!globalDestroy()) {
-            syslog(LOG_WARNING, "KrispNc: #Destroy; Failed to destroy Krisp globals");
+            syslog(LOG_WARNING, "KrispNc: #destroyAll; Failed to destroy Krisp globals");
         }
 
         // Reset all function pointers
@@ -204,9 +211,6 @@ namespace noise_cancellation {
             dlclose(m_handle);
             m_handle = nullptr;
         }
-
-        syslog(LOG_INFO, "KrispNc: #Destroy; Destroyed successfully");
-
         return true;
     }
 

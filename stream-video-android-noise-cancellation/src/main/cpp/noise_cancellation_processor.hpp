@@ -19,7 +19,7 @@ namespace noise_cancellation {
 
         NoiseCancellationProcessor &operator=(NoiseCancellationProcessor &&) = delete;
 
-        ~NoiseCancellationProcessor() override;
+        ~NoiseCancellationProcessor();
 
         static NoiseCancellationProcessor *getInstance() {
             if (m_instance == nullptr) {
@@ -63,6 +63,8 @@ namespace noise_cancellation {
         void* m_session = nullptr;
 
         static NoiseCancellationProcessor* m_instance;
+
+        bool destroyAll();
 
         void* createSession(int rate);
 
