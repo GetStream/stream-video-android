@@ -82,7 +82,7 @@ dependencies {
 //    api(files("libs/stream_libwebrtc_m118.4-nc.7-2e02164.aar"))
 //    api(files("libs/stream_libwebrtc_m118.4-nc.8-91de7c2.aar"))
 //    api(files("libs/stream_libwebrtc_m118.4-nc.9-5b77b04.aar"))
-    implementation(files("../.webrtc/stream_libwebrtc_m118.4-nc.10-ff2ad85.aar"))
+    implementation(files("../.webrtc/stream_libwebrtc_m118.4-nc.11-d53404a.aar"))
     implementation(project(":stream-video-android-core"))
 
     implementation(libs.stream.log)
