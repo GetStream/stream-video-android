@@ -19,16 +19,10 @@ package io.getstream.video.android.core.internal.module
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
-import io.getstream.video.android.core.api.SignalServerService
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
-import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
-import io.getstream.video.android.core.socket.sfu.SfuSocket
-import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -40,7 +34,6 @@ import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.concurrent.TimeUnit
 
@@ -119,14 +112,12 @@ internal class ConnectionModule(
     ): SfuConnectionModule {
         return SfuConnectionModule(
             sfuUrl = sfuUrl,
-            sessionId = sessionId,
             sfuToken = sfuToken,
             apiKey = apiKey,
-            getSubscriberSdp = getSubscriberSdp,
             loggingLevel = loggingLevel,
             scope = scope,
             networkStateProvider = networkStateProvider,
-            onWebsocketReconnectStrategy = onWebsocketReconnectStrategy,
+            lifecycle = lifecycle,
         )
     }
 
@@ -137,70 +128,6 @@ internal class ConnectionModule(
 
     fun updateAuthType(authType: String) {
         authInterceptor.authType = authType
-    }
-}
-
-/**
- * Sets upt he signalService and socket for the SFU connection.
- */
-internal class SfuConnectionModule(
-    /** The url of the SFU */
-    sfuUrl: String,
-    /** The user */
-    user: User,
-    /** A token which gives you access to the sfu */
-    private val sfuToken: String,
-    /** A token which gives you access to the sfu */
-    private val apiKey: String,
-    /** Function that gives a fresh SDP */
-    private val subscriberSDPProvider: SessionDescriptionProvider,
-    private val loggingLevel: LoggingLevel = LoggingLevel(),
-    /** The scope to use for the socket */
-    scope: CoroutineScope = CoroutineScope(DispatcherProvider.IO),
-    /** Network monitoring */
-    networkStateProvider: NetworkStateProvider,
-    /**
-     * Rejoin strategy to be used when the websocket connection is lost.
-     */
-    onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit,
-) {
-    internal var sfuSocket: SfuSocketConnection = SfuSocketConnection(
-        url = sfuUrl,
-        apiKey = apiKey,
-        scope = scope,
-        tokenProvider = ConstantTokenProvider(sfuToken),
-        networkStateProvider = networkStateProvider
-    )
-    private val updatedSignalUrl = if (sfuUrl.contains(Regex("https?://"))) {
-        sfuUrl
-    } else {
-        "http://$sfuUrl"
-    }.removeSuffix("/twirp")
-
-    private fun buildSfuOkHttpClient(): OkHttpClient {
-        val connectionTimeoutInMs = 10000L
-        // create a new OkHTTP client and set timeouts
-        val authInterceptor = CoordinatorAuthInterceptor(apiKey, sfuToken)
-        return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = loggingLevel.httpLoggingLevel.level
-                },
-            ).retryOnConnectionFailure(true)
-            .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
-    }
-
-    val okHttpClient = buildSfuOkHttpClient()
-
-    private val signalRetrofitClient: Retrofit by lazy {
-        Retrofit.Builder().client(okHttpClient).addConverterFactory(WireConverterFactory.create())
-            .baseUrl(updatedSignalUrl).build()
-    }
-
-    internal val signalService: SignalServerService by lazy {
-        signalRetrofitClient.create(SignalServerService::class.java)
     }
 }
 

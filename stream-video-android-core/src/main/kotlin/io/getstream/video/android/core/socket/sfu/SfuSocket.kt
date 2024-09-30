@@ -26,6 +26,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -333,10 +334,12 @@ internal open class SfuSocket(
      * Get connection id of this connection.
      */
     internal fun connectionIdOrError(): String =
-        when (val state = sfuSocketStateService.currentState) {
-            is SfuSocketState.Connected -> socketId.getOrNull()
-                ?: "st-aee7a458-7452-4b1d-9eef-3d4309167d1c"
-
+        when (sfuSocketStateService.currentState) {
+            is SfuSocketState.Connected -> {
+                safeCallWithDefault(error("This state doesn't contain connectionId")) {
+                    socketId.getOrThrow()
+                }
+            }
             else -> error("This state doesn't contain connectionId")
         }
 

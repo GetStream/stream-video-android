@@ -72,6 +72,8 @@ class ConnectionModule2(
      */
     public fun coordinatorConnection(): CoordinatorSocketConnection = coordinator
 
+    public fun okHttpClient(): OkHttpClient = okHttpClient
+
     // Internal implementation
     private val okHttpClient: OkHttpClient by lazy {
         // create a new OkHTTP client and set timeouts

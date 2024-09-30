@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -68,7 +69,21 @@ class MainActivity : ComponentActivity() {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
             setContent {
-                VideoTheme {
+                VideoTheme(
+                    colors = if (isSystemInDarkTheme()) {
+                        // Dark
+                        VideoTheme.colors.copy(
+                            baseSheetPrimary = VideoTheme.colors.baseSheetPrimary,
+                            baseSheetSecondary = VideoTheme.colors.baseSheetSecondary,
+                        )
+                    } else {
+                        // Light
+                        VideoTheme.colors.copy(
+                            baseSheetPrimary = VideoTheme.colors.baseSheetPrimary,
+                            baseSheetSecondary = VideoTheme.colors.baseSheetSecondary,
+                        )
+                    }
+                ) {
                     AppNavHost(
                         startDestination = if (!isLoggedIn) {
                             AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn

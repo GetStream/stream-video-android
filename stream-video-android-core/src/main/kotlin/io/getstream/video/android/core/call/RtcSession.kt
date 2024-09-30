@@ -309,7 +309,7 @@ public class RtcSession internal constructor(
      */
     private var sfuConnectionMigrationModule: SfuConnectionModule? = null
 
-    private val _sfuSfuSocketState = MutableStateFlow<SfuSocketState>(SfuSocketState.NotConnected)
+    private val _sfuSfuSocketState = MutableStateFlow<SfuSocketState>(SfuSocketState.Disconnected.Stopped)
     val sfuSocketState = _sfuSfuSocketState.asStateFlow()
 
     private val sfuFastReconnectListener: suspend () -> Unit = {
@@ -325,7 +325,7 @@ public class RtcSession internal constructor(
                 call.monitor.stopTimer()
                 call.monitor.reconnect(forceRestart = true)
             }
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_CLEAN -> {
                 call.handleSignalChannelDisconnect(false)
             }
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
