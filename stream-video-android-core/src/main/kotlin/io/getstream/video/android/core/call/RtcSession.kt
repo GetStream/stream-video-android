@@ -44,7 +44,7 @@ import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.internal.module.ConnectionModule
+import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
@@ -173,7 +173,7 @@ data class TrackDimensions(
  */
 public class RtcSession internal constructor(
     client: StreamVideo,
-    private val connectionModule: ConnectionModule,
+    private val coordinatorConnectionModule: CoordinatorConnectionModule,
     private val call: Call,
     internal var sfuUrl: String,
     internal var sfuToken: String,
@@ -197,7 +197,7 @@ public class RtcSession internal constructor(
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket
-        get() = sfuConnectionModule.sfuSocket
+        get() = sfuConnectionModule.socketConnection
 
     private val logger by taggedLogger("Call:RtcSession")
     private val dynascaleLogger by taggedLogger("Call:RtcSession:Dynascale")
@@ -356,8 +356,15 @@ public class RtcSession internal constructor(
         val getSdp = suspend {
             session.getSubscriberSdp().description
         }
+        /*
+        if (sfuUrl.contains(Regex("https?://"))) {
+        sfuUrl
+    } else {
+        "http://$sfuUrl"
+    }.removeSuffix("/twirp")
+         */
         val sfuConnectionModule =
-            connectionModule.createSFUConnectionModule(
+            coordinatorConnectionModule.createSFUConnectionModule(
                 sfuUrl,
                 sessionId,
                 sfuToken,
@@ -395,12 +402,12 @@ public class RtcSession internal constructor(
 
         // listen to socket events and errors
         eventJob = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.events.collect {
+            sfuConnectionModule.socketConnection.events.collect {
                 clientImpl.fireEvent(it, call.cid)
             }
         }
         errorJob = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.errors.collect {
+            sfuConnectionModule.socketConnection.errors.collect {
                 logger.e(it) { "permanent failure on socket connection" }
             }
         }
@@ -1762,7 +1769,7 @@ public class RtcSession internal constructor(
         }
         // Create a parallel SFU socket
         sfuConnectionMigrationModule =
-            connectionModule.createSFUConnectionModule(
+            coordinatorConnectionModule.createSFUConnectionModule(
                 sfuUrl,
                 sessionId,
                 sfuToken,

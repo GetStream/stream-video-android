@@ -31,7 +31,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
-import io.getstream.video.android.core.internal.module.ConnectionModule
+import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
@@ -142,7 +142,7 @@ internal class StreamVideoClient internal constructor(
     internal var token: String,
     private val lifecycle: Lifecycle,
     private val loggingLevel: LoggingLevel,
-    internal val connectionModule: ConnectionModule,
+    internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
     internal val callServiceConfig: CallServiceConfig = callServiceConfig(),
@@ -175,7 +175,7 @@ internal class StreamVideoClient internal constructor(
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
 
-    val socketImpl = connectionModule.coordinatorSocketConnection
+    val socketImpl = coordinatorConnectionModule.socketConnection
 
     fun onCallCleanUp(call: Call) {
         calls.remove(call.cid)
@@ -220,7 +220,7 @@ internal class StreamVideoClient internal constructor(
             if (e.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
                 token = newToken
-                connectionModule.updateToken(newToken)
+                coordinatorConnectionModule.updateToken(newToken)
                 apiCall()
             } else {
                 throw e
@@ -244,7 +244,7 @@ internal class StreamVideoClient internal constructor(
     ): Result<UpdateCallResponse> {
         logger.d { "[updateCall] type: $type, id: $id, request: $request" }
         return wrapAPICall {
-            connectionModule.api.updateCall(
+            coordinatorConnectionModule.api.updateCall(
                 type = type,
                 id = id,
                 updateCallRequest = request,
@@ -304,30 +304,30 @@ internal class StreamVideoClient internal constructor(
     }
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
-        connectionModule.coordinatorSocketConnection.connect(user)
+        coordinatorConnectionModule.socketConnection.connect(user)
     }
 
     init {
         // listen to socket events and errors
         scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
-            connectionModule.coordinatorSocketConnection.events().collect {
+            coordinatorConnectionModule.socketConnection.events().collect {
                 fireEvent(it)
             }
         }
         scope.launch {
-            connectionModule.coordinatorSocketConnection.state().collect {
+            coordinatorConnectionModule.socketConnection.state().collect {
                 state.handleState(it)
             }
         }
 
         scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
-            connectionModule.coordinatorSocketConnection.errors().collect { error ->
+            coordinatorConnectionModule.socketConnection.errors().collect { error ->
                 state.handleError(error.streamError)
             }
         }
 
         scope.launch(CoroutineName("init#coordinatorSocket.connectionState.collect")) {
-            connectionModule.coordinatorSocketConnection.state().collect { it ->
+            coordinatorConnectionModule.socketConnection.state().collect { it ->
                 // If the socket is reconnected then we have a new connection ID.
                 // We need to re-watch every watched call with the new connection ID
                 // (otherwise the WS events will stop)
@@ -403,7 +403,7 @@ internal class StreamVideoClient internal constructor(
     private suspend fun refreshToken(error: Throwable) {
         tokenProvider?.let {
             val newToken = tokenProvider.loadToken()
-            connectionModule.updateToken(newToken)
+            coordinatorConnectionModule.updateToken(newToken)
 
             logger.d { "[refreshToken] Token has been refreshed with: $newToken" }
 
@@ -432,15 +432,15 @@ internal class StreamVideoClient internal constructor(
                 throw IllegalStateException("Failed to create guest user")
             }
             response.onSuccess {
-                connectionModule.updateAuthType("jwt")
-                connectionModule.updateToken(it.accessToken)
+                coordinatorConnectionModule.updateAuthType("jwt")
+                coordinatorConnectionModule.updateToken(it.accessToken)
             }
         }
     }
 
     suspend fun createGuestUser(userRequest: UserRequest): Result<CreateGuestResponse> {
         return wrapAPICall {
-            connectionModule.api.createGuest(
+            coordinatorConnectionModule.api.createGuest(
                 createGuestRequest = CreateGuestRequest(userRequest),
             )
         }
@@ -516,7 +516,7 @@ internal class StreamVideoClient internal constructor(
 
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.api.getCall(
+            coordinatorConnectionModule.api.getCall(
                 type,
                 id,
                 connectionId = waitForConnectionId(),
@@ -569,7 +569,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
 
         return wrapAPICall {
-            connectionModule.api.getOrCreateCall(
+            coordinatorConnectionModule.api.getOrCreateCall(
                 type = type,
                 id = id,
                 getOrCreateCallRequest = GetOrCreateCallRequest(
@@ -593,7 +593,7 @@ internal class StreamVideoClient internal constructor(
         // if we jump right into the call from a deep link and we connect the call quickly.
         // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
-        return connectionModule.coordinatorSocketConnection.connectionId().first()
+        return coordinatorConnectionModule.socketConnection.connectionId().first()
     }
 
     internal suspend fun inviteUsers(
@@ -655,7 +655,7 @@ internal class StreamVideoClient internal constructor(
         )
 
         val result = wrapAPICall {
-            connectionModule.api.joinCall(
+            coordinatorConnectionModule.api.joinCall(
                 type,
                 id,
                 joinCallRequest,
@@ -671,7 +671,7 @@ internal class StreamVideoClient internal constructor(
         request: UpdateCallMembersRequest,
     ): Result<UpdateCallMembersResponse> {
         return wrapAPICall {
-            connectionModule.api.updateCallMembers(type, id, request)
+            coordinatorConnectionModule.api.updateCallMembers(type, id, request)
         }
     }
 
@@ -683,7 +683,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[sendCustomEvent] callCid: $type:$id, dataJson: $dataJson" }
 
         return wrapAPICall {
-            connectionModule.api.sendCallEvent(
+            coordinatorConnectionModule.api.sendCallEvent(
                 type,
                 id,
                 SendCallEventRequest(custom = dataJson),
@@ -701,7 +701,7 @@ internal class StreamVideoClient internal constructor(
         limit: Int,
     ): Result<QueryCallMembersResponse> {
         return wrapAPICall {
-            connectionModule.api.queryCallMembers(
+            coordinatorConnectionModule.api.queryCallMembers(
                 QueryCallMembersRequest(
                     type = type,
                     id = id,
@@ -739,7 +739,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall {
-            connectionModule.api.blockUser(
+            coordinatorConnectionModule.api.blockUser(
                 type,
                 id,
                 BlockUserRequest(userId),
@@ -751,7 +751,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[unblockUser] callCid: $type:$id, userId: $userId" }
 
         return wrapAPICall {
-            connectionModule.api.unblockUser(
+            coordinatorConnectionModule.api.unblockUser(
                 type,
                 id,
                 UnblockUserRequest(userId),
@@ -761,7 +761,7 @@ internal class StreamVideoClient internal constructor(
 
     suspend fun pinForEveryone(type: String, callId: String, sessionId: String, userId: String) =
         wrapAPICall {
-            connectionModule.api.videoPin(
+            coordinatorConnectionModule.api.videoPin(
                 type,
                 callId,
                 PinRequest(
@@ -773,7 +773,7 @@ internal class StreamVideoClient internal constructor(
 
     suspend fun unpinForEveryone(type: String, callId: String, sessionId: String, userId: String) =
         wrapAPICall {
-            connectionModule.api.videoUnpin(
+            coordinatorConnectionModule.api.videoUnpin(
                 type,
                 callId,
                 UnpinRequest(
@@ -784,7 +784,7 @@ internal class StreamVideoClient internal constructor(
         }
 
     suspend fun endCall(type: String, id: String): Result<Unit> {
-        return wrapAPICall { connectionModule.api.endCall(type, id) }
+        return wrapAPICall { coordinatorConnectionModule.api.endCall(type, id) }
     }
 
     suspend fun goLive(
@@ -797,7 +797,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[goLive] callCid: $type:$id" }
 
         return wrapAPICall {
-            connectionModule.api.goLive(
+            coordinatorConnectionModule.api.goLive(
                 type = type,
                 id = id,
                 goLiveRequest = GoLiveRequest(
@@ -810,7 +810,7 @@ internal class StreamVideoClient internal constructor(
     }
 
     suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
-        return wrapAPICall { connectionModule.api.stopLive(type, id) }
+        return wrapAPICall { coordinatorConnectionModule.api.stopLive(type, id) }
     }
 
     suspend fun muteUsers(
@@ -820,7 +820,7 @@ internal class StreamVideoClient internal constructor(
     ): Result<MuteUsersResponse> {
         val request = muteUsersData.toRequest()
         return wrapAPICall {
-            connectionModule.api.muteUsers(type, id, request)
+            coordinatorConnectionModule.api.muteUsers(type, id, request)
         }
     }
 
@@ -845,7 +845,7 @@ internal class StreamVideoClient internal constructor(
             watch = watch,
         )
         val result = wrapAPICall {
-            connectionModule.api.queryCalls(request, waitForConnectionId())
+            coordinatorConnectionModule.api.queryCalls(request, waitForConnectionId())
         }
         if (result.isSuccess) {
             // update state for these calls
@@ -868,7 +868,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[requestPermissions] callCid: $type:$id, permissions: $permissions" }
 
         return wrapAPICall {
-            connectionModule.api.requestPermission(
+            coordinatorConnectionModule.api.requestPermission(
                 type,
                 id,
                 RequestPermissionRequest(permissions),
@@ -879,11 +879,11 @@ internal class StreamVideoClient internal constructor(
     suspend fun startBroadcasting(type: String, id: String): Result<StartHLSBroadcastingResponse> {
         logger.d { "[startBroadcasting] callCid: $type $id" }
 
-        return wrapAPICall { connectionModule.api.startHLSBroadcasting(type, id) }
+        return wrapAPICall { coordinatorConnectionModule.api.startHLSBroadcasting(type, id) }
     }
 
     suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
-        return wrapAPICall { connectionModule.api.stopHLSBroadcasting(type, id) }
+        return wrapAPICall { coordinatorConnectionModule.api.stopHLSBroadcasting(type, id) }
     }
 
     suspend fun startRecording(
@@ -893,13 +893,13 @@ internal class StreamVideoClient internal constructor(
     ): Result<Unit> {
         return wrapAPICall {
             val req = StartRecordingRequest(externalStorage)
-            connectionModule.api.startRecording(type, id, req)
+            coordinatorConnectionModule.api.startRecording(type, id, req)
         }
     }
 
     suspend fun stopRecording(type: String, id: String): Result<Unit> {
         return wrapAPICall {
-            connectionModule.api.stopRecording(type, id)
+            coordinatorConnectionModule.api.stopRecording(type, id)
         }
     }
 
@@ -909,7 +909,7 @@ internal class StreamVideoClient internal constructor(
         updateUserPermissionsData: UpdateUserPermissionsData,
     ): Result<UpdateUserPermissionsResponse> {
         return wrapAPICall {
-            connectionModule.api.updateUserPermissions(
+            coordinatorConnectionModule.api.updateUserPermissions(
                 type,
                 id,
                 updateUserPermissionsData.toRequest(),
@@ -923,7 +923,7 @@ internal class StreamVideoClient internal constructor(
         sessionId: String?,
     ): Result<ListRecordingsResponse> {
         return wrapAPICall {
-            connectionModule.api.listRecordings(type, id)
+            coordinatorConnectionModule.api.listRecordings(type, id)
         }
     }
 
@@ -939,7 +939,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 
         return wrapAPICall {
-            connectionModule.api.sendVideoReaction(callType, id, request)
+            coordinatorConnectionModule.api.sendVideoReaction(callType, id, request)
         }
     }
 
@@ -950,7 +950,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[getEdges] no params" }
 
         return wrapAPICall {
-            val result = connectionModule.api.getEdges()
+            val result = coordinatorConnectionModule.api.getEdges()
 
             result.edges.map { it.toEdge() }
         }
@@ -983,7 +983,7 @@ internal class StreamVideoClient internal constructor(
         return wrapAPICall {
             val url = "https://hint.stream-io-video.com/"
             val request: Request = Request.Builder().url(url).method("HEAD", null).build()
-            val call = connectionModule.okHttpClient.newCall(request)
+            val call = coordinatorConnectionModule.http.newCall(request)
             val response = suspendCancellableCoroutine { continuation ->
                 call.enqueue(object : Callback {
                     override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
@@ -1010,7 +1010,7 @@ internal class StreamVideoClient internal constructor(
 
     internal suspend fun accept(type: String, id: String): Result<AcceptCallResponse> {
         return wrapAPICall {
-            connectionModule.api.acceptCall(type, id)
+            coordinatorConnectionModule.api.acceptCall(type, id)
         }
     }
 
@@ -1020,19 +1020,19 @@ internal class StreamVideoClient internal constructor(
         reason: RejectReason? = null,
     ): Result<RejectCallResponse> {
         return wrapAPICall {
-            connectionModule.api.rejectCall(type, id, RejectCallRequest(reason?.alias))
+            coordinatorConnectionModule.api.rejectCall(type, id, RejectCallRequest(reason?.alias))
         }
     }
 
     internal suspend fun notify(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.api.getCall(type, id, notify = true)
+            coordinatorConnectionModule.api.getCall(type, id, notify = true)
         }
     }
 
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return wrapAPICall {
-            connectionModule.api.getCall(type, id, ring = true)
+            coordinatorConnectionModule.api.getCall(type, id, ring = true)
         }
     }
 }

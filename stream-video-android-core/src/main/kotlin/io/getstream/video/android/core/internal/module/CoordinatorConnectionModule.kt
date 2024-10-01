@@ -34,46 +34,36 @@ import org.openapitools.client.infrastructure.Serializer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.concurrent.TimeUnit
 
 /**
- * ConnectionModule provides several helpful attributes
- *
- * preferences: token & user settings
- * oldService
- * eventsApi
- * defaultApi
- *
- * coordinatorSocket
- *
- * createSFUConnectionModule
+ * ConnectionModule for the coordinator socket.
  */
-internal class ConnectionModule(
+internal class CoordinatorConnectionModule(
+    // Coordinator API
     context: Context,
     tokenProvider: TokenProvider,
     user: User,
-    private val scope: CoroutineScope,
-    internal val videoDomain: String,
-    internal val connectionTimeoutInMs: Long,
-    internal val loggingLevel: LoggingLevel = LoggingLevel(),
-    internal val apiKey: ApiKey,
-    internal val userToken: UserToken,
-    internal val lifecycle: Lifecycle,
-) {
+    override val scope: CoroutineScope,
+    // Common API
+    override val apiUrl: String,
+    override val wssUrl: String,
+    override val connectionTimeoutInMs: Long,
+    override val loggingLevel: LoggingLevel = LoggingLevel(),
+    override val apiKey: ApiKey,
+    override val userToken: UserToken,
+    override val lifecycle: Lifecycle,
+) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
     // Internals
     private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
     private val retrofit: Retrofit by lazy {
-        Retrofit.Builder().baseUrl("https://$videoDomain")
+        Retrofit.Builder().baseUrl(apiUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
-            .client(okHttpClient).build()
+            .client(http).build()
     }
     // API
-    /**
-     * The OkHttpClient used for all network requests
-     */
-    val okHttpClient: OkHttpClient = OkHttpClient.Builder().addInterceptor(HeadersInterceptor())
+    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(HeadersInterceptor())
         .addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = loggingLevel.httpLoggingLevel.level
@@ -83,50 +73,31 @@ internal class ConnectionModule(
         .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
-
-    val networkStateProvider: NetworkStateProvider by lazy {
+    override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
             connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
         )
     }
-    val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
-    val coordinatorSocketConnection: CoordinatorSocketConnection = CoordinatorSocketConnection(
+    override val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
+    override val socketConnection: CoordinatorSocketConnection = CoordinatorSocketConnection(
         apiKey = apiKey,
-        url = "wss://$videoDomain/video/connect",
+        url = wssUrl,
         user = user,
         token = userToken,
-        httpClient = okHttpClient,
+        httpClient = http,
         networkStateProvider = networkStateProvider,
         scope = scope,
         lifecycle = lifecycle,
         tokenProvider = tokenProvider,
     )
 
-    internal fun createSFUConnectionModule(
-        sfuUrl: String,
-        sessionId: String,
-        sfuToken: String,
-        getSubscriberSdp: suspend () -> String,
-        onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit,
-    ): SfuConnectionModule {
-        return SfuConnectionModule(
-            sfuUrl = sfuUrl,
-            sfuToken = sfuToken,
-            apiKey = apiKey,
-            loggingLevel = loggingLevel,
-            scope = scope,
-            networkStateProvider = networkStateProvider,
-            lifecycle = lifecycle,
-        )
+    override fun updateToken(token: UserToken) {
+        socketConnection.updateToken(token)
+        authInterceptor.token = token
     }
 
-    fun updateToken(newToken: String) {
-        coordinatorSocketConnection.updateToken(newToken)
-        authInterceptor.token = newToken
-    }
-
-    fun updateAuthType(authType: String) {
+    override fun updateAuthType(authType: String) {
         authInterceptor.authType = authType
     }
 }

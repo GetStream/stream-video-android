@@ -23,7 +23,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
-import io.getstream.video.android.core.internal.module.ConnectionModule
+import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
@@ -159,10 +159,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         AndroidThreeTen.init(context)
 
         // This connection module class exposes the connections to the various retrofit APIs.
-        val connectionModule = ConnectionModule(
+        val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
-            videoDomain = videoDomain,
+            apiUrl = "https:///$videoDomain",
+            wssUrl = "wss://$videoDomain/video/connect",
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
             user = user,
@@ -179,7 +180,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
-            api = connectionModule.api,
+            api = coordinatorConnectionModule.api,
             deviceTokenStorage = deviceTokenStorage,
         )
 
@@ -193,7 +194,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenProvider = tokenProvider,
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
-            connectionModule = connectionModule,
+            coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
             callServiceConfig = callServiceConfig
                 ?: callServiceConfig().copy(
@@ -209,10 +210,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         if (user.type == UserType.Guest) {
-            connectionModule.updateAuthType("anonymous")
+            coordinatorConnectionModule.updateAuthType("anonymous")
             client.setupGuestUser(user)
         } else if (user.type == UserType.Anonymous) {
-            connectionModule.updateAuthType("anonymous")
+            coordinatorConnectionModule.updateAuthType("anonymous")
         }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)

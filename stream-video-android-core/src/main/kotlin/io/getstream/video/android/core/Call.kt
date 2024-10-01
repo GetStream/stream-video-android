@@ -130,7 +130,7 @@ public class Call(
     val state = CallState(client, this, user, scope)
 
     val sessionId by lazy { clientImpl.sessionId }
-    private val network by lazy { clientImpl.connectionModule.networkStateProvider }
+    private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
     val camera by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.camera }
@@ -410,7 +410,7 @@ public class Call(
                 call = this,
                 sfuUrl = sfuUrl,
                 sfuToken = sfuToken,
-                connectionModule = (client as StreamVideoClient).connectionModule,
+                coordinatorConnectionModule = (client as StreamVideoClient).coordinatorConnectionModule,
                 remoteIceServers = iceServers,
                 onMigrationCompleted = {
                     state._connection.value = RealtimeConnection.Connected
@@ -1082,7 +1082,7 @@ public class Call(
     public class Debug(val call: Call) {
 
         public fun doFullReconnection() {
-            call.session?.sfuConnectionModule?.sfuSocket?.dis
+            //call.session?.sfuConnectionModule?.sfuSocket?.dis
         }
 
         public fun restartSubscriberIce() {

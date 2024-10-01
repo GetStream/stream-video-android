@@ -48,7 +48,7 @@ public class CallHealthMonitor(
 ) {
     private val logger by taggedLogger("Call:HealthMonitor")
 
-    private val network by lazy { call.clientImpl.connectionModule.networkStateProvider }
+    private val network by lazy { call.clientImpl.coordinatorConnectionModule.networkStateProvider }
 
     private val supervisorJob = SupervisorJob()
     private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)

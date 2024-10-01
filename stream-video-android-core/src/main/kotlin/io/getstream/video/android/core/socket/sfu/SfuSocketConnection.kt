@@ -21,9 +21,11 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SfuDataEvent
+import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.SfuParser
+import io.getstream.video.android.core.socket.common.SocketActions
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
@@ -35,15 +37,20 @@ import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import org.openapitools.client.models.ConnectedEvent
+import org.openapitools.client.models.VideoEvent
+import stream.video.sfu.event.JoinRequest
 
 class SfuSocketConnection(
     private val apiKey: ApiKey,
@@ -59,30 +66,21 @@ class SfuSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
-) : SocketListener<SfuDataEvent, JoinCallResponseEvent>() {
+) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
+    SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken> {
 
     companion object {
         internal const val DEFAULT_SFU_SOCKET_TIMEOUT: Long = 10000L
     }
 
     private val logger by taggedLogger("Video:SfuSocket")
-    private val errors: MutableSharedFlow<StreamWebSocketEvent.Error> = MutableSharedFlow(
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        replay = 1,
-        extraBufferCapacity = 100,
-    )
-    private val events: MutableSharedFlow<SfuDataEvent> = MutableSharedFlow(
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        replay = 1,
-        extraBufferCapacity = 100,
-    )
     private val tokenManager = TokenManagerImpl()
     private val internalSocket: SfuSocket = SfuSocket(
         wssUrl = url,
         apiKey = apiKey,
         tokenManager = tokenManager,
         socketFactory = SocketFactory(
-            parser = object : SfuParser { } ,
+            parser = object : SfuParser {},
             httpClient = httpClient,
         ),
         lifecycleObserver = StreamLifecycleObserver(scope, lifecycle),
@@ -91,9 +89,18 @@ class SfuSocketConnection(
     ).also {
         it.addListener(this)
     }
-
-    private val connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
     private val state: StateFlow<SfuSocketState> = internalSocket.state()
+    private val events: MutableSharedFlow<SfuDataEvent> = MutableSharedFlow(
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        replay = 1,
+        extraBufferCapacity = 100,
+    )
+    private val errors: MutableSharedFlow<StreamWebSocketEvent.Error> = MutableSharedFlow(
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        replay = 1,
+        extraBufferCapacity = 100,
+    )
+    private val connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
 
     // Initialization
     init {
@@ -141,11 +148,8 @@ class SfuSocketConnection(
         logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
     }
 
-    /**
-     * Ensure that the token is connected before sending events.
-     */
-    public fun whenConnected(
-        connectionTimeout: Long = DEFAULT_SFU_SOCKET_TIMEOUT,
+    override fun whenConnected(
+        connectionTimeout: Long,
         connected: suspend (connectionId: String) -> Unit,
     ) {
         scope.launch {
@@ -154,5 +158,33 @@ class SfuSocketConnection(
                 connected(it)
             }
         }
+    }
+
+    override suspend fun connect(user: User) {
+        internalSocket.connect(user)
+    }
+
+    override suspend fun disconnect() {
+        internalSocket.disconnect()
+    }
+
+    override fun updateToken(token: SfuToken) {
+        throw UnsupportedOperationException("Update token is not supported for SFU. Create a new socket instead.")
+    }
+
+    override suspend fun reconnect(user: User, force: Boolean) {
+        throw UnsupportedOperationException("Reconnect user is not supported for SFU, it has different reconnect strategy")
+    }
+
+    override fun state(): StateFlow<SfuSocketState> = state
+
+    override fun events(): MutableSharedFlow<SfuDataEvent> = events
+
+    override fun errors(): MutableSharedFlow<StreamWebSocketEvent.Error> = errors
+
+    override suspend fun sendEvent(event: SfuDataRequest): Boolean = internalSocket.sendEvent(event)
+
+    override fun connectionId(): Flow<String> = connectionId.mapNotNull {
+        it
     }
 }

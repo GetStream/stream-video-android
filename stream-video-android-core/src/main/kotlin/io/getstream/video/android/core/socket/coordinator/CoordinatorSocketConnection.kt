@@ -21,6 +21,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
+import io.getstream.video.android.core.socket.common.SocketActions
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
@@ -78,10 +79,8 @@ public open class CoordinatorSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
-) : SocketListener<VideoEvent, ConnectedEvent>() {
-    companion object {
-        internal const val DEFAULT_COORDINATOR_SOCKET_TIMEOUT: Long = 10000L
-    }
+) : SocketListener<VideoEvent, ConnectedEvent>(),
+    SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken> {
 
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
@@ -191,18 +190,11 @@ public open class CoordinatorSocketConnection(
     }
 
     // API
-    /**
-     * Connection ID as [Flow]
-     */
-    public fun connectionId(): Flow<String> = connectionId.mapNotNull {
+    override fun connectionId(): Flow<String> = connectionId.mapNotNull {
         it
     }
-
-    /**
-     * Ensure that the token is connected before sending events.
-     */
-    public fun whenConnected(
-        connectionTimeout: Long = DEFAULT_COORDINATOR_SOCKET_TIMEOUT,
+    override fun whenConnected(
+        connectionTimeout: Long,
         connected: suspend (connectionId: String) -> Unit,
     ) {
         scope.launch {
@@ -212,50 +204,25 @@ public open class CoordinatorSocketConnection(
             }
         }
     }
+    override fun state(): StateFlow<VideoSocketState> = state
 
-    /**
-     * State of the socket as [StateFlow]
-     */
-    public fun state(): StateFlow<VideoSocketState> = state
+    override fun events(): Flow<VideoEvent> = events
 
-    /**
-     * Socket events as [Flow]
-     */
-    public fun events(): Flow<VideoEvent> = events
+    override fun errors(): Flow<StreamWebSocketEvent.Error> = errors
 
-    /**
-     * Socket errors as [Flow]
-     */
-    public fun errors(): Flow<StreamWebSocketEvent.Error> = errors
+    override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
-    /**
-     * Send event to the socket.
-     */
-    public suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
-
-    /**
-     * Connect the user.
-     */
-    public suspend fun connect(user: User) {
+    override suspend fun connect(user: User) {
         internalSocket.connectUser(user, user.isAnonymous())
     }
 
-    /**
-     * Reconnect the user to the socket.
-     */
-    public suspend fun reconnect(user: User, force: Boolean = false) {
+    override suspend fun reconnect(user: User, force: Boolean) {
         internalSocket.reconnectUser(user, user.isAnonymous(), force)
     }
 
-    /**
-     * Disconnect the socket.
-     */
-    public suspend fun disconnect() = internalSocket.disconnect()
+    override suspend fun disconnect() = internalSocket.disconnect()
 
-    /**
-     * Update the token from the outside.
-     */
-    public fun updateToken(token: UserToken) {
+    override fun updateToken(token: UserToken) {
         tokenManager.updateToken(token)
     }
 }
