@@ -206,7 +206,7 @@ dependencies {
     implementation(project(":stream-video-android-ui-compose"))
     implementation(project(":stream-video-android-ui-xml"))
     implementation(project(":stream-video-android-filters-video"))
-    implementation(project(":stream-video-android-noise-cancellation"))
+    // TODO implementation(project(":stream-video-android-noise-cancellation"))
     compileOnly(project(":stream-video-android-previewdata"))
 
     // Stream Chat SDK
