@@ -19,19 +19,18 @@ package io.getstream.video.android.noise.cancellation
 import android.content.Context
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.call.audio.AudioProcessor
+import java.io.File
+import java.io.FileOutputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.webrtc.AudioProcessingFactory
 import org.webrtc.ExternalAudioProcessingFactory
-import java.io.File
-import java.io.FileOutputStream
+import org.webrtc.ManagedAudioProcessingFactory
 
 public class NoiseCancellation(
     private val context: Context,
     private val model: Model = Model.FullBand,
-) : AudioProcessingFactory, AudioProcessor {
+) : ManagedAudioProcessingFactory {
 
     public enum class Model(
         internal val filename: String,
@@ -60,14 +59,16 @@ public class NoiseCancellation(
         return delegate.createNative()
     }
 
-    override var isEnabled: Boolean
-        get() = isEnabledNative()
-        set(value) {
-            setEnabledNative(value)
-        }
-
     override fun destroyNative() {
         delegate.destroyNative()
+    }
+
+    override fun isEnabled(): Boolean {
+        return isEnabledNative()
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        setEnabledNative(enabled)
     }
 
     private external fun initModelNative(path: String)

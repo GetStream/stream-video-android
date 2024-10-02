@@ -138,13 +138,7 @@ dependencies {
     // webrtc
 //    api(libs.stream.webrtc)
 //    api(libs.stream.webrtc.ui)
-//    api(files("libs/stream_libwebrtc_m118.3-63315da.aar"))
-//    api(files("libs/stream_libwebrtc_m118.4-nc.2-16e7b88.aar"))
-//    api(files("libs/stream_libwebrtc_m118.4-nc.3-806562f.aar"))
-//    api(files("libs/stream_libwebrtc_m118.4-nc.7-2e02164.aar"))
-//    api(files("libs/stream_libwebrtc_m118.4-nc.8-91de7c2.aar"))
-//    api(files("libs/stream_libwebrtc_m118.4-nc.9-5b77b04.aar"))
-    api(files("../.webrtc/stream_libwebrtc_m118.4-nc.11-d53404a.aar"))
+    api(files("../.webrtc/stream_libwebrtc_m118.6.aar"))
     api(libs.stream.webrtc.ui) {
         exclude(group = "io.getstream", module = "stream-webrtc-android")
     }

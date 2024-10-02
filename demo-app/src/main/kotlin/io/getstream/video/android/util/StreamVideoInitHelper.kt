@@ -208,7 +208,7 @@ object StreamVideoInitHelper {
                 authData.token
             },
             appName = "Stream Video Demo App",
-            audioProcessor = NoiseCancellation(context),
+            audioProcessing = NoiseCancellation(context),
         ).build()
     }
 }

@@ -23,7 +23,6 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
-import io.getstream.video.android.core.call.audio.AudioProcessor
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.module.ConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -39,10 +38,10 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
+import java.net.ConnectException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
-import java.net.ConnectException
+import org.webrtc.ManagedAudioProcessingFactory
 
 /**
  * The [StreamVideoBuilder] is used to create a new instance of the [StreamVideo] client. This is the
@@ -79,7 +78,7 @@ import java.net.ConnectException
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
- * @property audioProcessor The audio processor used for custom modifications to audio data within WebRTC.
+ * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
  *
  * @see build
  * @see ClientState.connection
@@ -106,7 +105,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
-    private val audioProcessor: AudioProcessor? = null,
+    private val audioProcessing: ManagedAudioProcessingFactory? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = CoroutineScope(DispatcherProvider.IO)
@@ -205,7 +204,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
             appName = appName,
-            audioProcessor = audioProcessor,
+            audioProcessing = audioProcessing,
         )
 
         if (user.type == UserType.Guest) {

@@ -25,7 +25,6 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.call.audio.AudioProcessor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -65,6 +64,9 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import java.net.ConnectException
+import java.util.*
+import kotlin.coroutines.Continuation
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -128,10 +130,8 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
+import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
-import java.net.ConnectException
-import java.util.*
-import kotlin.coroutines.Continuation
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -157,7 +157,7 @@ internal class StreamVideoImpl internal constructor(
     internal val crashOnMissingPermission: Boolean = false,
     internal val audioUsage: Int = defaultAudioUsage,
     internal val appName: String? = null,
-    internal val audioProcessor: AudioProcessor? = null,
+    internal val audioProcessing: ManagedAudioProcessingFactory? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -184,7 +184,7 @@ internal class StreamVideoImpl internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage, audioProcessor)
+    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage, audioProcessing)
 
     public override val userId = user.id
 
