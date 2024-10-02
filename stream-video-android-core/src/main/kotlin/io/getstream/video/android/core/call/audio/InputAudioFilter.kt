@@ -22,8 +22,8 @@ import java.nio.ByteBuffer
     message = "Use InputAudioFilter instead",
     replaceWith = ReplaceWith(
         expression = "InputAudioFilter",
-        imports = ["io.getstream.video.android.core.call.audio.InputAudioFilter"]
-    )
+        imports = ["io.getstream.video.android.core.call.audio.InputAudioFilter"],
+    ),
 )
 public fun interface AudioFilter : InputAudioFilter
 

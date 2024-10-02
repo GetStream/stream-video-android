@@ -30,6 +30,7 @@ import org.webrtc.AudioTrack
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.Logging
+import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
@@ -41,7 +42,6 @@ import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import java.nio.ByteBuffer
-import org.webrtc.ManagedAudioProcessingFactory
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.

@@ -38,10 +38,10 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
-import java.net.ConnectException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.webrtc.ManagedAudioProcessingFactory
+import java.net.ConnectException
 
 /**
  * The [StreamVideoBuilder] is used to create a new instance of the [StreamVideo] client. This is the

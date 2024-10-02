@@ -64,9 +64,6 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
-import java.net.ConnectException
-import java.util.*
-import kotlin.coroutines.Continuation
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -132,6 +129,9 @@ import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
 import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
+import java.net.ConnectException
+import java.util.*
+import kotlin.coroutines.Continuation
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -184,7 +184,8 @@ internal class StreamVideoImpl internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage, audioProcessing)
+    public var peerConnectionFactory =
+        StreamPeerConnectionFactory(context, audioUsage, audioProcessing)
 
     public override val userId = user.id
 
