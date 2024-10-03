@@ -139,9 +139,9 @@ class SpeakerManager(
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
         microphoneManager.setup()
         val devices = devices.value
-        val selectedBeforeSpeaker = selectedDevice.value
         if (enable) {
             val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
+            selectedBeforeSpeaker = selectedDevice.value
             _speakerPhoneEnabled.value = true
             microphoneManager.select(speaker)
         } else {
@@ -404,7 +404,6 @@ class MicrophoneManager(
         enforceSetup {
             if (enabled) {
                 enable(fromUser = fromUser)
-                mediaManager.speaker.setEnabled(enabled = false, fromUser = false)
             } else {
                 disable(fromUser = fromUser)
             }

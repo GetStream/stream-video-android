@@ -900,10 +900,20 @@ public class Call(
 
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
         // Speaker
-        speaker.setEnabled(
-            enabled = callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
-                callSettings.audio.speakerDefaultOn,
-        )
+        if (speaker.status.value is DeviceStatus.NotSelected) {
+            val enableSpeaker = if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
+                // if camera is enabled then enable speaker. Eventually this should
+                // be a new audio.defaultDevice setting returned from backend
+                true
+            } else {
+                callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
+                    callSettings.audio.speakerDefaultOn
+            }
+
+            speaker.setEnabled(
+                enabled = enableSpeaker,
+            )
+        }
 
         // Camera
         if (camera.status.value is DeviceStatus.NotSelected) {
