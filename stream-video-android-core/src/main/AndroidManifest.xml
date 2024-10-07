@@ -93,7 +93,7 @@
 
 
         <service android:name=".notifications.internal.service.CallService"
-            android:foregroundServiceType="shortService|phoneCall"/>
+            android:foregroundServiceType="shortService|camera|microphone"/>
 
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>
