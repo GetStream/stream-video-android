@@ -239,14 +239,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // Installs Stream Video instance
         StreamVideo.install(client)
 
-        // Needs to be started after the client is initialised because the VideoPushDelegate
-        // is accessing the StreamVideo instance
-        scope.launch {
-            if (user.type == UserType.Authenticated) {
-                client.registerPushDevice()
-            }
-        }
-
         return client
     }
 }

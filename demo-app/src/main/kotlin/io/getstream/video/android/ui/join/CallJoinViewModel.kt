@@ -20,23 +20,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.getstream.android.push.PushProvider
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallCid
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.util.NetworkMonitor
 import io.getstream.video.android.util.StreamVideoInitHelper
-import kotlinx.coroutines.delay
+import io.getstream.video.android.util.fcmToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -49,7 +51,7 @@ class CallJoinViewModel @Inject constructor(
     networkMonitor: NetworkMonitor,
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
-    val isLoggedOut = dataStore.user.map { it == null }
+    val isLoggedOut = MutableStateFlow(false)
     var autoLogInAfterLogOut = true
     val isNetworkAvailable = networkMonitor.isNetworkAvailable
 
@@ -101,12 +103,26 @@ class CallJoinViewModel @Inject constructor(
 
     fun logOut() {
         viewModelScope.launch {
-            googleSignInClient.signOut()
-            dataStore.clear()
-            StreamVideo.instance().logOut()
             ChatClient.instance().disconnect(true).enqueue()
-            delay(200)
+            dataStore.clear() // Demo App DataStore
+            googleSignInClient.signOut()
+
+            StreamVideo.instanceOrNull()?.let { streamVideo ->
+                fcmToken?.let { fcmToken ->
+                    streamVideo.deleteDevice(
+                        Device(
+                            id = fcmToken,
+                            pushProvider = PushProvider.FIREBASE.key,
+                            pushProviderName = "firebase",
+                        ),
+                    )
+                }
+                streamVideo.logOut()
+            }
+
             StreamVideo.removeClient()
+
+            isLoggedOut.value = true
         }
     }
 }
