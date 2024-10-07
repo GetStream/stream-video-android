@@ -136,12 +136,8 @@ baselineProfile {
 
 dependencies {
     // webrtc
-//    api(libs.stream.webrtc)
-//    api(libs.stream.webrtc.ui)
-    api(files("libs/stream_libwebrtc_m118.6.aar"))
-    api(libs.stream.webrtc.ui) {
-        exclude(group = "io.getstream", module = "stream-webrtc-android")
-    }
+    api(libs.stream.webrtc)
+    api(libs.stream.webrtc.ui)
 
     implementation(libs.audioswitch)
 
