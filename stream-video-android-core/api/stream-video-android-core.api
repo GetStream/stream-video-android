@@ -4239,7 +4239,8 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 }
 
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfigKt {
-	public static final fun callServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static final fun audioCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static final fun defaultCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamAudioCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamGuestCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;

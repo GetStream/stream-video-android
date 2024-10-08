@@ -89,6 +89,16 @@ public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
     )
 }
 
+public fun audioCallServiceConfig(): CallServiceConfig {
+    return CallServiceConfig(
+        runCallServiceInForeground = true,
+        callServicePerType = mapOf(
+            Pair(ANY_MARKER, CallService::class.java),
+            Pair("audio_call", AudioCallService::class.java),
+        ),
+    )
+}
+
 // Internal
 internal fun resolveServiceClass(callId: StreamCallId, config: CallServiceConfig): Class<*> {
     val callType = callId.type

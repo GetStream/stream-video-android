@@ -41,8 +41,6 @@
 
     <!-- Optional, if incoming / outgoing calls feature is used -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
 
     <!-- If the app is only livestream  host -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
@@ -91,7 +89,6 @@
             </intent-filter>
         </receiver>
 
-
         <service android:name=".notifications.internal.service.CallService"
             android:foregroundServiceType="shortService|camera|microphone"/>
 
@@ -111,6 +108,11 @@
         <service
             android:name=".notifications.internal.service.LivestreamViewerService"
             android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <service
+            android:name=".notifications.internal.service.AudioCallService"
+            android:foregroundServiceType="microphone"
             android:exported="false" />
     </application>
 </manifest>
