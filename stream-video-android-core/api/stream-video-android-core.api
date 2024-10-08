@@ -62,6 +62,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun sendReaction (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/InputAudioFilter;)V
+	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
 	public final fun startHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1042,6 +1043,7 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun makePeerConnection (Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;I)Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnectionFactory;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;IILjava/lang/Object;)Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;Ljava/lang/String;)Lorg/webrtc/VideoTrack;
+	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setAudioRecordDataCallback (Lkotlin/jvm/functions/Function4;)V
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
 	public final fun toggleAudioProcessing ()Z
@@ -4572,6 +4574,13 @@ public final class io/getstream/video/android/core/utils/MinimalSdpParser {
 	public final fun parseMLine (ILjava/lang/String;)Lio/getstream/video/android/core/utils/MediaStream;
 	public final fun parseRtpMap (ILjava/lang/String;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
 	public final fun setSdp (Ljava/lang/String;)V
+}
+
+public final class io/getstream/video/android/core/utils/NoiseCancellationUtilsKt {
+	public static final fun isAutoOn (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
+	public static final fun isAvailable (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
+	public static final fun isDisabled (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
+	public static final fun isEnabled (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
 }
 
 public final class io/getstream/video/android/core/utils/RtpMapAttribute {

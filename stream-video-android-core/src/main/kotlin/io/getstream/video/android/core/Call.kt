@@ -1072,6 +1072,10 @@ public class Call(
         return clientImpl.isAudioProcessingEnabled()
     }
 
+    fun setAudioProcessingEnabled(enabled: Boolean) {
+        return clientImpl.setAudioProcessingEnabled(enabled)
+    }
+
     fun toggleAudioProcessing(): Boolean {
         return clientImpl.toggleAudioProcessing()
     }

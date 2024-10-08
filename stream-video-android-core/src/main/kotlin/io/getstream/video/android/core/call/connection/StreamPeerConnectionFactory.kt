@@ -369,6 +369,13 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
+     * Sets the audio processing on or off.
+     */
+    public fun setAudioProcessingEnabled(enabled: Boolean) {
+        audioProcessing?.isEnabled = enabled
+    }
+
+    /**
      * Toggles the audio processing on and off.
      */
     public fun toggleAudioProcessing(): Boolean {

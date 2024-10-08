@@ -68,6 +68,7 @@ internal fun SettingsMenu(
     call: Call,
     selectedVideoFilter: Int,
     showDebugOptions: Boolean,
+    noiseCancellationFeatureEnabled: Boolean,
     noiseCancellationEnabled: Boolean,
     onDismissed: () -> Unit,
     onSelectVideoFilter: (Int) -> Unit,
@@ -208,6 +209,7 @@ internal fun SettingsMenu(
             },
             items = defaultStreamMenu(
                 showDebugOptions = showDebugOptions,
+                noiseCancellationFeatureEnabled = noiseCancellationFeatureEnabled,
                 noiseCancellationEnabled = noiseCancellationEnabled,
                 codecList = codecInfos,
                 availableDevices = availableDevices,

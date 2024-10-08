@@ -47,6 +47,7 @@ import io.getstream.video.android.ui.menu.base.SubMenuItem
  */
 fun defaultStreamMenu(
     showDebugOptions: Boolean = false,
+    noiseCancellationFeatureEnabled: Boolean = false,
     noiseCancellationEnabled: Boolean = false,
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
@@ -111,14 +112,16 @@ fun defaultStreamMenu(
             action = onToggleScreenShare,
         ),
     )
-    add(
-        ActionMenuItem(
-            title = "Noise cancellation",
-            icon = Icons.Default.SpatialAudioOff,
-            highlight = noiseCancellationEnabled,
-            action = onNoiseCancellation,
-        ),
-    )
+    if (noiseCancellationFeatureEnabled) {
+        add(
+            ActionMenuItem(
+                title = "Noise cancellation",
+                icon = Icons.Default.SpatialAudioOff,
+                highlight = noiseCancellationEnabled,
+                action = onNoiseCancellation,
+            ),
+        )
+    }
     if (showDebugOptions) {
         add(
             SubMenuItem(
