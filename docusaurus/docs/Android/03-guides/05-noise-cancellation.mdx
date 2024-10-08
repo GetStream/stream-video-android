@@ -3,28 +3,21 @@ title: Noise Cancellation
 description: How to implement noise cancellation in Stream Video Android SDK
 ---
 
-Noise Cancellation capabilities of our Android Video SDK can be enabled by installing our NoiseCancellation package. Under the hood, this package uses the technology developed by krisp.ai.
+Noise Cancellation capabilities of our [Android Video SDK](https://github.com/GetStream/stream-video-android) can be enabled by installing our [NoiseCancellation](https://central.sonatype.com/artifact/io.getstream/stream-video-android-noise-cancellation/overview) package. Under the hood, this package uses the technology developed by [krisp.ai](https://krisp.ai/).
 
 ## Installation
 
-### Add the SDK to your project
+### Add the library to your project
 
-To add the Stream Video Noise Cancellation SDK, open your app's `build.gradle.kts` file and add the following dependency:
+To add the Stream Video Noise Cancellation library, open your app's `build.gradle.kts` file and add the following dependency:
+
 ```kotlin
 dependencies {
-  implementation(libs.stream.video.android.noise.cancellation)
+    implementation("io.getstream:stream-video-android-noise-cancellation:1.0.1")
 }
 ```
 
-Make sure you have the correct version specified in your `libs.versions.toml` file:
-
-```toml
-[versions]
-streamNoiseCancellation = "1.0.1"
-
-[libraries]
-stream-video-android-noise-cancellation = { module = "io.getstream:stream-video-android-noise-cancellation", version.ref = "streamNoiseCancellation" }
-```
+Make sure to replace `1.0.1` with the latest version of the noise cancellation library.
 
 ## Integration
 
