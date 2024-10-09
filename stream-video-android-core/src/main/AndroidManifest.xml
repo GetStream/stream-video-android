@@ -86,7 +86,7 @@
         </receiver>
 
         <service android:name=".notifications.internal.service.CallService"
-            android:foregroundServiceType="shortService|camera|microphone"/>
+            android:foregroundServiceType="shortService|phoneCall"/>
 
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>

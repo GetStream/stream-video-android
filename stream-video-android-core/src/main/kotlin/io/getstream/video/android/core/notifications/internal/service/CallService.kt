@@ -67,8 +67,7 @@ internal open class CallService : Service() {
     internal open val logger by taggedLogger("CallService")
 
     // Service type
-    open val serviceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or
-        ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+    open val serviceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
 
     // Data
     private var callId: StreamCallId? = null
