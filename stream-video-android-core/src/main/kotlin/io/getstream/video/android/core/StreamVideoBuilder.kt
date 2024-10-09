@@ -42,7 +42,7 @@ import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
+import org.webrtc.ManagedAudioProcessingFactory
 import java.net.ConnectException
 
 /**
@@ -81,6 +81,7 @@ import java.net.ConnectException
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
+ * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
  *
  * @see build
  * @see ClientState.connection
@@ -107,6 +108,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
+    private val audioProcessing: ManagedAudioProcessingFactory? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = CoroutineScope(DispatcherProvider.IO)
@@ -205,6 +207,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
             appName = appName,
+            audioProcessing = audioProcessing,
         )
 
         if (user.type == UserType.Guest) {

@@ -44,6 +44,7 @@ tink = "1.9.0"
 turbine = "0.13.0"
 
 streamWebRTC = "1.2.1"
+streamNoiseCancellation = "1.0.1"
 streamResult = "1.2.0"
 streamChat = "6.0.13"
 streamLog = "1.1.4"
@@ -120,6 +121,7 @@ landscapist-transformation = { group = "com.github.skydoves", name = "landscapis
 
 accompanist-permission = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
+stream-video-android-noise-cancellation = { module = "io.getstream:stream-video-android-noise-cancellation", version.ref = "streamNoiseCancellation" }
 telephoto = { group = "me.saket.telephoto", name = "zoomable", version.ref = "telephoto"  }
 
 audioswitch = { group = "com.twilio", name = "audioswitch", version.ref = "audioswitch"}
