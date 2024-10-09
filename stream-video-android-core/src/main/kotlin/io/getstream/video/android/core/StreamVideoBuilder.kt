@@ -74,6 +74,7 @@ import java.net.ConnectException
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
+ * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig].
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
