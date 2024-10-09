@@ -44,7 +44,8 @@ public data class CallServiceConfig(
 )
 
 /**
- * Returns a default call foreground service configuration.
+ * Returns the default call foreground service configuration.
+ * Uses: `FOREGROUND_SERVICE_TYPE_PHONE_CALL`.
  */
 public fun callServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
