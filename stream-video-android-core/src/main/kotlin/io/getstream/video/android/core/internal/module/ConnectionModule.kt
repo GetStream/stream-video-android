@@ -18,6 +18,7 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.os.Build
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -67,7 +68,7 @@ internal class ConnectionModule(
     private val authInterceptor: CoordinatorAuthInterceptor by lazy {
         CoordinatorAuthInterceptor(apiKey, userToken)
     }
-    private val headersInterceptor: HeadersInterceptor by lazy { HeadersInterceptor() }
+    private val headersInterceptor: HeadersInterceptor by lazy { HeadersInterceptor(context) }
     val okHttpClient: OkHttpClient by lazy { buildOkHttpClient() }
     val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
@@ -288,12 +289,57 @@ internal class CoordinatorAuthInterceptor(
     }
 }
 
-internal class HeadersInterceptor : Interceptor {
+internal class HeadersInterceptor(
+    context: Context,
+) : Interceptor {
+    private val userAgent by lazy { buildUserAgent(context) }
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
             .newBuilder()
+            .addHeader("User-Agent", userAgent)
             .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
             .build()
         return chain.proceed(request)
+    }
+
+    private fun buildUserAgent(context: Context): String {
+        with(context.packageManager) {
+            val versionName = runCatching {
+                getPackageInfo(context.packageName, 0).versionName
+            }.getOrNull() ?: "nameNotFound"
+            val versionCode = runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    getPackageInfo(context.packageName, 0).longVersionCode.toString()
+                } else {
+                    getPackageInfo(context.packageName, 0).versionCode.toString()
+                }
+            }.getOrNull() ?: "versionCodeNotFound"
+
+            val applicationInfo = context.applicationInfo
+            val stringId = applicationInfo.labelRes
+            val appName =
+                if (stringId == 0) {
+                    applicationInfo.nonLocalizedLabel.toString()
+                } else {
+                    context.getString(stringId)
+                }
+
+            val manufacturer = Build.MANUFACTURER
+            val model = Build.MODEL
+            val version = Build.VERSION.SDK_INT
+            val versionRelease = Build.VERSION.RELEASE
+
+            val installerName = runCatching {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    getInstallSourceInfo(context.packageName).installingPackageName
+                } else {
+                    getInstallerPackageName(context.packageName)
+                }
+            }.getOrNull() ?: "StandAloneInstall"
+
+            return "$appName / $versionName($versionCode); $installerName; ($manufacturer; " +
+                "$model; SDK $version; Android $versionRelease)"
+        }
     }
 }
