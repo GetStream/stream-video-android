@@ -94,6 +94,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
+import io.getstream.video.android.core.utils.isEnabled
 import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
 import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -458,10 +459,17 @@ fun CallScreen(
         }
 
         if (isShowingSettingMenu) {
+            var isNoiseCancellationEnabled by remember {
+                mutableStateOf(call.isAudioProcessingEnabled())
+            }
+            val settings by call.state.settings.collectAsStateWithLifecycle()
+            val noiseCancellationFeatureEnabled = settings?.audio?.noiseCancellation?.isEnabled == true
             SettingsMenu(
                 call = call,
                 selectedVideoFilter = selectedVideoFilter,
                 showDebugOptions = showDebugOptions,
+                noiseCancellationFeatureEnabled = noiseCancellationFeatureEnabled,
+                noiseCancellationEnabled = isNoiseCancellationEnabled,
                 onDismissed = { isShowingSettingMenu = false },
                 onSelectVideoFilter = { filterIndex ->
                     selectedVideoFilter = filterIndex
@@ -481,6 +489,9 @@ fun CallScreen(
                 onShowFeedback = {
                     isShowingSettingMenu = false
                     isShowingFeedbackDialog = true
+                },
+                onNoiseCancellation = {
+                    isNoiseCancellationEnabled = call.toggleAudioProcessing()
                 },
             ) {
                 isShowingStats = true

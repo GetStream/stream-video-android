@@ -26,37 +26,32 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- Call service permission -->
+    <!-- Call foreground service permission -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-    <!-- Optional, if incoming / outgoing calls feature is used -->
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
+    <!-- Optional, if incoming & outgoing calls are used -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
-    <!-- If the app is only livestream  host -->
+    <!-- Use in a livestream host scenario -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
 
-    <!-- If the app is only livestream viewer/guest type -->
+    <!-- Use in a livestream viewer/guest scenario -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
-    <!-- If the calls support screensharing -->
+    <!-- Required if calls support screensharing -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
 
-
     <application>
-
         <provider
             android:name="io.getstream.android.push.delegate.PushDelegateProvider"
             android:authorities="${applicationId}.io.getstream.android.push"
@@ -91,7 +86,6 @@
             </intent-filter>
         </receiver>
 
-
         <service android:name=".notifications.internal.service.CallService"
             android:foregroundServiceType="shortService|phoneCall"/>
 
@@ -111,6 +105,11 @@
         <service
             android:name=".notifications.internal.service.LivestreamViewerService"
             android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <service
+            android:name=".notifications.internal.service.AudioCallService"
+            android:foregroundServiceType="microphone"
             android:exported="false" />
     </application>
 </manifest>

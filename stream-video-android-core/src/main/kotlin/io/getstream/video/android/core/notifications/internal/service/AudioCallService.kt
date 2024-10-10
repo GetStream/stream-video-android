@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.call.audio
+package io.getstream.video.android.core.notifications.internal.service
 
-import java.nio.ByteBuffer
+import android.content.pm.ServiceInfo
+import io.getstream.log.TaggedLogger
+import io.getstream.log.taggedLogger
 
-interface AudioFilter {
-    /**
-     * Invoked after an audio sample is recorded. Can be used to manipulate
-     * the ByteBuffer before it's fed into WebRTC. Currently the audio in the
-     * ByteBuffer is always PCM 16bit and the buffer sample size is ~10ms.
-     *
-     * @param audioFormat format in android.media.AudioFormat
-     */
-    fun applyFilter(audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer)
+internal class AudioCallService : CallService() {
+    override val logger: TaggedLogger by taggedLogger("AudioCallService")
+    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
 }

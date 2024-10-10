@@ -42,7 +42,7 @@ import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
+import org.webrtc.ManagedAudioProcessingFactory
 import java.net.ConnectException
 
 /**
@@ -74,12 +74,14 @@ import java.net.ConnectException
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
+ * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig].
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
+ * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
  *
  * @see build
  * @see ClientState.connection
@@ -106,6 +108,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
+    private val audioProcessing: ManagedAudioProcessingFactory? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = CoroutineScope(DispatcherProvider.IO)
@@ -204,6 +207,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             crashOnMissingPermission = crashOnMissingPermission,
             audioUsage = audioUsage,
             appName = appName,
+            audioProcessing = audioProcessing,
         )
 
         if (user.type == UserType.Guest) {

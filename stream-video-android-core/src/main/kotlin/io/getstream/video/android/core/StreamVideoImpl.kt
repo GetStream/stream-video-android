@@ -127,6 +127,7 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.UserRequest
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.WSCallEvent
+import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
 import java.net.ConnectException
 import java.util.*
@@ -156,6 +157,7 @@ internal class StreamVideoImpl internal constructor(
     internal val crashOnMissingPermission: Boolean = false,
     internal val audioUsage: Int = defaultAudioUsage,
     internal val appName: String? = null,
+    internal val audioProcessing: ManagedAudioProcessingFactory? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -182,7 +184,9 @@ internal class StreamVideoImpl internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory = StreamPeerConnectionFactory(context, audioUsage)
+    public var peerConnectionFactory =
+        StreamPeerConnectionFactory(context, audioUsage, audioProcessing)
+
     public override val userId = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
@@ -1105,6 +1109,18 @@ internal class StreamVideoImpl internal constructor(
         return wrapAPICall {
             connectionModule.api.getCall(type, id, ring = true)
         }
+    }
+
+    internal fun isAudioProcessingEnabled(): Boolean {
+        return peerConnectionFactory.isAudioProcessingEnabled()
+    }
+
+    internal fun setAudioProcessingEnabled(enabled: Boolean) {
+        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
+    }
+
+    internal fun toggleAudioProcessing(): Boolean {
+        return peerConnectionFactory.toggleAudioProcessing()
     }
 }
 
