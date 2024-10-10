@@ -32,7 +32,7 @@ coil = "2.6.0"
 landscapist = "2.3.6"
 accompanist = "0.34.0"
 telephoto = "0.3.0"
-audioswitch = "1.1.8"
+audioswitch = "1.2.0"
 libyuv = "0.30.0"
 
 wire = "4.7.0"
