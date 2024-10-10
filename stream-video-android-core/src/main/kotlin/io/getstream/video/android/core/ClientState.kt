@@ -23,8 +23,11 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
@@ -103,6 +106,8 @@ class ClientState(client: StreamVideo) {
         // mark connected
         if (event is ConnectedEvent) {
             _connection.value = ConnectionState.Connected
+
+            registerPushDevice()
         } else if (event is CallCreatedEvent) {
             // what's the right thing to do here?
             // if it's ringing we add it
@@ -115,6 +120,14 @@ class ClientState(client: StreamVideo) {
             val (type, id) = event.callCid.split(":")
             val call = clientImpl.call(type, id)
             _ringingCall.value = call
+        }
+    }
+
+    private fun registerPushDevice() {
+        with(clientImpl) {
+            scope.launch(CoroutineName("ClientState#registerPushDevice")) {
+                if (user.type == UserType.Authenticated) registerPushDevice()
+            }
         }
     }
 

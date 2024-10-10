@@ -51,7 +51,7 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.call.audio.AudioFilter
+import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
@@ -68,9 +68,12 @@ internal fun SettingsMenu(
     call: Call,
     selectedVideoFilter: Int,
     showDebugOptions: Boolean,
+    noiseCancellationFeatureEnabled: Boolean,
+    noiseCancellationEnabled: Boolean,
     onDismissed: () -> Unit,
     onSelectVideoFilter: (Int) -> Unit,
     onShowFeedback: () -> Unit,
+    onNoiseCancellation: () -> Unit,
     onShowCallStats: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -104,7 +107,7 @@ internal fun SettingsMenu(
 
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
-            call.audioFilter = object : AudioFilter {
+            call.audioFilter = object : InputAudioFilter {
                 override fun applyFilter(
                     audioFormat: Int,
                     channelCount: Int,
@@ -206,6 +209,8 @@ internal fun SettingsMenu(
             },
             items = defaultStreamMenu(
                 showDebugOptions = showDebugOptions,
+                noiseCancellationFeatureEnabled = noiseCancellationFeatureEnabled,
+                noiseCancellationEnabled = noiseCancellationEnabled,
                 codecList = codecInfos,
                 availableDevices = availableDevices,
                 onDeviceSelected = {
@@ -223,6 +228,7 @@ internal fun SettingsMenu(
                 onToggleAudioFilterClick = onToggleAudioFilterClick,
                 onSwitchSfuClick = onSwitchSfuClick,
                 onShowCallStats = onShowCallStats,
+                onNoiseCancellation = onNoiseCancellation,
                 isScreenShareEnabled = isScreenSharing,
                 loadRecordings = onLoadRecordings,
             ),
@@ -284,6 +290,7 @@ private fun SettingsMenuPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
             ),
         )

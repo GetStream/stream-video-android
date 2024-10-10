@@ -48,7 +48,7 @@ internal class StreamNotificationManager private constructor(
     private val context: Context,
     private val scope: CoroutineScope,
     private val notificationConfig: NotificationConfig,
-    private val api: ProductvideoApi,
+    private var api: ProductvideoApi,
     internal val deviceTokenStorage: DeviceTokenStorage,
     private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
@@ -123,6 +123,7 @@ internal class StreamNotificationManager private constructor(
             pushProvider = this.pushProvider.key,
             pushProviderName = this.providerName ?: "",
         )
+
     private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
         when (pushProvider) {
             PushProvider.FIREBASE -> Result.Success(CreateDeviceRequest.PushProvider.Firebase)
@@ -138,10 +139,12 @@ internal class StreamNotificationManager private constructor(
         }
 
     internal companion object {
+
         private val logger: TaggedLogger by taggedLogger("StreamVideo:Notifications")
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var internalStreamNotificationManager: StreamNotificationManager
+
         internal fun install(
             context: Context,
             scope: CoroutineScope,
@@ -151,10 +154,7 @@ internal class StreamNotificationManager private constructor(
         ): StreamNotificationManager {
             synchronized(this) {
                 if (Companion::internalStreamNotificationManager.isInitialized) {
-                    logger.e {
-                        "The $internalStreamNotificationManager is already installed but you've " +
-                            "tried to install a new one."
-                    }
+                    internalStreamNotificationManager.api = api
                 } else {
                     val application = context.applicationContext as? Application
                     val updatedNotificationConfig =
