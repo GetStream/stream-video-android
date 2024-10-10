@@ -18,8 +18,6 @@ package io.getstream.video.android.core.audio
 
 import android.content.Context
 import android.media.AudioManager
-import android.os.Handler
-import android.os.Looper
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
@@ -51,23 +49,17 @@ public class AudioSwitchHandler(
 
     private var audioSwitch: AudioSwitch? = null
 
-    // AudioSwitch is not threadsafe, so all calls should be done on the main thread.
-    private val handler = Handler(Looper.getMainLooper())
-
     override fun start() {
         logger.d { "[start] audioSwitch: $audioSwitch" }
-        if (audioSwitch == null) {
-            handler.removeCallbacksAndMessages(null)
+        synchronized(this) {
+            if (audioSwitch == null) {
+                val devices = mutableListOf(
+                    AudioDevice.WiredHeadset::class.java,
+                    AudioDevice.BluetoothHeadset::class.java,
+                    AudioDevice.Earpiece::class.java,
+                    AudioDevice.Speakerphone::class.java,
+                )
 
-            val devices = mutableListOf(
-                AudioDevice.WiredHeadset::class.java,
-                AudioDevice.BluetoothHeadset::class.java,
-            )
-
-            devices.add(AudioDevice.Earpiece::class.java)
-            devices.add(AudioDevice.Speakerphone::class.java)
-
-            handler.post {
                 val switch = AudioSwitch(
                     context = context,
                     audioFocusChangeListener = onAudioFocusChangeListener,
@@ -85,8 +77,7 @@ public class AudioSwitchHandler(
 
     override fun stop() {
         logger.d { "[stop] no args" }
-        handler.removeCallbacksAndMessages(null)
-        handler.post {
+        synchronized(this) {
             audioSwitch?.stop()
             audioSwitch = null
         }

@@ -53,6 +53,7 @@ import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
 import stream.video.sfu.models.VideoDimension
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
 
 sealed class DeviceStatus {
     data object NotSelected : DeviceStatus()
@@ -448,14 +449,23 @@ class MicrophoneManager(
         }
 
         if (canHandleDeviceSwitch()) {
-            audioHandler =
-                AudioSwitchHandler(mediaManager.context) { devices, selected ->
-                    logger.i { "audio devices. selected $selected, available devices are $devices" }
-                    _devices.value = devices.map { it.fromAudio() }
-                    _selectedDevice.value = selected?.fromAudio()
-                }
+            val latch = CountDownLatch(1)
+
+            audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
+                logger.i { "audio devices. selected $selected, available devices are $devices" }
+                _devices.value = devices.map { it.fromAudio() }
+                _selectedDevice.value = selected?.fromAudio()
+
+                latch.countDown()
+            }
 
             audioHandler.start()
+
+            try {
+                latch.await()
+            } finally {
+                setupCompleted = true
+            }
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
