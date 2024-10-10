@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.0.15
+            <div class="library-version">1.0.16
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -78,9 +78,9 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-call-service-config/index.html">CallServiceConfig</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>runCallServiceInForeground<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>audioUsage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>AudioAttributes.USAGE_VOICE_COMMUNICATION<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>callServicePerType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>mapOf(
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-call-service-config/index.html">CallServiceConfig</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>runCallServiceInForeground<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>audioUsage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>AudioAttributes.USAGE_VOICE_COMMUNICATION<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>callServicePerType<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator"> = </span>mapOf(
         Pair(ANY_MARKER, CallService::class.java),
-    )</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Configuration class for the call service.</p></div></div></div>
+    )</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Configuration class for the call foreground service.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -89,7 +89,22 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="754678347%2FFunctions%2F-1625990423" anchor-label="callServiceConfig" id="754678347%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+        <div class="table"><a data-name="-228306669%2FFunctions%2F-1625990423" anchor-label="audioCallServiceConfig" id="-228306669%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="audio-call-service-config.html"><span>audio</span><wbr><span>Call</span><wbr><span>Service</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-228306669%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="audio-call-service-config.html"><span class="token function">audioCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Returns a foreground service configuration appropriate for audio-only calls. Uses: <code class="lang-kotlin">FOREGROUND_SERVICE_TYPE_MICROPHONE</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="754678347%2FFunctions%2F-1625990423" anchor-label="callServiceConfig" id="754678347%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -99,7 +114,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="call-service-config.html"><span class="token function">callServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Return a default configuration for the call service configuration.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="call-service-config.html"><span class="token function">callServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Returns the default call foreground service configuration. Uses: <code class="lang-kotlin">FOREGROUND_SERVICE_TYPE_PHONE_CALL</code>.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -114,7 +129,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="livestream-audio-call-service-config.html"><span class="token function">livestreamAudioCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Return a default configuration for the call service configuration for livestream which has no camera</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="livestream-audio-call-service-config.html"><span class="token function">livestreamAudioCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Returns a foreground service configuration appropriate for audio-only livestream hosts. Uses: <code class="lang-kotlin">FOREGROUND_SERVICE_TYPE_MICROPHONE</code>.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -129,7 +144,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="livestream-call-service-config.html"><span class="token function">livestreamCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Return a default configuration for the call service configuration.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="livestream-call-service-config.html"><span class="token function">livestreamCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Returns a foreground service configuration appropriate for livestream hosts. Uses: <code class="lang-kotlin">FOREGROUND_SERVICE_TYPE_CAMERA</code> and <code class="lang-kotlin">FOREGROUND_SERVICE_TYPE_MICROPHONE</code>.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -144,7 +159,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="livestream-guest-call-service-config.html"><span class="token function">livestreamGuestCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Return a default configuration for the call service configuration.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="livestream-guest-call-service-config.html"><span class="token function">livestreamGuestCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-call-service-config/index.html">CallServiceConfig</a></div><div class="brief "><p class="paragraph">Returns a foreground service configuration appropriate for livestream viewers. Uses: <code class="lang-kotlin">FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK</code>.</p></div></div></div>
                 </div>
               </div>
             </div>
