@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.HeadsetMic
 import androidx.compose.material.icons.filled.PortableWifiOff
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.SettingsVoice
+import androidx.compose.material.icons.filled.SpatialAudioOff
 import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
@@ -46,6 +47,8 @@ import io.getstream.video.android.ui.menu.base.SubMenuItem
  */
 fun defaultStreamMenu(
     showDebugOptions: Boolean = false,
+    noiseCancellationFeatureEnabled: Boolean = false,
+    noiseCancellationEnabled: Boolean = false,
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
     isScreenShareEnabled: Boolean,
@@ -57,6 +60,7 @@ fun defaultStreamMenu(
     onKillSfuWsClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
     onShowFeedback: () -> Unit,
+    onNoiseCancellation: () -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
@@ -108,6 +112,16 @@ fun defaultStreamMenu(
             action = onToggleScreenShare,
         ),
     )
+    if (noiseCancellationFeatureEnabled) {
+        add(
+            ActionMenuItem(
+                title = "Noise cancellation",
+                icon = Icons.Default.SpatialAudioOff,
+                highlight = noiseCancellationEnabled,
+                action = onNoiseCancellation,
+            ),
+        )
+    }
     if (showDebugOptions) {
         add(
             SubMenuItem(

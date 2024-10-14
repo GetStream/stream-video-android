@@ -9,7 +9,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun end (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun fireEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getAudioFilter ()Lio/getstream/video/android/core/call/audio/AudioFilter;
+	public final fun getAudioFilter ()Lio/getstream/video/android/core/call/audio/InputAudioFilter;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
@@ -31,6 +31,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun hasCapability ([Lorg/openapitools/client/models/OwnCapability;)Z
 	public final fun initRenderer (Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun initRenderer$default (Lio/getstream/video/android/core/Call;Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun isAudioProcessingEnabled ()Z
 	public final fun isLocalPin (Ljava/lang/String;)Z
 	public final fun isPinnedParticipant (Ljava/lang/String;)Z
 	public final fun isServerPin (Ljava/lang/String;)Z
@@ -60,7 +61,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun sendCustomEvent (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun sendReaction (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/AudioFilter;)V
+	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/InputAudioFilter;)V
+	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
 	public final fun startHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -74,6 +76,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public final fun switchSfu (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun takeScreenshot (Lio/getstream/video/android/core/model/VideoTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun toggleAudioProcessing ()Z
 	public final fun unpinForEveryone (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -478,7 +481,7 @@ public final class io/getstream/video/android/core/MemberState {
 }
 
 public final class io/getstream/video/android/core/MicrophoneManager {
-	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;ZI)V
+	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;I)V
 	public final fun canHandleDeviceSwitch ()Z
 	public final fun cleanup ()V
 	public final fun disable (Z)V
@@ -486,7 +489,6 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getAudioUsage ()I
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
-	public final fun getPreferSpeakerphone ()Z
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
@@ -824,7 +826,8 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;I)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 }
 
@@ -868,11 +871,8 @@ public abstract interface class io/getstream/video/android/core/audio/AudioHandl
 
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
-	public fun <init> (Landroid/content/Context;ZLkotlin/jvm/functions/Function2;)V
-	public final fun getAudioDeviceChangeListener ()Lkotlin/jvm/functions/Function2;
-	public final fun getPreferSpeakerphone ()Z
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function2;)V
 	public final fun selectDevice (Lcom/twilio/audioswitch/AudioDevice;)V
-	public final fun setAudioDeviceChangeListener (Lkotlin/jvm/functions/Function2;)V
 	public fun start ()V
 	public fun stop ()V
 }
@@ -991,7 +991,10 @@ public final class io/getstream/video/android/core/call/TrackDimensions {
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract interface class io/getstream/video/android/core/call/audio/AudioFilter {
+public abstract interface class io/getstream/video/android/core/call/audio/AudioFilter : io/getstream/video/android/core/call/audio/InputAudioFilter {
+}
+
+public abstract interface class io/getstream/video/android/core/call/audio/InputAudioFilter {
 	public abstract fun applyFilter (IIILjava/nio/ByteBuffer;)V
 }
 
@@ -1030,17 +1033,20 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
-	public fun <init> (Landroid/content/Context;I)V
-	public synthetic fun <init> (Landroid/content/Context;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;ILorg/webrtc/ManagedAudioProcessingFactory;)V
+	public synthetic fun <init> (Landroid/content/Context;ILorg/webrtc/ManagedAudioProcessingFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
+	public final fun isAudioProcessingEnabled ()Z
 	public final fun makeAudioSource (Lorg/webrtc/MediaConstraints;)Lorg/webrtc/AudioSource;
 	public static synthetic fun makeAudioSource$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnectionFactory;Lorg/webrtc/MediaConstraints;ILjava/lang/Object;)Lorg/webrtc/AudioSource;
 	public final fun makeAudioTrack (Lorg/webrtc/AudioSource;Ljava/lang/String;)Lorg/webrtc/AudioTrack;
 	public final fun makePeerConnection (Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;I)Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnectionFactory;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;IILjava/lang/Object;)Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;Ljava/lang/String;)Lorg/webrtc/VideoTrack;
+	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setAudioRecordDataCallback (Lkotlin/jvm/functions/Function4;)V
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
+	public final fun toggleAudioProcessing ()Z
 }
 
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
@@ -4243,6 +4249,7 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 }
 
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfigKt {
+	public static final fun audioCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun callServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamAudioCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
@@ -4568,6 +4575,13 @@ public final class io/getstream/video/android/core/utils/MinimalSdpParser {
 	public final fun parseMLine (ILjava/lang/String;)Lio/getstream/video/android/core/utils/MediaStream;
 	public final fun parseRtpMap (ILjava/lang/String;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
 	public final fun setSdp (Ljava/lang/String;)V
+}
+
+public final class io/getstream/video/android/core/utils/NoiseCancellationUtilsKt {
+	public static final fun isAutoOn (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
+	public static final fun isAvailable (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
+	public static final fun isDisabled (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
+	public static final fun isEnabled (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
 }
 
 public final class io/getstream/video/android/core/utils/RtpMapAttribute {

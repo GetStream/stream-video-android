@@ -25,9 +25,15 @@ internal const val ANY_MARKER = "ALL_CALL_TYPES"
 
 // API
 /**
- * Configuration class for the call service.
+ * Configuration class for the call foreground service.
  * @param runCallServiceInForeground If the call service should run in the foreground.
  * @param callServicePerType A map of call service per type.
+ *
+ * @see callServiceConfig
+ * @see livestreamCallServiceConfig
+ * @see livestreamAudioCallServiceConfig
+ * @see livestreamGuestCallServiceConfig
+ * @see audioCallServiceConfig
  */
 public data class CallServiceConfig(
     val runCallServiceInForeground: Boolean = true,
@@ -38,7 +44,8 @@ public data class CallServiceConfig(
 )
 
 /**
- * Return a default configuration for the call service configuration.
+ * Returns the default call foreground service configuration.
+ * Uses: `FOREGROUND_SERVICE_TYPE_PHONE_CALL`.
  */
 public fun callServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
@@ -50,7 +57,8 @@ public fun callServiceConfig(): CallServiceConfig {
 }
 
 /**
- * Return a default configuration for the call service configuration.
+ * Returns a foreground service configuration appropriate for livestream hosts.
+ * Uses: `FOREGROUND_SERVICE_TYPE_CAMERA` and `FOREGROUND_SERVICE_TYPE_MICROPHONE`.
  */
 public fun livestreamCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
@@ -63,7 +71,8 @@ public fun livestreamCallServiceConfig(): CallServiceConfig {
 }
 
 /**
- * Return a default configuration for the call service configuration for livestream which has no camera
+ * Returns a foreground service configuration appropriate for audio-only livestream hosts.
+ * Uses: `FOREGROUND_SERVICE_TYPE_MICROPHONE`.
  */
 public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
@@ -76,7 +85,8 @@ public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
 }
 
 /**
- * Return a default configuration for the call service configuration.
+ * Returns a foreground service configuration appropriate for livestream viewers.
+ * Uses: `FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK`.
  */
 public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
@@ -85,6 +95,20 @@ public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
         callServicePerType = mapOf(
             Pair(ANY_MARKER, CallService::class.java),
             Pair("livestream", LivestreamViewerService::class.java),
+        ),
+    )
+}
+
+/**
+ * Returns a foreground service configuration appropriate for audio-only calls.
+ * Uses: `FOREGROUND_SERVICE_TYPE_MICROPHONE`.
+ */
+public fun audioCallServiceConfig(): CallServiceConfig {
+    return CallServiceConfig(
+        runCallServiceInForeground = true,
+        callServicePerType = mapOf(
+            Pair(ANY_MARKER, CallService::class.java),
+            Pair("audio_call", AudioCallService::class.java),
         ),
     )
 }

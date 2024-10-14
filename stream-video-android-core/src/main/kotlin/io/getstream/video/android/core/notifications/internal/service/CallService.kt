@@ -337,9 +337,9 @@ internal open class CallService : Service() {
 
             if (trigger == TRIGGER_INCOMING_CALL) {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
-                if (mediaPlayer == null) mediaPlayer = MediaPlayer()
+                instantiateMediaPlayer()
             } else if (trigger == TRIGGER_OUTGOING_CALL) {
-                if (mediaPlayer == null) mediaPlayer = MediaPlayer()
+                instantiateMediaPlayer()
             }
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
@@ -424,6 +424,12 @@ internal open class CallService : Service() {
         }
     }
 
+    private fun instantiateMediaPlayer() {
+        synchronized(this) {
+            if (mediaPlayer == null) mediaPlayer = MediaPlayer()
+        }
+    }
+
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
@@ -480,16 +486,18 @@ internal open class CallService : Service() {
 
     private fun playCallSound(soundUri: Uri?) {
         try {
-            requestAudioFocus(
-                context = applicationContext,
-                onGranted = {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        playWithRingtone(soundUri)
-                    } else {
-                        playWithMediaPlayer(soundUri)
-                    }
-                },
-            )
+            synchronized(this) {
+                requestAudioFocus(
+                    context = applicationContext,
+                    onGranted = {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            playWithRingtone(soundUri)
+                        } else {
+                            playWithMediaPlayer(soundUri)
+                        }
+                    },
+                )
+            }
         } catch (e: Exception) {
             logger.d { "[Sounds] Error playing call sound: ${e.message}" }
         }
@@ -564,18 +572,20 @@ internal open class CallService : Service() {
     }
 
     private fun stopCallSound() {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                logger.d { "[Sounds] Stopping Ringtone sound" }
-                if (ringtone?.isPlaying == true) ringtone?.stop()
-            } else {
-                logger.d { "[Sounds] Stopping MediaPlayer sound" }
-                if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
+        synchronized(this) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    logger.d { "[Sounds] Stopping Ringtone sound" }
+                    if (ringtone?.isPlaying == true) ringtone?.stop()
+                } else {
+                    logger.d { "[Sounds] Stopping MediaPlayer sound" }
+                    if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
+                }
+            } catch (e: Exception) {
+                logger.d { "[Sounds] Error stopping call sound: ${e.message}" }
+            } finally {
+                abandonAudioFocus()
             }
-        } catch (e: Exception) {
-            logger.d { "[Sounds] Error stopping call sound: ${e.message}" }
-        } finally {
-            abandonAudioFocus()
         }
     }
 
@@ -675,17 +685,6 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun unregisterToggleCameraBroadcastReceiver() {
-        if (isToggleCameraBroadcastReceiverRegistered) {
-            try {
-                unregisterReceiver(toggleCameraBroadcastReceiver)
-                isToggleCameraBroadcastReceiverRegistered = false
-            } catch (e: Exception) {
-                logger.d { "Unable to unregister ToggleCameraBroadcastReceiver." }
-            }
-        }
-    }
-
     override fun onTimeout(startId: Int) {
         super.onTimeout(startId)
         logger.w { "Timeout received from the system, service will stop." }
@@ -775,17 +774,30 @@ internal open class CallService : Service() {
         stopSelf()
     }
 
+    private fun unregisterToggleCameraBroadcastReceiver() {
+        if (isToggleCameraBroadcastReceiverRegistered) {
+            try {
+                unregisterReceiver(toggleCameraBroadcastReceiver)
+                isToggleCameraBroadcastReceiverRegistered = false
+            } catch (e: Exception) {
+                logger.d { "Unable to unregister ToggleCameraBroadcastReceiver." }
+            }
+        }
+    }
+
     private fun cleanAudioResources() {
-        logger.d { "[Sounds] Cleaning audio resources" }
+        synchronized(this) {
+            logger.d { "[Sounds] Cleaning audio resources" }
 
-        if (ringtone?.isPlaying == true) ringtone?.stop()
-        ringtone = null
+            if (ringtone?.isPlaying == true) ringtone?.stop()
+            ringtone = null
 
-        mediaPlayer?.release()
-        mediaPlayer = null
+            mediaPlayer?.release()
+            mediaPlayer = null
 
-        audioManager = null
-        audioFocusRequest = null
+            audioManager = null
+            audioFocusRequest = null
+        }
     }
 
     // This service does not return a Binder

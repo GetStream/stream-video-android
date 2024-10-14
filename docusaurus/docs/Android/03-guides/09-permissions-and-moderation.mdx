@@ -72,12 +72,12 @@ The permissions are required and any usage of the `Call` object without them may
 :::
 
 In order to notify an inconsistency the SDK will log a warning when `Call.join()` is being called without the required permissions.
-This is completely ok, if you have a [call type](./05-call-types.mdx) which does not require streaming audio or video from the users device (e.g. `audio_room` or live broadcast where the user is only a guest and listens in to the stream).
+This is completely ok, if you have a [call type](./06-call-types.mdx) which does not require streaming audio or video from the users device (e.g. `audio_room` or live broadcast where the user is only a guest and listens in to the stream).
 
 The SDK by default will check for runtime permissions based on call capabilities, so if your call requires audio to be sent, the SDK will expect that the `android.Manifest.permission.RECORD_AUDIO` is granted.
 
 :::warning
-If you are not overriding the `runForegroundServiceForCalls` flag to `false` in the `StreamVideoBuilder` the resulting foreground service that starts for [keeping the call alive](./06-keeping-the-call-alive.mdx) can not run without the permissions and will crash with a detailed message.
+If you are not overriding the `runForegroundServiceForCalls` flag to `false` in the `StreamVideoBuilder` the resulting foreground service that starts for [keeping the call alive](./07-keeping-the-call-alive.mdx) can not run without the permissions and will crash with a detailed message.
 :::
 
 If you wish to override the behavior on which permissions are required for your calls you can provide a new implementation of `StreamPermissionCheck` to the `StreamVideoBuilder`.

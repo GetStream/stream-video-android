@@ -26,7 +26,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.audio.AudioFilter
+import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -147,9 +147,9 @@ public class Call(
     var videoFilter: VideoFilter? = null
 
     /**
-     * Set a custom [AudioFilter] that will be applied to the audio stream recorded on your device.
+     * Set a custom [InputAudioFilter] that will be applied to the audio stream recorded on your device.
      */
-    var audioFilter: AudioFilter? = null
+    var audioFilter: InputAudioFilter? = null
 
     /**
      * Called by the [CallHealthMonitor] when the ICE restarts failed after
@@ -900,17 +900,10 @@ public class Call(
 
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
         // Speaker
-        if (speaker.status.value is DeviceStatus.NotSelected) {
-            val enableSpeaker =
-                if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
-                    // if camera is enabled then enable speaker. Eventually this should
-                    // be a new audio.defaultDevice setting returned from backend
-                    true
-                } else {
-                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker
-                }
-            speaker.setEnabled(enableSpeaker)
-        }
+        speaker.setEnabled(
+            enabled = callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
+                callSettings.audio.speakerDefaultOn,
+        )
 
         // Camera
         if (camera.status.value is DeviceStatus.NotSelected) {
@@ -1073,6 +1066,18 @@ public class Call(
     fun hasCapability(vararg capability: OwnCapability): Boolean {
         val elements = capability.toList()
         return state.ownCapabilities.value.containsAll(elements)
+    }
+
+    fun isAudioProcessingEnabled(): Boolean {
+        return clientImpl.isAudioProcessingEnabled()
+    }
+
+    fun setAudioProcessingEnabled(enabled: Boolean) {
+        return clientImpl.setAudioProcessingEnabled(enabled)
+    }
+
+    fun toggleAudioProcessing(): Boolean {
+        return clientImpl.toggleAudioProcessing()
     }
 
     @InternalStreamVideoApi

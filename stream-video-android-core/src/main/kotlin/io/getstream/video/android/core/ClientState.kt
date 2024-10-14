@@ -25,8 +25,11 @@ import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
@@ -102,6 +105,7 @@ class ClientState(private val client: StreamVideo) {
         when (event) {
             is ConnectedEvent -> {
                 _connection.value = ConnectionState.Connected
+                registerPushDevice()
             }
 
             is CallCreatedEvent -> {
@@ -117,6 +121,14 @@ class ClientState(private val client: StreamVideo) {
                 val (type, id) = event.callCid.split(":")
                 val call = client.call(type, id)
                 _ringingCall.value = call
+            }
+        }
+    }
+
+    private fun registerPushDevice() {
+        with(clientImpl) {
+            scope.launch(CoroutineName("ClientState#registerPushDevice")) {
+                if (user.type == UserType.Authenticated) registerPushDevice()
             }
         }
     }
