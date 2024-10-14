@@ -126,7 +126,7 @@ class ClientState(private val client: StreamVideo) {
     }
 
     private fun registerPushDevice() {
-        with(clientImpl) {
+        with(streamVideoClient) {
             scope.launch(CoroutineName("ClientState#registerPushDevice")) {
                 if (user.type == UserType.Authenticated) registerPushDevice()
             }
