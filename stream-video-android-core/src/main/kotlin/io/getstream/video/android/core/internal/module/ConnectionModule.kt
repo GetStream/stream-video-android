@@ -41,6 +41,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.wire.WireConverterFactory
 import java.io.IOException
+import java.text.Normalizer
 import java.util.concurrent.TimeUnit
 
 /**
@@ -338,8 +339,16 @@ internal class HeadersInterceptor(
                 }
             }.getOrNull() ?: "StandAloneInstall"
 
-            return "$appName / $versionName($versionCode); $installerName; ($manufacturer; " +
-                "$model; SDK $version; Android $versionRelease)"
+            return (
+                "$appName / $versionName($versionCode); $installerName; ($manufacturer; " +
+                    "$model; SDK $version; Android $versionRelease)"
+                )
+                .sanitize()
         }
+    }
+
+    private fun String.sanitize(): String {
+        return Normalizer.normalize(this, Normalizer.Form.NFD)
+            .replace("[^\\p{ASCII}]".toRegex(), "")
     }
 }
