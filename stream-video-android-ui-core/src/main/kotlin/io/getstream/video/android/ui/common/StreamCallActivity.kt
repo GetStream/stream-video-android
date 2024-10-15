@@ -411,7 +411,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
         return call.hasCapability(OwnCapability.SendVideo) || call.isVideoSettingsEnabled()
     }
 
-
     // Picture in picture (for Video calls)
     /**
      * Enter picture in picture mode. By default supported for video calls.

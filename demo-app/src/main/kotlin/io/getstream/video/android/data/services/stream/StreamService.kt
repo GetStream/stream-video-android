@@ -17,6 +17,9 @@
 package io.getstream.video.android.data.services.stream
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import io.getstream.video.android.model.User
+import io.getstream.video.android.models.UserCredentials
+import io.getstream.video.android.models.builtInCredentials
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
@@ -24,7 +27,7 @@ import retrofit2.create
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface StreamService {
+fun interface StreamService {
     @GET("api/auth/create-token")
     suspend fun getAuthData(
         @Query("environment") environment: String,
@@ -41,6 +44,15 @@ interface StreamService {
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
 
-        val instance = retrofit.create<StreamService>()
+        private val serviceInstance = retrofit.create<StreamService>()
+
+        val instance = StreamService { environment, userId ->
+            User.builtInCredentials[userId]?.toAuthDataResponse()
+                ?: serviceInstance.getAuthData(environment, userId)
+        }
     }
+}
+
+private fun UserCredentials.toAuthDataResponse(): GetAuthDataResponse {
+    return GetAuthDataResponse(userId, apiKey, token)
 }
