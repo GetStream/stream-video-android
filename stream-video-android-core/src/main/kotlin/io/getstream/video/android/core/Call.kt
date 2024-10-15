@@ -1068,6 +1068,10 @@ public class Call(
         return state.ownCapabilities.value.containsAll(elements)
     }
 
+    fun isVideoSettingsEnabled(): Boolean {
+        return state.settings.value?.video?.enabled ?: false
+    }
+
     fun isAudioProcessingEnabled(): Boolean {
         return clientImpl.isAudioProcessingEnabled()
     }
