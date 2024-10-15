@@ -429,6 +429,10 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
 }
 
+public final class io/getstream/video/android/core/MediaManagerKt {
+	public static final fun trySetEnabled (Lorg/webrtc/MediaStreamTrack;Z)V
+}
+
 public final class io/getstream/video/android/core/MediaStatsInfo {
 	public static final field Companion Lio/getstream/video/android/core/MediaStatsInfo$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Double;Ljava/lang/Double;)V

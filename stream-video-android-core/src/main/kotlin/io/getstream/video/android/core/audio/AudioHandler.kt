@@ -18,6 +18,8 @@ package io.getstream.video.android.core.audio
 
 import android.content.Context
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
@@ -49,17 +51,21 @@ public class AudioSwitchHandler(
 
     private var audioSwitch: AudioSwitch? = null
 
+    private val handler = Handler(Looper.getMainLooper())
+
     override fun start() {
         logger.d { "[start] audioSwitch: $audioSwitch" }
-        synchronized(this) {
-            if (audioSwitch == null) {
-                val devices = mutableListOf(
-                    AudioDevice.WiredHeadset::class.java,
-                    AudioDevice.BluetoothHeadset::class.java,
-                    AudioDevice.Earpiece::class.java,
-                    AudioDevice.Speakerphone::class.java,
-                )
+        if (audioSwitch == null) {
+            handler.removeCallbacksAndMessages(null)
 
+            val devices = mutableListOf(
+                AudioDevice.WiredHeadset::class.java,
+                AudioDevice.BluetoothHeadset::class.java,
+                AudioDevice.Earpiece::class.java,
+                AudioDevice.Speakerphone::class.java,
+            )
+
+            handler.post {
                 val switch = AudioSwitch(
                     context = context,
                     audioFocusChangeListener = onAudioFocusChangeListener,
@@ -77,7 +83,8 @@ public class AudioSwitchHandler(
 
     override fun stop() {
         logger.d { "[stop] no args" }
-        synchronized(this) {
+        handler.removeCallbacksAndMessages(null)
+        handler.post {
             audioSwitch?.stop()
             audioSwitch = null
         }

@@ -39,6 +39,7 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,11 +50,11 @@ import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.EglBase
+import org.webrtc.MediaStreamTrack
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
 import stream.video.sfu.models.VideoDimension
 import java.util.UUID
-import java.util.concurrent.CountDownLatch
 
 sealed class DeviceStatus {
     data object NotSelected : DeviceStatus()
@@ -138,23 +139,24 @@ class SpeakerManager(
      * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
      * */
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
-        microphoneManager.setup()
-        val devices = devices.value
-        if (enable) {
-            val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-            selectedBeforeSpeaker = selectedDevice.value
-            _speakerPhoneEnabled.value = true
-            microphoneManager.select(speaker)
-        } else {
-            _speakerPhoneEnabled.value = false
-            // swap back to the old one
-            val defaultFallbackFromType = defaultFallback?.let {
-                devices.filterIsInstance(defaultFallback::class.java)
-            }?.firstOrNull()
-            val fallback = defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                it !is StreamAudioDevice.Speakerphone
+        microphoneManager.enforceSetup {
+            val devices = devices.value
+            if (enable) {
+                val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
+                selectedBeforeSpeaker = selectedDevice.value
+                _speakerPhoneEnabled.value = true
+                microphoneManager.select(speaker)
+            } else {
+                _speakerPhoneEnabled.value = false
+                // swap back to the old one
+                val defaultFallbackFromType = defaultFallback?.let {
+                    devices.filterIsInstance(defaultFallback::class.java)
+                }?.firstOrNull()
+                val fallback = defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
+                    it !is StreamAudioDevice.Speakerphone
+                }
+                microphoneManager.select(fallback)
             }
-            microphoneManager.select(fallback)
         }
     }
 
@@ -162,12 +164,13 @@ class SpeakerManager(
      * Set the volume as a percentage, 0-100
      */
     fun setVolume(volumePercentage: Int) {
-        microphoneManager.setup()
-        microphoneManager.audioManager?.let {
-            val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
-            val level = max / 100 * volumePercentage
-            _volume.value = volumePercentage
-            it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
+        microphoneManager.enforceSetup {
+            microphoneManager.audioManager?.let {
+                val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
+                val level = max / 100 * volumePercentage
+                _volume.value = volumePercentage
+                it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
+            }
         }
     }
 
@@ -365,7 +368,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Enabled
             }
-            mediaManager.audioTrack.setEnabled(true)
+            safeCall { mediaManager.audioTrack.trySetEnabled(true) }
         }
     }
 
@@ -394,7 +397,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            mediaManager.audioTrack.setEnabled(false)
+            safeCall { mediaManager.audioTrack.trySetEnabled(false) }
         }
     }
 
@@ -425,10 +428,7 @@ class MicrophoneManager(
     /**
      * List the devices, returns a stateflow with audio devices
      */
-    fun listDevices(): StateFlow<List<StreamAudioDevice>> {
-        setup()
-        return devices
-    }
+    fun listDevices(): StateFlow<List<StreamAudioDevice>> = devices
 
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
@@ -438,44 +438,40 @@ class MicrophoneManager(
     fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
 
     // Internal logic
-    internal fun setup() {
+    internal fun setup(onAudioDevicesUpdate: (() -> Unit)? = null) {
+        var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
+
         if (setupCompleted) {
-            // Already setup, return
+            capturedOnAudioDevicesUpdate?.invoke()
+            capturedOnAudioDevicesUpdate = null
+
             return
         }
+
         audioManager = mediaManager.context.getSystemService()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
         }
 
         if (canHandleDeviceSwitch()) {
-            val latch = CountDownLatch(1)
-
             audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
                 logger.i { "audio devices. selected $selected, available devices are $devices" }
+
                 _devices.value = devices.map { it.fromAudio() }
                 _selectedDevice.value = selected?.fromAudio()
 
-                latch.countDown()
+                capturedOnAudioDevicesUpdate?.invoke()
+                capturedOnAudioDevicesUpdate = null
+                setupCompleted = true
             }
 
             audioHandler.start()
-
-            try {
-                latch.await()
-            } finally {
-                setupCompleted = true
-            }
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
-        setupCompleted = true
     }
 
-    private inline fun <T> enforceSetup(actual: () -> T): T {
-        setup()
-        return actual.invoke()
-    }
+    internal fun enforceSetup(actual: () -> Unit) = setup(onAudioDevicesUpdate = actual)
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
@@ -558,7 +554,7 @@ public class CameraManager(
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
-        mediaManager.videoTrack.setEnabled(true)
+        safeCall { mediaManager.videoTrack.trySetEnabled(true) }
         startCapture()
     }
 
@@ -592,7 +588,7 @@ public class CameraManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            mediaManager.videoTrack.setEnabled(false)
+            safeCall { mediaManager.videoTrack.trySetEnabled(false) }
             videoCapturer.stopCapture()
             isCapturingVideo = false
         }
@@ -878,5 +874,13 @@ class MediaManagerImpl(
         audioTrack.dispose()
         camera.cleanup()
         microphone.cleanup()
+    }
+}
+
+fun MediaStreamTrack.trySetEnabled(enabled: Boolean) {
+    try {
+        setEnabled(enabled)
+    } catch (t: Throwable) {
+        // No-op
     }
 }
