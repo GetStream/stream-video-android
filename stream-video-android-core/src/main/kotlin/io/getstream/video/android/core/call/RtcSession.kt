@@ -1284,10 +1284,17 @@ public class RtcSession internal constructor(
                 // setRemoteDescription has been called and everything is ready - we can
                 // now start handling the ICE subscriber candidates queue
                 syncSubscriberCandidates = coroutineScope.launch {
+                    sfuConnectionModule.socketConnection.events().collect { event ->
+                        if (event is ICETrickleEvent) {
+                            handleIceTrickle(event)
+                        }
+                    }
+                }
+                /*syncSubscriberCandidates = coroutineScope.launch {
                     sfuConnectionModule.socketConnection.pendingSubscriberIceCandidates.collect { iceCandidates ->
                         subscriber.addIceCandidate(iceCandidates)
                     }
-                }
+                }*/
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = answerSdp == subscriberSdpAnswer.value
                 val sameSfu = currentSfu == sfuUrl
@@ -1390,8 +1397,10 @@ public class RtcSession internal constructor(
 
                     // start listening to ICE candidates
                     launch {
-                        sfuConnectionModule.socketConnection.pendingPublisherIceCandidates.collect { iceCandidates ->
-                            publisher?.addIceCandidate(iceCandidates)
+                        sfuConnectionModule.socketConnection.events().collect { event ->
+                            if (event is ICETrickleEvent) {
+                                handleIceTrickle(event)
+                            }
                         }
                     }
 
