@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call
 
+import android.os.Build
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
@@ -43,6 +44,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SfuDataEvent
+import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
@@ -105,10 +107,17 @@ import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
+import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.Migration
+import stream.video.sfu.event.SfuRequest
+import stream.video.sfu.models.ClientDetails
+import stream.video.sfu.models.Device
 import stream.video.sfu.models.ICETrickle
+import stream.video.sfu.models.OS
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.Sdk
+import stream.video.sfu.models.SdkType
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
@@ -306,6 +315,22 @@ public class RtcSession internal constructor(
 
     internal lateinit var sfuConnectionModule: SfuConnectionModule
 
+    private val clientDetails = ClientDetails(
+        os = OS(
+            name = "Android",
+            version = Build.VERSION.SDK_INT.toString(),
+        ),
+        device = Device(
+            name = "${Build.MANUFACTURER} : ${Build.MODEL}",
+        ),
+        sdk = Sdk(
+            type = SdkType.SDK_TYPE_ANDROID,
+            major = BuildConfig.STREAM_VIDEO_VERSION_MAJOR.toString(),
+            minor = BuildConfig.STREAM_VIDEO_VERSION_MINOR.toString(),
+            patch = BuildConfig.STREAM_VIDEO_VERSION_PATCH.toString(),
+        ),
+    )
+
     /**
      * Used during a SFU migration as a temporary new SFU connection. Is null before and after
      * the migration is finished.
@@ -330,12 +355,17 @@ public class RtcSession internal constructor(
                 call.monitor.reconnect(forceRestart = true)
             }
 
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_CLEAN -> {
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
                 call.handleSignalChannelDisconnect(false)
             }
 
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                 call.switchSfu()
+            }
+
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
+                sfuConnectionModule.socketConnection.disconnect()
+                coordinatorConnectionModule.socketConnection.disconnect()
             }
 
             else -> { // Do nothing }
@@ -1807,7 +1837,23 @@ public class RtcSession internal constructor(
                 getSdp,
                 onWebsocketReconnectStrategy,
             )
-*/
+            */
+        // Connect to SFU socket
+        val migrationData = migration.invoke()
+        val request = JoinRequest(
+            session_id = sessionId,
+            token = sfuToken,
+            subscriber_sdp = getSdp.invoke(),
+            fast_reconnect = false,
+            migration = migrationData,
+            client_details = clientDetails,
+        )
+
+        sfuConnectionModule.socketConnection.whenConnected {
+            sfuConnectionMigrationModule!!.socketConnection.sendEvent(
+                SfuDataRequest(SfuRequest(join_request = request))
+            )
+        }
         // Wait until the socket connects - if it fails to connect then return to "Reconnecting"
         // state (to make sure that the full reconnect logic will kick in)
         coroutineScope.launch {
@@ -1902,8 +1948,5 @@ public class RtcSession internal constructor(
                 }
             }
         }
-
-        // Connect to SFU socket
-        sfuConnectionMigrationModule!!.socketConnection.connectMigrating(migration) {}
     }
 }
