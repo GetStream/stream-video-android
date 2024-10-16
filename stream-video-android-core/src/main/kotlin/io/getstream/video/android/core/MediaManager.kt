@@ -428,7 +428,10 @@ class MicrophoneManager(
     /**
      * List the devices, returns a stateflow with audio devices
      */
-    fun listDevices(): StateFlow<List<StreamAudioDevice>> = devices
+    fun listDevices(): StateFlow<List<StreamAudioDevice>> {
+        setup()
+        return devices
+    }
 
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
