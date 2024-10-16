@@ -198,6 +198,7 @@ public interface StreamVideo : NotificationHandler {
                             "install a new exception handler: $streamVideo"
                     }
                 }
+                isInstalled = true
                 internalStreamVideo = streamVideo
             }
         }
@@ -227,6 +228,7 @@ public interface StreamVideo : NotificationHandler {
          * Uninstall a previous [StreamVideo] instance.
          */
         public fun removeClient() {
+            isInstalled = false
             internalStreamVideo?.cleanup()
             internalStreamVideo = null
         }

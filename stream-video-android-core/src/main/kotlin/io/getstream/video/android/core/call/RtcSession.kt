@@ -171,6 +171,7 @@ data class TrackDimensions(
  * * The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
  *
  */
+@Deprecated("The RTC session contains internal data which is not to be public. The only public variables are `sfuSocketState`, `trackDimensions`, `tracks`. They can now be accessed via `Call`. The rest of the variables are internal and should not be accessed directly.")
 public class RtcSession internal constructor(
     client: StreamVideo,
     private val coordinatorConnectionModule: CoordinatorConnectionModule,
@@ -309,7 +310,8 @@ public class RtcSession internal constructor(
      */
     private var sfuConnectionMigrationModule: SfuConnectionModule? = null
 
-    private val _sfuSfuSocketState = MutableStateFlow<SfuSocketState>(SfuSocketState.Disconnected.Stopped)
+    private val _sfuSfuSocketState =
+        MutableStateFlow<SfuSocketState>(SfuSocketState.Disconnected.Stopped)
     val sfuSocketState = _sfuSfuSocketState.asStateFlow()
 
     private val sfuFastReconnectListener: suspend () -> Unit = {
@@ -325,12 +327,15 @@ public class RtcSession internal constructor(
                 call.monitor.stopTimer()
                 call.monitor.reconnect(forceRestart = true)
             }
+
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_CLEAN -> {
                 call.handleSignalChannelDisconnect(false)
             }
+
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                 call.switchSfu()
             }
+
             else -> { // Do nothing }
             }
         }
@@ -592,7 +597,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -1143,7 +1148,7 @@ public class RtcSession internal constructor(
             if (it == null) {
                 logger.e {
                     "[handleEvent] Failed to remove track on ParticipantLeft " +
-                        "- track ID: ${participant.session_id}). Tracks: $tracks"
+                            "- track ID: ${participant.session_id}). Tracks: $tracks"
                 }
             }
         }
@@ -1155,7 +1160,7 @@ public class RtcSession internal constructor(
             if (it == null) {
                 logger.e {
                     "[handleEvent] Failed to remove track dimension on ParticipantLeft " +
-                        "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
+                            "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
                 }
             }
         }
@@ -1163,7 +1168,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     Section, basic webrtc calls
+    Section, basic webrtc calls
      */
 
     /**
@@ -1479,8 +1484,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                // if `msid` is not present, we assume that the track is the first one
-                (m.msid?.equals(track.id()) ?: true)
+                    // if `msid` is not present, we assume that the track is the first one
+                    (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
