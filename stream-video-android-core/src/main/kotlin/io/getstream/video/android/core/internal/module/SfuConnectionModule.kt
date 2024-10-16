@@ -29,7 +29,6 @@ internal class SfuConnectionModule(
     override val connectionTimeoutInMs: Long,
     override val userToken: SfuToken,
     override val lifecycle: Lifecycle,
-
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
@@ -73,10 +72,10 @@ internal class SfuConnectionModule(
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 
     override fun updateToken(token: SfuToken) {
-        _internalSocketConnection.onDisconnected()
+        _internalSocketConnection.updateToken(token)
     }
 
     override fun updateAuthType(authType: String) {
-        throw UnsupportedOperationException("Not supported for SFU")
+        throw UnsupportedOperationException("Not supported for SFU, do not call.")
     }
 }
