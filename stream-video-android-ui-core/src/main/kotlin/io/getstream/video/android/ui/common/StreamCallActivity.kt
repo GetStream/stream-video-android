@@ -407,8 +407,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
     // Decision making
     @StreamCallActivityDelicateApi
-    public open fun isVideoCall(call: Call): Boolean =
-        call.hasCapability(OwnCapability.SendVideo)
+    public open fun isVideoCall(call: Call): Boolean {
+        return call.hasCapability(OwnCapability.SendVideo) || call.isVideoEnabled()
+    }
 
     // Picture in picture (for Video calls)
     /**
