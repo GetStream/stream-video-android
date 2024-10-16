@@ -399,7 +399,8 @@ public class Call(
             return result as Failure
         }
         val sfuToken = result.value.credentials.token
-        val sfuUrl = clientImpl.testSfuAddress ?: result.value.credentials.server.url
+        val sfuUrl = result.value.credentials.server.url
+        val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
 
         session = if (testInstanceProvider.rtcSessionCreator != null) {
@@ -409,6 +410,7 @@ public class Call(
                 client = client,
                 call = this,
                 sfuUrl = sfuUrl,
+                sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
                 coordinatorConnectionModule = (client as StreamVideoClient).coordinatorConnectionModule,
                 remoteIceServers = iceServers,

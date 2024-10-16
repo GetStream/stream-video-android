@@ -17,10 +17,12 @@
 package io.getstream.video.android.core.call
 
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.extractCause
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.Call
@@ -171,12 +173,12 @@ data class TrackDimensions(
  * * The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
  *
  */
-@Deprecated("The RTC session contains internal data which is not to be public. The only public variables are `sfuSocketState`, `trackDimensions`, `tracks`. They can now be accessed via `Call`. The rest of the variables are internal and should not be accessed directly.")
 public class RtcSession internal constructor(
     client: StreamVideo,
     private val coordinatorConnectionModule: CoordinatorConnectionModule,
     private val call: Call,
     internal var sfuUrl: String,
+    internal var sfuWsUrl: String,
     internal var sfuToken: String,
     internal var remoteIceServers: List<IceServer>,
     internal var onMigrationCompleted: () -> Unit,
@@ -368,14 +370,22 @@ public class RtcSession internal constructor(
         "http://$sfuUrl"
     }.removeSuffix("/twirp")
          */
-        val sfuConnectionModule =
-            coordinatorConnectionModule.createSFUConnectionModule(
+        val sfuConnectionModule = SfuConnectionModule(
+            context = clientImpl.context,
+            apiKey = coordinatorConnectionModule.apiKey,
+            apiUrl = sfuUrl,
+            wssUrl = sfuWsUrl,
+            connectionTimeoutInMs = 10000L,
+            userToken = sfuToken,
+            lifecycle = coordinatorConnectionModule.lifecycle,
+        )
+            /*coordinatorConnectionModule.createSFUConnectionModule(
                 sfuUrl,
                 sessionId,
                 sfuToken,
                 getSdp,
                 onWebsocketReconnectStrategy,
-            )
+            )*/
         setSfuConnectionModule(sfuConnectionModule)
         listenToSocketEventsAndErrors()
 
@@ -407,13 +417,13 @@ public class RtcSession internal constructor(
 
         // listen to socket events and errors
         eventJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.events.collect {
+            sfuConnectionModule.socketConnection.events().collect {
                 clientImpl.fireEvent(it, call.cid)
             }
         }
         errorJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.errors.collect {
-                logger.e(it) { "permanent failure on socket connection" }
+            sfuConnectionModule.socketConnection.errors().collect {
+                logger.e(it.streamError.extractCause() ?: IllegalStateException("Error emitted without a cause on SFU connection.")) { "permanent failure on socket connection" }
             }
         }
     }
@@ -453,7 +463,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect() {
-        sfuConnectionModule.sfuSocket.connect()
+        sfuConnectionModule.socketConnection.connect(user = call.user)
         // ensure that the join event has been handled before starting RTC
         try {
             withTimeout(2000L) {
@@ -490,15 +500,15 @@ public class RtcSession internal constructor(
 
         // Start listening to connection state on new SFU connection
         sfuSocketStateJob = coroutineScope.launch {
-            sfuConnectionModule.sfuSocket.connectionState.collect { sfuSocketState ->
+            sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
 
                 // make sure we stop handling ICE candidates when a new SFU socket
                 // connection is being established. We need to wait until a SubscriberOffer
                 // is received again and then we start listening to the ICE candidate queue
-                if (sfuSocketState == SfuSocketState.Connecting ||
-                    sfuSocketState is SfuSocketState.DisconnectedTemporarily ||
-                    sfuSocketState is SfuSocketState.DisconnectedByRequest
+                if (sfuSocketState is SfuSocketState.Connecting ||
+                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedTemporarily ||
+                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedByRequest
                 ) {
                     syncSubscriberCandidates?.cancel()
                     syncSubscriberCandidates?.cancel()
@@ -757,9 +767,8 @@ public class RtcSession internal constructor(
         supervisorJob.cancel()
 
         // disconnect the socket and clean it up
-        sfuConnectionModule.sfuSocket.cleanup()
 
-        sfuConnectionMigrationModule?.sfuSocket?.cleanup()
+        coroutineScope.launch { sfuConnectionMigrationModule?.socketConnection?.disconnect() }
         sfuConnectionMigrationModule = null
 
         // cleanup the publisher and subcriber peer connections
@@ -1275,7 +1284,7 @@ public class RtcSession internal constructor(
                 // setRemoteDescription has been called and everything is ready - we can
                 // now start handling the ICE subscriber candidates queue
                 syncSubscriberCandidates = coroutineScope.launch {
-                    sfuConnectionModule.sfuSocket.pendingSubscriberIceCandidates.collect { iceCandidates ->
+                    sfuConnectionModule.socketConnection.pendingSubscriberIceCandidates.collect { iceCandidates ->
                         subscriber.addIceCandidate(iceCandidates)
                     }
                 }
@@ -1381,7 +1390,7 @@ public class RtcSession internal constructor(
 
                     // start listening to ICE candidates
                     launch {
-                        sfuConnectionModule.sfuSocket.pendingPublisherIceCandidates.collect { iceCandidates ->
+                        sfuConnectionModule.socketConnection.pendingPublisherIceCandidates.collect { iceCandidates ->
                             publisher?.addIceCandidate(iceCandidates)
                         }
                     }
@@ -1584,7 +1593,7 @@ public class RtcSession internal constructor(
 
     internal suspend fun sendCallStats(report: CallStatsReport) {
         val result = wrapAPICall {
-            sfuConnectionModule.signalService.sendStats(
+            sfuConnectionModule.api.sendStats(
                 sendStatsRequest = SendStatsRequest(
                     session_id = sessionId,
                     sdk = "stream-android",
@@ -1648,7 +1657,7 @@ public class RtcSession internal constructor(
     // reply to when we get an offer from the SFU
     private suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {
-            val result = sfuConnectionModule.signalService.sendAnswer(request)
+            val result = sfuConnectionModule.api.sendAnswer(request)
             result.error?.let {
                 throw RtcException(error = it, message = it.message)
             }
@@ -1658,7 +1667,7 @@ public class RtcSession internal constructor(
     // send whenever we have a new ice candidate
     private suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
         wrapAPICall {
-            val result = sfuConnectionModule.signalService.iceTrickle(request)
+            val result = sfuConnectionModule.api.iceTrickle(request)
             result.error?.let {
                 throw RtcException(error = it, message = it.message)
             }
@@ -1668,7 +1677,7 @@ public class RtcSession internal constructor(
     // call after onNegotiation Needed
     private suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
         wrapAPICall {
-            val result = sfuConnectionModule.signalService.setPublisher(request)
+            val result = sfuConnectionModule.api.setPublisher(request)
             result.error?.let {
                 throw RtcException(error = it, message = it.message)
             }
@@ -1680,7 +1689,7 @@ public class RtcSession internal constructor(
         request: UpdateSubscriptionsRequest,
     ): Result<UpdateSubscriptionsResponse> =
         wrapAPICall {
-            val result = sfuConnectionModule.signalService.updateSubscriptions(request)
+            val result = sfuConnectionModule.api.updateSubscriptions(request)
             result.error?.let {
                 throw RtcException(error = it, message = it.message)
             }
@@ -1694,12 +1703,12 @@ public class RtcSession internal constructor(
                 session_id = sessionId,
                 peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
             )
-            sfuConnectionModule.signalService.iceRestart(request)
+            sfuConnectionModule.api.iceRestart(request)
         }
 
     private suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         wrapAPICall {
-            val result = sfuConnectionModule.signalService.updateMuteStates(request)
+            val result = sfuConnectionModule.api.updateMuteStates(request)
             result.error?.let {
                 throw RtcException(error = it, message = it.message)
             }
@@ -1773,7 +1782,15 @@ public class RtcSession internal constructor(
             )
         }
         // Create a parallel SFU socket
-        sfuConnectionMigrationModule =
+        sfuConnectionMigrationModule = SfuConnectionModule(
+            context = clientImpl.context,
+            apiKey = coordinatorConnectionModule.apiKey,
+            apiUrl = sfuUrl,
+            wssUrl = sfuWsUrl,
+            connectionTimeoutInMs = 10000L,
+            userToken = sfuToken,
+            lifecycle = coordinatorConnectionModule.lifecycle,
+        )/*
             coordinatorConnectionModule.createSFUConnectionModule(
                 sfuUrl,
                 sessionId,
@@ -1781,11 +1798,11 @@ public class RtcSession internal constructor(
                 getSdp,
                 onWebsocketReconnectStrategy,
             )
-
+*/
         // Wait until the socket connects - if it fails to connect then return to "Reconnecting"
         // state (to make sure that the full reconnect logic will kick in)
         coroutineScope.launch {
-            sfuConnectionMigrationModule!!.sfuSocket.connectionState.collect { it ->
+            sfuConnectionMigrationModule!!.socketConnection.state().collect { it ->
                 when (it) {
                     is SfuSocketState.Connected -> {
                         logger.d { "[switchSfu] Migration SFU socket state changed to Connected" }
@@ -1856,13 +1873,13 @@ public class RtcSession internal constructor(
                         cancel()
                     }
 
-                    is SfuSocketState.DisconnectedPermanently -> {
+                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
                         logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected permanently ${it.error}" }
                         failedToSwitch()
                         cancel()
                     }
 
-                    is SfuSocketState.DisconnectedTemporarily -> {
+                    is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
                         logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected temporarily ${it.error}" }
                         // We don't wait for the socket to retry during migration
                         // In this case we will fall back to full-reconnect
@@ -1878,6 +1895,6 @@ public class RtcSession internal constructor(
         }
 
         // Connect to SFU socket
-        sfuConnectionMigrationModule!!.sfuSocket.connectMigrating(migration) {}
+        sfuConnectionMigrationModule!!.socketConnection.connectMigrating(migration) {}
     }
 }
