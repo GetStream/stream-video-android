@@ -35,7 +35,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun isLocalPin (Ljava/lang/String;)Z
 	public final fun isPinnedParticipant (Ljava/lang/String;)Z
 	public final fun isServerPin (Ljava/lang/String;)Z
-	public final fun isVideoSettingsEnabled ()Z
+	public final fun isVideoEnabled ()Z
 	public final fun join (ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun join$default (Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun leave ()V

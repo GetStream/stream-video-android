@@ -1068,7 +1068,7 @@ public class Call(
         return state.ownCapabilities.value.containsAll(elements)
     }
 
-    fun isVideoSettingsEnabled(): Boolean {
+    fun isVideoEnabled(): Boolean {
         return state.settings.value?.video?.enabled ?: false
     }
 
