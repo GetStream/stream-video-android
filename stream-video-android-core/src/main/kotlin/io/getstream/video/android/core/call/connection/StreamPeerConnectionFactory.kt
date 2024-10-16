@@ -27,7 +27,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
-import org.webrtc.DefaultVideoDecoderFactory
+import org.webrtc.BlacklistAwareVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.Logging
 import org.webrtc.ManagedAudioProcessingFactory
@@ -101,9 +101,7 @@ public class StreamPeerConnectionFactory(
      * Default video decoder factory used to unpack video from the remote tracks.
      */
     private val videoDecoderFactory by lazy {
-        DefaultVideoDecoderFactory(
-            eglBase.eglBaseContext,
-        )
+        BlacklistAwareVideoDecoderFactory(eglBase.eglBaseContext)
     }
 
     /**
