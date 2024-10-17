@@ -368,7 +368,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Enabled
             }
-            safeCall { mediaManager.audioTrack.trySetEnabled(true) }
+            mediaManager.audioTrack.trySetEnabled(true)
         }
     }
 
@@ -397,7 +397,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            safeCall { mediaManager.audioTrack.trySetEnabled(false) }
+            mediaManager.audioTrack.trySetEnabled(false)
         }
     }
 
@@ -557,7 +557,7 @@ public class CameraManager(
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
-        safeCall { mediaManager.videoTrack.trySetEnabled(true) }
+        mediaManager.videoTrack.trySetEnabled(true)
         startCapture()
     }
 
@@ -591,7 +591,7 @@ public class CameraManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            safeCall { mediaManager.videoTrack.trySetEnabled(false) }
+            mediaManager.videoTrack.trySetEnabled(false)
             videoCapturer.stopCapture()
             isCapturingVideo = false
         }
@@ -880,10 +880,4 @@ class MediaManagerImpl(
     }
 }
 
-fun MediaStreamTrack.trySetEnabled(enabled: Boolean) {
-    try {
-        setEnabled(enabled)
-    } catch (t: Throwable) {
-        // No-op
-    }
-}
+fun MediaStreamTrack.trySetEnabled(enabled: Boolean) = safeCall { setEnabled(enabled) }
