@@ -51,7 +51,7 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
             }.onError {
                 eventFlow.tryEmit(StreamWebSocketEvent.Error(it))
             }
-            logger.v { "[handleEvent] event: `$event`" }
+            logger.v { "[handleEvent#ByteString] event: `$event`" }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -60,7 +60,7 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
             }.onError {
                 eventFlow.tryEmit(StreamWebSocketEvent.Error(it))
             }
-            logger.v { "[handleEvent] event: `$event`" }
+            logger.v { "[handleEvent#string] event: `$event`" }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -89,6 +89,7 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
     })
 
     fun send(event: V): Boolean {
+        logger.d { "[send] event: `$event`" }
         val parsedEvent = parser.encode(event)
         return webSocket.send(parsedEvent)
     }

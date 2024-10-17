@@ -69,21 +69,7 @@ class MainActivity : ComponentActivity() {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
             setContent {
-                VideoTheme(
-                    colors = if (isSystemInDarkTheme()) {
-                        // Dark
-                        VideoTheme.colors.copy(
-                            baseSheetPrimary = VideoTheme.colors.baseSheetPrimary,
-                            baseSheetSecondary = VideoTheme.colors.baseSheetSecondary,
-                        )
-                    } else {
-                        // Light
-                        VideoTheme.colors.copy(
-                            baseSheetPrimary = VideoTheme.colors.baseSheetPrimary,
-                            baseSheetSecondary = VideoTheme.colors.baseSheetSecondary,
-                        )
-                    }
-                ) {
+                VideoTheme {
                     AppNavHost(
                         startDestination = if (!isLoggedIn) {
                             AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn

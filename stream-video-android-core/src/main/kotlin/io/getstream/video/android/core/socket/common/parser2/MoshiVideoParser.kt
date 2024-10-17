@@ -16,11 +16,13 @@
 
 package io.getstream.video.android.core.socket.common.parser2
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Moshi.Builder
+import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.getstream.video.android.core.socket.common.parser2.adapters.DateAdapter
 import io.getstream.video.android.core.socket.common.VideoParser
@@ -151,11 +153,13 @@ internal class MoshiVideoParser : VideoParser {
 inline fun <reified T> lenientAdapter(adapter: JsonAdapter<T>): JsonAdapter<T> {
     return object : JsonAdapter<T>() {
 
+        @ToJson
         override fun toJson(writer: JsonWriter, value: T?) {
             writer.isLenient = true
             adapter.toJson(writer, value)
         }
 
+        @FromJson
         override fun fromJson(reader: JsonReader): T? {
             reader.isLenient = true
             return adapter.fromJson(reader)

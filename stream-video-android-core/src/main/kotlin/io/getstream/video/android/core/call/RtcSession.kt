@@ -409,13 +409,13 @@ public class RtcSession internal constructor(
             userToken = sfuToken,
             lifecycle = coordinatorConnectionModule.lifecycle,
         )
-            /*coordinatorConnectionModule.createSFUConnectionModule(
-                sfuUrl,
-                sessionId,
-                sfuToken,
-                getSdp,
-                onWebsocketReconnectStrategy,
-            )*/
+        /*coordinatorConnectionModule.createSFUConnectionModule(
+            sfuUrl,
+            sessionId,
+            sfuToken,
+            getSdp,
+            onWebsocketReconnectStrategy,
+        )*/
         setSfuConnectionModule(sfuConnectionModule)
         listenToSocketEventsAndErrors()
 
@@ -453,7 +453,10 @@ public class RtcSession internal constructor(
         }
         errorJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.errors().collect {
-                logger.e(it.streamError.extractCause() ?: IllegalStateException("Error emitted without a cause on SFU connection.")) { "permanent failure on socket connection" }
+                logger.e(
+                    it.streamError.extractCause()
+                        ?: IllegalStateException("Error emitted without a cause on SFU connection.")
+                ) { "permanent failure on socket connection" }
             }
         }
     }
@@ -495,6 +498,17 @@ public class RtcSession internal constructor(
     suspend fun connect() {
         sfuConnectionModule.socketConnection.connect(user = call.user)
         // ensure that the join event has been handled before starting RTC
+        sfuConnectionModule.socketConnection.whenConnected {
+            val request = JoinRequest(
+                session_id = sessionId,
+                token = sfuToken,
+                fast_reconnect = false,
+                client_details = clientDetails,
+            )
+            sfuConnectionModule.socketConnection.sendEvent(
+                SfuDataRequest(SfuRequest(join_request = request))
+            )
+        }
         try {
             withTimeout(2000L) {
                 joinEventReceivedMutex.withLock { connectRtc() }

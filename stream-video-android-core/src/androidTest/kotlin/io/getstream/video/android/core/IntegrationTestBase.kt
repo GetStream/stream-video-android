@@ -19,9 +19,9 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
+import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog
-import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.logging.LoggingLevel

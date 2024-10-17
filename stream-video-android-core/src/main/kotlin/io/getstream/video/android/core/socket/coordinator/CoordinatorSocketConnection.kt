@@ -126,7 +126,7 @@ public open class CoordinatorSocketConnection(
         super.onCreated()
         logger.d { "[onCreated] Socket is created" }
         scope.launch {
-            logger.d { "[onConnected] Video socket connected, user: $user" }
+            logger.d { "[onConnected] Video socket created, user: $user" }
             if (token.isEmpty()) {
                 logger.e { "[onConnected] Token is empty. Disconnecting." }
                 disconnect()
@@ -180,13 +180,6 @@ public open class CoordinatorSocketConnection(
     override fun onDisconnected(cause: DisconnectCause) {
         super.onDisconnected(cause)
         logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
-        when (cause) {
-            DisconnectCause.ConnectionReleased -> TODO()
-            is DisconnectCause.Error -> TODO()
-            DisconnectCause.NetworkNotAvailable -> TODO()
-            is DisconnectCause.UnrecoverableError -> TODO()
-            DisconnectCause.WebSocketNotAvailable -> TODO()
-        }
     }
 
     // API
