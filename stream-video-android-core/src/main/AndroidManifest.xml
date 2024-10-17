@@ -109,7 +109,7 @@
 
         <service
             android:name=".notifications.internal.service.AudioCallService"
-            android:foregroundServiceType="microphone"
+            android:foregroundServiceType="microphone|shortService"
             android:exported="false" />
     </application>
 </manifest>
