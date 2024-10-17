@@ -18,6 +18,7 @@ package org.webrtc
 
 import android.media.MediaCodecInfo
 import android.media.MediaCodecList
+import android.os.Build
 import io.getstream.log.taggedLogger
 
 internal class BlacklistAwareVideoDecoderFactory(
@@ -115,14 +116,21 @@ private fun MediaCodecInfo.isExynosVP9(): Boolean {
 }
 
 private fun MediaCodecInfo.stringify(): String {
-    return "MediaCodecInfo(" +
-        "name=$name, " +
-        "canonicalName=$canonicalName, " +
-        "isAlias=$isAlias, " +
-        "isVendor=$isVendor, " +
-        "isEncoder=$isEncoder, " +
-        "isHardwareAccelerated=$isHardwareAccelerated, " +
-        "isSoftwareOnly=$isSoftwareOnly, " +
-        "supportedTypes=${supportedTypes.joinToString()}" +
-        ")"
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        "MediaCodecInfo(" +
+            "name=$name, " +
+            "canonicalName=$canonicalName, " +
+            "isAlias=$isAlias, " +
+            "isVendor=$isVendor, " +
+            "isEncoder=$isEncoder, " +
+            "isHardwareAccelerated=$isHardwareAccelerated, " +
+            "isSoftwareOnly=$isSoftwareOnly, " +
+            "supportedTypes=${supportedTypes.joinToString()}" +
+            ")"
+    } else {
+        return "MediaCodecInfo(" +
+            "name=$name, " +
+            "isEncoder=$isEncoder" +
+            ")"
+    }
 }
