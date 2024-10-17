@@ -37,7 +37,6 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConnectionType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
-import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
@@ -47,7 +46,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.ConnectionErrorEvent
-import org.openapitools.client.models.CreateDeviceRequest
 import org.openapitools.client.models.HealthCheckEvent
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy
@@ -110,7 +108,7 @@ internal open class CoordinatorSocket(
             socketListenerJob?.cancel()
             when (networkStateProvider.isConnected()) {
                 true -> {
-                    streamWebSocket = socketFactory.createSocket<VideoEvent>(connectionConf).apply {
+                    streamWebSocket = socketFactory.createSocket<VideoEvent>(connectionConf, "#coordinator").apply {
                         listeners.forEach { it.onCreated() }
 
                         socketListenerJob = listen().onEach {

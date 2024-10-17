@@ -30,10 +30,10 @@ internal class SocketFactory<V, P : GenericParser<V>, C: ConnectionConf>(
     private val logger by taggedLogger("Video:SocketFactory")
 
     @Throws(UnsupportedEncodingException::class)
-    fun <T: VideoEvent> createSocket(connectionConf: C): StreamWebSocket<V, P> {
+    fun <T: VideoEvent> createSocket(connectionConf: C, tag: String): StreamWebSocket<V, P> {
         val request = buildRequest(connectionConf)
         logger.i { "[createSocket] new web socket: ${request.url}" }
-        return StreamWebSocket(parser) { httpClient.newWebSocket(request, it) }
+        return StreamWebSocket(tag, parser) { httpClient.newWebSocket(request, it) }
     }
 
     @Throws(UnsupportedEncodingException::class)

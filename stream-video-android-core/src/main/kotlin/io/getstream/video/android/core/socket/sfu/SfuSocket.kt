@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
 import kotlin.coroutines.EmptyCoroutineContext
@@ -95,7 +96,7 @@ internal open class SfuSocket(
             when (networkStateProvider.isConnected()) {
                 true -> {
                     streamWebSocket =
-                        socketFactory.createSocket<SfuDataEvent>(connectionConf).apply {
+                        socketFactory.createSocket<SfuDataEvent>(connectionConf, "#sfu").apply {
                             listeners.forEach { it.onCreated() }
 
                             socketListenerJob = listen().onEach {
@@ -190,12 +191,12 @@ internal open class SfuSocket(
         }
     }
 
-    suspend fun connect(user: User) {
-        logger.d { "[connect] user.id: ${user.id}" }
+    suspend fun connect(joinRequest: JoinRequest) {
+        logger.d { "[connect] request: ${joinRequest.client_details}" }
         socketStateObserverJob?.cancel()
         socketStateObserverJob = observeSocketStateService()
         sfuSocketStateService.onConnect(
-            ConnectionConf.SfuConnectionConf(wssUrl, apiKey, user, tokenManager.getToken())
+            ConnectionConf.SfuConnectionConf(wssUrl, apiKey, User.anonymous(), joinRequest, tokenManager.getToken())
         )
     }
 
@@ -292,13 +293,19 @@ internal open class SfuSocket(
      *
      * @see [okhttp3.WebSocket.send]
      */
-    internal fun sendEvent(event: SfuDataRequest): Boolean = streamWebSocket?.send(event) ?: false
+    internal fun sendEvent(event: SfuDataRequest): Boolean {
+        logger.d { "[sendEvent] event: $event" }
+        return streamWebSocket?.send(event) ?: false
+    }
 
 
     /**
      * Send raw data to the web socket connection.
      */
-    internal fun sendRawData(data: String) = streamWebSocket?.sendRaw(data) ?: Unit
+    internal fun sendRawData(data: String) {
+        logger.d { "[sendRawData] data: $data" }
+        streamWebSocket?.sendRaw(data) ?: Unit
+    }
 
     internal fun isConnected(): Boolean =
         sfuSocketStateService.currentState is SfuSocketState.Connected
@@ -389,7 +396,7 @@ internal open class SfuSocket(
     }
 
     companion object {
-        private const val TAG = "Video:Socket"
+        private const val TAG = "Video:SfuSocket"
         private const val DEFAULT_CONNECTION_TIMEOUT = 60_000L
     }
 }

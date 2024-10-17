@@ -32,10 +32,11 @@ private const val CLOSE_SOCKET_CODE = 1000
 private const val CLOSE_SOCKET_REASON = "Connection close by client"
 
 internal class StreamWebSocket<V, T: GenericParser<V>>(
+    private val tag: String = "",
     private val parser: T,
     socketCreator: (WebSocketListener) -> WebSocket,
 ) {
-    private val logger by taggedLogger("Video:Events")
+    private val logger by taggedLogger("Video:Events$tag")
     private val eventFlow =
         MutableSharedFlow<StreamWebSocketEvent>(extraBufferCapacity = EVENTS_BUFFER_SIZE)
 
@@ -51,7 +52,7 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
             }.onError {
                 eventFlow.tryEmit(StreamWebSocketEvent.Error(it))
             }
-            logger.v { "[handleEvent#ByteString] event: `$event`" }
+            logger.v { "[onMessage#ByteString] event: `$event`" }
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -60,7 +61,7 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
             }.onError {
                 eventFlow.tryEmit(StreamWebSocketEvent.Error(it))
             }
-            logger.v { "[handleEvent#string] event: `$event`" }
+            logger.v { "[onMessage#string] event: `$event`" }
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {

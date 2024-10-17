@@ -2,6 +2,7 @@ package io.getstream.video.android.core.socket.common
 
 import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.User
+import stream.video.sfu.event.JoinRequest
 
 public sealed class ConnectionConf {
     var isReconnection: Boolean = false
@@ -25,7 +26,8 @@ public sealed class ConnectionConf {
     data class SfuConnectionConf(
         override val endpoint: String,
         override val apiKey: String,
-        override val user: User,
+        override val user: User = User.anonymous(),
+        val joinRequest: JoinRequest,
         val token: SfuToken,
     ) : ConnectionConf()
 

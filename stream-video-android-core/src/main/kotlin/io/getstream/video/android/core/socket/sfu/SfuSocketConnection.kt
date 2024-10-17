@@ -160,7 +160,7 @@ class SfuSocketConnection(
 
     override suspend fun connect(connectData: Any) {
         val join = connectData as JoinRequest
-        internalSocket.sendEvent(SfuDataRequest(SfuRequest(join_request = join)))
+        internalSocket.connect(join)
     }
 
     override suspend fun disconnect() {

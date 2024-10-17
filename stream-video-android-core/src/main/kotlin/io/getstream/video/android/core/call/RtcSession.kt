@@ -502,9 +502,10 @@ public class RtcSession internal constructor(
             fast_reconnect = false,
             client_details = clientDetails,
         )
+        logger.d { "Connecting RTC, $request" }
         sfuConnectionModule.socketConnection.connect(request)
         try {
-            withTimeout(2000L) {
+            withTimeout(10000L) {
                 joinEventReceivedMutex.withLock { connectRtc() }
             }
         } catch (e: TimeoutCancellationException) {
