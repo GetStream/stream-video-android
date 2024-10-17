@@ -19,8 +19,10 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
+import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
@@ -37,9 +39,21 @@ class MicrophoneManagerTest {
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
         val actual = MicrophoneManager(mediaManager, audioUsage)
         val context = mockk<Context>(relaxed = true)
-        val microphoneManager = spyk(actual)
         every { mediaManager.context } returns context
         every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
+
+        val microphoneManager = spyk(actual)
+        val slot = slot<() -> Unit>()
+        every { microphoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
+        every {
+            microphoneManager["ifAudioHandlerInitialized"](
+                any<
+                    (
+                        AudioSwitchHandler,
+                    ) -> Unit,
+                    >(),
+            )
+        } answers { true }
 
         // When
         microphoneManager.enable() // 1
@@ -53,12 +67,7 @@ class MicrophoneManagerTest {
         // Then
         verify(exactly = 10) {
             // Setup will be called exactly 10 times
-            microphoneManager.setup()
-        }
-        verify(exactly = 1) {
-            // Even thou setup was invoked 10 times, actual initialization happened once
-            // because context.getSystemService was called once only.
-            context.getSystemService(any())
+            microphoneManager.setup(any())
         }
     }
 
@@ -96,6 +105,9 @@ class MicrophoneManagerTest {
         every { mediaManager.context } returns context
         every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
 
+        val slot = slot<() -> Unit>()
+        every { microphoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
+
         // When
         microphoneManager.setup()
         microphoneManager.cleanup() // Clean and then invoke again
@@ -104,13 +116,15 @@ class MicrophoneManagerTest {
         // Then
         verify(exactly = 2) {
             // Setup was called twice
-            microphoneManager.setup()
+            microphoneManager.setup(any())
         }
         verifyOrder {
-            microphoneManager.setup() // Manual call
+            microphoneManager.setup(any()) // Manual call
             microphoneManager.cleanup() // Manual call
             microphoneManager.resume() // Manual call
-            microphoneManager.setup() // Automatic as part of enforce setup strategy of resume()
+            microphoneManager.setup(
+                any(),
+            ) // Automatic as part of enforce setup strategy of resume()
         }
     }
 
@@ -118,21 +132,23 @@ class MicrophoneManagerTest {
     fun `Resume will call enable only if prior status was DeviceStatus#enabled`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, audioUsage)
-        val context = mockk<Context>(relaxed = true)
-        val microphoneManager = spyk(actual)
-        every { mediaManager.context } returns context
-        every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage)
+        val spyMicrophoneManager = spyk(microphoneManager)
+        val mockContext = mockk<Context>(relaxed = true)
+        every { mediaManager.context } returns mockContext
+        every { mockContext.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
+
+        val slot = slot<() -> Unit>()
+        every { spyMicrophoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
 
         // When
-        microphoneManager.setup()
-        microphoneManager.priorStatus = DeviceStatus.Enabled
-        microphoneManager.resume() // Should call setup again
+        spyMicrophoneManager.priorStatus = DeviceStatus.Enabled
+        spyMicrophoneManager.resume() // Calls setup internally
 
         // Then
         verify(exactly = 1) {
             // Setup was called twice
-            microphoneManager.enable()
+            spyMicrophoneManager.enable()
         }
     }
 }

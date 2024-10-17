@@ -51,7 +51,6 @@ public class AudioSwitchHandler(
 
     private var audioSwitch: AudioSwitch? = null
 
-    // AudioSwitch is not threadsafe, so all calls should be done on the main thread.
     private val handler = Handler(Looper.getMainLooper())
 
     override fun start() {
@@ -62,10 +61,9 @@ public class AudioSwitchHandler(
             val devices = mutableListOf(
                 AudioDevice.WiredHeadset::class.java,
                 AudioDevice.BluetoothHeadset::class.java,
+                AudioDevice.Earpiece::class.java,
+                AudioDevice.Speakerphone::class.java,
             )
-
-            devices.add(AudioDevice.Earpiece::class.java)
-            devices.add(AudioDevice.Speakerphone::class.java)
 
             handler.post {
                 val switch = AudioSwitch(
