@@ -95,6 +95,10 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
     }
     fun close(): Boolean = webSocket.close(CLOSE_SOCKET_CODE, CLOSE_SOCKET_REASON)
     fun listen(): Flow<StreamWebSocketEvent> = eventFlow.asSharedFlow()
+
+    fun sendRaw(data: String) {
+        webSocket.send(data)
+    }
 }
 
 

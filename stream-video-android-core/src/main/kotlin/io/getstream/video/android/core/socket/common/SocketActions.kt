@@ -25,6 +25,11 @@ interface SocketActions<EventIn, EventOut, Error, State, Token> {
     public fun errors(): Flow<Error>
 
     /**
+     * Send raw data to the socket. If you already have a parsed event that can be sent.
+     */
+    fun sendData(data: String)
+
+    /**
      * Send event to the socket.
      */
     public suspend fun sendEvent(event: EventIn): Boolean

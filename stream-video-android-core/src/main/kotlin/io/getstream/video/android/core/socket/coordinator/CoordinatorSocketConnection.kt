@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.socket.coordinator
 
 import androidx.lifecycle.Lifecycle
+import com.squareup.moshi.JsonAdapter
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -47,6 +48,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.models.ConnectUserDetailsRequest
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
@@ -140,8 +142,13 @@ public open class CoordinatorSocketConnection(
                         custom = user.custom,
                     ),
                 )
+
+                val adapter: JsonAdapter<WSAuthMessageRequest> =
+                    Serializer.moshi.adapter(WSAuthMessageRequest::class.java)
+                val data = adapter.toJson(authRequest)
                 logger.d { "[onConnected] Sending auth request: $authRequest" }
-                sendEvent(authRequest)
+                logger.d { "[onConnected#data] Data: $data" }
+                sendData(data)
             }
         }
     }
@@ -202,6 +209,8 @@ public open class CoordinatorSocketConnection(
     override fun events(): Flow<VideoEvent> = events
 
     override fun errors(): Flow<StreamWebSocketEvent.Error> = errors
+
+    override fun sendData(data: String) = internalSocket.senRawData(data)
 
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 

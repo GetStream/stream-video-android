@@ -182,6 +182,8 @@ class SfuSocketConnection(
 
     override fun errors(): MutableSharedFlow<StreamWebSocketEvent.Error> = errors
 
+    override fun sendData(data: String) = internalSocket.sendRawData(data)
+
     override suspend fun sendEvent(event: SfuDataRequest): Boolean = internalSocket.sendEvent(event)
 
     override fun connectionId(): Flow<String> = connectionId.mapNotNull {

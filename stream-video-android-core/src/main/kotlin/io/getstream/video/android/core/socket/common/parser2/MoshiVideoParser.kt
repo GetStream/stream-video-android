@@ -32,9 +32,11 @@ import org.openapitools.client.infrastructure.ByteArrayAdapter
 import org.openapitools.client.infrastructure.LocalDateAdapter
 import org.openapitools.client.infrastructure.LocalDateTimeAdapter
 import org.openapitools.client.infrastructure.OffsetDateTimeAdapter
+import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.infrastructure.URIAdapter
 import org.openapitools.client.infrastructure.UUIDAdapter
 import org.openapitools.client.models.VideoEventAdapter
+import org.openapitools.client.models.WSAuthMessageRequest
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -47,7 +49,7 @@ internal class MoshiVideoParser : VideoParser {
             .add(UUIDAdapter()).add(ByteArrayAdapter()).add(URIAdapter()).add(BigDecimalAdapter())
             .add(BigIntegerAdapter())
             // JsonAdapter
-            .addAdapter(lenientAdapter(DateAdapter()))
+            .addAdapter(DateAdapter())
             .add(lenientAdapter(VideoEventAdapter())).add(
                 lenientAdapter(
                     org.openapitools.client.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter(),

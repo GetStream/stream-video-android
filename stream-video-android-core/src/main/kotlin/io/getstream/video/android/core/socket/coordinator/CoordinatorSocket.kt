@@ -307,6 +307,13 @@ internal open class CoordinatorSocket(
      */
     internal fun sendEvent(event: VideoEvent): Boolean = streamWebSocket?.send(event) ?: false
 
+    /**
+     * Send raw data to the web socket connection.
+     */
+    internal fun senRawData(data: String) {
+        streamWebSocket?.sendRaw(data)
+    }
+
     internal fun isConnected(): Boolean = coordinatorSocketStateService.currentState is VideoSocketState.Connected
 
     /**

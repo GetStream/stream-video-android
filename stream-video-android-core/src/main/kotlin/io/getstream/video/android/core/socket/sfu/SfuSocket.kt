@@ -294,6 +294,12 @@ internal open class SfuSocket(
      */
     internal fun sendEvent(event: SfuDataRequest): Boolean = streamWebSocket?.send(event) ?: false
 
+
+    /**
+     * Send raw data to the web socket connection.
+     */
+    internal fun sendRawData(data: String) = streamWebSocket?.sendRaw(data) ?: Unit
+
     internal fun isConnected(): Boolean =
         sfuSocketStateService.currentState is SfuSocketState.Connected
 
