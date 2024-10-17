@@ -405,7 +405,7 @@ public class RtcSession internal constructor(
             apiKey = coordinatorConnectionModule.apiKey,
             apiUrl = sfuUrl,
             wssUrl = sfuWsUrl,
-            connectionTimeoutInMs = 10000L,
+            connectionTimeoutInMs = 2000L,
             userToken = sfuToken,
             lifecycle = coordinatorConnectionModule.lifecycle,
         )
@@ -496,19 +496,13 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect() {
-        sfuConnectionModule.socketConnection.connect(user = call.user)
-        // ensure that the join event has been handled before starting RTC
-        sfuConnectionModule.socketConnection.whenConnected {
-            val request = JoinRequest(
-                session_id = sessionId,
-                token = sfuToken,
-                fast_reconnect = false,
-                client_details = clientDetails,
-            )
-            sfuConnectionModule.socketConnection.sendEvent(
-                SfuDataRequest(SfuRequest(join_request = request))
-            )
-        }
+        val request = JoinRequest(
+            session_id = sessionId,
+            token = sfuToken,
+            fast_reconnect = false,
+            client_details = clientDetails,
+        )
+        sfuConnectionModule.socketConnection.connect(request)
         try {
             withTimeout(2000L) {
                 joinEventReceivedMutex.withLock { connectRtc() }

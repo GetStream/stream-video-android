@@ -37,7 +37,7 @@ interface SocketActions<EventIn, EventOut, Error, State, Token> {
     /**
      * Connect the user.
      */
-    public suspend fun connect(user: User)
+    public suspend fun connect(connectData: Any)
 
     /**
      * Reconnect the user to the socket.

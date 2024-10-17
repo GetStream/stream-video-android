@@ -51,6 +51,7 @@ import okhttp3.OkHttpClient
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.JoinRequest
+import stream.video.sfu.event.SfuRequest
 
 class SfuSocketConnection(
     private val apiKey: ApiKey,
@@ -119,9 +120,6 @@ class SfuSocketConnection(
 
     override fun onConnected(event: JoinCallResponseEvent) {
         super.onConnected(event)
-        whenConnected {
-            connectionId.value = it
-        }
         logger.d { "[onConnected] Socket connected with event: $event" }
     }
 
@@ -160,8 +158,9 @@ class SfuSocketConnection(
         }
     }
 
-    override suspend fun connect(user: User) {
-        internalSocket.connect(user)
+    override suspend fun connect(connectData: Any) {
+        val join = connectData as JoinRequest
+        internalSocket.sendEvent(SfuDataRequest(SfuRequest(join_request = join)))
     }
 
     override suspend fun disconnect() {

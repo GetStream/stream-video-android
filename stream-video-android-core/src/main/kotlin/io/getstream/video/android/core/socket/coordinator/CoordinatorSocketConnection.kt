@@ -214,7 +214,7 @@ public open class CoordinatorSocketConnection(
 
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
-    override suspend fun connect(user: User) {
+    override suspend fun connect(connectData: Any) {
         internalSocket.connectUser(user, user.isAnonymous())
     }
 

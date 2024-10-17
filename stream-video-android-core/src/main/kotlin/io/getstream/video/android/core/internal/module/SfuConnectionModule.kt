@@ -32,9 +32,11 @@ internal class SfuConnectionModule(
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
+    override val http: OkHttpClient = buildSfuOkHttpClient()
+
     private val signalRetrofitClient: Retrofit by lazy {
         Retrofit.Builder().client(http).addConverterFactory(WireConverterFactory.create())
-            .baseUrl(apiUrl).build()
+            .baseUrl("$apiUrl/").build()
     }
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
@@ -53,7 +55,6 @@ internal class SfuConnectionModule(
 
     // API
     override val api: SignalServerService = signalRetrofitClient.create(SignalServerService::class.java)
-    override val http: OkHttpClient = buildSfuOkHttpClient()
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,

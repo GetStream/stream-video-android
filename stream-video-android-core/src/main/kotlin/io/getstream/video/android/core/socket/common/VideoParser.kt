@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.socket.common
 
 import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.extractCause
@@ -91,17 +92,18 @@ internal interface SfuParser: GenericParser<SfuDataRequest> {
 internal interface VideoParser : GenericParser<VideoEvent> {
 
     private val tag: String get() = "Video:VideoParser"
-
     override fun encode(event: VideoEvent): ByteString {
         val json = toJson(event)
         return json.encodeToByteArray().toByteString()
     }
 
     override fun decodeOrError(raw: ByteArray): Result<StreamWebSocketEvent> {
-        val text = raw.toString()
+        val text = String(raw)
+        StreamLog.d(tag) { "[decode] raw: ${String(raw)}" }
         val event = fromJsonOrError(text, VideoEvent::class.java)
             .map { StreamWebSocketEvent.VideoMessage(it) }
             .recover { parseChatError ->
+                StreamLog.d(tag) { "[decode#recover] raw: $parseChatError" }
                 val errorResponse =
                     when (
                         val chatErrorResult = fromJsonOrError(

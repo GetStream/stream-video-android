@@ -314,7 +314,7 @@ internal open class SfuSocket(
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     internal suspend fun awaitConnection(timeoutInMillis: Long = DEFAULT_CONNECTION_TIMEOUT) {
-        awaitState<SfuSocketState.Connected>(timeoutInMillis)
+        awaitState<SfuSocketState.Connecting>(timeoutInMillis)
     }
 
     /**
@@ -341,7 +341,7 @@ internal open class SfuSocket(
      */
     internal fun connectionIdOrError(): String =
         when (sfuSocketStateService.currentState) {
-            is SfuSocketState.Connected -> {
+            is SfuSocketState.Connecting -> {
                 safeCallWithDefault(error("This state doesn't contain connectionId")) {
                     socketId.getOrThrow()
                 }

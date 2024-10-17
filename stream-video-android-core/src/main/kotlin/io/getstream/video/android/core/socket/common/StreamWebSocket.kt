@@ -97,6 +97,7 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
     fun listen(): Flow<StreamWebSocketEvent> = eventFlow.asSharedFlow()
 
     fun sendRaw(data: String) {
+        logger.d { "[send#raw] event: `$data`" }
         webSocket.send(data)
     }
 }
