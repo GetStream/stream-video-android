@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import stream.video.sfu.event.HealthCheckRequest
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.WebsocketReconnectStrategy
@@ -61,7 +62,11 @@ internal open class SfuSocket(
     private val healthMonitor = HealthMonitor(
         userScope = userScope,
         checkCallback = {
-            sendEvent(SFUHealthCheckEvent())
+            sendEvent(
+                SfuDataRequest(
+                    SfuRequest(health_check_request = HealthCheckRequest())
+                )
+            )
         },
         reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
     )
@@ -223,6 +228,7 @@ internal open class SfuSocket(
             is SFUHealthCheckEvent -> {
                 healthMonitor.ack()
             }
+
             else -> {
                 // Ignore, maybe handled on upper levels.
             }
