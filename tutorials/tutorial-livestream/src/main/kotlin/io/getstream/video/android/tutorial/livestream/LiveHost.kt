@@ -59,7 +59,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LiveHost(
     navController: NavController,
-    callId: String
+    callId: String,
 ) {
     val context = LocalContext.current
     val userId = "Darth_Krayt"
@@ -99,7 +99,7 @@ fun LiveHost(
 @Composable
 private fun LiveHostContent(
     navController: NavController,
-    call: Call
+    call: Call,
 ) {
     LaunchCallPermissions(call = call)
 

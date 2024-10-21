@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
-import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.GEO
@@ -40,7 +39,7 @@ import io.getstream.video.android.model.User
 @Composable
 fun LiveAudience(
     navController: NavController,
-    callId: String
+    callId: String,
 ) {
     val context = LocalContext.current
     val userId = "Ben_Skywalker"
@@ -77,11 +76,11 @@ fun LiveAudience(
     Column {
         LivestreamPlayer(
             modifier = Modifier.weight(1f),
-            call = call
+            call = call,
         )
 
         Row(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             LeaveCallAction {
                 call.leave()
