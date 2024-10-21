@@ -27,12 +27,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.compose.ui.components.base.styling.StreamTextFieldStyles
+import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
 @Composable
 fun LiveMain(
@@ -48,6 +58,18 @@ fun LiveMain(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            var callId by remember { mutableStateOf(TextFieldValue("dE8AsD5Qxqrt")) }
+            StreamTextField(
+                modifier = Modifier.width(300.dp),
+                value = callId,
+                placeholder = "Call Id (required)",
+                onValueChange = {
+                    callId = it
+                },
+            )
+
+            Spacer(modifier = Modifier.height(44.dp))
+
             Button(
                 modifier = Modifier
                     .width(300.dp)
@@ -57,7 +79,7 @@ fun LiveMain(
                     backgroundColor = VideoTheme.colors.brandPrimary,
                 ),
                 onClick = {
-                    navController.navigate(LiveScreens.Host.destination)
+                    navController.navigate(LiveScreens.Host.destination(callId.text))
                 },
             ) {
                 Text(text = "host", color = VideoTheme.colors.basePrimary)
@@ -74,7 +96,7 @@ fun LiveMain(
                     backgroundColor = VideoTheme.colors.brandPrimary,
                 ),
                 onClick = {
-                    navController.navigate(LiveScreens.Guest.destination)
+                    navController.navigate(LiveScreens.Guest.destination(callId.text))
                 },
             ) {
                 Text(text = "guest", color = VideoTheme.colors.basePrimary)

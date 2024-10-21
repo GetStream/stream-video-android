@@ -49,14 +49,14 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.internal.service.livestreamCallServiceConfig
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.launch
 
 @Composable
-fun LiveHost() {
+fun LiveHost(callId: String) {
     val context = LocalContext.current
     val userId = "Darth_Krayt"
     val userToken = StreamVideo.devToken(userId)
-    val callId = "dE8AsD5Qxqrt"
 
     // step1 - create a user.
     val user = User(
