@@ -30,6 +30,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallStatsReport
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.ScreenShareManager
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
@@ -234,11 +235,6 @@ public class RtcSession internal constructor(
     private val supervisorJob = SupervisorJob()
     private val coroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
-    /**
-     * We can't publish tracks till we've received the join event response
-     */
-    private val joinEventReceivedMutex = Mutex(locked = true)
-
     // participants by session id -> participant state
     private val trackPrefixToSessionIdMap =
         call.state.participants.mapState { it.associate { it.trackLookupPrefix to it.sessionId } }
@@ -393,6 +389,8 @@ public class RtcSession internal constructor(
         val getSdp = suspend {
             session.getSubscriberSdp().description
         }
+
+
         /*
         if (sfuUrl.contains(Regex("https?://"))) {
         sfuUrl
@@ -409,6 +407,21 @@ public class RtcSession internal constructor(
             userToken = sfuToken,
             lifecycle = coordinatorConnectionModule.lifecycle,
         )
+        coroutineScope.launch {
+            sfuConnectionModule.socketConnection.state().collectLatest {
+                when(it) {
+                    is SfuSocketState.Connected -> call.state._connection.value = RealtimeConnection.Connected
+                    is SfuSocketState.Connecting -> call.state._connection.value = RealtimeConnection.InProgress
+                    is SfuSocketState.Disconnected.DisconnectedPermanently -> call.state._connection.value = RealtimeConnection.Disconnected
+                    SfuSocketState.Disconnected.NetworkDisconnected -> RealtimeConnection.Reconnecting
+                    SfuSocketState.Disconnected.Stopped -> RealtimeConnection.Disconnected
+                    is SfuSocketState.RestartConnection -> RealtimeConnection.Reconnecting
+                    else -> {
+                        // Do nothing
+                    }
+                }
+            }
+        }
         /*coordinatorConnectionModule.createSFUConnectionModule(
             sfuUrl,
             sessionId,
@@ -504,15 +517,8 @@ public class RtcSession internal constructor(
         )
         logger.d { "Connecting RTC, $request" }
         sfuConnectionModule.socketConnection.connect(request)
-        try {
-            withTimeout(10000L) {
-                joinEventReceivedMutex.withLock { connectRtc() }
-            }
-        } catch (e: TimeoutCancellationException) {
-            throw RtcException(
-                message = "RtcSession.connect() timed out. JoinCallResponseEvent not received in time.",
-                cause = e,
-            )
+        sfuConnectionModule.socketConnection.whenConnected(2000) {
+            connectRtc()
         }
     }
 
@@ -1140,12 +1146,6 @@ public class RtcSession internal constructor(
 
     fun handleEvent(event: VideoEvent) {
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
-        if (event is JoinCallResponseEvent) {
-            if (joinEventReceivedMutex.isLocked) {
-                logger.i { "[rtc handleEvent] unlocking joinEventReceivedMutex" }
-                joinEventReceivedMutex.unlock()
-            }
-        }
         if (event is SfuDataEvent) {
             coroutineScope.launch {
                 logger.v { "[onRtcEvent] event: $event" }
@@ -1396,12 +1396,6 @@ public class RtcSession internal constructor(
             if (result.isFailure) {
                 // the call health monitor will end up restarting the peer connection and recover from this
                 logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
-                return@launch
-            }
-
-            // the Sfu WS needs to be connected before calling SetPublisherRequest
-            if (joinEventReceivedMutex.isLocked) {
-                logger.e { "[negotiate] #$id; #sfu; #${peerType.stringify()}; SFU WS isn't connected" }
                 return@launch
             }
 

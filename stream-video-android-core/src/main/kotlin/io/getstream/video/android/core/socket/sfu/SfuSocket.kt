@@ -61,7 +61,7 @@ internal open class SfuSocket(
     private val healthMonitor = HealthMonitor(
         userScope = userScope,
         checkCallback = {
-            //  Do nothing
+            sendEvent(SFUHealthCheckEvent())
         },
         reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
     )
@@ -100,14 +100,14 @@ internal open class SfuSocket(
                         socketFactory.createSocket<SfuDataEvent>(connectionConf, "#sfu").apply {
                             listeners.forEach { it.onCreated() }
 
-                                logger.d { "[connectUser] send join request = ${connectionConf.joinRequest}" }
-                                send(
-                                    SfuDataRequest(
-                                        SfuRequest(
-                                            join_request = connectionConf.joinRequest,
-                                        )
+                            logger.d { "[connectUser] send join request = ${connectionConf.joinRequest}" }
+                            send(
+                                SfuDataRequest(
+                                    SfuRequest(
+                                        join_request = connectionConf.joinRequest,
                                     )
                                 )
+                            )
 
                             socketListenerJob = listen().onEach {
                                 when (it) {
@@ -223,9 +223,11 @@ internal open class SfuSocket(
             is SFUHealthCheckEvent -> {
                 healthMonitor.ack()
             }
-
-            else -> callListeners { listener -> listener.onEvent(sfuEvent) }
+            else -> {
+                // Ignore, maybe handled on upper levels.
+            }
         }
+        listeners.forEach { listener -> listener.onEvent(sfuEvent) }
     }
 
     private suspend fun startObservers() {
@@ -263,6 +265,7 @@ internal open class SfuSocket(
             VideoErrorCode.INVALID_TOKEN.code,
             VideoErrorCode.API_KEY_NOT_FOUND.code,
             VideoErrorCode.VALIDATION_ERROR.code,
+            VideoErrorCode.SOCKET_CLOSED.code,
             -> {
                 logger.d {
                     "One unrecoverable error happened. Error: $error. Error code: ${error.serverErrorCode}"
