@@ -27,12 +27,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,8 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
-import io.getstream.video.android.compose.ui.components.base.styling.StreamTextFieldStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
 @Composable
 fun LiveMain(

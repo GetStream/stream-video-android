@@ -28,7 +28,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.model.User
 
 @Composable
 fun LiveNavHost(
@@ -48,11 +47,11 @@ fun LiveNavHost(
         }
 
         composable(LiveScreens.Host.destination, LiveScreens.Host.args) {
-            LiveHost(callId = LiveScreens.Host.getCallId(it))
+            LiveHost(navController = navController, callId = LiveScreens.Host.getCallId(it))
         }
 
         composable(LiveScreens.Guest.destination, LiveScreens.Guest.args) {
-            LiveAudience(callId = LiveScreens.Guest.getCallId(it))
+            LiveAudience(navController = navController, callId = LiveScreens.Guest.getCallId(it))
         }
     }
 }

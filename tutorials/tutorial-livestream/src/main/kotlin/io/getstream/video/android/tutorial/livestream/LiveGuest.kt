@@ -17,10 +17,18 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
@@ -28,10 +36,12 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.internal.service.livestreamGuestCallServiceConfig
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserType
 
 @Composable
-fun LiveAudience(callId: String) {
+fun LiveAudience(
+    navController: NavController,
+    callId: String
+) {
     val context = LocalContext.current
     val userId = "Ben_Skywalker"
     val userToken = StreamVideo.devToken(userId)
@@ -64,5 +74,19 @@ fun LiveAudience(callId: String) {
         }
     }
 
-    LivestreamPlayer(call = call)
+    Column {
+        LivestreamPlayer(
+            modifier = Modifier.weight(1f),
+            call = call
+        )
+
+        Row(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            LeaveCallAction {
+                call.leave()
+                navController.popBackStack()
+            }
+        }
+    }
 }

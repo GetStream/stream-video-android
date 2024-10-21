@@ -19,9 +19,12 @@ package io.getstream.video.android.tutorial.livestream
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -37,9 +40,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
@@ -49,11 +54,13 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.internal.service.livestreamCallServiceConfig
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.launch
 
 @Composable
-fun LiveHost(callId: String) {
+fun LiveHost(
+    navController: NavController,
+    callId: String
+) {
     val context = LocalContext.current
     val userId = "Darth_Krayt"
     val userToken = StreamVideo.devToken(userId)
@@ -86,11 +93,14 @@ fun LiveHost(callId: String) {
             Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
         }
     }
-    LiveHostContent(call)
+    LiveHostContent(navController, call)
 }
 
 @Composable
-private fun LiveHostContent(call: Call) {
+private fun LiveHostContent(
+    navController: NavController,
+    call: Call
+) {
     LaunchCallPermissions(call = call)
 
     val connection by call.state.connection.collectAsState()
@@ -148,21 +158,28 @@ private fun LiveHostContent(call: Call) {
             }
         },
         bottomBar = {
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = VideoTheme.colors.brandPrimary,
-                    backgroundColor = VideoTheme.colors.brandPrimary,
-                ),
-                onClick = {
-                    scope.launch {
-                        if (backstage) call.goLive() else call.stopLive()
-                    }
-                },
-            ) {
-                Text(
-                    text = if (backstage) "Start Broadcast" else "Stop Broadcast",
-                    color = Color.White,
-                )
+            Row {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = VideoTheme.colors.brandPrimary,
+                        backgroundColor = VideoTheme.colors.brandPrimary,
+                    ),
+                    onClick = {
+                        scope.launch {
+                            if (backstage) call.goLive() else call.stopLive()
+                        }
+                    },
+                ) {
+                    Text(
+                        text = if (backstage) "Start Broadcast" else "Stop Broadcast",
+                        color = Color.White,
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                LeaveCallAction {
+                    call.leave()
+                    navController.popBackStack()
+                }
             }
         },
     ) {
