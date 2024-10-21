@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import stream.video.sfu.event.JoinRequest
+import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
 import kotlin.coroutines.EmptyCoroutineContext
@@ -99,6 +100,15 @@ internal open class SfuSocket(
                         socketFactory.createSocket<SfuDataEvent>(connectionConf, "#sfu").apply {
                             listeners.forEach { it.onCreated() }
 
+                                logger.d { "[connectUser] send join request = ${connectionConf.joinRequest}" }
+                                send(
+                                    SfuDataRequest(
+                                        SfuRequest(
+                                            join_request = connectionConf.joinRequest,
+                                        )
+                                    )
+                                )
+
                             socketListenerJob = listen().onEach {
                                 when (it) {
                                     is StreamWebSocketEvent.Error -> handleError(it)
@@ -120,11 +130,6 @@ internal open class SfuSocket(
             }
         }
 
-        suspend fun reconnect(connectionConf: ConnectionConf.SfuConnectionConf) {
-            logger.d { "[reconnect] connectionConf: $connectionConf" }
-            connectUser(connectionConf)
-        }
-
         return userScope.launch {
             sfuSocketStateService.observer { state ->
                 logger.i { "[onSocketStateChanged] state: $state" }
@@ -142,8 +147,8 @@ internal open class SfuSocket(
                     }
 
                     is SfuSocketState.Connecting -> {
-                        callListeners { listener -> listener.onConnecting() }
                         connectUser(state.connectionConf)
+                        callListeners { listener -> listener.onConnecting() }
                     }
 
                     is SfuSocketState.Disconnected -> {
@@ -196,7 +201,13 @@ internal open class SfuSocket(
         socketStateObserverJob?.cancel()
         socketStateObserverJob = observeSocketStateService()
         sfuSocketStateService.onConnect(
-            ConnectionConf.SfuConnectionConf(wssUrl, apiKey, User.anonymous(), joinRequest, tokenManager.getToken())
+            ConnectionConf.SfuConnectionConf(
+                wssUrl,
+                apiKey,
+                User.anonymous(),
+                joinRequest,
+                tokenManager.getToken()
+            )
         )
     }
 
@@ -353,6 +364,7 @@ internal open class SfuSocket(
                     socketId.getOrThrow()
                 }
             }
+
             else -> error("This state doesn't contain connectionId")
         }
 

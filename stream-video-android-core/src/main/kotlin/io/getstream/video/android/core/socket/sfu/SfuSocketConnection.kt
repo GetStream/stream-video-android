@@ -160,6 +160,7 @@ class SfuSocketConnection(
 
     override suspend fun connect(connectData: Any) {
         val join = connectData as JoinRequest
+        logger.d { "[connect] request: $join" }
         internalSocket.connect(join)
     }
 
