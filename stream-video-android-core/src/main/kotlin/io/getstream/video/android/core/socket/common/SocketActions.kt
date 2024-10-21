@@ -4,7 +4,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-interface SocketActions<EventIn, EventOut, Error, State, Token> {
+interface SocketActions<EventIn, EventOut, Error, State, Token, ConnectData> {
     companion object {
         internal const val DEFAULT_SOCKET_TIMEOUT: Long = 10000L
     }
@@ -37,12 +37,12 @@ interface SocketActions<EventIn, EventOut, Error, State, Token> {
     /**
      * Connect the user.
      */
-    public suspend fun connect(connectData: Any)
+    public suspend fun connect(connectData: ConnectData)
 
     /**
      * Reconnect the user to the socket.
      */
-    public suspend fun reconnect(user: User, force: Boolean = false)
+    public suspend fun reconnect(data: ConnectData, force: Boolean = false)
 
     /**
      * Disconnect the socket.

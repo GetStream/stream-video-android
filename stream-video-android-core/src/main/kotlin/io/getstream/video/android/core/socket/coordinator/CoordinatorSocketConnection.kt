@@ -82,7 +82,7 @@ public open class CoordinatorSocketConnection(
     /** Token provider */
     private val tokenProvider: TokenProvider,
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
-    SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken> {
+    SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
 
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
@@ -214,12 +214,12 @@ public open class CoordinatorSocketConnection(
 
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
-    override suspend fun connect(connectData: Any) {
-        internalSocket.connectUser(user, user.isAnonymous())
+    override suspend fun connect(connectData: User) {
+        internalSocket.connectUser(connectData, connectData.isAnonymous())
     }
 
-    override suspend fun reconnect(user: User, force: Boolean) {
-        internalSocket.reconnectUser(user, user.isAnonymous(), force)
+    override suspend fun reconnect(data: User, force: Boolean) {
+        internalSocket.reconnectUser(data, data.isAnonymous(), force)
     }
 
     override suspend fun disconnect() = internalSocket.disconnect()

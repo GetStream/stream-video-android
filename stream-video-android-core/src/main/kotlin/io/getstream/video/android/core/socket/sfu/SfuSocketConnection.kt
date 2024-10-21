@@ -68,7 +68,7 @@ class SfuSocketConnection(
     /** Token provider */
     private val tokenProvider: TokenProvider,
 ) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
-    SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken> {
+    SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken, JoinRequest> {
 
     companion object {
         internal const val DEFAULT_SFU_SOCKET_TIMEOUT: Long = 10000L
@@ -158,13 +158,13 @@ class SfuSocketConnection(
         }
     }
 
-    override suspend fun connect(connectData: Any) {
-        val join = connectData as JoinRequest
-        logger.d { "[connect] request: $join" }
-        internalSocket.connect(join)
+    override suspend fun connect(connectData: JoinRequest) {
+        logger.d { "[connect] request: $connectData" }
+        internalSocket.connect(connectData)
     }
 
     override suspend fun disconnect() {
+        logger.d { "[disconnect] Disconnecting socket" }
         internalSocket.disconnect()
     }
 
@@ -172,8 +172,11 @@ class SfuSocketConnection(
         throw UnsupportedOperationException("Update token is not supported for SFU. Create a new socket instead.")
     }
 
-    override suspend fun reconnect(user: User, force: Boolean) {
-        throw UnsupportedOperationException("Reconnect user is not supported for SFU, it has different reconnect strategy")
+    override suspend fun reconnect(data: JoinRequest, force: Boolean) {
+        if (data.reconnect_details == null) {
+            logger.w { "[reconnect] Reconnect details are missing!" }
+        }
+        internalSocket.connect(data)
     }
 
     override fun state(): StateFlow<SfuSocketState> = state

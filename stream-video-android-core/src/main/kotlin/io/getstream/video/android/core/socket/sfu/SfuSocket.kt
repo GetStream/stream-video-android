@@ -341,7 +341,7 @@ internal open class SfuSocket(
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     internal suspend fun awaitConnection(timeoutInMillis: Long = DEFAULT_CONNECTION_TIMEOUT) {
-        awaitState<SfuSocketState.Connecting>(timeoutInMillis)
+        awaitState<SfuSocketState.Connected>(timeoutInMillis)
     }
 
     /**
@@ -368,12 +368,7 @@ internal open class SfuSocket(
      */
     internal fun connectionIdOrError(): String =
         when (sfuSocketStateService.currentState) {
-            is SfuSocketState.Connecting -> {
-                safeCallWithDefault(error("This state doesn't contain connectionId")) {
-                    socketId.getOrThrow()
-                }
-            }
-
+            is SfuSocketState.Connected -> socketId.getOrThrow()
             else -> error("This state doesn't contain connectionId")
         }
 
@@ -418,6 +413,6 @@ internal open class SfuSocket(
 
     companion object {
         private const val TAG = "Video:SfuSocket"
-        private const val DEFAULT_CONNECTION_TIMEOUT = 60_000L
+        private const val DEFAULT_CONNECTION_TIMEOUT = 2000L
     }
 }

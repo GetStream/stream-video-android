@@ -73,12 +73,6 @@ public class StreamPeerConnection(
 
     private val setDescriptionMutex = Mutex()
 
-    private val goodStates = listOf(
-        PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
-        PeerConnection.PeerConnectionState.CONNECTED,
-        PeerConnection.PeerConnectionState.CONNECTING,
-    )
-
     internal var localSdp: SessionDescription? = null
     internal var remoteSdp: SessionDescription? = null
     private val typeTag = type.stringify()
@@ -108,7 +102,12 @@ public class StreamPeerConnection(
         private set
 
     fun isHealthy(): Boolean {
-        return state.value in goodStates
+        return when (state.value) {
+            PeerConnection.PeerConnectionState.NEW,
+            PeerConnection.PeerConnectionState.CONNECTED,
+            PeerConnection.PeerConnectionState.CONNECTING -> true
+            else -> false
+        }
     }
 
     init {

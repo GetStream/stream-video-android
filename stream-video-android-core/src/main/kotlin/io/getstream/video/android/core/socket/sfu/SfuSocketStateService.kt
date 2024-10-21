@@ -215,7 +215,7 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                 onEvent<SfuSocketStateEvent.NetworkError> { SfuSocketState.Disconnected.DisconnectedTemporarily(it.error, it.reconnectStrategy) }
                 onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
-                onEvent<SfuSocketStateEvent.NetworkAvailable> { SfuSocketState.RestartConnection(RestartReason.NETWORK_AVAILABLE, WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED) }
+                onEvent<SfuSocketStateEvent.NetworkAvailable> { SfuSocketState.RestartConnection(RestartReason.NETWORK_AVAILABLE, WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN) }
             }
 
             state<SfuSocketState.Disconnected.WebSocketEventLost> {

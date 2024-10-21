@@ -18,7 +18,6 @@ package io.getstream.video.android.core.call
 
 import android.os.Build
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
@@ -41,7 +40,6 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
-import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SfuDataEvent
@@ -71,7 +69,6 @@ import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
@@ -88,10 +85,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
@@ -110,6 +104,7 @@ import org.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.Migration
+import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.ClientDetails
 import stream.video.sfu.models.Device
@@ -296,10 +291,10 @@ public class RtcSession internal constructor(
         get() = buildConnectionConfiguration(iceServers)
 
     /** subscriber peer connection is used for subs */
-    public var subscriber: StreamPeerConnection? = null
+    public var subscriber: StreamPeerConnection = createSubscriber()
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    internal var publisher: StreamPeerConnection? = null
+    internal var publisher: StreamPeerConnection = createPublisher()
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
@@ -342,31 +337,6 @@ public class RtcSession internal constructor(
         // until the health check runs
         call.monitor.stopTimer()
         call.monitor.reconnect(forceRestart = true)
-    }
-
-    private val onWebsocketReconnectStrategy: suspend (WebsocketReconnectStrategy?) -> Unit = {
-        when (it) {
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                call.monitor.stopTimer()
-                call.monitor.reconnect(forceRestart = true)
-            }
-
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
-                call.handleSignalChannelDisconnect(false)
-            }
-
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
-                call.switchSfu()
-            }
-
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
-                sfuConnectionModule.socketConnection.disconnect()
-                coordinatorConnectionModule.socketConnection.disconnect()
-            }
-
-            else -> { // Do nothing }
-            }
-        }
     }
 
     private val sfuCallEnded: suspend () -> Unit = {
@@ -466,6 +436,53 @@ public class RtcSession internal constructor(
         }
         errorJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.errors().collect {
+                val reconnectStrategy = it.reconnectStrategy
+                logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
+                when (reconnectStrategy) {
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
+                        call.monitor.stopTimer()
+                        call.monitor.reconnect(forceRestart = true)
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                        val currentSubscriptions = subscriptions.value
+                        syncPublisherJob
+                        // We need to rejoin on the same SFU.
+                        val publisherTracks = publisher?.let { pub ->
+                            getPublisherTracks(pub.connection.localDescription.description)
+                        } ?: emptyList()
+                        val request = JoinRequest(
+                            session_id = sessionId,
+                            token = sfuToken,
+                            fast_reconnect = false,
+                            client_details = clientDetails,
+                            reconnect_details = ReconnectDetails(
+                                reconnectStrategy,
+                                publisherTracks,
+                                currentSubscriptions,
+                            )
+                        )
+                        sfuConnectionModule.socketConnection.reconnect(request)
+                        sfuConnectionModule.socketConnection.whenConnected {
+                            publisher?.connection?.restartIce()
+                        }
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                        // We need to move to a different SFU.
+                        call.switchSfu()
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
+                        // We are told to disconnect.
+                        sfuConnectionModule.socketConnection.disconnect()
+                        coordinatorConnectionModule.socketConnection.disconnect()
+                    }
+
+                    else -> {
+                        // Either null or UNSPECIFIED, do not reconnect
+                    }
+                }
                 logger.e(
                     it.streamError.extractCause()
                         ?: IllegalStateException("Error emitted without a cause on SFU connection.")
@@ -517,7 +534,7 @@ public class RtcSession internal constructor(
         )
         logger.d { "Connecting RTC, $request" }
         sfuConnectionModule.socketConnection.connect(request)
-        sfuConnectionModule.socketConnection.whenConnected(2000) {
+        sfuConnectionModule.socketConnection.whenConnected {
             connectRtc()
         }
     }
@@ -811,17 +828,16 @@ public class RtcSession internal constructor(
         logger.i { "[cleanup] #sfu; no args" }
         supervisorJob.cancel()
 
-        // disconnect the socket and clean it up
-
-        coroutineScope.launch { sfuConnectionMigrationModule?.socketConnection?.disconnect() }
+        coroutineScope.launch {
+            sfuConnectionModule.socketConnection.disconnect()
+            sfuConnectionMigrationModule?.socketConnection?.disconnect()
+        }
         sfuConnectionMigrationModule = null
 
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
         publisher?.connection?.close()
 
-        subscriber = null
-        publisher = null
 
         // cleanup all non-local tracks
         tracks.filter { it.key != sessionId }.values.map { it.values }.flatten()
@@ -1906,7 +1922,6 @@ public class RtcSession internal constructor(
                                     logger.d { "[switchSfu] Migration subscriber state changed to Connected" }
                                     tempSubscriber?.let { tempSubscriberValue ->
                                         tempSubscriberValue.connection.close()
-                                        tempSubscriber = null
                                     }
 
                                     onMigrationCompleted.invoke()
