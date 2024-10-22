@@ -56,6 +56,10 @@ public data class ICETrickleEvent(
     val peerType: PeerType,
 ) : SfuDataEvent()
 
+public data class ICERestartEvent(
+    val peerType: PeerType,
+) : SfuDataEvent()
+
 public data class SubscriberOfferEvent(
     val sdp: String,
 ) : SfuDataEvent()
