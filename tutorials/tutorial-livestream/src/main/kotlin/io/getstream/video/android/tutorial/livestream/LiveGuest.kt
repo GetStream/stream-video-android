@@ -17,20 +17,32 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import io.getstream.log.Priority
+import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
-import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.internal.service.livestreamGuestCallServiceConfig
@@ -75,9 +87,20 @@ fun LiveAudience(
 
     Column {
         LivestreamPlayer(
-            modifier = Modifier.weight(1f),
-            call = call,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(bottom = VideoTheme.dimens.spacingXXs),
+            call = call
         )
+
+        /*LiveVideoContent(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(bottom = VideoTheme.dimens.spacingXXs),
+            call = call,
+        )*/
 
         Row(
             modifier = Modifier.padding(16.dp),
@@ -86,6 +109,53 @@ fun LiveAudience(
                 call.leave()
                 navController.popBackStack()
             }
+        }
+    }
+}
+
+@Composable
+fun LiveVideoContent(
+    modifier: Modifier = Modifier,
+    call: Call
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        val participants by call.state.participants.collectAsStateWithLifecycle()
+        val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle(emptyList())
+        val callParticipants by remember(participants) {
+            derivedStateOf {
+                if (sortedParticipants.size > 6) {
+                    sortedParticipants
+                } else {
+                    participants
+                }
+            }
+        }
+
+        val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
+
+        StreamLog.e("LiveAudience") {
+            "participants: ${participants.map { it.userId.value }}, " +
+                    "callParticipants: ${callParticipants.map { it.userId.value }}, " +
+                    "remoteParticipants: ${remoteParticipants.map { it.userId.value }}"
+        }
+
+        val predicate: (ParticipantState) -> Boolean = { it.userId.value == "martin" }
+//        val predicate: (ParticipantState) -> Boolean = { it.videoTrack.value != null }
+        val hostState = remoteParticipants.firstOrNull(predicate)
+            ?: participants.firstOrNull(predicate)
+            ?: callParticipants.firstOrNull(predicate)
+
+        if (hostState == null) {
+            Text(
+                style = VideoTheme.styles.textStyles.defaultBody().default.platform,
+                text = "Waiting for host to join..."
+            )
+        } else {
+            ParticipantVideo(
+                modifier = Modifier.fillMaxSize(),
+                call = call,
+                participant = hostState,
+            )
         }
     }
 }
