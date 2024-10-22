@@ -265,7 +265,6 @@ public class CallState(
 
     val stats = CallStats(call, scope)
 
-
     private val pastPublishers: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
 
@@ -343,7 +342,11 @@ public class CallState(
         awaitClose { }
     }
 
-    val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.stateIn(
+        scope,
+        SharingStarted.WhileSubscribed(10000L),
+        null,
+    )
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
@@ -956,13 +959,13 @@ public class CallState(
         Log.d(
             "RingingState",
             "Flags: [\n" +
-                    "acceptedByMe: $isAcceptedByMe,\n" +
-                    "rejectedByMe: $isRejectedByMe,\n" +
-                    "rejectReason: $rejectReason,\n" +
-                    "hasActiveCall: $hasActiveCall\n" +
-                    "hasRingingCall: $hasRingingCall\n" +
-                    "userIsParticipant: $userIsParticipant,\n" +
-                    "]",
+                "acceptedByMe: $isAcceptedByMe,\n" +
+                "rejectedByMe: $isRejectedByMe,\n" +
+                "rejectReason: $rejectReason,\n" +
+                "hasActiveCall: $hasActiveCall\n" +
+                "hasRingingCall: $hasRingingCall\n" +
+                "userIsParticipant: $userIsParticipant,\n" +
+                "]",
         )
 
         // no members - call is empty, we can join

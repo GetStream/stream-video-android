@@ -133,6 +133,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getLiveDuration ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLiveDurationInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLivestream ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getLivestreamFlow ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMe ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMember (Ljava/lang/String;)Lio/getstream/video/android/core/MemberState;
@@ -3030,6 +3031,17 @@ public final class io/getstream/video/android/core/events/GoAwayEvent : io/getst
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/GoAwayEvent;Lstream/video/sfu/models/GoAwayReason;ILjava/lang/Object;)Lio/getstream/video/android/core/events/GoAwayEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReason ()Lstream/video/sfu/models/GoAwayReason;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/ICERestartEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/models/PeerType;)V
+	public final fun component1 ()Lstream/video/sfu/models/PeerType;
+	public final fun copy (Lstream/video/sfu/models/PeerType;)Lio/getstream/video/android/core/events/ICERestartEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/ICERestartEvent;Lstream/video/sfu/models/PeerType;ILjava/lang/Object;)Lio/getstream/video/android/core/events/ICERestartEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPeerType ()Lstream/video/sfu/models/PeerType;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
