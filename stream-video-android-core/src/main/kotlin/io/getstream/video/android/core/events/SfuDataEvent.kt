@@ -30,7 +30,7 @@ import stream.video.sfu.models.TrackType
 
 public sealed class SfuDataEvent : VideoEvent() {
     override fun getEventType(): String {
-        return "SfuDataEvent"
+        return this::class.simpleName ?: "UnknownEvent"
     }
 }
 

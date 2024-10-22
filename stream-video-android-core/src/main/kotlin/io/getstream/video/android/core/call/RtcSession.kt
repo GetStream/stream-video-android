@@ -250,8 +250,7 @@ public class RtcSession internal constructor(
 
         when (type) {
             TrackType.TRACK_TYPE_VIDEO -> {
-                call.state.getParticipantBySessionId(sessionId)?._videoTrack?.value =
-                    track.asVideoTrack()
+                call.state.getParticipantBySessionId(sessionId)?.setVideoTrack(track.asVideoTrack())
             }
 
             TrackType.TRACK_TYPE_AUDIO -> {
@@ -325,6 +324,7 @@ public class RtcSession internal constructor(
                 "SDK hasn't been initialised yet - can't start a RtcSession",
             )
         }
+        logger.i { "<init> #sfu; #track; no args" }
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
@@ -349,6 +349,7 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             // call update participant subscriptions debounced
             trackDimensionsDebounced.collect {
+                logger.v { "<init> #sfu; #track; trackDimensions: $it" }
                 setVideoSubscriptions()
             }
         }
@@ -420,6 +421,7 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect() {
+        logger.i { "[connect] #sfu; #track; no args" }
         sfuConnectionModule.sfuSocket.connect()
         // ensure that the join event has been handled before starting RTC
         try {
@@ -566,7 +568,7 @@ public class RtcSession internal constructor(
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
                 ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
-        logger.i { "[] #sfu; mediaStream: $mediaStream" }
+        logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
             logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
             track.setEnabled(true)
@@ -582,6 +584,7 @@ public class RtcSession internal constructor(
         }
 
         mediaStream.videoTracks.forEach { track ->
+            logger.w { "[addStream] #sfu; #track; videoTrack: ${track.stringify()}" }
             track.setEnabled(true)
             val videoTrack = VideoTrack(
                 streamId = mediaStream.id,
@@ -599,6 +602,7 @@ public class RtcSession internal constructor(
     }
 
     private suspend fun connectRtc() {
+        logger.d { "[connectRtc] #sfu; #track; no args" }
         val settings = call.state.settings.value
 
         // turn of the speaker if needed
@@ -720,7 +724,7 @@ public class RtcSession internal constructor(
     }
 
     fun cleanup() {
-        logger.i { "[cleanup] #sfu; no args" }
+        logger.i { "[cleanup] #sfu; #track; no args" }
         supervisorJob.cancel()
 
         // disconnect the socket and clean it up
@@ -812,7 +816,7 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     public fun createSubscriber(): StreamPeerConnection {
-        logger.i { "[createSubscriber] #sfu" }
+        logger.i { "[createSubscriber] #sfu; no args" }
         val peerConnection = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
@@ -859,6 +863,7 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     fun createPublisher(): StreamPeerConnection {
+        logger.i { "[createPublisher] #sfu; no args" }
         val publisher = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
@@ -1000,6 +1005,7 @@ public class RtcSession internal constructor(
      * -- we cap at 30 retries to prevent endless loops
      */
     private fun setVideoSubscriptions(useDefaults: Boolean = false) {
+        logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
         // default is to subscribe to the top 5 sorted participants
         var tracks = if (useDefaults) {
             defaultTracks()
@@ -1018,6 +1024,7 @@ public class RtcSession internal constructor(
                 it.copy(dimension = it.dimension?.copy(width = 200, height = 200))
             }
         }
+        logger.v { "[setVideoSubscriptions] #sfu; #track; tracks.size: ${tracks.size}" }
 
         val new = tracks.toList()
         subscriptions.value = new
@@ -1036,8 +1043,8 @@ public class RtcSession internal constructor(
                     )
                     println("request $request")
                     val sessionToDimension = tracks.map { it.session_id to it.dimension }
-                    dynascaleLogger.i {
-                        "[setVideoSubscriptions] $useDefaults #sfu; $sessionId subscribing to : $sessionToDimension"
+                    dynascaleLogger.v {
+                        "[setVideoSubscriptions] $useDefaults #sfu; #track; $sessionId subscribing to : $sessionToDimension"
                     }
                     val result = updateSubscriptions(request)
                     emit(result.getOrThrow())
@@ -1138,6 +1145,7 @@ public class RtcSession internal constructor(
     }
 
     private fun removeParticipantTrackDimensions(participant: Participant) {
+        logger.v { "[removeParticipantTrackDimensions] #sfu; #track; participant: $participant" }
         val newTrackDimensions = trackDimensions.value.toMutableMap()
         newTrackDimensions.remove(participant.session_id).also {
             if (it == null) {
@@ -1649,20 +1657,23 @@ public class RtcSession internal constructor(
         }
 
     // call after onNegotiation Needed
-    private suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> =
-        wrapAPICall {
+    private suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> {
+        logger.e { "[setPublisher] #sfu; request $request" }
+        return wrapAPICall {
             val result = sfuConnectionModule.signalService.setPublisher(request)
             result.error?.let {
                 throw RtcException(error = it, message = it.message)
             }
             result
         }
+    }
 
     // share what size and which participants we're looking at
     private suspend fun updateSubscriptions(
         request: UpdateSubscriptionsRequest,
     ): Result<UpdateSubscriptionsResponse> =
         wrapAPICall {
+            logger.v { "[updateSubscriptions] #sfu; #track; request $request" }
             val result = sfuConnectionModule.signalService.updateSubscriptions(request)
             result.error?.let {
                 throw RtcException(error = it, message = it.message)
@@ -1697,6 +1708,7 @@ public class RtcSession internal constructor(
         visible: Boolean,
         dimensions: VideoDimension = defaultVideoDimension,
     ) {
+        logger.v { "[updateTrackDimensions] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions" }
         // The map contains all track dimensions for all participants
         dynascaleLogger.d { "updating dimensions $sessionId $visible $dimensions" }
 
@@ -1740,7 +1752,7 @@ public class RtcSession internal constructor(
         remoteIceServers: List<IceServer>,
         failedToSwitch: () -> Unit,
     ) {
-        logger.i { "[switchSfu] from ${this.sfuUrl} to $sfuUrl" }
+        logger.i { "[switchSfu] #sfu; #track; from ${this.sfuUrl} to $sfuUrl" }
 
         // Prepare SDP
         val getSdp = suspend {
