@@ -36,6 +36,7 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -1099,6 +1100,22 @@ public class RtcSession internal constructor(
                     is ParticipantLeftEvent -> {
                         removeParticipantTracks(event.participant)
                         removeParticipantTrackDimensions(event.participant)
+                    }
+
+                    is ICETrickleEvent -> {
+                        handleIceTrickle(event)
+                    }
+
+                    is ICERestartEvent -> {
+                        val peerType = event.peerType
+                        when (peerType) {
+                            PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
+                                publisher?.connection?.restartIce()
+                            }
+                            PeerType.PEER_TYPE_SUBSCRIBER -> {
+                                subscriber?.connection?.restartIce()
+                            }
+                        }
                     }
 
                     else -> {
