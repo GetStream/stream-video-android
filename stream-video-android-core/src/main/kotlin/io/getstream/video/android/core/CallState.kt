@@ -120,6 +120,9 @@ import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
+import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.signal.TrackSubscriptionDetails
+import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -189,6 +192,7 @@ public class CallState(
 
     private val logger by taggedLogger("CallState")
     private var participantsVisibilityMonitor: Job? = null
+    private val forceSubscribe = true
 
     internal val _connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
     public val connection: StateFlow<RealtimeConnection> = _connection
@@ -261,11 +265,18 @@ public class CallState(
 
     val stats = CallStats(call, scope)
 
-    private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
+
+    private val pastPublishers: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
+
         fun emitLivestreamVideo() {
             val participants = participants.value
-            val filteredVideo =
+            val pastPubs = pastPublishers.value
+            val filteredVideo = if (pastPubs.isEmpty()) {
                 participants.mapNotNull { it.video.value }.firstOrNull { it.track != null }
+            } else {
+                participants.firstOrNull { pastPubs.contains(it.userId.value) }?.video?.value
+            }
             scope.launch {
                 if (_backstage.value) {
                     send(null)
@@ -291,6 +302,26 @@ public class CallState(
                 } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
                     participant._audioEnabled.value = true
                 }
+                val newPublishers = pastPublishers.value + participant.userId.value
+                pastPublishers.value = newPublishers
+
+                if (forceSubscribe) {
+                    val request = UpdateSubscriptionsRequest(
+                        session_id = participant.sessionId,
+                        tracks = listOf(
+                            TrackSubscriptionDetails(
+                                user_id = participant.userId.value,
+                                track_type = TrackType.TRACK_TYPE_VIDEO,
+                                dimension = VideoDimension(1080, 2340),
+                                session_id = participant.sessionId,
+                            ),
+                        ),
+                    )
+
+                    scope.launch {
+                        call.session?.updateSubscriptions(request)
+                    }
+                }
             }
 
             if (it is TrackUnpublishedEvent) {
@@ -312,8 +343,7 @@ public class CallState(
         awaitClose { }
     }
 
-    val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.debounce(1000)
-        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
@@ -457,7 +487,8 @@ public class CallState(
             val liveEndedAt = _session.value?.liveEndedAt ?: OffsetDateTime.now()
 
             liveStartedAt?.let {
-                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant().toEpochMilli()
+                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant()
+                    .toEpochMilli()
                 emit(duration)
             }
         }
@@ -925,13 +956,13 @@ public class CallState(
         Log.d(
             "RingingState",
             "Flags: [\n" +
-                "acceptedByMe: $isAcceptedByMe,\n" +
-                "rejectedByMe: $isRejectedByMe,\n" +
-                "rejectReason: $rejectReason,\n" +
-                "hasActiveCall: $hasActiveCall\n" +
-                "hasRingingCall: $hasRingingCall\n" +
-                "userIsParticipant: $userIsParticipant,\n" +
-                "]",
+                    "acceptedByMe: $isAcceptedByMe,\n" +
+                    "rejectedByMe: $isRejectedByMe,\n" +
+                    "rejectReason: $rejectReason,\n" +
+                    "hasActiveCall: $hasActiveCall\n" +
+                    "hasRingingCall: $hasRingingCall\n" +
+                    "userIsParticipant: $userIsParticipant,\n" +
+                    "]",
         )
 
         // no members - call is empty, we can join
