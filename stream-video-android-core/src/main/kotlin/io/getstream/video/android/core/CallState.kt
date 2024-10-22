@@ -278,8 +278,10 @@ public class CallState(
 
         scope.launch {
             _participants.collect {
-                logger.v { "[livestreamFlow] #track; participants: ${it.size} =>" +
-                        "${it.map { "${it.value.userId.value} - ${it.value.video.value?.enabled}" }}" }
+                logger.v {
+                    "[livestreamFlow] #track; participants: ${it.size} =>" +
+                        "${it.map { "${it.value.userId.value} - ${it.value.video.value?.enabled}" }}"
+                }
                 emitLivestreamVideo()
             }
         }

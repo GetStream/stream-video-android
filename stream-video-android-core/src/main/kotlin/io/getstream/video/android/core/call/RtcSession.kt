@@ -1708,7 +1708,9 @@ public class RtcSession internal constructor(
         visible: Boolean,
         dimensions: VideoDimension = defaultVideoDimension,
     ) {
-        logger.v { "[updateTrackDimensions] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions" }
+        logger.v {
+            "[updateTrackDimensions] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
+        }
         // The map contains all track dimensions for all participants
         dynascaleLogger.d { "updating dimensions $sessionId $visible $dimensions" }
 

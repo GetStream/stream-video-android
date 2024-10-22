@@ -307,7 +307,9 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
-        logger.d { "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions" }
+        logger.d {
+            "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
+        }
         val permissionPass =
             clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
@@ -378,7 +380,9 @@ public class Call(
                 "Call $cid has already been joined. Please use call.leave before joining it again",
             )
         }
-        logger.d { "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions" }
+        logger.d {
+            "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
+        }
 
         // step 1. call the join endpoint to get a list of SFUs
 
@@ -494,12 +498,16 @@ public class Call(
         // first check if sfuSocketReconnectionTime isn't already set - if yes
         // then we are already doing a full reconnect
         if (state._connection.value == RealtimeConnection.Migrating) {
-            logger.d { "[handleSignalChannelDisconnect] #track; Skipping disconnected channel event - we are migrating" }
+            logger.d {
+                "[handleSignalChannelDisconnect] #track; Skipping disconnected channel event - we are migrating"
+            }
             return
         }
 
         if (!isRetry && sfuSocketReconnectionTime != null) {
-            logger.d { "[handleSignalChannelDisconnect] #track; Already doing a full reconnect cycle - ignoring call" }
+            logger.d {
+                "[handleSignalChannelDisconnect] #track; Already doing a full reconnect cycle - ignoring call"
+            }
             return
         }
         logger.d { "[handleSignalChannelDisconnect] #track; isRetry: $isRetry" }
@@ -677,7 +685,9 @@ public class Call(
     }
 
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
-        logger.i { "[setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible" }
+        logger.i {
+            "[setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
         session?.updateTrackDimensions(sessionId, trackType, visible)
     }
 

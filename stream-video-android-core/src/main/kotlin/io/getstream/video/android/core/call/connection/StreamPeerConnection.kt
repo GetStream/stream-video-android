@@ -383,15 +383,21 @@ public class StreamPeerConnection(
      * @param mediaStreams The streams that were added containing their appropriate tracks.
      */
     override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
-        logger.i { "[onAddTrack] #sfu; #track; #$typeTag; receiver: $receiver, mediaStreams: $mediaStreams" }
+        logger.i {
+            "[onAddTrack] #sfu; #track; #$typeTag; receiver: $receiver, mediaStreams: $mediaStreams"
+        }
         mediaStreams?.forEach { mediaStream ->
             logger.v { "[onAddTrack] #sfu; #track; #$typeTag; mediaStream: $mediaStream" }
             mediaStream.audioTracks?.forEach { remoteAudioTrack ->
-                logger.v { "[onAddTrack] #sfu; #track; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
+                logger.v {
+                    "[onAddTrack] #sfu; #track; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}"
+                }
                 remoteAudioTrack.setEnabled(true)
             }
             mediaStream.videoTracks?.forEach { remoteVideoTrack ->
-                logger.v { "[onAddTrack] #sfu; #track; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}" }
+                logger.v {
+                    "[onAddTrack] #sfu; #track; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}"
+                }
                 remoteVideoTrack.setEnabled(true)
             }
             onStreamAdded?.invoke(mediaStream)

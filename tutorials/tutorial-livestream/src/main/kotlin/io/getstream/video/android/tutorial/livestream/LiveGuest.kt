@@ -91,7 +91,7 @@ fun LiveAudience(
                 .fillMaxSize()
                 .weight(1f)
                 .padding(bottom = VideoTheme.dimens.spacingXXs),
-            call = call
+            call = call,
         )
 
         /*LiveVideoContent(
@@ -116,11 +116,13 @@ fun LiveAudience(
 @Composable
 fun LiveVideoContent(
     modifier: Modifier = Modifier,
-    call: Call
+    call: Call,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         val participants by call.state.participants.collectAsStateWithLifecycle()
-        val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle(emptyList())
+        val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle(
+            emptyList(),
+        )
         val callParticipants by remember(participants) {
             derivedStateOf {
                 if (sortedParticipants.size > 6) {
@@ -135,8 +137,8 @@ fun LiveVideoContent(
 
         StreamLog.e("LiveAudience") {
             "participants: ${participants.map { it.userId.value }}, " +
-                    "callParticipants: ${callParticipants.map { it.userId.value }}, " +
-                    "remoteParticipants: ${remoteParticipants.map { it.userId.value }}"
+                "callParticipants: ${callParticipants.map { it.userId.value }}, " +
+                "remoteParticipants: ${remoteParticipants.map { it.userId.value }}"
         }
 
         val predicate: (ParticipantState) -> Boolean = { it.userId.value == "martin" }
@@ -148,7 +150,7 @@ fun LiveVideoContent(
         if (hostState == null) {
             Text(
                 style = VideoTheme.styles.textStyles.defaultBody().default.platform,
-                text = "Waiting for host to join..."
+                text = "Waiting for host to join...",
             )
         } else {
             ParticipantVideo(
