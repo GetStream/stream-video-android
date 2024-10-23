@@ -291,10 +291,10 @@ public class RtcSession internal constructor(
         get() = buildConnectionConfiguration(iceServers)
 
     /** subscriber peer connection is used for subs */
-    public var subscriber: StreamPeerConnection = createSubscriber()
+    public var subscriber: StreamPeerConnection? = null
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    internal var publisher: StreamPeerConnection = createPublisher()
+    internal var publisher: StreamPeerConnection? = null
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
@@ -352,15 +352,9 @@ public class RtcSession internal constructor(
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
+        publisher = createPublisher()
 
         listenToSubscriberConnection()
-
-        val session = this
-        val getSdp = suspend {
-            session.getSubscriberSdp().description
-        }
-
-
         /*
         if (sfuUrl.contains(Regex("https?://"))) {
         sfuUrl
@@ -1345,11 +1339,6 @@ public class RtcSession internal constructor(
                         }
                     }
                 }
-                /*syncSubscriberCandidates = coroutineScope.launch {
-                    sfuConnectionModule.socketConnection.pendingSubscriberIceCandidates.collect { iceCandidates ->
-                        subscriber.addIceCandidate(iceCandidates)
-                    }
-                }*/
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 val sameValue = answerSdp == subscriberSdpAnswer.value
                 val sameSfu = currentSfu == sfuUrl
@@ -1848,15 +1837,8 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 10000L,
             userToken = sfuToken,
             lifecycle = coordinatorConnectionModule.lifecycle,
-        )/*
-            coordinatorConnectionModule.createSFUConnectionModule(
-                sfuUrl,
-                sessionId,
-                sfuToken,
-                getSdp,
-                onWebsocketReconnectStrategy,
-            )
-            */
+        )
+
         // Connect to SFU socket
         val migrationData = migration.invoke()
         val request = JoinRequest(
