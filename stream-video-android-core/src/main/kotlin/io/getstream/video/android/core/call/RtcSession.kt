@@ -197,12 +197,12 @@ public class RtcSession internal constructor(
     private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
-    private var sfuSocketStateJob: Job? = null
     private var subscriberListenJob: Job? = null
 
     private var videoTransceiverInitialized: Boolean = false
     private var audioTransceiverInitialized: Boolean = false
     private var screenshareTransceiverInitialized: Boolean = false
+    private var stateJob: Job? = null
     private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket
@@ -332,17 +332,6 @@ public class RtcSession internal constructor(
         MutableStateFlow<SfuSocketState>(SfuSocketState.Disconnected.Stopped)
     val sfuSocketState = _sfuSfuSocketState.asStateFlow()
 
-    private val sfuFastReconnectListener: suspend () -> Unit = {
-        // SFU socket has done a fast-reconnect. We need to an ICE restart immediately and not wait
-        // until the health check runs
-        call.monitor.stopTimer()
-        call.monitor.reconnect(forceRestart = true)
-    }
-
-    private val sfuCallEnded: suspend () -> Unit = {
-        call.leave()
-    }
-
     init {
         if (!StreamVideo.isInstalled) {
             throw IllegalArgumentException(
@@ -356,13 +345,7 @@ public class RtcSession internal constructor(
         publisher = createPublisher()
 
         listenToSubscriberConnection()
-        /*
-        if (sfuUrl.contains(Regex("https?://"))) {
-        sfuUrl
-    } else {
-        "http://$sfuUrl"
-    }.removeSuffix("/twirp")
-         */
+
         val sfuConnectionModule = SfuConnectionModule(
             context = clientImpl.context,
             apiKey = coordinatorConnectionModule.apiKey,
@@ -374,11 +357,22 @@ public class RtcSession internal constructor(
         )
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.state().collectLatest {
-                when(it) {
-                    is SfuSocketState.Connected -> call.state._connection.value = RealtimeConnection.Connected
-                    is SfuSocketState.Connecting -> call.state._connection.value = RealtimeConnection.InProgress
-                    is SfuSocketState.Disconnected.DisconnectedPermanently -> call.state._connection.value = RealtimeConnection.Disconnected
-                    SfuSocketState.Disconnected.NetworkDisconnected -> RealtimeConnection.Reconnecting
+                when (it) {
+                    is SfuSocketState.Connected -> call.state._connection.value =
+                        RealtimeConnection.Connected
+
+                    is SfuSocketState.Connecting -> call.state._connection.value =
+                        RealtimeConnection.InProgress
+
+                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
+                        call.state._connection.value = RealtimeConnection.Disconnected
+                        call.leave()
+                    }
+
+                    SfuSocketState.Disconnected.NetworkDisconnected -> {
+                        RealtimeConnection.Reconnecting
+                    }
+
                     SfuSocketState.Disconnected.Stopped -> RealtimeConnection.Disconnected
                     is SfuSocketState.RestartConnection -> RealtimeConnection.Reconnecting
                     else -> {
@@ -387,15 +381,8 @@ public class RtcSession internal constructor(
                 }
             }
         }
-        /*coordinatorConnectionModule.createSFUConnectionModule(
-            sfuUrl,
-            sessionId,
-            sfuToken,
-            getSdp,
-            onWebsocketReconnectStrategy,
-        )*/
         setSfuConnectionModule(sfuConnectionModule)
-        listenToSocketEventsAndErrors()
+        listenToSfuSocket()
 
         coroutineScope.launch {
             // call update participant subscriptions debounced
@@ -419,10 +406,30 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun listenToSocketEventsAndErrors() {
+    private fun listenToSfuSocket() {
         // cancel any old socket monitoring if needed
         eventJob?.cancel()
         errorJob?.cancel()
+        stateJob?.cancel()
+
+        // State
+        // Start listening to connection state on new SFU connection
+        stateJob = coroutineScope.launch {
+            sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
+                _sfuSfuSocketState.value = sfuSocketState
+
+                // make sure we stop handling ICE candidates when a new SFU socket
+                // connection is being established. We need to wait until a SubscriberOffer
+                // is received again and then we start listening to the ICE candidate queue
+                if (sfuSocketState is SfuSocketState.Connecting ||
+                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedTemporarily ||
+                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedByRequest
+                ) {
+                    syncSubscriberCandidates?.cancel()
+                    syncSubscriberCandidates?.cancel()
+                }
+            }
+        }
 
         // listen to socket events and errors
         eventJob = coroutineScope.launch {
@@ -430,20 +437,19 @@ public class RtcSession internal constructor(
                 clientImpl.fireEvent(it, call.cid)
             }
         }
+
+        // Errors
         errorJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.errors().collect {
                 val reconnectStrategy = it.reconnectStrategy
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.monitor.stopTimer()
-                        call.monitor.reconnect(forceRestart = true)
-                    }
-
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                        // Fast reconnect, send a JOIN request on the same SFU
+                        // and restart ICE on publisher
+                        call.monitor.stop()
                         val currentSubscriptions = subscriptions.value
                         syncPublisherJob
-                        // We need to rejoin on the same SFU.
                         val publisherTracks = publisher?.let { pub ->
                             getPublisherTracks(pub.connection.localDescription.description)
                         } ?: emptyList()
@@ -460,12 +466,21 @@ public class RtcSession internal constructor(
                         )
                         sfuConnectionModule.socketConnection.reconnect(request)
                         sfuConnectionModule.socketConnection.whenConnected {
+                            call.monitor.start()
                             publisher?.connection?.restartIce()
                         }
                     }
 
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                        val currentSubscriptions = subscriptions.value
+                        syncPublisherJob
+                        val publisherTracks = publisher?.let { pub ->
+                            getPublisherTracks(pub.connection.localDescription.description)
+                        } ?: emptyList()
+                        call.rejoin(currentSubscriptions, publisherTracks)
+                    }
+
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
-                        // We need to move to a different SFU.
                         call.switchSfu()
                     }
 
@@ -552,28 +567,6 @@ public class RtcSession internal constructor(
     private fun setSfuConnectionModule(sfuConnectionModule: SfuConnectionModule) {
         // This is used to switch from a current SFU connection to a new migrated SFU connection
         this@RtcSession.sfuConnectionModule = sfuConnectionModule
-
-        // Stop listening to connection state on the existing SFU connection
-        sfuSocketStateJob?.cancel()
-        sfuSocketStateJob = null
-
-        // Start listening to connection state on new SFU connection
-        sfuSocketStateJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
-                _sfuSfuSocketState.value = sfuSocketState
-
-                // make sure we stop handling ICE candidates when a new SFU socket
-                // connection is being established. We need to wait until a SubscriberOffer
-                // is received again and then we start listening to the ICE candidate queue
-                if (sfuSocketState is SfuSocketState.Connecting ||
-                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedTemporarily ||
-                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedByRequest
-                ) {
-                    syncSubscriberCandidates?.cancel()
-                    syncSubscriberCandidates?.cancel()
-                }
-            }
-        }
     }
 
     private fun initializeScreenshareTransceiver() {
@@ -1213,6 +1206,7 @@ public class RtcSession internal constructor(
                             PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
                                 publisher?.connection?.restartIce()
                             }
+
                             PeerType.PEER_TYPE_SUBSCRIBER -> {
                                 subscriber?.connection?.restartIce()
                             }
@@ -1839,6 +1833,51 @@ public class RtcSession internal constructor(
         }
     }
 
+
+
+    internal suspend fun rejoinSfu(
+        currentSubscriptions: List<TrackSubscriptionDetails>,
+        publisherTracks: List<TrackInfo>,
+        apiUrl: String,
+        wsUrl: String,
+        token: String,
+    ) {
+        sfuConnectionModule.socketConnection.disconnect()
+        call.monitor.stop()
+        publisher?.connection?.close()
+        subscriber?.connection?.close()
+
+        sfuWsUrl = wsUrl
+        sfuToken = token
+        sfuUrl = apiUrl
+
+        sfuConnectionModule = SfuConnectionModule(
+            context = clientImpl.context,
+            apiKey = coordinatorConnectionModule.apiKey,
+            apiUrl = apiUrl,
+            wssUrl = sfuWsUrl,
+            connectionTimeoutInMs = 10000L,
+            userToken = token,
+            lifecycle = coordinatorConnectionModule.lifecycle,
+        )
+
+        publisher = createPublisher()
+        subscriber = createSubscriber()
+
+        val request = JoinRequest(
+            session_id = sessionId,
+            token = sfuToken,
+            fast_reconnect = false,
+            client_details = clientDetails,
+        )
+        logger.d { "Connecting RTC, $request" }
+        sfuConnectionModule.socketConnection.connect(request)
+        sfuConnectionModule.socketConnection.whenConnected {
+            connectRtc()
+        }
+        publisherTracks
+    }
+
     suspend fun switchSfu(
         sfuName: String,
         sfuUrl: String,
@@ -1914,7 +1953,7 @@ public class RtcSession internal constructor(
                         this@RtcSession.iceServers = buildRemoteIceServers(remoteIceServers)
 
                         // reconnect socket listeners
-                        listenToSocketEventsAndErrors()
+                        listenToSfuSocket()
 
                         var tempSubscriber = subscriber
 

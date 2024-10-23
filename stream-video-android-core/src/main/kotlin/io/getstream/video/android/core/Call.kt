@@ -87,8 +87,10 @@ import org.threeten.bp.OffsetDateTime
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.signal.TrackSubscriptionDetails
 import java.util.Collections
 import kotlin.coroutines.resume
 
@@ -115,7 +117,7 @@ public class Call(
     val id: String,
     val user: User,
 ) {
-    private var location: String? = null
+    internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     internal val clientImpl = client as StreamVideoClient
@@ -545,6 +547,36 @@ public class Call(
                 handleSignalChannelDisconnect(isRetry = true)
             } else {
                 sfuSocketReconnectionTime = null
+            }
+        }
+    }
+
+    internal suspend fun rejoin(
+        currentSubscriptions: List<TrackSubscriptionDetails>,
+        publisherTracks: List<TrackInfo>
+    ) {
+        state._connection.value = RealtimeConnection.Reconnecting
+        location?.let {
+            val joinResponse = joinRequest(location = it)
+
+            if (joinResponse is Success) {
+                // switch to the new SFU
+                val cred = joinResponse.value.credentials
+                logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
+
+                session?.rejoinSfu(
+                    currentSubscriptions,
+                    publisherTracks,
+                    cred.server.url,
+                    cred.server.wsEndpoint,
+                    cred.token,
+                )
+            } else {
+                logger.e {
+                    "[switchSfu] Failed to get a join response during " +
+                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                }
+                state._connection.value = RealtimeConnection.Reconnecting
             }
         }
     }
