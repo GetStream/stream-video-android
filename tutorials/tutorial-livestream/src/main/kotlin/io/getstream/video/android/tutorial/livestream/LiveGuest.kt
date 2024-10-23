@@ -17,12 +17,15 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -31,7 +34,9 @@ import androidx.navigation.NavController
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
@@ -78,35 +83,18 @@ fun LiveAudience(
         }
     }
 
-    Column {
-        val modifier = Modifier
-            .fillMaxSize()
-            .weight(1f)
-            .padding(bottom = VideoTheme.dimens.spacingXXs)
-
-        LiveVideoContent(modifier = modifier, call = call)
-        // LivestreamPlayer(modifier = modifier, call = call)
-
-        Row(
-            modifier = Modifier.padding(16.dp),
-        ) {
-            LeaveCallAction {
+    Box {
+        LivestreamPlayer(call = call)
+        CallAppBar(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(end = 16.dp, top = 16.dp),
+            call = call,
+            centerContent = { },
+            onCallAction = {
                 call.leave()
                 navController.popBackStack()
-            }
-        }
+            },
+        )
     }
-}
-
-@Composable
-fun LiveVideoContent(
-    modifier: Modifier = Modifier,
-    call: Call,
-) {
-    val livestream by call.state.livestream.collectAsStateWithLifecycle()
-    VideoRenderer(
-        modifier = modifier,
-        call = call,
-        video = livestream,
-    )
 }
