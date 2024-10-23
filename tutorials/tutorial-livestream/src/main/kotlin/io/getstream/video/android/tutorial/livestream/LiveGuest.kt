@@ -35,6 +35,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Le
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.internal.service.livestreamGuestCallServiceConfig
