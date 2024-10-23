@@ -18,27 +18,18 @@ package io.getstream.video.android.tutorial.livestream
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
