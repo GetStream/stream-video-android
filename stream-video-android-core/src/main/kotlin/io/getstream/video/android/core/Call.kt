@@ -721,40 +721,52 @@ public class Call(
         trackType: TrackType,
         onRendered: (VideoTextureViewRenderer) -> Unit = {},
     ) {
-        logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
+        logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
             clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
-                    logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
+                    val width = videoRenderer.measuredWidth
+                    val height = videoRenderer.measuredHeight
+                    logger.i {
+                        "[initRenderer.onFirstFrameRendered] #sfu; #track; " +
+                            "trackType: $trackType, dimension: ($width - $height), " +
+                            "sessionId: $sessionId"
+                    }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(
-                                videoRenderer.measuredWidth,
-                                videoRenderer.measuredHeight,
-                            ),
+                            VideoDimension(width, height),
                         )
                     }
                     onRendered(videoRenderer)
                 }
 
-                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
-                    logger.d { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
+                override fun onFrameResolutionChanged(
+                    videoWidth: Int,
+                    videoHeight: Int,
+                    rotation: Int,
+                ) {
+                    val width = videoRenderer.measuredWidth
+                    val height = videoRenderer.measuredHeight
+                    logger.v {
+                        "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
+                            "trackType: $trackType, " +
+                            "dimension1: ($width - $height), " +
+                            "dimension2: ($videoWidth - $videoHeight), " +
+                            "sessionId: $sessionId"
+                    }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(
-                                videoRenderer.measuredWidth,
-                                videoRenderer.measuredHeight,
-                            ),
+                            VideoDimension(videoWidth, videoHeight),
                         )
                     }
                 }

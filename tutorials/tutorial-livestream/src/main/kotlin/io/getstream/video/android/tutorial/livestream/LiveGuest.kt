@@ -17,7 +17,6 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,7 +84,7 @@ fun LiveAudience(
             .padding(bottom = VideoTheme.dimens.spacingXXs)
 
         LiveVideoContent(modifier = modifier, call = call)
-        //LivestreamPlayer(modifier = modifier, call = call)
+        // LivestreamPlayer(modifier = modifier, call = call)
 
         Row(
             modifier = Modifier.padding(16.dp),
