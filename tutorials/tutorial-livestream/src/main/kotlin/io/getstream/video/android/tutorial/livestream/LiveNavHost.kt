@@ -20,10 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import io.getstream.video.android.compose.theme.VideoTheme
 
 @Composable
@@ -43,18 +46,36 @@ fun LiveNavHost(
             LiveMain(navController = navController)
         }
 
-        composable(LiveScreens.Host.destination) {
-            LiveHost()
+        composable(LiveScreens.Host.destination, LiveScreens.Host.args) {
+            LiveHost(navController = navController, callId = LiveScreens.Host.getCallId(it))
         }
 
-        composable(LiveScreens.Guest.destination) {
-            LiveAudience()
+        composable(LiveScreens.Guest.destination, LiveScreens.Guest.args) {
+            LiveAudience(navController = navController, callId = LiveScreens.Guest.getCallId(it))
         }
     }
 }
 
-enum class LiveScreens(val destination: String) {
-    Main("main"),
-    Host("host"),
-    Guest("audience"),
+sealed class LiveScreens(val destination: String) {
+    data object Main : LiveScreens(destination = "main")
+
+    sealed class HasCallId(destination: String) : LiveScreens(destination) {
+        private val argCallId: String = "call_id"
+        val args = listOf(navArgument(argCallId) { type = NavType.StringType })
+
+        fun getCallId(backStackEntry: NavBackStackEntry): String {
+            return backStackEntry.arguments?.getString(argCallId) ?: error("Call ID not found")
+        }
+    }
+
+    data object Host : HasCallId(destination = "host/{call_id}") {
+        fun destination(callId: String): String {
+            return "host/$callId"
+        }
+    }
+    data object Guest : HasCallId(destination = "guest/{call_id}") {
+        fun destination(callId: String): String {
+            return "guest/$callId"
+        }
+    }
 }

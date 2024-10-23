@@ -307,7 +307,9 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
-        logger.d { "[join] #ringing; create: $create, ring: $ring, notify: $notify" }
+        logger.d {
+            "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
+        }
         val permissionPass =
             clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
@@ -377,6 +379,9 @@ public class Call(
             throw IllegalStateException(
                 "Call $cid has already been joined. Please use call.leave before joining it again",
             )
+        }
+        logger.d {
+            "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
         // step 1. call the join endpoint to get a list of SFUs
@@ -493,14 +498,19 @@ public class Call(
         // first check if sfuSocketReconnectionTime isn't already set - if yes
         // then we are already doing a full reconnect
         if (state._connection.value == RealtimeConnection.Migrating) {
-            logger.d { "Skipping disconnected channel event - we are migrating" }
+            logger.d {
+                "[handleSignalChannelDisconnect] #track; Skipping disconnected channel event - we are migrating"
+            }
             return
         }
 
         if (!isRetry && sfuSocketReconnectionTime != null) {
-            logger.d { "[handleSignalChannelDisconnect] Already doing a full reconnect cycle - ignoring call" }
+            logger.d {
+                "[handleSignalChannelDisconnect] #track; Already doing a full reconnect cycle - ignoring call"
+            }
             return
         }
+        logger.d { "[handleSignalChannelDisconnect] #track; isRetry: $isRetry" }
 
         if (!isRetry) {
             state._connection.value = RealtimeConnection.Reconnecting
@@ -675,11 +685,14 @@ public class Call(
     }
 
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+        logger.i {
+            "[setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
         session?.updateTrackDimensions(sessionId, trackType, visible)
     }
 
     fun handleEvent(event: VideoEvent) {
-        logger.i { "[call handleEvent] #sfu; event: $event" }
+        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
 
         when (event) {
             is GoAwayEvent ->
@@ -708,40 +721,52 @@ public class Call(
         trackType: TrackType,
         onRendered: (VideoTextureViewRenderer) -> Unit = {},
     ) {
-        logger.d { "[initRenderer] #sfu; sessionId: $sessionId" }
+        logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
             clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
-                    logger.d { "[initRenderer.onFirstFrameRendered] #sfu; sessionId: $sessionId" }
+                    val width = videoRenderer.measuredWidth
+                    val height = videoRenderer.measuredHeight
+                    logger.i {
+                        "[initRenderer.onFirstFrameRendered] #sfu; #track; " +
+                            "trackType: $trackType, dimension: ($width - $height), " +
+                            "sessionId: $sessionId"
+                    }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(
-                                videoRenderer.measuredWidth,
-                                videoRenderer.measuredHeight,
-                            ),
+                            VideoDimension(width, height),
                         )
                     }
                     onRendered(videoRenderer)
                 }
 
-                override fun onFrameResolutionChanged(p0: Int, p1: Int, p2: Int) {
-                    logger.d { "[initRenderer.onFrameResolutionChanged] #sfu; sessionId: $sessionId" }
+                override fun onFrameResolutionChanged(
+                    videoWidth: Int,
+                    videoHeight: Int,
+                    rotation: Int,
+                ) {
+                    val width = videoRenderer.measuredWidth
+                    val height = videoRenderer.measuredHeight
+                    logger.v {
+                        "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
+                            "trackType: $trackType, " +
+                            "dimension1: ($width - $height), " +
+                            "dimension2: ($videoWidth - $videoHeight), " +
+                            "sessionId: $sessionId"
+                    }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(
-                                videoRenderer.measuredWidth,
-                                videoRenderer.measuredHeight,
-                            ),
+                            VideoDimension(videoWidth, videoHeight),
                         )
                     }
                 }

@@ -143,7 +143,9 @@ public abstract interface class io/getstream/video/android/ui/common/permission/
 
 public final class io/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
 	public fun <init> (Landroid/content/Context;)V
+	public fun onSurfaceTextureAvailable (Landroid/graphics/SurfaceTexture;II)V
 	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
+	public fun onSurfaceTextureSizeChanged (Landroid/graphics/SurfaceTexture;II)V
 }
 
 public final class io/getstream/video/android/ui/common/util/ColorUtilsKt {
