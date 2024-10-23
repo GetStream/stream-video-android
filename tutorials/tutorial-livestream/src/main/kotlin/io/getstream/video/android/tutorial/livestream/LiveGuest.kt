@@ -79,9 +79,7 @@ fun LiveAudience(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().background(Color.Red),
-    ) {
+    Column {
         val modifier = Modifier
             .fillMaxSize()
             .weight(1f)
