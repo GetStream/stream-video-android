@@ -57,6 +57,25 @@ val streamVideo = StreamVideoBuilder(
 ).build()
 ```
 
+Anonymous users don't establish an active web socket connection, therefore they won't receive any events. They are just able to watch a livestream or join a call.
+
+The token for an anonymous user should contain the `call_cids` field, which is an array of the call `cid`'s that the user is allowed to join.
+
+Here's an example JWT token payload for an anonymous user:
+
+```kotlin
+{
+  "iss": "@stream-io/dashboard",
+  "iat": 1726406693,
+  "exp": 1726493093,
+  "user_id": "!anon",
+  "role": "viewer",
+  "call_cids": [
+    "livestream:123"
+  ]
+}
+```
+
 ### Client options
 
 Here's a more complete example of the client options:

@@ -65,67 +65,75 @@ public fun VideoRenderer(
     videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     onRendered: (VideoTextureViewRenderer) -> Unit = {},
 ) {
-    if (LocalInspectionMode.current) {
-        Image(
-            modifier = modifier
-                .fillMaxSize()
-                .testTag("video_renderer"),
-            painter = painterResource(
-                id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
-            ),
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-        )
-        return
-    }
-
-    // Show avatar always behind the video.
-    videoRendererConfig.fallbackContent.invoke(call)
-
-    if (video?.enabled == true) {
-        val mediaTrack = video.track
-        val sessionId = video.sessionId
-        val trackType = video.type
-
-        var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
-
-        DisposableEffect(call, video) {
-            // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-            call.setVisibility(sessionId, trackType, true)
-
-            onDispose {
-                cleanTrack(view, mediaTrack)
-                // inform the call that we no longer want to render this video track
-                call.setVisibility(sessionId, trackType, false)
-            }
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .testTag("video_renderer_container"),
+    ) {
+        if (LocalInspectionMode.current) {
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("video_renderer"),
+                painter = painterResource(
+                    id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
+                ),
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+            )
+            return
         }
 
-        if (mediaTrack != null) {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                AndroidView(
-                    factory = { context ->
-                        StreamVideoTextureViewRenderer(context).apply {
-                            call.initRenderer(
-                                videoRenderer = this,
-                                sessionId = sessionId,
-                                trackType = trackType,
-                                onRendered = onRendered,
-                            )
-                            setMirror(videoRendererConfig.mirrorStream)
-                            setScalingType(
-                                scalingType = videoRendererConfig.scalingType.toCommonScalingType(),
-                            )
-                            setupVideo(mediaTrack, this)
+        // Show avatar always behind the video.
+        videoRendererConfig.fallbackContent.invoke(call)
 
-                            view = this
-                        }
-                    },
-                    update = { v ->
-                        v.setMirror(videoRendererConfig.mirrorStream)
-                        setupVideo(mediaTrack, v)
-                    },
-                    modifier = modifier.testTag("video_renderer"),
-                )
+        if (video?.enabled == true) {
+            val mediaTrack = video.track
+            val sessionId = video.sessionId
+            val trackType = video.type
+
+            var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
+
+            DisposableEffect(call, video) {
+                // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+                call.setVisibility(sessionId, trackType, true)
+
+                onDispose {
+                    cleanTrack(view, mediaTrack)
+                    // inform the call that we no longer want to render this video track
+                    call.setVisibility(sessionId, trackType, false)
+                }
+            }
+
+            if (mediaTrack != null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    AndroidView(
+                        factory = { context ->
+                            StreamVideoTextureViewRenderer(context).apply {
+                                call.initRenderer(
+                                    videoRenderer = this,
+                                    sessionId = sessionId,
+                                    trackType = trackType,
+                                    onRendered = onRendered,
+                                )
+                                setMirror(videoRendererConfig.mirrorStream)
+                                setScalingType(
+                                    videoRendererConfig.scalingType.toCommonScalingType(),
+                                )
+                                setupVideo(mediaTrack, this)
+
+                                view = this
+                            }
+                        },
+                        update = { v ->
+                            v.setMirror(videoRendererConfig.mirrorStream)
+                            setupVideo(mediaTrack, v)
+                        },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("video_renderer"),
+                    )
+                }
             }
         }
     }
