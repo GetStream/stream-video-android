@@ -25,15 +25,47 @@ public class StreamVideoTextureViewRenderer(
     context: Context,
 ) : VideoTextureViewRenderer(context) {
 
-    private val logger by taggedLogger()
+    private val logger by taggedLogger("StreamVideoTextureViewRenderer")
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        logger.d {
+            "[onLayout] #track; changed: $changed, left: $left, top: $top, right: $right, " +
+                "bottom: $bottom"
+        }
+    }
+
+    override fun onSurfaceTextureAvailable(
+        surfaceTexture: SurfaceTexture,
+        width: Int,
+        height: Int,
+    ) {
+        super.onSurfaceTextureAvailable(surfaceTexture, width, height)
+        logger.d {
+            "[onSurfaceTextureAvailable] #track; width: $width, height: $height, " +
+                "surfaceTexture: $surfaceTexture"
+        }
+    }
+
+    override fun onSurfaceTextureSizeChanged(
+        surfaceTexture: SurfaceTexture,
+        width: Int,
+        height: Int,
+    ) {
+        super.onSurfaceTextureSizeChanged(surfaceTexture, width, height)
+        logger.d {
+            "[onSurfaceTextureSizeChanged] #track; width: $width, height: $height, " +
+                "surfaceTexture: $surfaceTexture"
+        }
+    }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-        logger.d { "onSurfaceTextureDestroyed: $surfaceTexture" }
+        logger.d { "[onSurfaceTextureDestroyed] #track; surfaceTexture: $surfaceTexture" }
         return super.onSurfaceTextureDestroyed(surfaceTexture)
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        logger.d { "onDetachedFromWindow" }
+        logger.d { "[onDetachedFromWindow] no args" }
     }
 }

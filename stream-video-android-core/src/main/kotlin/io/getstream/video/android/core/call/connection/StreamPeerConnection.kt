@@ -368,7 +368,7 @@ public class StreamPeerConnection(
      * @param stream The stream that contains audio or video.
      */
     override fun onAddStream(stream: MediaStream?) {
-        logger.i { "[onAddStream] #sfu; #$typeTag; stream: $stream" }
+        logger.w { "[onAddStream] #sfu; #track; #$typeTag; stream: $stream" }
         if (stream != null) {
             onStreamAdded?.invoke(stream)
         }
@@ -382,15 +382,21 @@ public class StreamPeerConnection(
      * @param mediaStreams The streams that were added containing their appropriate tracks.
      */
     override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
-        logger.i { "[onAddTrack] #sfu; #$typeTag; receiver: $receiver, mediaStreams: $mediaStreams" }
+        logger.i {
+            "[onAddTrack] #sfu; #track; #$typeTag; receiver: $receiver, mediaStreams: $mediaStreams"
+        }
         mediaStreams?.forEach { mediaStream ->
-            logger.v { "[onAddTrack] #sfu; #$typeTag; mediaStream: $mediaStream" }
+            logger.v { "[onAddTrack] #sfu; #track; #$typeTag; mediaStream: $mediaStream" }
             mediaStream.audioTracks?.forEach { remoteAudioTrack ->
-                logger.v { "[onAddTrack] #sfu; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
+                logger.v {
+                    "[onAddTrack] #sfu; #track; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}"
+                }
                 remoteAudioTrack.setEnabled(true)
             }
             mediaStream.videoTracks?.forEach { remoteVideoTrack ->
-                logger.v { "[onAddTrack] #sfu; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}" }
+                logger.v {
+                    "[onAddTrack] #sfu; #track; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}"
+                }
                 remoteVideoTrack.setEnabled(true)
             }
             onStreamAdded?.invoke(mediaStream)
@@ -410,7 +416,9 @@ public class StreamPeerConnection(
      *
      * @param stream The stream that was removed from the connection.
      */
-    override fun onRemoveStream(stream: MediaStream?) {}
+    override fun onRemoveStream(stream: MediaStream?) {
+        logger.v { "[onRemoveStream] #sfu; #track; #$typeTag; stream: $stream" }
+    }
 
     /**
      * Triggered when the connection state changes.  Used to start and stop the stats observing.
@@ -473,7 +481,7 @@ public class StreamPeerConnection(
      */
 
     override fun onRemoveTrack(receiver: RtpReceiver?) {
-        logger.i { "[onRemoveTrack] #sfu; #$typeTag; receiver: $receiver" }
+        logger.i { "[onRemoveTrack] #sfu; #track; #$typeTag; receiver: $receiver" }
     }
 
     override fun onSignalingChange(newState: PeerConnection.SignalingState?) {

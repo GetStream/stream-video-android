@@ -32,7 +32,7 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 
 public sealed class SfuDataEvent : VideoEvent() {
     override fun getEventType(): String {
-        return "SfuDataEvent"
+        return this::class.simpleName ?: "UnknownEvent"
     }
 }
 
@@ -61,6 +61,10 @@ public data class SFUConnectedEvent(
 
 public data class ICETrickleEvent(
     val candidate: String,
+    val peerType: PeerType,
+) : SfuDataEvent()
+
+public data class ICERestartEvent(
     val peerType: PeerType,
 ) : SfuDataEvent()
 

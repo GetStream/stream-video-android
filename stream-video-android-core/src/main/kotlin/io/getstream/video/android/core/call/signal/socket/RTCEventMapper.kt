@@ -25,6 +25,7 @@ import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.GoAwayEvent
+import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
@@ -120,6 +121,8 @@ public object RTCEventMapper {
             event.ice_trickle != null -> with(event.ice_trickle) {
                 ICETrickleEvent(ice_candidate, peer_type)
             }
+
+            event.ice_restart != null -> ICERestartEvent(event.ice_restart.peer_type)
 
             event.publisher_answer != null -> PublisherAnswerEvent(sdp = event.publisher_answer.sdp)
             event.error != null -> ErrorEvent(event.error.error, event.error.reconnect_strategy)
