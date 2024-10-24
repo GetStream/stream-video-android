@@ -35,6 +35,7 @@ import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.isWhitespaceOnly
+import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.User.Companion.isAnonymous
@@ -190,7 +191,7 @@ public open class CoordinatorSocketConnection(
     }
 
     // API
-    override fun connectionId(): Flow<String> = connectionId.mapNotNull {
+    override fun connectionId(): StateFlow<String?> = connectionId.mapState {
         it
     }
     override fun whenConnected(

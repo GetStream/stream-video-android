@@ -30,6 +30,8 @@ public sealed class SfuSocketState {
      */
     sealed class Disconnected : SfuSocketState() {
 
+        object Rejoin: Disconnected() { override fun toString() = "Disconnected.Rejoin" }
+
         /**
          * State of socket when is stopped.
          */

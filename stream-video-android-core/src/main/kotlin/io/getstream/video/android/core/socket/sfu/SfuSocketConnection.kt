@@ -36,6 +36,7 @@ import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.SfuToken
 import io.getstream.video.android.model.User
@@ -92,12 +93,12 @@ class SfuSocketConnection(
     }
     private val state: StateFlow<SfuSocketState> = internalSocket.state()
     private val events: MutableSharedFlow<SfuDataEvent> = MutableSharedFlow(
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = BufferOverflow.SUSPEND,
         replay = 1,
         extraBufferCapacity = 100,
     )
     private val errors: MutableSharedFlow<StreamWebSocketEvent.Error> = MutableSharedFlow(
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        onBufferOverflow = BufferOverflow.SUSPEND,
         replay = 1,
         extraBufferCapacity = 100,
     )
@@ -176,6 +177,7 @@ class SfuSocketConnection(
         if (data.reconnect_details == null) {
             logger.w { "[reconnect] Reconnect details are missing!" }
         }
+        internalSocket.disconnect()
         internalSocket.connect(data)
     }
 
@@ -189,7 +191,7 @@ class SfuSocketConnection(
 
     override suspend fun sendEvent(event: SfuDataRequest): Boolean = internalSocket.sendEvent(event)
 
-    override fun connectionId(): Flow<String> = connectionId.mapNotNull {
+    override fun connectionId(): StateFlow<String?> = connectionId.mapState {
         it
     }
 }

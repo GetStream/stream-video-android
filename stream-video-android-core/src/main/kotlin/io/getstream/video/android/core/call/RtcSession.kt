@@ -81,6 +81,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
@@ -135,7 +137,9 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import java.util.UUID
 import kotlin.math.absoluteValue
+import kotlin.math.log
 import kotlin.random.Random
 
 /**
@@ -208,8 +212,8 @@ public class RtcSession internal constructor(
     internal val socket
         get() = sfuConnectionModule.socketConnection
 
-    private val logger by taggedLogger("Call:RtcSession")
-    private val dynascaleLogger by taggedLogger("Call:RtcSession:Dynascale")
+    private val logger by taggedLogger("Video:RtcSession")
+    private val dynascaleLogger by taggedLogger("Video:RtcSession:Dynascale")
     private val clientImpl = client as StreamVideoClient
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
@@ -219,7 +223,7 @@ public class RtcSession internal constructor(
             null,
         )
 
-    internal val sessionId = clientImpl.sessionId
+    internal var sessionId : String = call.sessionId
 
     val trackDimensions =
         MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
@@ -345,7 +349,6 @@ public class RtcSession internal constructor(
         publisher = createPublisher()
 
         listenToSubscriberConnection()
-
         val sfuConnectionModule = SfuConnectionModule(
             context = clientImpl.context,
             apiKey = coordinatorConnectionModule.apiKey,
@@ -355,35 +358,8 @@ public class RtcSession internal constructor(
             userToken = sfuToken,
             lifecycle = coordinatorConnectionModule.lifecycle,
         )
-        coroutineScope.launch {
-            sfuConnectionModule.socketConnection.state().collectLatest {
-                when (it) {
-                    is SfuSocketState.Connected -> call.state._connection.value =
-                        RealtimeConnection.Connected
-
-                    is SfuSocketState.Connecting -> call.state._connection.value =
-                        RealtimeConnection.InProgress
-
-                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
-                        call.state._connection.value = RealtimeConnection.Disconnected
-                        call.leave()
-                    }
-
-                    SfuSocketState.Disconnected.NetworkDisconnected -> {
-                        RealtimeConnection.Reconnecting
-                    }
-
-                    SfuSocketState.Disconnected.Stopped -> RealtimeConnection.Disconnected
-                    is SfuSocketState.RestartConnection -> RealtimeConnection.Reconnecting
-                    else -> {
-                        // Do nothing
-                    }
-                }
-            }
-        }
         setSfuConnectionModule(sfuConnectionModule)
         listenToSfuSocket()
-
         coroutineScope.launch {
             // call update participant subscriptions debounced
             trackDimensionsDebounced.collect {
@@ -422,11 +398,41 @@ public class RtcSession internal constructor(
                 // connection is being established. We need to wait until a SubscriberOffer
                 // is received again and then we start listening to the ICE candidate queue
                 if (sfuSocketState is SfuSocketState.Connecting ||
-                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedTemporarily ||
+                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedPermanently ||
                     sfuSocketState is SfuSocketState.Disconnected.DisconnectedByRequest
                 ) {
                     syncSubscriberCandidates?.cancel()
                     syncSubscriberCandidates?.cancel()
+                }
+
+                when (sfuSocketState) {
+                    is SfuSocketState.Connected -> call.state._connection.value =
+                        RealtimeConnection.Connected
+
+                    is SfuSocketState.Connecting -> call.state._connection.value =
+                        RealtimeConnection.InProgress
+
+                    is SfuSocketState.Disconnected.DisconnectedPermanently,
+                    SfuSocketState.Disconnected.DisconnectedByRequest -> {
+                        call.state._connection.value =
+                            RealtimeConnection.Disconnected
+                        call.leave()
+                    }
+                    SfuSocketState.Disconnected.Stopped -> {
+                        call.state._connection.value =
+                            RealtimeConnection.PreJoin
+                    }
+                    is SfuSocketState.Disconnected.DisconnectedTemporarily,
+                    SfuSocketState.Disconnected.NetworkDisconnected,
+                    SfuSocketState.Disconnected.WebSocketEventLost,
+                    is SfuSocketState.RestartConnection -> {
+                        call.state._connection.value =
+                            RealtimeConnection.Reconnecting
+                    }
+
+                    SfuSocketState.Disconnected.Rejoin -> {
+                        // Do not update state we are rejoining.
+                    }
                 }
             }
         }
@@ -445,39 +451,11 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        // Fast reconnect, send a JOIN request on the same SFU
-                        // and restart ICE on publisher
-                        call.monitor.stop()
-                        val currentSubscriptions = subscriptions.value
-                        syncPublisherJob
-                        val publisherTracks = publisher?.let { pub ->
-                            getPublisherTracks(pub.connection.localDescription.description)
-                        } ?: emptyList()
-                        val request = JoinRequest(
-                            session_id = sessionId,
-                            token = sfuToken,
-                            fast_reconnect = false,
-                            client_details = clientDetails,
-                            reconnect_details = ReconnectDetails(
-                                reconnectStrategy,
-                                publisherTracks,
-                                currentSubscriptions,
-                            )
-                        )
-                        sfuConnectionModule.socketConnection.reconnect(request)
-                        sfuConnectionModule.socketConnection.whenConnected {
-                            call.monitor.start()
-                            publisher?.connection?.restartIce()
-                        }
+                        fastReconnect()
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
-                        val currentSubscriptions = subscriptions.value
-                        syncPublisherJob
-                        val publisherTracks = publisher?.let { pub ->
-                            getPublisherTracks(pub.connection.localDescription.description)
-                        } ?: emptyList()
-                        call.rejoin(currentSubscriptions, publisherTracks)
+                        call.rejoin()
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
@@ -488,6 +466,7 @@ public class RtcSession internal constructor(
                         // We are told to disconnect.
                         sfuConnectionModule.socketConnection.disconnect()
                         coordinatorConnectionModule.socketConnection.disconnect()
+                        call.state._connection.value = RealtimeConnection.Disconnected
                     }
 
                     else -> {
@@ -567,6 +546,7 @@ public class RtcSession internal constructor(
     private fun setSfuConnectionModule(sfuConnectionModule: SfuConnectionModule) {
         // This is used to switch from a current SFU connection to a new migrated SFU connection
         this@RtcSession.sfuConnectionModule = sfuConnectionModule
+        listenToSfuSocket()
     }
 
     private fun initializeScreenshareTransceiver() {
@@ -956,6 +936,9 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     fun createPublisher(): StreamPeerConnection {
+        audioTransceiverInitialized = false
+        videoTransceiverInitialized = false
+        screenshareTransceiverInitialized = false
         logger.i { "[createPublisher] #sfu; no args" }
         val publisher = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
@@ -1430,60 +1413,61 @@ public class RtcSession internal constructor(
             val currentSfu = sfuUrl
 
             publisherSdpOffer.value = mangledSdp
+            synchronized(this) {
+                syncPublisherJob?.cancel()
+                syncPublisherJob = coroutineScope.launch {
+                    var attempt = 0
+                    val maxAttempts = 3
+                    val delayInMs = listOf(10L, 30L, 100L)
 
-            // prevent running multiple of these at the same time
-            // if there's already a job active. cancel it
-            syncPublisherJob?.cancel()
-            // start a new job
-            // this code is a bit more complicated due to the retry behaviour
-            syncPublisherJob = coroutineScope.launch {
-                flow {
-                    // step 4 - send the tracks and SDP
-                    val request = SetPublisherRequest(
-                        sdp = mangledSdp.description,
-                        session_id = sessionId,
-                        tracks = tracks,
-                    )
+                    while (attempt <= maxAttempts) {
+                        try {
+                            // step 4 - send the tracks and SDP
+                            val request = SetPublisherRequest(
+                                sdp = mangledSdp.description,
+                                session_id = sessionId,
+                                tracks = tracks,
+                            )
 
-                    val result = setPublisher(request)
-                    // step 5 - set the remote description
+                            val result = setPublisher(request)
+                            // step 5 - set the remote description
 
-                    peerConnection.setRemoteDescription(
-                        SessionDescription(
-                            SessionDescription.Type.ANSWER, result.getOrThrow().sdp,
-                        ),
-                    )
+                            peerConnection.setRemoteDescription(
+                                SessionDescription(
+                                    SessionDescription.Type.ANSWER, result.getOrThrow().sdp,
+                                ),
+                            )
 
-                    // start listening to ICE candidates
-                    launch {
-                        sfuConnectionModule.socketConnection.events().collect { event ->
-                            if (event is ICETrickleEvent) {
-                                handleIceTrickle(event)
+                            // If successful, emit the result and break the loop
+                            result.getOrThrow()
+                            break
+                        } catch (cause: Throwable) {
+                            val sameValue = mangledSdp == publisherSdpOffer.value
+                            val sameSfu = currentSfu == sfuUrl
+                            val isPermanent = isPermanentError(cause)
+                            val willRetry =
+                                !isPermanent && sameValue && sameSfu && attempt < maxAttempts
+
+                            logger.w {
+                                "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in ${delayInMs[attempt]} ms"
+                            }
+
+                            if (willRetry) {
+                                delay(delayInMs[attempt])
+                                attempt++
+                            } else {
+                                logger.e { "setPublisher failed after $attempt retries, asking the call monitor to do an ice restart" }
+                                coroutineScope.launch { call.monitor.reconnect(forceRestart = true) }
+                                break
                             }
                         }
                     }
-
-                    emit(result.getOrThrow())
-                }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
-                    val sameValue = mangledSdp == publisherSdpOffer.value
-                    val sameSfu = currentSfu == sfuUrl
-                    val isPermanent = isPermanentError(cause)
-                    val willRetry = !isPermanent && sameValue && sameSfu && attempt <= 3
-                    val delayInMs = if (attempt <= 1) 10L else if (attempt <= 2) 30L else 100L
-                    logger.w {
-                        "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
-                    }
-                    delay(delayInMs)
-                    willRetry
-                }.catch {
-                    logger.e { "setPublisher failed after 3 retries, asking the call monitor to do an ice restart" }
-                    coroutineScope.launch { call.monitor.reconnect(forceRestart = true) }
-                }.collect()
+                }
             }
         }
     }
 
-    private fun getPublisherTracks(sdp: String): List<TrackInfo> {
+    internal fun getPublisherTracks(sdp: String): List<TrackInfo> {
         val captureResolution = call.camera.resolution.value
         val screenShareTrack = getLocalTrack(TrackType.TRACK_TYPE_SCREEN_SHARE)
 
@@ -1744,7 +1728,7 @@ public class RtcSession internal constructor(
 
     // call after onNegotiation Needed
     private suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> {
-        logger.e { "[setPublisher] #sfu; request $request" }
+        logger.d { "[setPublisher] #sfu; request $request" }
         return wrapAPICall {
             val result = sfuConnectionModule.api.setPublisher(request)
             result.error?.let {
@@ -1833,20 +1817,73 @@ public class RtcSession internal constructor(
         }
     }
 
+    private fun currentSfuInfo(): Triple<String?, List<TrackSubscriptionDetails>, List<TrackInfo>> {
+        val previousSessionId = sessionId
+        val currentSubscriptions = subscriptions.value
+        val publisherTracks = publisher?.let { pub ->
+            if (pub.connection.remoteDescription != null) {
+                getPublisherTracks(pub.connection.localDescription.description)
+            } else null
+        } ?: emptyList()
+        return Triple(previousSessionId, currentSubscriptions, publisherTracks)
+    }
 
+    internal fun fastReconnect() {
+        // Fast reconnect, send a JOIN request on the same SFU
+        // and restart ICE on publisher
+        logger.d { "[fastReconnect] Starting fast reconnect." }
+        call.monitor.stop()
+        val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
+        logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
+        val request = JoinRequest(
+            session_id = sessionId,
+            token = sfuToken,
+            fast_reconnect = true,
+            client_details = clientDetails,
+            reconnect_details = ReconnectDetails(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                publisherTracks,
+                currentSubscriptions,
+            )
+        )
+        logger.d { "[fastReconnect] join: $request" }
+        coroutineScope.launch {
+            stateJob?.cancel()
+            sfuConnectionModule.socketConnection.reconnect(request)
+            sfuConnectionModule.socketConnection.whenConnected {
+                listenToSfuSocket()
+                call.monitor.start()
+                publisher?.connection?.restartIce()
+            }
+        }
+    }
 
-    internal suspend fun rejoinSfu(
-        currentSubscriptions: List<TrackSubscriptionDetails>,
-        publisherTracks: List<TrackInfo>,
+    private var reconnectAttepmts = 0
+
+    internal fun rejoinSfu(
         apiUrl: String,
         wsUrl: String,
         token: String,
     ) {
-        sfuConnectionModule.socketConnection.disconnect()
+        logger.d { "[rejoinSfu] #rtcsession [apiUrl: $apiUrl, wsUrl: $wsUrl, token: $token]" }
+        val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
+
+        sessionId =  call.sessionId
+        logger.d { "[rejoinSfu] Disconnect current socket." }
+
+        // We are rejoining from the start, we don't want to know.
+        stateJob?.cancel()
+        eventJob?.cancel()
+        eventJob?.cancel()
+
+        coroutineScope.launch {
+            sfuConnectionModule.socketConnection.disconnect()
+        }
         call.monitor.stop()
         publisher?.connection?.close()
         subscriber?.connection?.close()
 
+        val previousWsUrl = sfuWsUrl
         sfuWsUrl = wsUrl
         sfuToken = token
         sfuUrl = apiUrl
@@ -1861,21 +1898,38 @@ public class RtcSession internal constructor(
             lifecycle = coordinatorConnectionModule.lifecycle,
         )
 
+        setSfuConnectionModule(sfuConnectionModule)
         publisher = createPublisher()
         subscriber = createSubscriber()
-
+        reconnectAttepmts++
         val request = JoinRequest(
             session_id = sessionId,
             token = sfuToken,
             fast_reconnect = false,
+            reconnect_details = ReconnectDetails(
+                strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                reconnect_attempt = reconnectAttepmts,
+                from_sfu_id = previousWsUrl,
+                announced_tracks = publisherTracks,
+                subscriptions = currentSubscriptions,
+            ).also {
+                if (previousSessionId != null) {
+                    it.copy(
+                        previous_session_id = previousSessionId
+                    )
+                } else {
+                    it
+                }
+            },
             client_details = clientDetails,
         )
         logger.d { "Connecting RTC, $request" }
-        sfuConnectionModule.socketConnection.connect(request)
-        sfuConnectionModule.socketConnection.whenConnected {
-            connectRtc()
+        coroutineScope.launch {
+            sfuConnectionModule.socketConnection.connect(request)
+            sfuConnectionModule.socketConnection.whenConnected {
+                connectRtc()
+            }
         }
-        publisherTracks
     }
 
     suspend fun switchSfu(

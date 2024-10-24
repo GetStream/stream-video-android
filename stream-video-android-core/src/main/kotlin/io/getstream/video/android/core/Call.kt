@@ -92,6 +92,7 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.TrackSubscriptionDetails
 import java.util.Collections
+import java.util.UUID
 import kotlin.coroutines.resume
 
 /**
@@ -131,7 +132,7 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
 
-    val sessionId by lazy { clientImpl.sessionId }
+    var sessionId = UUID.randomUUID().toString()
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
@@ -551,10 +552,7 @@ public class Call(
         }
     }
 
-    internal suspend fun rejoin(
-        currentSubscriptions: List<TrackSubscriptionDetails>,
-        publisherTracks: List<TrackInfo>
-    ) {
+    internal suspend fun rejoin() {
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
             val joinResponse = joinRequest(location = it)
@@ -564,9 +562,9 @@ public class Call(
                 val cred = joinResponse.value.credentials
                 logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
 
+                sessionId = UUID.randomUUID().toString()
+
                 session?.rejoinSfu(
-                    currentSubscriptions,
-                    publisherTracks,
                     cred.server.url,
                     cred.server.wsEndpoint,
                     cred.token,
@@ -590,7 +588,7 @@ public class Call(
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                logger.i { "Switching SFU from ${session?.sfuUrl} to ${cred.server.url}" }
+                logger.d { "Switching SFU from ${session?.sfuUrl} to ${cred.server.url}" }
                 val iceServers = cred.iceServers.map { it.toIceServer() }
 
                 session?.switchSfu(
@@ -616,20 +614,7 @@ public class Call(
     }
 
     suspend fun reconnect(forceRestart: Boolean) {
-        // mark us as reconnecting
-        val connectionState = state._connection.value
-
-        if (connectionState is RealtimeConnection.Joined || connectionState == RealtimeConnection.Connected) {
-            state._connection.value = RealtimeConnection.Reconnecting
-        }
-
-        // see if we are online before attempting to reconnect
-        val online = network.isConnected()
-
-        if (online) {
-            // start by restarting ice connections
-            session?.reconnect(forceRestart = forceRestart)
-        }
+        session?.fastReconnect()
     }
 
     /** Leave the call, but don't end it for other users */
@@ -731,14 +716,9 @@ public class Call(
         when (event) {
             is GoAwayEvent ->
                 scope.launch {
-                    handleSessionMigrationEvent()
+                    switchSfu()
                 }
         }
-    }
-
-    private suspend fun handleSessionMigrationEvent() {
-        logger.d { "[handleSessionMigrationEvent] Received goAway event - starting migration" }
-        switchSfu()
     }
 
     // TODO: review this
@@ -1159,8 +1139,10 @@ public class Call(
     @InternalStreamVideoApi
     public class Debug(val call: Call) {
 
-        public fun doFullReconnection() {
-            //call.session?.sfuConnectionModule?.sfuSocket?.dis
+        public fun rejoin() {
+            call.scope.launch {
+                call.rejoin()
+            }
         }
 
         public fun restartSubscriberIce() {
@@ -1171,9 +1153,15 @@ public class Call(
             call.session?.publisher?.connection?.restartIce()
         }
 
-        public fun switchSfu() {
+        fun migrate() {
             call.scope.launch {
                 call.switchSfu()
+            }
+        }
+
+        fun fastReconnect() {
+            call.scope.launch {
+                call.reconnect(true)
             }
         }
     }

@@ -57,7 +57,7 @@ interface SocketActions<EventIn, EventOut, Error, State, Token, ConnectData> {
     /**
      * Get the connection id.
      */
-    fun connectionId(): Flow<String>
+    fun connectionId(): StateFlow<String?>
 
     /**
      * When connected to the socket.

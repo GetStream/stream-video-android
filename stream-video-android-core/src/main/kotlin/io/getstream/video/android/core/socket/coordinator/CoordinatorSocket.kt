@@ -83,7 +83,7 @@ internal open class CoordinatorSocket(
         }
 
         override suspend fun stopped() {
-            logger.d { "[stopped] lifecycle stopped" }
+            coordinatorSocketStateService.onStop()
         }
     }
 

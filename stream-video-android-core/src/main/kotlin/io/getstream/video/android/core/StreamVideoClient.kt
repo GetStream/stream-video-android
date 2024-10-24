@@ -74,6 +74,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -162,9 +163,6 @@ internal class StreamVideoClient internal constructor(
     override val state = ClientState(this)
 
     /** if true we fail fast on errors instead of logging them */
-
-    /** session id is generated client side */
-    public val sessionId = UUID.randomUUID().toString()
 
     internal var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
@@ -597,7 +595,7 @@ internal class StreamVideoClient internal constructor(
         // if we jump right into the call from a deep link and we connect the call quickly.
         // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
-        return coordinatorConnectionModule.socketConnection.connectionId().first()
+        return coordinatorConnectionModule.socketConnection.connectionId().mapNotNull { it }.first()
     }
 
     internal suspend fun inviteUsers(

@@ -493,10 +493,11 @@ fun CallScreen(
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
                 },
-            ) {
-                isShowingStats = true
-                isShowingSettingMenu = false
-            }
+                onShowCallStats = {
+                    isShowingStats = true
+                    isShowingSettingMenu = false
+                }
+            )
         }
 
         if (isShowingFeedbackDialog) {

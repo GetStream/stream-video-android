@@ -37,7 +37,8 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
         }
         stateMachine.sendEvent(
             SfuSocketStateEvent.Connect(
-                connectionConf
+                connectionConf,
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
             ),
         )
     }

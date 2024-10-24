@@ -76,7 +76,7 @@ internal open class SfuSocket(
         }
 
         override suspend fun stopped() {
-            logger.d { "[stopped] lifecycle stopped" }
+            healthMonitor.stop()
         }
     }
 
@@ -169,6 +169,12 @@ internal open class SfuSocket(
                                 healthMonitor.stop()
                             }
 
+                            is SfuSocketState.Disconnected.Rejoin -> {
+                                streamWebSocket?.close()
+                                healthMonitor.stop()
+                                disposeNetworkStateObserver()
+                            }
+
                             is SfuSocketState.Disconnected.Stopped -> {
                                 streamWebSocket?.close()
                                 healthMonitor.stop()
@@ -226,7 +232,9 @@ internal open class SfuSocket(
         when (sfuEvent) {
             is JoinCallResponseEvent -> sfuSocketStateService.onConnectionEstablished(sfuEvent)
             is SFUHealthCheckEvent -> {
-                healthMonitor.ack()
+                if (isConnected()) {
+                    healthMonitor.ack()
+                }
             }
 
             else -> {
@@ -398,6 +406,7 @@ internal open class SfuSocket(
 
             is SfuSocketState.Disconnected.DisconnectedTemporarily -> DisconnectCause.Error(error)
             is SfuSocketState.Disconnected.WebSocketEventLost -> DisconnectCause.WebSocketNotAvailable
+            SfuSocketState.Disconnected.Rejoin -> DisconnectCause.ConnectionReleased
         }
 
     private fun ErrorEvent.toNetworkError(): StreamWebSocketEvent.Error {
