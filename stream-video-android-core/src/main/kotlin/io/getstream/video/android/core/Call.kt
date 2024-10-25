@@ -157,7 +157,7 @@ public class Call(
      */
     private val onIceRecoveryFailed = {
         scope.launch {
-            handleSignalChannelDisconnect(false)
+            handleSignalChannelDisconnect(true)
         }
         Unit
     }
@@ -510,40 +510,45 @@ public class Call(
             }
             return
         }
-        logger.d { "[handleSignalChannelDisconnect] #track; isRetry: $isRetry" }
 
-        if (!isRetry) {
-            state._connection.value = RealtimeConnection.Reconnecting
+        state._connection.value = RealtimeConnection.Reconnecting
 
-            if (sfuSocketReconnectionTime == null) {
-                sfuSocketReconnectionTime = System.currentTimeMillis()
-            }
+        if (sfuSocketReconnectionTime == null) {
+            sfuSocketReconnectionTime = System.currentTimeMillis()
+        }
 
-            // We were not able to restore the SFU peer connection in time
-            if (System.currentTimeMillis() - (
-                    sfuSocketReconnectionTime
-                        ?: System.currentTimeMillis()
-                    ) > sfuReconnectTimeoutMillis
-            ) {
-                leave(Error("Failed to do a full reconnect - connection issue?"))
-                return
-            }
+        // We were not able to restore the SFU peer connection in time
+        if (System.currentTimeMillis() - (
+                sfuSocketReconnectionTime
+                    ?: System.currentTimeMillis()
+                ) > sfuReconnectTimeoutMillis
+        ) {
+            logger.d { "[handleSignalChannelDisconnect] #track; SFU reconnect timed out" }
 
-            // Clean up the existing RtcSession
-            session?.cleanup()
-            session = null
+            leave(Error("Failed to do a full reconnect - connection issue?"))
+            return
+        }
 
-            // Wait a little for clean-up
-            delay(250)
+        // Clean up the existing RtcSession
+        session?.cleanup()
+        session = null
 
-            // Re-join the call
-            val result = _join()
-            if (result.isFailure) {
-                // keep trying until timeout
+        // Wait a little for clean-up
+        delay(250)
+
+        // Re-join the call
+        logger.d { "[handleSignalChannelDisconnect] #track; Will rejoin call" }
+        val result = _join()
+        logger.d { "[handleSignalChannelDisconnect] #track; Join result: $result" }
+
+        if (result.isFailure) {
+            // keep trying until timeout
+            if (isRetry) {
+                logger.d { "[handleSignalChannelDisconnect] #track; Will retry rejoin" }
                 handleSignalChannelDisconnect(isRetry = true)
-            } else {
-                sfuSocketReconnectionTime = null
             }
+        } else {
+            sfuSocketReconnectionTime = null
         }
     }
 
