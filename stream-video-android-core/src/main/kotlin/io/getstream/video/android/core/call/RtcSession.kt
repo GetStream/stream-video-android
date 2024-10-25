@@ -127,6 +127,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
@@ -210,7 +211,7 @@ public class RtcSession internal constructor(
             null,
         )
 
-    internal val sessionId = clientImpl.sessionId
+    internal val sessionId = UUID.randomUUID().toString()
 
     val trackDimensions =
         MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
