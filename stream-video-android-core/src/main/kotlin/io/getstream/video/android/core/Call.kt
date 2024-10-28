@@ -415,17 +415,14 @@ public class Call(
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
             RtcSession(
+                apiKey = clientImpl.apiKey,
+                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
                 client = client,
                 call = this,
                 sfuUrl = sfuUrl,
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
-                coordinatorConnectionModule = (client as StreamVideoClient).coordinatorConnectionModule,
                 remoteIceServers = iceServers,
-                onMigrationCompleted = {
-                    state._connection.value = RealtimeConnection.Connected
-                    monitor.check()
-                },
             )
         }
 
@@ -563,12 +560,21 @@ public class Call(
                 logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
 
                 sessionId = UUID.randomUUID().toString()
+                session?.cleanup()
 
-                session?.rejoinSfu(
+                session = RtcSession(
+                    clientImpl,
+                    this,
+                    clientImpl.apiKey,
+                    clientImpl.coordinatorConnectionModule.lifecycle,
                     cred.server.url,
                     cred.server.wsEndpoint,
                     cred.token,
+                    cred.iceServers.map { ice ->
+                        ice.toIceServer()
+                    },
                 )
+                session?.connect()
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +

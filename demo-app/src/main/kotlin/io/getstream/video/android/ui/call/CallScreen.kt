@@ -331,33 +331,35 @@ fun CallScreen(
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
-                            FloatingParticipantVideo(
-                                call = call,
-                                participant = me!!,
-                                parentBounds = IntSize(
-                                    this@BoxWithConstraints.constraints.maxWidth,
-                                    this@BoxWithConstraints.constraints.maxHeight,
-                                ),
-                                videoRenderer = { participant ->
-                                    ParticipantVideo(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(VideoTheme.shapes.dialog),
-                                        call = call,
-                                        participant = participant,
-                                        reactionContent = {
-                                            CustomReactionContent(
-                                                participant = participant,
-                                                style = RegularVideoRendererStyle().copy(
-                                                    isShowingConnectionQualityIndicator = false,
-                                                    reactionPosition = Alignment.TopCenter,
-                                                    reactionDuration = 5000,
-                                                ),
-                                            )
-                                        },
-                                    )
-                                },
-                            )
+                            me?.let {
+                                FloatingParticipantVideo(
+                                    call = call,
+                                    participant = me!!,
+                                    parentBounds = IntSize(
+                                        this@BoxWithConstraints.constraints.maxWidth,
+                                        this@BoxWithConstraints.constraints.maxHeight,
+                                    ),
+                                    videoRenderer = { participant ->
+                                        ParticipantVideo(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .clip(VideoTheme.shapes.dialog),
+                                            call = call,
+                                            participant = participant,
+                                            reactionContent = {
+                                                CustomReactionContent(
+                                                    participant = participant,
+                                                    style = RegularVideoRendererStyle().copy(
+                                                        isShowingConnectionQualityIndicator = false,
+                                                        reactionPosition = Alignment.TopCenter,
+                                                        reactionDuration = 5000,
+                                                    ),
+                                                )
+                                            },
+                                        )
+                                    },
+                                )
+                            }
                         },
                         videoOverlayContent = {
                             Crossfade(

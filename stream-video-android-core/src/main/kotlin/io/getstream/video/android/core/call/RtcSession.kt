@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call
 
 import android.os.Build
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
@@ -67,6 +68,7 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
+import io.getstream.video.android.model.ApiKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -185,13 +187,13 @@ data class TrackDimensions(
  */
 public class RtcSession internal constructor(
     client: StreamVideo,
-    private val coordinatorConnectionModule: CoordinatorConnectionModule,
     private val call: Call,
+    private val apiKey: String,
+    private val lifecycle: Lifecycle,
     internal var sfuUrl: String,
     internal var sfuWsUrl: String,
     internal var sfuToken: String,
     internal var remoteIceServers: List<IceServer>,
-    internal var onMigrationCompleted: () -> Unit,
 ) {
 
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
@@ -351,12 +353,12 @@ public class RtcSession internal constructor(
         listenToSubscriberConnection()
         val sfuConnectionModule = SfuConnectionModule(
             context = clientImpl.context,
-            apiKey = coordinatorConnectionModule.apiKey,
+            apiKey = apiKey,
             apiUrl = sfuUrl,
             wssUrl = sfuWsUrl,
             connectionTimeoutInMs = 2000L,
             userToken = sfuToken,
-            lifecycle = coordinatorConnectionModule.lifecycle,
+            lifecycle = lifecycle,
         )
         setSfuConnectionModule(sfuConnectionModule)
         listenToSfuSocket()
@@ -465,7 +467,6 @@ public class RtcSession internal constructor(
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
                         // We are told to disconnect.
                         sfuConnectionModule.socketConnection.disconnect()
-                        coordinatorConnectionModule.socketConnection.disconnect()
                         call.state._connection.value = RealtimeConnection.Disconnected
                     }
 
@@ -1890,12 +1891,12 @@ public class RtcSession internal constructor(
 
         sfuConnectionModule = SfuConnectionModule(
             context = clientImpl.context,
-            apiKey = coordinatorConnectionModule.apiKey,
+            apiKey = apiKey,
             apiUrl = apiUrl,
             wssUrl = sfuWsUrl,
             connectionTimeoutInMs = 10000L,
             userToken = token,
-            lifecycle = coordinatorConnectionModule.lifecycle,
+            lifecycle = lifecycle,
         )
 
         setSfuConnectionModule(sfuConnectionModule)
@@ -1957,12 +1958,12 @@ public class RtcSession internal constructor(
         // Create a parallel SFU socket
         sfuConnectionMigrationModule = SfuConnectionModule(
             context = clientImpl.context,
-            apiKey = coordinatorConnectionModule.apiKey,
+            apiKey = apiKey,
             apiUrl = sfuUrl,
             wssUrl = sfuWsUrl,
             connectionTimeoutInMs = 10000L,
             userToken = sfuToken,
-            lifecycle = coordinatorConnectionModule.lifecycle,
+            lifecycle = lifecycle,
         )
 
         // Connect to SFU socket
@@ -2031,9 +2032,6 @@ public class RtcSession internal constructor(
                                     tempSubscriber?.let { tempSubscriberValue ->
                                         tempSubscriberValue.connection.close()
                                     }
-
-                                    onMigrationCompleted.invoke()
-
                                     cancel()
                                 } else if (it == PeerConnectionState.CLOSED ||
                                     it == PeerConnectionState.DISCONNECTED ||
