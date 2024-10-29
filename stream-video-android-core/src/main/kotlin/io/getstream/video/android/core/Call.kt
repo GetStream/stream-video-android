@@ -87,9 +87,11 @@ import org.threeten.bp.OffsetDateTime
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.models.WebsocketReconnectStrategy
 import stream.video.sfu.signal.TrackSubscriptionDetails
 import java.util.Collections
 import java.util.UUID
@@ -121,6 +123,8 @@ public class Call(
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
+    private var reconnectAttepmts = 0
+
     internal val clientImpl = client as StreamVideoClient
 
     private val logger by taggedLogger("Call:$type:$id")
@@ -132,7 +136,6 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
 
-    var sessionId = UUID.randomUUID().toString()
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
@@ -209,6 +212,8 @@ public class Call(
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
+    var sessionId = UUID.randomUUID().toString()
+
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
             testInstanceProvider.mediaManagerCreator!!.invoke()
@@ -415,6 +420,7 @@ public class Call(
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
             RtcSession(
+                sessionId = this.sessionId,
                 apiKey = clientImpl.apiKey,
                 lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
                 client = client,
@@ -553,18 +559,26 @@ public class Call(
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
             val joinResponse = joinRequest(location = it)
-
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
+                val session = this.session!!
                 logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
 
-                sessionId = UUID.randomUUID().toString()
-                session?.cleanup()
-
-                session = RtcSession(
+                this.sessionId = UUID.randomUUID().toString()
+                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+                val reconnectDetails = ReconnectDetails(
+                    previous_session_id = prevSessionId,
+                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                    announced_tracks = publishingInfo,
+                    subscriptions = subscriptionsInfo,
+                    reconnect_attempt = reconnectAttepmts,
+                )
+                session.prepareRejoin()
+                this.session = RtcSession(
                     clientImpl,
                     this,
+                    sessionId,
                     clientImpl.apiKey,
                     clientImpl.coordinatorConnectionModule.lifecycle,
                     cred.server.url,
@@ -574,7 +588,7 @@ public class Call(
                         ice.toIceServer()
                     },
                 )
-                session?.connect()
+                this.session?.connect(reconnectDetails)
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +

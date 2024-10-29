@@ -1326,6 +1326,19 @@ public class CallState(
             }
         }
     }
+
+    fun replaceParticipants(participants: List<ParticipantState>) {
+        this._participants.value = participants.associate { it.sessionId to it }.toSortedMap()
+        val screensharing = mutableListOf<ParticipantState>()
+        participants.forEach {
+            if (it.screenSharingEnabled.value) {
+                screensharing.add(it)
+            }
+        }
+        _screenSharingSession.value = ScreenSharingSession(
+            screensharing[0],
+        )
+    }
 }
 
 private fun MemberResponse.toMemberState(): MemberState {
