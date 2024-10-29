@@ -87,6 +87,7 @@ import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.CallSessionEndedEvent
+import org.openapitools.client.models.CallSessionParticipantCountsUpdatedEvent
 import org.openapitools.client.models.CallSessionParticipantJoinedEvent
 import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.CallSessionResponse
@@ -866,6 +867,23 @@ public class CallState(
 
             is CallSessionEndedEvent -> {
                 _session.value = event.call.session
+            }
+
+            is CallSessionParticipantCountsUpdatedEvent -> {
+                _session.value?.let {
+                    _session.value = it.copy(
+                        participantsCountByRole = event.participantsCountByRole,
+                        anonymousParticipantCount = event.anonymousParticipantCount,
+                    )
+                }
+
+                // When in JOINED state, we should use the participant from SFU health check event, as it's more accurate.
+                if (connection.value !is RealtimeConnection.Joined) {
+                    _participantCounts.value = ParticipantCount(
+                        total = event.anonymousParticipantCount + event.participantsCountByRole.values.sum(),
+                        anonymous = event.anonymousParticipantCount,
+                    )
+                }
             }
 
             is CallSessionParticipantLeftEvent -> {
