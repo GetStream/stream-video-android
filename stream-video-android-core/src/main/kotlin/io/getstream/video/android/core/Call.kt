@@ -459,7 +459,7 @@ public class Call(
             session?.let {
                 it.sfuSocketState.collect { sfuSocketState ->
                     if (sfuSocketState is SfuSocketState.Disconnected.DisconnectedPermanently) {
-                        handleSignalChannelDisconnect(isRetry = false)
+                        rejoin()
                     }
                 }
             }
@@ -634,7 +634,25 @@ public class Call(
     }
 
     suspend fun reconnect(forceRestart: Boolean) {
-        session?.fastReconnect()
+        logger.e { "[reconnect] Reconnecting (fast)" }
+        session?.prepareRejoin()
+        this.state._connection.value = RealtimeConnection.Reconnecting
+        if (session != null) {
+            val session = session!!
+            val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+            val reconnectDetails = ReconnectDetails(
+                previous_session_id = prevSessionId,
+                strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                announced_tracks = publishingInfo,
+                subscriptions = subscriptionsInfo,
+                reconnect_attempt = reconnectAttepmts,
+            )
+
+            session.fastReconnect(reconnectDetails)
+        } else {
+            logger.e { "[reconnect] Disconnecting" }
+            this.state._connection.value = RealtimeConnection.Disconnected
+        }
     }
 
     /** Leave the call, but don't end it for other users */

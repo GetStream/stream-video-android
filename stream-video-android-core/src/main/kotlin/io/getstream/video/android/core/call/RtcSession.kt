@@ -453,7 +453,7 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        fastReconnect()
+                        call.reconnect(true)
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
@@ -1837,31 +1837,34 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal fun fastReconnect() {
+    internal fun fastReconnect(reconnectDetails: ReconnectDetails?) {
         // Fast reconnect, send a JOIN request on the same SFU
         // and restart ICE on publisher
         logger.d { "[fastReconnect] Starting fast reconnect." }
         call.monitor.stop()
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
-        val request = JoinRequest(
-            session_id = sessionId,
-            token = sfuToken,
-            fast_reconnect = true,
-            client_details = clientDetails,
-            reconnect_details = ReconnectDetails(
+        coroutineScope.launch {
+            connect(ReconnectDetails(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                 publisherTracks,
                 currentSubscriptions,
-            )
+            ))
+        }
+
+        logger.i { "[connect] #sfu; #track; no args" }
+        val request = JoinRequest(
+            session_id = sessionId,
+            token = sfuToken,
+            fast_reconnect = false,
+            client_details = clientDetails,
+            reconnect_details = reconnectDetails
         )
-        logger.d { "[fastReconnect] join: $request" }
+        logger.d { "Connecting RTC, $request" }
         coroutineScope.launch {
-            stateJob?.cancel()
             sfuConnectionModule.socketConnection.reconnect(request)
             sfuConnectionModule.socketConnection.whenConnected {
-                connectRtc()
-                call.monitor.start()
+                publisher?.connection?.restartIce()
             }
         }
     }
@@ -1870,7 +1873,7 @@ public class RtcSession internal constructor(
         // We are rejoining from the start, we don't want to know.
         stateJob?.cancel()
         eventJob?.cancel()
-        eventJob?.cancel()
+        errorJob?.cancel()
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.disconnect()
         }
