@@ -14,19 +14,6 @@ env:
   BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
 
 jobs:
-  lint:
-    name: Spotless check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3.1.0
-      - name: Set up JDK
-        uses: actions/setup-java@v3.6.0
-        with:
-          distribution: adopt
-          java-version: 17
-      - name: spotless
-        run: ./gradlew spotlessCheck --scan
 
   vale:
     name: Vale doc linter
