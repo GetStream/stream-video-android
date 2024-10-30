@@ -163,7 +163,7 @@ public class Call(
      */
     private val onIceRecoveryFailed = {
         scope.launch {
-            handleSignalChannelDisconnect(false)
+            rejoin()
         }
         Unit
     }
@@ -502,7 +502,7 @@ public class Call(
     }
 
     internal suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
-        // Prevent multiple starts of the reconnect flow. For the start call
+        /*// Prevent multiple starts of the reconnect flow. For the start call
         // first check if sfuSocketReconnectionTime isn't already set - if yes
         // then we are already doing a full reconnect
         if (state._connection.value == RealtimeConnection.Migrating) {
@@ -552,10 +552,11 @@ public class Call(
             } else {
                 sfuSocketReconnectionTime = null
             }
-        }
+        }*/
     }
 
     internal suspend fun rejoin() {
+        reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
             val joinResponse = joinRequest(location = it)
@@ -633,9 +634,10 @@ public class Call(
         }
     }
 
-    suspend fun reconnect(forceRestart: Boolean) {
+    suspend fun reconnect() {
+        reconnectAttepmts++
         logger.e { "[reconnect] Reconnecting (fast)" }
-        session?.prepareRejoin()
+        session?.prepareReconnect()
         this.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
             val session = session!!
@@ -1199,7 +1201,7 @@ public class Call(
 
         fun fastReconnect() {
             call.scope.launch {
-                call.reconnect(true)
+                call.reconnect()
             }
         }
     }

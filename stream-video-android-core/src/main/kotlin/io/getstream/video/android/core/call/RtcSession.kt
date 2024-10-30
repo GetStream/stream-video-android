@@ -395,18 +395,6 @@ public class RtcSession internal constructor(
         stateJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
-
-                // make sure we stop handling ICE candidates when a new SFU socket
-                // connection is being established. We need to wait until a SubscriberOffer
-                // is received again and then we start listening to the ICE candidate queue
-                if (sfuSocketState is SfuSocketState.Connecting ||
-                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedPermanently ||
-                    sfuSocketState is SfuSocketState.Disconnected.DisconnectedByRequest
-                ) {
-                    syncSubscriberCandidates?.cancel()
-                    syncSubscriberCandidates?.cancel()
-                }
-
                 when (sfuSocketState) {
                     is SfuSocketState.Connected -> call.state._connection.value =
                         RealtimeConnection.Connected
@@ -416,9 +404,7 @@ public class RtcSession internal constructor(
 
                     is SfuSocketState.Disconnected.DisconnectedPermanently,
                     SfuSocketState.Disconnected.DisconnectedByRequest -> {
-                        call.state._connection.value =
-                            RealtimeConnection.Disconnected
-                        call.leave()
+                        call.state._connection.value = RealtimeConnection.Disconnected
                     }
                     SfuSocketState.Disconnected.Stopped -> {
                         call.state._connection.value =
@@ -428,8 +414,7 @@ public class RtcSession internal constructor(
                     SfuSocketState.Disconnected.NetworkDisconnected,
                     SfuSocketState.Disconnected.WebSocketEventLost,
                     is SfuSocketState.RestartConnection -> {
-                        call.state._connection.value =
-                            RealtimeConnection.Reconnecting
+                        call.state._connection.value = RealtimeConnection.Reconnecting
                     }
 
                     SfuSocketState.Disconnected.Rejoin -> {
@@ -453,7 +438,7 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.reconnect(true)
+                        call.reconnect()
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
@@ -518,7 +503,6 @@ public class RtcSession internal constructor(
 
     suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
         logger.i { "[connect] #sfu; #track; no args" }
-        listenToSfuSocket()
         val request = JoinRequest(
             session_id = sessionId,
             token = sfuToken,
@@ -527,6 +511,7 @@ public class RtcSession internal constructor(
             reconnect_details = reconnectDetails
         )
         logger.d { "Connecting RTC, $request" }
+        listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
         sfuConnectionModule.socketConnection.whenConnected {
             connectRtc()
@@ -1842,25 +1827,17 @@ public class RtcSession internal constructor(
         // and restart ICE on publisher
         logger.d { "[fastReconnect] Starting fast reconnect." }
         call.monitor.stop()
+        subscriptions.value = emptyList()
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
-        coroutineScope.launch {
-            connect(ReconnectDetails(
-                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-                publisherTracks,
-                currentSubscriptions,
-            ))
-        }
-
-        logger.i { "[connect] #sfu; #track; no args" }
         val request = JoinRequest(
             session_id = sessionId,
             token = sfuToken,
-            fast_reconnect = false,
             client_details = clientDetails,
             reconnect_details = reconnectDetails
         )
         logger.d { "Connecting RTC, $request" }
+        listenToSfuSocket()
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.reconnect(request)
             sfuConnectionModule.socketConnection.whenConnected {
@@ -1880,6 +1857,16 @@ public class RtcSession internal constructor(
         call.monitor.stop()
         publisher?.connection?.close()
         subscriber?.connection?.close()
+    }
+
+    internal fun prepareReconnect() {
+        // We are rejoining from the start, we don't want to know.
+        stateJob?.cancel()
+        eventJob?.cancel()
+        errorJob?.cancel()
+        coroutineScope.launch {
+            sfuConnectionModule.socketConnection.disconnect()
+        }
     }
 
     suspend fun switchSfu(

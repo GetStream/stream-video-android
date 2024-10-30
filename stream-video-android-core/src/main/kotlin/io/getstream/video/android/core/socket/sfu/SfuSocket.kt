@@ -200,7 +200,7 @@ internal open class SfuSocket(
                                 }
                             }
                         }
-                        callListeners { listener -> listener.onDisconnected(cause = state.cause) }
+                        //callListeners { listener -> listener.onDisconnected(cause = state.cause) }
                     }
                 }
             }

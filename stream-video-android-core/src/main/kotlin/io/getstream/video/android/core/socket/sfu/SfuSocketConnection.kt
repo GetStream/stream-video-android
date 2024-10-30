@@ -144,7 +144,7 @@ class SfuSocketConnection(
 
     override fun onDisconnected(cause: DisconnectCause) {
         super.onDisconnected(cause)
-        logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
+        logger.d { "[onDisconnected] Socket disconnected. Cause: ${(cause as? DisconnectCause.Error)?.error}" }
     }
 
     override fun whenConnected(
@@ -177,7 +177,6 @@ class SfuSocketConnection(
         if (data.reconnect_details == null) {
             logger.w { "[reconnect] Reconnect details are missing!" }
         }
-        internalSocket.disconnect()
         internalSocket.connect(data)
     }
 
