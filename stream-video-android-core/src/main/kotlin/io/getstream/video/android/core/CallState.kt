@@ -1096,7 +1096,7 @@ public class CallState(
     internal fun getOrCreateParticipant(participant: Participant): ParticipantState {
         if (participant.session_id.isEmpty()) {
             // Empty session ID is technically allowed but should not happen.
-            logger.w { "A user with empty session ID joined the call." }
+            logger.w { "A user [id:${participant.user_id}] is in the call with empty session_id" }
         }
 
         val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
