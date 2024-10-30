@@ -25,7 +25,7 @@ import java.util.*
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.application.compose")
-    id("io.getstream.spotless")
+//    id("io.getstream.spotless")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)

@@ -86,4 +86,4 @@ cp -r "${PROTOCOL_ROOT}/protobuf/." "${PROJECT_ROOT}/stream-video-android-core/s
 
 # move to the project root and run spotlessApply to reformat generated codes.
 cd "${PROJECT_ROOT}"
-./gradlew spotlessApply
+#./gradlew spotlessApply

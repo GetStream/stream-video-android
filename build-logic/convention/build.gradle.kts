@@ -14,7 +14,7 @@ dependencies {
   compileOnly(libs.android.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin)
   compileOnly(libs.compose.compiler.gradlePlugin)
-  compileOnly(libs.spotless.gradlePlugin)
+//  compileOnly(libs.spotless.gradlePlugin)
 }
 
 gradlePlugin {
@@ -35,9 +35,9 @@ gradlePlugin {
       id = "io.getstream.android.library"
       implementationClass = "AndroidLibraryConventionPlugin"
     }
-    register("spotless") {
-      id = "io.getstream.spotless"
-      implementationClass = "SpotlessConventionPlugin"
-    }
+//    register("spotless") {
+//      id = "io.getstream.spotless"
+//      implementationClass = "SpotlessConventionPlugin"
+//    }
   }
 }

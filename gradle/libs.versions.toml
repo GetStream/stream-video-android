@@ -1,7 +1,7 @@
 [versions]
 androidGradlePlugin = "8.4.2"
 cameraCamera2 = "1.3.0"
-spotless = "6.21.0"
+#spotless = "6.21.0"
 nexusPlugin = "1.3.0"
 kotlin = "2.0.20"
 ksp = "2.0.20-1.0.25"
@@ -230,7 +230,7 @@ google-mlkit-selfie-segmentation = { group = "com.google.mlkit", name = "segment
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
-spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+#spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version = "1.3.0" }
 play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version = "18.3.0" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version = "1.3.0" }
@@ -246,7 +246,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatabilityValidator" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+#spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "kotlinDokka" }
 nexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPlugin" }
 google-gms = { id = "com.google.gms.google-services", version.ref = "googleService" }

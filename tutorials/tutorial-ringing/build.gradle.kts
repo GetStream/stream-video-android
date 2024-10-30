@@ -20,7 +20,6 @@ import io.getstream.video.android.Configuration
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.application.compose")
-    id("io.getstream.spotless")
 
     id("com.google.gms.google-services")
 }

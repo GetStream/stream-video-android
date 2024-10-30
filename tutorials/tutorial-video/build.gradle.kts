@@ -22,7 +22,6 @@ import java.util.*
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.android.application.compose")
-    id("io.getstream.spotless")
 }
 
 android {
