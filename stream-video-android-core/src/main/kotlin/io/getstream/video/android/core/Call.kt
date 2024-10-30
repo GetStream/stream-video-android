@@ -129,7 +129,7 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
 
-    val sessionId by lazy { clientImpl.sessionId }
+    val sessionId get() = clientImpl.sessionId
     private val network by lazy { clientImpl.connectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
@@ -384,8 +384,7 @@ public class Call(
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
-        // step 1. call the join endpoint to get a list of SFUs
-
+        // call the join endpoint to get a list of SFUs
         val locationResult = clientImpl.getCachedLocation()
         if (locationResult !is Success) {
             return locationResult as Failure
@@ -537,14 +536,16 @@ public class Call(
         delay(250)
 
         // Re-join the call
-        logger.d { "[handleSignalChannelDisconnect] #track; Will rejoin call" }
+        clientImpl.generateNewSessionId()
+        logger.d {
+            "[handleSignalChannelDisconnect] #track; Will retry rejoin with new session ID: $sessionId"
+        }
         val result = _join()
         logger.d { "[handleSignalChannelDisconnect] #track; Join result: $result" }
 
         if (result.isFailure) {
             // keep trying until timeout
             if (isRetry) {
-                logger.d { "[handleSignalChannelDisconnect] #track; Will retry rejoin" }
                 handleSignalChannelDisconnect(isRetry = true)
             }
         } else {

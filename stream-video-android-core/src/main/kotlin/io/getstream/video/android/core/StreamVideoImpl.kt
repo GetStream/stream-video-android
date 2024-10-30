@@ -178,7 +178,17 @@ internal class StreamVideoImpl internal constructor(
     /** if true we fail fast on errors instead of logging them */
 
     /** session id is generated client side */
-    public val sessionId = UUID.randomUUID().toString()
+    public var sessionId: String = ""
+        get() {
+            if (field.isEmpty()) generateNewSessionId()
+            return field
+        }
+        private set
+
+    internal fun generateNewSessionId() {
+        sessionId = UUID.randomUUID().toString()
+        logger.d { "[generateNewSessionId] sessionId: $sessionId" }
+    }
 
     internal var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
