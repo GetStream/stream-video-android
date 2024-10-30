@@ -35,11 +35,18 @@ plugins {
     id(libs.plugins.baseline.profile.get().pluginId)
 }
 
+configurations.all {
+    resolutionStrategy {
+        force(libs.testing.tracing)
+    }
+}
+
 android {
     namespace = "io.getstream.video.android"
     compileSdk = Configuration.compileSdk
 
     defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         applicationId = "io.getstream.video.android"
         minSdk = Configuration.minSdk
         targetSdk = Configuration.targetSdk
@@ -48,6 +55,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     val signFile: File = rootProject.file(".sign/keystore.properties")
@@ -275,6 +291,27 @@ dependencies {
 
     // Http
     implementation(libs.okhttp)
+
+    implementation(libs.mockweb.server)
+    androidTestImplementation(libs.strikt)
+    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.espresso.idling)
+    androidTestImplementation(libs.espresso.runner)
+    androidTestImplementation(libs.espresso.rules)
+    androidTestImplementation(libs.espresso.intents)
+    androidTestImplementation(libs.testing.ui.automator)
+    androidTestImplementation(libs.androidx.compose.ui.test)
+
+
+    androidTestImplementation(libs.mockweb.server)
+    androidTestImplementation(libs.mockweb.server.extensions.request)
+    androidTestImplementation(libs.mockweb.server.extensions.assertions)
+    androidTestImplementation(libs.mockweb.server.extensions)
+
+
+    debugImplementation(libs.mockweb.server.staging)
+
+    androidTestImplementation(libs.squareup.mockweb.server)
 
     // Memory detection
     debugImplementation(libs.leakCanary)

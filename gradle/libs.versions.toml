@@ -22,8 +22,8 @@ androidxActivity = "1.9.2"
 androidxDataStore = "1.0.0"
 googleService = "4.3.14"
 
-androidxComposeBom = "2024.09.00"
-androidxComposeTracing = "1.0.0-beta01"
+androidxComposeBom = "2024.10.00"
+androidxComposeTracing = "1.7.4"
 androidxHiltNavigation = "1.2.0"
 androidxComposeNavigation = "2.8.0"
 composeStableMarker = "1.0.5"
@@ -76,9 +76,38 @@ leakCanary = "2.13"
 binaryCompatabilityValidator = "0.16.3"
 playPublisher = "3.8.4"
 
+
 googleMlKitSelfieSegmentation = "16.0.0-beta6"
 
+# Espresso
+espressoCore = "3.6.1"
+espressoRunner = "1.6.1"
+mockweb-server = "0.3.0"
+espressoRules = "1.6.1"
+testing-tracing = "1.2.0"
+striktVersion = "0.34.1"
+testing-ui-automator = "2.3.0"
+
 [libraries]
+
+mockweb-server = { module = "com.github.appunite.MockWebServer-Extensions:mockwebserver-interceptor", version.ref = "mockweb-server" }
+mockweb-server-extensions = { module = "com.github.appunite.MockWebServer-Extensions:mockwebserver-extensions", version.ref = "mockweb-server" }
+mockweb-server-extensions-request = { module = "com.github.appunite.MockWebServer-Extensions:mockwebserver-request", version.ref = "mockweb-server" }
+mockweb-server-extensions-assertions = { module = "com.github.appunite.MockWebServer-Extensions:mockwebserver-assertions", version.ref = "mockweb-server" }
+mockweb-server-staging = { module = "com.github.appunite.MockWebServer-Extensions:mockwebserver-allow-mocking", version.ref = "mockweb-server" }
+
+squareup-mockweb-server = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+
+strikt = { module = "io.strikt:strikt-core", version.ref = "striktVersion" }
+espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoCore" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+espresso-runner = { module = "androidx.test:runner", version.ref = "espressoRunner" }
+espresso-rules = { module = "androidx.test:rules", version.ref = "espressoRules" }
+espresso-idling = { module = "androidx.test.espresso:espresso-idling-resource", version.ref = "espressoCore" }
+androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4"  }
+testing-ui-automator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "testing-ui-automator" }
+testing-tracing = { module = "androidx.tracing:tracing", version.ref = "testing-tracing" }
+
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }

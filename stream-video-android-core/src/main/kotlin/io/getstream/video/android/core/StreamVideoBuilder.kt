@@ -100,6 +100,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val connectionTimeoutInMs: Long = 10000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
+    private val hintDomain: String? = null,
     private val runForegroundServiceForCalls: Boolean = true,
     private val callServiceConfig: CallServiceConfig? = null,
     private val localSfuAddress: String? = null,
@@ -125,6 +126,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
      * @throws ConnectException If the WebSocket connection fails.
      */
     public fun build(): StreamVideo {
+
+        hintDomain?.let {
+            StreamVideoImpl.hintDomain = it
+        }
+
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
 
         val existingInstance = StreamVideo.instanceOrNull()

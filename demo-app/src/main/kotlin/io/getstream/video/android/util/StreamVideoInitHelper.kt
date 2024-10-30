@@ -29,6 +29,7 @@ import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
@@ -48,6 +49,8 @@ public enum class InitializedState {
 
 @SuppressLint("StaticFieldLeak")
 object StreamVideoInitHelper {
+
+    var testUrl: String? = null
 
     private var isInitialising = false
     private lateinit var context: Context
@@ -133,7 +136,7 @@ object StreamVideoInitHelper {
                     apiKey = authData.apiKey,
                     user = loggedInUser,
                     token = authData.token,
-                    loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                    loggingLevel = LoggingLevel(priority = Priority.VERBOSE, httpLoggingLevel = HttpLoggingLevel.BODY),
                 )
             }
             Log.i("StreamVideoInitHelper", "Init successful.")
@@ -192,6 +195,7 @@ object StreamVideoInitHelper {
             apiKey = apiKey,
             user = user,
             token = token,
+            hintDomain = testUrl,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             notificationConfig = NotificationConfig(

@@ -18,6 +18,8 @@ package io.getstream.video.android.core.internal.module
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.util.Log
+import com.appunite.mockwebserver_interceptor.TestInterceptor
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -102,6 +104,7 @@ internal class ConnectionModule(
     private fun buildOkHttpClient(): OkHttpClient {
         // create a new OkHTTP client and set timeouts
         return OkHttpClient.Builder()
+            .addInterceptor(TestInterceptor)
             .addInterceptor(headersInterceptor)
             .addInterceptor(authInterceptor)
             .addInterceptor(

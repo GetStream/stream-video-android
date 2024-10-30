@@ -160,6 +160,10 @@ internal class StreamVideoImpl internal constructor(
     internal val audioProcessing: ManagedAudioProcessingFactory? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
+    companion object {
+        var hintDomain = "https://hint.stream-io-video.com/"
+    }
+
     private var locationJob: Deferred<Result<String>>? = null
 
     /** the state for the client, includes the current user */
@@ -658,9 +662,9 @@ internal class StreamVideoImpl internal constructor(
     }
 
     private suspend fun waitForConnectionId(): String? =
-        // The Coordinator WS connection can take a moment to set up - this can be an issue
-        // if we jump right into the call from a deep link and we connect the call quickly.
-        // We return null on timeout. The Coordinator WS will update the connectionId later
+    // The Coordinator WS connection can take a moment to set up - this can be an issue
+    // if we jump right into the call from a deep link and we connect the call quickly.
+    // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
         withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
             val value = connectionModule.coordinatorSocket.connectionId.first { it != null }
@@ -1056,7 +1060,7 @@ internal class StreamVideoImpl internal constructor(
     @OptIn(InternalCoroutinesApi::class)
     suspend fun _selectLocation(): Result<String> {
         return wrapAPICall {
-            val url = "https://hint.stream-io-video.com/"
+            val url = hintDomain
             val request: Request = Request.Builder().url(url).method("HEAD", null).build()
             val call = connectionModule.okHttpClient.newCall(request)
             val response = suspendCancellableCoroutine { continuation ->

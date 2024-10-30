@@ -190,6 +190,8 @@ dependencies {
     // crypto
     implementation(libs.tink)
 
+    implementation(libs.mockweb.server)
+
     // unit tests
     testImplementation(libs.junit)
     testImplementation(libs.truth)

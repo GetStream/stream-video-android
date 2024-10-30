@@ -19,3 +19,25 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+
+# ============ START: rules required for running androidTests ============
+-keep class androidx.tracing.Trace {
+    public static void beginSection(java.lang.String);
+    public static void endSection();
+}
+-keep class androidx.concurrent.futures.ResolvableFuture { *; }
+-keep class androidx.concurrent.futures.CallbackToFutureAdapter$Resolver { *; }
+-keep class androidx.concurrent.futures.CallbackToFutureAdapter { *; }
+-keep class androidx.concurrent.futures.CallbackToFutureAdapter$Completer { *; }
+-keep class kotlin.LazyKt { *; }
+-keep class kotlin.jvm.internal.Intrinsics { *; }
+-keep class androidx.test.espresso.idling.** { *; }
+-keep class androidx.test.espresso.IdlingRegistry { *; }
+-keep class androidx.test.espresso.IdlingResource { *; }
+
+-keep @androidx.annotation.VisibleForTesting class * { *; }
+-keep class * {
+  @androidx.annotation.VisibleForTesting *;
+}
+# ============ END:   rules required for running androidTests ============
