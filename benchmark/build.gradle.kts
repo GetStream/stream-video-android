@@ -20,7 +20,6 @@ plugins {
     id(libs.plugins.android.test.get().pluginId)
     id(libs.plugins.kotlin.android.get().pluginId)
     id(libs.plugins.baseline.profile.get().pluginId)
-//    id("io.getstream.spotless")
 }
 
 android {

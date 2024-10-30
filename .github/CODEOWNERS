@@ -18,7 +18,6 @@ stream-video-android-ui-compose        @GetStream/android-developers
 .github                     @GetStream/android-developers
 team-props                  @GetStream/android-developers
 benchmark                   @GetStream/android-developers
-spotless                    @GetStream/android-developers
 
 # Build config
 build.gradle                @GetStream/android-developers
