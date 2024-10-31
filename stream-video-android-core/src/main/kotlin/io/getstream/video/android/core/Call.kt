@@ -42,7 +42,6 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -54,8 +53,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -230,23 +227,29 @@ public class Call(
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             logger.d { "[onConnected] no args" }
-            val elapsedTime = System.currentTimeMillis() - lastDisconnect
-            if (lastDisconnect > 0 && elapsedTime > reconnectDeadline) {
-                logger.d { "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTime/1000} seconds. Deadline is ${reconnectDeadline / 1000} seconds" }
-                reconnect()
+            val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
+            if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
+                logger.d { "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds" }
+                rejoin()
             } else {
-                logger.d { "[onConnected] Reconnecting (full)" }
+                logger.d { "[onConnected] Reconnecting (full) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds" }
                 rejoin()
             }
         }
 
         override suspend fun onDisconnected() {
             lastDisconnect = System.currentTimeMillis()
+            leaveTimeoutAfterDisconnect = scope.launch {
+                delay(40_000)
+                leave()
+            }
             logger.d { "[onDisconnected] at $lastDisconnect" }
         }
     }
+
+    private var leaveTimeoutAfterDisconnect: Job? = null
     private var lastDisconnect = 0L
-    private var reconnectDeadline: Int = 10_000
+    private var reconnectDeadlineMils: Int = 10_000
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
 
@@ -467,32 +470,28 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
-
-        scope.launch {
-            // wait for the first stream to be added
-            session?.let { rtcSession ->
-                val mainRtcSession = rtcSession.lastVideoStreamAdded.filter { it != null }.first()
-                logger.d { "stream added, rtc completed, ready to display video $mainRtcSession" }
-            }
-        }
-
-        monitor.start()
         client.state.setActiveCall(this)
-        startCallStatsReporting(result.value.statsOptions.reportingIntervalMs.toLong())
+        monitorSession(result.value)
+        return Success(value = session!!)
+    }
 
+    private suspend fun Call.monitorSession(result: JoinCallResponse) {
+        sfuEvents?.cancel()
+        sfuListener?.cancel()
+        monitor.start()
+        startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
         // listen to Signal WS
         sfuEvents = scope.launch {
             session?.let {
                 it.socket.events().collect { event ->
                     if (event is JoinCallResponseEvent) {
-                        reconnectDeadline = event.fastReconnectDeadlineSeconds * 1000
-                        logger.d { "[join] #deadline for reconnect is $reconnectDeadline seconds" }
+                        reconnectDeadlineMils = event.fastReconnectDeadlineSeconds * 1000
+                        logger.d { "[join] #deadline for reconnect is ${reconnectDeadlineMils / 1000} seconds" }
                     }
                 }
             }
         }
         network.subscribe(listener)
-        return Success(value = session!!)
     }
 
     private suspend fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
@@ -530,6 +529,7 @@ public class Call(
 
     internal suspend fun rejoin() {
         reconnectAttepmts++
+        monitor.stop()
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
             val joinResponse = joinRequest(location = it)
@@ -563,6 +563,7 @@ public class Call(
                     },
                 )
                 this.session?.connect(reconnectDetails)
+                monitorSession(joinResponse.value)
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
@@ -575,32 +576,49 @@ public class Call(
 
     suspend fun switchSfu() {
         state._connection.value = RealtimeConnection.Migrating
-
         location?.let {
-            val joinResponse = joinRequest(location = it, migratingFrom = session?.sfuUrl)
-
+            val joinResponse = joinRequest(location = it)
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                logger.d { "Switching SFU from ${session?.sfuUrl} to ${cred.server.url}" }
-                val iceServers = cred.iceServers.map { it.toIceServer() }
+                val session = this.session!!
+                val oldSfuUrl = session.sfuUrl
+                logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
 
-                session?.switchSfu(
-                    cred.server.edgeName,
+                this.sessionId = UUID.randomUUID().toString()
+                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+                val reconnectDetails = ReconnectDetails(
+                    previous_session_id = prevSessionId,
+                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+                    announced_tracks = publishingInfo,
+                    subscriptions = subscriptionsInfo,
+                    from_sfu_id = oldSfuUrl,
+                    reconnect_attempt = reconnectAttepmts,
+                )
+                session.prepareRejoin()
+                val newSession = RtcSession(
+                    clientImpl,
+                    this,
+                    sessionId,
+                    clientImpl.apiKey,
+                    clientImpl.coordinatorConnectionModule.lifecycle,
                     cred.server.url,
+                    cred.server.wsEndpoint,
                     cred.token,
-                    iceServers,
-                    failedToSwitch = {
-                        logger.e {
-                            "[switchSfu] Failed to connect to new SFU during migration. Reverting to full reconnect"
-                        }
-                        state._connection.value = RealtimeConnection.Reconnecting
+                    cred.iceServers.map { ice ->
+                        ice.toIceServer()
                     },
                 )
+                val oldSession = this.session
+                this.session = newSession
+                this.session?.connect(reconnectDetails)
+                monitorSession(joinResponse.value)
+                oldSession?.leaveWithReason("migrating")
+                oldSession?.cleanup()
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
-                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }
@@ -638,6 +656,7 @@ public class Call(
     private fun leave(disconnectionReason: Throwable?) = safeCall {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         session?.cleanup()
+        leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
         sfuEvents?.cancel()
