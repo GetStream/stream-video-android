@@ -569,8 +569,7 @@ public class Call(
                 monitorSession(joinResponse.value)
             } else {
                 logger.e {
-                    "[switchSfu] Failed to get a join response during " +
-                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                    "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }
