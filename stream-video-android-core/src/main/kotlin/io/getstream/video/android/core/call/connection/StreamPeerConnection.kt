@@ -105,7 +105,8 @@ public class StreamPeerConnection(
         return when (state.value) {
             PeerConnection.PeerConnectionState.NEW,
             PeerConnection.PeerConnectionState.CONNECTED,
-            PeerConnection.PeerConnectionState.CONNECTING -> true
+            PeerConnection.PeerConnectionState.CONNECTING,
+            -> true
             else -> false
         }
     }

@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.socket.common
 
 import io.getstream.log.StreamLog
-import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.extractCause
@@ -36,13 +35,13 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 
 internal interface GenericParser<E> {
     /** Encodes the given object into a ByteString. */
-    fun encode(event: E) : ByteString
+    fun encode(event: E): ByteString
 
     /** Decodes the given [raw] [ByteArray] into an object of type [T]. */
     fun decodeOrError(raw: ByteArray): Result<StreamWebSocketEvent>
 }
 
-internal interface SfuParser: GenericParser<SfuDataRequest> {
+internal interface SfuParser : GenericParser<SfuDataRequest> {
 
     private val tag: String get() = "Video:SfuParser"
     override fun encode(event: SfuDataRequest): ByteString {
@@ -60,7 +59,7 @@ internal interface SfuParser: GenericParser<SfuDataRequest> {
         } catch (e: Exception) {
             val error = Error.NetworkError.fromVideoErrorCode(
                 VideoErrorCode.UNABLE_TO_PARSE_SOCKET_EVENT,
-                cause = e
+                cause = e,
             )
             return Result.Failure(error)
         }
@@ -83,11 +82,15 @@ internal interface SfuParser: GenericParser<SfuDataRequest> {
         } else {
             StreamLog.e(tag) { "[toError] failed" }
             val error = Error.NetworkError.fromVideoErrorCode(VideoErrorCode.CANT_PARSE_EVENT)
-            return Result.Success(StreamWebSocketEvent.Error(error, WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED))
+            return Result.Success(
+                StreamWebSocketEvent.Error(
+                    error,
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                ),
+            )
         }
     }
 }
-
 
 internal interface VideoParser : GenericParser<VideoEvent> {
 

@@ -230,10 +230,14 @@ public class Call(
             logger.d { "[onConnected] no args" }
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
-                logger.d { "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds" }
+                logger.d {
+                    "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                }
                 rejoin()
             } else {
-                logger.d { "[onConnected] Reconnecting (full) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds" }
+                logger.d {
+                    "[onConnected] Reconnecting (full) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                }
                 rejoin()
             }
         }
@@ -243,7 +247,9 @@ public class Call(
             lastDisconnect = System.currentTimeMillis()
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
-                logger.d { "[onDisconnected] Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}" }
+                logger.d {
+                    "[onDisconnected] Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+                }
                 leave()
             }
             logger.d { "[onDisconnected] at $lastDisconnect" }
@@ -620,7 +626,7 @@ public class Call(
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
-                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }

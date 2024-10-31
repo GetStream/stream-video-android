@@ -62,6 +62,7 @@ internal class CoordinatorConnectionModule(
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             .client(http).build()
     }
+
     // API
     override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(HeadersInterceptor())
         .addInterceptor(authInterceptor).addInterceptor(
@@ -76,7 +77,9 @@ internal class CoordinatorConnectionModule(
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
-            connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
+            connectivityManager = context.getSystemService(
+                Context.CONNECTIVITY_SERVICE,
+            ) as ConnectivityManager,
         )
     }
     override val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
@@ -101,4 +104,3 @@ internal class CoordinatorConnectionModule(
         authInterceptor.authType = authType
     }
 }
-

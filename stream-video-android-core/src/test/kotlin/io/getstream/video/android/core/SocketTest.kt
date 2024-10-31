@@ -21,9 +21,9 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.SocketTestBase
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.SfuSocket
+import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState.Connected
-import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay

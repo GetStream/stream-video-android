@@ -21,10 +21,10 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
+import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import io.getstream.log.StreamLog
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 public class NetworkStateProvider(
     private val scope: CoroutineScope,
-    private val connectivityManager: ConnectivityManager) {
-
+    private val connectivityManager: ConnectivityManager,
+) {
 
     private val logger by taggedLogger("Video:NetworkStateProvider")
     private val lock: Any = Any()

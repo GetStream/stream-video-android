@@ -933,13 +933,13 @@ public class CallState(
         Log.d(
             "RingingState",
             "Flags: [\n" +
-                    "acceptedByMe: $isAcceptedByMe,\n" +
-                    "rejectedByMe: $isRejectedByMe,\n" +
-                    "rejectReason: $rejectReason,\n" +
-                    "hasActiveCall: $hasActiveCall\n" +
-                    "hasRingingCall: $hasRingingCall\n" +
-                    "userIsParticipant: $userIsParticipant,\n" +
-                    "]",
+                "acceptedByMe: $isAcceptedByMe,\n" +
+                "rejectedByMe: $isRejectedByMe,\n" +
+                "rejectReason: $rejectReason,\n" +
+                "hasActiveCall: $hasActiveCall\n" +
+                "hasRingingCall: $hasRingingCall\n" +
+                "userIsParticipant: $userIsParticipant,\n" +
+                "]",
         )
 
         // no members - call is empty, we can join

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.socket.common
 
-
 internal data class ErrorResponse(
     val code: Int = -1,
     var message: String = "",

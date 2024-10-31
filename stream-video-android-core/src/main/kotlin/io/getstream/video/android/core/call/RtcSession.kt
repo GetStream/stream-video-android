@@ -92,7 +92,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
-import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
@@ -106,7 +105,6 @@ import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
-import stream.video.sfu.event.CallEnded
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
 import stream.video.sfu.event.Migration
@@ -394,11 +392,13 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected -> call.state._connection.value =
-                        RealtimeConnection.Connected
+                    is SfuSocketState.Connected ->
+                        call.state._connection.value =
+                            RealtimeConnection.Connected
 
-                    is SfuSocketState.Connecting -> call.state._connection.value =
-                        RealtimeConnection.InProgress
+                    is SfuSocketState.Connecting ->
+                        call.state._connection.value =
+                            RealtimeConnection.InProgress
                     else -> {
                         // Ignore it
                     }
@@ -447,7 +447,7 @@ public class RtcSession internal constructor(
                 }
                 logger.e(
                     it.streamError.extractCause()
-                        ?: IllegalStateException("Error emitted without a cause on SFU connection.")
+                        ?: IllegalStateException("Error emitted without a cause on SFU connection."),
                 ) { "permanent failure on socket connection" }
             }
         }
@@ -494,7 +494,7 @@ public class RtcSession internal constructor(
             token = sfuToken,
             fast_reconnect = false,
             client_details = clientDetails,
-            reconnect_details = reconnectDetails
+            reconnect_details = reconnectDetails,
         )
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
@@ -613,7 +613,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -1189,7 +1189,7 @@ public class RtcSession internal constructor(
             if (it == null) {
                 logger.e {
                     "[handleEvent] Failed to remove track on ParticipantLeft " +
-                            "- track ID: ${participant.session_id}). Tracks: $tracks"
+                        "- track ID: ${participant.session_id}). Tracks: $tracks"
                 }
             }
         }
@@ -1202,7 +1202,7 @@ public class RtcSession internal constructor(
             if (it == null) {
                 logger.e {
                     "[handleEvent] Failed to remove track dimension on ParticipantLeft " +
-                            "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
+                        "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
                 }
             }
         }
@@ -1210,7 +1210,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     /**
@@ -1436,7 +1436,9 @@ public class RtcSession internal constructor(
                                 delay(delayInMs[attempt])
                                 attempt++
                             } else {
-                                logger.e { "setPublisher failed after $attempt retries, asking the call monitor to do an ice restart" }
+                                logger.e {
+                                    "setPublisher failed after $attempt retries, asking the call monitor to do an ice restart"
+                                }
                                 coroutineScope.launch { call.monitor.reconnect(forceRestart = true) }
                                 break
                             }
@@ -1525,8 +1527,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                    // if `msid` is not present, we assume that the track is the first one
-                    (m.msid?.equals(track.id()) ?: true)
+                // if `msid` is not present, we assume that the track is the first one
+                (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
@@ -1812,7 +1814,9 @@ public class RtcSession internal constructor(
         val publisherTracks = publisher?.let { pub ->
             if (pub.connection.remoteDescription != null) {
                 getPublisherTracks(pub.connection.localDescription.description)
-            } else null
+            } else {
+                null
+            }
         } ?: emptyList()
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
@@ -1828,7 +1832,7 @@ public class RtcSession internal constructor(
             session_id = sessionId,
             token = sfuToken,
             client_details = clientDetails,
-            reconnect_details = reconnectDetails
+            reconnect_details = reconnectDetails,
         )
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
@@ -1917,7 +1921,7 @@ public class RtcSession internal constructor(
 
         sfuConnectionModule.socketConnection.whenConnected {
             sfuConnectionMigrationModule!!.socketConnection.sendEvent(
-                SfuDataRequest(SfuRequest(join_request = request))
+                SfuDataRequest(SfuRequest(join_request = request)),
             )
         }
         // Wait until the socket connects - if it fails to connect then return to "Reconnecting"

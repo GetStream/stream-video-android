@@ -71,7 +71,6 @@ class ClientState(private val client: StreamVideo) {
     // Stream video client is used until full decoupling is archived between `CallState` and `StreamVideoClient (former StreamVideoImpl)
     private val streamVideoClient: StreamVideoClient = client as StreamVideoClient
 
-
     // API
     /** Current user for the client. */
     public val user: StateFlow<User?> = _user

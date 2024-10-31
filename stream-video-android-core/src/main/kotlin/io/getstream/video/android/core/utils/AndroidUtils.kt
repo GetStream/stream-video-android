@@ -34,12 +34,12 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ServiceCompat
 import io.getstream.log.StreamLog
+import io.getstream.result.Error
+import io.getstream.result.Result
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
 import io.getstream.video.android.core.screenshare.StreamScreenShareService.Companion.TRIGGER_SHARE_SCREEN
-import io.getstream.result.Error
-import io.getstream.result.Result
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking

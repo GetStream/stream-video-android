@@ -23,14 +23,14 @@ import okhttp3.Request
 import org.openapitools.client.models.VideoEvent
 import java.io.UnsupportedEncodingException
 
-internal class SocketFactory<V, P : GenericParser<V>, C: ConnectionConf>(
+internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(
     private val parser: P,
     private val httpClient: OkHttpClient = OkHttpClient(),
 ) {
     private val logger by taggedLogger("Video:SocketFactory")
 
     @Throws(UnsupportedEncodingException::class)
-    fun <T: VideoEvent> createSocket(connectionConf: C, tag: String): StreamWebSocket<V, P> {
+    fun <T : VideoEvent> createSocket(connectionConf: C, tag: String): StreamWebSocket<V, P> {
         val request = buildRequest(connectionConf)
         logger.i { "[createSocket] new web socket: ${request.url}" }
         return StreamWebSocket(tag, parser) { httpClient.newWebSocket(request, it) }
@@ -44,5 +44,4 @@ internal class SocketFactory<V, P : GenericParser<V>, C: ConnectionConf>(
             .addHeader("Upgrade", "websocket")
             .addHeader("X-Stream-Client", buildSdkTrackingHeaders())
             .build()
-
 }

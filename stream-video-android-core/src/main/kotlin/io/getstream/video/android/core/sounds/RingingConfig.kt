@@ -22,7 +22,6 @@ import android.net.Uri
 import androidx.annotation.RawRes
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.R
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import org.jetbrains.annotations.ApiStatus
 

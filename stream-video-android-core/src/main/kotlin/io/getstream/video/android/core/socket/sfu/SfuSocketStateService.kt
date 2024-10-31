@@ -1,14 +1,26 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.socket.sfu
 
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.fsm.FiniteStateMachine
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConnectionType
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketStateEvent
 import io.getstream.video.android.core.socket.sfu.state.RestartReason
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketStateEvent
@@ -52,7 +64,12 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
         logger.v {
             "[onConnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
         }
-        stateMachine.sendEvent(SfuSocketStateEvent.Connect(connectionConf, WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED))
+        stateMachine.sendEvent(
+            SfuSocketStateEvent.Connect(
+                connectionConf,
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+            ),
+        )
     }
 
     /**
@@ -70,7 +87,7 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
      */
     suspend fun onConnectionEstablished(connectedEvent: JoinCallResponseEvent) {
         logger.i {
-            "[onConnected] client.id: '${connectedEvent}'"
+            "[onConnected] client.id: '$connectedEvent'"
         }
         stateMachine.sendEvent(SfuSocketStateEvent.ConnectionEstablished(connectedEvent))
     }
@@ -90,7 +107,10 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
      *
      * @param error The [Error.NetworkError]
      */
-    suspend fun onNetworkError(error: Error.NetworkError, reconnectStrategy: WebsocketReconnectStrategy) {
+    suspend fun onNetworkError(
+        error: Error.NetworkError,
+        reconnectStrategy: WebsocketReconnectStrategy,
+    ) {
         logger.e { "[onNetworkError] error: $error" }
         stateMachine.sendEvent(SfuSocketStateEvent.NetworkError(error, reconnectStrategy))
     }
@@ -157,8 +177,14 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
             }
 
             state<SfuSocketState.RestartConnection> {
-                onEvent<SfuSocketStateEvent.Connect> { SfuSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> { SfuSocketState.Connected(it.connectedEvent) }
+                onEvent<SfuSocketStateEvent.Connect> {
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
+                    SfuSocketState.Connected(
+                        it.connectedEvent,
+                    )
+                }
                 onEvent<SfuSocketStateEvent.WebSocketEventLost> { SfuSocketState.Disconnected.WebSocketEventLost }
                 onEvent<SfuSocketStateEvent.NetworkNotAvailable> { SfuSocketState.Disconnected.NetworkDisconnected }
                 onEvent<SfuSocketStateEvent.UnrecoverableError> {
@@ -166,14 +192,27 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> { SfuSocketState.Disconnected.DisconnectedTemporarily(it.error, it.reconnectStrategy) }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<SfuSocketStateEvent.NetworkError> {
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        it.error,
+                        it.reconnectStrategy,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
             }
 
             state<SfuSocketState.Connecting> {
-                onEvent<SfuSocketStateEvent.Connect> { SfuSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> { SfuSocketState.Connected(it.connectedEvent) }
+                onEvent<SfuSocketStateEvent.Connect> {
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
+                    SfuSocketState.Connected(
+                        it.connectedEvent,
+                    )
+                }
                 onEvent<SfuSocketStateEvent.WebSocketEventLost> { SfuSocketState.Disconnected.WebSocketEventLost }
                 onEvent<SfuSocketStateEvent.NetworkNotAvailable> { SfuSocketState.Disconnected.NetworkDisconnected }
                 onEvent<SfuSocketStateEvent.UnrecoverableError> {
@@ -181,13 +220,24 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> { SfuSocketState.Disconnected.DisconnectedTemporarily(it.error, it.reconnectStrategy) }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<SfuSocketStateEvent.NetworkError> {
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        it.error,
+                        it.reconnectStrategy,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
             }
 
             state<SfuSocketState.Connected> {
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> { SfuSocketState.Connected(it.connectedEvent) }
+                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
+                    SfuSocketState.Connected(
+                        it.connectedEvent,
+                    )
+                }
                 onEvent<SfuSocketStateEvent.WebSocketEventLost> { SfuSocketState.Disconnected.WebSocketEventLost }
                 onEvent<SfuSocketStateEvent.NetworkNotAvailable> { SfuSocketState.Disconnected.NetworkDisconnected }
                 onEvent<SfuSocketStateEvent.UnrecoverableError> {
@@ -195,41 +245,83 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> { SfuSocketState.Disconnected.DisconnectedTemporarily(it.error, it.reconnectStrategy) }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<SfuSocketStateEvent.NetworkError> {
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        it.error,
+                        it.reconnectStrategy,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
             }
 
             state<SfuSocketState.Disconnected.Stopped> {
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
-                onEvent<SfuSocketStateEvent.Connect> { SfuSocketState.Connecting(it.connectionConf, it.connectionType) }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
+                onEvent<SfuSocketStateEvent.Connect> {
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
             }
 
             state<SfuSocketState.Disconnected.NetworkDisconnected> {
-                onEvent<SfuSocketStateEvent.Connect> { SfuSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> { SfuSocketState.Connected(it.connectedEvent) }
+                onEvent<SfuSocketStateEvent.Connect> {
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
+                    SfuSocketState.Connected(
+                        it.connectedEvent,
+                    )
+                }
                 onEvent<SfuSocketStateEvent.UnrecoverableError> {
                     SfuSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> { SfuSocketState.Disconnected.DisconnectedTemporarily(it.error, it.reconnectStrategy) }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<SfuSocketStateEvent.NetworkError> {
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        it.error,
+                        it.reconnectStrategy,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
-                onEvent<SfuSocketStateEvent.NetworkAvailable> { SfuSocketState.RestartConnection(RestartReason.NETWORK_AVAILABLE, WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN) }
+                onEvent<SfuSocketStateEvent.NetworkAvailable> {
+                    SfuSocketState.RestartConnection(
+                        RestartReason.NETWORK_AVAILABLE,
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                    )
+                }
             }
 
             state<SfuSocketState.Disconnected.WebSocketEventLost> {
-                onEvent<SfuSocketStateEvent.Connect> { SfuSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> { SfuSocketState.Connected(it.connectedEvent) }
+                onEvent<SfuSocketStateEvent.Connect> {
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
+                    SfuSocketState.Connected(
+                        it.connectedEvent,
+                    )
+                }
                 onEvent<SfuSocketStateEvent.NetworkNotAvailable> { SfuSocketState.Disconnected.NetworkDisconnected }
                 onEvent<SfuSocketStateEvent.UnrecoverableError> {
                     SfuSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> { SfuSocketState.Disconnected.DisconnectedTemporarily(it.error, it.reconnectStrategy) }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<SfuSocketStateEvent.NetworkError> {
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        it.error,
+                        it.reconnectStrategy,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
             }
 
@@ -238,13 +330,20 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                 onEvent<SfuSocketStateEvent.Connect> {
                     SfuSocketState.Connecting(
                         it.connectionConf,
-                        it.connectionType)
+                        it.connectionType,
+                    )
                 }
             }
 
             state<SfuSocketState.Disconnected.DisconnectedTemporarily> {
-                onEvent<SfuSocketStateEvent.Connect> { SfuSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> { SfuSocketState.Connected(it.connectedEvent) }
+                onEvent<SfuSocketStateEvent.Connect> {
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
+                    SfuSocketState.Connected(
+                        it.connectedEvent,
+                    )
+                }
                 onEvent<SfuSocketStateEvent.NetworkNotAvailable> { SfuSocketState.Disconnected.NetworkDisconnected }
                 onEvent<SfuSocketStateEvent.WebSocketEventLost> { SfuSocketState.Disconnected.WebSocketEventLost }
                 onEvent<SfuSocketStateEvent.UnrecoverableError> {
@@ -252,8 +351,15 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> { SfuSocketState.Disconnected.DisconnectedTemporarily(it.error, it.reconnectStrategy) }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<SfuSocketStateEvent.NetworkError> {
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        it.error,
+                        it.reconnectStrategy,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
             }
 
@@ -261,9 +367,10 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                 onEvent<SfuSocketStateEvent.Connect> {
                     SfuSocketState.Connecting(it.connectionConf, it.connectionType)
                 }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> { SfuSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
             }
         }
     }
-
 }

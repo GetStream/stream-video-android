@@ -498,7 +498,7 @@ fun CallScreen(
                 onShowCallStats = {
                     isShowingStats = true
                     isShowingSettingMenu = false
-                }
+                },
             )
         }
 

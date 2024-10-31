@@ -31,7 +31,7 @@ private const val EVENTS_BUFFER_SIZE = 100
 private const val CLOSE_SOCKET_CODE = 1000
 private const val CLOSE_SOCKET_REASON = "Connection close by client"
 
-internal class StreamWebSocket<V, T: GenericParser<V>>(
+internal class StreamWebSocket<V, T : GenericParser<V>>(
     private val tag: String = "",
     private val parser: T,
     socketCreator: (WebSocketListener) -> WebSocket,
@@ -102,6 +102,3 @@ internal class StreamWebSocket<V, T: GenericParser<V>>(
         webSocket.send(data)
     }
 }
-
-
-

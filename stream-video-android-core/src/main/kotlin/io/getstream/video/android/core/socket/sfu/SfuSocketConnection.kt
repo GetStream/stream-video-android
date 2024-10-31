@@ -32,27 +32,20 @@ import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
-import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.SfuToken
-import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.JoinRequest
-import stream.video.sfu.event.SfuRequest
 
 class SfuSocketConnection(
     private val apiKey: ApiKey,
@@ -144,7 +137,9 @@ class SfuSocketConnection(
 
     override fun onDisconnected(cause: DisconnectCause) {
         super.onDisconnected(cause)
-        logger.d { "[onDisconnected] Socket disconnected. Cause: ${(cause as? DisconnectCause.Error)?.error}" }
+        logger.d {
+            "[onDisconnected] Socket disconnected. Cause: ${(cause as? DisconnectCause.Error)?.error}"
+        }
     }
 
     override fun whenConnected(
@@ -170,7 +165,9 @@ class SfuSocketConnection(
     }
 
     override fun updateToken(token: SfuToken) {
-        throw UnsupportedOperationException("Update token is not supported for SFU. Create a new socket instead.")
+        throw UnsupportedOperationException(
+            "Update token is not supported for SFU. Create a new socket instead.",
+        )
     }
 
     override suspend fun reconnect(data: JoinRequest, force: Boolean) {

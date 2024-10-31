@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.socket.sfu
 
 import io.getstream.log.taggedLogger
@@ -26,7 +42,6 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
-import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -47,7 +62,8 @@ internal open class SfuSocket(
     private val wssUrl: String,
     private val apiKey: ApiKey,
     private val tokenManager: TokenManager,
-    private val socketFactory: SocketFactory<SfuDataRequest, SfuParser, ConnectionConf.SfuConnectionConf>,
+    private val socketFactory:
+    SocketFactory<SfuDataRequest, SfuParser, ConnectionConf.SfuConnectionConf>,
     private val userScope: UserScope,
     private val lifecycleObserver: StreamLifecycleObserver,
     private val networkStateProvider: NetworkStateProvider,
@@ -64,8 +80,8 @@ internal open class SfuSocket(
         checkCallback = {
             sendEvent(
                 SfuDataRequest(
-                    SfuRequest(health_check_request = HealthCheckRequest())
-                )
+                    SfuRequest(health_check_request = HealthCheckRequest()),
+                ),
             )
         },
         reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
@@ -110,15 +126,17 @@ internal open class SfuSocket(
                                 SfuDataRequest(
                                     SfuRequest(
                                         join_request = connectionConf.joinRequest,
-                                    )
-                                )
+                                    ),
+                                ),
                             )
 
                             socketListenerJob = listen().onEach {
                                 when (it) {
                                     is StreamWebSocketEvent.Error -> handleError(it)
-                                    is StreamWebSocketEvent.SfuMessage -> when (val event =
-                                        it.sfuEvent) {
+                                    is StreamWebSocketEvent.SfuMessage -> when (
+                                        val event =
+                                            it.sfuEvent
+                                    ) {
                                         is ErrorEvent -> handleError(event.toNetworkError())
                                         else -> handleEvent(event)
                                     }
@@ -195,12 +213,12 @@ internal open class SfuSocket(
                                 streamWebSocket?.close()
                                 connectionConf?.let {
                                     sfuSocketStateService.onReconnect(
-                                        it
+                                        it,
                                     )
                                 }
                             }
                         }
-                        //callListeners { listener -> listener.onDisconnected(cause = state.cause) }
+                        // callListeners { listener -> listener.onDisconnected(cause = state.cause) }
                     }
                 }
             }
@@ -217,8 +235,8 @@ internal open class SfuSocket(
                 apiKey,
                 User.anonymous(),
                 joinRequest,
-                tokenManager.getToken()
-            )
+                tokenManager.getToken(),
+            ),
         )
     }
 
@@ -268,7 +286,7 @@ internal open class SfuSocket(
 
     private suspend fun onVideoNetworkError(
         error: Error.NetworkError,
-        reconnectStrategy: WebsocketReconnectStrategy?
+        reconnectStrategy: WebsocketReconnectStrategy?,
     ) {
         if (VideoErrorCode.isAuthenticationError(error.serverErrorCode)) {
             tokenManager.expireToken()
@@ -290,7 +308,7 @@ internal open class SfuSocket(
             else -> sfuSocketStateService.onNetworkError(
                 error,
                 reconnectStrategy
-                    ?: WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED
+                    ?: WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
             )
         }
     }
@@ -325,7 +343,6 @@ internal open class SfuSocket(
         logger.d { "[sendEvent] event: $event" }
         return streamWebSocket?.send(event) ?: false
     }
-
 
     /**
      * Send raw data to the web socket connection.

@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.BluetoothAudio
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
-import androidx.compose.material.icons.filled.PortableWifiOff
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
@@ -168,7 +167,7 @@ fun reconnectMenu(
     onRestartSubscriberIceClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
     onSfuRejoinClick: () -> Unit,
-    onSfuFastReconnectClick: () -> Unit
+    onSfuFastReconnectClick: () -> Unit,
 ) = listOf(
     ActionMenuItem(
         title = "Publisher - ICE restart",
@@ -194,7 +193,7 @@ fun reconnectMenu(
         title = "Reconnect SFU - fast",
         icon = Icons.Default.RestartAlt,
         action = onSfuFastReconnectClick,
-    )
+    ),
 )
 
 /**
@@ -208,7 +207,7 @@ fun debugSubmenu(
     onRestartSubscriberIceClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
     onSfuRejoinClick: () -> Unit,
-    onSfuFastReconnectClick: () -> Unit
+    onSfuFastReconnectClick: () -> Unit,
 ) = listOf(
     SubMenuItem(
         title = "Available video codecs",
@@ -228,7 +227,7 @@ fun debugSubmenu(
             onRestartSubscriberIceClick,
             onSwitchSfuClick,
             onSfuRejoinClick,
-            onSfuFastReconnectClick
+            onSfuFastReconnectClick,
         ),
-    )
+    ),
 )

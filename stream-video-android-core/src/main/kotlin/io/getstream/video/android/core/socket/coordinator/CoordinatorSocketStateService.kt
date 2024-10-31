@@ -66,7 +66,12 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
         logger.v {
             "[onConnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
         }
-        stateMachine.sendEvent(VideoSocketStateEvent.Connect(connectionConf, VideoSocketConnectionType.INITIAL_CONNECTION))
+        stateMachine.sendEvent(
+            VideoSocketStateEvent.Connect(
+                connectionConf,
+                VideoSocketConnectionType.INITIAL_CONNECTION,
+            ),
+        )
     }
 
     /**
@@ -171,66 +176,115 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
             }
 
             state<VideoSocketState.RestartConnection> {
-                onEvent<VideoSocketStateEvent.Connect> { VideoSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<VideoSocketStateEvent.ConnectionEstablished> { VideoSocketState.Connected(it.connectedEvent) }
-                onEvent<VideoSocketStateEvent.WebSocketEventLost> { VideoSocketState.Disconnected.WebSocketEventLost }
-                onEvent<VideoSocketStateEvent.NetworkNotAvailable> { VideoSocketState.Disconnected.NetworkDisconnected }
+                onEvent<VideoSocketStateEvent.Connect> {
+                    VideoSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<VideoSocketStateEvent.ConnectionEstablished> {
+                    VideoSocketState.Connected(it.connectedEvent)
+                }
+                onEvent<VideoSocketStateEvent.WebSocketEventLost> {
+                    VideoSocketState.Disconnected.WebSocketEventLost
+                }
+                onEvent<VideoSocketStateEvent.NetworkNotAvailable> {
+                    VideoSocketState.Disconnected.NetworkDisconnected
+                }
                 onEvent<VideoSocketStateEvent.UnrecoverableError> {
                     VideoSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<VideoSocketStateEvent.NetworkError> { VideoSocketState.Disconnected.DisconnectedTemporarily(it.error) }
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<VideoSocketStateEvent.NetworkError> {
+                    VideoSocketState.Disconnected.DisconnectedTemporarily(it.error)
+                }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<VideoSocketStateEvent.Stop> { VideoSocketState.Disconnected.Stopped }
             }
 
             state<VideoSocketState.Connecting> {
-                onEvent<VideoSocketStateEvent.Connect> { VideoSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<VideoSocketStateEvent.ConnectionEstablished> { VideoSocketState.Connected(it.connectedEvent) }
-                onEvent<VideoSocketStateEvent.WebSocketEventLost> { VideoSocketState.Disconnected.WebSocketEventLost }
-                onEvent<VideoSocketStateEvent.NetworkNotAvailable> { VideoSocketState.Disconnected.NetworkDisconnected }
+                onEvent<VideoSocketStateEvent.Connect> {
+                    VideoSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<VideoSocketStateEvent.ConnectionEstablished> {
+                    VideoSocketState.Connected(it.connectedEvent)
+                }
+                onEvent<VideoSocketStateEvent.WebSocketEventLost> {
+                    VideoSocketState.Disconnected.WebSocketEventLost
+                }
+                onEvent<VideoSocketStateEvent.NetworkNotAvailable> {
+                    VideoSocketState.Disconnected.NetworkDisconnected
+                }
                 onEvent<VideoSocketStateEvent.UnrecoverableError> {
                     VideoSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<VideoSocketStateEvent.NetworkError> { VideoSocketState.Disconnected.DisconnectedTemporarily(it.error) }
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<VideoSocketStateEvent.NetworkError> {
+                    VideoSocketState.Disconnected.DisconnectedTemporarily(it.error)
+                }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<VideoSocketStateEvent.Stop> { VideoSocketState.Disconnected.Stopped }
             }
 
             state<VideoSocketState.Connected> {
-                onEvent<VideoSocketStateEvent.ConnectionEstablished> { VideoSocketState.Connected(it.connectedEvent) }
-                onEvent<VideoSocketStateEvent.WebSocketEventLost> { VideoSocketState.Disconnected.WebSocketEventLost }
-                onEvent<VideoSocketStateEvent.NetworkNotAvailable> { VideoSocketState.Disconnected.NetworkDisconnected }
+                onEvent<VideoSocketStateEvent.ConnectionEstablished> {
+                    VideoSocketState.Connected(it.connectedEvent)
+                }
+                onEvent<VideoSocketStateEvent.WebSocketEventLost> {
+                    VideoSocketState.Disconnected.WebSocketEventLost
+                }
+                onEvent<VideoSocketStateEvent.NetworkNotAvailable> {
+                    VideoSocketState.Disconnected.NetworkDisconnected
+                }
                 onEvent<VideoSocketStateEvent.UnrecoverableError> {
                     VideoSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<VideoSocketStateEvent.NetworkError> { VideoSocketState.Disconnected.DisconnectedTemporarily(it.error) }
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<VideoSocketStateEvent.NetworkError> {
+                    VideoSocketState.Disconnected.DisconnectedTemporarily(it.error)
+                }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<VideoSocketStateEvent.Stop> { VideoSocketState.Disconnected.Stopped }
             }
 
             state<VideoSocketState.Disconnected.Stopped> {
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
-                onEvent<VideoSocketStateEvent.Connect> { VideoSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<VideoSocketStateEvent.Resume> { VideoSocketState.RestartConnection(
-                    RestartReason.LIFECYCLE_RESUME) }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
+                onEvent<VideoSocketStateEvent.Connect> {
+                    VideoSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<VideoSocketStateEvent.Resume> {
+                    VideoSocketState.RestartConnection(
+                        RestartReason.LIFECYCLE_RESUME,
+                    )
+                }
             }
 
             state<VideoSocketState.Disconnected.NetworkDisconnected> {
-                onEvent<VideoSocketStateEvent.Connect> { VideoSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<VideoSocketStateEvent.ConnectionEstablished> { VideoSocketState.Connected(it.connectedEvent) }
+                onEvent<VideoSocketStateEvent.Connect> {
+                    VideoSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<VideoSocketStateEvent.ConnectionEstablished> {
+                    VideoSocketState.Connected(it.connectedEvent)
+                }
                 onEvent<VideoSocketStateEvent.UnrecoverableError> {
                     VideoSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<VideoSocketStateEvent.NetworkError> { VideoSocketState.Disconnected.DisconnectedTemporarily(it.error) }
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<VideoSocketStateEvent.NetworkError> {
+                    VideoSocketState.Disconnected.DisconnectedTemporarily(it.error)
+                }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<VideoSocketStateEvent.Stop> { VideoSocketState.Disconnected.Stopped }
                 onEvent<VideoSocketStateEvent.NetworkAvailable> {
                     VideoSocketState.RestartConnection(
@@ -240,16 +294,26 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
             }
 
             state<VideoSocketState.Disconnected.WebSocketEventLost> {
-                onEvent<VideoSocketStateEvent.Connect> { VideoSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<VideoSocketStateEvent.ConnectionEstablished> { VideoSocketState.Connected(it.connectedEvent) }
-                onEvent<VideoSocketStateEvent.NetworkNotAvailable> { VideoSocketState.Disconnected.NetworkDisconnected }
+                onEvent<VideoSocketStateEvent.Connect> {
+                    VideoSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<VideoSocketStateEvent.ConnectionEstablished> {
+                    VideoSocketState.Connected(it.connectedEvent)
+                }
+                onEvent<VideoSocketStateEvent.NetworkNotAvailable> {
+                    VideoSocketState.Disconnected.NetworkDisconnected
+                }
                 onEvent<VideoSocketStateEvent.UnrecoverableError> {
                     VideoSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<VideoSocketStateEvent.NetworkError> { VideoSocketState.Disconnected.DisconnectedTemporarily(it.error) }
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<VideoSocketStateEvent.NetworkError> {
+                    VideoSocketState.Disconnected.DisconnectedTemporarily(it.error)
+                }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<VideoSocketStateEvent.Stop> { VideoSocketState.Disconnected.Stopped }
             }
 
@@ -271,17 +335,29 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
             }
 
             state<VideoSocketState.Disconnected.DisconnectedTemporarily> {
-                onEvent<VideoSocketStateEvent.Connect> { VideoSocketState.Connecting(it.connectionConf, it.connectionType) }
-                onEvent<VideoSocketStateEvent.ConnectionEstablished> { VideoSocketState.Connected(it.connectedEvent) }
-                onEvent<VideoSocketStateEvent.NetworkNotAvailable> { VideoSocketState.Disconnected.NetworkDisconnected }
-                onEvent<VideoSocketStateEvent.WebSocketEventLost> { VideoSocketState.Disconnected.WebSocketEventLost }
+                onEvent<VideoSocketStateEvent.Connect> {
+                    VideoSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<VideoSocketStateEvent.ConnectionEstablished> {
+                    VideoSocketState.Connected(it.connectedEvent)
+                }
+                onEvent<VideoSocketStateEvent.NetworkNotAvailable> {
+                    VideoSocketState.Disconnected.NetworkDisconnected
+                }
+                onEvent<VideoSocketStateEvent.WebSocketEventLost> {
+                    VideoSocketState.Disconnected.WebSocketEventLost
+                }
                 onEvent<VideoSocketStateEvent.UnrecoverableError> {
                     VideoSocketState.Disconnected.DisconnectedPermanently(
                         it.error,
                     )
                 }
-                onEvent<VideoSocketStateEvent.NetworkError> { VideoSocketState.Disconnected.DisconnectedTemporarily(it.error) }
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<VideoSocketStateEvent.NetworkError> {
+                    VideoSocketState.Disconnected.DisconnectedTemporarily(it.error)
+                }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
                 onEvent<VideoSocketStateEvent.Stop> { VideoSocketState.Disconnected.Stopped }
             }
 
@@ -299,9 +375,10 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
                         )
                     }
                 }
-                onEvent<VideoSocketStateEvent.RequiredDisconnection> { VideoSocketState.Disconnected.DisconnectedByRequest }
+                onEvent<VideoSocketStateEvent.RequiredDisconnection> {
+                    VideoSocketState.Disconnected.DisconnectedByRequest
+                }
             }
         }
     }
-
 }

@@ -24,19 +24,17 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.getstream.video.android.core.socket.common.parser2.adapters.DateAdapter
 import io.getstream.video.android.core.socket.common.VideoParser
+import io.getstream.video.android.core.socket.common.parser2.adapters.DateAdapter
 import org.openapitools.client.infrastructure.BigDecimalAdapter
 import org.openapitools.client.infrastructure.BigIntegerAdapter
 import org.openapitools.client.infrastructure.ByteArrayAdapter
 import org.openapitools.client.infrastructure.LocalDateAdapter
 import org.openapitools.client.infrastructure.LocalDateTimeAdapter
 import org.openapitools.client.infrastructure.OffsetDateTimeAdapter
-import org.openapitools.client.infrastructure.Serializer
 import org.openapitools.client.infrastructure.URIAdapter
 import org.openapitools.client.infrastructure.UUIDAdapter
 import org.openapitools.client.models.VideoEventAdapter
-import org.openapitools.client.models.WSAuthMessageRequest
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -145,10 +143,6 @@ internal class MoshiVideoParser : VideoParser {
     override fun <T : Any> fromJson(raw: String, clazz: Class<T>): T {
         return moshi.adapter(clazz).fromJson(raw)!!
     }
-
-
-
-
 }
 
 // Make any adapter lenient
