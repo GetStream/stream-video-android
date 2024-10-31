@@ -242,7 +242,8 @@ public class Call(
             state._connection.value = RealtimeConnection.Reconnecting
             lastDisconnect = System.currentTimeMillis()
             leaveTimeoutAfterDisconnect = scope.launch {
-                delay(clientImpl.leaveAfterDisconnectSeconds)
+                delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
+                logger.d { "[onDisconnected] Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}" }
                 leave()
             }
             logger.d { "[onDisconnected] at $lastDisconnect" }

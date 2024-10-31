@@ -156,8 +156,6 @@ public class CallHealthMonitor(
                     return@launch
                 }
             }
-
-            scope.launch { reconnect(false) }
         }
     }
 
