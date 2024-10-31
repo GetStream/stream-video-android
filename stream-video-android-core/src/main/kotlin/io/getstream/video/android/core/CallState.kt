@@ -773,7 +773,7 @@ public class CallState(
             }
 
             is SFUHealthCheckEvent -> {
-                call.state._participantCounts.value = event.participantCount
+                updateParticipantCounts(sfuHealthCheckEvent = event)
             }
 
             is ICETrickleEvent -> {
@@ -877,23 +877,26 @@ public class CallState(
                     )
                 }
 
-                // When in JOINED state, we should use the participant from SFU health check event, as it's more accurate.
-                if (connection.value !is RealtimeConnection.Joined) {
-                    _participantCounts.value = ParticipantCount(
-                        total = event.anonymousParticipantCount + event.participantsCountByRole.values.sum(),
-                        anonymous = event.anonymousParticipantCount,
-                    )
-                }
+                updateParticipantCounts(session = session.value)
             }
 
             is CallSessionParticipantLeftEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
                     newList.removeIf { it.userSessionId == event.participant.userSessionId }
+
+                    val newMap = callSessionResponse.participantsCountByRole.toMutableMap()
+                    newMap
+                        .computeIfPresent(event.participant.role) { _, v -> maxOf(v - 1, 0) }
+                        .also { if (it == 0) newMap.remove(event.participant.role) }
+
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toList(),
+                        participants = newList,
+                        participantsCountByRole = newMap,
                     )
                 }
+
+                updateParticipantCounts(session = session.value)
             }
 
             is CallSessionParticipantJoinedEvent -> {
@@ -902,26 +905,37 @@ public class CallState(
                     val participant = CallParticipantResponse(
                         user = event.participant.user,
                         joinedAt = event.createdAt,
-                        role = "user",
+                        role = event.participant.user.role,
                         userSessionId = event.participant.userSessionId,
                     )
+                    val newMap = callSessionResponse.participantsCountByRole.toMutableMap()
+                    newMap.merge(event.participant.role, 1, Int::plus)
+
+                    // It could happen that the backend delivers the same participant more than once.
+                    // Once with the call.session_started event and once again with the
+                    // call.session_participant_joined event. In this case,
+                    // we should update the existing participant and prevent duplicating it.
                     val index = newList.indexOfFirst { user.id == event.participant.user.id }
                     if (index == -1) {
                         newList.add(participant)
                     } else {
                         newList[index] = participant
                     }
+
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toList(),
+                        participants = newList,
+                        participantsCountByRole = newMap,
                     )
                 }
+
+                updateParticipantCounts(session = session.value)
                 updateRingingState()
             }
         }
     }
 
     private fun updateServerSidePins(pins: List<PinUpdate>) {
-        // Update particioants that are still in the call
+        // Update participants that are still in the call
         val pinnedInCall = pins.filter {
             _participants.value.containsKey(it.sessionId)
         }
@@ -1043,6 +1057,19 @@ public class CallState(
             getOrCreateParticipant(it)
         }
         upsertParticipants(participantStates)
+    }
+
+    private fun updateParticipantCounts(session: CallSessionResponse? = null, sfuHealthCheckEvent: SFUHealthCheckEvent? = null) {
+        // When in JOINED state, we should use the participant from SFU health check event, as it's more accurate.
+
+        if (sfuHealthCheckEvent != null) {
+            _participantCounts.value = sfuHealthCheckEvent.participantCount
+        } else if (session != null && connection.value !is RealtimeConnection.Joined) {
+            _participantCounts.value = ParticipantCount(
+                total = session.anonymousParticipantCount + session.participantsCountByRole.values.sum(),
+                anonymous = session.anonymousParticipantCount,
+            )
+        }
     }
 
     fun markSpeakingAsMuted() {
