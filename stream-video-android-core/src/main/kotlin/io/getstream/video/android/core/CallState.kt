@@ -464,7 +464,8 @@ public class CallState(
             val liveEndedAt = _session.value?.liveEndedAt ?: OffsetDateTime.now()
 
             liveStartedAt?.let {
-                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant().toEpochMilli()
+                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant()
+                    .toEpochMilli()
                 emit(duration)
             }
         }
@@ -932,13 +933,13 @@ public class CallState(
         Log.d(
             "RingingState",
             "Flags: [\n" +
-                "acceptedByMe: $isAcceptedByMe,\n" +
-                "rejectedByMe: $isRejectedByMe,\n" +
-                "rejectReason: $rejectReason,\n" +
-                "hasActiveCall: $hasActiveCall\n" +
-                "hasRingingCall: $hasRingingCall\n" +
-                "userIsParticipant: $userIsParticipant,\n" +
-                "]",
+                    "acceptedByMe: $isAcceptedByMe,\n" +
+                    "rejectedByMe: $isRejectedByMe,\n" +
+                    "rejectReason: $rejectReason,\n" +
+                    "hasActiveCall: $hasActiveCall\n" +
+                    "hasRingingCall: $hasRingingCall\n" +
+                    "userIsParticipant: $userIsParticipant,\n" +
+                    "]",
         )
 
         // no members - call is empty, we can join
@@ -1335,9 +1336,13 @@ public class CallState(
                 screensharing.add(it)
             }
         }
-        _screenSharingSession.value = ScreenSharingSession(
-            screensharing[0],
-        )
+        _screenSharingSession.value = if (screensharing.isNotEmpty()) {
+            ScreenSharingSession(
+                screensharing[0],
+            )
+        } else {
+            null
+        }
     }
 }
 

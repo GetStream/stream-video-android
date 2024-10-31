@@ -1755,6 +1755,15 @@ public class RtcSession internal constructor(
             sfuConnectionModule.api.iceRestart(request)
         }
 
+    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> =
+        wrapAPICall {
+            val request = ICERestartRequest(
+                session_id = sessionId,
+                peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+            )
+            sfuConnectionModule.api.iceRestart(request)
+        }
+
     private suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         wrapAPICall {
             val result = sfuConnectionModule.api.updateMuteStates(request)
@@ -1864,9 +1873,6 @@ public class RtcSession internal constructor(
         stateJob?.cancel()
         eventJob?.cancel()
         errorJob?.cancel()
-        coroutineScope.launch {
-            sfuConnectionModule.socketConnection.disconnect()
-        }
     }
 
     suspend fun switchSfu(
