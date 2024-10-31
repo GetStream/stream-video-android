@@ -88,11 +88,9 @@ import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.event.ReconnectDetails
-import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
-import stream.video.sfu.signal.TrackSubscriptionDetails
 import java.util.Collections
 import java.util.UUID
 import kotlin.coroutines.resume
@@ -672,6 +670,7 @@ public class Call(
         isDestroyed = true
 
         sfuSocketReconnectionTime = null
+        session?.leaveWithReason(disconnectionReason?.message ?: "user")
         state._connection.value = if (disconnectionReason != null) {
             RealtimeConnection.Failed(disconnectionReason)
         } else {

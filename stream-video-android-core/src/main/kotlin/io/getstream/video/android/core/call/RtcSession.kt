@@ -39,6 +39,7 @@ import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
+import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
@@ -50,7 +51,6 @@ import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
@@ -69,7 +69,6 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.stringify
-import io.getstream.video.android.model.ApiKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -84,8 +83,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
@@ -95,6 +92,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
+import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
@@ -108,7 +106,9 @@ import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
+import stream.video.sfu.event.CallEnded
 import stream.video.sfu.event.JoinRequest
+import stream.video.sfu.event.LeaveCallRequest
 import stream.video.sfu.event.Migration
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.event.SfuRequest
@@ -140,9 +140,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
-import java.util.UUID
 import kotlin.math.absoluteValue
-import kotlin.math.log
 import kotlin.random.Random
 
 /**
@@ -422,6 +420,10 @@ public class RtcSession internal constructor(
         // listen to socket events and errors
         eventJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.events().collect {
+                if (it is CallEndedSfuEvent) {
+                    logger.d { "#rtcsession #events #sfu, event: $it" }
+                    call.leave()
+                }
                 clientImpl.fireEvent(it, call.cid)
             }
         }
@@ -1831,7 +1833,6 @@ public class RtcSession internal constructor(
         // and restart ICE on publisher
         logger.d { "[fastReconnect] Starting fast reconnect." }
         call.monitor.stop()
-        subscriptions.value = emptyList()
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
         val request = JoinRequest(
@@ -1845,7 +1846,18 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.reconnect(request)
             sfuConnectionModule.socketConnection.whenConnected {
-                publisher?.connection?.restartIce()
+                // ice restart
+                val subscriberAsync = coroutineScope.async {
+                    subscriber?.let {
+                        requestSubscriberIceRestart()
+                    }
+                }
+
+                val publisherAsync = coroutineScope.async {
+                    publisher?.connection?.restartIce()
+                }
+
+                awaitAll(subscriberAsync, publisherAsync)
             }
         }
     }
@@ -2008,6 +2020,17 @@ public class RtcSession internal constructor(
                     }
                 }
             }
+        }
+    }
+
+    internal fun leaveWithReason(reason: String) {
+        val leaveCallRequest = LeaveCallRequest(
+            session_id = sessionId,
+            reason = reason,
+        )
+        val request = SfuRequest(leave_call_request = leaveCallRequest)
+        coroutineScope.launch {
+            sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
         }
     }
 }
