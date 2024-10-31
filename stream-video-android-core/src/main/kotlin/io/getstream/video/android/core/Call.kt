@@ -226,6 +226,7 @@ public class Call(
 
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
+            leaveTimeoutAfterDisconnect?.cancel()
             logger.d { "[onConnected] no args" }
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
@@ -238,9 +239,10 @@ public class Call(
         }
 
         override suspend fun onDisconnected() {
+            state._connection.value = RealtimeConnection.Reconnecting
             lastDisconnect = System.currentTimeMillis()
             leaveTimeoutAfterDisconnect = scope.launch {
-                delay(40_000)
+                delay(clientImpl.leaveAfterDisconnectSeconds)
                 leave()
             }
             logger.d { "[onDisconnected] at $lastDisconnect" }
