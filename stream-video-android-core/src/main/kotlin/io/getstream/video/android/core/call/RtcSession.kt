@@ -402,14 +402,9 @@ public class RtcSession internal constructor(
                     is SfuSocketState.Connecting -> call.state._connection.value =
                         RealtimeConnection.InProgress
 
+                    is SfuSocketState.Disconnected.Stopped,
+                    is SfuSocketState.Disconnected.DisconnectedByRequest,
                     is SfuSocketState.Disconnected.DisconnectedPermanently,
-                    SfuSocketState.Disconnected.DisconnectedByRequest -> {
-                        call.state._connection.value = RealtimeConnection.Disconnected
-                    }
-                    SfuSocketState.Disconnected.Stopped -> {
-                        call.state._connection.value =
-                            RealtimeConnection.PreJoin
-                    }
                     is SfuSocketState.Disconnected.DisconnectedTemporarily,
                     SfuSocketState.Disconnected.NetworkDisconnected,
                     SfuSocketState.Disconnected.WebSocketEventLost,
