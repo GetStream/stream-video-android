@@ -31,8 +31,10 @@ import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.events.GoAwayEvent
+import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
@@ -122,7 +124,6 @@ public class Call(
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     private var reconnectAttepmts = 0
-
     internal val clientImpl = client as StreamVideoClient
 
     private val logger by taggedLogger("Call:$type:$id")
@@ -225,6 +226,29 @@ public class Call(
             )
         }
     }
+
+    private val listener = object : NetworkStateProvider.NetworkStateListener {
+        override suspend fun onConnected() {
+            logger.d { "[onConnected] no args" }
+            val elapsedTime = System.currentTimeMillis() - lastDisconnect
+            if (lastDisconnect > 0 && elapsedTime > reconnectDeadline) {
+                logger.d { "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTime/1000} seconds. Deadline is ${reconnectDeadline / 1000} seconds" }
+                reconnect()
+            } else {
+                logger.d { "[onConnected] Reconnecting (full)" }
+                rejoin()
+            }
+        }
+
+        override suspend fun onDisconnected() {
+            lastDisconnect = System.currentTimeMillis()
+            logger.d { "[onDisconnected] at $lastDisconnect" }
+        }
+    }
+    private var lastDisconnect = 0L
+    private var reconnectDeadline: Int = 10_000
+    private var sfuListener: Job? = null
+    private var sfuEvents: Job? = null
 
     init {
         scope.launch {
@@ -381,6 +405,10 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        reconnectAttepmts = 0
+        sfuEvents?.cancel()
+        sfuListener?.cancel()
+
         if (session != null) {
             throw IllegalStateException(
                 "Call $cid has already been joined. Please use call.leave before joining it again",
@@ -453,16 +481,17 @@ public class Call(
         startCallStatsReporting(result.value.statsOptions.reportingIntervalMs.toLong())
 
         // listen to Signal WS
-        scope.launch {
+        sfuEvents = scope.launch {
             session?.let {
-                it.sfuSocketState.collect { sfuSocketState ->
-                    if (sfuSocketState is SfuSocketState.Disconnected.DisconnectedPermanently) {
-                        rejoin()
+                it.socket.events().collect { event ->
+                    if (event is JoinCallResponseEvent) {
+                        reconnectDeadline = event.fastReconnectDeadlineSeconds * 1000
+                        logger.d { "[join] #deadline for reconnect is $reconnectDeadline seconds" }
                     }
                 }
             }
         }
-
+        network.subscribe(listener)
         return Success(value = session!!)
     }
 
@@ -497,60 +526,6 @@ public class Call(
                 session?.sendCallStats(report)
             }
         }
-    }
-
-    internal suspend fun handleSignalChannelDisconnect(isRetry: Boolean) {
-        /*// Prevent multiple starts of the reconnect flow. For the start call
-        // first check if sfuSocketReconnectionTime isn't already set - if yes
-        // then we are already doing a full reconnect
-        if (state._connection.value == RealtimeConnection.Migrating) {
-            logger.d {
-                "[handleSignalChannelDisconnect] #track; Skipping disconnected channel event - we are migrating"
-            }
-            return
-        }
-
-        if (!isRetry && sfuSocketReconnectionTime != null) {
-            logger.d {
-                "[handleSignalChannelDisconnect] #track; Already doing a full reconnect cycle - ignoring call"
-            }
-            return
-        }
-        logger.d { "[handleSignalChannelDisconnect] #track; isRetry: $isRetry" }
-
-        if (!isRetry) {
-            state._connection.value = RealtimeConnection.Reconnecting
-
-            if (sfuSocketReconnectionTime == null) {
-                sfuSocketReconnectionTime = System.currentTimeMillis()
-            }
-
-            // We were not able to restore the SFU peer connection in time
-            if (System.currentTimeMillis() - (
-                    sfuSocketReconnectionTime
-                        ?: System.currentTimeMillis()
-                    ) > sfuReconnectTimeoutMillis
-            ) {
-                leave(Error("Failed to do a full reconnect - connection issue?"))
-                return
-            }
-
-            // Clean up the existing RtcSession
-            session?.cleanup()
-            session = null
-
-            // Wait a little for clean-up
-            delay(250)
-
-            // Re-join the call
-            val result = _join()
-            if (result.isFailure) {
-                // keep trying until timeout
-                handleSignalChannelDisconnect(isRetry = true)
-            } else {
-                sfuSocketReconnectionTime = null
-            }
-        }*/
     }
 
     internal suspend fun rejoin() {
@@ -633,8 +608,7 @@ public class Call(
     }
 
     suspend fun reconnect() {
-        reconnectAttepmts++
-        logger.e { "[reconnect] Reconnecting (fast)" }
+        logger.d { "[reconnect] Reconnecting (fast)" }
         session?.prepareReconnect()
         this.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
@@ -662,6 +636,12 @@ public class Call(
     }
 
     private fun leave(disconnectionReason: Throwable?) = safeCall {
+        session?.leaveWithReason(disconnectionReason?.message ?: "user")
+        session?.cleanup()
+        network.unsubscribe(listener)
+        sfuListener?.cancel()
+        sfuEvents?.cancel()
+        state._connection.value = RealtimeConnection.Disconnected
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
@@ -670,12 +650,6 @@ public class Call(
         isDestroyed = true
 
         sfuSocketReconnectionTime = null
-        session?.leaveWithReason(disconnectionReason?.message ?: "user")
-        state._connection.value = if (disconnectionReason != null) {
-            RealtimeConnection.Failed(disconnectionReason)
-        } else {
-            RealtimeConnection.Disconnected
-        }
         stopScreenSharing()
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()

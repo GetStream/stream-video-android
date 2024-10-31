@@ -399,19 +399,8 @@ public class RtcSession internal constructor(
 
                     is SfuSocketState.Connecting -> call.state._connection.value =
                         RealtimeConnection.InProgress
-
-                    is SfuSocketState.Disconnected.Stopped,
-                    is SfuSocketState.Disconnected.DisconnectedByRequest,
-                    is SfuSocketState.Disconnected.DisconnectedPermanently,
-                    is SfuSocketState.Disconnected.DisconnectedTemporarily,
-                    SfuSocketState.Disconnected.NetworkDisconnected,
-                    SfuSocketState.Disconnected.WebSocketEventLost,
-                    is SfuSocketState.RestartConnection -> {
-                        call.state._connection.value = RealtimeConnection.Reconnecting
-                    }
-
-                    SfuSocketState.Disconnected.Rejoin -> {
-                        // Do not update state we are rejoining.
+                    else -> {
+                        // Ignore it
                     }
                 }
             }
