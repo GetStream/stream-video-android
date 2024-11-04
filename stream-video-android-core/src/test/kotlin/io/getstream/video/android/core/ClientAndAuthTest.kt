@@ -184,7 +184,7 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = testData.expiredToken,
-            tokenProvider = { error ->
+            legacyTokenProvider = { error ->
                 testData.tokens["thierry"]!!
             },
         ).build()
