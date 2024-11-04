@@ -31,7 +31,7 @@
     <string name="join_description">Start a new call, join a meeting by \nentering the call ID or by scanning \na QR code.</string>
     <string name="join_call">Join Call</string>
     <string name="join_call_by_qr_code">Scan QR meeting code</string>
-    <string name="join_call_description">You are about to join a call. %d more people are in the call.</string>
+    <string name="join_call_description">You are about to join a call. %d more people are in the call (%d anonymous).</string>
     <string name="join_call_no_id_hint">Don\'t have a Call ID?</string>
     <string name="join_call_call_id_hint">Call ID</string>
     <string name="start_a_new_call">Start a New Call</string>
