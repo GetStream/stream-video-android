@@ -20,9 +20,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.common.StreamWebSocket
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.mockk.impl.annotations.RelaxedMockK
@@ -56,7 +54,9 @@ open class SocketTestBase : TestBase() {
      */
     val networkStateProvider = NetworkStateProvider(
         scope = scope,
-        connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
+        connectivityManager = context.getSystemService(
+            Context.CONNECTIVITY_SERVICE,
+        ) as ConnectivityManager,
     )
 
     val lifecycle = mockk<Lifecycle>(relaxed = true)
@@ -64,10 +64,10 @@ open class SocketTestBase : TestBase() {
     fun buildOkHttp(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         return OkHttpClient.Builder().addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BASIC
-                },
-            ).connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BASIC
+            },
+        ).connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
