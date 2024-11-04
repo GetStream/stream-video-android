@@ -1139,9 +1139,9 @@ public class CallState(
     }
 
     internal fun getOrCreateParticipant(participant: Participant): ParticipantState {
-        // get or create the participant and update them
         if (participant.session_id.isEmpty()) {
-            throw IllegalStateException("Participant session id is empty")
+            // Empty session ID is technically allowed but should not happen.
+            logger.w { "A user [id:${participant.user_id}] is in the call with empty session_id" }
         }
 
         val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
