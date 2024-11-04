@@ -96,7 +96,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val geo: GEO = GEO.GlobalEdgeNetwork,
     private var user: User = User.anonymous(),
     private val token: UserToken = "",
-    private val tokenProvider: TokenProvider = ConstantTokenProvider(token),
+    private val legacyTokenProvider: (suspend (error: Throwable?) -> String)? = null,
+    private val tokenProvider: TokenProvider = legacyTokenProvider?.let { legacy ->
+        object : TokenProvider {
+            override suspend fun loadToken(): String = legacy.invoke(null)
+        }
+    } ?: ConstantTokenProvider(token),
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
