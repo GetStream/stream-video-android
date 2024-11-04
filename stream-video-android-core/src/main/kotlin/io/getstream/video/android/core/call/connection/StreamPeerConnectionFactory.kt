@@ -37,6 +37,7 @@ import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.ResolutionAdjustment
 import org.webrtc.SimulcastAlignedVideoEncoderFactory
+import org.webrtc.VideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
@@ -98,29 +99,12 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
-     * Default video decoder factory used to unpack video from the remote tracks.
-     */
-    private val videoDecoderFactory by lazy {
-        DefaultBlacklistedVideoDecoderFactory(eglBase.eglBaseContext)
-    }
-
-    /**
-     * Default encoder factory that supports Simulcast, used to send video tracks to the server.
-     */
-    private val videoEncoderFactory by lazy {
-        SimulcastAlignedVideoEncoderFactory(
-            eglBase.eglBaseContext,
-            true,
-            true,
-            ResolutionAdjustment.MULTIPLE_OF_16,
-        )
-    }
-
-    /**
      * Factory that builds all the connections based on the extensive configuration provided under
      * the hood.
      */
-    private val factory by lazy {
+    private var peerConnectionFactory by lazyFactory(::createPeerConnectionFactory)
+
+    private fun createPeerConnectionFactory(preferredEncodingCodec: VideoCodec? = null): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .setInjectableLogger({ message, severity, label ->
@@ -151,12 +135,12 @@ public class StreamPeerConnectionFactory(
                 .createInitializationOptions(),
         )
 
-        PeerConnectionFactory.builder()
+        return PeerConnectionFactory.builder()
             .apply {
                 audioProcessing?.also { setAudioProcessingFactory(it) }
             }
-            .setVideoDecoderFactory(videoDecoderFactory)
-            .setVideoEncoderFactory(videoEncoderFactory)
+            .setVideoDecoderFactory(defaultVideoDecoderFactory())
+            .setVideoEncoderFactory(defaultVideoEncoderFactory(preferredEncodingCodec))
             .setAudioDeviceModule(
                 JavaAudioDeviceModule
                     .builder(context)
@@ -245,6 +229,22 @@ public class StreamPeerConnectionFactory(
             .createPeerConnectionFactory()
     }
 
+    private fun defaultVideoDecoderFactory() = DefaultBlacklistedVideoDecoderFactory(
+        eglBase.eglBaseContext,
+    )
+
+    private fun defaultVideoEncoderFactory(preferredCodec: VideoCodec? = null): VideoEncoderFactory {
+        return PreferredCodecVideoEncoderFactory(
+            baseFactory = SimulcastAlignedVideoEncoderFactory(
+                eglBase.eglBaseContext,
+                true,
+                true,
+                ResolutionAdjustment.MULTIPLE_OF_16,
+            ),
+            preferredCodec = preferredCodec,
+        )
+    }
+
     /**
      * Builds a [StreamPeerConnection] that wraps the WebRTC [PeerConnection] and exposes several
      * helpful handlers.
@@ -301,7 +301,7 @@ public class StreamPeerConnectionFactory(
         observer: PeerConnection.Observer?,
     ): PeerConnection {
         return requireNotNull(
-            factory.createPeerConnection(
+            peerConnectionFactory.createPeerConnection(
                 configuration,
                 observer,
             ),
@@ -309,7 +309,7 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
-     * Builds a [VideoSource] from the [factory] that can be used for regular video share (camera)
+     * Builds a [VideoSource] from the [peerConnectionFactory] that can be used for regular video share (camera)
      * or screen sharing.
      *
      * @param isScreencast If we're screen sharing using this source.
@@ -320,12 +320,12 @@ public class StreamPeerConnectionFactory(
         isScreencast: Boolean,
         filterVideoProcessor: FilterVideoProcessor,
     ): VideoSource =
-        factory.createVideoSource(isScreencast).apply {
+        peerConnectionFactory.createVideoSource(isScreencast).apply {
             setVideoProcessor(filterVideoProcessor)
         }
 
     /**
-     * Builds a [VideoTrack] from the [factory] that can be used for regular video share (camera)
+     * Builds a [VideoTrack] from the [peerConnectionFactory] that can be used for regular video share (camera)
      * or screen sharing.
      *
      * @param source The [VideoSource] used for the track.
@@ -335,19 +335,19 @@ public class StreamPeerConnectionFactory(
     public fun makeVideoTrack(
         source: VideoSource,
         trackId: String,
-    ): VideoTrack = factory.createVideoTrack(trackId, source)
+    ): VideoTrack = peerConnectionFactory.createVideoTrack(trackId, source)
 
     /**
-     * Builds an [AudioSource] from the [factory] that can be used for audio sharing.
+     * Builds an [AudioSource] from the [peerConnectionFactory] that can be used for audio sharing.
      *
      * @param constraints The constraints used to change the way the audio behaves.
      * @return [AudioSource] that can be used to build tracks.
      */
     public fun makeAudioSource(constraints: MediaConstraints = MediaConstraints()): AudioSource =
-        factory.createAudioSource(constraints)
+        peerConnectionFactory.createAudioSource(constraints)
 
     /**
-     * Builds an [AudioTrack] from the [factory] that can be used for regular video share (camera)
+     * Builds an [AudioTrack] from the [peerConnectionFactory] that can be used for regular video share (camera)
      * or screen sharing.
      *
      * @param source The [AudioSource] used for the track.
@@ -357,7 +357,7 @@ public class StreamPeerConnectionFactory(
     public fun makeAudioTrack(
         source: AudioSource,
         trackId: String,
-    ): AudioTrack = factory.createAudioTrack(trackId, source)
+    ): AudioTrack = peerConnectionFactory.createAudioTrack(trackId, source)
 
     /**
      * True if the audio processing is enabled, false otherwise.
@@ -381,5 +381,12 @@ public class StreamPeerConnectionFactory(
             it.isEnabled = !it.isEnabled
             it.isEnabled
         } ?: false
+    }
+
+    internal fun updateEncodingOptions(preferredCodec: VideoCodec) {
+        // We cannot initialize videoEncoderFactory separately without getting
+        // java.lang.UnsatisfiedLinkError:  No impl found for long org.webrtc.SoftwareVideoEncoderFactory.nativeCreateFactory().
+        // So we recreate peerConnectionFactory and let it create videoEncoderFactory internally with the new preferredCodec.
+        peerConnectionFactory = createPeerConnectionFactory(preferredCodec)
     }
 }

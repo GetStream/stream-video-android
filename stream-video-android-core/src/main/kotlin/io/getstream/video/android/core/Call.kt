@@ -27,6 +27,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
+import io.getstream.video.android.core.call.connection.VideoCodec
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -1117,6 +1118,10 @@ public class Call(
 
     fun toggleAudioProcessing(): Boolean {
         return clientImpl.toggleAudioProcessing()
+    }
+
+    fun updatePublishingOptions(preferredCodec: VideoCodec) {
+        clientImpl.peerConnectionFactory.updateEncodingOptions(preferredCodec)
     }
 
     @InternalStreamVideoApi

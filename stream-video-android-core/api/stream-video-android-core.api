@@ -82,6 +82,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updatePublishingOptions (Lio/getstream/video/android/core/call/connection/VideoCodec;)V
 }
 
 public final class io/getstream/video/android/core/Call$Companion {
@@ -616,6 +617,7 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 public final class io/getstream/video/android/core/PeerConnectionStats {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun getBitrateKbps ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getCodec ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getJitterInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLatency ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getQualityDropReason ()Lkotlinx/coroutines/flow/StateFlow;
@@ -1053,6 +1055,16 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun setAudioRecordDataCallback (Lkotlin/jvm/functions/Function4;)V
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
 	public final fun toggleAudioProcessing ()Z
+}
+
+public final class io/getstream/video/android/core/call/connection/VideoCodec : java/lang/Enum {
+	public static final field AV1 Lio/getstream/video/android/core/call/connection/VideoCodec;
+	public static final field H264 Lio/getstream/video/android/core/call/connection/VideoCodec;
+	public static final field VP8 Lio/getstream/video/android/core/call/connection/VideoCodec;
+	public static final field VP9 Lio/getstream/video/android/core/call/connection/VideoCodec;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/call/connection/VideoCodec;
+	public static fun values ()[Lio/getstream/video/android/core/call/connection/VideoCodec;
 }
 
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
