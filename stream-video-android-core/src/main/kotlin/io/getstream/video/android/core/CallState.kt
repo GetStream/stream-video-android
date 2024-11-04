@@ -264,8 +264,9 @@ public class CallState(
     private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
         fun emitLivestreamVideo() {
             val participants = participants.value
-            val filteredVideo =
-                participants.mapNotNull { it.video.value }.firstOrNull { it.track != null }
+            val filteredVideo = participants.firstOrNull {
+                it.video.value?.enabled == true
+            }?.video?.value
             scope.launch {
                 if (_backstage.value) {
                     send(null)
@@ -277,12 +278,17 @@ public class CallState(
 
         scope.launch {
             _participants.collect {
+                logger.v {
+                    "[livestreamFlow] #track; participants: ${it.size} =>" +
+                        "${it.map { "${it.value.userId.value} - ${it.value.video.value?.enabled}" }}"
+                }
                 emitLivestreamVideo()
             }
         }
 
         // TODO: could optimize performance by subscribing only to relevant events
         call.subscribe {
+            logger.v { "[livestreamFlow] #track; event.type: ${it.getEventType()}" }
             if (it is TrackPublishedEvent) {
                 val participant = getOrCreateParticipant(it.sessionId, it.userId)
 
@@ -307,6 +313,7 @@ public class CallState(
         }
 
         // emit livestream Video
+        logger.d { "[livestreamFlow] #track; no args" }
         emitLivestreamVideo()
 
         awaitClose { }
@@ -1087,9 +1094,9 @@ public class CallState(
     }
 
     internal fun getOrCreateParticipant(participant: Participant): ParticipantState {
-        // get or create the participant and update them
         if (participant.session_id.isEmpty()) {
-            throw IllegalStateException("Participant session id is empty")
+            // Empty session ID is technically allowed but should not happen.
+            logger.w { "A user [id:${participant.user_id}] is in the call with empty session_id" }
         }
 
         val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
