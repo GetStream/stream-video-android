@@ -43,7 +43,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.VideoLayerSetting
-import stream.video.sfu.event.VideoMediaRequest
 import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -566,21 +565,20 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, true)
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_SCREEN_SHARE, true)
 
-//        val tracks1 = call.session?.defaultTracks()
-//        val tracks2 = call.session?.visibleTracks()
-//
-//        assertThat(tracks1?.size).isEqualTo(2)
-//        assertThat(tracks1?.map { it.session_id }).contains("fake")
-//        assertThat(tracks2?.size).isEqualTo(2)
-//        assertThat(tracks2?.map { it.session_id }).contains("fake")
-//
-//        // if their video isn't visible it shouldn't be in the tracks
-//        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
-//        val tracks3 = call.session?.visibleTracks()
-//        assertThat(tracks3?.size).isEqualTo(1)
+        //        val tracks1 = call.session?.defaultTracks()
+        //        val tracks2 = call.session?.visibleTracks()
+        //
+        //        assertThat(tracks1?.size).isEqualTo(2)
+        //        assertThat(tracks1?.map { it.session_id }).contains("fake")
+        //        assertThat(tracks2?.size).isEqualTo(2)
+        //        assertThat(tracks2?.map { it.session_id }).contains("fake")
+        //
+        //        // if their video isn't visible it shouldn't be in the tracks
+        //        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
+        //        val tracks3 = call.session?.visibleTracks()
+        //        assertThat(tracks3?.size).isEqualTo(1)
 
         // test handling publish quality change
-        val mediaRequest = VideoMediaRequest()
         val layers = listOf(
             VideoLayerSetting(name = "f", active = false),
             VideoLayerSetting(name = "h", active = true),
@@ -589,7 +587,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val quality = ChangePublishQuality(
             video_senders = listOf(
                 VideoSender(
-                    media_request = mediaRequest,
                     layers = layers,
                 ),
             ),
