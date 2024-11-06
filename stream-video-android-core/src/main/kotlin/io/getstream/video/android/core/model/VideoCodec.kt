@@ -28,4 +28,13 @@ enum class VideoCodec {
     VP8,
     VP9,
     AV1,
+    ;
+
+    /**
+     * Checks if the codec supports SVC (Scalable Video Coding).
+     * Scalable Video Coding allows encoding multiple video layers (e.g., resolution or quality) into a single stream.
+     *
+     * @return True if the codec supports SVC, false otherwise.
+     */
+    fun supportsSvc() = this == VP9 || this == AV1
 }

@@ -31,7 +31,6 @@ import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.call.connection.VideoCodec
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
@@ -57,15 +56,6 @@ class CallActivity : ComposeStreamCallActivity() {
             }
         }
         super.onPreCreate(savedInstanceState, persistentState)
-    }
-
-    override fun onCreate(
-        savedInstanceState: Bundle?,
-        persistentState: PersistableBundle?,
-        call: Call,
-    ) {
-        super.onCreate(savedInstanceState, persistentState, call)
-        call.updatePublishingOptions(preferredCodec = VideoCodec.AV1)
     }
 
     private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {

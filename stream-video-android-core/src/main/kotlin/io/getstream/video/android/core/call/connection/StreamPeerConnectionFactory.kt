@@ -391,7 +391,7 @@ public class StreamPeerConnectionFactory(
     }
 
     internal fun updatePublishOptions(preferredVideoCodec: VideoCodec?) {
-        webRtcLogger.d {
+        webRtcLogger.v {
             "[updatePublishOptions] #updatePublishOptions; preferredCodec: $preferredVideoCodec"
         }
 

@@ -271,11 +271,12 @@ public class StreamPeerConnection(
         track: MediaStreamTrack,
         streamIds: List<String>,
         isScreenShare: Boolean,
+        isUsingSvcCodec: Boolean = false,
     ) {
         logger.d {
             "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
         }
-        val transceiverInit = buildVideoTransceiverInit(streamIds, isScreenShare)
+        val transceiverInit = buildVideoTransceiverInit(streamIds, isScreenShare, isUsingSvcCodec)
 
         videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
@@ -288,6 +289,7 @@ public class StreamPeerConnection(
     private fun buildVideoTransceiverInit(
         streamIds: List<String>,
         isScreenShare: Boolean,
+        isUsingSvcCodec: Boolean = false,
     ): RtpTransceiverInit {
         val encodings = if (!isScreenShare) {
             /**
@@ -325,7 +327,20 @@ public class StreamPeerConnection(
 //            bitratePriority = 4.0
             }
 
-            listOf(quarterQuality, halfQuality, fullQuality)
+            if (!isUsingSvcCodec) {
+                listOf(quarterQuality, halfQuality, fullQuality)
+            } else {
+                // TODO: Here we should just add f, which we rename to q (see specs).
+                // But doing so makes the SetPublisher request return an error (probably SDP-related),
+                // so, for now, we just apply the scalabilityMode.
+                val newScalabilityMode = "L3T2_KEY"
+
+                listOf(
+                    quarterQuality.apply { scalabilityMode = newScalabilityMode },
+                    halfQuality.apply { scalabilityMode = newScalabilityMode },
+                    fullQuality.apply { scalabilityMode = newScalabilityMode },
+                )
+            }
         } else {
             // this is aligned with iOS
             val screenshareQuality = RtpParameters.Encoding(
