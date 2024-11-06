@@ -27,7 +27,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
-import io.getstream.video.android.core.call.connection.VideoCodec
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -39,6 +38,7 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
+import io.getstream.video.android.core.model.VideoCodec
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.SocketState
@@ -207,6 +207,7 @@ public class Call(
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
+
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
             testInstanceProvider.mediaManagerCreator!!.invoke()
@@ -220,6 +221,8 @@ public class Call(
             )
         }
     }
+
+    internal var isPreferredVideoCodecSet = false
 
     init {
         scope.launch {
@@ -1029,6 +1032,7 @@ public class Call(
     }
 
     fun cleanup() {
+        updatePublishOptions(preferredVideoCodec = null)
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
@@ -1120,8 +1124,14 @@ public class Call(
         return clientImpl.toggleAudioProcessing()
     }
 
-    fun updatePublishingOptions(preferredCodec: VideoCodec) {
-        clientImpl.peerConnectionFactory.updateEncodingOptions(preferredCodec)
+    /**
+     * Updates publishing options for the call.
+     *
+     * @param preferredVideoCodec The preferred codec to use for publishing video. Pass `null` to return to the default codec.
+     */
+    fun updatePublishOptions(preferredVideoCodec: VideoCodec?) {
+        clientImpl.peerConnectionFactory.updatePublishOptions(preferredVideoCodec)
+        isPreferredVideoCodecSet = preferredVideoCodec != null
     }
 
     @InternalStreamVideoApi

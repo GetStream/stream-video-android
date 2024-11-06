@@ -16,7 +16,8 @@
 
 package io.getstream.video.android.core.call.connection
 
-import android.util.Log
+import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.model.VideoCodec
 import org.webrtc.VideoCodecInfo
 import org.webrtc.VideoEncoder
 import org.webrtc.VideoEncoderFactory
@@ -26,36 +27,39 @@ internal class PreferredCodecVideoEncoderFactory(
     internal var preferredCodec: VideoCodec? = null,
 ) : VideoEncoderFactory {
 
-    override fun createEncoder(p0: VideoCodecInfo?): VideoEncoder? {
-        Log.d("CodecDebug", "[createEncoder] Creating encoder for codec: ${p0?.name}")
-        return baseFactory.createEncoder(p0)
+    private val logger by taggedLogger("Call:PreferredCodecVideoEncoderFactory")
+
+    override fun createEncoder(info: VideoCodecInfo?): VideoEncoder? {
+        logger.d { "[createEncoder] #updatePublishOptions; Creating encoder for codec: ${info?.name}" }
+        return baseFactory.createEncoder(info)
     }
 
     override fun getSupportedCodecs(): Array<VideoCodecInfo> {
         // Search for preferredCodec and make it first in the list if found
-        val codecs = baseFactory.supportedCodecs.toMutableList()
-        Log.d(
-            "CodecDebug",
-            "[getSupportedCodecs] Supported codecs: ${codecs.joinToString { it.name }}",
-        )
-        val preferredCodecIndex = codecs.indexOfFirst {
-            it.name.lowercase() == preferredCodec?.name?.lowercase()
-        }
-        if (preferredCodecIndex != -1) {
-            val preferredCodecInfo = codecs.removeAt(preferredCodecIndex)
-            codecs.add(0, preferredCodecInfo)
-        }
-        Log.d(
-            "CodecDebug",
-            "[getSupportedCodecs] Preferred codecs: ${codecs.joinToString { it.name }}",
-        )
-        return codecs.toTypedArray()
-    }
-}
+        return preferredCodec?.let { preferredCodec ->
+            val supportedCodecs = baseFactory.supportedCodecs.toMutableList()
 
-enum class VideoCodec {
-    H264,
-    VP8,
-    VP9,
-    AV1,
+            logger.d {
+                "[getSupportedCodecs] #updatePublishOptions; Supported codecs: ${supportedCodecs.joinToString { it.name }}"
+            }
+
+            val preferredCodecIndex = supportedCodecs.indexOfFirst {
+                it.name.lowercase() == preferredCodec.name.lowercase()
+            }
+            if (preferredCodecIndex == -1) {
+                logger.w {
+                    "[getSupportedCodecs] #updatePublishOptions; Preferred codec ${preferredCodec.name} not supported. Ignoring."
+                }
+            } else {
+                val preferredCodecInfo = supportedCodecs.removeAt(preferredCodecIndex)
+                supportedCodecs.add(0, preferredCodecInfo)
+            }
+
+            logger.d {
+                "[getSupportedCodecs] #updatePublishOptions; Sorted codecs: ${supportedCodecs.joinToString { it.name }}"
+            }
+
+            supportedCodecs.toTypedArray()
+        } ?: baseFactory.supportedCodecs
+    }
 }

@@ -24,6 +24,7 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.VideoCodec
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -105,6 +106,8 @@ public class StreamPeerConnectionFactory(
     private var peerConnectionFactory by lazyFactory(::createPeerConnectionFactory)
 
     private fun createPeerConnectionFactory(preferredEncodingCodec: VideoCodec? = null): PeerConnectionFactory {
+        webRtcLogger.d { "[createPeerConnectionFactory] #updatePublishOptions" }
+
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .setInjectableLogger({ message, severity, label ->
@@ -234,6 +237,10 @@ public class StreamPeerConnectionFactory(
     )
 
     private fun defaultVideoEncoderFactory(preferredCodec: VideoCodec? = null): VideoEncoderFactory {
+        webRtcLogger.d {
+            "[defaultVideoEncoderFactory] #updatePublishOptions; preferredCodec: ${preferredCodec?.name}"
+        }
+
         return PreferredCodecVideoEncoderFactory(
             baseFactory = SimulcastAlignedVideoEncoderFactory(
                 eglBase.eglBaseContext,
@@ -383,10 +390,14 @@ public class StreamPeerConnectionFactory(
         } ?: false
     }
 
-    internal fun updateEncodingOptions(preferredCodec: VideoCodec) {
+    internal fun updatePublishOptions(preferredVideoCodec: VideoCodec?) {
+        webRtcLogger.d {
+            "[updatePublishOptions] #updatePublishOptions; preferredCodec: $preferredVideoCodec"
+        }
+
         // We cannot initialize videoEncoderFactory separately without getting
         // java.lang.UnsatisfiedLinkError:  No impl found for long org.webrtc.SoftwareVideoEncoderFactory.nativeCreateFactory().
         // So we recreate peerConnectionFactory and let it create videoEncoderFactory internally with the new preferredCodec.
-        peerConnectionFactory = createPeerConnectionFactory(preferredCodec)
+        peerConnectionFactory = createPeerConnectionFactory(preferredVideoCodec)
     }
 }

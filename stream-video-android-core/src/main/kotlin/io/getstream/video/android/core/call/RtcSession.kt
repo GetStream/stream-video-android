@@ -858,7 +858,9 @@ public class RtcSession internal constructor(
         val red = settings?.audio?.redundantCodingEnabled ?: true
         val opus = settings?.audio?.opusDtxEnabled ?: true
 
-        return mangleSdpUtil(sdp, red, opus, enableVp8 = false)
+        logger.d { "[mangleSdp] #updatePublishOptions; Enforcing VP8: ${!call.isPreferredVideoCodecSet}" }
+
+        return mangleSdpUtil(sdp, red, opus, enableVp8 = !call.isPreferredVideoCodecSet)
     }
 
     @VisibleForTesting
