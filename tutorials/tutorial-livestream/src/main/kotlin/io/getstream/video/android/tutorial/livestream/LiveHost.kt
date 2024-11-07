@@ -106,7 +106,7 @@ private fun LiveHostContent(
     val connection by call.state.connection.collectAsState()
     val totalParticipants by call.state.totalParticipants.collectAsState()
     val backstage by call.state.backstage.collectAsState()
-    val localParticipant by call.state.localParticipant.collectAsState()
+    val localParticipant by call.state.me.collectAsState()
     val video = localParticipant?.video?.collectAsState()?.value
     val duration by call.state.duration.collectAsState()
     val scope = rememberCoroutineScope()

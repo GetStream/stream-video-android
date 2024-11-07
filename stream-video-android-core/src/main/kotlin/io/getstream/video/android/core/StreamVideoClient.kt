@@ -25,6 +25,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -56,6 +57,7 @@ import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
+import io.getstream.video.android.core.utils.retry
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
@@ -347,41 +349,21 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
-    var location: String? = null
+    private val errLocation = "ERR"
+    var location: String = errLocation
 
-    internal suspend fun getCachedLocation(): Result<String> {
-        val job = loadLocationAsync()
-        job.join()
-        location?.let {
-            return Success(it)
-        }
-        return selectLocation()
-    }
-
-    internal fun loadLocationAsync(): Deferred<Result<String>> {
-        if (locationJob != null) return locationJob as Deferred<Result<String>>
-        locationJob = scope.async { selectLocation() }
-        return locationJob as Deferred<Result<String>>
-    }
-
-    internal suspend fun selectLocation(): Result<String> {
-        var attempts = 0
-        var lastResult: Result<String>?
-        while (attempts < 3) {
-            attempts += 1
-            lastResult = _selectLocation()
-            if (lastResult is Success) {
-                location = lastResult.value
-                return lastResult
+    internal suspend fun selectLocation(): String =
+        location.takeIf { it != errLocation } ?: retry(3) {
+            val locationResult = _selectLocation()
+            locationResult.onError {
+                logger.e { "Failed to select location: $it" }
             }
-            delay(100L)
-            if (attempts == 3) {
-                return lastResult
-            }
-        }
-
-        return Failure(Error.GenericError("failed to select location"))
-    }
+            locationResult.getOrThrow()
+        }.onError {
+            errLocation
+        }.onSuccess {
+            location = it
+        }.getOrNull() ?: errLocation
 
     override suspend fun connectAsync(): Deferred<Result<Long>> {
         return scope.async {
@@ -499,10 +481,7 @@ internal class StreamVideoClient internal constructor(
                 // Skip accepted events not meant for the current outgoing call.
                 val currentRingingCall = state.ringingCall.value
                 val state = currentRingingCall?.state?.ringingState?.value
-                if (currentRingingCall != null &&
-                    (state is RingingState.Outgoing || state == RingingState.Idle) &&
-                    currentRingingCall.cid != event.callCid
-                ) {
+                if (currentRingingCall != null && (state is RingingState.Outgoing || state == RingingState.Idle) && currentRingingCall.cid != event.callCid) {
                     // Skip this event
                     return
                 }
@@ -982,32 +961,19 @@ internal class StreamVideoClient internal constructor(
     }
 
     @OptIn(InternalCoroutinesApi::class)
-    suspend fun _selectLocation(): Result<String> {
+    private suspend fun _selectLocation(): Result<String> {
         return wrapAPICall {
             val url = "https://hint.stream-io-video.com/"
             val request: Request = Request.Builder().url(url).method("HEAD", null).build()
             val call = coordinatorConnectionModule.http.newCall(request)
-            val response = suspendCancellableCoroutine { continuation ->
-                call.enqueue(object : Callback {
-                    override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
-                        continuation.tryResumeWithException(e)?.let {
-                            continuation.completeResume(it)
-                        }
-                    }
-
-                    override fun onResponse(call: okhttp3.Call, response: Response) {
-                        continuation.resume(response) {
-                            call.cancel()
-                        }
-                    }
-                })
+            val response = call.execute()
+            if (response.isSuccessful) {
+                val locationHeader = response.headers["X-Amz-Cf-Pop"]
+                locationHeader?.take(3) ?: errLocation
+            } else {
+                logger.e { "Failed to get location: ${response.code}, ${response.message}" }
+                errLocation
             }
-
-            if (!response.isSuccessful) {
-                throw Error("Unexpected code $response")
-            }
-            val locationHeader = response.headers["X-Amz-Cf-Pop"]
-            locationHeader?.take(3) ?: "missing-location"
         }
     }
 

@@ -28,6 +28,8 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
+import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.webrtc.AudioTrack
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidateErrorEvent
@@ -47,6 +50,7 @@ import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
+import org.webrtc.VideoTrack
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -81,7 +85,7 @@ public class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
-    private val logger by taggedLogger("Call:PeerConnection:$typeTag")
+    private val logger by taggedLogger("Video:PC:$typeTag")
 
     /**
      * The wrapped connection for all the WebRTC communication.
@@ -93,6 +97,12 @@ public class StreamPeerConnection(
      * Transceiver used to send video in different resolutions.
      */
     public var videoTransceiver: RtpTransceiver? = null
+        private set
+
+    /**
+     * Transceiver used to send video in different resolutions.
+     */
+    public var screenShareTransceiver: RtpTransceiver? = null
         private set
 
     /**
@@ -237,6 +247,18 @@ public class StreamPeerConnection(
         audioTransceiver = connection.addTransceiver(track, transceiverInit)
     }
 
+    public fun addScreenShareTransceiver(
+        track: MediaStreamTrack,
+        streamIds: List<String>,
+    ) {
+        logger.i {
+            "[addScreenShareTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
+        }
+        val transceiverInit = buildVideoTransceiverInit(streamIds, true)
+
+        screenShareTransceiver = connection.addTransceiver(track, transceiverInit)
+    }
+
     /**
      * Creates the initialization configuration for the [RtpTransceiver], when sending audio.
      *
@@ -270,12 +292,11 @@ public class StreamPeerConnection(
     public fun addVideoTransceiver(
         track: MediaStreamTrack,
         streamIds: List<String>,
-        isScreenShare: Boolean,
     ) {
         logger.d {
             "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
         }
-        val transceiverInit = buildVideoTransceiverInit(streamIds, isScreenShare)
+        val transceiverInit = buildVideoTransceiverInit(streamIds, false)
 
         videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
@@ -305,6 +326,7 @@ public class StreamPeerConnection(
                 4.0,
             ).apply {
                 maxBitrateBps = maxBitRate / 4
+                maxFramerate = 30
             }
 
             val halfQuality = RtpParameters.Encoding(
@@ -313,6 +335,7 @@ public class StreamPeerConnection(
                 2.0,
             ).apply {
                 maxBitrateBps = maxBitRate / 2
+                maxFramerate = 30
             }
 
             val fullQuality = RtpParameters.Encoding(
@@ -321,6 +344,7 @@ public class StreamPeerConnection(
                 1.0,
             ).apply {
                 maxBitrateBps = maxBitRate
+                maxFramerate = 30
 //            networkPriority = 3
 //            bitratePriority = 4.0
             }
@@ -333,7 +357,8 @@ public class StreamPeerConnection(
                 true,
                 1.0,
             ).apply {
-                maxBitrateBps = 1_000_000
+                maxBitrateBps = 350_000
+                maxFramerate = 24
             }
 
             listOf(screenshareQuality)
@@ -507,6 +532,7 @@ public class StreamPeerConnection(
 
     override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {
         logger.i { "[onSelectedCandidatePairChanged] #sfu; #$typeTag; event: $event" }
+        connection.restartIce()
     }
 
     override fun onTrack(transceiver: RtpTransceiver?) {
@@ -520,6 +546,31 @@ public class StreamPeerConnection(
 
     private fun String.mungeCodecs(): String {
         return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
+    }
+
+    fun updateVideoTransceiver(
+        videoTrack: VideoTrack,
+    ) {
+        logger.d { "[updateVideoTransceiver] #sfu; #$typeTag; videoTrack: $videoTrack" }
+        safeCall {
+            videoTransceiver?.sender?.setTrack(videoTrack, false)
+        }
+    }
+
+    fun updateAudioTransceiver(audioTrack: AudioTrack) {
+        logger.d { "[updateAudioTransceiver] #sfu; #$typeTag; audioTrack: $audioTrack" }
+        audioTransceiver?.sender?.setTrack(audioTrack, false)
+    }
+
+    fun updateScreenShareTransceiver(screenShareTrack: VideoTrack) {
+        logger.d { "[updateScreenShareTransceiver] #sfu; #$typeTag; screenShareTrack: $screenShareTrack" }
+        safeCall {
+            val track = screenShareTransceiver?.sender?.track()
+            if (track?.state() == MediaStreamTrack.State.LIVE) {
+                track.dispose()
+            }
+        }
+        screenShareTransceiver?.sender?.setTrack(screenShareTrack, false)
     }
 
     private companion object {

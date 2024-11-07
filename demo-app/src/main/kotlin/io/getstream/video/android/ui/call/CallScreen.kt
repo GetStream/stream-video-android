@@ -331,10 +331,11 @@ fun CallScreen(
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
-                            me?.let {
+                            val meLocal by call.state.me.collectAsState()
+                            meLocal?.let {
                                 FloatingParticipantVideo(
                                     call = call,
-                                    participant = me!!,
+                                    participant = it,
                                     parentBounds = IntSize(
                                         this@BoxWithConstraints.constraints.maxWidth,
                                         this@BoxWithConstraints.constraints.maxHeight,

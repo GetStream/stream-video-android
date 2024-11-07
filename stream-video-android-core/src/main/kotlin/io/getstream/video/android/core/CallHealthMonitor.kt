@@ -111,10 +111,6 @@ public class CallHealthMonitor(
     @Synchronized
     fun check() {
         // skip health checks if we are migrating
-        if (call.state._connection.value == RealtimeConnection.Migrating) {
-            logger.d { "Skipping health-check - we are migrating" }
-            return
-        }
 
         val subscriberState = call.session?.subscriber?.state?.value
         val publisherState = call.session?.publisher?.state?.value
@@ -135,11 +131,6 @@ public class CallHealthMonitor(
             timeoutJob?.cancel()
             timeoutJob = null
             lastReconnectAt = null
-
-            if (call.state._connection.value != RealtimeConnection.Connected) {
-                logger.i { "call health check passed, marking connection as healthy" }
-                call.state._connection.value = RealtimeConnection.Connected
-            }
         } else {
             logger.w {
                 "call health check failed, reconnecting. publisher $publisherState subscriber $subscriberState"
@@ -157,48 +148,6 @@ public class CallHealthMonitor(
                 }
             }
         }
-    }
-
-    /**
-     * Only 1 reconnect attempt runs at the same time
-     * Will skip if we already tried to reconnect less than reconnectDebounceMs ms ago
-     */
-    suspend fun reconnect(forceRestart: Boolean) {
-        if (reconnectInProgress && !forceRestart) {
-            logger.d { "[reconnect] Reconnect already in progress - skipping" }
-            return
-        }
-
-        if (call.state._connection.value == RealtimeConnection.Migrating) {
-            logger.d { "[reconnect] Skipping reconnect - already migrating" }
-            return
-        }
-
-        logger.i { "attempting to reconnect" }
-
-        reconnectInProgress = true
-
-        val now = OffsetDateTime.now()
-
-        val timeDifference = if (lastReconnectAt != null) {
-            ChronoUnit.MILLIS.between(lastReconnectAt?.toInstant(), now.toInstant())
-        } else {
-            null
-        }
-
-        logger.i {
-            "reconnect called, time since last reconnect $timeDifference"
-        }
-
-        // ensure we don't run the reconnect too often
-        if (timeDifference != null && timeDifference < reconnectDebounceMs && !forceRestart) {
-            logger.d { "[reconnect] skipping reconnect - too often" }
-        } else {
-            lastReconnectAt = now
-            call.reconnect()
-        }
-
-        reconnectInProgress = false
     }
 
     // monitor the network state since it's faster to detect recovered network sometimes
@@ -227,11 +176,35 @@ public class CallHealthMonitor(
 
         scope.launch {
             session?.let {
-                // failed and closed indicate we should retry connecting to this or another SFU
-                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
-                it.subscriber?.state?.collect {
-                    logger.d { "subscriber ice connection state changed to $it" }
-                    check()
+                it.subscriber?.iceState?.collect { iceState ->
+                    logger.d { "subscriber ice connection state changed to $iceState" }
+                    when (iceState) {
+                        PeerConnection.IceConnectionState.DISCONNECTED,
+                        PeerConnection.IceConnectionState.FAILED,
+                        PeerConnection.IceConnectionState.CLOSED -> {
+                            it.requestSubscriberIceRestart()
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
+                }
+            }
+        }
+
+        scope.launch {
+            session?.let {
+                it.publisher?.iceState?.collect { iceState ->
+                    logger.d { "publisher ice connection state changed to $iceState" }
+                    when (iceState) {
+                        PeerConnection.IceConnectionState.DISCONNECTED,
+                        PeerConnection.IceConnectionState.FAILED -> {
+                            it.publisher?.connection?.restartIce()
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
                 }
             }
         }
@@ -240,9 +213,40 @@ public class CallHealthMonitor(
             session?.let {
                 // failed and closed indicate we should retry connecting to this or another SFU
                 // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
-                it.publisher?.state?.collect {
-                    logger.d { "publisher ice connection state changed to $it " }
-                    check()
+                it.subscriber?.state?.collect { connectionState ->
+                    logger.d { "subscriber peer connection state changed to $connectionState" }
+                    when(connectionState) {
+                        PeerConnection.PeerConnectionState.DISCONNECTED,
+                        PeerConnection.PeerConnectionState.FAILED -> {
+                            callScope.launch {
+                                call.rejoin()
+                            }
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
+                }
+            }
+        }
+
+        scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                it.publisher?.state?.collect { connectionState ->
+                    logger.d { "publisher peer connection state changed to $it " }
+                   when(connectionState) {
+                        PeerConnection.PeerConnectionState.DISCONNECTED,
+                        PeerConnection.PeerConnectionState.FAILED -> {
+                            callScope.launch {
+                                call.rejoin()
+                            }
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
                 }
             }
         }

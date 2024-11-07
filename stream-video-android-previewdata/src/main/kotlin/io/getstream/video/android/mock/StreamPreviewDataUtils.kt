@@ -120,7 +120,7 @@ public val previewParticipantsList: List<ParticipantState>
         previewCall.state.clearParticipants()
         previewUsers.forEach { user ->
             val sessionId = if (user == previewUsers.first()) {
-                previewCall.sessionId ?: UUID.randomUUID().toString()
+                previewCall.sessionId.value ?: UUID.randomUUID().toString()
             } else {
                 UUID.randomUUID().toString()
             }

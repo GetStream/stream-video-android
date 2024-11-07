@@ -247,8 +247,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // See which location is best to connect to
         scope.launch {
-            val location = client.loadLocationAsync().await()
-            streamLog { "location initialized: ${location.getOrNull()}" }
+            val location = client.selectLocation()
+            streamLog { "location initialized: $location" }
         }
 
         // Installs Stream Video instance
