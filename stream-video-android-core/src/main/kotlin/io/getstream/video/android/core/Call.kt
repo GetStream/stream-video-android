@@ -468,7 +468,6 @@ public class Call(
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
             RtcSession(
-                sessionId = this.sessionId.value,
                 apiKey = clientImpl.apiKey,
                 lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
                 client = client,
@@ -559,23 +558,8 @@ public class Call(
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 val oldSession = session
-                session = RtcSession(
-                    clientImpl,
-                    this@Call,
-                    sessionId.value,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
                 val reconnectDetails = oldSession?.let {
                     logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
-
-                    sessionId.value = UUID.randomUUID().toString()
                     val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
                     val details = ReconnectDetails(
                         previous_session_id = prevSessionId,
@@ -587,6 +571,20 @@ public class Call(
                     oldSession.cleanup()
                     details
                 }
+
+                sessionId.value = UUID.randomUUID().toString()
+                session = RtcSession(
+                    clientImpl,
+                    this@Call,
+                    clientImpl.apiKey,
+                    clientImpl.coordinatorConnectionModule.lifecycle,
+                    cred.server.url,
+                    cred.server.wsEndpoint,
+                    cred.token,
+                    cred.iceServers.map { ice ->
+                        ice.toIceServer()
+                    },
+                )
                 session?.connect(reconnectDetails)
                 monitorSession(joinResponse.value)
             } else {
@@ -628,7 +626,6 @@ public class Call(
                 val newSession = RtcSession(
                     clientImpl,
                     this@Call,
-                    sessionId.value,
                     clientImpl.apiKey,
                     clientImpl.coordinatorConnectionModule.lifecycle,
                     cred.server.url,

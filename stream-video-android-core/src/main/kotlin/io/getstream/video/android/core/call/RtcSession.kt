@@ -42,6 +42,7 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -185,7 +186,6 @@ data class TrackDimensions(
 public class RtcSession internal constructor(
     client: StreamVideo,
     private val call: Call,
-    private val sessionId: String,
     private val apiKey: String,
     private val lifecycle: Lifecycle,
     internal var sfuUrl: String,
@@ -215,14 +215,7 @@ public class RtcSession internal constructor(
     private val logger by taggedLogger("Video:RtcSession")
     private val dynascaleLogger by taggedLogger("Video:RtcSession:Dynascale")
     private val clientImpl = client as StreamVideoClient
-
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
-
-    internal val _peerConnectionStates =
-        MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
-            null,
-        )
-
     val trackDimensions =
         MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
             emptyMap(),
@@ -276,11 +269,11 @@ public class RtcSession internal constructor(
     }
 
     private fun getLocalTrack(type: TrackType): MediaTrack? {
-        return getTrack(sessionId, type)
+        return getTrack(call.sessionId.value, type)
     }
 
     private fun setLocalTrack(type: TrackType, track: MediaTrack) {
-        return setTrack(sessionId, type, track)
+        return setTrack(call.sessionId.value, type, track)
     }
 
     /**
@@ -377,100 +370,12 @@ public class RtcSession internal constructor(
                 sampleData = sampleData,
             )
         }
-    }
 
-    private fun listenToSfuSocket() {
-        // cancel any old socket monitoring if needed
-        eventJob?.cancel()
-        errorJob?.cancel()
-        stateJob?.cancel()
-
-        // State
-        // Start listening to connection state on new SFU connection
-        stateJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
-                _sfuSfuSocketState.value = sfuSocketState
-                when (sfuSocketState) {
-                    is SfuSocketState.Connected ->
-                        call.state._connection.value =
-                            RealtimeConnection.Connected
-
-                    is SfuSocketState.Connecting ->
-                        call.state._connection.value =
-                            RealtimeConnection.InProgress
-
-                    else -> {
-                        // Ignore it
-                    }
-                }
-            }
-        }
-
-        // listen to socket events and errors
-        eventJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.events().collect {
-                logger.d { "#rtcsession #events #sfu, event: $it" }
-                when (it) {
-                    is JoinCallResponseEvent -> {
-                        call.state._connection.value = RealtimeConnection.Connected
-                    }
-
-                    is ICETrickleEvent -> {
-                        handleIceTrickle(it)
-                    }
-
-                    is SubscriberOfferEvent -> {
-                        handleSubscriberOffer(it)
-                    }
-
-                    is CallEndedSfuEvent -> {
-                        call.leave()
-                    }
-
-                    else -> {
-                        // Do nothing
-                    }
-                }
-                clientImpl.fireEvent(it, call.cid)
-            }
-        }
-
-        // Errors
-        errorJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.errors().collect {
-                val reconnectStrategy = it.reconnectStrategy
-                logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
-                when (reconnectStrategy) {
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.fastReconnect()
-                    }
-
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
-                        call.rejoin()
-                    }
-
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
-                        call.switchSfu()
-                    }
-
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
-                        // We are told to disconnect.
-                        call.leave()
-                        call.state._connection.value = RealtimeConnection.Disconnected
-                    }
-
-                    else -> {
-                        // Either null or UNSPECIFIED, do not reconnect
-                    }
-                }
-                logger.e(
-                    it.streamError.extractCause()
-                        ?: IllegalStateException("Error emitted without a cause on SFU connection."),
-                ) { "permanent failure on socket connection" }
-            }
-        }
 
         // Publisher
+        muteStateSyncJob = coroutineScope.launch {
+            listenToMediaChanges()
+        }
         syncPublisherJob = coroutineScope.launch {
             combine(call.state.ownCapabilities, call.state.me) { capabilities, me ->
                 val canPublish =
@@ -517,6 +422,76 @@ public class RtcSession internal constructor(
         }
     }
 
+    private fun listenToSfuSocket() {
+        // cancel any old socket monitoring if needed
+        eventJob?.cancel()
+        errorJob?.cancel()
+        stateJob?.cancel()
+
+        // State
+        // Start listening to connection state on new SFU connection
+        stateJob = coroutineScope.launch {
+            sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
+                _sfuSfuSocketState.value = sfuSocketState
+                when (sfuSocketState) {
+                    is SfuSocketState.Connected ->
+                        call.state._connection.value =
+                            RealtimeConnection.Connected
+
+                    is SfuSocketState.Connecting ->
+                        call.state._connection.value =
+                            RealtimeConnection.InProgress
+
+                    else -> {
+                        // Ignore it
+                    }
+                }
+            }
+        }
+
+        // listen to socket events and errors
+        eventJob = coroutineScope.launch {
+            sfuConnectionModule.socketConnection.events().collect {
+                clientImpl.fireEvent(it, call.cid)
+            }
+        }
+
+        // Errors
+        errorJob = coroutineScope.launch {
+            sfuConnectionModule.socketConnection.errors().collect {
+                val reconnectStrategy = it.reconnectStrategy
+                logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
+                when (reconnectStrategy) {
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
+                        call.fastReconnect()
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                        call.rejoin()
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                        call.switchSfu()
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
+                        // We are told to disconnect.
+                        call.leave()
+                        call.state._connection.value = RealtimeConnection.Disconnected
+                    }
+
+                    else -> {
+                        // Either null or UNSPECIFIED, do not reconnect
+                    }
+                }
+                logger.e(
+                    it.streamError.extractCause()
+                        ?: IllegalStateException("Error emitted without a cause on SFU connection."),
+                ) { "permanent failure on socket connection" }
+            }
+        }
+    }
+
     /**
      * @param forceRestart - set to true if you want to force restart both ICE connections
      * regardless of their current connection status (even if they are CONNECTED)
@@ -547,7 +522,7 @@ public class RtcSession internal constructor(
     suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
         logger.i { "[connect] #sfu; #track; no args" }
         val request = JoinRequest(
-            session_id = sessionId,
+            session_id = call.sessionId.value,
             token = sfuToken,
             subscriber_sdp = getJoinSDP(),
             client_details = clientDetails,
@@ -601,7 +576,9 @@ public class RtcSession internal constructor(
                 call.mediaManager.audioTrack,
                 listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
             )
-        } else if (call.mediaManager.audioTrack.id() != publisher?.audioTransceiver?.sender?.track()?.id()) {
+        } else if (call.mediaManager.audioTrack.id() != publisher?.audioTransceiver?.sender?.track()
+                ?.id()
+        ) {
             publisher?.updateAudioTransceiver(
                 call.mediaManager.audioTrack,
             )
@@ -673,7 +650,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -771,7 +748,7 @@ public class RtcSession internal constructor(
         publisher = null
 
         // cleanup all non-local tracks
-        tracks.filter { it.key != sessionId }.values.map { it.values }.flatten()
+        tracks.filter { it.key != call.sessionId.value }.values.map { it.values }.flatten()
             .forEach { wrapper ->
                 try {
                     wrapper.asAudioTrack()?.audio?.dispose()
@@ -800,25 +777,30 @@ public class RtcSession internal constructor(
      * -- error isn't permanent, SFU didn't change, the mute/publish state didn't change
      * -- we cap at 30 retries to prevent endless loops
      */
-    private val muteStateMutex = Mutex(false)
     private suspend fun setMuteState(isEnabled: Boolean, trackType: TrackType) =
-        muteStateMutex.withLock {
-            logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
-            // update the local copy
-            val copy = muteState.value.toMutableMap()
-            copy[trackType] = isEnabled
-            val new = copy.toMap()
-            muteState.value = new
-            retry(3) {
-                val request = UpdateMuteStatesRequest(
-                    session_id = sessionId,
-                    mute_states = copy.map {
-                        TrackMuteState(track_type = it.key, muted = !it.value)
-                    },
-                )
-                updateMuteState(request)
-            }.onErrorSuspend {
-                call.rejoin()
+        waitForJob(coroutineScope, muteStateSyncJob) {
+            update {
+                muteStateSyncJob = it
+            }
+
+            execute {
+                logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
+                // update the local copy
+                val copy = muteState.value.toMutableMap()
+                copy[trackType] = isEnabled
+                val new = copy.toMap()
+                muteState.value = new
+                retry(3) {
+                    val request = UpdateMuteStatesRequest(
+                        session_id = call.sessionId.value,
+                        mute_states = copy.map {
+                            TrackMuteState(track_type = it.key, muted = !it.value)
+                        },
+                    )
+                    updateMuteState(request)
+                }.onErrorSuspend {
+                    call.rejoin()
+                }
             }
         }
 
@@ -882,7 +864,7 @@ public class RtcSession internal constructor(
         )
         val offerResult = dummySubscriber.createOffer()
         dummySubscriber.connection.close()
-        return offerResult.getOrNull()?.description ?: ""
+        return offerResult.getOrNull()?.let { mangleSdp(it).description } ?: ""
     }
 
     @VisibleForTesting
@@ -906,7 +888,7 @@ public class RtcSession internal constructor(
         // track prefix is only available after the join response
         val trackType = trackTypeVideo.value
         logger.d { "[buildTrackId] #sfu; trackType: ${call.state.me.value}" }
-        val trackPrefix = trackPrefixToSessionIdMap.value.firstNotNullOf {
+        val trackPrefix = trackPrefixToSessionIdMap.value.firstNotNullOfOrNull {
             it.value == call.sessionId.value
         }
         val old = "$trackPrefix:$trackType:${(Math.random() * 100).toInt()}"
@@ -967,7 +949,8 @@ public class RtcSession internal constructor(
      */
     internal fun defaultTracks(): List<TrackSubscriptionDetails> {
         val sortedParticipants = call.state.participants.value
-        val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
+        val otherParticipants =
+            sortedParticipants.filter { it.sessionId != call.sessionId.value }.take(5)
         val tracks = mutableListOf<TrackSubscriptionDetails>()
         otherParticipants.forEach { participant ->
             if (participant.videoEnabled.value) {
@@ -1002,7 +985,7 @@ public class RtcSession internal constructor(
 
             trackDisplay.entries.filter { it.value.visible }.map { display ->
                 dynascaleLogger.i {
-                    "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}"
+                    "[visibleTracks] ${call.sessionId.value} subscribing ${participant.sessionId} to : ${display.key}"
                 }
                 TrackSubscriptionDetails(
                     user_id = participant.userId.value,
@@ -1048,13 +1031,13 @@ public class RtcSession internal constructor(
                 subscriptions.value = new
                 retry(3) {
                     val request = UpdateSubscriptionsRequest(
-                        session_id = sessionId,
+                        session_id = call.sessionId.value,
                         tracks = subscriptions.value,
                     )
                     println("request $request")
                     val sessionToDimension = tracks.map { it.session_id to it.dimension }
                     dynascaleLogger.v {
-                        "[setVideoSubscriptions] $useDefaults #sfu; #track; $sessionId subscribing to : $sessionToDimension"
+                        "[setVideoSubscriptions] $useDefaults #sfu; #track; ${call.sessionId.value} subscribing to : $sessionToDimension"
                     }
                     updateSubscriptions(request)
                 }.onErrorSuspend {
@@ -1070,13 +1053,25 @@ public class RtcSession internal constructor(
                 logger.v { "[onRtcEvent] event: $event" }
                 when (event) {
                     is JoinCallResponseEvent -> {
+                        call.state._connection.value = RealtimeConnection.Connected
                         val participantStates = event.callState.participants.map {
                             call.state.getOrCreateParticipant(it)
                         }
                         call.state.replaceParticipants(participantStates)
                     }
 
-                    // is SubscriberOfferEvent -> handleSubscriberOffer(event)
+                    is ICETrickleEvent -> {
+                        handleIceTrickle(event)
+                    }
+
+                    is SubscriberOfferEvent -> {
+                        handleSubscriberOffer(event)
+                    }
+
+                    is CallEndedSfuEvent -> {
+                        call.leave()
+                    }
+
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
@@ -1100,13 +1095,22 @@ public class RtcSession internal constructor(
                         )
                     }
 
-                    is ParticipantJoinedEvent -> {
-                        // the UI layer will automatically trigger updateParticipantsSubscriptions
-                    }
-
                     is ParticipantLeftEvent -> {
                         removeParticipantTracks(event.participant)
                         removeParticipantTrackDimensions(event.participant)
+                    }
+
+                    is ICERestartEvent -> {
+                        val peerType = event.peerType
+                        when (peerType) {
+                            PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
+                                publisher?.connection?.restartIce()
+                            }
+
+                            PeerType.PEER_TYPE_SUBSCRIBER -> {
+                                subscriber?.connection?.restartIce()
+                            }
+                        }
                     }
 
                     else -> {
@@ -1141,21 +1145,33 @@ public class RtcSession internal constructor(
     }
 
     /**
-     Section, basic webrtc calls
+    Section, basic webrtc calls
      */
 
+    private var publisherIceSync: Job? = null
+    private var subscriberIceSync: Job? = null
     /**
      * Whenever onIceCandidateRequest is called we send the ice candidate
      */
-    private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) {
-        coroutineScope.launch {
+    private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) = waitForJob(coroutineScope, when(peerType) {
+        StreamPeerType.PUBLISHER -> publisherIceSync
+        StreamPeerType.SUBSCRIBER -> subscriberIceSync
+    }) {
+        update {
+            when(peerType) {
+                StreamPeerType.PUBLISHER -> publisherIceSync = it
+                StreamPeerType.SUBSCRIBER -> subscriberIceSync = it
+            }
+        }
+
+        execute {
             retry(3) {
                 val iceTrickle = ICETrickle(
                     peer_type = peerType.toPeerType(),
                     ice_candidate = Json.encodeToString(candidate),
-                    session_id = sessionId,
+                    session_id = call.sessionId.value,
                 )
-                sendIceCandidate(iceTrickle)
+                sendIceCandidate(iceTrickle).getOrThrow()
             }.onErrorSuspend {
                 call.rejoin()
             }
@@ -1189,35 +1205,39 @@ public class RtcSession internal constructor(
      * - Sets the local description
      * - Sends the answer back to the SFU
      */
-    suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
-        val previousJob = subscriberOfferJob
-        subscriberOfferJob = coroutineScope.launch {
-            previousJob?.join()
-            safeSuspendingCallWithResult {
-                logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
-                val subscriber = subscriber ?: createSubscriber()
-                val offerDescription = SessionDescription(
-                    SessionDescription.Type.OFFER,
-                    offerEvent.sdp,
-                )
-                subscriber.setRemoteDescription(offerDescription)
-                subscriber.createAnswer().flatMap { sessionDescription ->
-                    val answerSdp = mangleSdp(sessionDescription)
-                    subscriber.setLocalDescription(answerSdp).map { answerSdp }
-                }.flatMapSuspend { answerSdp ->
-                    retry(3) {
-                        val sendAnswerRequest = SendAnswerRequest(
-                            PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId,
-                        )
-                        sendAnswer(sendAnswerRequest).getOrThrow()
-                    }
-                }.getOrThrow()
-            }.onErrorSuspend { response ->
-                logger.e { "[handleSubscriberOffer] #sfu; #subscriber; response: $response" }
-                call.rejoin()
+    suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) =
+        waitForJob(coroutineScope, subscriberOfferJob) {
+            update {
+                subscriberOfferJob = it
+            }
+            execute {
+                safeSuspendingCallWithResult {
+                    logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
+                    val subscriber = subscriber ?: createSubscriber()
+                    val offerDescription = SessionDescription(
+                        SessionDescription.Type.OFFER,
+                        offerEvent.sdp,
+                    )
+                    subscriber.setRemoteDescription(offerDescription)
+                    subscriber.createAnswer().flatMap { sessionDescription ->
+                        val answerSdp = mangleSdp(sessionDescription)
+                        subscriber.setLocalDescription(answerSdp).map { answerSdp }
+                    }.flatMapSuspend { answerSdp ->
+                        retry(3) {
+                            val sendAnswerRequest = SendAnswerRequest(
+                                PeerType.PEER_TYPE_SUBSCRIBER,
+                                answerSdp.description,
+                                call.sessionId.value,
+                            )
+                            sendAnswer(sendAnswerRequest).getOrThrow()
+                        }
+                    }.getOrThrow()
+                }.onErrorSuspend { response ->
+                    logger.e { "[handleSubscriberOffer] #sfu; #subscriber; response: $response" }
+                    call.rejoin()
+                }
             }
         }
-    }
 
     /**
      * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/negotiationneeded_event
@@ -1258,7 +1278,7 @@ public class RtcSession internal constructor(
                     retry(3) {
                         val request = SetPublisherRequest(
                             sdp = offerSdp.description,
-                            session_id = sessionId,
+                            session_id = call.sessionId.value,
                             tracks = getPublisherTracks(offerSdp.description),
                         )
                         setPublisher(request).flatMap { response ->
@@ -1412,8 +1432,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                // if `msid` is not present, we assume that the track is the first one
-                (m.msid?.equals(track.id()) ?: true)
+                    // if `msid` is not present, we assume that the track is the first one
+                    (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
@@ -1514,7 +1534,7 @@ public class RtcSession internal constructor(
         val result = wrapAPICall {
             sfuConnectionModule.api.sendStats(
                 sendStatsRequest = SendStatsRequest(
-                    session_id = sessionId,
+                    session_id = call.sessionId.value,
                     sdk = "stream-android",
                     sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
                     webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
@@ -1621,7 +1641,7 @@ public class RtcSession internal constructor(
     // share what size and which participants we're looking at
     suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> = wrapAPICall {
         val request = ICERestartRequest(
-            session_id = sessionId,
+            session_id = call.sessionId.value,
             peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
         )
         sfuConnectionModule.api.iceRestart(request)
@@ -1672,7 +1692,7 @@ public class RtcSession internal constructor(
     }
 
     internal fun currentSfuInfo(): Triple<String, List<TrackSubscriptionDetails>, List<TrackInfo>> {
-        val previousSessionId = sessionId
+        val previousSessionId = call.sessionId.value
         val currentSubscriptions = subscriptions.value
         val publisherTracks = publisher?.let { pub ->
             if (pub.connection.remoteDescription != null) {
@@ -1692,7 +1712,7 @@ public class RtcSession internal constructor(
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
         val request = JoinRequest(
-            session_id = sessionId,
+            session_id = call.sessionId.value,
             token = sfuToken,
             subscriber_sdp = getJoinSDP(),
             client_details = clientDetails,
@@ -1731,7 +1751,7 @@ public class RtcSession internal constructor(
 
     internal fun leaveWithReason(reason: String) {
         val leaveCallRequest = LeaveCallRequest(
-            session_id = sessionId,
+            session_id = call.sessionId.value,
             reason = reason,
         )
         val request = SfuRequest(leave_call_request = leaveCallRequest)
