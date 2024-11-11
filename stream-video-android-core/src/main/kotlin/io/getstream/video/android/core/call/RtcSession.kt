@@ -45,7 +45,6 @@ import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
@@ -89,8 +88,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -102,7 +99,6 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.PeerConnection.PeerConnectionState
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
@@ -370,7 +366,6 @@ public class RtcSession internal constructor(
                 sampleData = sampleData,
             )
         }
-
 
         // Publisher
         muteStateSyncJob = coroutineScope.launch {
@@ -650,7 +645,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -1145,20 +1140,27 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     private var publisherIceSync: Job? = null
     private var subscriberIceSync: Job? = null
+
     /**
      * Whenever onIceCandidateRequest is called we send the ice candidate
      */
-    private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) = waitForJob(coroutineScope, when(peerType) {
-        StreamPeerType.PUBLISHER -> publisherIceSync
-        StreamPeerType.SUBSCRIBER -> subscriberIceSync
-    }) {
+    private fun sendIceCandidate(
+        candidate: IceCandidate,
+        peerType: StreamPeerType,
+    ) = waitForJob(
+        coroutineScope,
+        when (peerType) {
+            StreamPeerType.PUBLISHER -> publisherIceSync
+            StreamPeerType.SUBSCRIBER -> subscriberIceSync
+        },
+    ) {
         update {
-            when(peerType) {
+            when (peerType) {
                 StreamPeerType.PUBLISHER -> publisherIceSync = it
                 StreamPeerType.SUBSCRIBER -> subscriberIceSync = it
             }
@@ -1432,8 +1434,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                    // if `msid` is not present, we assume that the track is the first one
-                    (m.msid?.equals(track.id()) ?: true)
+                // if `msid` is not present, we assume that the track is the first one
+                (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
