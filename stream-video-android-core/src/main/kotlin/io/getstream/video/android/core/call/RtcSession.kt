@@ -62,7 +62,6 @@ import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.utils.SdpSession
-import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
@@ -76,8 +75,6 @@ import io.getstream.video.android.core.utils.waitForJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -420,11 +417,13 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected -> call.state._connection.value =
-                        RealtimeConnection.Connected
+                    is SfuSocketState.Connected ->
+                        call.state._connection.value =
+                            RealtimeConnection.Connected
 
-                    is SfuSocketState.Connecting -> call.state._connection.value =
-                        RealtimeConnection.InProgress
+                    is SfuSocketState.Connecting ->
+                        call.state._connection.value =
+                            RealtimeConnection.InProgress
 
                     else -> {
                         // Ignore it
@@ -579,7 +578,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -795,7 +794,9 @@ public class RtcSession internal constructor(
     }
 
     @VisibleForTesting
-    fun createPublisher(onNegotiationNeeded: (StreamPeerConnection, StreamPeerType) -> Unit): StreamPeerConnection {
+    fun createPublisher(
+        onNegotiationNeeded: (StreamPeerConnection, StreamPeerType) -> Unit,
+    ): StreamPeerConnection {
         val maxPublishingBitrate = 750_000
         val publisher = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
@@ -1072,7 +1073,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     private var publisherIceSync: Job? = null
@@ -1366,8 +1367,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                    // if `msid` is not present, we assume that the track is the first one
-                    (m.msid?.equals(track.id()) ?: true)
+                // if `msid` is not present, we assume that the track is the first one
+                (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {

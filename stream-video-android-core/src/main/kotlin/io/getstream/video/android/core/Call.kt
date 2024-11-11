@@ -167,7 +167,7 @@ public class Call(
         Unit
     }
 
-    //val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
+    // val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -656,7 +656,7 @@ public class Call(
                 } else {
                     logger.e {
                         "[switchSfu] Failed to get a join response during " +
-                                "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                     }
                     joinResponse.onErrorSuspend { error ->
                         leaveOnUnrecoverableAPIError(error) {
