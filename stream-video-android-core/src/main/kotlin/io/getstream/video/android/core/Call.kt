@@ -25,6 +25,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
@@ -88,6 +89,7 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.OffsetDateTime
+import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
@@ -165,7 +167,7 @@ public class Call(
         Unit
     }
 
-    val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
+    //val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -261,6 +263,7 @@ public class Call(
     private var lastDisconnect = 0L
     private var reconnectDeadlineMils: Int = 10_000
     private var sfuEvents: Job? = null
+    private var reconnectJob: Job? = null
 
     init {
         scope.launch {
@@ -411,7 +414,7 @@ public class Call(
         return true
     }
 
-    private fun leaveOnUnrecoverableAPIError(error: Error) {
+    private inline fun leaveOnUnrecoverableAPIError(error: Error, recover: () -> Unit = {}) {
         val throwableError = error as? Error.ThrowableError
         throwableError?.cause?.let { cause ->
             val httpException = cause as? HttpException
@@ -420,8 +423,10 @@ public class Call(
                 val apiError = adapter.fromJson(body)
                 apiError?.let {
                     if (apiError.unrecoverable) {
-                        leave()
                         state._connection.value = RealtimeConnection.Failed(it)
+                        leave()
+                    } else {
+                        recover()
                     }
                 }
                 logger.e { "[rejoin] Error: $error" }
@@ -436,6 +441,7 @@ public class Call(
         notify: Boolean = false,
     ): Result<RtcSession> {
         reconnectAttepmts = 0
+        stopMonitoringPeerConnections()
         sfuEvents?.cancel()
 
         if (session != null) {
@@ -488,14 +494,14 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
+
         client.state.setActiveCall(this)
-        monitorSession(result.value)
+        monitorSessionEvents(result.value)
         return Success(value = session!!)
     }
 
-    private suspend fun monitorSession(result: JoinCallResponse) {
+    private suspend fun monitorSessionEvents(result: JoinCallResponse) {
         sfuEvents?.cancel()
-        monitor.start()
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
         // listen to Signal WS
         sfuEvents = scope.launch {
@@ -508,6 +514,7 @@ public class Call(
                 }
             }
         }
+        monitorPeerConnection()
         network.subscribe(listener)
     }
 
@@ -543,136 +550,152 @@ public class Call(
             }
         }
     }
+    internal suspend fun rejoin() {
+        waitForJob(scope, reconnectJob, timeout = 2000L) {
+            update {
+                reconnectJob = it
+            }
+            execute {
+                sfuEvents?.cancel()
+                stopMonitoringPeerConnections()
+                reconnectAttepmts++
+                state._connection.value = RealtimeConnection.Reconnecting
+                val location = clientImpl.selectLocation()
+                val joinResponse = joinRequest(location = location)
+                if (joinResponse is Success) {
+                    // switch to the new SFU
+                    val cred = joinResponse.value.credentials
+                    val oldSession = session
+                    val reconnectDetails = oldSession?.let {
+                        logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
+                        val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
+                        val details = ReconnectDetails(
+                            previous_session_id = prevSessionId,
+                            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                            announced_tracks = publishingInfo,
+                            subscriptions = subscriptionsInfo,
+                            reconnect_attempt = reconnectAttepmts,
+                        )
+                        oldSession.cleanup()
+                        details
+                    }
 
-    private var reconnectJob: Job? = null
-    internal suspend fun rejoin() = waitForJob(scope, reconnectJob, timeout = 2000L) {
-        update {
-            reconnectJob = it
+                    sessionId.value = UUID.randomUUID().toString()
+                    session = RtcSession(
+                        clientImpl,
+                        this@Call,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    session?.connect(reconnectDetails)
+                    monitorSessionEvents(joinResponse.value)
+                } else {
+                    logger.e {
+                        "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
+                    }
+                    joinResponse.onErrorSuspend { error ->
+                        leaveOnUnrecoverableAPIError(error) {
+                            rejoin()
+                        }
+                    }
+                }
+            }
         }
-        execute {
-            reconnectAttepmts++
-            monitor.stop()
-            state._connection.value = RealtimeConnection.Reconnecting
-            val joinResponse = joinRequest(location = clientImpl.selectLocation())
-            if (joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val oldSession = session
-                val reconnectDetails = oldSession?.let {
-                    logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
-                    val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
-                    val details = ReconnectDetails(
-                        previous_session_id = prevSessionId,
-                        strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+    }
+
+    suspend fun switchSfu() {
+        waitForJob(scope, reconnectJob) {
+            update {
+                reconnectJob = it
+            }
+            execute {
+                state._connection.value = RealtimeConnection.Reconnecting
+                val joinResponse = joinRequest(location = clientImpl.selectLocation())
+                if (joinResponse is Success) {
+                    // switch to the new SFU
+                    val cred = joinResponse.value.credentials
+                    val oldSession = session
+                    this@Call.sessionId.value = UUID.randomUUID().toString()
+                    val reconnectDetails = oldSession?.let { old ->
+                        val (prevSessionId, subscriptionsInfo, publishingInfo) = old.currentSfuInfo()
+                        val oldSfuUrl = old.sfuUrl
+                        logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
+                        val data = ReconnectDetails(
+                            previous_session_id = prevSessionId,
+                            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+                            announced_tracks = publishingInfo,
+                            subscriptions = subscriptionsInfo,
+                            from_sfu_id = oldSfuUrl,
+                            reconnect_attempt = reconnectAttepmts,
+                        )
+                        old.prepareReconnect()
+                        data
+                    }
+                    this@Call.session = RtcSession(
+                        clientImpl,
+                        this@Call,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    this@Call.session?.connect(reconnectDetails)
+                    monitorSessionEvents(joinResponse.value)
+                    oldSession?.leaveWithReason("migrating")
+                    oldSession?.cleanup()
+                } else {
+                    logger.e {
+                        "[switchSfu] Failed to get a join response during " +
+                                "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                    }
+                    joinResponse.onErrorSuspend { error ->
+                        leaveOnUnrecoverableAPIError(error) {
+                            rejoin()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun fastReconnect() {
+        waitForJob(scope, reconnectJob) {
+            update {
+                reconnectJob = it
+            }
+            execute {
+                stopMonitoringPeerConnections()
+                network.unsubscribe(listener)
+                logger.d { "[reconnect] Reconnecting (fast)" }
+                session?.prepareReconnect()
+                this@Call.state._connection.value = RealtimeConnection.Reconnecting
+                if (session != null) {
+                    val session = session!!
+                    val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+                    val reconnectDetails = ReconnectDetails(
+                        strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                         announced_tracks = publishingInfo,
                         subscriptions = subscriptionsInfo,
                         reconnect_attempt = reconnectAttepmts,
                     )
-                    oldSession.cleanup()
-                    details
+
+                    session.fastReconnect(reconnectDetails)
+                    monitorPeerConnection()
+                    network.subscribe(listener)
+                } else {
+                    logger.e { "[reconnect] Disconnecting" }
+                    this@Call.state._connection.value = RealtimeConnection.Disconnected
                 }
-
-                sessionId.value = UUID.randomUUID().toString()
-                session = RtcSession(
-                    clientImpl,
-                    this@Call,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                session?.connect(reconnectDetails)
-                monitorSession(joinResponse.value)
-            } else {
-                logger.e {
-                    "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
-                }
-                joinResponse.onError { error ->
-                    leaveOnUnrecoverableAPIError(error)
-                }
-            }
-        }
-    }
-
-    suspend fun switchSfu() = waitForJob(scope, reconnectJob) {
-        update {
-            reconnectJob = it
-        }
-        execute {
-            state._connection.value = RealtimeConnection.Migrating
-            val joinResponse = joinRequest(location = clientImpl.selectLocation())
-            if (joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val session = session!!
-                val oldSfuUrl = session.sfuUrl
-                logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
-
-                this@Call.sessionId.value = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = prevSessionId,
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    from_sfu_id = oldSfuUrl,
-                    reconnect_attempt = reconnectAttepmts,
-                )
-                session.prepareRejoin()
-                val newSession = RtcSession(
-                    clientImpl,
-                    this@Call,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                val oldSession = this@Call.session
-                this@Call.session = newSession
-                this@Call.session?.connect(reconnectDetails)
-                monitorSession(joinResponse.value)
-                oldSession?.leaveWithReason("migrating")
-                oldSession?.cleanup()
-            } else {
-                logger.e {
-                    "[switchSfu] Failed to get a join response during " +
-                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
-                }
-                state._connection.value = RealtimeConnection.Reconnecting
-            }
-        }
-    }
-
-    suspend fun fastReconnect() = waitForJob(scope, reconnectJob) {
-        update {
-            reconnectJob = it
-        }
-        execute {
-            logger.d { "[reconnect] Reconnecting (fast)" }
-            session?.prepareReconnect()
-            this@Call.state._connection.value = RealtimeConnection.Reconnecting
-            if (session != null) {
-                val session = session!!
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    reconnect_attempt = reconnectAttepmts,
-                )
-
-                session.fastReconnect(reconnectDetails)
-            } else {
-                logger.e { "[reconnect] Disconnecting" }
-                this@Call.state._connection.value = RealtimeConnection.Disconnected
             }
         }
     }
@@ -998,6 +1021,105 @@ public class Call(
         }
     }
 
+    private var iceSubscriberJob: Job? = null
+    private var icePublisherJob: Job? = null
+    private var peerStateSubscriberJob: Job? = null
+    private var peerStatePublihserJob: Job? = null
+
+    private fun stopMonitoringPeerConnections() {
+        iceSubscriberJob?.cancel()
+        icePublisherJob?.cancel()
+        peerStateSubscriberJob?.cancel()
+        peerStatePublihserJob?.cancel()
+    }
+
+    private fun monitorPeerConnection() {
+        iceSubscriberJob?.cancel()
+        icePublisherJob?.cancel()
+        peerStateSubscriberJob?.cancel()
+        peerStatePublihserJob?.cancel()
+
+        iceSubscriberJob = scope.launch {
+            session?.let {
+                it.subscriber?.iceState?.collect { iceState ->
+                    logger.d { "subscriber ice connection state changed to $iceState" }
+                    when (iceState) {
+                        PeerConnection.IceConnectionState.DISCONNECTED,
+                        PeerConnection.IceConnectionState.FAILED,
+                        -> {
+                            it.requestSubscriberIceRestart()
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
+                }
+            }
+        }
+
+        icePublisherJob = scope.launch {
+            session?.let {
+                it.publisher?.iceState?.collect { iceState ->
+                    logger.d { "publisher ice connection state changed to $iceState" }
+                    when (iceState) {
+                        PeerConnection.IceConnectionState.DISCONNECTED,
+                        PeerConnection.IceConnectionState.FAILED,
+                        -> {
+                            it.publisher?.connection?.restartIce()
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
+                }
+            }
+        }
+
+        peerStateSubscriberJob = scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                it.subscriber?.state?.collect { connectionState ->
+                    logger.d { "subscriber peer connection state changed to $connectionState" }
+                    when (connectionState) {
+                        PeerConnection.PeerConnectionState.DISCONNECTED,
+                        PeerConnection.PeerConnectionState.FAILED,
+                        -> {
+                            scope.launch {
+                                rejoin()
+                            }
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
+                }
+            }
+        }
+
+        peerStatePublihserJob = scope.launch {
+            session?.let {
+                // failed and closed indicate we should retry connecting to this or another SFU
+                // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
+                it.publisher?.state?.collect { connectionState ->
+                    logger.d { "publisher peer connection state changed to $it " }
+                    when (connectionState) {
+                        PeerConnection.PeerConnectionState.DISCONNECTED,
+                        PeerConnection.PeerConnectionState.FAILED,
+                        -> {
+                            scope.launch {
+                                rejoin()
+                            }
+                        }
+                        else -> {
+                            // Do nothing
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
         // Speaker
         if (speaker.status.value is DeviceStatus.NotSelected) {
@@ -1104,7 +1226,6 @@ public class Call(
     }
 
     fun cleanup() {
-        monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
         callStatsReportingJob?.cancel()

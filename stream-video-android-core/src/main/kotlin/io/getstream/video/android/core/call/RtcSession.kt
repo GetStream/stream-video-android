@@ -79,6 +79,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -212,10 +213,9 @@ public class RtcSession internal constructor(
     private val dynascaleLogger by taggedLogger("Video:RtcSession:Dynascale")
     private val clientImpl = client as StreamVideoClient
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
-    val trackDimensions =
-        MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
-            emptyMap(),
-        )
+    val trackDimensions = MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
+        emptyMap(),
+    )
     val trackDimensionsDebounced = trackDimensions.debounce(100)
 
     // run all calls on a supervisor job so we can easily cancel them
@@ -291,11 +291,15 @@ public class RtcSession internal constructor(
         buildMediaConstraints()
     }
 
-    private val audioConstraints: MediaConstraints by lazy {
-        buildAudioConstraints()
-    }
-
-    internal lateinit var sfuConnectionModule: SfuConnectionModule
+    private val sfuConnectionModule: SfuConnectionModule = SfuConnectionModule(
+        context = clientImpl.context,
+        apiKey = apiKey,
+        apiUrl = sfuUrl,
+        wssUrl = sfuWsUrl,
+        connectionTimeoutInMs = 6000L,
+        userToken = sfuToken,
+        lifecycle = lifecycle,
+    )
 
     private val clientDetails = ClientDetails(
         os = OS(
@@ -317,7 +321,6 @@ public class RtcSession internal constructor(
      * Used during a SFU migration as a temporary new SFU connection. Is null before and after
      * the migration is finished.
      */
-    private var sfuConnectionMigrationModule: SfuConnectionModule? = null
 
     private val _sfuSfuSocketState =
         MutableStateFlow<SfuSocketState>(SfuSocketState.Disconnected.Stopped)
@@ -332,20 +335,10 @@ public class RtcSession internal constructor(
         logger.i { "<init> #sfu; #track; no args" }
 
         // step 1 setup the peer connections
+        // TODO Question this?
         subscriber = createSubscriber()
-        publisher = createPublisher()
-
-        val sfuConnectionModule = SfuConnectionModule(
-            context = clientImpl.context,
-            apiKey = apiKey,
-            apiUrl = sfuUrl,
-            wssUrl = sfuWsUrl,
-            connectionTimeoutInMs = 6000L,
-            userToken = sfuToken,
-            lifecycle = lifecycle,
-        )
-        setSfuConnectionModule(sfuConnectionModule)
         listenToSfuSocket()
+
         coroutineScope.launch {
             // call update participant subscriptions debounced
             trackDimensionsDebounced.collect {
@@ -368,50 +361,48 @@ public class RtcSession internal constructor(
         }
 
         // Publisher
-        muteStateSyncJob = coroutineScope.launch {
-            listenToMediaChanges()
-        }
         syncPublisherJob = coroutineScope.launch {
             combine(call.state.ownCapabilities, call.state.me) { capabilities, me ->
                 val canPublish =
                     capabilities.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }
                 Pair(canPublish, me)
             }.collect { pair ->
+                muteStateSyncJob?.cancel()
                 logger.d { "[observe] pair: ${pair.first}, ${pair.second}" }
                 val canPublish = pair.first
                 val me = pair.second
                 if (canPublish && me != null) {
-                    publisher = publisher ?: createPublisher()
-                    publisher?.let {
-                        setLocalTrack(
-                            TrackType.TRACK_TYPE_AUDIO,
-                            AudioTrack(
-                                streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
-                                audio = call.mediaManager.audioTrack,
-                            ),
-                        )
-
-                        // step 5 create the video track
-                        setLocalTrack(
-                            TrackType.TRACK_TYPE_VIDEO,
-                            VideoTrack(
-                                streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
-                                video = call.mediaManager.videoTrack,
-                            ),
-                        )
-
-                        // render it on the surface. but we need to start this before forwarding it to the publisher
-                        logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-                        if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
-                            initializeVideoTransceiver()
+                    publisher = publisher ?: createPublisher(onNegotiationNeeded = { connection, type ->
+                        coroutineScope.launch {
+                            delay(1000)
+                            onNegotiationNeeded(connection, type)
                         }
-                        if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
-                            initialiseAudioTransceiver()
-                        }
-                        if (call.mediaManager.screenShare.status.value == DeviceStatus.Enabled) {
-                            initializeScreenshareTransceiver()
-                        }
-                    }
+                    })
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_VIDEO,
+                        VideoTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
+                            video = call.mediaManager.videoTrack,
+                        ),
+                    )
+                    initializeVideoTransceiver()
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_AUDIO,
+                        AudioTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                            audio = call.mediaManager.audioTrack,
+                        ),
+                    )
+                    initialiseAudioTransceiver()
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_SCREEN_SHARE,
+                        VideoTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
+                            video = call.mediaManager.screenShareTrack,
+                        ),
+                    )
+                    initializeScreenshareTransceiver()
+                    listenToMediaChanges()
                 }
             }
         }
@@ -429,13 +420,11 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected ->
-                        call.state._connection.value =
-                            RealtimeConnection.Connected
+                    is SfuSocketState.Connected -> call.state._connection.value =
+                        RealtimeConnection.Connected
 
-                    is SfuSocketState.Connecting ->
-                        call.state._connection.value =
-                            RealtimeConnection.InProgress
+                    is SfuSocketState.Connecting -> call.state._connection.value =
+                        RealtimeConnection.InProgress
 
                     else -> {
                         // Ignore it
@@ -487,33 +476,6 @@ public class RtcSession internal constructor(
         }
     }
 
-    /**
-     * @param forceRestart - set to true if you want to force restart both ICE connections
-     * regardless of their current connection status (even if they are CONNECTED)
-     */
-    suspend fun reconnect(forceRestart: Boolean) {
-        // ice restart
-        val subscriberAsync = coroutineScope.async {
-            subscriber?.let {
-                if (!it.isHealthy()) {
-                    logger.i { "ice restarting subscriber peer connection" }
-                    requestSubscriberIceRestart()
-                }
-            }
-        }
-
-        val publisherAsync = coroutineScope.async {
-            publisher?.let {
-                if (!it.isHealthy() || forceRestart) {
-                    logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
-                    it.connection.restartIce()
-                }
-            }
-        }
-
-        awaitAll(subscriberAsync, publisherAsync)
-    }
-
     suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
         logger.i { "[connect] #sfu; #track; no args" }
         val request = JoinRequest(
@@ -532,22 +494,13 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun initializeVideoTransceiver() = synchronized(this) {
+    private fun initializeVideoTransceiver() {
         if (publisher?.videoTransceiver == null) {
             publisher?.addVideoTransceiver(
                 call.mediaManager.videoTrack,
                 listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
             )
-        } else {
-            val callManagerTrack = call.mediaManager.videoTrack
-            publisher?.updateVideoTransceiver(callManagerTrack)
         }
-    }
-
-    private fun setSfuConnectionModule(sfuConnectionModule: SfuConnectionModule) {
-        // This is used to switch from a current SFU connection to a new migrated SFU connection
-        this@RtcSession.sfuConnectionModule = sfuConnectionModule
-        listenToSfuSocket()
     }
 
     private fun initializeScreenshareTransceiver() {
@@ -555,12 +508,6 @@ public class RtcSession internal constructor(
             publisher?.addScreenShareTransceiver(
                 call.mediaManager.screenShareTrack,
                 listOf(buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)),
-            )
-        } else if (call.mediaManager.screenShareTrack.id() != publisher?.screenShareTransceiver?.sender?.track()
-                ?.id()
-        ) {
-            publisher?.updateScreenShareTransceiver(
-                call.mediaManager.screenShareTrack,
             )
         }
     }
@@ -571,48 +518,35 @@ public class RtcSession internal constructor(
                 call.mediaManager.audioTrack,
                 listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
             )
-        } else if (call.mediaManager.audioTrack.id() != publisher?.audioTransceiver?.sender?.track()
-                ?.id()
-        ) {
-            publisher?.updateAudioTransceiver(
-                call.mediaManager.audioTrack,
-            )
         }
     }
 
-    private suspend fun listenToMediaChanges() {
-        coroutineScope.launch {
-            // update the tracks when the camera or microphone status changes
-            call.mediaManager.camera.status.collectLatest {
-                // set the mute /unumute status
-                setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
-
-                if (it == DeviceStatus.Enabled) {
-                    initializeVideoTransceiver()
+    private suspend fun listenToMediaChanges() = waitForJob(coroutineScope, muteStateSyncJob) {
+        update {
+            muteStateSyncJob = it
+        }
+        execute {
+            coroutineScope.launch {
+                // update the tracks when the camera or microphone status changes
+                call.mediaManager.camera.status.collectLatest {
+                    // set the mute /unumute status
+                    setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
                 }
             }
-        }
-        coroutineScope.launch {
-            call.mediaManager.microphone.status.collectLatest {
-                // set the mute /unumute status
-                setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
-
-                if (it == DeviceStatus.Enabled) {
-                    initialiseAudioTransceiver()
+            coroutineScope.launch {
+                call.mediaManager.microphone.status.collectLatest {
+                    // set the mute /unumute status
+                    setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
                 }
             }
-        }
 
-        coroutineScope.launch {
-            call.mediaManager.screenShare.status.collectLatest {
-                // set the mute /unumute status
-                setMuteState(
-                    isEnabled = it == DeviceStatus.Enabled,
-                    TrackType.TRACK_TYPE_SCREEN_SHARE,
-                )
-
-                if (it == DeviceStatus.Enabled) {
-                    initializeScreenshareTransceiver()
+            coroutineScope.launch {
+                call.mediaManager.screenShare.status.collectLatest {
+                    // set the mute /unumute status
+                    setMuteState(
+                        isEnabled = it == DeviceStatus.Enabled,
+                        TrackType.TRACK_TYPE_SCREEN_SHARE,
+                    )
                 }
             }
         }
@@ -645,7 +579,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -730,10 +664,8 @@ public class RtcSession internal constructor(
 
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.disconnect()
-            sfuConnectionMigrationModule?.socketConnection?.disconnect()
         }
         syncPublisherJob?.cancel()
-        sfuConnectionMigrationModule = null
 
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
@@ -863,14 +795,14 @@ public class RtcSession internal constructor(
     }
 
     @VisibleForTesting
-    fun createPublisher(): StreamPeerConnection {
+    fun createPublisher(onNegotiationNeeded: (StreamPeerConnection, StreamPeerType) -> Unit): StreamPeerConnection {
         val maxPublishingBitrate = 750_000
         val publisher = clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.PUBLISHER,
             mediaConstraints = MediaConstraints(),
-            onNegotiationNeeded = ::onNegotiationNeeded,
+            onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
             maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate
                 ?: maxPublishingBitrate,
@@ -1140,7 +1072,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     Section, basic webrtc calls
+    Section, basic webrtc calls
      */
 
     private var publisherIceSync: Job? = null
@@ -1434,8 +1366,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                // if `msid` is not present, we assume that the track is the first one
-                (m.msid?.equals(track.id()) ?: true)
+                    // if `msid` is not present, we assume that the track is the first one
+                    (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
@@ -1710,7 +1642,6 @@ public class RtcSession internal constructor(
         // Fast reconnect, send a JOIN request on the same SFU
         // and restart ICE on publisher
         logger.d { "[fastReconnect] Starting fast reconnect." }
-        call.monitor.stop()
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
         val request = JoinRequest(
@@ -1721,9 +1652,9 @@ public class RtcSession internal constructor(
             reconnect_details = reconnectDetails,
         )
         logger.d { "Connecting RTC, $request" }
-        listenToSfuSocket()
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.reconnect(request)
+            listenToSfuSocket()
             sfuConnectionModule.socketConnection.whenConnected {
                 // ice restart
                 publisher?.connection?.restartIce()
@@ -1739,7 +1670,6 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.disconnect()
         }
-        call.monitor.stop()
         publisher?.connection?.close()
         subscriber?.connection?.close()
     }

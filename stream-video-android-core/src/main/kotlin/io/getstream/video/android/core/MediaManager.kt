@@ -142,7 +142,8 @@ class SpeakerManager(
         microphoneManager.enforceSetup {
             val devices = devices.value
             if (enable) {
-                val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
+                val speaker =
+                    devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
                 selectedBeforeSpeaker = selectedDevice.value
                 _speakerPhoneEnabled.value = true
                 microphoneManager.select(speaker)
@@ -152,9 +153,10 @@ class SpeakerManager(
                 val defaultFallbackFromType = defaultFallback?.let {
                     devices.filterIsInstance(defaultFallback::class.java)
                 }?.firstOrNull()
-                val fallback = defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                    it !is StreamAudioDevice.Speakerphone
-                }
+                val fallback =
+                    defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
+                        it !is StreamAudioDevice.Speakerphone
+                    }
                 microphoneManager.select(fallback)
             }
         }
@@ -284,7 +286,8 @@ class ScreenShareManager(
 
     private fun startScreenShare(mediaProjectionPermissionResultData: Intent) {
         mediaManager.scope.launch {
-            this@ScreenShareManager.mediaProjectionPermissionResultData = mediaProjectionPermissionResultData
+            this@ScreenShareManager.mediaProjectionPermissionResultData =
+                mediaProjectionPermissionResultData
 
             // Screen sharing requires a foreground service with foregroundServiceType "mediaProjection" to be started first.
             // We can wait for the service to be ready by binding to it and then starting the
@@ -539,7 +542,7 @@ public class CameraManager(
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
     private val _availableResolutions:
-        MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+            MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         MutableStateFlow(emptyList())
     public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         _availableResolutions
@@ -849,12 +852,11 @@ class MediaManagerImpl(
         trackId = UUID.randomUUID().toString(),
     )
 
-    val screenShareTrack by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoTrack(
-            source = screenShareVideoSource,
-            trackId = UUID.randomUUID().toString(),
-        )
-    }
+    val screenShareTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
+        source = screenShareVideoSource,
+        trackId = UUID.randomUUID().toString(),
+    )
+
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 

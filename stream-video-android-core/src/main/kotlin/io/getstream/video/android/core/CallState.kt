@@ -163,7 +163,6 @@ public sealed interface RealtimeConnection {
     public data object Reconnecting :
         RealtimeConnection // reconnecting to recover from temporary issues
 
-    public data object Migrating : RealtimeConnection
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
