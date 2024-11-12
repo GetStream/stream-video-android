@@ -474,6 +474,7 @@ public class Call(
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
             RtcSession(
+                sessionId = sessionId.value,
                 apiKey = clientImpl.apiKey,
                 lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
                 client = client,
@@ -580,9 +581,11 @@ public class Call(
                         details
                     }
 
-                    sessionId.value = UUID.randomUUID().toString()
+                    val newSessionId = UUID.randomUUID().toString()
+                    sessionId.value = newSessionId
                     session = RtcSession(
                         clientImpl,
+                        newSessionId,
                         this@Call,
                         clientImpl.apiKey,
                         clientImpl.coordinatorConnectionModule.lifecycle,
@@ -621,7 +624,8 @@ public class Call(
                     // switch to the new SFU
                     val cred = joinResponse.value.credentials
                     val oldSession = session
-                    this@Call.sessionId.value = UUID.randomUUID().toString()
+                    val newSessionId = UUID.randomUUID().toString()
+                    this@Call.sessionId.value = newSessionId
                     val reconnectDetails = oldSession?.let { old ->
                         val (prevSessionId, subscriptionsInfo, publishingInfo) = old.currentSfuInfo()
                         val oldSfuUrl = old.sfuUrl
@@ -639,6 +643,7 @@ public class Call(
                     }
                     this@Call.session = RtcSession(
                         clientImpl,
+                        newSessionId,
                         this@Call,
                         clientImpl.apiKey,
                         clientImpl.coordinatorConnectionModule.lifecycle,

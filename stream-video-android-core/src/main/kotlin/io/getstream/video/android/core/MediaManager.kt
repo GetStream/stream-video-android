@@ -498,7 +498,7 @@ public sealed class CameraDirection {
  *
  * @sample
  *
- * camera.enable() // enables the camera. starts capture
+ * `camera`.enable() // enables the camera. starts capture
  * camera.disable() // disables the camera. stops capture
  * camera.flip() // flips the camera
  * camera.listDevices() // the list of available camera devices
@@ -542,7 +542,7 @@ public class CameraManager(
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
     private val _availableResolutions:
-        MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+            MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         MutableStateFlow(emptyList())
     public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         _availableResolutions
@@ -655,40 +655,38 @@ public class CameraManager(
     /**
      * Capture is called whenever you call enable()
      */
-    internal fun startCapture() {
+    internal fun startCapture() = synchronized(this) {
+
         val selectedDevice = _selectedDevice.value ?: return
         val selectedResolution = resolution.value ?: return
 
-        // setup the camera 2 capturer
-        videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
+        if(!::videoCapturer.isInitialized) {
+            videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
+        }
 
         // initialize it
-        runBlocking(mediaManager.scope.coroutineContext) {
-            videoCapturer.initialize(
-                surfaceTextureHelper,
-                mediaManager.context,
-                mediaManager.videoSource.capturerObserver,
-            )
-        }
+        videoCapturer.initialize(
+            surfaceTextureHelper,
+            mediaManager.context,
+            mediaManager.videoSource.capturerObserver,
+        )
 
         // and start capture
-        runBlocking(mediaManager.scope.coroutineContext) {
-            videoCapturer.startCapture(
-                selectedResolution.width,
-                selectedResolution.height,
-                selectedResolution.framerate.max,
-            )
-        }
+        videoCapturer.startCapture(
+            selectedResolution.width,
+            selectedResolution.height,
+            selectedResolution.framerate.max,
+        )
         isCapturingVideo = true
     }
 
     /**
      * Stops capture if it's running
      */
-    internal fun stopCapture() {
+    internal fun stopCapture() = synchronized(this) {
         if (isCapturingVideo) {
-            videoCapturer.stopCapture()
             isCapturingVideo = false
+            videoCapturer.stopCapture()
         }
     }
 
