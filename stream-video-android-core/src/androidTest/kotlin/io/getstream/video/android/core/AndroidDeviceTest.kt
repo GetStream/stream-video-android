@@ -565,18 +565,18 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, true)
         call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_SCREEN_SHARE, true)
 
-        //        val tracks1 = call.session?.defaultTracks()
-        //        val tracks2 = call.session?.visibleTracks()
-        //
-        //        assertThat(tracks1?.size).isEqualTo(2)
-        //        assertThat(tracks1?.map { it.session_id }).contains("fake")
-        //        assertThat(tracks2?.size).isEqualTo(2)
-        //        assertThat(tracks2?.map { it.session_id }).contains("fake")
-        //
-        //        // if their video isn't visible it shouldn't be in the tracks
-        //        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
-        //        val tracks3 = call.session?.visibleTracks()
-        //        assertThat(tracks3?.size).isEqualTo(1)
+//        val tracks1 = call.session?.defaultTracks()
+//        val tracks2 = call.session?.visibleTracks()
+//
+//        assertThat(tracks1?.size).isEqualTo(2)
+//        assertThat(tracks1?.map { it.session_id }).contains("fake")
+//        assertThat(tracks2?.size).isEqualTo(2)
+//        assertThat(tracks2?.map { it.session_id }).contains("fake")
+//
+//        // if their video isn't visible it shouldn't be in the tracks
+//        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
+//        val tracks3 = call.session?.visibleTracks()
+//        assertThat(tracks3?.size).isEqualTo(1)
 
         // test handling publish quality change
         val layers = listOf(
