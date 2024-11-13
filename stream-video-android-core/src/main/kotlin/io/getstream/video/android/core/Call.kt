@@ -154,7 +154,7 @@ public class Call(
      */
     var audioFilter: InputAudioFilter? = null
 
-    //val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
+    // val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -495,7 +495,7 @@ public class Call(
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = scope.launch {
             session?.publisher?.iceState?.collect {
-                when(it) {
+                when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session?.publisher?.connection?.restartIce()
                     }
@@ -509,7 +509,7 @@ public class Call(
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
             session?.subscriber?.iceState?.collect {
-                when(it) {
+                when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session?.requestSubscriberIceRestart()
                     }
@@ -1100,7 +1100,7 @@ public class Call(
     }
 
     fun cleanup() {
-        //monitor.stop()
+        // monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
         callStatsReportingJob?.cancel()

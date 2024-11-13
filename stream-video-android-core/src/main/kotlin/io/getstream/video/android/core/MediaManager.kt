@@ -44,7 +44,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.VideoSettingsResponse
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -542,7 +541,7 @@ public class CameraManager(
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
     private val _availableResolutions:
-            MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+        MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         MutableStateFlow(emptyList())
     public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         _availableResolutions
@@ -656,7 +655,6 @@ public class CameraManager(
      * Capture is called whenever you call enable()
      */
     internal fun startCapture() = synchronized(this) {
-
         if (isCapturingVideo) {
             stopCapture()
         }
@@ -686,7 +684,7 @@ public class CameraManager(
     /**
      * Stops capture if it's running
      */
-    internal fun stopCapture() = synchronized(this){
+    internal fun stopCapture() = synchronized(this) {
         if (isCapturingVideo) {
             videoCapturer.stopCapture()
             isCapturingVideo = false
