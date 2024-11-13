@@ -104,7 +104,6 @@ class ClientState(private val client: StreamVideo) {
         when (event) {
             is ConnectedEvent -> {
                 _connection.value = ConnectionState.Connected
-                registerPushDevice()
             }
 
             is CallCreatedEvent -> {
@@ -120,14 +119,6 @@ class ClientState(private val client: StreamVideo) {
                 val (type, id) = event.callCid.split(":")
                 val call = client.call(type, id)
                 _ringingCall.value = call
-            }
-        }
-    }
-
-    private fun registerPushDevice() {
-        with(streamVideoClient) {
-            scope.launch(CoroutineName("ClientState#registerPushDevice")) {
-                if (user.type == UserType.Authenticated) registerPushDevice()
             }
         }
     }
