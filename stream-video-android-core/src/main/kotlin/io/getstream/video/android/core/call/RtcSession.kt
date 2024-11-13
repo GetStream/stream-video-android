@@ -879,7 +879,8 @@ public class RtcSession internal constructor(
             mediaConstraints = MediaConstraints(),
             onNegotiationNeeded = ::onNegotiationNeeded,
             onIceCandidateRequest = ::sendIceCandidate,
-            maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate
+            maxPublishingBitrate = call.state.videoPublishOptions.preferredMaxBitrate
+                ?: call.state.settings.value?.video?.targetResolution?.bitrate
                 ?: 1_200_000,
         )
         logger.i { "[createPublisher] #sfu; publisher: $publisher" }

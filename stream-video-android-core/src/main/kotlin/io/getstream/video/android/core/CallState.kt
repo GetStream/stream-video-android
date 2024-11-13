@@ -42,6 +42,7 @@ import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
+import io.getstream.video.android.core.model.VideoPublishOptions
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
@@ -563,6 +564,8 @@ public class CallState(
     private var ringingTimerJob: Job? = null
 
     internal var acceptedOnThisDevice: Boolean = false
+
+    internal var videoPublishOptions: VideoPublishOptions = VideoPublishOptions()
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }

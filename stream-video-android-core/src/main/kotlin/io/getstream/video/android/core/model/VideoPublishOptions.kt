@@ -19,6 +19,19 @@ package io.getstream.video.android.core.model
 import io.getstream.video.android.core.Call
 
 /**
+ * Options to configure video publishing.
+ * @param preferredCodec The preferred video codec to use for publishing.
+ * @param preferredMaxBitrate The preferred maximum bitrate to use for publishing.
+ *
+ * @see VideoCodec
+ * @see [Call.updatePublishOptions]
+ */
+data class VideoPublishOptions(
+    val preferredCodec: VideoCodec? = null,
+    val preferredMaxBitrate: Int? = null,
+)
+
+/**
  * Contains the video codecs supported by the SDK.
  *
  * @see [Call.updatePublishOptions]

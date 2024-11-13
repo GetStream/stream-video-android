@@ -222,8 +222,6 @@ public class Call(
         }
     }
 
-    internal var isPreferredVideoCodecSet = false
-
     init {
         scope.launch {
             soundInputProcessor.currentAudioLevel.collect {
@@ -1032,7 +1030,10 @@ public class Call(
     }
 
     fun cleanup() {
-        updatePublishOptions(preferredVideoCodec = null)
+        updatePublishOptions(
+            preferredVideoCodec = null,
+            preferredMaxBitrate = null,
+        ) // preferredMaxBitrate not necessarily needed
         monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
@@ -1128,10 +1129,24 @@ public class Call(
      * Updates publishing options for the call.
      *
      * @param preferredVideoCodec The preferred codec to use for publishing video. Pass `null` to return to the default codec.
+     * @param preferredMaxBitrate The preferred maximum bitrate to use for publishing video.
      */
-    fun updatePublishOptions(preferredVideoCodec: VideoCodec?) {
+    fun updatePublishOptions(
+        preferredVideoCodec: VideoCodec? = null,
+        preferredMaxBitrate: Int? = null,
+    ) {
+        logger.d {
+            "[updatePublishOptions] #track #updatePublishOptions; preferredVideoCodec: $preferredVideoCodec, preferredMaxBitrate: $preferredMaxBitrate"
+        }
+
+        // Note that the preferredVideoCodec won't affect any transceivers that are already created.
+
+        state.videoPublishOptions = state.videoPublishOptions.copy(
+            preferredCodec = preferredVideoCodec,
+            preferredMaxBitrate = preferredMaxBitrate,
+        )
+
         clientImpl.peerConnectionFactory.updatePublishOptions(preferredVideoCodec)
-        isPreferredVideoCodecSet = preferredVideoCodec != null
     }
 
     @InternalStreamVideoApi
