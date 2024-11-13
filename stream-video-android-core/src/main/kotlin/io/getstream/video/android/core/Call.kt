@@ -124,7 +124,7 @@ public class Call(
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
-    private var reconnectAttepmts = 0
+    internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
 
     private val logger by taggedLogger("Call:$type:$id")

@@ -109,7 +109,6 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             clientImpl.peerConnectionFactory = mockedPCFactory
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
             Call.testInstanceProvider.rtcSessionCreator = { mockk(relaxed = true) }
-
             // Connect to the WS if needed
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests
