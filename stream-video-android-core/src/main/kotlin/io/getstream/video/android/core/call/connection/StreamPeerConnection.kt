@@ -29,6 +29,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
 import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

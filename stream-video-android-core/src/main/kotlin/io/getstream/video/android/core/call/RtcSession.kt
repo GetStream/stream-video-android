@@ -27,6 +27,7 @@ import io.getstream.result.extractCause
 import io.getstream.result.flatMap
 import io.getstream.result.flatMapSuspend
 import io.getstream.result.onErrorSuspend
+import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallStatsReport
@@ -39,9 +40,11 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -69,7 +72,9 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.retry
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
+import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import io.getstream.video.android.core.utils.stringify
 import io.getstream.video.android.core.utils.waitForJob
@@ -79,14 +84,20 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.retry
+import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -109,6 +120,7 @@ import org.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
+import stream.video.sfu.event.Migration
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.ClientDetails
@@ -139,7 +151,10 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import kotlin.math.absoluteValue
+import kotlin.math.log
 import kotlin.math.min
+import kotlin.random.Random
 
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -391,13 +406,11 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected ->
-                        call.state._connection.value =
-                            RealtimeConnection.Connected
+                    is SfuSocketState.Connected -> call.state._connection.value =
+                        RealtimeConnection.Connected
 
-                    is SfuSocketState.Connecting ->
-                        call.state._connection.value =
-                            RealtimeConnection.InProgress
+                    is SfuSocketState.Connecting -> call.state._connection.value =
+                        RealtimeConnection.InProgress
 
                     else -> {
                         // Ignore it
@@ -590,7 +603,7 @@ public class RtcSession internal constructor(
                 ?.id()
         ) {
             publisher?.updateScreenShareTransceiver(
-                call.mediaManager.screenShareTrack,
+                call.mediaManager.screenShareTrack
             )
         }
     }
@@ -601,9 +614,9 @@ public class RtcSession internal constructor(
                 call.mediaManager.audioTrack,
                 listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
             )
-        } else if (call.mediaManager.audioTrack.id() != publisher?.audioTransceiver?.sender?.track()?.id()) {
+        } else if (call.mediaManager.audioTrack.id() != publisher?.audioTransceiver?.sender?.track()?.id()){
             publisher?.updateAudioTransceiver(
-                call.mediaManager.audioTrack,
+                call.mediaManager.audioTrack
             )
         }
     }
@@ -673,7 +686,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -1076,7 +1089,7 @@ public class RtcSession internal constructor(
                         call.state.replaceParticipants(participantStates)
                     }
 
-                    // is SubscriberOfferEvent -> handleSubscriberOffer(event)
+                    //is SubscriberOfferEvent -> handleSubscriberOffer(event)
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
@@ -1141,7 +1154,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     Section, basic webrtc calls
+    Section, basic webrtc calls
      */
 
     /**
@@ -1265,8 +1278,7 @@ public class RtcSession internal constructor(
                             logger.d { "[onNegotiationNeeded] #sfu; #publisher; response: $response" }
                             peerConnection.setRemoteDescription(
                                 SessionDescription(
-                                    SessionDescription.Type.ANSWER,
-                                    response.sdp,
+                                    SessionDescription.Type.ANSWER, response.sdp,
                                 ),
                             )
                         }
@@ -1281,6 +1293,7 @@ public class RtcSession internal constructor(
         }
     }
 
+
     internal fun getPublisherTracks(sdp: String): List<TrackInfo> {
         val captureResolution = call.camera.resolution.value
         val screenShareTrack = getLocalTrack(TrackType.TRACK_TYPE_SCREEN_SHARE)
@@ -1288,7 +1301,7 @@ public class RtcSession internal constructor(
         val transceivers = listOf(
             publisher?.audioTransceiver,
             publisher?.videoTransceiver,
-            publisher?.screenShareTransceiver,
+            publisher?.screenShareTransceiver
         )
         val transceiversWithTracks = transceivers.mapNotNull {
             if (it?.sender?.track() != null) {
@@ -1304,6 +1317,7 @@ public class RtcSession internal constructor(
                 track?.state()
             }
             if (state == MediaStreamTrack.State.LIVE && track != null) {
+
                 val trackType = convertKindToTrackType(track, screenShareTrack)
 
                 val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
@@ -1412,8 +1426,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                // if `msid` is not present, we assume that the track is the first one
-                (m.msid?.equals(track.id()) ?: true)
+                    // if `msid` is not present, we assume that the track is the first one
+                    (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {

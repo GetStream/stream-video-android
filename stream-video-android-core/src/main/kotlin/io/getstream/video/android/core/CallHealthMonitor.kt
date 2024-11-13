@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
 import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.temporal.ChronoUnit
 import org.webrtc.PeerConnection
 
 /**
@@ -180,8 +181,7 @@ public class CallHealthMonitor(
                     when (iceState) {
                         PeerConnection.IceConnectionState.DISCONNECTED,
                         PeerConnection.IceConnectionState.FAILED,
-                        PeerConnection.IceConnectionState.CLOSED,
-                        -> {
+                        PeerConnection.IceConnectionState.CLOSED -> {
                             it.requestSubscriberIceRestart()
                         }
                         else -> {
@@ -198,8 +198,7 @@ public class CallHealthMonitor(
                     logger.d { "publisher ice connection state changed to $iceState" }
                     when (iceState) {
                         PeerConnection.IceConnectionState.DISCONNECTED,
-                        PeerConnection.IceConnectionState.FAILED,
-                        -> {
+                        PeerConnection.IceConnectionState.FAILED -> {
                             it.publisher?.connection?.restartIce()
                         }
                         else -> {
@@ -216,10 +215,9 @@ public class CallHealthMonitor(
                 // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
                 it.subscriber?.state?.collect { connectionState ->
                     logger.d { "subscriber peer connection state changed to $connectionState" }
-                    when (connectionState) {
+                    when(connectionState) {
                         PeerConnection.PeerConnectionState.DISCONNECTED,
-                        PeerConnection.PeerConnectionState.FAILED,
-                        -> {
+                        PeerConnection.PeerConnectionState.FAILED -> {
                             callScope.launch {
                                 call.rejoin()
                             }
@@ -238,10 +236,9 @@ public class CallHealthMonitor(
                 // disconnected is temporary, only if it lasts for a certain duration we should reconnect or switch
                 it.publisher?.state?.collect { connectionState ->
                     logger.d { "publisher peer connection state changed to $it " }
-                    when (connectionState) {
+                   when(connectionState) {
                         PeerConnection.PeerConnectionState.DISCONNECTED,
-                        PeerConnection.PeerConnectionState.FAILED,
-                        -> {
+                        PeerConnection.PeerConnectionState.FAILED -> {
                             callScope.launch {
                                 call.rejoin()
                             }
