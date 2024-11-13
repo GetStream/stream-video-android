@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
 internal open class CustomObjectDtoAdapter<Value : Any>(private val kClass: KClass<Value>) {
 
     private companion object {
-        private const val EXTRA_DATA = "extraData"
+        private const val EXTRA_DATA = "custom"
     }
 
     /**
