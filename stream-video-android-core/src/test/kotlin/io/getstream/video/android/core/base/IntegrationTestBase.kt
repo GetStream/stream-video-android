@@ -57,6 +57,7 @@ import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -103,6 +104,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
         if (IntegrationTestState.client == null) {
             client = builder.build()
             clientImpl = client as StreamVideoClient
+            clientImpl.testSessionId = UUID.randomUUID().toString()
             // always mock the peer connection factory, it can't work in unit tests
             clientImpl.peerConnectionFactory = mockedPCFactory
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }

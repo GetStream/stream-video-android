@@ -58,7 +58,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.AudioSettingsResponse
@@ -682,7 +681,9 @@ public class Call(
             }
         }
         reconnectChannel.trySend(job).onFailure { e ->
-            logger.e(e ?: IllegalStateException()) { "[schedule] Failed to send job to reconnect channel" }
+            logger.e(
+                e ?: IllegalStateException(),
+            ) { "[schedule] Failed to send job to reconnect channel" }
         }
     }
 

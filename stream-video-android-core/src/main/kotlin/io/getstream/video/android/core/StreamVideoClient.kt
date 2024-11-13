@@ -74,10 +74,10 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
@@ -162,6 +162,11 @@ internal class StreamVideoClient internal constructor(
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
+
+    /**
+     * Can be set from tests to be returned as a session id for the coordinator.
+     */
+    internal var testSessionId: String? = null
 
     /** if true we fail fast on errors instead of logging them */
 
@@ -597,12 +602,18 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
-    private suspend fun waitForConnectionId(): String {
+    private suspend fun waitForConnectionId(): String? {
         // The Coordinator WS connection can take a moment to set up - this can be an issue
         // if we jump right into the call from a deep link and we connect the call quickly.
         // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
-        return coordinatorConnectionModule.socketConnection.connectionId().mapNotNull { it }.first()
+        val connectionId = withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
+            val value = coordinatorConnectionModule.socketConnection.connectionId().first { it != null }
+            value
+        }.also {
+            logger.d { "[waitForConnectionId]: $it" }
+        }
+        return connectionId ?: testSessionId
     }
 
     internal suspend fun inviteUsers(
