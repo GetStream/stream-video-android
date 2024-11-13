@@ -76,8 +76,6 @@ data class APIError (
 
     /* Additional error info */
     @Json(name = "exception_fields")
-    val exceptionFields: kotlin.collections.Map<kotlin.String, kotlin.String>? = null,
+    val exceptionFields: kotlin.collections.Map<kotlin.String, kotlin.String>? = null
 
-    @Json(name = "unrecoverable")
-    val unrecoverable: kotlin.Boolean = false
 )

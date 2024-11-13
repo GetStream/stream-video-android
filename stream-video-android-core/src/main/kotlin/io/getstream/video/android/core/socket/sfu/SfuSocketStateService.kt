@@ -327,7 +327,6 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
 
             state<SfuSocketState.Disconnected.DisconnectedByRequest> {
                 onEvent<SfuSocketStateEvent.RequiredDisconnection> { currentState }
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> { SfuSocketState.Connected(it.connectedEvent) }
                 onEvent<SfuSocketStateEvent.Connect> {
                     SfuSocketState.Connecting(
                         it.connectionConf,

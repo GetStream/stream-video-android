@@ -174,7 +174,6 @@ class SfuSocketConnection(
         if (data.reconnect_details == null) {
             logger.w { "[reconnect] Reconnect details are missing!" }
         }
-        internalSocket.disconnect()
         internalSocket.connect(data)
     }
 

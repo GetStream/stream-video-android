@@ -267,7 +267,7 @@ public class StreamPeerConnectionFactory(
         onStreamAdded: ((MediaStream) -> Unit)? = null,
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
-        maxPublishingBitrate: Int = 750_000,
+        maxPublishingBitrate: Int = 1_200_000,
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope = coroutineScope,

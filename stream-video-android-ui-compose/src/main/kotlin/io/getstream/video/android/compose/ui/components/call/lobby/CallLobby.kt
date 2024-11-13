@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,9 +91,9 @@ public fun CallLobby(
         call.microphone.isEnabled.value
     },
     video: ParticipantState.Video = ParticipantState.Video(
-        sessionId = call.sessionId.value,
+        sessionId = call.sessionId,
         track = VideoTrack(
-            streamId = call.sessionId.value,
+            streamId = call.sessionId,
             video = if (LocalInspectionMode.current) {
                 org.webrtc.VideoTrack(1000L)
             } else {
@@ -218,13 +216,12 @@ private fun OnDisabledContent(user: User) {
 private fun CallLobbyPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val sessionId by previewCall.sessionId.collectAsState()
         CallLobby(
             call = previewCall,
             video = ParticipantState.Video(
-                sessionId = sessionId,
+                sessionId = previewCall.sessionId,
                 track = VideoTrack(
-                    streamId = sessionId,
+                    streamId = previewCall.sessionId,
                     video = org.webrtc.VideoTrack(1000L),
                 ),
                 enabled = true,

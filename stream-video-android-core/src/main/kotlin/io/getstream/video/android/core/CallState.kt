@@ -220,9 +220,12 @@ public class CallState(
     val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
 
     /** Your own participant state */
-    private val _me: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
-    public val me: StateFlow<ParticipantState?> = _me
+    public val me: StateFlow<ParticipantState?> = _participants.mapState {
+        it[call.sessionId]
+    }
+
     /** Your own participant state */
+    public val localParticipant = me
 
     /** participants who are currently speaking */
     private val _activeSpeakers: MutableStateFlow<List<ParticipantState>> =
@@ -231,7 +234,7 @@ public class CallState(
 
     /** participants other than yourself */
     public val remoteParticipants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.filterKeys { key -> key != call.sessionId.value }.values.toList() }
+        _participants.mapState { it.filterKeys { key -> key != call.sessionId }.values.toList() }
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
@@ -1102,9 +1105,6 @@ public class CallState(
     private fun removeParticipant(sessionId: String) {
         val new = _participants.value.toSortedMap()
         new.remove(sessionId)
-        if (new.contains(_me.value?.sessionId)) {
-            _me.value = null
-        }
         _participants.value = new
     }
 
@@ -1118,7 +1118,6 @@ public class CallState(
                 screensharing.add(it)
             }
         }
-        _me.value = participants.firstOrNull { it.isLocal }
         _participants.value = new
 
         if (screensharing.isNotEmpty()) {
@@ -1200,14 +1199,10 @@ public class CallState(
     fun updateParticipant(participant: ParticipantState) {
         val new = _participants.value.toSortedMap()
         new[participant.sessionId] = participant
-        if (participant.isLocal) {
-            _me.value = participant
-        }
         _participants.value = new
     }
 
     fun clearParticipants() {
-        _me.value = null
         _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
     }
 
@@ -1379,7 +1374,6 @@ public class CallState(
     }
 
     fun replaceParticipants(participants: List<ParticipantState>) {
-        participants.firstOrNull { it.isLocal }?.let { _me.value = it }
         this._participants.value = participants.associate { it.sessionId to it }.toSortedMap()
         val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {

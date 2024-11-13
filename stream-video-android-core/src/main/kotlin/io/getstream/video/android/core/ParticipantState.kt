@@ -59,7 +59,7 @@ public data class ParticipantState(
     private val logger by taggedLogger("ParticipantState")
 
     val isLocal by lazy {
-        sessionId == call.sessionId.value
+        sessionId == call.sessionId
     }
 
     /** video track */

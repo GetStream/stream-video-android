@@ -278,7 +278,10 @@ internal open class SfuSocket(
 
     private suspend fun handleError(error: StreamWebSocketEvent.Error) {
         logger.e { "[handleError] error: $error" }
-        callListeners { it.onError(error) }
+        when (error.streamError) {
+            is Error.NetworkError -> onVideoNetworkError(error.streamError, error.reconnectStrategy)
+            else -> callListeners { it.onError(error) }
+        }
     }
 
     private suspend fun onVideoNetworkError(
