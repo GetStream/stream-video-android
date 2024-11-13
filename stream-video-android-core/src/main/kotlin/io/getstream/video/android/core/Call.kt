@@ -51,12 +51,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.AudioSettingsResponse
 import org.openapitools.client.models.BlockUserResponse
@@ -658,7 +661,7 @@ public class Call(
         }
     }
 
-    private val reconnectChannel = Channel<Job>(Channel.UNLIMITED)
+    private var reconnectChannel = Channel<Job>(Channel.UNLIMITED)
     private var monitorReconnectChannelJob: Job? = null
 
     private fun waitForReconnectTasks() {
@@ -673,9 +676,14 @@ public class Call(
     private suspend fun schedule(block: suspend () -> Unit) {
         logger.d { "[schedule] #reconnect; no args" }
         val job = scope.launch {
-            block()
+            withTimeoutOrNull(30_000) {
+                // Skip the job if its not finished in 15 seconds.
+                block()
+            }
         }
-        reconnectChannel.send(job)
+        reconnectChannel.trySend(job).onFailure { e ->
+            logger.e(e ?: IllegalStateException()) { "[schedule] Failed to send job to reconnect channel" }
+        }
     }
 
     suspend fun fastReconnect() = schedule {
