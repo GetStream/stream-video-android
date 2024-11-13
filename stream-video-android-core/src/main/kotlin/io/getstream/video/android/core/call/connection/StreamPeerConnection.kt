@@ -43,7 +43,6 @@ import org.webrtc.IceCandidateErrorEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
-import org.webrtc.MediaStreamTrack.MediaType
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
 import org.webrtc.RtpReceiver
@@ -51,7 +50,6 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import org.webrtc.VideoTrack
-import stream.video.sfu.models.TrackType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -118,7 +116,6 @@ public class StreamPeerConnection(
             PeerConnection.PeerConnectionState.CONNECTED,
             PeerConnection.PeerConnectionState.CONNECTING,
             -> true
-
             else -> false
         }
     }
@@ -247,83 +244,6 @@ public class StreamPeerConnection(
         val transceiverInit = buildAudioTransceiverInit(streamIds)
 
         audioTransceiver = connection.addTransceiver(track, transceiverInit)
-    }
-
-    public fun addTransceiver(type: TrackType, streamIds: List<String>) = synchronized(this) {
-        val transceiverInit =
-            buildVideoTransceiverInit(streamIds, type == TrackType.TRACK_TYPE_SCREEN_SHARE)
-        when (type) {
-            TrackType.TRACK_TYPE_UNSPECIFIED -> throw IllegalStateException("Track type is unspecified")
-            TrackType.TRACK_TYPE_AUDIO -> {
-                if (audioTransceiver == null) {
-                    audioTransceiver =
-                        connection.addTransceiver(MediaType.MEDIA_TYPE_AUDIO, transceiverInit)
-                }
-            }
-
-            TrackType.TRACK_TYPE_VIDEO -> {
-                if (videoTransceiver == null) {
-                    videoTransceiver =
-                        connection.addTransceiver(MediaType.MEDIA_TYPE_VIDEO, transceiverInit)
-                }
-            }
-
-            TrackType.TRACK_TYPE_SCREEN_SHARE -> {
-                if (screenShareTransceiver == null) {
-                    screenShareTransceiver =
-                        connection.addTransceiver(MediaType.MEDIA_TYPE_VIDEO, transceiverInit)
-                }
-            }
-
-            TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> {
-                logger.e { "Screen share audio is not supported" }
-            }
-        }
-    }
-
-    public fun addTrack(type: TrackType, track: MediaStreamTrack) = synchronized(this) {
-        when (type) {
-            TrackType.TRACK_TYPE_UNSPECIFIED -> throw IllegalStateException("Track type is unspecified")
-            TrackType.TRACK_TYPE_AUDIO -> {
-                try {
-                    val currentTrack = audioTransceiver?.sender?.track()
-                    if (currentTrack != null && (currentTrack == track || currentTrack.id() == track.id())) {
-                        return@synchronized // already added
-                    }
-                } catch (e: Exception) {
-                    logger.e { "Error adding audio track: $e" }
-                }
-                audioTransceiver?.sender?.setTrack(track, false)
-            }
-
-            TrackType.TRACK_TYPE_VIDEO -> {
-                try {
-                    val currentTrack = videoTransceiver?.sender?.track()
-                    if (currentTrack != null && (currentTrack == track || currentTrack.id() == track.id())) {
-                        return@synchronized // already added
-                    }
-                } catch (e: Exception) {
-                    logger.e { "Error adding video track: $e" }
-                }
-                videoTransceiver?.sender?.setTrack(track, false)
-            }
-
-            TrackType.TRACK_TYPE_SCREEN_SHARE -> {
-                try {
-                    val currentTrack = screenShareTransceiver?.sender?.track()
-                    if (currentTrack != null && (currentTrack == track || currentTrack.id() == track.id())) {
-                        return@synchronized // already added
-                    }
-                } catch (e: Exception) {
-                    logger.e { "Error adding screen share track: $e" }
-                }
-                screenShareTransceiver?.sender?.setTrack(track, false)
-            }
-
-            TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> {
-                logger.e { "Screen share audio is not supported" }
-            }
-        }
     }
 
     public fun addScreenShareTransceiver(
@@ -560,11 +480,13 @@ public class StreamPeerConnection(
                 coroutineScope.launch(Dispatchers.IO) {
                     if (DEBUG_STATS) {
                         logger.v {
-                            "[getStats] #sfu; #$typeTag; " + "stats.keys: ${origin?.statsMap?.keys}"
+                            "[getStats] #sfu; #$typeTag; " +
+                                "stats.keys: ${origin?.statsMap?.keys}"
                         }
                         origin?.statsMap?.values?.forEach {
                             logger.v {
-                                "[getStats] #sfu; #$typeTag; " + "report.type: ${it.type}, report.members: $it"
+                                "[getStats] #sfu; #$typeTag; " +
+                                    "report.type: ${it.type}, report.members: $it"
                             }
                         }
                     }
