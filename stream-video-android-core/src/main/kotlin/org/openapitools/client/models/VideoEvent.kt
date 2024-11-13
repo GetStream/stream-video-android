@@ -141,6 +141,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.rejected" -> CallRejectedEvent::class.java
             "call.ring" -> CallRingEvent::class.java
             "call.session_ended" -> CallSessionEndedEvent::class.java
+            "call.session_participant_count_updated" -> CallSessionParticipantCountsUpdatedEvent::class.java
             "call.session_participant_joined" -> CallSessionParticipantJoinedEvent::class.java
             "call.session_participant_left" -> CallSessionParticipantLeftEvent::class.java
             "call.session_started" -> CallSessionStartedEvent::class.java

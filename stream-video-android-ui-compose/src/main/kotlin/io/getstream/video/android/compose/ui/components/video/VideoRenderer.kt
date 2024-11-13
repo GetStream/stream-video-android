@@ -127,6 +127,9 @@ public fun VideoRenderer(
                         },
                         update = { v ->
                             v.setMirror(videoRendererConfig.mirrorStream)
+                            v.setScalingType(
+                                videoRendererConfig.scalingType.toCommonScalingType(),
+                            )
                             setupVideo(mediaTrack, v)
                         },
                         modifier = Modifier

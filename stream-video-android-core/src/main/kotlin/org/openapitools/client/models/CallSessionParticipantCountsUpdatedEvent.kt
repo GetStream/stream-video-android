@@ -23,7 +23,6 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallParticipantResponse
 
 
 
@@ -37,59 +36,46 @@ import com.squareup.moshi.ToJson
 import org.openapitools.client.infrastructure.Serializer
 
 /**
+ * This event is sent when the participant counts in a call session are updated
  *
- *
- * @param acceptedBy
  * @param anonymousParticipantCount
- * @param id
- * @param missedBy
- * @param participants
+ * @param callCid
+ * @param createdAt
  * @param participantsCountByRole
- * @param rejectedBy
- * @param endedAt
- * @param liveEndedAt
- * @param liveStartedAt
- * @param startedAt
- * @param timerEndsAt
+ * @param sessionId Call session ID
+ * @param type The type of event: \"call.session_participant_count_updated\" in this case
  */
 
 
-data class CallSessionResponse (
-
-    @Json(name = "accepted_by")
-    val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
+data class CallSessionParticipantCountsUpdatedEvent (
 
     @Json(name = "anonymous_participant_count")
     val anonymousParticipantCount: kotlin.Int,
 
-    @Json(name = "id")
-    val id: kotlin.String,
+    @Json(name = "call_cid")
+    val callCid: kotlin.String,
 
-    @Json(name = "missed_by")
-    val missedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
-
-    @Json(name = "participants")
-    val participants: kotlin.collections.List<CallParticipantResponse>,
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "participants_count_by_role")
     val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int>,
 
-    @Json(name = "rejected_by")
-    val rejectedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
+    /* Call session ID */
+    @Json(name = "session_id")
+    val sessionId: kotlin.String,
 
-    @Json(name = "ended_at")
-    val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    /* The type of event: \"call.session_participant_count_updated\" in this case */
+    @Json(name = "type")
+    val type: kotlin.String = "call.session_participant_count_updated"
 
-    @Json(name = "live_ended_at")
-    val liveEndedAt: org.threeten.bp.OffsetDateTime? = null,
+) : VideoEvent(), WSCallEvent {
 
-    @Json(name = "live_started_at")
-    val liveStartedAt: org.threeten.bp.OffsetDateTime? = null,
+    override fun getCallCID(): String {
+        return callCid
+    }
 
-    @Json(name = "started_at")
-    val startedAt: org.threeten.bp.OffsetDateTime? = null,
-
-    @Json(name = "timer_ends_at")
-    val timerEndsAt: org.threeten.bp.OffsetDateTime? = null
-
-)
+    override fun getEventType(): String {
+        return type
+    }
+}
