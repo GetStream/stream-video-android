@@ -424,7 +424,7 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.reconnect()
+                        call.fastReconnect()
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
@@ -432,7 +432,7 @@ public class RtcSession internal constructor(
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
-                        call.switchSfu()
+                        call.migrate()
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
@@ -1336,7 +1336,7 @@ public class RtcSession internal constructor(
                 willRetry
             }.catch {
                 logger.e { "setPublisher failed after 3 retries, asking the call monitor to do an ice restart" }
-                coroutineScope.launch { call.monitor.reconnect(forceRestart = true) }
+                coroutineScope.launch { call.rejoin() }
             }.collect()
         }
     }
@@ -1439,7 +1439,7 @@ public class RtcSession internal constructor(
                                 logger.e {
                                     "setPublisher failed after $attempt retries, asking the call monitor to do an ice restart"
                                 }
-                                coroutineScope.launch { call.monitor.reconnect(forceRestart = true) }
+                                coroutineScope.launch { call.rejoin() }
                                 break
                             }
                         }
@@ -1825,7 +1825,6 @@ public class RtcSession internal constructor(
         // Fast reconnect, send a JOIN request on the same SFU
         // and restart ICE on publisher
         logger.d { "[fastReconnect] Starting fast reconnect." }
-        call.monitor.stop()
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
         val request = JoinRequest(
@@ -1863,7 +1862,6 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.disconnect()
         }
-        call.monitor.stop()
         publisher?.connection?.close()
         subscriber?.connection?.close()
     }

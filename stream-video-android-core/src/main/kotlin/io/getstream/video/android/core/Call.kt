@@ -83,6 +83,7 @@ import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.OffsetDateTime
+import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
@@ -153,18 +154,7 @@ public class Call(
      */
     var audioFilter: InputAudioFilter? = null
 
-    /**
-     * Called by the [CallHealthMonitor] when the ICE restarts failed after
-     * several retries. At this point we can do a full reconnect.
-     */
-    private val onIceRecoveryFailed = {
-        scope.launch {
-            rejoin()
-        }
-        Unit
-    }
-
-    val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
+    //val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -233,7 +223,7 @@ public class Call(
                 logger.d {
                     "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+                fastReconnect()
             } else {
                 logger.d {
                     "[onConnected] Reconnecting (full) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
@@ -259,6 +249,9 @@ public class Call(
     private var leaveTimeoutAfterDisconnect: Job? = null
     private var lastDisconnect = 0L
     private var reconnectDeadlineMils: Int = 10_000
+
+    private var monitorPublisherPCStateJob: Job? = null
+    private var monitorSubscriberPCStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
 
@@ -487,7 +480,6 @@ public class Call(
     private suspend fun Call.monitorSession(result: JoinCallResponse) {
         sfuEvents?.cancel()
         sfuListener?.cancel()
-        monitor.start()
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
         // listen to Signal WS
         sfuEvents = scope.launch {
@@ -496,6 +488,33 @@ public class Call(
                     if (event is JoinCallResponseEvent) {
                         reconnectDeadlineMils = event.fastReconnectDeadlineSeconds * 1000
                         logger.d { "[join] #deadline for reconnect is ${reconnectDeadlineMils / 1000} seconds" }
+                    }
+                }
+            }
+        }
+        monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = scope.launch {
+            session?.publisher?.iceState?.collect {
+                when(it) {
+                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
+                        session?.publisher?.connection?.restartIce()
+                    }
+                    else -> {
+                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
+                    }
+                }
+            }
+        }
+
+        monitorSubscriberPCStateJob?.cancel()
+        monitorSubscriberPCStateJob = scope.launch {
+            session?.subscriber?.iceState?.collect {
+                when(it) {
+                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
+                        session?.requestSubscriberIceRestart()
+                    }
+                    else -> {
+                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
                     }
                 }
             }
@@ -538,7 +557,6 @@ public class Call(
 
     internal suspend fun rejoin() {
         reconnectAttepmts++
-        monitor.stop()
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
             val joinResponse = joinRequest(location = it)
@@ -582,7 +600,7 @@ public class Call(
         }
     }
 
-    suspend fun switchSfu() {
+    suspend fun migrate() {
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
             val joinResponse = joinRequest(location = it)
@@ -633,7 +651,7 @@ public class Call(
         }
     }
 
-    suspend fun reconnect() {
+    suspend fun fastReconnect() {
         logger.d { "[reconnect] Reconnecting (fast)" }
         session?.prepareReconnect()
         this.state._connection.value = RealtimeConnection.Reconnecting
@@ -756,7 +774,7 @@ public class Call(
         when (event) {
             is GoAwayEvent ->
                 scope.launch {
-                    switchSfu()
+                    migrate()
                 }
         }
     }
@@ -1082,7 +1100,7 @@ public class Call(
     }
 
     fun cleanup() {
-        monitor.stop()
+        //monitor.stop()
         session?.cleanup()
         supervisorJob.cancel()
         callStatsReportingJob?.cancel()
@@ -1195,13 +1213,13 @@ public class Call(
 
         fun migrate() {
             call.scope.launch {
-                call.switchSfu()
+                call.migrate()
             }
         }
 
         fun fastReconnect() {
             call.scope.launch {
-                call.reconnect()
+                call.fastReconnect()
             }
         }
     }

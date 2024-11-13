@@ -107,6 +107,7 @@ import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
 
@@ -331,10 +332,11 @@ fun CallScreen(
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
-                            me?.let {
+                            val myself = me ?: participantsSize.firstOrNull { it.sessionId == call.sessionId }
+                            myself?.let {
                                 FloatingParticipantVideo(
                                     call = call,
-                                    participant = me!!,
+                                    participant = it,
                                     parentBounds = IntSize(
                                         this@BoxWithConstraints.constraints.maxWidth,
                                         this@BoxWithConstraints.constraints.maxHeight,
@@ -465,7 +467,8 @@ fun CallScreen(
                 mutableStateOf(call.isAudioProcessingEnabled())
             }
             val settings by call.state.settings.collectAsStateWithLifecycle()
-            val noiseCancellationFeatureEnabled = settings?.audio?.noiseCancellation?.isEnabled == true
+            val noiseCancellationFeatureEnabled =
+                settings?.audio?.noiseCancellation?.isEnabled == true
             SettingsMenu(
                 call = call,
                 selectedVideoFilter = selectedVideoFilter,
@@ -480,11 +483,14 @@ fun CallScreen(
                         is VideoFilter.None -> {
                             call.videoFilter = null
                         }
+
                         is VideoFilter.BlurredBackground -> {
                             call.videoFilter = BlurredBackgroundVideoFilter()
                         }
+
                         is VideoFilter.VirtualBackground -> {
-                            call.videoFilter = VirtualBackgroundVideoFilter(context, filter.drawable)
+                            call.videoFilter =
+                                VirtualBackgroundVideoFilter(context, filter.drawable)
                         }
                     }
                 },
