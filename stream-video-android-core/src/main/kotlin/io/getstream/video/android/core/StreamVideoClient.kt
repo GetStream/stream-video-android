@@ -189,8 +189,6 @@ internal class StreamVideoClient internal constructor(
         calls.clear()
         // stop all running coroutines
         scope.cancel()
-        // stop the socket
-        // socketImpl.cleanup()
         // call cleanup on the active call
         val activeCall = state.activeCall.value
         activeCall?.leave()
