@@ -527,7 +527,6 @@ public class StreamPeerConnection(
 
     override fun onIceCandidateError(event: IceCandidateErrorEvent?) {
         logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
-        connection.restartIce()
     }
 
     override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {

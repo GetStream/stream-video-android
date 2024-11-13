@@ -73,7 +73,13 @@ public class CallHealthMonitor(
     )
 
     fun start() {
-        supervisorJob.cancel()
+        // Don't start multiple instances of call health monitor for one call.
+        // We keep it running until the call is left and then we stop (it can't
+        // be restarted again)
+        if (isRunning) {
+            return
+        }
+        isRunning = true
         supervisorJob.start()
         logger.i { "starting call health monitor" }
         network.subscribe(networkStateListener)
@@ -82,8 +88,9 @@ public class CallHealthMonitor(
     }
 
     fun stop() {
-        network.unsubscribe(networkStateListener)
+        isRunning = false
         supervisorJob.cancel()
+        network.unsubscribe(networkStateListener)
     }
 
     fun stopTimer() {
@@ -102,6 +109,8 @@ public class CallHealthMonitor(
      */
     @Synchronized
     fun check() {
+        // skip health checks if we are migrating
+
         val subscriberState = call.session?.subscriber?.state?.value
         val publisherState = call.session?.publisher?.state?.value
         val canPublish = call.state.ownCapabilities.value.any {
@@ -145,8 +154,6 @@ public class CallHealthMonitor(
         override suspend fun onConnected() {
             logger.i { "network connected, running check to see if we should reconnect" }
             scope.launch {
-                // Give time for the network to stabilize
-                delay(500)
                 check()
             }
         }
@@ -173,6 +180,7 @@ public class CallHealthMonitor(
                     when (iceState) {
                         PeerConnection.IceConnectionState.DISCONNECTED,
                         PeerConnection.IceConnectionState.FAILED,
+                        PeerConnection.IceConnectionState.CLOSED,
                         -> {
                             it.requestSubscriberIceRestart()
                         }
