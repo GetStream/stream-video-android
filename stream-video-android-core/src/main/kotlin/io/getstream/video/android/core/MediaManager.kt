@@ -542,7 +542,7 @@ public class CameraManager(
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
     private val _availableResolutions:
-        MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+            MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         MutableStateFlow(emptyList())
     public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         _availableResolutions
@@ -856,6 +856,7 @@ class MediaManagerImpl(
         source = screenShareVideoSource,
         trackId = UUID.randomUUID().toString(),
     )
+
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 
