@@ -50,6 +50,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -261,6 +262,8 @@ public class Call(
                 audioLevelOutputHelper.rampToValue(it)
             }
         }
+
+        waitForReconnectTasks()
     }
 
     /** Basic crud operations */
@@ -499,6 +502,7 @@ public class Call(
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session?.publisher?.connection?.restartIce()
                     }
+
                     else -> {
                         logger.d { "[monitorConnectionState] Ice connection state is $it" }
                     }
@@ -513,6 +517,7 @@ public class Call(
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session?.requestSubscriberIceRestart()
                     }
+
                     else -> {
                         logger.d { "[monitorConnectionState] Ice connection state is $it" }
                     }
@@ -555,7 +560,8 @@ public class Call(
         }
     }
 
-    internal suspend fun rejoin() {
+    internal suspend fun rejoin() = schedule {
+        logger.d { "[rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
@@ -600,7 +606,8 @@ public class Call(
         }
     }
 
-    suspend fun migrate() {
+    suspend fun migrate() = schedule {
+        logger.d { "[migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
             val joinResponse = joinRequest(location = it)
@@ -651,10 +658,30 @@ public class Call(
         }
     }
 
-    suspend fun fastReconnect() {
-        logger.d { "[reconnect] Reconnecting (fast)" }
+    private val reconnectChannel = Channel<Job>(Channel.UNLIMITED)
+    private var monitorReconnectChannelJob: Job? = null
+
+    private fun waitForReconnectTasks() {
+        monitorReconnectChannelJob?.cancel()
+        monitorReconnectChannelJob = scope.launch {
+            for (task in reconnectChannel) {
+                task.join()
+            }
+        }
+    }
+
+    private suspend fun schedule(block: suspend () -> Unit) {
+        logger.d { "[schedule] #reconnect; no args" }
+        val job = scope.launch {
+            block()
+        }
+        reconnectChannel.send(job)
+    }
+
+    suspend fun fastReconnect() = schedule {
+        logger.d { "[fastReconnect] Reconnecting" }
         session?.prepareReconnect()
-        this.state._connection.value = RealtimeConnection.Reconnecting
+        this@Call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
             val session = session!!
             val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
@@ -665,11 +692,10 @@ public class Call(
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
             )
-
             session.fastReconnect(reconnectDetails)
         } else {
             logger.e { "[reconnect] Disconnecting" }
-            this.state._connection.value = RealtimeConnection.Disconnected
+            this@Call.state._connection.value = RealtimeConnection.Disconnected
         }
     }
 
@@ -998,14 +1024,15 @@ public class Call(
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
         // Speaker
         if (speaker.status.value is DeviceStatus.NotSelected) {
-            val enableSpeaker = if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
-                // if camera is enabled then enable speaker. Eventually this should
-                // be a new audio.defaultDevice setting returned from backend
-                true
-            } else {
-                callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
-                    callSettings.audio.speakerDefaultOn
-            }
+            val enableSpeaker =
+                if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
+                    // if camera is enabled then enable speaker. Eventually this should
+                    // be a new audio.defaultDevice setting returned from backend
+                    true
+                } else {
+                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
+                        callSettings.audio.speakerDefaultOn
+                }
 
             speaker.setEnabled(
                 enabled = enableSpeaker,
@@ -1101,6 +1128,7 @@ public class Call(
 
     fun cleanup() {
         // monitor.stop()
+        monitorReconnectChannelJob?.cancel()
         session?.cleanup()
         supervisorJob.cancel()
         callStatsReportingJob?.cancel()

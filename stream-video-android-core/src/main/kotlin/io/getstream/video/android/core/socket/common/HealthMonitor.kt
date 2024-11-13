@@ -38,7 +38,7 @@ public object TimeProvider {
 
 internal class HealthMonitor(
     private val timeProvider: TimeProvider = TimeProvider,
-    private val retryInterval: RetryInterval = ExponencialRetryInterval,
+    private val retryInterval: RetryInterval = ExponentialRetryInterval,
     private val userScope: UserScope,
     private val checkCallback: suspend () -> Unit,
     private val reconnectCallback: suspend () -> Unit,
@@ -156,7 +156,7 @@ internal class HealthMonitor(
         fun nextInterval(consecutiveFailures: Int): Long
     }
 
-    object ExponencialRetryInterval : RetryInterval {
+    object ExponentialRetryInterval : RetryInterval {
 
         @Suppress("MagicNumber")
         override fun nextInterval(consecutiveFailures: Int): Long {
