@@ -109,7 +109,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     private val runForegroundServiceForCalls: Boolean = true,
-    private val callServiceConfig: CallServiceConfig? = livestreamGuestCallServiceConfig(),
+    private val callServiceConfig: CallServiceConfig? = null,
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val crashOnMissingPermission: Boolean = false,
