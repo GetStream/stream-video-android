@@ -232,12 +232,13 @@ internal class StreamVideoClient internal constructor(
     private fun HttpException.isAuthError(): Boolean {
         val failure = parseError(this)
         val parsedError = failure.value as Error.NetworkError
-        return when(parsedError.serverErrorCode) {
+        return when (parsedError.serverErrorCode) {
             VideoErrorCode.AUTHENTICATION_ERROR.code,
             VideoErrorCode.TOKEN_EXPIRED.code,
             VideoErrorCode.TOKEN_NOT_VALID.code,
             VideoErrorCode.TOKEN_DATE_INCORRECT.code,
-            VideoErrorCode.TOKEN_SIGNATURE_INCORRECT.code -> true
+            VideoErrorCode.TOKEN_SIGNATURE_INCORRECT.code,
+            -> true
             else -> false
         }
     }
