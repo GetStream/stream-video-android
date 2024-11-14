@@ -533,7 +533,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        rejoin()
+                        fastReconnect()
                     }
 
                     else -> {
@@ -548,7 +548,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        rejoin()
+                        fastReconnect()
                     }
 
                     else -> {
