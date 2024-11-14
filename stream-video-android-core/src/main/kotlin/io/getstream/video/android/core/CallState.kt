@@ -1102,7 +1102,7 @@ public class CallState(
         }
     }
 
-    private fun removeParticipant(sessionId: String) {
+    internal fun removeParticipant(sessionId: String) {
         val new = _participants.value.toSortedMap()
         new.remove(sessionId)
         _participants.value = new

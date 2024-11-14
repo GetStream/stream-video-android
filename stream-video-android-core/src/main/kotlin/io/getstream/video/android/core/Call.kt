@@ -562,7 +562,10 @@ public class Call(
         }
     }
 
-    internal suspend fun rejoin() = schedule {
+    /**
+     * Rejoin a call. Creates a new session and joins as a new participant.
+     */
+    suspend fun rejoin() = schedule {
         logger.d { "[rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
@@ -583,6 +586,7 @@ public class Call(
                     subscriptions = subscriptionsInfo,
                     reconnect_attempt = reconnectAttepmts,
                 )
+                this.state.removeParticipant(prevSessionId)
                 session.prepareRejoin()
                 this.session = RtcSession(
                     clientImpl,
@@ -598,6 +602,7 @@ public class Call(
                     },
                 )
                 this.session?.connect(reconnectDetails)
+                session.cleanup()
                 monitorSession(joinResponse.value)
             } else {
                 logger.e {
@@ -608,6 +613,9 @@ public class Call(
         }
     }
 
+    /**
+     * Migrate to another SFU.
+     */
     suspend fun migrate() = schedule {
         logger.d { "[migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
@@ -687,6 +695,9 @@ public class Call(
         }
     }
 
+    /**
+     * Fast reconnect to the same SFU with the same participant session.
+     */
     suspend fun fastReconnect() = schedule {
         logger.d { "[fastReconnect] Reconnecting" }
         session?.prepareReconnect()
