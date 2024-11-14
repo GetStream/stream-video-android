@@ -50,15 +50,12 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeoutOrNull
 import org.openapitools.client.models.AcceptCallResponse
 import org.openapitools.client.models.AudioSettingsResponse
 import org.openapitools.client.models.BlockUserResponse
@@ -723,7 +720,7 @@ public class Call(
 
     private var reconnectJob: Job? = null
 
-    private suspend fun schedule(block: suspend () -> Unit) {
+    private suspend fun schedule(block: suspend () -> Unit) = synchronized(this) {
         logger.d { "[schedule] #reconnect; no args" }
         reconnectJob?.cancel()
         reconnectJob = scope.launch {
