@@ -255,6 +255,8 @@ public class Call(
 
     private var monitorPublisherPCStateJob: Job? = null
     private var monitorSubscriberPCStateJob: Job? = null
+    private var monitorPublisherStateJob: Job? = null
+    private var monitorSubscriberStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
 
@@ -518,6 +520,35 @@ public class Call(
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session?.requestSubscriberIceRestart()
+                    }
+
+                    else -> {
+                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
+                    }
+                }
+            }
+        }
+        monitorPublisherStateJob?.cancel()
+        monitorPublisherStateJob = scope.launch {
+            session?.subscriber?.state?.collect {
+                when (it) {
+                    PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
+                        rejoin()
+                    }
+
+                    else -> {
+                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
+                    }
+                }
+            }
+        }
+
+        monitorSubscriberStateJob?.cancel()
+        monitorSubscriberStateJob = scope.launch {
+            session?.subscriber?.state?.collect {
+                when (it) {
+                    PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
+                        rejoin()
                     }
 
                     else -> {

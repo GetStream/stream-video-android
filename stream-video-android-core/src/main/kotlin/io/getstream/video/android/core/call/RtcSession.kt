@@ -1402,7 +1402,7 @@ public class RtcSession internal constructor(
                     val maxAttempts = 3
                     val delayInMs = listOf(10L, 30L, 100L)
 
-                    while (attempt <= maxAttempts) {
+                    while (attempt <= maxAttempts - 1) {
                         try {
                             // step 4 - send the tracks and SDP
                             val request = SetPublisherRequest(
