@@ -266,8 +266,6 @@ public class Call(
                 audioLevelOutputHelper.rampToValue(it)
             }
         }
-
-        waitForReconnectTasks()
     }
 
     /** Basic crud operations */
@@ -723,30 +721,13 @@ public class Call(
         }
     }
 
-    private var reconnectChannel = Channel<Job>(Channel.UNLIMITED)
-    private var monitorReconnectChannelJob: Job? = null
-
-    private fun waitForReconnectTasks() {
-        monitorReconnectChannelJob?.cancel()
-        monitorReconnectChannelJob = scope.launch {
-            for (task in reconnectChannel) {
-                task.join()
-            }
-        }
-    }
+    private var reconnectJob: Job? = null
 
     private suspend fun schedule(block: suspend () -> Unit) {
         logger.d { "[schedule] #reconnect; no args" }
-        val job = scope.launch {
-            withTimeoutOrNull(30_000) {
-                // Skip the job if its not finished in 15 seconds.
-                block()
-            }
-        }
-        reconnectChannel.trySend(job).onFailure { e ->
-            logger.e(
-                e ?: IllegalStateException(),
-            ) { "[schedule] Failed to send job to reconnect channel" }
+        reconnectJob?.cancel()
+        reconnectJob = scope.launch {
+            block()
         }
     }
 
@@ -1179,7 +1160,6 @@ public class Call(
 
     fun cleanup() {
         // monitor.stop()
-        monitorReconnectChannelJob?.cancel()
         session?.cleanup()
         supervisorJob.cancel()
         callStatsReportingJob?.cancel()
