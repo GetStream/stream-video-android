@@ -563,6 +563,30 @@ public class Call(
     }
 
     /**
+     * Fast reconnect to the same SFU with the same participant session.
+     */
+    suspend fun fastReconnect() = schedule {
+        logger.d { "[fastReconnect] Reconnecting" }
+        session?.prepareReconnect()
+        this@Call.state._connection.value = RealtimeConnection.Reconnecting
+        if (session != null) {
+            val session = session!!
+            val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+            val reconnectDetails = ReconnectDetails(
+                previous_session_id = prevSessionId,
+                strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                announced_tracks = publishingInfo,
+                subscriptions = subscriptionsInfo,
+                reconnect_attempt = reconnectAttepmts,
+            )
+            session.fastReconnect(reconnectDetails)
+        } else {
+            logger.e { "[reconnect] Disconnecting" }
+            this@Call.state._connection.value = RealtimeConnection.Disconnected
+        }
+    }
+
+    /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
     suspend fun rejoin() = schedule {
@@ -692,30 +716,6 @@ public class Call(
             logger.e(
                 e ?: IllegalStateException(),
             ) { "[schedule] Failed to send job to reconnect channel" }
-        }
-    }
-
-    /**
-     * Fast reconnect to the same SFU with the same participant session.
-     */
-    suspend fun fastReconnect() = schedule {
-        logger.d { "[fastReconnect] Reconnecting" }
-        session?.prepareReconnect()
-        this@Call.state._connection.value = RealtimeConnection.Reconnecting
-        if (session != null) {
-            val session = session!!
-            val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
-            val reconnectDetails = ReconnectDetails(
-                previous_session_id = prevSessionId,
-                strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-                announced_tracks = publishingInfo,
-                subscriptions = subscriptionsInfo,
-                reconnect_attempt = reconnectAttepmts,
-            )
-            session.fastReconnect(reconnectDetails)
-        } else {
-            logger.e { "[reconnect] Disconnecting" }
-            this@Call.state._connection.value = RealtimeConnection.Disconnected
         }
     }
 

@@ -1843,6 +1843,7 @@ public class RtcSession internal constructor(
                 val peerConnectionNotUsable =
                     subscriber?.isFailedOrClosed() == true && publisher?.isFailedOrClosed() == true
                 if (peerConnectionNotUsable) {
+                    logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
                     // We could not reuse the peer connections.
                     call.rejoin()
                 } else {
@@ -1871,9 +1872,6 @@ public class RtcSession internal constructor(
         stateJob?.cancel()
         eventJob?.cancel()
         errorJob?.cancel()
-        runBlocking {
-            sfuConnectionModule.socketConnection.disconnect()
-        }
     }
 
     suspend fun switchSfu(
