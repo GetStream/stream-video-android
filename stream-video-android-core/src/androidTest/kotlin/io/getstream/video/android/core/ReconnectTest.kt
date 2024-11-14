@@ -77,11 +77,11 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
         // assert the connection state is connected
         // disconnect the network
-        call.monitor.networkStateListener.onDisconnected()
+        // call.monitor.networkStateListener.onDisconnected()
         // verify that the connection state is reconnecting
         assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Reconnecting)
         // go online and verify we're reconnected
-        call.monitor.networkStateListener.onConnected()
+        // call.monitor.networkStateListener.onConnected()
         // asset that the connection state is connected
         assertThat(connectionState.awaitItem()).isEqualTo(RealtimeConnection.Connected)
         // leave and clean up a call

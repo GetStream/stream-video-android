@@ -615,7 +615,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -1191,7 +1191,7 @@ public class RtcSession internal constructor(
             if (it == null) {
                 logger.e {
                     "[handleEvent] Failed to remove track on ParticipantLeft " +
-                            "- track ID: ${participant.session_id}). Tracks: $tracks"
+                        "- track ID: ${participant.session_id}). Tracks: $tracks"
                 }
             }
         }
@@ -1204,7 +1204,7 @@ public class RtcSession internal constructor(
             if (it == null) {
                 logger.e {
                     "[handleEvent] Failed to remove track dimension on ParticipantLeft " +
-                            "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
+                        "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
                 }
             }
         }
@@ -1212,7 +1212,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     /**
@@ -1529,8 +1529,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.find { m ->
             m.mline?.type == track.kind() &&
-                    // if `msid` is not present, we assume that the track is the first one
-                    (m.msid?.equals(track.id()) ?: true)
+                // if `msid` is not present, we assume that the track is the first one
+                (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
@@ -1840,9 +1840,16 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.connect(request)
             sfuConnectionModule.socketConnection.whenConnected {
-                subscriber?.connection?.restartIce()
-                publisher?.connection?.restartIce()
-                setVideoSubscriptions(true)
+                val peerConnectionNotUsable =
+                    subscriber?.isFailedOrClosed() == true && publisher?.isFailedOrClosed() == true
+                if (peerConnectionNotUsable) {
+                    // We could not reuse the peer connections.
+                    call.rejoin()
+                } else {
+                    subscriber?.connection?.restartIce()
+                    publisher?.connection?.restartIce()
+                    setVideoSubscriptions(true)
+                }
             }
         }
     }

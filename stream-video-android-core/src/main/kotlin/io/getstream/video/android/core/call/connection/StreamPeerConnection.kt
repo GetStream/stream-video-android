@@ -111,6 +111,15 @@ public class StreamPeerConnection(
         }
     }
 
+    fun isFailedOrClosed(): Boolean {
+        return when (state.value) {
+            PeerConnection.PeerConnectionState.CLOSED,
+            PeerConnection.PeerConnectionState.FAILED,
+            -> true
+            else -> false
+        }
+    }
+
     init {
         logger.i { "<init> #sfu; #$typeTag; mediaConstraints: $mediaConstraints" }
     }
