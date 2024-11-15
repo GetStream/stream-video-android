@@ -41,12 +41,12 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
-import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
@@ -152,7 +152,7 @@ internal open class CallService : Service() {
         fun buildStopIntent(
             context: Context,
             callServiceConfiguration: CallServiceConfig = callServiceConfig(),
-        ) = safeCall(Intent(context, CallService::class.java)) {
+        ) = safeCallWithDefault(Intent(context, CallService::class.java)) {
             val intent = callServiceConfiguration.callServicePerType.firstNotNullOfOrNull {
                 val serviceClass = it.value
                 if (isServiceRunning(context, serviceClass)) {
@@ -202,7 +202,7 @@ internal open class CallService : Service() {
             )
         }
 
-        private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean = safeCall(
+        private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean = safeCallWithDefault(
             true,
         ) {
             val activityManager = context.getSystemService(
@@ -222,7 +222,7 @@ internal open class CallService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val trigger = intent?.getStringExtra(TRIGGER_KEY)
-        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoImpl
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
 
         val intentCallId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         val intentCallDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
@@ -347,7 +347,7 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun maybePromoteToForegroundService(videoClient: StreamVideoImpl, notificationId: Int, trigger: String) {
+    private fun maybePromoteToForegroundService(videoClient: StreamVideoClient, notificationId: Int, trigger: String) {
         val hasActiveCall = videoClient.state.activeCall.value != null
         val not = if (hasActiveCall) " not" else ""
 
@@ -430,13 +430,13 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+    private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
         observeNotificationUpdates(callId, streamVideo)
     }
 
-    private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+    private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoClient) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             call.state.ringingState.collect {
@@ -599,7 +599,7 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+    private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoClient) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             call.subscribe { event ->
@@ -650,7 +650,7 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun observeNotificationUpdates(callId: StreamCallId, streamVideo: StreamVideoImpl) {
+    private fun observeNotificationUpdates(callId: StreamCallId, streamVideo: StreamVideoClient) {
         streamVideo.getNotificationUpdates(
             serviceScope,
             streamVideo.call(callId.type, callId.id),

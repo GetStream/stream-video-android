@@ -19,21 +19,20 @@ package io.getstream.video.android.core
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserType
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.VideoEvent
-import java.net.ConnectException
 
+// These are UI states, need to move out.
 @Stable
 public sealed interface ConnectionState {
     public data object PreConnect : ConnectionState
@@ -44,6 +43,7 @@ public sealed interface ConnectionState {
     public class Failed(val error: Error) : ConnectionState
 }
 
+// These are UI states, need to move out.
 @Stable
 public sealed interface RingingState {
     public data object Idle : RingingState
@@ -55,42 +55,36 @@ public sealed interface RingingState {
 }
 
 @Stable
-class ClientState(client: StreamVideo) {
+class ClientState(private val client: StreamVideo) {
+    private val logger by taggedLogger("ClientState")
 
-    val logger by taggedLogger("ClientState")
-
-    /**
-     * Current user object
-     */
+    // Internal data
     private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
-    public val user: StateFlow<User?> = _user
-
     private val _connection: MutableStateFlow<ConnectionState> =
         MutableStateFlow(ConnectionState.PreConnect)
+    internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
 
-    /**
-     * Shows the Coordinator connection state
-     */
+    // Stream video client is used until full decoupling is archived between `CallState` and `StreamVideoClient (former StreamVideoImpl)
+    private val streamVideoClient: StreamVideoClient = client as StreamVideoClient
+
+    // API
+    /** Current user for the client. */
+    public val user: StateFlow<User?> = _user
+
+    /** Coordinator connection state */
     public val connection: StateFlow<ConnectionState> = _connection
 
-    /**
-     * Incoming call. True when we receive an event or notification with an incoming call
-     */
-    internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    /** When there is an incoming call, this state will be set. */
     public val ringingCall: StateFlow<Call?> = _ringingCall
 
-    /**
-     * Active call. The call that you've currently joined
-     */
-    private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    /** When there is an active call, this state will be set, otherwise its null. */
     public val activeCall: StateFlow<Call?> = _activeCall
-
-    internal val clientImpl = client as StreamVideoImpl
 
     /**
      * Returns true if there is an active or ringing call
      */
-    fun hasActiveOrRingingCall(): Boolean = safeCall(false) {
+    public fun hasActiveOrRingingCall(): Boolean = safeCallWithDefault(false) {
         val hasActiveCall = _activeCall.value != null
         val hasRingingCall = _ringingCall.value != null
         val activeOrRingingCall = hasActiveCall || hasRingingCall
@@ -104,37 +98,50 @@ class ClientState(client: StreamVideo) {
      */
     fun handleEvent(event: VideoEvent) {
         // mark connected
-        if (event is ConnectedEvent) {
-            _connection.value = ConnectionState.Connected
+        when (event) {
+            is ConnectedEvent -> {
+                _connection.value = ConnectionState.Connected
+            }
 
-            registerPushDevice()
-        } else if (event is CallCreatedEvent) {
-            // what's the right thing to do here?
-            // if it's ringing we add it
+            is CallCreatedEvent -> {
+                // what's the right thing to do here?
+                // if it's ringing we add it
 
-            // get or create the call, update is handled by CallState
-            val (type, id) = event.callCid.split(":")
-            val call = clientImpl.call(type, id)
-        } else if (event is CallRingEvent) {
-            // get or create the call, update is handled by CallState
-            val (type, id) = event.callCid.split(":")
-            val call = clientImpl.call(type, id)
-            _ringingCall.value = call
-        }
-    }
+                // get or create the call, update is handled by CallState
+                val (type, id) = event.callCid.split(":")
+                val call = client.call(type, id)
+            }
 
-    private fun registerPushDevice() {
-        with(clientImpl) {
-            scope.launch(CoroutineName("ClientState#registerPushDevice")) {
-                if (user.type == UserType.Authenticated) registerPushDevice()
+            is CallRingEvent -> {
+                val (type, id) = event.callCid.split(":")
+                val call = client.call(type, id)
+                _ringingCall.value = call
             }
         }
     }
 
-    internal fun handleError(error: Throwable) {
-        if (error is ConnectException) {
-            _connection.value = ConnectionState.Failed(error = Error(error))
+    internal fun handleState(socketState: VideoSocketState) {
+        val state = when (socketState) {
+            // Before connection is established
+            is VideoSocketState.Disconnected.Stopped -> ConnectionState.PreConnect
+            // Loading
+            is VideoSocketState.Connecting -> ConnectionState.Loading
+            // Connected
+            is VideoSocketState.Connected -> ConnectionState.Connected
+            //  Reconnecting
+            is VideoSocketState.Disconnected.DisconnectedTemporarily -> ConnectionState.Reconnecting
+            is VideoSocketState.RestartConnection -> ConnectionState.Reconnecting
+            // Disconnected
+            is VideoSocketState.Disconnected.WebSocketEventLost -> ConnectionState.Disconnected
+            is VideoSocketState.Disconnected.NetworkDisconnected -> ConnectionState.Disconnected
+            is VideoSocketState.Disconnected.DisconnectedByRequest -> ConnectionState.Disconnected
+            is VideoSocketState.Disconnected.DisconnectedPermanently -> ConnectionState.Disconnected
         }
+        _connection.value = state
+    }
+
+    fun handleError(error: Error) {
+        _connection.value = ConnectionState.Failed(error)
     }
 
     fun setActiveCall(call: Call) {
@@ -167,13 +174,13 @@ class ClientState(client: StreamVideo) {
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
-        if (clientImpl.callServiceConfig.runCallServiceInForeground) {
-            val context = clientImpl.context
+        if (streamVideoClient.callServiceConfig.runCallServiceInForeground) {
+            val context = streamVideoClient.context
             val serviceIntent = CallService.buildStartIntent(
                 context,
                 StreamCallId.fromCallCid(call.cid),
                 trigger,
-                callServiceConfiguration = clientImpl.callServiceConfig,
+                callServiceConfiguration = streamVideoClient.callServiceConfig,
             )
             ContextCompat.startForegroundService(context, serviceIntent)
         }
@@ -183,11 +190,11 @@ class ClientState(client: StreamVideo) {
      * Stop the foreground service that manages the call even when the UI is gone.
      */
     internal fun maybeStopForegroundService() {
-        if (clientImpl.callServiceConfig.runCallServiceInForeground) {
-            val context = clientImpl.context
+        if (streamVideoClient.callServiceConfig.runCallServiceInForeground) {
+            val context = streamVideoClient.context
             val serviceIntent = CallService.buildStopIntent(
                 context,
-                callServiceConfiguration = clientImpl.callServiceConfig,
+                callServiceConfiguration = streamVideoClient.callServiceConfig,
             )
             context.stopService(serviceIntent)
         }

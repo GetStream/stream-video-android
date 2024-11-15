@@ -107,6 +107,7 @@ import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
 
@@ -331,33 +332,36 @@ fun CallScreen(
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
-                            FloatingParticipantVideo(
-                                call = call,
-                                participant = me!!,
-                                parentBounds = IntSize(
-                                    this@BoxWithConstraints.constraints.maxWidth,
-                                    this@BoxWithConstraints.constraints.maxHeight,
-                                ),
-                                videoRenderer = { participant ->
-                                    ParticipantVideo(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(VideoTheme.shapes.dialog),
-                                        call = call,
-                                        participant = participant,
-                                        reactionContent = {
-                                            CustomReactionContent(
-                                                participant = participant,
-                                                style = RegularVideoRendererStyle().copy(
-                                                    isShowingConnectionQualityIndicator = false,
-                                                    reactionPosition = Alignment.TopCenter,
-                                                    reactionDuration = 5000,
-                                                ),
-                                            )
-                                        },
-                                    )
-                                },
-                            )
+                            val myself = me ?: participantsSize.firstOrNull { it.sessionId == call.sessionId }
+                            myself?.let {
+                                FloatingParticipantVideo(
+                                    call = call,
+                                    participant = it,
+                                    parentBounds = IntSize(
+                                        this@BoxWithConstraints.constraints.maxWidth,
+                                        this@BoxWithConstraints.constraints.maxHeight,
+                                    ),
+                                    videoRenderer = { participant ->
+                                        ParticipantVideo(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .clip(VideoTheme.shapes.dialog),
+                                            call = call,
+                                            participant = participant,
+                                            reactionContent = {
+                                                CustomReactionContent(
+                                                    participant = participant,
+                                                    style = RegularVideoRendererStyle().copy(
+                                                        isShowingConnectionQualityIndicator = false,
+                                                        reactionPosition = Alignment.TopCenter,
+                                                        reactionDuration = 5000,
+                                                    ),
+                                                )
+                                            },
+                                        )
+                                    },
+                                )
+                            }
                         },
                         videoOverlayContent = {
                             Crossfade(
@@ -463,7 +467,8 @@ fun CallScreen(
                 mutableStateOf(call.isAudioProcessingEnabled())
             }
             val settings by call.state.settings.collectAsStateWithLifecycle()
-            val noiseCancellationFeatureEnabled = settings?.audio?.noiseCancellation?.isEnabled == true
+            val noiseCancellationFeatureEnabled =
+                settings?.audio?.noiseCancellation?.isEnabled == true
             SettingsMenu(
                 call = call,
                 selectedVideoFilter = selectedVideoFilter,
@@ -478,11 +483,14 @@ fun CallScreen(
                         is VideoFilter.None -> {
                             call.videoFilter = null
                         }
+
                         is VideoFilter.BlurredBackground -> {
                             call.videoFilter = BlurredBackgroundVideoFilter()
                         }
+
                         is VideoFilter.VirtualBackground -> {
-                            call.videoFilter = VirtualBackgroundVideoFilter(context, filter.drawable)
+                            call.videoFilter =
+                                VirtualBackgroundVideoFilter(context, filter.drawable)
                         }
                     }
                 },
@@ -493,10 +501,11 @@ fun CallScreen(
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
                 },
-            ) {
-                isShowingStats = true
-                isShowingSettingMenu = false
-            }
+                onShowCallStats = {
+                    isShowingStats = true
+                    isShowingSettingMenu = false
+                },
+            )
         }
 
         if (isShowingFeedbackDialog) {

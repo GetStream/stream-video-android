@@ -52,4 +52,6 @@ data class WSAuthMessageRequest (
     @Json(name = "user_details")
     val userDetails: ConnectUserDetailsRequest
 
-)
+) : VideoEvent() {
+    override fun getEventType(): String = "authenticate"
+}

@@ -91,7 +91,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             context: Context,
             cid: StreamCallId,
             members: List<String> = defaultExtraMembers,
-            leaveWhenLastInCall: Boolean = true,
+            leaveWhenLastInCall: Boolean = DEFAULT_LEAVE_WHEN_LAST,
             action: String? = null,
             clazz: Class<T>,
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
@@ -179,6 +179,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     // Platform restriction
     public final override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onPreCreate(savedInstanceState, null)
         logger.d { "Entered [onCreate(Bundle?)" }
         initializeCallOrFail(
             savedInstanceState,
@@ -698,10 +699,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val total = call.state.participantCounts.value?.total
-                logger.d { "Participant left, remaining: $total" }
-                if (total != null && total <= 2) {
-                    onLastParticipant(call)
+                val connectionState = call.state.connection.value
+                if (connectionState == RealtimeConnection.Disconnected) {
+                    val total = call.state.participantCounts.value?.total
+                    logger.d { "Participant left, remaining: $total" }
+                    if (total != null && total <= 2) {
+                        onLastParticipant(call)
+                    }
                 }
             }
         }

@@ -27,8 +27,9 @@ import androidx.compose.material.icons.filled.BluetoothAudio
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
-import androidx.compose.material.icons.filled.PortableWifiOff
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.SettingsVoice
 import androidx.compose.material.icons.filled.SpatialAudioOff
 import androidx.compose.material.icons.filled.SpeakerPhone
@@ -57,11 +58,12 @@ fun defaultStreamMenu(
     onToggleAudioFilterClick: () -> Unit,
     onRestartSubscriberIceClick: () -> Unit,
     onRestartPublisherIceClick: () -> Unit,
-    onKillSfuWsClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
+    onSfuRejoinClick: () -> Unit,
+    onSfuFastReconnectClick: () -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
 ) = buildList<MenuItem> {
@@ -133,8 +135,9 @@ fun defaultStreamMenu(
                     onToggleAudioFilterClick,
                     onRestartSubscriberIceClick,
                     onRestartPublisherIceClick,
-                    onKillSfuWsClick,
                     onSwitchSfuClick,
+                    onSfuRejoinClick,
+                    onSfuFastReconnectClick,
                 ),
             ),
         )
@@ -159,6 +162,40 @@ fun codecMenu(codecList: List<MediaCodecInfo>, onCodecSelected: (MediaCodecInfo)
         )
     }
 
+fun reconnectMenu(
+    onRestartPublisherIceClick: () -> Unit,
+    onRestartSubscriberIceClick: () -> Unit,
+    onSwitchSfuClick: () -> Unit,
+    onSfuRejoinClick: () -> Unit,
+    onSfuFastReconnectClick: () -> Unit,
+) = listOf(
+    ActionMenuItem(
+        title = "Publisher - ICE restart",
+        icon = Icons.Default.SettingsBackupRestore,
+        action = onRestartPublisherIceClick,
+    ),
+    ActionMenuItem(
+        title = "Subscriber - ICE restart",
+        icon = Icons.Default.SettingsBackupRestore,
+        action = onRestartSubscriberIceClick,
+    ),
+    ActionMenuItem(
+        title = "Reconnect SFU - migrate",
+        icon = Icons.Default.SwitchLeft,
+        action = onSwitchSfuClick,
+    ),
+    ActionMenuItem(
+        title = "Reconnect SFU - rejoin",
+        icon = Icons.Default.Replay,
+        action = onSfuRejoinClick,
+    ),
+    ActionMenuItem(
+        title = "Reconnect SFU - fast",
+        icon = Icons.Default.RestartAlt,
+        action = onSfuFastReconnectClick,
+    ),
+)
+
 /**
  * Optionally defines the debug sub-menu of the demo app.
  */
@@ -166,10 +203,11 @@ fun debugSubmenu(
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
     onToggleAudioFilterClick: () -> Unit,
-    onRestartSubscriberIceClick: () -> Unit,
     onRestartPublisherIceClick: () -> Unit,
-    onKillSfuWsClick: () -> Unit,
+    onRestartSubscriberIceClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
+    onSfuRejoinClick: () -> Unit,
+    onSfuFastReconnectClick: () -> Unit,
 ) = listOf(
     SubMenuItem(
         title = "Available video codecs",
@@ -181,24 +219,15 @@ fun debugSubmenu(
         icon = Icons.Default.Audiotrack,
         action = onToggleAudioFilterClick,
     ),
-    ActionMenuItem(
-        title = "Restart subscriber Ice",
-        icon = Icons.Default.RestartAlt,
-        action = onRestartSubscriberIceClick,
-    ),
-    ActionMenuItem(
-        title = "Restart publisher Ice",
-        icon = Icons.Default.RestartAlt,
-        action = onRestartPublisherIceClick,
-    ),
-    ActionMenuItem(
-        title = "Shut down SFU web-socket",
-        icon = Icons.Default.PortableWifiOff,
-        action = onKillSfuWsClick,
-    ),
-    ActionMenuItem(
-        title = "Switch SFU",
-        icon = Icons.Default.SwitchLeft,
-        action = onSwitchSfuClick,
+    SubMenuItem(
+        title = "Reconnect V2",
+        icon = Icons.Default.Replay,
+        items = reconnectMenu(
+            onRestartPublisherIceClick,
+            onRestartSubscriberIceClick,
+            onSwitchSfuClick,
+            onSfuRejoinClick,
+            onSfuFastReconnectClick,
+        ),
     ),
 )

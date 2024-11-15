@@ -87,6 +87,7 @@ import org.openapitools.client.models.CallRejectedEvent
 import org.openapitools.client.models.CallResponse
 import org.openapitools.client.models.CallRingEvent
 import org.openapitools.client.models.CallSessionEndedEvent
+import org.openapitools.client.models.CallSessionParticipantCountsUpdatedEvent
 import org.openapitools.client.models.CallSessionParticipantJoinedEvent
 import org.openapitools.client.models.CallSessionParticipantLeftEvent
 import org.openapitools.client.models.CallSessionResponse
@@ -220,7 +221,7 @@ public class CallState(
 
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
-        it[call.clientImpl.sessionId]
+        it[call.sessionId]
     }
 
     /** Your own participant state */
@@ -233,7 +234,7 @@ public class CallState(
 
     /** participants other than yourself */
     public val remoteParticipants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.filterKeys { key -> key != call.clientImpl.sessionId }.values.toList() }
+        _participants.mapState { it.filterKeys { key -> key != call.sessionId }.values.toList() }
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
@@ -464,7 +465,8 @@ public class CallState(
             val liveEndedAt = _session.value?.liveEndedAt ?: OffsetDateTime.now()
 
             liveStartedAt?.let {
-                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant().toEpochMilli()
+                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant()
+                    .toEpochMilli()
                 emit(duration)
             }
         }
@@ -772,7 +774,7 @@ public class CallState(
             }
 
             is SFUHealthCheckEvent -> {
-                call.state._participantCounts.value = event.participantCount
+                updateParticipantCounts(sfuHealthCheckEvent = event)
             }
 
             is ICETrickleEvent -> {
@@ -868,14 +870,34 @@ public class CallState(
                 _session.value = event.call.session
             }
 
+            is CallSessionParticipantCountsUpdatedEvent -> {
+                _session.value?.let {
+                    _session.value = it.copy(
+                        participantsCountByRole = event.participantsCountByRole,
+                        anonymousParticipantCount = event.anonymousParticipantCount,
+                    )
+                }
+
+                updateParticipantCounts(session = session.value)
+            }
+
             is CallSessionParticipantLeftEvent -> {
                 _session.value?.let { callSessionResponse ->
                     val newList = callSessionResponse.participants.toMutableList()
                     newList.removeIf { it.userSessionId == event.participant.userSessionId }
+
+                    val newMap = callSessionResponse.participantsCountByRole.toMutableMap()
+                    newMap
+                        .computeIfPresent(event.participant.role) { _, v -> maxOf(v - 1, 0) }
+                        .also { if (it == 0) newMap.remove(event.participant.role) }
+
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toList(),
+                        participants = newList,
+                        participantsCountByRole = newMap,
                     )
                 }
+
+                updateParticipantCounts(session = session.value)
             }
 
             is CallSessionParticipantJoinedEvent -> {
@@ -884,26 +906,37 @@ public class CallState(
                     val participant = CallParticipantResponse(
                         user = event.participant.user,
                         joinedAt = event.createdAt,
-                        role = "user",
+                        role = event.participant.user.role,
                         userSessionId = event.participant.userSessionId,
                     )
+                    val newMap = callSessionResponse.participantsCountByRole.toMutableMap()
+                    newMap.merge(event.participant.role, 1, Int::plus)
+
+                    // It could happen that the backend delivers the same participant more than once.
+                    // Once with the call.session_started event and once again with the
+                    // call.session_participant_joined event. In this case,
+                    // we should update the existing participant and prevent duplicating it.
                     val index = newList.indexOfFirst { user.id == event.participant.user.id }
                     if (index == -1) {
                         newList.add(participant)
                     } else {
                         newList[index] = participant
                     }
+
                     _session.value = callSessionResponse.copy(
-                        participants = newList.toList(),
+                        participants = newList,
+                        participantsCountByRole = newMap,
                     )
                 }
+
+                updateParticipantCounts(session = session.value)
                 updateRingingState()
             }
         }
     }
 
     private fun updateServerSidePins(pins: List<PinUpdate>) {
-        // Update particioants that are still in the call
+        // Update participants that are still in the call
         val pinnedInCall = pins.filter {
             _participants.value.containsKey(it.sessionId)
         }
@@ -1027,6 +1060,19 @@ public class CallState(
         upsertParticipants(participantStates)
     }
 
+    private fun updateParticipantCounts(session: CallSessionResponse? = null, sfuHealthCheckEvent: SFUHealthCheckEvent? = null) {
+        // When in JOINED state, we should use the participant from SFU health check event, as it's more accurate.
+
+        if (sfuHealthCheckEvent != null) {
+            _participantCounts.value = sfuHealthCheckEvent.participantCount
+        } else if (session != null && connection.value !is RealtimeConnection.Joined) {
+            _participantCounts.value = ParticipantCount(
+                total = session.anonymousParticipantCount + session.participantsCountByRole.values.sum(),
+                anonymous = session.anonymousParticipantCount,
+            )
+        }
+    }
+
     fun markSpeakingAsMuted() {
         _speakingWhileMuted.value = true
         speakingWhileMutedResetJob?.cancel()
@@ -1056,7 +1102,7 @@ public class CallState(
         }
     }
 
-    private fun removeParticipant(sessionId: String) {
+    internal fun removeParticipant(sessionId: String) {
         val new = _participants.value.toSortedMap()
         new.remove(sessionId)
         _participants.value = new
@@ -1094,9 +1140,9 @@ public class CallState(
     }
 
     internal fun getOrCreateParticipant(participant: Participant): ParticipantState {
-        // get or create the participant and update them
         if (participant.session_id.isEmpty()) {
-            throw IllegalStateException("Participant session id is empty")
+            // Empty session ID is technically allowed but should not happen.
+            logger.w { "A user [id:${participant.user_id}] is in the call with empty session_id" }
         }
 
         val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
@@ -1324,6 +1370,23 @@ public class CallState(
                     }
                 }
             }
+        }
+    }
+
+    fun replaceParticipants(participants: List<ParticipantState>) {
+        this._participants.value = participants.associate { it.sessionId to it }.toSortedMap()
+        val screensharing = mutableListOf<ParticipantState>()
+        participants.forEach {
+            if (it.screenSharingEnabled.value) {
+                screensharing.add(it)
+            }
+        }
+        _screenSharingSession.value = if (screensharing.isNotEmpty()) {
+            ScreenSharingSession(
+                screensharing[0],
+            )
+        } else {
+            null
         }
     }
 }

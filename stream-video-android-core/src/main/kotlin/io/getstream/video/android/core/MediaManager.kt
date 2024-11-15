@@ -44,7 +44,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.VideoSettingsResponse
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
@@ -142,7 +141,8 @@ class SpeakerManager(
         microphoneManager.enforceSetup {
             val devices = devices.value
             if (enable) {
-                val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
+                val speaker =
+                    devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
                 selectedBeforeSpeaker = selectedDevice.value
                 _speakerPhoneEnabled.value = true
                 microphoneManager.select(speaker)
@@ -152,9 +152,10 @@ class SpeakerManager(
                 val defaultFallbackFromType = defaultFallback?.let {
                     devices.filterIsInstance(defaultFallback::class.java)
                 }?.firstOrNull()
-                val fallback = defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                    it !is StreamAudioDevice.Speakerphone
-                }
+                val fallback =
+                    defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
+                        it !is StreamAudioDevice.Speakerphone
+                    }
                 microphoneManager.select(fallback)
             }
         }
@@ -284,7 +285,8 @@ class ScreenShareManager(
 
     private fun startScreenShare(mediaProjectionPermissionResultData: Intent) {
         mediaManager.scope.launch {
-            this@ScreenShareManager.mediaProjectionPermissionResultData = mediaProjectionPermissionResultData
+            this@ScreenShareManager.mediaProjectionPermissionResultData =
+                mediaProjectionPermissionResultData
 
             // Screen sharing requires a foreground service with foregroundServiceType "mediaProjection" to be started first.
             // We can wait for the service to be ready by binding to it and then starting the
@@ -652,7 +654,11 @@ public class CameraManager(
     /**
      * Capture is called whenever you call enable()
      */
-    internal fun startCapture() {
+    internal fun startCapture() = synchronized(this) {
+        if (isCapturingVideo) {
+            stopCapture()
+        }
+
         val selectedDevice = _selectedDevice.value ?: return
         val selectedResolution = resolution.value ?: return
 
@@ -660,29 +666,25 @@ public class CameraManager(
         videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
 
         // initialize it
-        runBlocking(mediaManager.scope.coroutineContext) {
-            videoCapturer.initialize(
-                surfaceTextureHelper,
-                mediaManager.context,
-                mediaManager.videoSource.capturerObserver,
-            )
-        }
+        videoCapturer.initialize(
+            surfaceTextureHelper,
+            mediaManager.context,
+            mediaManager.videoSource.capturerObserver,
+        )
 
         // and start capture
-        runBlocking(mediaManager.scope.coroutineContext) {
-            videoCapturer.startCapture(
-                selectedResolution.width,
-                selectedResolution.height,
-                selectedResolution.framerate.max,
-            )
-        }
+        videoCapturer.startCapture(
+            selectedResolution.width,
+            selectedResolution.height,
+            selectedResolution.framerate.max,
+        )
         isCapturingVideo = true
     }
 
     /**
      * Stops capture if it's running
      */
-    internal fun stopCapture() {
+    internal fun stopCapture() = synchronized(this) {
         if (isCapturingVideo) {
             videoCapturer.stopCapture()
             isCapturingVideo = false
