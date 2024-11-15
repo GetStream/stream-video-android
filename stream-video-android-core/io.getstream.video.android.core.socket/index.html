@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.0.17
+            <div class="library-version">1.0.18
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -68,22 +68,7 @@
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
         <h2 class="">Types</h2>
-        <div class="table"><a data-name="-1071286003%2FClasslikes%2F-1625990423" anchor-label="CoordinatorSocket" id="-1071286003%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-coordinator-socket/index.html"><span>Coordinator</span><wbr><span><span>Socket</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1071286003%2FClasslikes%2F-1625990423"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-coordinator-socket/index.html">CoordinatorSocket</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">url<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">user<span class="token operator">: </span><a href="../io.getstream.video.android.model/-user/index.html">User</a><span class="token punctuation">, </span></span><span class="parameter ">token<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>CoroutineScope(DispatcherProvider.IO)<span class="token punctuation">, </span></span><span class="parameter ">httpClient<span class="token operator">: </span><span data-unresolved-link="okhttp3/OkHttpClient///PointingToDeclaration/">OkHttpClient</span><span class="token punctuation">, </span></span><span class="parameter ">networkStateProvider<span class="token operator">: </span><a href="../io.getstream.video.android.core.internal.network/-network-state-provider/index.html">NetworkStateProvider</a></span></span><span class="token punctuation">)</span> : <a href="-persistent-socket/index.html">PersistentSocket</a><span class="token operator">&lt;</span><a href="../org.openapitools.client.models/-connected-event/index.html">ConnectedEvent</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">The Coordinator sockets send a user authentication request</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="2064095143%2FClasslikes%2F-1625990423" anchor-label="ErrorResponse" id="2064095143%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+        <div class="table"><a data-name="2064095143%2FClasslikes%2F-1625990423" anchor-label="ErrorResponse" id="2064095143%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -94,36 +79,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-error-response/index.html">ErrorResponse</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>code<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>-1<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>statusCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>-1<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>details<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>exceptionFields<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>mapOf()<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>moreInfo<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">""</span></span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-243135384%2FClasslikes%2F-1625990423" anchor-label="PersistentSocket" id="-243135384%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-persistent-socket/index.html"><span>Persistent</span><wbr><span><span>Socket</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-243135384%2FClasslikes%2F-1625990423"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-persistent-socket/index.html">PersistentSocket</a><span class="token operator">&lt;</span><a href="-persistent-socket/index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">url<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">httpClient<span class="token operator">: </span><span data-unresolved-link="okhttp3/OkHttpClient///PointingToDeclaration/">OkHttpClient</span><span class="token punctuation">, </span></span><span class="parameter ">networkStateProvider<span class="token operator">: </span><a href="../io.getstream.video.android.core.internal.network/-network-state-provider/index.html">NetworkStateProvider</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>CoroutineScope(DispatcherProvider.IO)<span class="token punctuation">, </span></span><span class="parameter ">onFastReconnected<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span> : <span data-unresolved-link="okhttp3/WebSocketListener///PointingToDeclaration/">WebSocketListener</span></div><div class="brief "><p class="paragraph">PersistentSocket architecture</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="47643771%2FClasslikes%2F-1625990423" anchor-label="SfuSocket" id="47643771%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-sfu-socket/index.html"><span>Sfu</span><wbr><span><span>Socket</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="47643771%2FClasslikes%2F-1625990423"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-sfu-socket/index.html">SfuSocket</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">url<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">sessionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">token<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">getSubscriberSdp<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">scope<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines/CoroutineScope///PointingToDeclaration/">CoroutineScope</span><span class="token operator"> = </span>CoroutineScope(DispatcherProvider.IO)<span class="token punctuation">, </span></span><span class="parameter ">httpClient<span class="token operator">: </span><span data-unresolved-link="okhttp3/OkHttpClient///PointingToDeclaration/">OkHttpClient</span><span class="token punctuation">, </span></span><span class="parameter ">networkStateProvider<span class="token operator">: </span><a href="../io.getstream.video.android.core.internal.network/-network-state-provider/index.html">NetworkStateProvider</a><span class="token punctuation">, </span></span><span class="parameter ">onFastReconnected<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span> : <a href="-persistent-socket/index.html">PersistentSocket</a><span class="token operator">&lt;</span><a href="../io.getstream.video.android.core.events/-join-call-response-event/index.html">JoinCallResponseEvent</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">The SFU socket is slightly different from the coordinator socket It sends a JoinRequest to authenticate SFU socket uses binary instead of text</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -139,21 +94,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-socket-error/index.html">SocketError</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>error<span class="token operator">: </span><a href="-error-response/index.html">ErrorResponse</a></span></span><span class="token punctuation">)</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-655747438%2FClasslikes%2F-1625990423" anchor-label="SocketState" id="-655747438%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-socket-state/index.html"><span>Socket</span><wbr><span><span>State</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-655747438%2FClasslikes%2F-1625990423"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-socket-state/index.html">SocketState</a></div></div></div>
                 </div>
               </div>
             </div>

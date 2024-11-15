@@ -1,0 +1,269 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SocketActions</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            stream-video-android
+                    </a>            </div>
+            <div class="library-version">1.0.18
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stream-video-android-core:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="stream-video-android-core::io.getstream.video.android.core.socket.common/SocketActions///PointingToDeclaration//-1625990423">
+  <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.core.socket.common</a><span class="delimiter">/</span><span class="current">SocketActions</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Socket</span><wbr><span><span>Actions</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">SocketActions</a><span class="token operator">&lt;</span><a href="index.html">EventIn</a><span class="token punctuation">, </span><a href="index.html">EventOut</a><span class="token punctuation">, </span><a href="index.html">Error</a><span class="token punctuation">, </span><a href="index.html">State</a><span class="token punctuation">, </span><a href="index.html">Token</a><span class="token punctuation">, </span><a href="index.html">ConnectData</a><span class="token operator">&gt;</span></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.getstream.video.android.core.socket.coordinator/-coordinator-socket-connection/index.html">CoordinatorSocketConnection</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.getstream.video.android.core.socket.sfu/-sfu-socket-connection/index.html">SfuSocketConnection</a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1371614641%2FClasslikes%2F-1625990423" anchor-label="Companion" id="-1371614641%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1371614641%2FClasslikes%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1566179296%2FFunctions%2F-1625990423" anchor-label="connect" id="-1566179296%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connect.html"><span><span>connect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1566179296%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="connect.html"><span class="token function">connect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">connectData<span class="token operator">: </span><a href="index.html">ConnectData</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Connect the user.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1136239641%2FFunctions%2F-1625990423" anchor-label="connectionId" id="1136239641%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="connection-id.html"><span>connection</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1136239641%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="connection-id.html"><span class="token function">connectionId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Get the connection id.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1422049610%2FFunctions%2F-1625990423" anchor-label="disconnect" id="-1422049610%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="disconnect.html"><span><span>disconnect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1422049610%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="disconnect.html"><span class="token function">disconnect</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Disconnect the socket.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1311732039%2FFunctions%2F-1625990423" anchor-label="errors" id="1311732039%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="errors.html"><span><span>errors</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1311732039%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="errors.html"><span class="token function">errors</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="index.html">Error</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Socket errors as <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span></p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1180393639%2FFunctions%2F-1625990423" anchor-label="events" id="-1180393639%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="events.html"><span><span>events</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1180393639%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="events.html"><span class="token function">events</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="index.html">EventOut</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Socket events as <span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span></p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1042540951%2FFunctions%2F-1625990423" anchor-label="reconnect" id="1042540951%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="reconnect.html"><span><span>reconnect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1042540951%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="reconnect.html"><span class="token function">reconnect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="index.html">ConnectData</a><span class="token punctuation">, </span></span><span class="parameter ">force<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Reconnect the user to the socket.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1429475076%2FFunctions%2F-1625990423" anchor-label="sendData" id="1429475076%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="send-data.html"><span>send</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1429475076%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="send-data.html"><span class="token function">sendData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Send raw data to the socket. If you already have a parsed event that can be sent.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1463114264%2FFunctions%2F-1625990423" anchor-label="sendEvent" id="-1463114264%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="send-event.html"><span>send</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1463114264%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-event.html"><span class="token function">sendEvent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="index.html">EventIn</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Send event to the socket.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="989081367%2FFunctions%2F-1625990423" anchor-label="state" id="989081367%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="state.html"><span><span>state</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="989081367%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="state.html"><span class="token function">state</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="index.html">State</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">State of the socket as <span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span></p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1205391718%2FFunctions%2F-1625990423" anchor-label="updateToken" id="1205391718%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="update-token.html"><span>update</span><wbr><span><span>Token</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1205391718%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="update-token.html"><span class="token function">updateToken</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">token<span class="token operator">: </span><a href="index.html">Token</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Update the token from the outside.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1307257743%2FFunctions%2F-1625990423" anchor-label="whenConnected" id="-1307257743%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="when-connected.html"><span>when</span><wbr><span><span>Connected</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1307257743%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="when-connected.html"><span class="token function">whenConnected</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">connectionTimeout<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span>DEFAULT_SOCKET_TIMEOUT<span class="token punctuation">, </span></span><span class="parameter ">connected<span class="token operator">: </span><span class="token keyword">suspend </span><span class="token punctuation">(</span>connectionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">When connected to the socket.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
