@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.lifecycle
+package io.getstream.video.android.core.socket.common.token
 
-internal interface LifecycleHandler {
-    fun started()
-    fun stopped()
+internal class ConstantTokenProvider(private val token: String) : TokenProvider {
+    override suspend fun loadToken(): String = token
 }

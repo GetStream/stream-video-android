@@ -23,8 +23,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.internal.module.ConnectionModule
+import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
@@ -33,6 +32,10 @@ import io.getstream.video.android.core.notifications.internal.service.callServic
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.toSounds
@@ -40,7 +43,6 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.webrtc.ManagedAudioProcessingFactory
 import java.net.ConnectException
@@ -93,7 +95,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val geo: GEO = GEO.GlobalEdgeNetwork,
     private var user: User = User.anonymous(),
     private val token: UserToken = "",
-    private val tokenProvider: (suspend (error: Throwable?) -> String)? = null,
+    private val legacyTokenProvider: (suspend (error: Throwable?) -> String)? = null,
+    private val tokenProvider: TokenProvider = legacyTokenProvider?.let { legacy ->
+        object : TokenProvider {
+            override suspend fun loadToken(): String = legacy.invoke(null)
+        }
+    } ?: ConstantTokenProvider(token),
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
@@ -109,9 +116,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
+    private val leaveAfterDisconnectSeconds: Long = 30,
 ) {
     private val context: Context = context.applicationContext
-    private val scope = CoroutineScope(DispatcherProvider.IO)
+    private val scope = UserScope(ClientScope())
 
     /**
      * Builds the [StreamVideo] client.
@@ -138,10 +146,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException("The API key cannot be blank")
         }
 
-        if (token.isBlank() && tokenProvider == null && user.type == UserType.Authenticated) {
-            throw IllegalArgumentException(
-                "Either a user token or a token provider must be provided",
-            )
+        if (token.isBlank()) {
+            throw IllegalStateException("The token cannot be blank")
         }
 
         if (user.type == UserType.Authenticated && user.id.isBlank()) {
@@ -162,15 +168,18 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         AndroidThreeTen.init(context)
 
         // This connection module class exposes the connections to the various retrofit APIs.
-        val connectionModule = ConnectionModule(
+        val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
-            videoDomain = videoDomain,
+            apiUrl = "https:///$videoDomain",
+            wssUrl = "wss://$videoDomain/video/connect",
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
             user = user,
             apiKey = apiKey,
             userToken = token,
+            tokenProvider = tokenProvider,
+            lifecycle = lifecycle,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -180,21 +189,21 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
-            api = connectionModule.api,
+            api = coordinatorConnectionModule.api,
             deviceTokenStorage = deviceTokenStorage,
         )
 
         // Create the client
-        val client = StreamVideoImpl(
+        val client = StreamVideoClient(
             context = context,
-            _scope = scope,
+            scope = scope,
             user = user,
             apiKey = apiKey,
             token = token,
             tokenProvider = tokenProvider,
             loggingLevel = loggingLevel,
             lifecycle = lifecycle,
-            connectionModule = connectionModule,
+            coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
             callServiceConfig = callServiceConfig
                 ?: callServiceConfig().copy(
@@ -208,13 +217,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             audioUsage = audioUsage,
             appName = appName,
             audioProcessing = audioProcessing,
+            leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
         )
 
         if (user.type == UserType.Guest) {
-            connectionModule.updateAuthType("anonymous")
+            coordinatorConnectionModule.updateAuthType("anonymous")
             client.setupGuestUser(user)
         } else if (user.type == UserType.Anonymous) {
-            connectionModule.updateAuthType("anonymous")
+            coordinatorConnectionModule.updateAuthType("anonymous")
         }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)

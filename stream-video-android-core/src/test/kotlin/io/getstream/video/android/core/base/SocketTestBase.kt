@@ -18,11 +18,13 @@ package io.getstream.video.android.core.base
 
 import android.content.Context
 import android.net.ConnectivityManager
+import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.CoordinatorSocket
-import io.getstream.video.android.core.socket.PersistentSocket
+import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
+import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -43,52 +45,53 @@ open class SocketTestBase : TestBase() {
     @RelaxedMockK
     lateinit var mockedWebSocket: WebSocket
 
+    val scope = CoroutineScope(DispatcherProvider.IO)
+
     /**
      * Mocks
      * - network state, so we can fake going offline/online
      * - socket, so we can pretend the network is unavailable or we get an error
      */
-
     val networkStateProvider = NetworkStateProvider(
-        connectivityManager = context
-            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager,
+        scope = scope,
+        connectivityManager = context.getSystemService(
+            Context.CONNECTIVITY_SERVICE,
+        ) as ConnectivityManager,
     )
-    val scope = CoroutineScope(DispatcherProvider.IO)
+
+    val lifecycle = mockk<Lifecycle>(relaxed = true)
 
     fun buildOkHttp(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
-        return OkHttpClient.Builder()
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BASIC
-                },
-            )
-            .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        return OkHttpClient.Builder().addInterceptor(
+            HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BASIC
+            },
+        ).connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-            .build()
+            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
     }
 
-    fun collectEvents(socket: CoordinatorSocket): Pair<List<VideoEvent>, List<Throwable>> {
+    fun collectEvents(socket: CoordinatorSocketConnection): Pair<List<VideoEvent>, List<StreamWebSocketEvent.Error>> {
         val events = mutableListOf<VideoEvent>()
-        val errors = mutableListOf<Throwable>()
+        val errors = mutableListOf<StreamWebSocketEvent.Error>()
 
         runBlocking {
             val job = launch {
-                socket.events.collect {
+                socket.events().collect {
                     events.add(it)
                 }
             }
 
             val job2 = launch {
-                socket.errors.collect() {
-                    errors.add(it)
+                socket.errors().collect { err ->
+                    errors.add(err)
                 }
             }
 
             delay(1000)
-            socket.disconnect(PersistentSocket.DisconnectReason.ByRequest)
+            socket.disconnect()
             job.cancel()
             job2.cancel()
         }

@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call.signal.socket
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.CallGrantsUpdatedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -30,6 +31,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.ParticipantMigrationCompleteEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.events.PinsUpdatedEvent
 import io.getstream.video.android.core.events.PublisherAnswerEvent
@@ -111,6 +113,7 @@ public object RTCEventMapper {
                 JoinCallResponseEvent(
                     event.join_response.call_state!!,
                     counts,
+                    event.join_response.fast_reconnect_deadline_seconds,
                     event.join_response.reconnected,
                 )
             }
@@ -122,7 +125,7 @@ public object RTCEventMapper {
             event.ice_restart != null -> ICERestartEvent(event.ice_restart.peer_type)
 
             event.publisher_answer != null -> PublisherAnswerEvent(sdp = event.publisher_answer.sdp)
-            event.error != null -> ErrorEvent(event.error.error)
+            event.error != null -> ErrorEvent(event.error.error, event.error.reconnect_strategy)
 
             event.call_grants_updated != null -> CallGrantsUpdatedEvent(
                 event.call_grants_updated.current_grants,
@@ -131,11 +134,17 @@ public object RTCEventMapper {
 
             event.go_away != null -> GoAwayEvent(reason = event.go_away.reason)
 
+            event.participant_migration_complete != null -> ParticipantMigrationCompleteEvent
+
             event.pins_updated != null -> PinsUpdatedEvent(
                 event.pins_updated.pins.map {
                     PinUpdate(it.user_id, it.session_id)
                 },
             )
+
+            event.call_ended != null -> {
+                CallEndedSfuEvent(event.call_ended.reason.value)
+            }
 
             else -> {
                 logger.w { "Unknown event: $event" }

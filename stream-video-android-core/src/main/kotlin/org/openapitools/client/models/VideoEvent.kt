@@ -164,8 +164,14 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "user.reactivated" -> UserReactivatedEvent::class.java
             "user.unbanned" -> UserUnbannedEvent::class.java
             "user.updated" -> UserUpdatedEvent::class.java
-            else -> throw UnsupportedVideoEventException(type)
+            else -> UnsupportedVideoEvent::class.java
         }
+    }
+}
+
+class UnsupportedVideoEvent(val type: String) : VideoEvent() {
+    override fun getEventType(): String {
+        return type
     }
 }
 
