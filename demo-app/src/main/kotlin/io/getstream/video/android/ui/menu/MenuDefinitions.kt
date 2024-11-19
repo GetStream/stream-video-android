@@ -249,7 +249,7 @@ fun debugSubmenu(
         title = "Scale type",
         icon = Icons.Default.AspectRatio,
         items = scaleTypeMenu(
-            onSelectScaleType
+            onSelectScaleType,
         ),
     ),
     SubMenuItem(

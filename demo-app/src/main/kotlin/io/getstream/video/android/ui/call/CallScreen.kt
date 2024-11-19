@@ -45,7 +45,6 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -69,7 +68,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
-import io.getstream.log.StreamLog
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
@@ -174,7 +172,6 @@ fun CallScreen(
     } else {
         PaddingValues(0.dp)
     }
-
 
     VideoTheme {
         ChatDialog(

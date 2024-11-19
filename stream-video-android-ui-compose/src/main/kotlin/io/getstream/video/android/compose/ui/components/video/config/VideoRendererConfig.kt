@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.ui.components.video.DefaultMediaTrackFallbackContent
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import io.getstream.video.android.ui.common.util.StreamVideoExperimentalApi
 import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 
@@ -58,7 +57,9 @@ public data class VideoRendererModifiersConfig(
  * A scope to create a modifier config.
  */
 @StreamVideoUiDelicateApi
-@StreamVideoExperimentalApi("Experimental exposure of internal modifiers for the video renderer. Maybe removed in the future without notice.")
+@StreamVideoExperimentalApi(
+    "Experimental exposure of internal modifiers for the video renderer. Maybe removed in the future without notice.",
+)
 @Immutable
 public data class VideoRendererModifierScope(
     var containerModifier: BoxScope.() -> Modifier = defaultVideoContainerModifier,
@@ -68,7 +69,9 @@ public data class VideoRendererModifierScope(
 /**
  * Builders scope for the builder function for the internal component modifiers.
  */
-@StreamVideoExperimentalApi("Experimental exposure of internal modifiers for the video renderer. Maybe removed in the future without notice.")
+@StreamVideoExperimentalApi(
+    "Experimental exposure of internal modifiers for the video renderer. Maybe removed in the future without notice.",
+)
 @StreamVideoUiDelicateApi
 public inline fun videoComponentModifiers(
     block: VideoRendererModifierScope.() -> Unit,

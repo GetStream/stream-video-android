@@ -110,7 +110,7 @@ public fun VideoRenderer(
             if (mediaTrack != null) {
                 Box(
                     modifier = videoRendererConfig.modifiers.containerModifier.invoke(this),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     AndroidView(
                         factory = { context ->
