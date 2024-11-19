@@ -1556,7 +1556,7 @@ public class RtcSession internal constructor(
                         "video capture needs to be enabled before adding the local track",
                     )
                 }
-                createVideoLayers(transceiver, captureResolution)
+                createVideoLayers(captureResolution)
             } else if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
                 createScreenShareLayers(transceiver)
             } else {
@@ -1639,15 +1639,15 @@ public class RtcSession internal constructor(
         return media.mid.toString()
     }
 
-    private fun createVideoLayers(
-        transceiver: RtpTransceiver,
-        captureResolution: CaptureFormat,
-    ): List<VideoLayer> {
-        // we tell the Sfu which resolutions we're sending
-        return transceiver.sender.parameters.encodings.map {
+    private fun createVideoLayers(captureResolution: CaptureFormat): List<VideoLayer> {
+        // We tell the SFU which resolutions we're sending.
+        // Even if we use SVC, we still generate three layers [f, h, q]
+        // because we need to announce them to the SFU via the SetPublisher request,
+        // so we use the simulcast encodings here.
+        return publisher?.simulcastEncodings?.map {
             val scaleBy = it.scaleResolutionDownBy ?: 1.0
-            val width = captureResolution.width.div(scaleBy) ?: 0
-            val height = captureResolution.height.div(scaleBy) ?: 0
+            val width = captureResolution.width.div(scaleBy)
+            val height = captureResolution.height.div(scaleBy)
             val quality = ridToVideoQuality(it.rid)
 
             // We need to divide by 1000 because the the FramerateRange is multiplied
@@ -1664,7 +1664,7 @@ public class RtcSession internal constructor(
                 fps = fps,
                 quality = quality,
             )
-        }
+        } ?: emptyList()
     }
 
     private fun createScreenShareLayers(transceiver: RtpTransceiver): List<VideoLayer> {

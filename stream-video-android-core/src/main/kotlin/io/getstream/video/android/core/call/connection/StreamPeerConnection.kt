@@ -87,6 +87,10 @@ public class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
+    internal val simulcastEncodings by lazy { createSimulcastEncodings() }
+    internal val svcEncoding by lazy { createSvcEncoding() }
+    internal val screenShareEncoding by lazy { createScreenShareEncoding() }
+
     private val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
     /**
@@ -292,66 +296,13 @@ public class StreamPeerConnection(
         isUsingSvcCodec: Boolean = false,
     ): RtpTransceiverInit {
         val encodings = if (!isScreenShare) {
-            /**
-             * We create different RTP encodings for the transceiver.
-             * Full quality, represented by "f" ID.
-             * Half quality, represented by "h" ID.
-             * Quarter quality, represented by "q" ID.
-             *
-             * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
-             * for "half" and another half, or total quarter of maximum, for "quarter".
-             */
-            val quarterQuality = RtpParameters.Encoding(
-                "q",
-                true,
-                4.0,
-            ).apply {
-                maxBitrateBps = maxBitRate / 4
-            }
-
-            val halfQuality = RtpParameters.Encoding(
-                "h",
-                true,
-                2.0,
-            ).apply {
-                maxBitrateBps = maxBitRate / 2
-            }
-
-            val fullQuality = RtpParameters.Encoding(
-                "f",
-                true,
-                1.0,
-            ).apply {
-                maxBitrateBps = maxBitRate
-//            networkPriority = 3
-//            bitratePriority = 4.0
-            }
-
             if (!isUsingSvcCodec) {
-                listOf(quarterQuality, halfQuality, fullQuality)
+                simulcastEncodings
             } else {
-                // TODO: Here we should just add f, which we rename to q (see specs).
-                // But doing so makes the SetPublisher request return an error (probably SDP-related),
-                // so, for now, we just apply the scalabilityMode.
-                val newScalabilityMode = "L3T2_KEY"
-
-                listOf(
-                    quarterQuality.apply { scalabilityMode = newScalabilityMode },
-                    halfQuality.apply { scalabilityMode = newScalabilityMode },
-                    fullQuality.apply { scalabilityMode = newScalabilityMode },
-                )
+                svcEncoding
             }
         } else {
-            // this is aligned with iOS
-            val screenshareQuality = RtpParameters.Encoding(
-                "q",
-                true,
-                1.0,
-            ).apply {
-                maxBitrateBps = 1_000_000
-            }
-
-            listOf(screenshareQuality)
+            screenShareEncoding
         }
 
         return RtpTransceiverInit(
@@ -530,12 +481,78 @@ public class StreamPeerConnection(
 
     override fun onDataChannel(channel: DataChannel?): Unit = Unit
 
-    override fun toString(): String =
-        "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
-
     private fun String.mungeCodecs(): String {
         return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
     }
+
+    private fun createSimulcastEncodings(): List<RtpParameters.Encoding> {
+        /**
+         * We create different RTP encodings for the transceiver.
+         * Full quality, represented by "f" ID.
+         * Half quality, represented by "h" ID.
+         * Quarter quality, represented by "q" ID.
+         *
+         * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
+         * for "half" and another half, or total quarter of maximum, for "quarter".
+         */
+
+        val quarterQuality = RtpParameters.Encoding(
+            "q",
+            true,
+            4.0,
+        ).apply {
+            maxBitrateBps = maxBitRate / 4
+        }
+
+        val halfQuality = RtpParameters.Encoding(
+            "h",
+            true,
+            2.0,
+        ).apply {
+            maxBitrateBps = maxBitRate / 2
+        }
+
+        val fullQuality = RtpParameters.Encoding(
+            "f",
+            true,
+            1.0,
+        ).apply {
+            maxBitrateBps = maxBitRate
+//            networkPriority = 3
+//            bitratePriority = 4.0
+        }
+
+        return listOf(quarterQuality, halfQuality, fullQuality)
+    }
+
+    private fun createSvcEncoding(): List<RtpParameters.Encoding> {
+        val encoding = RtpParameters.Encoding(
+            "q",
+            true,
+            1.0,
+        ).apply {
+            maxBitrateBps = maxBitRate
+            scalabilityMode = "L3T2_KEY"
+        }
+
+        return listOf(encoding)
+    }
+
+    private fun createScreenShareEncoding(): List<RtpParameters.Encoding> {
+        // This is aligned with iOS
+        val encoding = RtpParameters.Encoding(
+            "q",
+            true,
+            1.0,
+        ).apply {
+            maxBitrateBps = 1_000_000
+        }
+
+        return listOf(encoding)
+    }
+
+    override fun toString(): String =
+        "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
 
     private companion object {
         private const val DEBUG_STATS = false
