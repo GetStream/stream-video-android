@@ -21,9 +21,13 @@ import android.os.Build
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MobileScreenShare
 import androidx.compose.material.icons.automirrored.filled.ReadMore
+import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
+import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.Crop
+import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
@@ -37,6 +41,7 @@ import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.VideoSettings
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
@@ -64,6 +69,7 @@ fun defaultStreamMenu(
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
+    onSelectScaleType: (VideoScalingType) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
 ) = buildList<MenuItem> {
@@ -138,6 +144,7 @@ fun defaultStreamMenu(
                     onSwitchSfuClick,
                     onSfuRejoinClick,
                     onSfuFastReconnectClick,
+                    onSelectScaleType,
                 ),
             ),
         )
@@ -196,6 +203,24 @@ fun reconnectMenu(
     ),
 )
 
+fun scaleTypeMenu(onSelectScaleType: (VideoScalingType) -> Unit): List<MenuItem> = listOf(
+    ActionMenuItem(
+        title = "Scale FIT",
+        icon = Icons.Default.CropFree,
+        action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_FIT) },
+    ),
+    ActionMenuItem(
+        title = "Scale FILL",
+        icon = Icons.Default.Crop,
+        action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_FILL) },
+    ),
+    ActionMenuItem(
+        title = "Scale BALANCED",
+        icon = Icons.Default.Balance,
+        action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_BALANCED) },
+    ),
+)
+
 /**
  * Optionally defines the debug sub-menu of the demo app.
  */
@@ -208,6 +233,7 @@ fun debugSubmenu(
     onSwitchSfuClick: () -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
+    onSelectScaleType: (VideoScalingType) -> Unit,
 ) = listOf(
     SubMenuItem(
         title = "Available video codecs",
@@ -218,6 +244,13 @@ fun debugSubmenu(
         title = "Toggle audio filter",
         icon = Icons.Default.Audiotrack,
         action = onToggleAudioFilterClick,
+    ),
+    SubMenuItem(
+        title = "Scale type",
+        icon = Icons.Default.AspectRatio,
+        items = scaleTypeMenu(
+            onSelectScaleType
+        ),
     ),
     SubMenuItem(
         title = "Reconnect V2",

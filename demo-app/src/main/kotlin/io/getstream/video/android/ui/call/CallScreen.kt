@@ -45,6 +45,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -68,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
+import io.getstream.log.StreamLog
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
@@ -91,6 +93,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
@@ -149,6 +152,7 @@ fun CallScreen(
     val scope = rememberCoroutineScope()
     val messageScope = rememberCoroutineScope()
     var showingLandscapeControls by remember { mutableStateOf(false) }
+    var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsState()
@@ -170,6 +174,7 @@ fun CallScreen(
     } else {
         PaddingValues(0.dp)
     }
+
 
     VideoTheme {
         ChatDialog(
@@ -320,6 +325,7 @@ fun CallScreen(
                                 call = call,
                                 participant = participant,
                                 style = style,
+                                scalingType = preferredScaleType,
                                 reactionContent = {
                                     CustomReactionContent(
                                         participant = participant,
@@ -500,6 +506,10 @@ fun CallScreen(
                 },
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
+                },
+                onSelectScaleType = {
+                    preferredScaleType = it
+                    isShowingSettingMenu = false
                 },
                 onShowCallStats = {
                     isShowingStats = true

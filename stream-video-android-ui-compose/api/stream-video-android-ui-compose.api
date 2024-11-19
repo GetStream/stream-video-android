@@ -1891,17 +1891,19 @@ public final class io/getstream/video/android/compose/ui/components/video/config
 public final class io/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun <init> (ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)V
-	public synthetic fun <init> (ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
-	public final fun component2 ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
-	public final fun component3 ()Lkotlin/jvm/functions/Function3;
-	public final fun copy (ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public final fun component4 ()Lkotlin/jvm/functions/Function3;
+	public final fun copy (ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFallbackContent ()Lkotlin/jvm/functions/Function3;
 	public final fun getMirrorStream ()Z
 	public final fun getScalingType ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public final fun getVideoComponentModifier ()Lkotlin/jvm/functions/Function1;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1909,20 +1911,23 @@ public final class io/getstream/video/android/compose/ui/components/video/config
 public final class io/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun <init> (ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)V
-	public synthetic fun <init> (ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
-	public final fun component2 ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
-	public final fun component3 ()Lkotlin/jvm/functions/Function3;
-	public final fun copy (ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;ZLio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public final fun component4 ()Lkotlin/jvm/functions/Function3;
+	public final fun copy (ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;ZLkotlin/jvm/functions/Function1;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFallbackContent ()Lkotlin/jvm/functions/Function3;
 	public final fun getMirrorStream ()Z
+	public final fun getVideoComponentModifier ()Lkotlin/jvm/functions/Function1;
 	public final fun getVideoScalingType ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 	public fun hashCode ()I
 	public final fun setFallbackContent (Lkotlin/jvm/functions/Function3;)V
 	public final fun setMirrorStream (Z)V
+	public final fun setVideoComponentModifier (Lkotlin/jvm/functions/Function1;)V
 	public final fun setVideoScalingType (Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;)V
 	public fun toString ()Ljava/lang/String;
 }

@@ -16,24 +16,86 @@
 
 package io.getstream.video.android.compose.ui.components.video.config
 
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.ui.components.video.DefaultMediaTrackFallbackContent
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
+import io.getstream.video.android.ui.common.util.StreamVideoExperimentalApi
+import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 
+private val defaultScalingType = VideoScalingType.SCALE_ASPECT_FILL
+private val defaultVideoContainerModifier: BoxScope.() -> Modifier = {
+    Modifier
+        .fillMaxSize()
+        .align(Alignment.Center)
+}
+private val defaultVideoComponentModifier: BoxScope.() -> Modifier =
+    {
+        Modifier
+            .wrapContentSize()
+            .align(Alignment.Center)
+    }
+
+/**
+ * The [VideoRenderer] consists of two components one [Box] that acts as a container and another [AndroidView] that holds the actual [TextureView] for rendering the video.
+ * Only modify these modifiers if you want to change the default behavior of the [VideoRenderer] and understand exactly the effect they have on the layout.
+ */
+@StreamVideoUiDelicateApi
+@Immutable
+public data class VideoRendererModifiersConfig(
+    val containerModifier: BoxScope.() -> Modifier = defaultVideoContainerModifier,
+    val componentModifier: BoxScope.() -> Modifier = defaultVideoComponentModifier,
+)
+
+/**
+ * A scope to create a modifier config.
+ */
+@StreamVideoUiDelicateApi
+@StreamVideoExperimentalApi("Experimental exposure of internal modifiers for the video renderer. Maybe removed in the future without notice.")
+@Immutable
+public data class VideoRendererModifierScope(
+    var containerModifier: BoxScope.() -> Modifier = defaultVideoContainerModifier,
+    var componentModifier: BoxScope.() -> Modifier = defaultVideoComponentModifier,
+)
+
+/**
+ * Builders scope for the builder function for the internal component modifiers.
+ */
+@StreamVideoExperimentalApi("Experimental exposure of internal modifiers for the video renderer. Maybe removed in the future without notice.")
+@StreamVideoUiDelicateApi
+public inline fun videoComponentModifiers(
+    block: VideoRendererModifierScope.() -> Unit,
+): VideoRendererModifiersConfig {
+    val scope = VideoRendererModifierScope()
+    scope.block()
+    return VideoRendererModifiersConfig(
+        containerModifier = scope.containerModifier,
+        componentModifier = scope.componentModifier,
+    )
+}
+
+@OptIn(StreamVideoUiDelicateApi::class)
 @Immutable
 public data class VideoRendererConfig(
     val mirrorStream: Boolean = false,
-    val scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    val modifiers: VideoRendererModifiersConfig = VideoRendererModifiersConfig(),
+    val scalingType: VideoScalingType = defaultScalingType,
     val fallbackContent: @Composable (Call) -> Unit = {},
 )
 
+@OptIn(StreamVideoUiDelicateApi::class)
 @Immutable
 public data class VideoRendererConfigCreationScope(
     public var mirrorStream: Boolean = false,
-    public var videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    public var modifiers: VideoRendererModifiersConfig = VideoRendererModifiersConfig(),
+    public var videoScalingType: VideoScalingType = defaultScalingType,
     public var fallbackContent: @Composable (Call) -> Unit = {
         DefaultMediaTrackFallbackContent(
             modifier = Modifier,
@@ -45,6 +107,7 @@ public data class VideoRendererConfigCreationScope(
 /**
  * A builder method for a video renderer config.
  */
+@OptIn(StreamVideoUiDelicateApi::class)
 public inline fun videoRenderConfig(
     block: VideoRendererConfigCreationScope.() -> Unit = {},
 ): VideoRendererConfig {
@@ -52,6 +115,7 @@ public inline fun videoRenderConfig(
     scope.block()
     return VideoRendererConfig(
         mirrorStream = scope.mirrorStream,
+        modifiers = scope.modifiers,
         scalingType = scope.videoScalingType,
         fallbackContent = scope.fallbackContent,
     )
