@@ -1,5 +1,7 @@
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import io.getstream.video.configureAndroidCompose
+import io.getstream.video.configureFlavors
 import io.getstream.video.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -23,6 +25,10 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
                         excludes += "/META-INF/{AL2.0,LGPL2.1}"
                     }
                 }
+            }
+
+            extensions.configure<ApplicationExtension> {
+                configureFlavors(this)
             }
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")

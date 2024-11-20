@@ -18,6 +18,8 @@
 import com.android.build.api.variant.BuildConfigField
 import com.android.build.api.variant.ResValue
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
+import io.getstream.video.FlavorDimension
+import io.getstream.video.VideoDemoFlavor
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
 import java.util.*
@@ -45,6 +47,7 @@ android {
         targetSdk = Configuration.targetSdk
         versionCode = 1
         versionName = Configuration.streamVideoCallGooglePlayVersion
+        missingDimensionStrategy(FlavorDimension.contentType.name, VideoDemoFlavor.development.name)
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -94,6 +97,7 @@ android {
         }
         getByName("release") {
             isMinifyEnabled = true
+            baselineProfile.automaticGenerationDuringBuild = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -107,17 +111,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
             proguardFiles("benchmark-rules.pro")
-        }
-    }
-
-    flavorDimensions += "environment"
-    productFlavors {
-        create("development") {
-            dimension = "environment"
-            applicationIdSuffix = ".dogfooding"
-        }
-        create("production") {
-            dimension = "environment"
         }
     }
 
@@ -136,6 +129,13 @@ android {
 
     baselineProfile {
         mergeIntoMain = true
+
+        // Don't build on every iteration of a full assemble.
+        // Instead enable generation directly for the release build variant.
+        automaticGenerationDuringBuild = false
+
+        // Make use of Dex Layout Optimizations via Startup Profiles
+        dexLayoutOptimization = true
     }
 
     playConfigs {
