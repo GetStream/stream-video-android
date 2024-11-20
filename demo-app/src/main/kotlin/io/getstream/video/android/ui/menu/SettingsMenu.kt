@@ -50,6 +50,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
@@ -75,6 +76,7 @@ internal fun SettingsMenu(
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
     onShowCallStats: () -> Unit,
+    onSelectScaleType: (VideoScalingType) -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -237,6 +239,7 @@ internal fun SettingsMenu(
                 onSfuRejoinClick = onSfuRejoinClick,
                 onSfuFastReconnectClick = onSfuFastReconnectClick,
                 isScreenShareEnabled = isScreenSharing,
+                onSelectScaleType = onSelectScaleType,
                 loadRecordings = onLoadRecordings,
             ),
         )
@@ -298,6 +301,7 @@ private fun SettingsMenuPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onSelectScaleType = {},
                 onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
             ),
