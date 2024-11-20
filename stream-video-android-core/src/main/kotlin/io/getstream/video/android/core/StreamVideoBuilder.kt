@@ -208,7 +208,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             callServiceConfig = callServiceConfig
                 ?: callServiceConfig().copy(
                     runCallServiceInForeground = runForegroundServiceForCalls,
-                    audioUsage = audioUsage,
                 ),
             testSfuAddress = localSfuAddress,
             sounds = sounds,

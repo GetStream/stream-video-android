@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
-import android.media.AudioAttributes
+import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.model.StreamCallId
 
 // Constants
@@ -35,13 +35,27 @@ internal const val ANY_MARKER = "ALL_CALL_TYPES"
  * @see livestreamGuestCallServiceConfig
  * @see audioCallServiceConfig
  */
-public data class CallServiceConfig(
+
+public data class CallServiceConfig
+@Deprecated(
+    message = "The audioUsage parameter is deprecated. Set audioUsage directly in StreamVideoBuilder constructor.",
+    replaceWith = ReplaceWith("CallServiceConfig(runCallServiceInForeground, callServicePerType)"),
+)
+constructor(
     val runCallServiceInForeground: Boolean = true,
-    val audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+    @Deprecated(
+        "This property is ignored. Set audioUsage directly in StreamVideoBuilder constructor.",
+    )
+    val audioUsage: Int = defaultAudioUsage,
     val callServicePerType: Map<String, Class<*>> = mapOf(
         Pair(ANY_MARKER, CallService::class.java),
     ),
-)
+) {
+    constructor(
+        runCallServiceInForeground: Boolean = true,
+        callServicePerType: Map<String, Class<*>>,
+    ) : this(runCallServiceInForeground, defaultAudioUsage, callServicePerType)
+}
 
 /**
  * Returns the default call foreground service configuration.
@@ -91,7 +105,6 @@ public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
 public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
         runCallServiceInForeground = true,
-        audioUsage = AudioAttributes.USAGE_MEDIA,
         callServicePerType = mapOf(
             Pair(ANY_MARKER, CallService::class.java),
             Pair("livestream", LivestreamViewerService::class.java),
