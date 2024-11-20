@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(StreamVideoUiDelicateApi::class)
+
 package io.getstream.video.android.compose.ui.components.video
 
 import androidx.compose.foundation.Image
@@ -55,6 +57,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
+import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 
 @Composable
@@ -67,7 +70,6 @@ public fun VideoRenderer(
 ) {
     Box(
         modifier = modifier
-            .fillMaxSize()
             .testTag("video_renderer_container"),
     ) {
         if (LocalInspectionMode.current) {
@@ -106,7 +108,10 @@ public fun VideoRenderer(
             }
 
             if (mediaTrack != null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = videoRendererConfig.modifiers.containerModifier.invoke(this),
+                    contentAlignment = Alignment.Center,
+                ) {
                     AndroidView(
                         factory = { context ->
                             StreamVideoTextureViewRenderer(context).apply {
@@ -132,8 +137,11 @@ public fun VideoRenderer(
                             )
                             setupVideo(mediaTrack, v)
                         },
-                        modifier = Modifier
-                            .fillMaxSize()
+                        modifier = videoRendererConfig
+                            .modifiers
+                            .componentModifier(
+                                this,
+                            )
                             .testTag("video_renderer"),
                     )
                 }
