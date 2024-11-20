@@ -30,3 +30,35 @@ package io.getstream.video.android.ui.common.util
     message = "This is a delicate Stream Video SDK Api, overriding this API may interfere on how the activity handles the call state.",
 )
 public annotation class StreamCallActivityDelicateApi()
+
+@MustBeDocumented
+@Retention(AnnotationRetention.BINARY)
+@Target(
+    AnnotationTarget.CLASS,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.PROPERTY,
+)
+@RequiresOptIn(
+    level = RequiresOptIn.Level.WARNING,
+    message = "This is a delicate Stream Video SDK Api, overriding this API may interfere on how the video is rendered and may introduce unwanted behavior.",
+)
+public annotation class StreamVideoUiDelicateApi()
+
+@MustBeDocumented
+@Retention(AnnotationRetention.BINARY)
+@Target(
+    AnnotationTarget.CLASS,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.FIELD,
+    AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.PROPERTY,
+)
+@RequiresOptIn(
+    level = RequiresOptIn.Level.ERROR,
+    message = "This is an experimental Stream Video SDK Api, it may have breaking changes without notice.",
+)
+public annotation class StreamVideoExperimentalApi(val message: String)
