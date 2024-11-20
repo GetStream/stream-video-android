@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.0.18
+            <div class="library-version">1.0.19
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -58,7 +58,7 @@
                 <div class="sidebar--inner" id="sideMenu"></div>
             </div>
             <div id="main">
-<div class="main-content" data-page-type="member" id="content" pageids="stream-video-android-ui-compose::io.getstream.video.android.compose.ui.components.call.renderer//ParticipantVideo/#io.getstream.video.android.core.Call#io.getstream.video.android.core.ParticipantState#androidx.compose.ui.Modifier#io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle#kotlin.Function2[androidx.compose.foundation.layout.BoxScope,io.getstream.video.android.core.ParticipantState,kotlin.Unit]#kotlin.Function2[androidx.compose.foundation.layout.BoxScope,io.getstream.video.android.core.model.NetworkQuality,kotlin.Unit]#kotlin.Function1[io.getstream.video.android.core.Call,kotlin.Unit]#kotlin.Function2[androidx.compose.foundation.layout.BoxScope,io.getstream.video.android.core.ParticipantState,kotlin.Unit]#kotlin.Function4[androidx.compose.foundation.layout.BoxScope,kotlin.collections.List[io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction],io.getstream.video.android.core.Call,io.getstream.video.android.core.ParticipantState,kotlin.Unit]/PointingToDeclaration//-1889015313">
+<div class="main-content" data-page-type="member" id="content" pageids="stream-video-android-ui-compose::io.getstream.video.android.compose.ui.components.call.renderer//ParticipantVideo/#io.getstream.video.android.core.Call#io.getstream.video.android.core.ParticipantState#androidx.compose.ui.Modifier#io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle#kotlin.Function2[androidx.compose.foundation.layout.BoxScope,io.getstream.video.android.core.ParticipantState,kotlin.Unit]#kotlin.Function2[androidx.compose.foundation.layout.BoxScope,io.getstream.video.android.core.model.NetworkQuality,kotlin.Unit]#io.getstream.video.android.compose.ui.components.video.VideoScalingType#kotlin.Function1[io.getstream.video.android.core.Call,kotlin.Unit]#kotlin.Function2[androidx.compose.foundation.layout.BoxScope,io.getstream.video.android.core.ParticipantState,kotlin.Unit]#kotlin.Function4[androidx.compose.foundation.layout.BoxScope,kotlin.collections.List[io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction],io.getstream.video.android.core.Call,io.getstream.video.android.core.ParticipantState,kotlin.Unit]/PointingToDeclaration//-1889015313">
   <div class="breadcrumbs"><a href="../index.html">stream-video-android-ui-compose</a><span class="delimiter">/</span><a href="index.html">io.getstream.video.android.compose.ui.components.call.renderer</a><span class="delimiter">/</span><span class="current">ParticipantVideo</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Participant</span><wbr><span><span>Video</span></span></h1>
@@ -72,7 +72,7 @@
                 .align(BottomEnd)
                 .height(VideoTheme.dimens.componentHeightM),
         )
-    }<span class="token punctuation">, </span></span><span class="parameter ">videoFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
+    }<span class="token punctuation">, </span></span><span class="parameter ">scalingType<span class="token operator">: </span><a href="../io.getstream.video.android.compose.ui.components.video/-video-scaling-type/index.html">VideoScalingType</a><span class="token operator"> = </span>VideoScalingType.SCALE_ASPECT_FILL<span class="token punctuation">, </span></span><span class="parameter ">videoFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
         UserAvatarBackground(userImage = userImage, userName = userName)
