@@ -91,6 +91,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
@@ -149,6 +150,7 @@ fun CallScreen(
     val scope = rememberCoroutineScope()
     val messageScope = rememberCoroutineScope()
     var showingLandscapeControls by remember { mutableStateOf(false) }
+    var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsState()
@@ -320,6 +322,7 @@ fun CallScreen(
                                 call = call,
                                 participant = participant,
                                 style = style,
+                                scalingType = preferredScaleType,
                                 reactionContent = {
                                     CustomReactionContent(
                                         participant = participant,
@@ -500,6 +503,10 @@ fun CallScreen(
                 },
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
+                },
+                onSelectScaleType = {
+                    preferredScaleType = it
+                    isShowingSettingMenu = false
                 },
                 onShowCallStats = {
                     isShowingStats = true

@@ -225,6 +225,7 @@ private fun DynamicMenuPreview() {
                 onDeviceSelected = {},
                 onShowFeedback = {},
                 onNoiseCancellation = {},
+                onSelectScaleType = {},
                 loadRecordings = { emptyList() },
             ),
         )
@@ -252,6 +253,7 @@ private fun DynamicMenuDebugOptionPreview() {
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onSelectScaleType = { },
                 onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
             ),
@@ -272,6 +274,7 @@ private fun DynamicMenuDebugPreview() {
                 onRestartPublisherIceClick = { },
                 onRestartSubscriberIceClick = { },
                 onToggleAudioFilterClick = { },
+                onSelectScaleType = { },
                 onSwitchSfuClick = { },
             ),
         )
