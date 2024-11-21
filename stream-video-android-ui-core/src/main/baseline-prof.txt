@@ -5,4 +5,6 @@ Lio/getstream/video/android/ui/common/R$drawable;
 PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;-><init>(Landroid/content/Context;)V
 PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->getLogger()Lio/getstream/log/TaggedLogger;
 PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onDetachedFromWindow()V
+PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onLayout(ZIIII)V
+PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onSurfaceTextureAvailable(Landroid/graphics/SurfaceTexture;II)V
 PLio/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer;->onSurfaceTextureDestroyed(Landroid/graphics/SurfaceTexture;)Z
