@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import io.getstream.video.android.Configuration
+import io.getstream.video.configureFlavors
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -62,16 +63,15 @@ android {
         }
     }
 
-    flavorDimensions += "environment"
-    productFlavors {
-        create("development") {
-            dimension = "environment"
-            proguardFiles("benchmark-rules.pro")
-        }
-        create("production") {
-            dimension = "environment"
-            proguardFiles("benchmark-rules.pro")
-        }
+    // Use the same flavor dimensions as the application to allow generating Baseline Profiles on prod,
+    // which is more close to what will be shipped to users (no fake data), but has ability to run the
+    // benchmarks on demo, so we benchmark on stable data.
+    configureFlavors(this) { flavor ->
+        buildConfigField(
+            "String",
+            "APP_FLAVOR_SUFFIX",
+            "\"${flavor.applicationIdSuffix ?: ""}\""
+        )
     }
 
     targetProjectPath = ":demo-app"
