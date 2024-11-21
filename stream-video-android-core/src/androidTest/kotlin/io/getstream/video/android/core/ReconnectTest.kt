@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
@@ -26,7 +25,6 @@ import org.junit.Ignore
 import org.junit.Test
 import org.webrtc.PeerConnection
 import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Connection state shows if we've established a connection with the SFU
