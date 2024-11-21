@@ -492,6 +492,7 @@ public class RtcSession internal constructor(
     suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
         logger.i { "[connect] #sfu; #track; no args" }
         val request = JoinRequest(
+            subscriber_sdp = getSubscriberSdp().description,
             session_id = sessionId,
             token = sfuToken,
             fast_reconnect = false,
@@ -1823,13 +1824,14 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal fun fastReconnect(reconnectDetails: ReconnectDetails?) {
+    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?) {
         // Fast reconnect, send a JOIN request on the same SFU
         // and restart ICE on publisher
         logger.d { "[fastReconnect] Starting fast reconnect." }
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
         val request = JoinRequest(
+            subscriber_sdp = getSubscriberSdp().description,
             session_id = sessionId,
             token = sfuToken,
             client_details = clientDetails,
@@ -1872,147 +1874,6 @@ public class RtcSession internal constructor(
         stateJob?.cancel()
         eventJob?.cancel()
         errorJob?.cancel()
-    }
-
-    suspend fun switchSfu(
-        sfuName: String,
-        sfuUrl: String,
-        sfuToken: String,
-        remoteIceServers: List<IceServer>,
-        failedToSwitch: () -> Unit,
-    ) {
-        logger.i { "[switchSfu] #sfu; #track; from ${this.sfuUrl} to $sfuUrl" }
-
-        // Prepare SDP
-        val getSdp = suspend {
-            getSubscriberSdp().description
-        }
-
-        // Prepare migration object for SFU socket
-        val migration = suspend {
-            Migration(
-                from_sfu_id = sfuName,
-                announced_tracks = getPublisherTracks(getSdp.invoke()),
-                subscriptions = subscriptions.value,
-            )
-        }
-        // Create a parallel SFU socket
-        sfuConnectionMigrationModule = SfuConnectionModule(
-            context = clientImpl.context,
-            apiKey = apiKey,
-            apiUrl = sfuUrl,
-            wssUrl = sfuWsUrl,
-            connectionTimeoutInMs = 10000L,
-            userToken = sfuToken,
-            lifecycle = lifecycle,
-        )
-
-        // Connect to SFU socket
-        val migrationData = migration.invoke()
-        val request = JoinRequest(
-            session_id = sessionId,
-            token = sfuToken,
-            subscriber_sdp = getSdp.invoke(),
-            fast_reconnect = false,
-            migration = migrationData,
-            client_details = clientDetails,
-        )
-
-        sfuConnectionModule.socketConnection.whenConnected {
-            sfuConnectionMigrationModule!!.socketConnection.sendEvent(
-                SfuDataRequest(SfuRequest(join_request = request)),
-            )
-        }
-        // Wait until the socket connects - if it fails to connect then return to "Reconnecting"
-        // state (to make sure that the full reconnect logic will kick in)
-        coroutineScope.launch {
-            sfuConnectionMigrationModule!!.socketConnection.state().collect { it ->
-                when (it) {
-                    is SfuSocketState.Connected -> {
-                        logger.d { "[switchSfu] Migration SFU socket state changed to Connected" }
-
-                        // Disconnect the old SFU and stop listening to SFU stateflows
-                        eventJob?.cancel()
-                        errorJob?.cancel()
-                        // Cleanup called after the migration is successful
-                        // sfuConnectionModule.sfuSocket.cleanup()
-
-                        // Make the new SFU the currently used one
-                        setSfuConnectionModule(sfuConnectionMigrationModule!!)
-                        sfuConnectionMigrationModule = null
-
-                        // We are connected to the new SFU, change the RtcSession parameters to
-                        // match the new SFU
-                        this@RtcSession.sfuUrl = sfuUrl
-                        this@RtcSession.sfuToken = sfuToken
-                        this@RtcSession.remoteIceServers = remoteIceServers
-                        this@RtcSession.iceServers = buildRemoteIceServers(remoteIceServers)
-
-                        // reconnect socket listeners
-                        listenToSfuSocket()
-
-                        var tempSubscriber = subscriber
-
-                        // step 1 setup the peer connections
-                        subscriber = createSubscriber()
-
-                        // This makes sure that the new subscriber starts listening to the existing tracks
-                        // Without this the peer connection state would stay in NEW
-                        setVideoSubscriptions()
-
-                        // Start emiting the new subscriber connection state (used by CallHealthMonitor)
-                        listenToSubscriberConnection()
-
-                        // Necessary after SFU migration. This will trigger onNegotiationNeeded
-                        publisher?.connection?.restartIce()
-
-                        coroutineScope.launch {
-                            subscriber?.state?.collect {
-                                if (it == PeerConnectionState.CONNECTED) {
-                                    logger.d { "[switchSfu] Migration subscriber state changed to Connected" }
-                                    tempSubscriber?.let { tempSubscriberValue ->
-                                        tempSubscriberValue.connection.close()
-                                    }
-                                    cancel()
-                                } else if (it == PeerConnectionState.CLOSED ||
-                                    it == PeerConnectionState.DISCONNECTED ||
-                                    it == PeerConnectionState.FAILED
-                                ) {
-                                    logger.d { "[switchSfu] Failed to migrate - subscriber didn't connect ($it)" }
-                                    // Something when wrong with the new subscriber connection
-                                    // We give up the migration and wait for full reconnect
-                                    failedToSwitch()
-                                    cancel()
-                                }
-                            }
-                        }
-
-                        updatePeerState()
-
-                        // Only listen for the connection event once
-                        cancel()
-                    }
-
-                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
-                        logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected permanently ${it.error}" }
-                        failedToSwitch()
-                        cancel()
-                    }
-
-                    is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
-                        logger.d { "[switchSfu] Failed to migrate - SFU socket disconnected temporarily ${it.error}" }
-                        // We don't wait for the socket to retry during migration
-                        // In this case we will fall back to full-reconnect
-                        failedToSwitch()
-                        cancel()
-                    }
-
-                    else -> {
-                        // Wait
-                    }
-                }
-            }
-        }
     }
 
     internal fun leaveWithReason(reason: String) {
