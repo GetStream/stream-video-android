@@ -77,7 +77,20 @@ message SfuEvent {
     ParticipantUpdated participant_updated = 24;
     // ParticipantMigrationComplete is sent when the participant migration is complete
     ParticipantMigrationComplete participant_migration_complete = 25;
+    // CodecNegotiationComplete is sent to signal the completion of a codec negotiation.
+    // SDKs can safely stop previous transceivers
+    CodecNegotiationComplete codec_negotiation_complete = 26;
+    // ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
+    ChangePublishOptions change_publish_options = 27;
   }
+}
+
+message ChangePublishOptions {
+  models.PublishOption publish_option = 1;
+}
+
+message CodecNegotiationComplete {
+
 }
 
 message ParticipantMigrationComplete{
@@ -158,6 +171,7 @@ message JoinRequest {
   string session_id = 2;
   // dumb SDP that allow us to extract subscriber's decode codecs
   string subscriber_sdp = 3;
+  string publisher_sdp = 8;
   models.ClientDetails client_details = 4;
   // Deprecated: use ReconnectDetails instead
   Migration migration = 5 [deprecated = true];
@@ -173,6 +187,7 @@ message JoinRequest {
   bool fast_reconnect = 6 [deprecated = true];
 
   ReconnectDetails reconnect_details = 7;
+  repeated models.PublishOption preferred_publish_options = 9;
 }
 
 message ReconnectDetails {
@@ -195,6 +210,7 @@ message JoinResponse {
   models.CallState call_state = 1;
   bool reconnected = 2;
   int32 fast_reconnect_deadline_seconds = 3;
+  repeated models.PublishOption publish_options = 4;
 }
 
 // ParticipantJoined is fired when a user joins a call
@@ -256,21 +272,9 @@ message AudioLevelChanged {
   repeated AudioLevel audio_levels = 1;
 }
 
-message AudioMediaRequest {
-  int32 channel_count = 1;
-}
-
 message AudioSender {
-  AudioMediaRequest media_request = 1;
   models.Codec codec = 2;
 }
-
-message VideoMediaRequest {
-  int32 ideal_height = 1;
-  int32 ideal_width = 2;
-  int32 ideal_frame_rate = 3;
-}
-
 
 // VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
 // The parameters are specified here - https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpEncodingParameters
@@ -280,19 +284,12 @@ message VideoLayerSetting {
   bool active = 2;
   int32 max_bitrate = 3;
   float scale_resolution_down_by = 4;
-  enum Priority {
-    PRIORITY_HIGH_UNSPECIFIED = 0;
-    PRIORITY_LOW = 1;
-    PRIORITY_MEDIUM = 2;
-    PRIORITY_VERY_LOW = 3;
-  }
-  Priority priority = 5;
   models.Codec codec = 6;
   uint32 max_framerate = 7;
+  string scalability_mode = 8;
 }
 
 message VideoSender {
-  VideoMediaRequest media_request = 1;
   models.Codec codec = 2;
   repeated VideoLayerSetting layers = 3;
 }

@@ -108,14 +108,21 @@ message VideoLayer {
   VideoQuality quality = 6;
 }
 
+message PublishOption {
+  TrackType track_type = 1;
+  Codec codec = 2;
+  int32 bitrate = 3;
+  int32 fps = 4;
+  int32 max_spatial_layers = 5;
+  int32 max_temporal_layers = 6;
+}
 
 message Codec {
-  uint32 payload_type = 1;
-  string name = 2;
-  string fmtp_line = 3;
-  uint32 clock_rate = 4;
-  string encoding_parameters = 5;
-  repeated string feedbacks = 6;
+  uint32 payload_type = 16;
+  string name = 10;
+  uint32 clock_rate = 14;
+  string encoding_parameters = 15;
+  string fmtp = 12;
 }
 
 message ICETrickle {
@@ -133,6 +140,7 @@ message TrackInfo {
   bool dtx = 7;
   bool stereo = 8;
   bool red = 9;
+  bool muted = 10;
 }
 
 enum ErrorCode {
@@ -284,3 +292,44 @@ enum WebsocketReconnectStrategy {
   // SDK should migrate to a new SFU instance
   WEBSOCKET_RECONNECT_STRATEGY_MIGRATE = 4;
 };
+
+message InputDevices {
+  repeated string available_devices = 1;
+  string current_device = 2;
+  bool is_permitted = 3;
+}
+
+message AndroidState {
+  AndroidThermalState thermal_state = 1;
+  bool is_power_saver_mode = 2;
+}
+
+message AppleState {
+  AppleThermalState thermal_state = 1;
+
+  // https://developer.apple.com/documentation/foundation/processinfo/1617047-islowpowermodeenabled
+  bool is_low_power_mode_enabled = 2;
+}
+
+// AndroidThermalState is reported by the Android API. The full list of values is documented here
+// https://developer.android.com/reference/android/os/PowerManager.html#getCurrentThermalStatus()
+enum AndroidThermalState {
+  ANDROID_THERMAL_STATE_UNSPECIFIED = 0;
+  ANDROID_THERMAL_STATE_NONE = 1;
+  ANDROID_THERMAL_STATE_LIGHT = 2;
+  ANDROID_THERMAL_STATE_MODERATE = 3;
+  ANDROID_THERMAL_STATE_SEVERE = 4;
+  ANDROID_THERMAL_STATE_CRITICAL = 5;
+  ANDROID_THERMAL_STATE_EMERGENCY = 6;
+  ANDROID_THERMAL_STATE_SHUTDOWN = 7;
+}
+
+// AppleThermalState is the thermal state as reported by Apple devices when available or applicable to the platform.
+// The full list of states (enum) is available here: https://developer.apple.com/documentation/foundation/processinfo/thermalstate
+enum AppleThermalState {
+  APPLE_THERMAL_STATE_UNSPECIFIED = 0;
+  APPLE_THERMAL_STATE_NOMINAL = 1;
+  APPLE_THERMAL_STATE_FAIR = 2;
+  APPLE_THERMAL_STATE_SERIOUS = 3;
+  APPLE_THERMAL_STATE_CRITICAL = 4;
+}
