@@ -17,10 +17,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             extensions.configure<BaseAppModuleExtension> {
                 configureKotlinAndroid(this)
             }
-
-            extensions.configure<ApplicationExtension> {
-                configureFlavors(this)
-            }
         }
     }
 }

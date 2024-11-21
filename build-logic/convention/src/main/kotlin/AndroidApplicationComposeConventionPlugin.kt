@@ -27,10 +27,6 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
                 }
             }
 
-            extensions.configure<ApplicationExtension> {
-                configureFlavors(this)
-            }
-
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
             dependencies {
                 "implementation"(libs.findLibrary("androidx.compose.tracing").get())

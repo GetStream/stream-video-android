@@ -21,6 +21,7 @@ import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import io.getstream.video.FlavorDimension
 import io.getstream.video.VideoDemoFlavor
 import io.getstream.video.android.Configuration
+import io.getstream.video.configureFlavors
 import java.io.FileInputStream
 import java.util.*
 
@@ -85,6 +86,8 @@ android {
             storePassword = "android"
         }
     }
+
+    configureFlavors(this)
 
     buildTypes {
         getByName("debug") {
