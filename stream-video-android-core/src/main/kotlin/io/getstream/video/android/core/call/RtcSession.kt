@@ -40,7 +40,9 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.CallEndedSfuEvent
+import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.CodecNegotiationCompleteEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -507,8 +509,8 @@ public class RtcSession internal constructor(
                     codec = Codec(98, "AV1", 90000),
                     bitrate = 1_000_000,
                     max_spatial_layers = 3,
-                )
-            )
+                ),
+            ),
             // preferred_publish_options = // TODO-neg: add preferred publish options
         )
         logger.d { "Connecting RTC, $request" }
@@ -542,11 +544,11 @@ public class RtcSession internal constructor(
 
         tempPeerConnection?.connection?.addTransceiver(
             MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
-            RtpTransceiver.RtpTransceiverInit(direction)
+            RtpTransceiver.RtpTransceiverInit(direction),
         )
         tempPeerConnection?.connection?.addTransceiver(
             MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
-            RtpTransceiver.RtpTransceiverInit(direction)
+            RtpTransceiver.RtpTransceiverInit(direction),
         )
 
         val offerResult = tempPeerConnection?.createOffer()
@@ -1036,6 +1038,73 @@ public class RtcSession internal constructor(
         }
     }
 
+    private val storedPublishOptions: MutableMap<TrackType, PublishOption> = mutableMapOf() // TODO-neg: Needed because camera may be off
+    private var handleCodecNegotiationComplete: (() -> Unit)? = null
+
+    private fun updatePublishOptions(publishOption: PublishOption?) {
+        logger.d { "[updatePublishOptions] #codec-negotiation; publishOption: $publishOption" }
+
+        publishOption?.let {
+            storedPublishOptions[it.track_type] = it
+            switchCodec(it)
+        }
+    }
+
+    private fun switchCodec(publishOption: PublishOption) {
+        logger.d { "[switchCodec] #codec-negotiation; publishOption: $publishOption" }
+
+        // TODO-neg: will we need to also match SCREENSHARE track types?
+        val mediaType = when (publishOption.track_type) {
+            TrackType.TRACK_TYPE_VIDEO -> MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
+            TrackType.TRACK_TYPE_AUDIO -> MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
+            else -> return
+        }
+        val transceiver = publisher?.connection?.transceivers?.firstOrNull {
+            it.mediaType == mediaType
+        }
+
+        transceiver?.sender?.track()?.let { track ->
+            if (track.isPublishing()) {
+                logger.d { "[switchCodec] #codec-negotiation; Found transceiver and track is publishing" }
+
+                // TODO-neg: Will this lambda be available when te event comes in?
+                handleCodecNegotiationComplete = {
+                    val result = transceiver.sender?.setTrack(null, true)
+                    handleCodecNegotiationComplete = null
+
+                    logger.d { "[handleCodecNegotiationComplete] #codec-negotiation; setTrack result: $result" }
+                }
+
+                val newTrack = track // TODO-neg: clone track
+                addNewTransceiver(newTrack)
+            }
+        }
+    }
+
+    private fun MediaStreamTrack.isPublishing() = this.state() == MediaStreamTrack.State.LIVE
+
+    private fun addNewTransceiver(track: MediaStreamTrack) {
+        when (track.kind()) {
+            "video" -> publisher?.addVideoTransceiver(
+                track,
+                listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
+                false,
+            )
+            "audio" -> publisher?.addAudioTransceiver(
+                track,
+                listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
+            )
+            else -> logger.d {
+                "[addNewTransceiver] #codec-negotiation; Unsupported track kind: ${track.kind()}"
+            }
+        }
+        // TODO-neg: screenshare support?
+
+        logger.d {
+            "[addNewTransceiver] #codec-negotiation; Added new transceiver for track kind: ${track.kind()}"
+        }
+    }
+
     private val defaultVideoDimension = VideoDimension(1080, 2340)
 
     /**
@@ -1186,6 +1255,12 @@ public class RtcSession internal constructor(
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
+
+                    is ChangePublishOptionsEvent -> updatePublishOptions(
+                        event.changePublishOptions.publish_option,
+                    )
+
+                    is CodecNegotiationCompleteEvent -> handleCodecNegotiationComplete?.invoke()
 
                     is TrackPublishedEvent -> {
                         updatePublishState(

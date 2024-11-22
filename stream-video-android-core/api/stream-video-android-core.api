@@ -3006,6 +3006,17 @@ public final class io/getstream/video/android/core/events/CallGrantsUpdatedEvent
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/events/ChangePublishOptionsEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/event/ChangePublishOptions;)V
+	public final fun component1 ()Lstream/video/sfu/event/ChangePublishOptions;
+	public final fun copy (Lstream/video/sfu/event/ChangePublishOptions;)Lio/getstream/video/android/core/events/ChangePublishOptionsEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/ChangePublishOptionsEvent;Lstream/video/sfu/event/ChangePublishOptions;ILjava/lang/Object;)Lio/getstream/video/android/core/events/ChangePublishOptionsEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChangePublishOptions ()Lstream/video/sfu/event/ChangePublishOptions;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/events/ChangePublishQualityEvent : io/getstream/video/android/core/events/SfuDataEvent {
 	public fun <init> (Lstream/video/sfu/event/ChangePublishQuality;)V
 	public final fun component1 ()Lstream/video/sfu/event/ChangePublishQuality;
@@ -3013,6 +3024,17 @@ public final class io/getstream/video/android/core/events/ChangePublishQualityEv
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/ChangePublishQualityEvent;Lstream/video/sfu/event/ChangePublishQuality;ILjava/lang/Object;)Lio/getstream/video/android/core/events/ChangePublishQualityEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getChangePublishQuality ()Lstream/video/sfu/event/ChangePublishQuality;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/CodecNegotiationCompleteEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Lstream/video/sfu/event/CodecNegotiationComplete;)V
+	public final fun component1 ()Lstream/video/sfu/event/CodecNegotiationComplete;
+	public final fun copy (Lstream/video/sfu/event/CodecNegotiationComplete;)Lio/getstream/video/android/core/events/CodecNegotiationCompleteEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/CodecNegotiationCompleteEvent;Lstream/video/sfu/event/CodecNegotiationComplete;ILjava/lang/Object;)Lio/getstream/video/android/core/events/CodecNegotiationCompleteEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCodecNegotiationComplete ()Lstream/video/sfu/event/CodecNegotiationComplete;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
