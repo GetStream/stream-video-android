@@ -112,11 +112,13 @@ import stream.video.sfu.event.Migration
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.event.SfuRequest
 import stream.video.sfu.models.ClientDetails
+import stream.video.sfu.models.Codec
 import stream.video.sfu.models.Device
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.OS
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.Sdk
 import stream.video.sfu.models.SdkType
 import stream.video.sfu.models.TrackInfo
@@ -497,6 +499,17 @@ public class RtcSession internal constructor(
             fast_reconnect = false,
             client_details = clientDetails,
             reconnect_details = reconnectDetails,
+            subscriber_sdp = getGenericSdp(RtpTransceiver.RtpTransceiverDirection.RECV_ONLY),
+            publisher_sdp = getGenericSdp(RtpTransceiver.RtpTransceiverDirection.SEND_ONLY),
+            preferred_publish_options = listOf(
+                PublishOption(
+                    track_type = TrackType.TRACK_TYPE_VIDEO,
+                    codec = Codec(98, "AV1", 90000),
+                    bitrate = 1_000_000,
+                    max_spatial_layers = 3,
+                )
+            )
+            // preferred_publish_options = // TODO-neg: add preferred publish options
         )
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
@@ -506,7 +519,49 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun initializeVideoTransceiver() {
+    /**
+     * Prepares a generic SDP to send as part of the JoinRequest.
+     * This is a throw-away SDP that the SFU will use to determine the capabilities of the client (codec support, etc).
+     */
+    private suspend fun getGenericSdp(direction: RtpTransceiver.RtpTransceiverDirection): String {
+        val tempPeerConnection = when (direction) {
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY -> clientImpl.peerConnectionFactory.makePeerConnection(
+                coroutineScope = coroutineScope,
+                configuration = PeerConnection.RTCConfiguration(emptyList()),
+                type = StreamPeerType.PUBLISHER,
+                mediaConstraints = MediaConstraints(),
+            )
+            RtpTransceiver.RtpTransceiverDirection.RECV_ONLY -> clientImpl.peerConnectionFactory.makePeerConnection(
+                coroutineScope = coroutineScope,
+                configuration = PeerConnection.RTCConfiguration(emptyList()),
+                type = StreamPeerType.SUBSCRIBER,
+                mediaConstraints = mediaConstraints,
+            )
+            else -> null
+        }
+
+        tempPeerConnection?.connection?.addTransceiver(
+            MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+            RtpTransceiver.RtpTransceiverInit(direction)
+        )
+        tempPeerConnection?.connection?.addTransceiver(
+            MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
+            RtpTransceiver.RtpTransceiverInit(direction)
+        )
+
+        val offerResult = tempPeerConnection?.createOffer()
+        if (offerResult !is Success) return ""
+
+        val sdp = mangleSdp(offerResult.value) // TODO-neg: mangle needed here?
+
+        tempPeerConnection.videoTransceiver?.stop()
+        tempPeerConnection.audioTransceiver?.stop()
+        tempPeerConnection.connection.close()
+
+        return sdp.description
+    }
+
+    private fun initializeVideoTransceiver(publisher: StreamPeerConnection? = this.publisher) {
         if (!videoTransceiverInitialized) {
             publisher?.let {
                 it.addVideoTransceiver(
