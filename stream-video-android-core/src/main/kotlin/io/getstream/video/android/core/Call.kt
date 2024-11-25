@@ -67,6 +67,7 @@ import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.ListTranscriptionsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.OwnCapability
@@ -74,7 +75,9 @@ import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartTranscriptionResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnpinResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
@@ -1117,6 +1120,18 @@ public class Call(
 
     fun toggleAudioProcessing(): Boolean {
         return clientImpl.toggleAudioProcessing()
+    }
+
+    suspend fun startTranscription(): Result<StartTranscriptionResponse> {
+        return clientImpl.startTranscription(type, id)
+    }
+
+    suspend fun stopTranscription(): Result<StopTranscriptionResponse> {
+        return clientImpl.stopTranscription(type, id)
+    }
+
+    suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
+        return clientImpl.listTranscription(type, id)
     }
 
     @InternalStreamVideoApi

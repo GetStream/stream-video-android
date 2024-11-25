@@ -101,6 +101,7 @@ import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallRequest
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.ListTranscriptionsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.PinRequest
@@ -116,7 +117,10 @@ import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StartHLSBroadcastingResponse
 import org.openapitools.client.models.StartRecordingRequest
+import org.openapitools.client.models.StartTranscriptionRequest
+import org.openapitools.client.models.StartTranscriptionResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnblockUserRequest
 import org.openapitools.client.models.UnpinRequest
 import org.openapitools.client.models.UpdateCallMembersRequest
@@ -1121,6 +1125,25 @@ internal class StreamVideoImpl internal constructor(
 
     internal fun toggleAudioProcessing(): Boolean {
         return peerConnectionFactory.toggleAudioProcessing()
+    }
+
+    suspend fun startTranscription(type: String, id: String, externalStorage: String? = null): Result<StartTranscriptionResponse> {
+        return wrapAPICall {
+            val startTranscriptionRequest = StartTranscriptionRequest(externalStorage)
+            connectionModule.api.startTranscription(type, id, startTranscriptionRequest)
+        }
+    }
+
+    suspend fun stopTranscription(type: String, id: String): Result<StopTranscriptionResponse> {
+        return wrapAPICall {
+            connectionModule.api.stopTranscription(type, id)
+        }
+    }
+
+    suspend fun listTranscription(type: String, id: String): Result<ListTranscriptionsResponse> {
+        return wrapAPICall {
+            connectionModule.api.listTranscriptions(type, id)
+        }
     }
 }
 
