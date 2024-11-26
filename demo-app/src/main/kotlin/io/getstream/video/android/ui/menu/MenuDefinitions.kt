@@ -74,7 +74,7 @@ fun defaultStreamMenu(
     onSelectScaleType: (VideoScalingType) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
-    transcriptionState: TranscriptionState,
+    transcriptionUiState: TranscriptionUiState,
     onToggleTranscription: suspend () -> Unit,
     transcriptionList: suspend () -> List<MenuItem>,
 ) = buildList<MenuItem> {
@@ -154,16 +154,25 @@ fun defaultStreamMenu(
             ),
         )
     }
-    val transcriptionUiState = transcriptionState.mapTouUiState()
-    add(ActionMenuItem(
-        title = transcriptionUiState.text,
-        icon = transcriptionUiState.icon,
-        action = {
-            GlobalScope.launch {
-                onToggleTranscription.invoke()
-            }
-        },
-    ))
+
+    when (transcriptionUiState) {
+        is TranscriptionAvailableUiState, TranscriptionStoppedUiState -> {
+            add(
+                ActionMenuItem(
+                    title = transcriptionUiState.text,
+                    icon = transcriptionUiState.icon,
+                    highlight = transcriptionUiState.highlight,
+                    action = {
+                        GlobalScope.launch {
+                            onToggleTranscription.invoke()
+                        }
+                    },
+                ),
+            )
+        }
+
+        else -> {}
+    }
 }
 
 /**

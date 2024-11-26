@@ -53,6 +53,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -77,6 +80,7 @@ import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StartTranscriptionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
+import org.openapitools.client.models.TranscriptionSettingsResponse
 import org.openapitools.client.models.UnpinResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
@@ -266,6 +270,7 @@ public class Call(
                 audioLevelOutputHelper.rampToValue(it)
             }
         }
+        observeTranscription()
     }
 
     /** Basic crud operations */
@@ -1292,6 +1297,41 @@ public class Call(
             call.scope.launch {
                 call.fastReconnect()
             }
+        }
+    }
+
+    /**
+     * I need to do it in active session!! not before the session starts
+     * So, I am using [io.getstream.video.android.core.CallState.connection] == [io.getstream.video.android.core.RealtimeConnection.Connected]
+     */
+
+    private fun observeTranscription() {
+        fun isInActiveSession(callState: CallState): Boolean {
+            return callState.connection.value == RealtimeConnection.Connected
+        }
+
+        scope.launch {
+            state
+                .settings
+                .filter { isInActiveSession(state) }
+                .map { it?.transcription } // Safely map to the `transcription` field
+                .distinctUntilChanged() // Prevent duplicate emissions
+                .collect { transcription ->
+                    executeTranscriptionApis(transcription)
+                }
+        }
+    }
+
+    private suspend fun executeTranscriptionApis(transcriptionSettingsResponse: TranscriptionSettingsResponse?) {
+        val mode = transcriptionSettingsResponse?.mode
+        if (mode == TranscriptionSettingsResponse.Mode.Disabled && state.transcribing.value) {
+            stopTranscription()
+            logger.d { "TranscriptionSettings updated with mode:$mode. Will deactivate transcriptions." }
+        } else if (mode == TranscriptionSettingsResponse.Mode.AutoOn && !state.transcribing.value) {
+            startTranscription()
+            logger.d { "TranscriptionSettings updated with mode:$mode. Will activate transcriptions." }
+        } else {
+            logger.d { "TranscriptionSettings updated with mode:$mode. No action required." }
         }
     }
 
