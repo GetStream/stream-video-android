@@ -51,6 +51,7 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.TranscriptionState
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.tooling.extensions.toPx
@@ -178,6 +179,42 @@ internal fun SettingsMenu(
         }
     }
 
+    val transcriptionState by call.state.transcriptionState.collectAsStateWithLifecycle()
+
+    val onToggleTranscription: suspend () -> Unit =  {
+        when (transcriptionState) {
+            TranscriptionState.CallTranscriptionInitialState -> call.startTranscription()
+            TranscriptionState.CallTranscriptionReadyState -> call.startTranscription()
+            TranscriptionState.CallTranscriptionStartedState -> call.stopTranscription()
+            else -> {
+                //TODO Rahul, check it in chat gpt
+                throw IllegalStateException("Toggling of transcription should not work in state: $transcriptionState")
+            }
+        }
+    }
+
+    val onLoadTranscriptions: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
+        when (it) {
+            is PermissionStatus.Granted -> {
+                {
+                    call.listTranscription().getOrNull()?.transcriptions?.map {
+                        ActionMenuItem(
+                            title = it.filename,
+                            icon = Icons.Default.VideoFile, //TODO Rahul check this later
+                            action = {
+                                context.downloadFile(it.url, it.filename)
+                                onDismissed()
+                            },
+                        )
+                    } ?: emptyList()
+                }
+            }
+            is PermissionStatus.Denied -> {
+                { emptyList() }
+            }
+        }
+    }
+
     Popup(
         offset = IntOffset(
             0,
@@ -231,6 +268,9 @@ internal fun SettingsMenu(
                 onNoiseCancellation = onNoiseCancellation,
                 isScreenShareEnabled = isScreenSharing,
                 loadRecordings = onLoadRecordings,
+                transcriptionState = transcriptionState,
+                onToggleTranscription = onToggleTranscription ,
+                transcriptionList = onLoadTranscriptions
             ),
         )
     }
@@ -292,6 +332,9 @@ private fun SettingsMenuPreview() {
                 onShowFeedback = {},
                 onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
+                transcriptionState = TranscriptionState.CallTranscriptionReadyState,
+                onToggleTranscription = {},
+                transcriptionList = { emptyList() }
             ),
         )
     }

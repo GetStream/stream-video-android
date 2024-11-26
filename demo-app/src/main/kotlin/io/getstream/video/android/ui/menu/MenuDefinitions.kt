@@ -36,11 +36,14 @@ import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.VideoSettings
+import io.getstream.video.android.core.TranscriptionState
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -64,6 +67,9 @@ fun defaultStreamMenu(
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
+    transcriptionState: TranscriptionState,
+    onToggleTranscription: suspend () -> Unit,
+    transcriptionList: suspend () -> List<MenuItem>,
 ) = buildList<MenuItem> {
     add(
         DynamicSubMenuItem(
@@ -139,6 +145,16 @@ fun defaultStreamMenu(
             ),
         )
     }
+    val transcriptionUiState = transcriptionState.mapTouUiState()
+    add(ActionMenuItem(
+        title = transcriptionUiState.text,
+        icon = transcriptionUiState.icon,
+        action = {
+            GlobalScope.launch {
+                onToggleTranscription.invoke()
+            }
+        },
+    ))
 }
 
 /**

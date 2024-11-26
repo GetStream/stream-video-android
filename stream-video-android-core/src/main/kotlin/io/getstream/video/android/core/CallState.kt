@@ -94,6 +94,10 @@ import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.CallStateResponseFields
+import org.openapitools.client.models.CallTranscriptionFailedEvent
+import org.openapitools.client.models.CallTranscriptionReadyEvent
+import org.openapitools.client.models.CallTranscriptionStartedEvent
+import org.openapitools.client.models.CallTranscriptionStoppedEvent
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
@@ -565,6 +569,12 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
+    /** transcription state of the call */
+    private val _transcriptionState: MutableStateFlow<TranscriptionState> = MutableStateFlow(
+        TranscriptionState.CallTranscriptionInitialState
+    )
+    val transcriptionState: StateFlow<TranscriptionState> = _transcriptionState
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -930,6 +940,19 @@ public class CallState(
 
                 updateParticipantCounts(session = session.value)
                 updateRingingState()
+            }
+
+            is CallTranscriptionStartedEvent -> {
+                _transcriptionState.value = TranscriptionState.CallTranscriptionStartedState
+            }
+            is CallTranscriptionStoppedEvent -> {
+                _transcriptionState.value = TranscriptionState.CallTranscriptionStoppedState
+            }
+            is CallTranscriptionReadyEvent -> {
+                _transcriptionState.value = TranscriptionState.CallTranscriptionReadyState
+            }
+            is CallTranscriptionFailedEvent -> {
+                _transcriptionState.value = TranscriptionState.CallTranscriptionFailedState
             }
         }
     }
