@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.benchmark
+package io.getstream.video.android.core.socket.common.fsm.builder
 
-internal const val packageName = "io.getstream.video.android.dogfooding"
+@DslMarker
+public annotation class FSMBuilderMarker

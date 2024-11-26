@@ -55,11 +55,7 @@ public val previewCall: Call = Call(
     user = previewUsers[0],
 ).apply {
     val participants = previewUsers.take(2).map { user ->
-        val sessionId = if (user == previewUsers.first()) {
-            sessionId
-        } else {
-            UUID.randomUUID().toString()
-        }
+        val sessionId = UUID.randomUUID().toString()
         ParticipantState(
             initialUserId = user.id,
             sessionId = sessionId,

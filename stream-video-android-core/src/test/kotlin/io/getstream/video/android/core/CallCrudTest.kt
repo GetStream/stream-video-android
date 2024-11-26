@@ -28,6 +28,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.openapitools.client.models.MemberRequest
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 public class CallCrudTest : IntegrationTestBase() {
@@ -130,7 +131,7 @@ public class CallCrudTest : IntegrationTestBase() {
         val result = client.call("default", randomUUID()).update()
         assert(result.isFailure)
         result.onError {
-            assertThat((it as Error.NetworkError).serverErrorCode).isEqualTo(16)
+            assertTrue { it is Error.ThrowableError }
         }
     }
 
@@ -139,7 +140,7 @@ public class CallCrudTest : IntegrationTestBase() {
         val result = client.call("missing", "123").create()
         assert(result.isFailure)
         result.onError {
-            assertThat((it as Error.NetworkError).serverErrorCode).isEqualTo(16)
+            assertTrue { it is Error.ThrowableError }
         }
     }
 

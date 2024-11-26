@@ -75,7 +75,13 @@ message SfuEvent {
     CallEnded call_ended = 23;
     // ParticipantUpdated is sent when user data is updated
     ParticipantUpdated participant_updated = 24;
+    // ParticipantMigrationComplete is sent when the participant migration is complete
+    ParticipantMigrationComplete participant_migration_complete = 25;
   }
+}
+
+message ParticipantMigrationComplete{
+
 }
 
 message PinsChanged {
@@ -104,7 +110,13 @@ message SfuRequest {
   oneof request_payload {
     JoinRequest join_request = 1;
     HealthCheckRequest health_check_request = 2;
+    LeaveCallRequest leave_call_request = 3;
   }
+}
+
+message LeaveCallRequest {
+  string session_id = 1;
+  string reason = 2;
 }
 
 message HealthCheckRequest {
@@ -147,9 +159,8 @@ message JoinRequest {
   // dumb SDP that allow us to extract subscriber's decode codecs
   string subscriber_sdp = 3;
   models.ClientDetails client_details = 4;
-  // TODO: we should know if this is going to be
-  // - publishing and subscribing, or just subscribing for future routing
-  Migration migration = 5;
+  // Deprecated: use ReconnectDetails instead
+  Migration migration = 5 [deprecated = true];
   // Fast reconnect flag explicitly indicates that if the participant session
   // and the associated state is still present in the SFU, the client is ready
   // to restore the PeerConnection with an ICE restart. If the SFU replies with
@@ -159,7 +170,19 @@ message JoinRequest {
   // For the SFU, fast_reconnect:false indicates that even if it has the state
   // cached, the client state is not in sync and hence it must be cleaned up before
   // proceeding further.
-  bool fast_reconnect = 6;
+  bool fast_reconnect = 6 [deprecated = true];
+
+  ReconnectDetails reconnect_details = 7;
+}
+
+message ReconnectDetails {
+  models.WebsocketReconnectStrategy strategy = 1;
+  repeated models.TrackInfo announced_tracks = 3;
+  repeated signal.TrackSubscriptionDetails subscriptions = 4;
+  uint32 reconnect_attempt = 5;
+  string from_sfu_id = 6;
+  // only set in case of rejoin
+  string previous_session_id = 7;
 }
 
 message Migration {
@@ -171,6 +194,7 @@ message Migration {
 message JoinResponse {
   models.CallState call_state = 1;
   bool reconnected = 2;
+  int32 fast_reconnect_deadline_seconds = 3;
 }
 
 // ParticipantJoined is fired when a user joins a call

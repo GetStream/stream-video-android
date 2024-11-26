@@ -22,7 +22,7 @@ import android.net.Uri
 import androidx.annotation.RawRes
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.R
-import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import org.jetbrains.annotations.ApiStatus
 
 // Interface & API
@@ -80,7 +80,7 @@ public fun defaultResourcesRingingConfig(context: Context): RingingConfig = obje
 public fun deviceRingtoneRingingConfig(context: Context): RingingConfig = object : RingingConfig {
     private val streamResSoundConfig = defaultResourcesRingingConfig(context)
     override val incomingCallSoundUri: Uri?
-        get() = safeCall(default = null) {
+        get() = safeCallWithDefault(default = null) {
             RingtoneManager.getActualDefaultRingtoneUri(
                 context,
                 RingtoneManager.TYPE_RINGTONE,
@@ -134,7 +134,7 @@ public fun RingingConfig.toSounds() = Sounds(this)
 
 // Internal utilities
 private fun Int?.toUriOrNUll(context: Context): Uri? =
-    safeCall(default = null) {
+    safeCallWithDefault(default = null) {
         if (this != null) {
             Uri.parse("android.resource://${context.packageName}/$this")
         } else {

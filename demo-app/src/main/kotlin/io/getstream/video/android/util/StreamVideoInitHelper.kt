@@ -31,6 +31,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -199,13 +200,15 @@ object StreamVideoInitHelper {
                     FirebasePushDeviceGenerator(providerName = "firebase"),
                 ),
             ),
-            tokenProvider = {
-                val email = user.custom?.get("email")
-                val authData = StreamService.instance.getAuthData(
-                    environment = AppConfig.currentEnvironment.value!!.env,
-                    userId = email,
-                )
-                authData.token
+            tokenProvider = object : TokenProvider {
+                override suspend fun loadToken(): String {
+                    val email = user.custom?.get("email")
+                    val authData = StreamService.instance.getAuthData(
+                        environment = AppConfig.currentEnvironment.value!!.env,
+                        userId = email,
+                    )
+                    return authData.token
+                }
             },
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
