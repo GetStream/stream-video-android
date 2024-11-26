@@ -63,6 +63,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
+import io.getstream.video.android.core.utils.MinimalSdpParser
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
@@ -591,13 +592,30 @@ public class RtcSession internal constructor(
         }
     }
 
-        val sdp = mangleSdp(offerResult.value) // TODO-neg: mangle needed here?
+    private fun getPreferredPublishOptions(tempPublisher: StreamPeerConnection, sdp: String): List<PublishOption> {
+        val preferredCodec = "h264"
+        val preferredBitrate = 1_000_000
+        val preferredMaxSimulcastLayers = 3
 
-        tempPeerConnection.videoTransceiver?.stop()
-        tempPeerConnection.audioTransceiver?.stop()
-        tempPeerConnection.connection.close()
+        val parsedSdp = MinimalSdpParser(sdp)
+        val sdpCodec = parsedSdp.getVideoCodec(preferredCodec)
+        val sfuCodec = sdpCodec?.let {
+            Codec(
+                name = it.codecName,
+                fmtp = it.codecFmtp,
+                clock_rate = it.codecClockRate,
+                payload_type = it.payloadType.toIntOrNull() ?: 0,
+            )
+        }
 
-        return sdp.description
+        return listOf(
+            PublishOption(
+                track_type = TrackType.TRACK_TYPE_VIDEO,
+                codec = sfuCodec,
+                bitrate = preferredBitrate,
+                max_spatial_layers = preferredMaxSimulcastLayers,
+            ),
+        )
     }
 
     private fun initializeVideoTransceiver(publisher: StreamPeerConnection? = this.publisher) {

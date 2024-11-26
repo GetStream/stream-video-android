@@ -21,7 +21,14 @@ import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 
-data class RtpMapAttribute(val index: Int, val number: String, val codec: String, val line: String)
+data class RtpMapAttribute(
+    val index: Int,
+    val sdpLine: String,
+    val payloadType: String,
+    val codecName: String,
+    val codecClockRate: Int,
+    var codecFmtp: String = "",
+)
 
 data class MediaStream(val index: Int, var codecs: List<String>, val line: String) {
 
@@ -33,27 +40,26 @@ data class MediaStream(val index: Int, var codecs: List<String>, val line: Strin
     }
 }
 
-/**
- * A middle ground between a regex based approach vs a full parser
- */
-class MinimalSdpParser(var sdp: String) {
+internal class MinimalSdpParser(var sdp: String) {
 
-    private lateinit var lines: MutableList<String>
-    private var red: RtpMapAttribute? = null
-    private var opus: RtpMapAttribute? = null
-    private var h264: RtpMapAttribute? = null
-    private var vp8: RtpMapAttribute? = null
-    private var audioM: MediaStream? = null
-    private var videoM: MediaStream? = null
-    private var useinbandfecLine: Int? = null
+    lateinit var lines: MutableList<String>
+    var red: RtpMapAttribute? = null
+    var opus: RtpMapAttribute? = null
+    var h264: RtpMapAttribute? = null
+    var vp8: RtpMapAttribute? = null
+    var vp9: RtpMapAttribute? = null
+    var av1: RtpMapAttribute? = null
+    var audioM: MediaStream? = null
+    var videoM: MediaStream? = null
+    var useInBandFecLine: Int? = null
 
     init {
         parse()
     }
 
-    fun parse() {
+    private fun parse() {
         lines = sdp.split("\r\n", "\n").toMutableList()
-        lines?.let { lines ->
+        lines.let { lines ->
             lines.indices.forEach {
                 val line = lines[it]
                 if (line.contains("a=rtpmap")) {
@@ -66,35 +72,77 @@ class MinimalSdpParser(var sdp: String) {
                         h264 = parseRtpMap(it, line)
                     } else if (line.contains("VP8/90000")) {
                         vp8 = parseRtpMap(it, line)
+                    } else if (line.contains("VP9/90000")) { // TODO-neg: always hardcode 90000?
+                        vp9 = parseRtpMap(it, line)
+                    } else if (line.contains("AV1/90000")) {
+                        av1 = parseRtpMap(it, line)
                     }
                 } else if (line.contains("m=audio")) {
                     audioM = parseMLine(it, line)
                 } else if (line.contains("m=video")) {
                     videoM = parseMLine(it, line)
                 } else if (line.contains("useinbandfec=1")) {
-                    useinbandfecLine = it
+                    useInBandFecLine = it
+                } else if (line.contains("a=fmtp")) {
+                    parseFmtp(line)
                 }
             }
         }
     }
 
+    private fun parseRtpMap(index: Int, line: String): RtpMapAttribute {
+        // Example: a=rtpmap:100 VP9/90000
+
+        val parts = line.split(" ")
+        val codec = parts[1]
+        val codecName = codec.split("/")[0]
+        val codecClockRate = codec.split("/")[1].toInt()
+        val payloadType = parts[0].split(":")[1]
+
+        return RtpMapAttribute(index, line, payloadType, codecName, codecClockRate)
+    }
+
+    private fun parseMLine(index: Int, line: String): MediaStream {
+        val parts = line.split(" ")
+        val codecs = parts.subList(3, parts.size)
+        return MediaStream(index, codecs, line)
+    }
+
+    private fun parseFmtp(line: String) {
+        // Example: a=fmtp:96 level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=640c29
+
+        // TODO-neg: take lines like a=fmtp:97 apt=96 into account and check for errors
+
+        val parts = line.split(" ")
+        val payloadType = parts[0].split(":")[1]
+        val parameters = parts[1]
+
+        // TODO-neg: now it assigns the last fmtp it finds, but it should keep all of them?
+        when {
+            h264?.payloadType == payloadType -> h264?.codecFmtp = parameters
+            vp8?.payloadType == payloadType -> vp8?.codecFmtp = parameters
+            vp9?.payloadType == payloadType -> vp9?.codecFmtp = parameters
+            av1?.payloadType == payloadType -> av1?.codecFmtp = parameters
+        }
+    }
+
     fun mangle(enableDtx: Boolean = true, enableRed: Boolean = true, enableVp8: Boolean = true): String {
         if (enableDtx) {
-            useinbandfecLine?.let {
+            useInBandFecLine?.let {
                 lines[it] = lines[it].replace("useinbandfec=1", "useinbandfec=1;usedtx=1")
             }
         }
         if (enableRed) {
             if (audioM != null && red != null && opus != null) {
                 val codecs = audioM?.codecs
-                val redPosition = codecs?.indices?.find { codecs[it] == red?.number }
-                val opusPosition = codecs?.indices?.find { codecs[it] == opus?.number }
+                val redPosition = codecs?.indices?.find { codecs[it] == red?.payloadType }
+                val opusPosition = codecs?.indices?.find { codecs[it] == opus?.payloadType }
 
                 // swap the position in the M line
                 if (opusPosition != null && redPosition != null && opusPosition < redPosition) {
                     // remove red from the list
-                    val newCodecs = codecs.filter { it != red!!.number }.toMutableList()
-                    newCodecs.add(0, red!!.number)
+                    val newCodecs = codecs.filter { it != red!!.payloadType }.toMutableList()
+                    newCodecs.add(0, red!!.payloadType)
                     audioM!!.codecs = newCodecs
 
                     audioM?.let {
@@ -106,14 +154,14 @@ class MinimalSdpParser(var sdp: String) {
         if (enableVp8) {
             if (videoM != null && vp8 != null && h264 != null) {
                 val codecs = videoM?.codecs
-                val vp8Position = codecs?.indices?.find { codecs[it] == vp8?.number }
-                val h264Position = codecs?.indices?.find { codecs[it] == h264?.number }
+                val vp8Position = codecs?.indices?.find { codecs[it] == vp8?.payloadType }
+                val h264Position = codecs?.indices?.find { codecs[it] == h264?.payloadType }
 
                 // swap the position in the M line
                 if (vp8Position != null && h264Position != null && h264Position < vp8Position) {
                     // remove red from the list
-                    val newCodecs = codecs.filter { it != vp8!!.number }.toMutableList()
-                    newCodecs.add(0, vp8!!.number)
+                    val newCodecs = codecs.filter { it != vp8!!.payloadType }.toMutableList()
+                    newCodecs.add(0, vp8!!.payloadType)
                     videoM!!.codecs = newCodecs
 
                     videoM?.let {
@@ -126,17 +174,14 @@ class MinimalSdpParser(var sdp: String) {
         return new
     }
 
-    fun parseRtpMap(index: Int, line: String): RtpMapAttribute {
-        val parts = line.split(" ")
-        val codec = parts[1]
-        val number = parts[0].split(":")[1]
-        return RtpMapAttribute(index, number, codec, line)
-    }
-
-    fun parseMLine(index: Int, line: String): MediaStream {
-        val parts = line.split(" ")
-        val codecs = parts.subList(3, parts.size)
-        return MediaStream(index, codecs, line)
+    fun getVideoCodec(codec: String): RtpMapAttribute? { // TODO-neg: use VideoCodec enum
+        return when (codec.lowercase()) {
+            "h264" -> h264
+            "vp8" -> vp8
+            "vp9" -> vp9
+            "av1" -> opus
+            else -> null
+        }
     }
 }
 
