@@ -19,9 +19,9 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
+import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog
-import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -132,7 +132,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     val client: StreamVideo
 
     /** Implementation of the client for more access to interals */
-    internal val clientImpl: StreamVideoImpl
+    internal val clientImpl: StreamVideoClient
 
     /** Tracks all events received by the client during a test */
     var events: MutableList<VideoEvent>
@@ -158,7 +158,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
 
         if (IntegrationTestState.client == null) {
             client = builder.build()
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
             // Connect to the WS if needed
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests
@@ -172,7 +172,7 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             IntegrationTestState.client = client
         } else {
             client = IntegrationTestState.client!!
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
         }
 
         // monitor for events

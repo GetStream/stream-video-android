@@ -56,6 +56,7 @@ class ClientAndAuthTest : TestBase() {
         val builder = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
+            token = authData!!.token,
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 type = UserType.Anonymous,
@@ -75,6 +76,7 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
+            token = authData!!.token,
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
@@ -133,7 +135,7 @@ class ClientAndAuthTest : TestBase() {
             token = authData!!.token,
         ).build()
         assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
-        val clientImpl = client as StreamVideoImpl
+        val clientImpl = client as StreamVideoClient
 
         val connectResultDeferred = clientImpl.connectAsync()
 
@@ -184,7 +186,7 @@ class ClientAndAuthTest : TestBase() {
             geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = testData.expiredToken,
-            tokenProvider = { error ->
+            legacyTokenProvider = { error ->
                 testData.tokens["thierry"]!!
             },
         ).build()
@@ -232,7 +234,7 @@ class ClientAndAuthTest : TestBase() {
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         ).build()
-        val clientImpl = client as StreamVideoImpl
+        val clientImpl = client as StreamVideoClient
         client.subscribe {
         }
         val deferred = clientImpl.connectAsync()

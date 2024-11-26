@@ -21,14 +21,19 @@ import android.os.Build
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MobileScreenShare
 import androidx.compose.material.icons.automirrored.filled.ReadMore
+import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
+import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.Crop
+import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
-import androidx.compose.material.icons.filled.PortableWifiOff
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.SettingsVoice
 import androidx.compose.material.icons.filled.SpatialAudioOff
 import androidx.compose.material.icons.filled.SpeakerPhone
@@ -36,7 +41,7 @@ import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.VideoSettings
-import io.getstream.video.android.core.TranscriptionState
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
@@ -60,11 +65,13 @@ fun defaultStreamMenu(
     onToggleAudioFilterClick: () -> Unit,
     onRestartSubscriberIceClick: () -> Unit,
     onRestartPublisherIceClick: () -> Unit,
-    onKillSfuWsClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
+    onSfuRejoinClick: () -> Unit,
+    onSfuFastReconnectClick: () -> Unit,
+    onSelectScaleType: (VideoScalingType) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
     transcriptionState: TranscriptionState,
@@ -139,8 +146,10 @@ fun defaultStreamMenu(
                     onToggleAudioFilterClick,
                     onRestartSubscriberIceClick,
                     onRestartPublisherIceClick,
-                    onKillSfuWsClick,
                     onSwitchSfuClick,
+                    onSfuRejoinClick,
+                    onSfuFastReconnectClick,
+                    onSelectScaleType,
                 ),
             ),
         )
@@ -175,6 +184,58 @@ fun codecMenu(codecList: List<MediaCodecInfo>, onCodecSelected: (MediaCodecInfo)
         )
     }
 
+fun reconnectMenu(
+    onRestartPublisherIceClick: () -> Unit,
+    onRestartSubscriberIceClick: () -> Unit,
+    onSwitchSfuClick: () -> Unit,
+    onSfuRejoinClick: () -> Unit,
+    onSfuFastReconnectClick: () -> Unit,
+) = listOf(
+    ActionMenuItem(
+        title = "Publisher - ICE restart",
+        icon = Icons.Default.SettingsBackupRestore,
+        action = onRestartPublisherIceClick,
+    ),
+    ActionMenuItem(
+        title = "Subscriber - ICE restart",
+        icon = Icons.Default.SettingsBackupRestore,
+        action = onRestartSubscriberIceClick,
+    ),
+    ActionMenuItem(
+        title = "Reconnect SFU - migrate",
+        icon = Icons.Default.SwitchLeft,
+        action = onSwitchSfuClick,
+    ),
+    ActionMenuItem(
+        title = "Reconnect SFU - rejoin",
+        icon = Icons.Default.Replay,
+        action = onSfuRejoinClick,
+    ),
+    ActionMenuItem(
+        title = "Reconnect SFU - fast",
+        icon = Icons.Default.RestartAlt,
+        action = onSfuFastReconnectClick,
+    ),
+)
+
+fun scaleTypeMenu(onSelectScaleType: (VideoScalingType) -> Unit): List<MenuItem> = listOf(
+    ActionMenuItem(
+        title = "Scale FIT",
+        icon = Icons.Default.CropFree,
+        action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_FIT) },
+    ),
+    ActionMenuItem(
+        title = "Scale FILL",
+        icon = Icons.Default.Crop,
+        action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_FILL) },
+    ),
+    ActionMenuItem(
+        title = "Scale BALANCED",
+        icon = Icons.Default.Balance,
+        action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_BALANCED) },
+    ),
+)
+
 /**
  * Optionally defines the debug sub-menu of the demo app.
  */
@@ -182,10 +243,12 @@ fun debugSubmenu(
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
     onToggleAudioFilterClick: () -> Unit,
-    onRestartSubscriberIceClick: () -> Unit,
     onRestartPublisherIceClick: () -> Unit,
-    onKillSfuWsClick: () -> Unit,
+    onRestartSubscriberIceClick: () -> Unit,
     onSwitchSfuClick: () -> Unit,
+    onSfuRejoinClick: () -> Unit,
+    onSfuFastReconnectClick: () -> Unit,
+    onSelectScaleType: (VideoScalingType) -> Unit,
 ) = listOf(
     SubMenuItem(
         title = "Available video codecs",
@@ -197,24 +260,22 @@ fun debugSubmenu(
         icon = Icons.Default.Audiotrack,
         action = onToggleAudioFilterClick,
     ),
-    ActionMenuItem(
-        title = "Restart subscriber Ice",
-        icon = Icons.Default.RestartAlt,
-        action = onRestartSubscriberIceClick,
+    SubMenuItem(
+        title = "Scale type",
+        icon = Icons.Default.AspectRatio,
+        items = scaleTypeMenu(
+            onSelectScaleType,
+        ),
     ),
-    ActionMenuItem(
-        title = "Restart publisher Ice",
-        icon = Icons.Default.RestartAlt,
-        action = onRestartPublisherIceClick,
-    ),
-    ActionMenuItem(
-        title = "Shut down SFU web-socket",
-        icon = Icons.Default.PortableWifiOff,
-        action = onKillSfuWsClick,
-    ),
-    ActionMenuItem(
-        title = "Switch SFU",
-        icon = Icons.Default.SwitchLeft,
-        action = onSwitchSfuClick,
+    SubMenuItem(
+        title = "Reconnect V2",
+        icon = Icons.Default.Replay,
+        items = reconnectMenu(
+            onRestartPublisherIceClick,
+            onRestartSubscriberIceClick,
+            onSwitchSfuClick,
+            onSfuRejoinClick,
+            onSfuFastReconnectClick,
+        ),
     ),
 )

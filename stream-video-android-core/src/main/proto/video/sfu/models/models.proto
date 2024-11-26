@@ -135,22 +135,6 @@ message TrackInfo {
   bool red = 9;
 }
 
-// todo remove this
-message Call {
-  // the call type
-  string type = 1;
-  // the call id
-  string id = 2;
-  // the id of the user that created this call
-  string created_by_user_id = 3;
-  // the id of the current host for this call
-  string host_user_id = 4;
-  google.protobuf.Struct custom = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
-}
-
-
 enum ErrorCode {
   ERROR_CODE_UNSPECIFIED = 0;
 
@@ -203,6 +187,8 @@ enum SdkType {
   SDK_TYPE_FLUTTER = 5;
   SDK_TYPE_REACT_NATIVE = 6;
   SDK_TYPE_UNITY = 7;
+  SDK_TYPE_GO = 8;
+  SDK_TYPE_PLAIN_JAVASCRIPT = 9;
 }
 
 message Sdk {
@@ -226,6 +212,20 @@ message Browser {
 message Device {
   string name = 1;
   string version = 2;
+}
+
+message Call {
+  // the call type
+  string type = 1;
+  // the call id
+  string id = 2;
+  // the id of the user that created this call
+  string created_by_user_id = 3;
+  // the id of the current host for this call
+  string host_user_id = 4;
+  google.protobuf.Struct custom = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
 }
 
 enum TrackUnpublishReason {
@@ -273,17 +273,14 @@ enum CallEndedReason {
 // WebsocketReconnectStrategy defines the ws strategies available for handling reconnections.
 enum WebsocketReconnectStrategy {
   WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED = 0;
-  // Sent after reaching the maximum reconnection attempts, leading to permanent disconnect.
+  // Sent after reaching the maximum reconnection attempts, or any other unrecoverable error leading to permanent disconnect.
   WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT = 1;
   // SDK should maintaining existing publisher/subscriber pc instances
   // and establish a new WebSocket connection.
   WEBSOCKET_RECONNECT_STRATEGY_FAST = 2;
-  // SDK should drop existing pc instances and creates a fresh WebSocket connection,
-  // ensuring a clean state for the reconnection.
-  WEBSOCKET_RECONNECT_STRATEGY_CLEAN = 3;
-  // SDK should obtain new credentials from the coordinator, drops existing pc instances, and initializes
+  // SDK should obtain new credentials from the coordinator, drops existing pc instances, set a new session_id and initializes
   // a completely new WebSocket connection, ensuring a comprehensive reset.
-  WEBSOCKET_RECONNECT_STRATEGY_FULL = 4;
+  WEBSOCKET_RECONNECT_STRATEGY_REJOIN = 3;
   // SDK should migrate to a new SFU instance
-  WEBSOCKET_RECONNECT_STRATEGY_MIGRATE = 5;
+  WEBSOCKET_RECONNECT_STRATEGY_MIGRATE = 4;
 };

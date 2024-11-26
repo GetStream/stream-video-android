@@ -49,7 +49,7 @@ import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 
 @RunWith(RobolectricTestRunner::class)
-class EventTest : IntegrationTestBase(connectCoordinatorWS = false) {
+class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event

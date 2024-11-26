@@ -225,7 +225,7 @@ public class CallState(
 
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState {
-        it[call.clientImpl.sessionId]
+        it[call.sessionId]
     }
 
     /** Your own participant state */
@@ -238,7 +238,7 @@ public class CallState(
 
     /** participants other than yourself */
     public val remoteParticipants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.filterKeys { key -> key != call.clientImpl.sessionId }.values.toList() }
+        _participants.mapState { it.filterKeys { key -> key != call.sessionId }.values.toList() }
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
@@ -469,7 +469,8 @@ public class CallState(
             val liveEndedAt = _session.value?.liveEndedAt ?: OffsetDateTime.now()
 
             liveStartedAt?.let {
-                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant().toEpochMilli()
+                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant()
+                    .toEpochMilli()
                 emit(duration)
             }
         }
@@ -1124,7 +1125,7 @@ public class CallState(
         }
     }
 
-    private fun removeParticipant(sessionId: String) {
+    internal fun removeParticipant(sessionId: String) {
         val new = _participants.value.toSortedMap()
         new.remove(sessionId)
         _participants.value = new
@@ -1392,6 +1393,23 @@ public class CallState(
                     }
                 }
             }
+        }
+    }
+
+    fun replaceParticipants(participants: List<ParticipantState>) {
+        this._participants.value = participants.associate { it.sessionId to it }.toSortedMap()
+        val screensharing = mutableListOf<ParticipantState>()
+        participants.forEach {
+            if (it.screenSharingEnabled.value) {
+                screensharing.add(it)
+            }
+        }
+        _screenSharingSession.value = if (screensharing.isNotEmpty()) {
+            ScreenSharingSession(
+                screensharing[0],
+            )
+        } else {
+            null
         }
     }
 }
