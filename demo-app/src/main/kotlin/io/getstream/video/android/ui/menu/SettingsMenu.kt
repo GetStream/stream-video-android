@@ -187,7 +187,6 @@ internal fun SettingsMenu(
             TranscriptionState.CallTranscriptionReadyState -> call.startTranscription()
             TranscriptionState.CallTranscriptionStartedState -> call.stopTranscription()
             else -> {
-                //TODO Rahul, check it in chat gpt
                 throw IllegalStateException("Toggling of transcription should not work in state: $transcriptionState")
             }
         }
