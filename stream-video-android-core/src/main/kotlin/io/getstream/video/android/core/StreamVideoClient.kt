@@ -1075,19 +1075,19 @@ internal class StreamVideoClient internal constructor(
     suspend fun startTranscription(type: String, id: String, externalStorage: String? = null): Result<StartTranscriptionResponse> {
         return wrapAPICall {
             val startTranscriptionRequest = StartTranscriptionRequest(externalStorage)
-            connectionModule.api.startTranscription(type, id, startTranscriptionRequest)
+            coordinatorConnectionModule.api.startTranscription(type, id, startTranscriptionRequest)
         }
     }
 
     suspend fun stopTranscription(type: String, id: String): Result<StopTranscriptionResponse> {
         return wrapAPICall {
-            connectionModule.api.stopTranscription(type, id)
+            coordinatorConnectionModule.api.stopTranscription(type, id)
         }
     }
 
     suspend fun listTranscription(type: String, id: String): Result<ListTranscriptionsResponse> {
         return wrapAPICall {
-            connectionModule.api.listTranscriptions(type, id)
+            coordinatorConnectionModule.api.listTranscriptions(type, id)
         }
     }
 }
