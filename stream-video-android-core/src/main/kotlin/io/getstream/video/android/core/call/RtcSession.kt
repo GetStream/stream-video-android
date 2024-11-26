@@ -106,6 +106,7 @@ import org.webrtc.PeerConnection.PeerConnectionState
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
+import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
@@ -495,22 +496,29 @@ public class RtcSession internal constructor(
 
     suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
         logger.i { "[connect] #sfu; #track; no args" }
+
+        var subscriberSdp = ""
+        var publisherSdp = ""
+        var preferredPublishOptions = emptyList<PublishOption>()
+
+        withTempPeerConnections { tempPublisher, tempSubscriber ->
+            tempSubscriber?.let { subscriberSdp = getTempSdp(it) }
+            tempPublisher?.let {
+                publisherSdp = getTempSdp(it)
+                logger.d { "[connect] #codec-negotiation; Publisher SDP:\n$publisherSdp" }
+                preferredPublishOptions = getPreferredPublishOptions(tempPublisher, publisherSdp)
+            }
+        }
+
         val request = JoinRequest(
             session_id = sessionId,
             token = sfuToken,
             fast_reconnect = false,
             client_details = clientDetails,
             reconnect_details = reconnectDetails,
-            subscriber_sdp = getGenericSdp(RtpTransceiver.RtpTransceiverDirection.RECV_ONLY),
-            publisher_sdp = getGenericSdp(RtpTransceiver.RtpTransceiverDirection.SEND_ONLY),
-            preferred_publish_options = listOf(
-                PublishOption(
-                    track_type = TrackType.TRACK_TYPE_VIDEO,
-                    codec = Codec(98, "AV1", 90000),
-                    bitrate = 1_000_000,
-                    max_spatial_layers = 3,
-                ),
-            ),
+            subscriber_sdp = subscriberSdp,
+            publisher_sdp = publisherSdp,
+            preferred_publish_options = preferredPublishOptions,
             // preferred_publish_options = // TODO-neg: add preferred publish options
         )
         logger.d { "Connecting RTC, $request" }
@@ -521,38 +529,67 @@ public class RtcSession internal constructor(
         }
     }
 
+    private suspend fun withTempPeerConnections(
+        action: suspend (publisher: StreamPeerConnection?, subscriber: StreamPeerConnection?) -> Unit
+    ) {
+        val tempPublisher = createTempPeerConnection(RtpTransceiverDirection.SEND_ONLY)
+        val tempSubscriber = createTempPeerConnection(RtpTransceiverDirection.RECV_ONLY)
+
+        action(tempPublisher, tempSubscriber)
+
+        cleanTempPeerConnection(tempPublisher)
+        cleanTempPeerConnection(tempSubscriber)
+    }
+
+    private fun createTempPeerConnection(direction: RtpTransceiverDirection): StreamPeerConnection? {
+        if (direction != RtpTransceiverDirection.SEND_ONLY && direction != RtpTransceiverDirection.RECV_ONLY) {
+            return null
+        }
+
+        val addTempTransceivers = { spc: StreamPeerConnection ->
+            spc.addVideoTransceiver(
+                call.mediaManager.videoTrack, // TODO-neg: correct to use it here?
+                listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
+                isScreenShare = false,
+            )
+            spc.addAudioTransceiver(
+                call.mediaManager.audioTrack,
+                listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
+            )
+        }
+
+        return clientImpl.peerConnectionFactory.makePeerConnection(
+            coroutineScope = coroutineScope,
+            configuration = PeerConnection.RTCConfiguration(emptyList()),
+            type = if (direction == RtpTransceiverDirection.SEND_ONLY) {
+                StreamPeerType.PUBLISHER
+            } else {
+                StreamPeerType.SUBSCRIBER
+            },
+            mediaConstraints = MediaConstraints(),
+        ).apply {
+            addTempTransceivers(this)
+        }
+    }
+
+    private fun cleanTempPeerConnection(tempPeerConnection: StreamPeerConnection?) {
+        tempPeerConnection?.videoTransceiver?.stop()
+        tempPeerConnection?.audioTransceiver?.stop()
+        tempPeerConnection?.connection?.close()
+    }
+
     /**
      * Prepares a generic SDP to send as part of the JoinRequest.
      * This is a throw-away SDP that the SFU will use to determine the capabilities of the client (codec support, etc).
      */
-    private suspend fun getGenericSdp(direction: RtpTransceiver.RtpTransceiverDirection): String {
-        val tempPeerConnection = when (direction) {
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY -> clientImpl.peerConnectionFactory.makePeerConnection(
-                coroutineScope = coroutineScope,
-                configuration = PeerConnection.RTCConfiguration(emptyList()),
-                type = StreamPeerType.PUBLISHER,
-                mediaConstraints = MediaConstraints(),
-            )
-            RtpTransceiver.RtpTransceiverDirection.RECV_ONLY -> clientImpl.peerConnectionFactory.makePeerConnection(
-                coroutineScope = coroutineScope,
-                configuration = PeerConnection.RTCConfiguration(emptyList()),
-                type = StreamPeerType.SUBSCRIBER,
-                mediaConstraints = mediaConstraints,
-            )
-            else -> null
+    private suspend fun getTempSdp(tempPeerConnection: StreamPeerConnection): String {
+        val offerResult = tempPeerConnection.createOffer()
+        return if (offerResult !is Success) {
+            ""
+        } else {
+            mangleSdp(offerResult.value).description // TODO-neg: mangle needed here?
         }
-
-        tempPeerConnection?.connection?.addTransceiver(
-            MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
-            RtpTransceiver.RtpTransceiverInit(direction),
-        )
-        tempPeerConnection?.connection?.addTransceiver(
-            MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
-            RtpTransceiver.RtpTransceiverInit(direction),
-        )
-
-        val offerResult = tempPeerConnection?.createOffer()
-        if (offerResult !is Success) return ""
+    }
 
         val sdp = mangleSdp(offerResult.value) // TODO-neg: mangle needed here?
 
@@ -933,14 +970,14 @@ public class RtcSession internal constructor(
         peerConnection.connection.addTransceiver(
             MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
             RtpTransceiver.RtpTransceiverInit(
-                RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
+                RtpTransceiverDirection.RECV_ONLY,
             ),
         )
 
         peerConnection.connection.addTransceiver(
             MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
             RtpTransceiver.RtpTransceiverInit(
-                RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
+                RtpTransceiverDirection.RECV_ONLY,
             ),
         )
         return peerConnection
@@ -1587,7 +1624,7 @@ public class RtcSession internal constructor(
 
         val transceivers = publisher?.connection?.transceivers?.toList() ?: emptyList()
         val tracks = transceivers.filter {
-            it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
+            it.direction == RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
         }.map { transceiver ->
             val track = transceiver.sender.track()!!
 
