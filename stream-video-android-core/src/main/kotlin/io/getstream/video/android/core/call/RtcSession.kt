@@ -531,7 +531,10 @@ public class RtcSession internal constructor(
     }
 
     private suspend fun withTempPeerConnections(
-        action: suspend (publisher: StreamPeerConnection?, subscriber: StreamPeerConnection?) -> Unit
+        action: suspend (
+            publisher: StreamPeerConnection?,
+            subscriber: StreamPeerConnection?,
+        ) -> Unit,
     ) {
         val tempPublisher = createTempPeerConnection(RtpTransceiverDirection.SEND_ONLY)
         val tempSubscriber = createTempPeerConnection(RtpTransceiverDirection.RECV_ONLY)
@@ -1018,11 +1021,11 @@ public class RtcSession internal constructor(
         val red = settings?.audio?.redundantCodingEnabled ?: true
         val opus = settings?.audio?.opusDtxEnabled ?: true
 
-        return mangleSdpUtil(sdp, red, opus)
+        return mangleSdpUtil(sdp, red, opus, enableVp8 = false) // TODO-neg: manage vp8 enforcing
     }
 
     @VisibleForTesting
-    fun createPublisher(): StreamPeerConnection {
+    fun createPublisher(): StreamPeerConnection { // TODO-neg: this is called twice
         audioTransceiverInitialized = false
         videoTransceiverInitialized = false
         screenshareTransceiverInitialized = false
@@ -1054,6 +1057,7 @@ public class RtcSession internal constructor(
      * This is used for dynsacle
      */
     internal fun updatePublishQuality(event: ChangePublishQualityEvent) = synchronized(this) {
+        // TODO-neg: should I apply the changes done for codec prefs?
         val sender = publisher?.connection?.transceivers?.firstOrNull {
             it.mediaType == MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
         }?.sender
