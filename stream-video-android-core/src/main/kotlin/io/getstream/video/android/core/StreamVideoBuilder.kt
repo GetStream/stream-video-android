@@ -114,7 +114,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     @Deprecated(
-        message = "This property is ignored. Set audioUsage in callServiceConfig parameter.",
+        message = "This property is ignored. Set audioUsage in the callServiceConfig parameter.",
         level = DeprecationLevel.WARNING,
     )
     private val audioUsage: Int = defaultAudioUsage,
