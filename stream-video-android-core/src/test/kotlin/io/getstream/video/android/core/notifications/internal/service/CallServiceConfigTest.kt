@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.media.AudioAttributes
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.every
 import io.mockk.mockk
@@ -33,11 +34,13 @@ class CallServiceConfigTest {
         val runInForeground = config.runCallServiceInForeground
         val servicePerTypeSize = config.callServicePerType.size
         val serviceClass = config.callServicePerType[ANY_MARKER]
+        val audioUsage = config.audioUsage
 
         // Then
         assertEquals(true, runInForeground)
         assertEquals(1, servicePerTypeSize)
         assertEquals(CallService::class.java, serviceClass)
+        assertEquals(AudioAttributes.USAGE_VOICE_COMMUNICATION, audioUsage)
     }
 
     @Test
@@ -50,12 +53,14 @@ class CallServiceConfigTest {
         val servicePerTypeSize = config.callServicePerType.size
         val hostServiceClass = config.callServicePerType[ANY_MARKER]
         val livestreamServiceClass = config.callServicePerType["livestream"]
+        val audioUsage = config.audioUsage
 
         // Then
         assertEquals(true, runInForeground)
         assertEquals(2, servicePerTypeSize)
         assertEquals(CallService::class.java, hostServiceClass)
         assertEquals(LivestreamCallService::class.java, livestreamServiceClass)
+        assertEquals(AudioAttributes.USAGE_VOICE_COMMUNICATION, audioUsage)
     }
 
     @Test
@@ -130,11 +135,13 @@ class CallServiceConfigTest {
         val servicePerTypeSize = config.callServicePerType.size
         val hostServiceClass = config.callServicePerType[ANY_MARKER]
         val livestreamServiceClass = config.callServicePerType["livestream"]
+        val audioUsage = config.audioUsage
 
         // Then
         assertEquals(true, runInForeground)
         assertEquals(2, servicePerTypeSize)
         assertEquals(CallService::class.java, hostServiceClass)
         assertEquals(LivestreamAudioCallService::class.java, livestreamServiceClass)
+        assertEquals(AudioAttributes.USAGE_VOICE_COMMUNICATION, audioUsage)
     }
 }
