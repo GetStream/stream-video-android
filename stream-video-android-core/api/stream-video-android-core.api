@@ -83,6 +83,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updatePreferredPublishOptions (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public static synthetic fun updatePreferredPublishOptions$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/core/Call$Companion {
@@ -3977,6 +3979,23 @@ public final class io/getstream/video/android/core/model/NetworkQuality$UnSpecif
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/model/PreferredVideoPublishOptions {
+	public fun <init> ()V
+	public fun <init> (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/model/VideoCodec;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun copy (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/video/android/core/model/PreferredVideoPublishOptions;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/PreferredVideoPublishOptions;Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/video/android/core/model/PreferredVideoPublishOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCodec ()Lio/getstream/video/android/core/model/VideoCodec;
+	public final fun getMaxBitrate ()Ljava/lang/Integer;
+	public final fun getMaxSimulcastLayers ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/model/QueriedCalls {
 	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/util/List;
@@ -4189,6 +4208,17 @@ public final class io/getstream/video/android/core/model/UpdateUserPermissionsDa
 
 public final class io/getstream/video/android/core/model/UpdateUserPermissionsDataKt {
 	public static final fun toRequest (Lio/getstream/video/android/core/model/UpdateUserPermissionsData;)Lorg/openapitools/client/models/UpdateUserPermissionsRequest;
+}
+
+public final class io/getstream/video/android/core/model/VideoCodec : java/lang/Enum {
+	public static final field AV1 Lio/getstream/video/android/core/model/VideoCodec;
+	public static final field H264 Lio/getstream/video/android/core/model/VideoCodec;
+	public static final field VP8 Lio/getstream/video/android/core/model/VideoCodec;
+	public static final field VP9 Lio/getstream/video/android/core/model/VideoCodec;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun supportsSvc ()Z
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/VideoCodec;
+	public static fun values ()[Lio/getstream/video/android/core/model/VideoCodec;
 }
 
 public final class io/getstream/video/android/core/model/VideoModelKt {

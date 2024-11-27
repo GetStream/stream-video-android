@@ -40,6 +40,7 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
+import io.getstream.video.android.core.model.VideoCodec
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
@@ -1245,6 +1246,30 @@ public class Call(
 
     fun toggleAudioProcessing(): Boolean {
         return clientImpl.toggleAudioProcessing()
+    }
+
+    /**
+     * Updates the preferred publishing options for the call.
+     *
+     * @param videoCodec The preferred codec to use for publishing video.
+     * @param maxBitrate The preferred maximum bitrate to use for publishing video.
+     * @param maxSimulcastLayers The maximum number of simulcast layers to use for publishing video.
+     */
+    fun updatePreferredPublishOptions(
+        videoCodec: VideoCodec? = null,
+        maxBitrate: Int? = null,
+        maxSimulcastLayers: Int? = null,
+    ) {
+        // TODO-neg: check connection value
+        if (state.connection.value is RealtimeConnection.Joined) {
+            logger.w { "[updatePublishOptions] Cannot update publishing options after joining the call" }
+        } else {
+            state.preferredVideoPublishOptions = state.preferredVideoPublishOptions.copy(
+                codec = videoCodec,
+                maxBitrate = maxBitrate,
+                maxSimulcastLayers = maxSimulcastLayers,
+            )
+        }
     }
 
     @InternalStreamVideoApi

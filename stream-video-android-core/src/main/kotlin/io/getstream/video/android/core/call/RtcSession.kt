@@ -595,21 +595,20 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun getPreferredPublishOptions(tempPublisher: StreamPeerConnection, sdp: String): List<PublishOption> {
-        val preferredCodec = "h264"
-        val preferredBitrate = 1_000_000
-        val preferredMaxSimulcastLayers = 3
-
-        val parsedSdp = MinimalSdpParser(sdp)
-        val sdpCodec = parsedSdp.getVideoCodec(preferredCodec)
-        val sfuCodec = sdpCodec?.let {
-            Codec(
-                name = it.codecName,
-                fmtp = it.codecFmtp,
-                clock_rate = it.codecClockRate,
-                payload_type = it.payloadType.toIntOrNull() ?: 0,
-            )
-        }
+    private fun getPreferredPublishOptions(sdp: String): List<PublishOption> {
+        return call.state.preferredVideoPublishOptions.takeIf {
+            it.codec != null || it.maxBitrate != null || it.maxSimulcastLayers != null
+        }?.let { options ->
+            val parsedSdp = MinimalSdpParser(sdp)
+            val sdpCodec = options.codec?.let { parsedSdp.getVideoCodec(it.name) }
+            val sfuCodec = sdpCodec?.let {
+                Codec(
+                    name = it.codecName,
+                    fmtp = it.codecFmtp,
+                    clock_rate = it.codecClockRate,
+                    payload_type = it.payloadType.toIntOrNull() ?: 0,
+                )
+            }
 
             listOf(
                 PublishOption(

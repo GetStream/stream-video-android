@@ -174,12 +174,12 @@ internal class MinimalSdpParser(var sdp: String) {
         return new
     }
 
-    fun getVideoCodec(codec: String): RtpMapAttribute? { // TODO-neg: use VideoCodec enum
+    fun getVideoCodec(codec: String): RtpMapAttribute? {
         return when (codec.lowercase()) {
             "h264" -> h264
             "vp8" -> vp8
             "vp9" -> vp9
-            "av1" -> opus
+            "av1" -> av1
             else -> null
         }
     }
