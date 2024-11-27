@@ -4297,8 +4297,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public fun <init> ()V
 	public fun <init> (ZILjava/util/Map;)V
 	public synthetic fun <init> (ZILjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (ZLjava/util/Map;)V
-	public synthetic fun <init> (ZLjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()I
 	public final fun component3 ()Ljava/util/Map;

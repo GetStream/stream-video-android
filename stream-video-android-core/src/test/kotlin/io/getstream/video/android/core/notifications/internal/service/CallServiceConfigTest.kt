@@ -110,12 +110,14 @@ class CallServiceConfigTest {
         val servicePerTypeSize = config.callServicePerType.size
         val hostServiceClass = config.callServicePerType[ANY_MARKER]
         val livestreamServiceClass = config.callServicePerType["livestream"]
+        val audioUsage = config.audioUsage
 
         // Then
         assertEquals(true, runInForeground)
         assertEquals(2, servicePerTypeSize)
         assertEquals(CallService::class.java, hostServiceClass)
         assertEquals(LivestreamViewerService::class.java, livestreamServiceClass)
+        assertEquals(AudioAttributes.USAGE_MEDIA, audioUsage)
     }
 
     @Test
