@@ -496,18 +496,21 @@ public class RtcSession internal constructor(
     }
 
     suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
-        logger.i { "[connect] #sfu; #track; no args" }
+        logger.d { "[connect] #sfu; #track; no args" }
 
-        var subscriberSdp = ""
-        var publisherSdp = ""
+        var dummySubscriberSdp = ""
+        var dummyPublisherSdp = ""
         var preferredPublishOptions = emptyList<PublishOption>()
 
-        withTempPeerConnections { tempPublisher, tempSubscriber ->
-            tempSubscriber?.let { subscriberSdp = getTempSdp(it) }
-            tempPublisher?.let {
-                publisherSdp = getTempSdp(it)
-                logger.d { "[connect] #codec-negotiation; Publisher SDP:\n$publisherSdp" }
-                preferredPublishOptions = getPreferredPublishOptions(tempPublisher, publisherSdp)
+        withDummyPeerConnections { dummyPublisher, dummySubscriber ->
+            dummySubscriber?.let {
+                dummySubscriberSdp = getDummySdp(it)
+                logger.v { "[connect] #codec-negotiation; Dummy subscriber SDP:\n$dummySubscriberSdp" }
+            }
+            dummyPublisher?.let {
+                dummyPublisherSdp = getDummySdp(it)
+                preferredPublishOptions = getPreferredPublishOptions(dummyPublisherSdp)
+                logger.v { "[connect] #codec-negotiation; Dummy publisher SDP:\n$dummyPublisherSdp" }
             }
         }
 
@@ -517,35 +520,32 @@ public class RtcSession internal constructor(
             fast_reconnect = false,
             client_details = clientDetails,
             reconnect_details = reconnectDetails,
-            subscriber_sdp = subscriberSdp,
-            publisher_sdp = publisherSdp,
+            subscriber_sdp = dummySubscriberSdp,
+            publisher_sdp = dummyPublisherSdp,
             preferred_publish_options = preferredPublishOptions,
-            // preferred_publish_options = // TODO-neg: add preferred publish options
         )
-        logger.d { "Connecting RTC, $request" }
+        logger.d { "[connect] Sending JoinRequest: $request" }
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
-        sfuConnectionModule.socketConnection.whenConnected {
-            connectRtc()
-        }
+        sfuConnectionModule.socketConnection.whenConnected { connectRtc() }
     }
 
-    private suspend fun withTempPeerConnections(
+    private suspend fun withDummyPeerConnections(
         action: suspend (
             publisher: StreamPeerConnection?,
             subscriber: StreamPeerConnection?,
         ) -> Unit,
     ) {
-        val tempPublisher = createTempPeerConnection(RtpTransceiverDirection.SEND_ONLY)
-        val tempSubscriber = createTempPeerConnection(RtpTransceiverDirection.RECV_ONLY)
+        val dummyPublisher = createDummyPeerConnection(RtpTransceiverDirection.SEND_ONLY)
+        val dummySubscriber = createDummyPeerConnection(RtpTransceiverDirection.RECV_ONLY)
 
-        action(tempPublisher, tempSubscriber)
+        action(dummyPublisher, dummySubscriber)
 
-        cleanTempPeerConnection(tempPublisher)
-        cleanTempPeerConnection(tempSubscriber)
+        cleanDummyPeerConnection(dummyPublisher)
+        cleanDummyPeerConnection(dummySubscriber)
     }
 
-    private fun createTempPeerConnection(direction: RtpTransceiverDirection): StreamPeerConnection? {
+    private fun createDummyPeerConnection(direction: RtpTransceiverDirection): StreamPeerConnection? {
         if (direction != RtpTransceiverDirection.SEND_ONLY && direction != RtpTransceiverDirection.RECV_ONLY) {
             return null
         }
@@ -576,18 +576,18 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun cleanTempPeerConnection(tempPeerConnection: StreamPeerConnection?) {
-        tempPeerConnection?.videoTransceiver?.stop()
-        tempPeerConnection?.audioTransceiver?.stop()
-        tempPeerConnection?.connection?.close()
+    private fun cleanDummyPeerConnection(dummyPeerConnection: StreamPeerConnection?) {
+        dummyPeerConnection?.videoTransceiver?.stop()
+        dummyPeerConnection?.audioTransceiver?.stop()
+        dummyPeerConnection?.connection?.close()
     }
 
     /**
      * Prepares a generic SDP to send as part of the JoinRequest.
      * This is a throw-away SDP that the SFU will use to determine the capabilities of the client (codec support, etc).
      */
-    private suspend fun getTempSdp(tempPeerConnection: StreamPeerConnection): String {
-        val offerResult = tempPeerConnection.createOffer()
+    private suspend fun getDummySdp(dummyPeerConnection: StreamPeerConnection): String {
+        val offerResult = dummyPeerConnection.createOffer()
         return if (offerResult !is Success) {
             ""
         } else {
@@ -611,14 +611,20 @@ public class RtcSession internal constructor(
             )
         }
 
-        return listOf(
-            PublishOption(
-                track_type = TrackType.TRACK_TYPE_VIDEO,
-                codec = sfuCodec,
-                bitrate = preferredBitrate,
-                max_spatial_layers = preferredMaxSimulcastLayers,
-            ),
-        )
+            listOf(
+                PublishOption(
+                    track_type = TrackType.TRACK_TYPE_VIDEO,
+                    codec = sfuCodec,
+                    bitrate = options.maxBitrate ?: 0, // TODO-neg: default values
+                    max_spatial_layers = options.maxSimulcastLayers ?: 0,
+                ),
+            ).also {
+                logger.d { "[getPreferredPublishOptions] #codec-negotiation; ${it.toString()}" }
+            }
+        } ?: run {
+            logger.d { "[getPreferredPublishOptions] #codec-negotiation; No preferred options" }
+            emptyList()
+        }
     }
 
     private fun initializeVideoTransceiver(publisher: StreamPeerConnection? = this.publisher) {
