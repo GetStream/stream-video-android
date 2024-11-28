@@ -1192,19 +1192,21 @@ public class Call(
         soundInputProcessor.processSoundInput(audioSample.data)
     }
 
-    suspend fun collectUserFeedback(
+    fun collectUserFeedback(
         rating: Int,
         reason: String? = null,
         custom: Map<String, Any>? = null,
     ) {
-        clientImpl.collectFeedback(
-            callType = type,
-            id = id,
-            sessionId = sessionId,
-            rating = rating,
-            reason = reason,
-            custom = custom,
-        )
+        scope.launch {
+            clientImpl.collectFeedback(
+                callType = type,
+                id = id,
+                sessionId = sessionId,
+                rating = rating,
+                reason = reason,
+                custom = custom,
+            )
+        }
     }
 
     suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
