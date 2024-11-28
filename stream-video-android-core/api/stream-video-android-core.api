@@ -1016,7 +1016,8 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;I)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;Z)V
+	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;ZLstream/video/sfu/models/PublishOption;)V
+	public static synthetic fun addVideoTransceiver$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaStreamTrack;Ljava/util/List;ZLstream/video/sfu/models/PublishOption;ILjava/lang/Object;)V
 	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;
@@ -3994,6 +3995,10 @@ public final class io/getstream/video/android/core/model/PreferredVideoPublishOp
 	public final fun getMaxSimulcastLayers ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/PreferredVideoPublishOptionsKt {
+	public static final fun getScalabilityMode (Lstream/video/sfu/models/PublishOption;)Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/QueriedCalls {

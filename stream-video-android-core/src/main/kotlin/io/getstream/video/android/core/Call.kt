@@ -1264,7 +1264,7 @@ public class Call(
         if (state.connection.value is RealtimeConnection.Joined) {
             logger.w { "[updatePublishOptions] Cannot update publishing options after joining the call" }
         } else {
-            state.preferredVideoPublishOptions = state.preferredVideoPublishOptions.copy(
+            state.clientVideoPublishOptions = state.clientVideoPublishOptions.copy(
                 codec = videoCodec,
                 maxBitrate = maxBitrate,
                 maxSimulcastLayers = maxSimulcastLayers,

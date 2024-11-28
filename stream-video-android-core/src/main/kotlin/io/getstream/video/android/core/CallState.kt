@@ -38,11 +38,11 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.PreferredVideoPublishOptions
 import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.core.model.PreferredVideoPublishOptions
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
@@ -567,7 +567,8 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
-    internal var preferredVideoPublishOptions: PreferredVideoPublishOptions = PreferredVideoPublishOptions()
+    internal var clientVideoPublishOptions: PreferredVideoPublishOptions =
+        PreferredVideoPublishOptions()
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }

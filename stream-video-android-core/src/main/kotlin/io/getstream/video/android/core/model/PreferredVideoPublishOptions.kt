@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.Call
+import stream.video.sfu.models.PublishOption
 
 /**
  * Options to configure video publishing.
@@ -53,3 +54,6 @@ enum class VideoCodec {
      */
     fun supportsSvc() = this == VP9 || this == AV1
 }
+
+fun PublishOption.getScalabilityMode(): String =
+    "L${max_spatial_layers}T${max_temporal_layers}" + if (max_spatial_layers > 1) "_KEY" else ""

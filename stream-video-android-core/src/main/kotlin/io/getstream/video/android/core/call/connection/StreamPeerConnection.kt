@@ -26,6 +26,8 @@ import io.getstream.video.android.core.call.utils.setValue
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.VideoCodec
+import io.getstream.video.android.core.model.getScalabilityMode
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
 import io.getstream.video.android.core.utils.stringify
@@ -47,6 +49,7 @@ import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
+import stream.video.sfu.models.PublishOption
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -280,11 +283,16 @@ public class StreamPeerConnection(
         track: MediaStreamTrack,
         streamIds: List<String>,
         isScreenShare: Boolean,
+        publishOption: PublishOption? = null,
     ) {
         logger.d {
             "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
         }
-        val transceiverInit = buildVideoTransceiverInit(streamIds, isScreenShare)
+        val transceiverInit = buildVideoTransceiverInit(
+            streamIds,
+            isScreenShare,
+            publishOption,
+        )
 
         videoTransceiver = connection.addTransceiver(track, transceiverInit)
     }
@@ -297,55 +305,21 @@ public class StreamPeerConnection(
     private fun buildVideoTransceiverInit(
         streamIds: List<String>,
         isScreenShare: Boolean,
+        publishOption: PublishOption?,
     ): RtpTransceiverInit {
-        val encodings = if (!isScreenShare) {
-            /**
-             * We create different RTP encodings for the transceiver.
-             * Full quality, represented by "f" ID.
-             * Half quality, represented by "h" ID.
-             * Quarter quality, represented by "q" ID.
-             *
-             * Their bitrate is also roughly as the name states - maximum for "full", ~half of that
-             * for "half" and another half, or total quarter of maximum, for "quarter".
-             */
-            val quarterQuality = RtpParameters.Encoding(
-                "q",
-                true,
-                4.0,
-            ).apply {
-                maxBitrateBps = maxBitRate / 4
-            }
-
-            val halfQuality = RtpParameters.Encoding(
-                "h",
-                true,
-                2.0,
-            ).apply {
-                maxBitrateBps = maxBitRate / 2
-            }
-
-            val fullQuality = RtpParameters.Encoding(
-                "f",
-                true,
-                1.0,
-            ).apply {
-                maxBitrateBps = maxBitRate
-//            networkPriority = 3
-//            bitratePriority = 4.0
-            }
-
-            listOf(quarterQuality, halfQuality, fullQuality)
+        val encodings = if (isScreenShare) {
+            createScreenShareEncoding() // TODO-neg: apply bitrate (JS findOptimalScreenSharingLayers) & cache encoding
         } else {
-            // this is aligned with iOS
-            val screenshareQuality = RtpParameters.Encoding(
-                "q",
-                true,
-                1.0,
-            ).apply {
-                maxBitrateBps = 1_000_000
-            }
+            val encodings = createEncodings(publishOption) // TODO-neg: cache encodings
+            val isSvcCodec = publishOption?.codec?.let {
+                VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
+            } ?: false // TODO-neg add as PublishOption extension method
 
-            listOf(screenshareQuality)
+            if (!isSvcCodec) {
+                encodings
+            } else {
+                encodings.filter { it.rid == "f" }.map { it.apply { rid = "q" } }
+            }
         }
 
         return RtpTransceiverInit(
@@ -524,12 +498,96 @@ public class StreamPeerConnection(
 
     override fun onDataChannel(channel: DataChannel?): Unit = Unit
 
-    override fun toString(): String =
-        "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
-
     private fun String.mungeCodecs(): String {
         return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
     }
+
+    internal fun createEncodings(publishOption: PublishOption?): List<RtpParameters.Encoding> {
+        val allEncodings = createSimulcastEncodings() // from high to low quality
+        val isSvcCodec = publishOption?.codec?.let {
+            VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
+        } ?: false
+        val encodingCount = if (isSvcCodec) {
+            3
+        } else {
+            Math.min(
+                3,
+                publishOption?.max_spatial_layers ?: 3,
+            )
+        }
+        var factor = 1.0
+
+        return allEncodings.take(encodingCount).onEach { encoding ->
+            encoding.maxBitrateBps = maxBitRate / factor.toInt() // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
+            publishOption?.let { encoding.maxFramerate = publishOption.fps } // TODO-neg: correct?
+
+            if (isSvcCodec) {
+                encoding.scalabilityMode = publishOption?.getScalabilityMode()
+            } else {
+                encoding.scaleResolutionDownBy = factor
+            }
+
+            factor *= 2
+        }
+    }
+
+    private fun createSimulcastEncodings(): List<RtpParameters.Encoding> {
+        /**
+         * We create different RTP encodings for the transceiver.
+         * Full quality, represented by "f" ID.
+         * Half quality, represented by "h" ID.
+         * Quarter quality, represented by "q" ID.
+         */
+
+        val quarterQuality = RtpParameters.Encoding(
+            "q",
+            true,
+            4.0,
+        )
+
+        val halfQuality = RtpParameters.Encoding(
+            "h",
+            true,
+            2.0,
+        )
+
+        val fullQuality = RtpParameters.Encoding(
+            "f",
+            true,
+            1.0,
+        )
+
+        return listOf(fullQuality, halfQuality, quarterQuality)
+    }
+
+    private fun createSvcEncoding(): List<RtpParameters.Encoding> {
+        val encoding = RtpParameters.Encoding(
+            "q",
+            true,
+            1.0,
+        ).apply {
+            maxBitrateBps = maxBitRate
+            scalabilityMode = "L3T2_KEY"
+        }
+
+        return listOf(encoding)
+    }
+
+    private fun createScreenShareEncoding(): List<RtpParameters.Encoding> {
+        // This is aligned with iOS
+        val encoding = RtpParameters.Encoding(
+            "q",
+            true,
+            1.0,
+        ).apply {
+            maxBitrateBps = 1_000_000
+        }
+
+        return listOf(encoding)
+    }
+
+    override fun toString(): String =
+        "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"
 
     private companion object {
         private const val DEBUG_STATS = false

@@ -596,7 +596,7 @@ public class RtcSession internal constructor(
     }
 
     private fun getPreferredPublishOptions(sdp: String): List<PublishOption> {
-        return call.state.preferredVideoPublishOptions.takeIf {
+        return call.state.clientVideoPublishOptions.takeIf {
             it.codec != null || it.maxBitrate != null || it.maxSimulcastLayers != null
         }?.let { options ->
             val parsedSdp = MinimalSdpParser(sdp)
@@ -618,7 +618,7 @@ public class RtcSession internal constructor(
                     max_spatial_layers = options.maxSimulcastLayers ?: 0,
                 ),
             ).also {
-                logger.d { "[getPreferredPublishOptions] #codec-negotiation; ${it.toString()}" }
+                logger.d { "[getPreferredPublishOptions] #codec-negotiation; $it" }
             }
         } ?: run {
             logger.d { "[getPreferredPublishOptions] #codec-negotiation; No preferred options" }
@@ -626,13 +626,14 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun initializeVideoTransceiver(publisher: StreamPeerConnection? = this.publisher) {
-        if (!videoTransceiverInitialized) {
+    private fun addVideoTransceiver(track: MediaStreamTrack, force: Boolean = false) {
+        if (!videoTransceiverInitialized || force) {
             publisher?.let {
                 it.addVideoTransceiver(
-                    call.mediaManager.videoTrack,
+                    track,
                     listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
                     isScreenShare = false,
+                    storedPublishOptions[TrackType.TRACK_TYPE_VIDEO],
                 )
                 videoTransceiverInitialized = true
             }
@@ -678,7 +679,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
 
                 if (it == DeviceStatus.Enabled) {
-                    initializeVideoTransceiver()
+                    addVideoTransceiver(track = call.mediaManager.videoTrack)
                 }
             }
         }
@@ -839,7 +840,7 @@ public class RtcSession internal constructor(
                 // render it on the surface. but we need to start this before forwarding it to the publisher
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
                 if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
-                    initializeVideoTransceiver()
+                    addVideoTransceiver(track = call.mediaManager.videoTrack)
                 }
                 if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
                     initialiseAudioTransceiver()
@@ -1108,6 +1109,8 @@ public class RtcSession internal constructor(
     private fun updatePublishOptions(publishOption: PublishOption?) {
         logger.d { "[updatePublishOptions] #codec-negotiation; publishOption: $publishOption" }
 
+        // TODO-neg: sync needed? (find used mutex)
+
         publishOption?.let {
             storedPublishOptions[it.track_type] = it
             switchCodec(it)
@@ -1118,7 +1121,7 @@ public class RtcSession internal constructor(
         logger.d { "[switchCodec] #codec-negotiation; publishOption: $publishOption" }
 
         // TODO-neg: will we need to also match SCREENSHARE track types?
-        val mediaType = when (publishOption.track_type) {
+        val mediaType = when (publishOption.track_type) { // TODO-neg: add as PublishOption extension method
             TrackType.TRACK_TYPE_VIDEO -> MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
             TrackType.TRACK_TYPE_AUDIO -> MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
             else -> return
@@ -1127,7 +1130,7 @@ public class RtcSession internal constructor(
             it.mediaType == mediaType
         }
 
-        transceiver?.sender?.track()?.let { track ->
+        transceiver?.sender?.track()?.let { track -> // TODO-neg: is it ok to not have a track yet? (JS Publisher:97)
             if (track.isPublishing()) {
                 logger.d { "[switchCodec] #codec-negotiation; Found transceiver and track is publishing" }
 
@@ -1139,35 +1142,13 @@ public class RtcSession internal constructor(
                     logger.d { "[handleCodecNegotiationComplete] #codec-negotiation; setTrack result: $result" }
                 }
 
-                val newTrack = track // TODO-neg: clone track
-                addNewTransceiver(newTrack)
+                val clonedTrack = track // TODO-neg: clone track
+                addVideoTransceiver(track = clonedTrack, force = true)
             }
         }
     }
 
     private fun MediaStreamTrack.isPublishing() = this.state() == MediaStreamTrack.State.LIVE
-
-    private fun addNewTransceiver(track: MediaStreamTrack) {
-        when (track.kind()) {
-            "video" -> publisher?.addVideoTransceiver(
-                track,
-                listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
-                false,
-            )
-            "audio" -> publisher?.addAudioTransceiver(
-                track,
-                listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
-            )
-            else -> logger.d {
-                "[addNewTransceiver] #codec-negotiation; Unsupported track kind: ${track.kind()}"
-            }
-        }
-        // TODO-neg: screenshare support?
-
-        logger.d {
-            "[addNewTransceiver] #codec-negotiation; Added new transceiver for track kind: ${track.kind()}"
-        }
-    }
 
     private val defaultVideoDimension = VideoDimension(1080, 2340)
 
@@ -1663,7 +1644,7 @@ public class RtcSession internal constructor(
                         "video capture needs to be enabled before adding the local track",
                     )
                 }
-                createVideoLayers(transceiver, captureResolution)
+                createVideoLayers(captureResolution)
             } else if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
                 createScreenShareLayers(transceiver)
             } else {
@@ -1746,21 +1727,20 @@ public class RtcSession internal constructor(
         return media.mid.toString()
     }
 
-    private fun createVideoLayers(
-        transceiver: RtpTransceiver,
-        captureResolution: CaptureFormat,
-    ): List<VideoLayer> {
-        // we tell the Sfu which resolutions we're sending
-        return transceiver.sender.parameters.encodings.map {
+    private fun createVideoLayers(captureResolution: CaptureFormat): List<VideoLayer> {
+        // We tell the SFU which resolutions we're sending.
+        // Even if we use SVC, we still generate three layers [f, h, q]
+        // because we need to announce them to the SFU via the SetPublisher request,
+        // so we use the simulcast encodings here.
+        return publisher?.createEncodings(storedPublishOptions[TrackType.TRACK_TYPE_VIDEO])?.map {
             val scaleBy = it.scaleResolutionDownBy ?: 1.0
-            val width = captureResolution.width.div(scaleBy) ?: 0
-            val height = captureResolution.height.div(scaleBy) ?: 0
+            val width = captureResolution.width.div(scaleBy)
+            val height = captureResolution.height.div(scaleBy)
             val quality = ridToVideoQuality(it.rid)
 
             // We need to divide by 1000 because the the FramerateRange is multiplied
             // by 1000 (see javadoc).
             val fps = (captureResolution.framerate?.max ?: 0).div(1000)
-
             VideoLayer(
                 rid = it.rid ?: "",
                 video_dimension = VideoDimension(
@@ -1771,7 +1751,7 @@ public class RtcSession internal constructor(
                 fps = fps,
                 quality = quality,
             )
-        }
+        } ?: emptyList()
     }
 
     private fun createScreenShareLayers(transceiver: RtpTransceiver): List<VideoLayer> {
