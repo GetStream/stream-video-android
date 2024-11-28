@@ -966,13 +966,13 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
-
     internal suspend fun collectFeedback(
         callType: String,
         id: String,
         sessionId: String,
-        rating: Int, reason: String?,
-        custom: Map<String, Any>?
+        rating: Int,
+        reason: String?,
+        custom: Map<String, Any>?,
     ) = apiCall {
         coordinatorConnectionModule.api.collectUserFeedback(
             type = callType,

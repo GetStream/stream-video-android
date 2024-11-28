@@ -1195,7 +1195,7 @@ public class Call(
     suspend fun collectUserFeedback(
         rating: Int,
         reason: String? = null,
-        custom: Map<String, Any>? = null
+        custom: Map<String, Any>? = null,
     ) {
         clientImpl.collectFeedback(
             callType = type,
@@ -1203,7 +1203,7 @@ public class Call(
             sessionId = sessionId,
             rating = rating,
             reason = reason,
-            custom = custom
+            custom = custom,
         )
     }
 
