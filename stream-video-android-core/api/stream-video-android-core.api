@@ -5078,8 +5078,6 @@ public final class io/getstream/video/android/core/sounds/RingingConfigKt {
 }
 
 public final class io/getstream/video/android/core/sounds/Sounds {
-	public synthetic fun <init> (II)V
-	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/getstream/video/android/core/sounds/RingingConfig;)V
 	public final fun component1 ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public final fun copy (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;

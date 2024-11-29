@@ -47,17 +47,7 @@ public interface RingingConfig {
     replaceWith = ReplaceWith("SoundConfig"),
     level = DeprecationLevel.WARNING,
 )
-public data class Sounds(val ringingConfig: RingingConfig) {
-    @Deprecated(
-        message = "Deprecated. This Constructor will now return a sound configuration with no sounds. Use constructor with SoundConfig parameter instead.",
-        replaceWith = ReplaceWith("defaultResourcesRingingConfig(context).toSounds()"),
-        level = DeprecationLevel.HIDDEN,
-    )
-    constructor(
-        @RawRes incomingCallSound: Int = R.raw.call_incoming_sound,
-        @RawRes outgoingCallSound: Int = R.raw.call_outgoing_sound,
-    ) : this(emptyRingingConfig())
-}
+public data class Sounds(val ringingConfig: RingingConfig)
 
 // Factories
 /**
