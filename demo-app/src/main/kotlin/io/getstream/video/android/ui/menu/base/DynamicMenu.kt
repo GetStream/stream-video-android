@@ -225,6 +225,7 @@ private fun DynamicMenuPreview() {
                 onDeviceSelected = {},
                 onShowFeedback = {},
                 onNoiseCancellation = {},
+                onIncomingResolutionChanged = {},
                 onSelectScaleType = {},
                 loadRecordings = { emptyList() },
             ),
@@ -255,6 +256,7 @@ private fun DynamicMenuDebugOptionPreview() {
                 onShowFeedback = {},
                 onSelectScaleType = { },
                 onNoiseCancellation = {},
+                onIncomingResolutionChanged = {},
                 loadRecordings = { emptyList() },
             ),
         )

@@ -95,6 +95,7 @@ import kotlinx.serialization.json.Json
 import okio.IOException
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.VideoResolution
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -1050,12 +1051,15 @@ public class RtcSession internal constructor(
      * - it sends the resolutions we're displaying the video at so the SFU can decide which track to send
      * - when switching SFU we should repeat this info
      * - http calls failing here breaks the call. (since you won't receive the video)
-     * - we should retry continously until it works and after it continues to fail, raise an error that shuts down the call
+     * - we should retry continuously until it works and after it continues to fail, raise an error that shuts down the call
      * - we retry when:
      * -- error isn't permanent, SFU didn't change, the mute/publish state didn't change
      * -- we cap at 30 retries to prevent endless loops
      */
-    private fun setVideoSubscriptions(useDefaults: Boolean = false) {
+    internal fun setVideoSubscriptions(
+        useDefaults: Boolean = false,
+        manualResolutionOverrides: Map<String, VideoResolution> = emptyMap(),
+    ) {
         logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
         // default is to subscribe to the top 5 sorted participants
         var tracks = if (useDefaults) {
@@ -1064,18 +1068,29 @@ public class RtcSession internal constructor(
             // if we're not using the default, sub to visible tracks
             visibleTracks()
         }
+        // TODO-mqs: test default tracks and scrolling
 
         // TODO:
         // This is a hotfix to help with performance. Most devices struggle even with H resolution
         // if there are more than 2 remote participants and especially if there is a H264 participant.
         // We just report a very small window so force SFU to deliver us Q resolution. This will
         // be later less visible to the user once we make the participant grid smaller
-        if (tracks.size > 2) {
-            tracks = tracks.map {
-                it.copy(dimension = it.dimension?.copy(width = 200, height = 200))
-            }
+//        if (tracks.size > 2) {
+//            tracks = tracks.map {
+//                it.copy(dimension = it.dimension?.copy(width = 200, height = 200))
+//            }
+//        }
+
+        logger.v {
+            "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; manualResolutionOverrides: $manualResolutionOverrides"
         }
-        logger.v { "[setVideoSubscriptions] #sfu; #track; tracks.size: ${tracks.size}" }
+
+        // TODO-mqs: store overrides
+//        tracks = tracks.map {
+//            manualResolutionOverrides[it.session_id]?.let { resolution ->
+//                it.copy(dimension = VideoDimension(resolution.width, resolution.height))
+//            } ?: it
+//        }
 
         val new = tracks.toList()
         subscriptions.value = new
@@ -1092,12 +1107,17 @@ public class RtcSession internal constructor(
                         session_id = sessionId,
                         tracks = subscriptions.value,
                     )
-                    println("request $request")
+                    dynascaleLogger.d {
+                        "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; UpdateSubscriptionsRequest: $request"
+                    }
                     val sessionToDimension = tracks.map { it.session_id to it.dimension }
                     dynascaleLogger.v {
-                        "[setVideoSubscriptions] $useDefaults #sfu; #track; $sessionId subscribing to : $sessionToDimension"
+                        "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Subscribing to: $sessionToDimension"
                     }
                     val result = updateSubscriptions(request)
+                    dynascaleLogger.v {
+                        "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Result: $result"
+                    }
                     emit(result.getOrThrow())
                 }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                     val sameValue = new == subscriptions.value
@@ -1772,7 +1792,7 @@ public class RtcSession internal constructor(
         dimensions: VideoDimension = defaultVideoDimension,
     ) {
         logger.v {
-            "[updateTrackDimensions] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
+            "[updateTrackDimensions] #track; #sfu; #manual-quality-selection; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
         }
         // The map contains all track dimensions for all participants
         dynascaleLogger.d { "updating dimensions $sessionId $visible $dimensions" }

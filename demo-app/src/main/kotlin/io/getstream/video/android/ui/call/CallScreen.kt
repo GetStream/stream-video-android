@@ -111,6 +111,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.VideoResolution
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -503,6 +504,10 @@ fun CallScreen(
                 },
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
+                },
+                onIncomingResolutionChanged = {
+                    call.setPreferredIncomingVideoResolution(it)
+                    isShowingSettingMenu = false
                 },
                 onSelectScaleType = {
                     preferredScaleType = it

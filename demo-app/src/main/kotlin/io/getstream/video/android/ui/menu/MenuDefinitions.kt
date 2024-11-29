@@ -47,6 +47,7 @@ import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
+import org.openapitools.client.models.VideoResolution
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -66,6 +67,7 @@ fun defaultStreamMenu(
     onSwitchSfuClick: () -> Unit,
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
+    onIncomingResolutionChanged: (VideoResolution) -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
@@ -130,6 +132,20 @@ fun defaultStreamMenu(
             ),
         )
     }
+    add(
+        ActionMenuItem(
+            title = "Change incoming resolution (144)",
+            icon = Icons.Default.AspectRatio,
+            action = { onIncomingResolutionChanged(VideoResolution(height = 144, width = 144)) },
+        )
+    )
+    add(
+        ActionMenuItem(
+            title = "Change incoming resolution (2160p)",
+            icon = Icons.Default.AspectRatio,
+            action = { onIncomingResolutionChanged(VideoResolution(2160, 3840)) },
+        )
+    )
     if (showDebugOptions) {
         add(
             SubMenuItem(

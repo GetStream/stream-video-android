@@ -61,6 +61,7 @@ import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
+import org.openapitools.client.models.VideoResolution
 import java.nio.ByteBuffer
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -75,6 +76,7 @@ internal fun SettingsMenu(
     onSelectVideoFilter: (Int) -> Unit,
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
+    onIncomingResolutionChanged: (VideoResolution) -> Unit,
     onShowCallStats: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
 ) {
@@ -236,6 +238,7 @@ internal fun SettingsMenu(
                 onSwitchSfuClick = onSwitchSfuClick,
                 onShowCallStats = onShowCallStats,
                 onNoiseCancellation = onNoiseCancellation,
+                onIncomingResolutionChanged = { onIncomingResolutionChanged(it) },
                 onSfuRejoinClick = onSfuRejoinClick,
                 onSfuFastReconnectClick = onSfuFastReconnectClick,
                 isScreenShareEnabled = isScreenSharing,
@@ -303,6 +306,7 @@ private fun SettingsMenuPreview() {
                 onShowFeedback = {},
                 onSelectScaleType = {},
                 onNoiseCancellation = {},
+                onIncomingResolutionChanged = {},
                 loadRecordings = { emptyList() },
             ),
         )

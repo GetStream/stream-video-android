@@ -81,6 +81,7 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
+import org.openapitools.client.models.VideoResolution
 import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.PeerConnection
@@ -1245,6 +1246,25 @@ public class Call(
 
     fun toggleAudioProcessing(): Boolean {
         return clientImpl.toggleAudioProcessing()
+    }
+
+    fun setPreferredIncomingVideoResolution(resolution: VideoResolution, sessionIds: List<String>? = null) {
+        val targetSessionIds = sessionIds ?: state.remoteParticipants.value.map { it.sessionId }
+        val overrides = targetSessionIds.associateWith { resolution }
+
+//        session?.setVideoSubscriptions(manualResolutionOverrides = overrides)
+        // TODO-mqs: test with several incoming video tracks
+        targetSessionIds.forEach { sessionId ->
+            session?.updateTrackDimensions(
+                sessionId,
+                TrackType.TRACK_TYPE_VIDEO,
+                true,
+                VideoDimension(resolution.width, resolution.height),
+            )
+        }
+    }
+
+    fun setIncomingVideoEnabled(enabled: Boolean) {
     }
 
     @InternalStreamVideoApi
