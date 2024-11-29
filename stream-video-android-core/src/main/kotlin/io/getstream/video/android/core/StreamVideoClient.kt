@@ -153,7 +153,6 @@ internal class StreamVideoClient internal constructor(
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     internal val crashOnMissingPermission: Boolean = false,
-    internal val audioUsage: Int = defaultAudioUsage,
     internal val appName: String? = null,
     internal val audioProcessing: ManagedAudioProcessingFactory? = null,
     internal val leaveAfterDisconnectSeconds: Long = 30,
@@ -176,7 +175,7 @@ internal class StreamVideoClient internal constructor(
 
     @InternalStreamVideoApi
     public var peerConnectionFactory =
-        StreamPeerConnectionFactory(context, audioUsage, audioProcessing)
+        StreamPeerConnectionFactory(context, callServiceConfig.audioUsage, audioProcessing)
 
     public override val userId = user.id
 
