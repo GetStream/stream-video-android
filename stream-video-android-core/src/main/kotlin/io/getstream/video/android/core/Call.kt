@@ -1192,6 +1192,23 @@ public class Call(
         soundInputProcessor.processSoundInput(audioSample.data)
     }
 
+    fun collectUserFeedback(
+        rating: Int,
+        reason: String? = null,
+        custom: Map<String, Any>? = null,
+    ) {
+        scope.launch {
+            clientImpl.collectFeedback(
+                callType = type,
+                id = id,
+                sessionId = sessionId,
+                rating = rating,
+                reason = reason,
+                custom = custom,
+            )
+        }
+    }
+
     suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
         return suspendCancellableCoroutine { continuation ->
             var screenshotSink: VideoSink? = null
