@@ -26,6 +26,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.TrackDimensions
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
@@ -1248,23 +1249,53 @@ public class Call(
         return clientImpl.toggleAudioProcessing()
     }
 
-    fun setPreferredIncomingVideoResolution(resolution: VideoResolution, sessionIds: List<String>? = null) {
-        val targetSessionIds = sessionIds ?: state.remoteParticipants.value.map { it.sessionId }
-        val overrides = targetSessionIds.associateWith { resolution }
+    fun setPreferredIncomingVideoResolution(resolution: VideoResolution?, sessionIds: List<String>? = null) {
+        session?.let {  session ->
+            val targetSessionIds = sessionIds ?: state.remoteParticipants.value.map { it.sessionId }
 
-//        session?.setVideoSubscriptions(manualResolutionOverrides = overrides)
-        // TODO-mqs: test with several incoming video tracks
-        targetSessionIds.forEach { sessionId ->
-            session?.updateTrackDimensions(
-                sessionId,
-                TrackType.TRACK_TYPE_VIDEO,
-                true,
-                VideoDimension(resolution.width, resolution.height),
+            updateTrackDimensionsOverrides(
+                sessionIds = targetSessionIds,
+                dimensions = resolution?.let { VideoDimension(width = it.width, height = it.height) },
             )
+            session.setVideoSubscriptions()
         }
     }
 
     fun setIncomingVideoEnabled(enabled: Boolean) {
+        // TODO-neg: profile network usage
+        session?.let { session ->
+            val targetSessionIds = state.remoteParticipants.value.map { it.sessionId }
+
+            updateTrackDimensionsOverrides(targetSessionIds, visible = enabled)
+            updateParticipantVideoEnabled(targetSessionIds, enabled)
+            session.setVideoSubscriptions()
+        }
+    }
+
+    // TODO-neg: cand faci on/off, ramane rezolutia setata manual? Cand sterg din overrides?
+
+    internal fun updateTrackDimensionsOverrides(
+        sessionIds: List<String>,
+        dimensions: VideoDimension? = null,
+        visible: Boolean? = null,
+    ) {
+        session?.let { session ->
+            with(session.trackDimensionsOverrides) {
+                sessionIds.forEach { sessionId ->
+                    val existingOverride = get(sessionId)
+                    val putDimensions = dimensions ?: existingOverride?.dimensions ?: session.defaultVideoDimension
+                    val putVisibility = visible ?: existingOverride?.visible ?: true
+
+                    put(sessionId, TrackDimensions(dimensions = putDimensions, visible = putVisibility))
+                }
+            }
+        }
+    }
+
+    internal fun updateParticipantVideoEnabled(sessionIds: List<String>, enabled: Boolean) {
+        sessionIds.forEach { sessionId ->
+            state.getParticipantBySessionId(sessionId)?.let { it._videoEnabled.value = enabled }
+        }
     }
 
     @InternalStreamVideoApi
