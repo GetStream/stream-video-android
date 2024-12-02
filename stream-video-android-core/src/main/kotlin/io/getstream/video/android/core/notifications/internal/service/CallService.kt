@@ -403,9 +403,7 @@ internal open class CallService : Service() {
                     notification,
                     trigger,
                     serviceType,
-                ).onError {
-                    justNotify(notificationId, notification)
-                }
+                )
             }
         }
     }
