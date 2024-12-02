@@ -220,8 +220,8 @@ public class CallState(
     val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
 
     /** Your own participant state */
-    public val me: StateFlow<ParticipantState?> = _participants.mapState {
-        it[call.sessionId]
+    public val me: StateFlow<ParticipantState?> = _participants.mapState { map ->
+        map[call.sessionId] ?: participants.value.find { it.isLocal }
     }
 
     /** Your own participant state */
