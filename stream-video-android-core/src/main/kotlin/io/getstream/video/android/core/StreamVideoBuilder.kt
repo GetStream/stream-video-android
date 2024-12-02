@@ -121,6 +121,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
+    private val autoRegisterPushDevice: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -235,6 +236,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             scope.launch {
                 try {
                     val result = client.connectAsync().await()
+                    if (autoRegisterPushDevice) {
+                        client.registerPushDevice()
+                    }
                     result.onSuccess {
                         streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
                     }.onError {

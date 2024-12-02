@@ -37,6 +37,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.StreamLog
@@ -173,6 +174,7 @@ internal open class CallService : Service() {
             callId: StreamCallId,
             callDisplayName: String?,
             callServiceConfiguration: CallServiceConfig = callServiceConfig(),
+            notification: Notification?,
         ) {
             val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
             safeCallWithResult {
@@ -202,20 +204,17 @@ internal open class CallService : Service() {
                 result!!
             }.onError {
                 // Show notification
-                if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS,
-                    ) != PackageManager.PERMISSION_GRANTED
+                StreamLog.e(TAG) { "Could not start service, showing notification only: $it" }
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+                StreamLog.i(TAG) { "Has permission: $hasPermission" }
+                StreamLog.i(TAG) { "Notification: $notification" }
+                if (hasPermission && notification != null
                 ) {
-                    StreamVideo.instanceOrNull()?.getRingingCallNotification(
-                        ringingState = RingingState.Incoming(),
-                        callId = callId,
-                        callDisplayName = callDisplayName,
-                        shouldHaveContentIntent = true,
-                    )?.let {
-                        NotificationManagerCompat.from(context)
-                            .notify(INCOMING_CALL_NOTIFICATION_ID, it)
-                    }
+                    NotificationManagerCompat.from(context)
+                        .notify(INCOMING_CALL_NOTIFICATION_ID, notification)
                 }
             }
         }
@@ -225,14 +224,18 @@ internal open class CallService : Service() {
             callId: StreamCallId,
             config: CallServiceConfig = callServiceConfig(),
         ) {
-            context.startService(
-                buildStartIntent(
-                    context,
-                    callId,
-                    TRIGGER_REMOVE_INCOMING_CALL,
-                    callServiceConfiguration = config,
-                ),
-            )
+            safeCallWithResult {
+                context.startService(
+                    buildStartIntent(
+                        context,
+                        callId,
+                        TRIGGER_REMOVE_INCOMING_CALL,
+                        callServiceConfiguration = config,
+                    ),
+                )!!
+            }.onError {
+                NotificationManagerCompat.from(context).cancel(INCOMING_CALL_NOTIFICATION_ID)
+            }
         }
 
         private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
@@ -394,9 +397,22 @@ internal open class CallService : Service() {
         }
 
         if (!hasActiveCall) {
-            videoClient.getSettingUpCallNotification()?.let {
-                startForegroundWithServiceType(notificationId, it, trigger, serviceType)
+            videoClient.getSettingUpCallNotification()?.let { notification ->
+                startForegroundWithServiceType(
+                    notificationId,
+                    notification,
+                    trigger,
+                    serviceType,
+                ).onError {
+                    justNotify(notificationId, notification)
+                }
             }
+        }
+    }
+
+    private fun justNotify(notificationId: Int, notification: Notification) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            NotificationManagerCompat.from(this).notify(notificationId, notification)
         }
     }
 
@@ -409,12 +425,12 @@ internal open class CallService : Service() {
                 notification,
                 TRIGGER_INCOMING_CALL,
                 serviceType,
-            )
+            ).onError {
+                justNotify(notificationId, notification)
+            }
         } else {
             // Else, we show a simple notification (the service was already started as a foreground service).
-            NotificationManagerCompat
-                .from(this)
-                .notify(notificationId, notification)
+            justNotify(notificationId, notification)
         }
     }
 
@@ -708,7 +724,8 @@ internal open class CallService : Service() {
                 notification,
                 TRIGGER_ONGOING_CALL,
                 serviceType,
-            )
+            ).onError {
+            }
         }
     }
 
