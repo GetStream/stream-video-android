@@ -36,6 +36,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
+import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
@@ -74,7 +75,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -95,13 +95,11 @@ import kotlinx.serialization.json.Json
 import okio.IOException
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoResolution
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.PeerConnection.PeerConnectionState
 import org.webrtc.RTCStatsReport
 import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
@@ -224,15 +222,11 @@ public class RtcSession internal constructor(
             null,
         )
 
-    val trackDimensions =
-        MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
-            emptyMap(),
-        )
-    val trackDimensionsDebounced = trackDimensions.debounce(100)
-
     // run all calls on a supervisor job so we can easily cancel them
     private val supervisorJob = SupervisorJob()
     private val coroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
+    internal val defaultVideoDimension = VideoDimension(1080, 2340)
 
     // participants by session id -> participant state
     private val trackPrefixToSessionIdMap =
@@ -241,6 +235,16 @@ public class RtcSession internal constructor(
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
     var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
+    val trackDimensions = MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
+        emptyMap(),
+    )
+    val trackDimensionsDebounced = trackDimensions.debounce(100)
+    internal val trackOverridesHandler = TrackOverridesHandler(
+        getParticipantList = { call.state.remoteParticipants.value },
+        getParticipant = { call.state.getParticipantBySessionId(it) },
+        onOverridesUpdate = { setVideoSubscriptions() },
+        logger = logger,
+    )
 
     private fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
         if (!tracks.containsKey(sessionId)) {
@@ -982,8 +986,6 @@ public class RtcSession internal constructor(
         }
     }
 
-    private val defaultVideoDimension = VideoDimension(1080, 2340)
-
     /**
      * This is called when you are look at a different set of participants
      * or at a different size
@@ -1056,82 +1058,50 @@ public class RtcSession internal constructor(
      * -- error isn't permanent, SFU didn't change, the mute/publish state didn't change
      * -- we cap at 30 retries to prevent endless loops
      */
-    internal fun setVideoSubscriptions(
-        useDefaults: Boolean = false,
-        manualResolutionOverrides: Map<String, VideoResolution> = emptyMap(),
-    ) {
+    internal fun setVideoSubscriptions(useDefaults: Boolean = false) {
         logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
-        // default is to subscribe to the top 5 sorted participants
         var tracks = if (useDefaults) {
+            // default is to subscribe to the top 5 sorted participants
             defaultTracks()
         } else {
             // if we're not using the default, sub to visible tracks
             visibleTracks()
-        }
-        // TODO-mqs: test default tracks and scrolling
+        }.let(trackOverridesHandler::applyOverrides)
 
-        // TODO:
-        // This is a hotfix to help with performance. Most devices struggle even with H resolution
-        // if there are more than 2 remote participants and especially if there is a H264 participant.
-        // We just report a very small window so force SFU to deliver us Q resolution. This will
-        // be later less visible to the user once we make the participant grid smaller
-//        if (tracks.size > 2) {
-//            tracks = tracks.map {
-//                it.copy(dimension = it.dimension?.copy(width = 200, height = 200))
-//            }
-//        }
-
-        logger.v {
-            "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; manualResolutionOverrides: $manualResolutionOverrides"
-        }
-
-        // TODO-mqs: store overrides
-//        tracks = tracks.map {
-//            manualResolutionOverrides[it.session_id]?.let { resolution ->
-//                it.copy(dimension = VideoDimension(resolution.width, resolution.height))
-//            } ?: it
-//        }
-
-        val new = tracks.toList()
-        subscriptions.value = new
+        subscriptions.value = tracks
         val currentSfu = sfuUrl
 
         subscriptionSyncJob?.cancel()
-
-        if (new.isNotEmpty()) {
-            // start a new job
-            // this code is a bit more complicated due to the retry behaviour
-            subscriptionSyncJob = coroutineScope.launch {
-                flow {
-                    val request = UpdateSubscriptionsRequest(
-                        session_id = sessionId,
-                        tracks = subscriptions.value,
-                    )
-                    dynascaleLogger.d {
-                        "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; UpdateSubscriptionsRequest: $request"
-                    }
-                    val sessionToDimension = tracks.map { it.session_id to it.dimension }
-                    dynascaleLogger.v {
-                        "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Subscribing to: $sessionToDimension"
-                    }
-                    val result = updateSubscriptions(request)
-                    dynascaleLogger.v {
-                        "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Result: $result"
-                    }
-                    emit(result.getOrThrow())
-                }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
-                    val sameValue = new == subscriptions.value
-                    val sameSfu = currentSfu == sfuUrl
-                    val isPermanent = isPermanentError(cause)
-                    val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
-                    val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
-                    logger.w {
-                        "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
-                    }
-                    delay(delayInMs)
-                    willRetry
-                }.collect()
-            }
+        subscriptionSyncJob = coroutineScope.launch {
+            flow {
+                val request = UpdateSubscriptionsRequest(
+                    session_id = sessionId,
+                    tracks = subscriptions.value,
+                )
+                dynascaleLogger.d {
+                    "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; UpdateSubscriptionsRequest: $request"
+                }
+                val sessionToDimension = tracks.map { it.session_id to it.dimension }
+                dynascaleLogger.v {
+                    "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Subscribing to: $sessionToDimension"
+                }
+                val result = updateSubscriptions(request)
+                dynascaleLogger.v {
+                    "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Result: $result"
+                }
+                emit(result.getOrThrow())
+            }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
+                val sameValue = tracks == subscriptions.value
+                val sameSfu = currentSfu == sfuUrl
+                val isPermanent = isPermanentError(cause)
+                val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
+                val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
+                logger.w {
+                    "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
+                }
+                delay(delayInMs)
+                willRetry
+            }.collect()
         }
     }
 
