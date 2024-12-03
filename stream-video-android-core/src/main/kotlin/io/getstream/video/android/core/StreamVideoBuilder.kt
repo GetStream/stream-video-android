@@ -113,6 +113,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    @Deprecated(
+        message = "This property is ignored. Set audioUsage in the callServiceConfig parameter.",
+        level = DeprecationLevel.WARNING,
+    )
     private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
@@ -208,13 +212,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             callServiceConfig = callServiceConfig
                 ?: callServiceConfig().copy(
                     runCallServiceInForeground = runForegroundServiceForCalls,
-                    audioUsage = audioUsage,
+                    audioUsage = defaultAudioUsage,
                 ),
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
-            audioUsage = audioUsage,
             appName = appName,
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,

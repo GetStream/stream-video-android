@@ -4,6 +4,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun accept (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun blockUser (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun cleanup ()V
+	public final fun collectUserFeedback (ILjava/lang/String;Ljava/util/Map;)V
+	public static synthetic fun collectUserFeedback$default (Lio/getstream/video/android/core/Call;ILjava/lang/String;Ljava/util/Map;ILjava/lang/Object;)V
 	public final fun create (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun create$default (Lio/getstream/video/android/core/Call;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun end (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -5081,8 +5083,6 @@ public final class io/getstream/video/android/core/sounds/RingingConfigKt {
 }
 
 public final class io/getstream/video/android/core/sounds/Sounds {
-	public fun <init> (II)V
-	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/getstream/video/android/core/sounds/RingingConfig;)V
 	public final fun component1 ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public final fun copy (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;

@@ -23,7 +23,6 @@ import androidx.annotation.RawRes
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import org.jetbrains.annotations.ApiStatus
 
 // Interface & API
 /**
@@ -48,18 +47,7 @@ public interface RingingConfig {
     replaceWith = ReplaceWith("SoundConfig"),
     level = DeprecationLevel.WARNING,
 )
-public data class Sounds(val ringingConfig: RingingConfig) {
-    @ApiStatus.ScheduledForRemoval(inVersion = "1.0.18")
-    @Deprecated(
-        message = "Deprecated. This Constructor will now return a sound configuration with no sounds. Use constructor with SoundConfig parameter instead.",
-        replaceWith = ReplaceWith("defaultResourcesRingingConfig(context).toSounds()"),
-        level = DeprecationLevel.ERROR,
-    )
-    constructor(
-        @RawRes incomingCallSound: Int = R.raw.call_incoming_sound,
-        @RawRes outgoingCallSound: Int = R.raw.call_outgoing_sound,
-    ) : this(emptyRingingConfig())
-}
+public data class Sounds(val ringingConfig: RingingConfig)
 
 // Factories
 /**
