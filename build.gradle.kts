@@ -63,9 +63,15 @@ apply(from = "${rootDir}/scripts/publish-root.gradle")
 //}
 
 afterEvaluate {
-  println("Running Add Pre Commit Git Hook Script on Build")
-  exec {
-    commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
-  }
-  println("Added pre-push Git Hook Script.")
+    println("Running Add Pre Commit Git Hook Script on Build")
+    exec {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            // Windows-specific command
+            commandLine("cmd", "/c", "copy", ".\\scripts\\git-hooks\\pre-push", ".\\.git\\hooks")
+        } else {
+            // Unix-based systems
+            commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
+        }
+    }
+    println("Added pre-push Git Hook Script.")
 }
