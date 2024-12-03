@@ -211,8 +211,7 @@ internal open class CallService : Service() {
                 ) == PackageManager.PERMISSION_GRANTED
                 StreamLog.i(TAG) { "Has permission: $hasPermission" }
                 StreamLog.i(TAG) { "Notification: $notification" }
-                if (hasPermission && notification != null
-                ) {
+                if (hasPermission && notification != null) {
                     NotificationManagerCompat.from(context)
                         .notify(INCOMING_CALL_NOTIFICATION_ID, notification)
                 }
@@ -239,9 +238,7 @@ internal open class CallService : Service() {
         }
 
         private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
-            safeCallWithDefault(
-                true,
-            ) {
+            safeCallWithDefault(true) {
                 val activityManager = context.getSystemService(
                     Context.ACTIVITY_SERVICE,
                 ) as ActivityManager
@@ -722,8 +719,7 @@ internal open class CallService : Service() {
                 notification,
                 TRIGGER_ONGOING_CALL,
                 serviceType,
-            ).onError {
-            }
+            )
         }
     }
 
