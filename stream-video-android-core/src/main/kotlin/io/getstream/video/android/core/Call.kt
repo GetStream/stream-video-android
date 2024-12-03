@@ -1254,11 +1254,14 @@ public class Call(
      * @param resolution The preferred resolution. Set to `null` to switch back to auto.
      * @param sessionIds The participant session IDs to apply the resolution to. If `null`, the resolution will be applied to all participants.
      */
-    fun setPreferredIncomingVideoResolution(resolution: VideoResolution?, sessionIds: List<String>? = null) {
+    fun setPreferredIncomingVideoResolution(
+        resolution: VideoResolution?,
+        sessionIds: List<String>? = null,
+    ) {
         session?.let { session ->
             session.trackOverridesHandler.updateOverrides(
                 sessionIds = sessionIds,
-                dimensions = resolution?.let { VideoDimension(width = it.width, height = it.height) }
+                dimensions = resolution?.let { VideoDimension(it.width, it.height) },
             )
         }
     }

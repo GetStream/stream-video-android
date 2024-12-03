@@ -183,8 +183,8 @@ fun defaultStreamMenu(
                     icon = if (isIncomingVideoEnabled) Icons.Default.VideocamOff else Icons.Default.Videocam,
                     action = { onToggleIncomingVideoEnabled(!isIncomingVideoEnabled) },
                 ),
-            )
-        )
+            ),
+        ),
     )
     if (showDebugOptions) {
         add(

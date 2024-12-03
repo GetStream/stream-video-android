@@ -225,9 +225,8 @@ public data class ParticipantState(
         val hasVideoTrack = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
         _videoEnabled.value = call.session?.trackOverridesHandler?.applyOverrides(
             participant.session_id,
-            hasVideoTrack
+            hasVideoTrack,
         ) ?: hasVideoTrack
-
 
         _screenSharingEnabled.value =
             participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)

@@ -65,7 +65,8 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/InputAudioFilter;)V
 	public final fun setAudioProcessingEnabled (Z)V
-	public final fun setIncomingVideoEnabled (Z)V
+	public final fun setIncomingVideoEnabled (Ljava/lang/Boolean;Ljava/util/List;)V
+	public static synthetic fun setIncomingVideoEnabled$default (Lio/getstream/video/android/core/Call;Ljava/lang/Boolean;Ljava/util/List;ILjava/lang/Object;)V
 	public final fun setPreferredIncomingVideoResolution (Lorg/openapitools/client/models/VideoResolution;Ljava/util/List;)V
 	public static synthetic fun setPreferredIncomingVideoResolution$default (Lio/getstream/video/android/core/Call;Lorg/openapitools/client/models/VideoResolution;Ljava/util/List;ILjava/lang/Object;)V
 	public final fun setSessionId (Ljava/lang/String;)V

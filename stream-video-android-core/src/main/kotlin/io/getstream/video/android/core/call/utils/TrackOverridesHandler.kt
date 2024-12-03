@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.utils
 
 import io.getstream.log.TaggedLogger
@@ -43,14 +59,14 @@ internal class TrackOverridesHandler(
             putOrRemoveDimensionsOverride(
                 sessionId = ALL_PARTICIPANTS,
                 putDimensions = putDimensions,
-                existingVisibility = trackOverrides[ALL_PARTICIPANTS]?.visible
+                existingVisibility = trackOverrides[ALL_PARTICIPANTS]?.visible,
             )
         } else {
             sessionIds.forEach { sessionId ->
                 putOrRemoveDimensionsOverride(
                     sessionId = sessionId,
                     putDimensions = putDimensions,
-                    existingVisibility = trackOverrides[sessionId]?.visible
+                    existingVisibility = trackOverrides[sessionId]?.visible,
                 )
             }
         }
@@ -64,7 +80,10 @@ internal class TrackOverridesHandler(
         if (putDimensions == null && (existingVisibility == true || existingVisibility == null)) {
             trackOverrides.remove(sessionId)
         } else {
-            trackOverrides.put(sessionId, TrackOverride(dimensions = putDimensions, visible = existingVisibility))
+            trackOverrides.put(
+                sessionId,
+                TrackOverride(dimensions = putDimensions, visible = existingVisibility),
+            )
         }
     }
 
@@ -84,7 +103,7 @@ internal class TrackOverridesHandler(
             putOrRemoveVisibilityOverride(
                 sessionId = ALL_PARTICIPANTS,
                 putVisibility = putVisibility,
-                existingDimensions = trackOverrides[ALL_PARTICIPANTS]?.dimensions
+                existingDimensions = trackOverrides[ALL_PARTICIPANTS]?.dimensions,
             )
 
             getParticipantList().forEach {
@@ -96,7 +115,7 @@ internal class TrackOverridesHandler(
                 putOrRemoveVisibilityOverride(
                     sessionId = sessionId,
                     putVisibility = putVisibility,
-                    existingDimensions = trackOverrides[sessionId]?.dimensions
+                    existingDimensions = trackOverrides[sessionId]?.dimensions,
                 )
 
                 getParticipant(sessionId)?.let {
@@ -115,7 +134,10 @@ internal class TrackOverridesHandler(
         if (existingDimensions == null && (putVisibility == true || putVisibility == null)) {
             trackOverrides.remove(sessionId)
         } else {
-            trackOverrides.put(sessionId, TrackOverride(dimensions = existingDimensions, visible = putVisibility))
+            trackOverrides.put(
+                sessionId,
+                TrackOverride(dimensions = existingDimensions, visible = putVisibility),
+            )
         }
     }
 
@@ -134,13 +156,14 @@ internal class TrackOverridesHandler(
         }
     }
 
-
     /**
      * Applies overrides to given list of tracks.
      *
      * @return List of tracks with visibility and dimensions overrides applied.
      */
-    internal fun applyOverrides(tracks: List<TrackSubscriptionDetails>): List<TrackSubscriptionDetails> {
+    internal fun applyOverrides(
+        tracks: List<TrackSubscriptionDetails>,
+    ): List<TrackSubscriptionDetails> {
         return tracks.mapNotNull { track ->
             val override = trackOverrides[track.session_id] ?: trackOverrides[ALL_PARTICIPANTS]
 
