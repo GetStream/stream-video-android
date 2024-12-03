@@ -41,6 +41,8 @@ import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.VideoSettings
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.VideocamOff
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
@@ -67,7 +69,10 @@ fun defaultStreamMenu(
     onSwitchSfuClick: () -> Unit,
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
-    onIncomingResolutionChanged: (VideoResolution) -> Unit,
+    selectedIncomingVideoResolution: VideoResolution?,
+    onSelectIncomingVideoResolution: (VideoResolution?) -> Unit,
+    isIncomingVideoEnabled: Boolean,
+    onToggleIncomingVideoEnabled: (Boolean) -> Unit,
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
@@ -133,17 +138,52 @@ fun defaultStreamMenu(
         )
     }
     add(
-        ActionMenuItem(
-            title = "Change incoming resolution (144)",
-            icon = Icons.Default.AspectRatio,
-            action = { onIncomingResolutionChanged(VideoResolution(height = 144, width = 144)) },
-        )
-    )
-    add(
-        ActionMenuItem(
-            title = "Change incoming resolution (2160p)",
-            icon = Icons.Default.AspectRatio,
-            action = { onIncomingResolutionChanged(VideoResolution(2160, 3840)) },
+        SubMenuItem(
+            title = "Incoming video settings",
+            icon = Icons.Default.VideoSettings,
+            items = listOf(
+                ActionMenuItem(
+                    title = "Auto Quality",
+                    icon = Icons.Default.AspectRatio,
+                    highlight = selectedIncomingVideoResolution == null,
+                    action = { onSelectIncomingVideoResolution(null) },
+                ),
+                ActionMenuItem(
+                    title = "4K 2160p",
+                    icon = Icons.Default.AspectRatio,
+                    highlight = selectedIncomingVideoResolution == VideoResolution(2160, 3840),
+                    action = { onSelectIncomingVideoResolution(VideoResolution(2160, 3840)) },
+                ),
+                ActionMenuItem(
+                    title = "Full HD 1080p",
+                    icon = Icons.Default.AspectRatio,
+                    highlight = selectedIncomingVideoResolution == VideoResolution(1080, 1920),
+                    action = { onSelectIncomingVideoResolution(VideoResolution(1080, 1920)) },
+                ),
+                ActionMenuItem(
+                    title = "HD 720p",
+                    icon = Icons.Default.AspectRatio,
+                    highlight = selectedIncomingVideoResolution == VideoResolution(720, 1280),
+                    action = { onSelectIncomingVideoResolution(VideoResolution(720, 1280)) },
+                ),
+                ActionMenuItem(
+                    title = "SD 480p",
+                    icon = Icons.Default.AspectRatio,
+                    highlight = selectedIncomingVideoResolution == VideoResolution(480, 640),
+                    action = { onSelectIncomingVideoResolution(VideoResolution(480, 640)) },
+                ),
+                ActionMenuItem(
+                    title = "Data Saver 144p",
+                    icon = Icons.Default.AspectRatio,
+                    highlight = selectedIncomingVideoResolution == VideoResolution(144, 256),
+                    action = { onSelectIncomingVideoResolution(VideoResolution(144, 256)) },
+                ),
+                ActionMenuItem(
+                    title = if (isIncomingVideoEnabled) "Disable incoming video" else "Enable incoming video",
+                    icon = if (isIncomingVideoEnabled) Icons.Default.VideocamOff else Icons.Default.Videocam,
+                    action = { onToggleIncomingVideoEnabled(!isIncomingVideoEnabled) },
+                ),
+            )
         )
     )
     if (showDebugOptions) {

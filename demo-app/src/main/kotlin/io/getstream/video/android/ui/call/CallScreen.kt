@@ -108,7 +108,6 @@ import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoResolution
@@ -151,7 +150,9 @@ fun CallScreen(
     val scope = rememberCoroutineScope()
     val messageScope = rememberCoroutineScope()
     var showingLandscapeControls by remember { mutableStateOf(false) }
-    var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
+    var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FIT) }
+    var selectedIncomingVideoResolution by remember { mutableStateOf<VideoResolution?>(null) }
+    var isIncomingVideoEnabled by remember { mutableStateOf(true) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsState()
@@ -505,8 +506,18 @@ fun CallScreen(
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
                 },
-                onIncomingResolutionChanged = {
+                selectedIncomingVideoResolution = selectedIncomingVideoResolution,
+                onSelectIncomingVideoResolution = {
                     call.setPreferredIncomingVideoResolution(it)
+
+                    selectedIncomingVideoResolution = it
+                    isShowingSettingMenu = false
+                },
+                isIncomingVideoEnabled = isIncomingVideoEnabled,
+                onToggleIncomingVideoVisibility = {
+                    call.setIncomingVideoEnabled(it)
+
+                    isIncomingVideoEnabled = it
                     isShowingSettingMenu = false
                 },
                 onSelectScaleType = {
