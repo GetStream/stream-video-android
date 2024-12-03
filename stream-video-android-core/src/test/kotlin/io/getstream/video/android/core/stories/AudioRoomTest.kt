@@ -30,7 +30,6 @@ import org.threeten.bp.OffsetDateTime
 class AudioRoomTest : IntegrationTestBase() {
     /**
      * The Swift tutorial is good inspiration
-     * https://github.com/GetStream/stream-video-swift/blob/main/docusaurus/docs/iOS/guides/quickstart/audio-room.md
      *
      * Create a call
      * Go live in that call
