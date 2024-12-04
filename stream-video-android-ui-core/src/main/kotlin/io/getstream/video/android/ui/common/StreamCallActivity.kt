@@ -779,11 +779,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
         if (cid == null) {
             val e = IllegalArgumentException("CallActivity started without call ID.")
-            logger.e(
-                e,
-            ) { "Failed to initialize call because call ID is not found in the intent. $intent" }
-            onError?.let {
-            } ?: throw e
+
+            logger.e(e) {
+                "Failed to initialize call because call ID is not found in the intent. $intent"
+            }
+
+            onError?.invoke(e) ?: throw e
+
             // Finish
             return
         }
