@@ -150,7 +150,7 @@ fun CallScreen(
     val scope = rememberCoroutineScope()
     val messageScope = rememberCoroutineScope()
     var showingLandscapeControls by remember { mutableStateOf(false) }
-    var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FIT) }
+    var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
     var selectedIncomingVideoResolution by remember { mutableStateOf<VideoResolution?>(null) }
     var isIncomingVideoEnabled by remember { mutableStateOf(true) }
 
