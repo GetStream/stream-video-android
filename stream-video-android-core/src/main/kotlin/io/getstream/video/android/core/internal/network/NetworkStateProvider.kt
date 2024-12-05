@@ -42,14 +42,18 @@ public class NetworkStateProvider(
     private val lock: Any = Any()
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
+            logger.d { "[callback#onAvailable] #network; onAvailable." }
             notifyListenersIfNetworkStateChanged()
         }
 
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            logger.d { "[callback#onCapabilitiesChanged] #network; onCapabilitiesChanged" }
             notifyListenersIfNetworkStateChanged()
         }
 
         override fun onLost(network: Network) {
+            logger.d { "[callback#onLost] #network; onLost" }
+            isConnected = false
             notifyListenersIfNetworkStateChanged()
         }
     }
@@ -64,12 +68,14 @@ public class NetworkStateProvider(
 
     private fun notifyListenersIfNetworkStateChanged() {
         val isNowConnected = isConnected()
+        logger.d { "[notifyListenersIfNetworkStateChanged] #network; Network state changed: isConnected: $isConnected, isNowConnected: $isNowConnected" }
+
         if (!isConnected && isNowConnected) {
-            logger.i { "Network connected." }
+            logger.d { "[notifyListenersIfNetworkStateChanged] #network; Network connected." }
             isConnected = true
             listeners.onConnected()
         } else if (isConnected && !isNowConnected) {
-            logger.i { "Network disconnected." }
+            logger.d { "[notifyListenersIfNetworkStateChanged] #network; Network disconnected." }
             isConnected = false
             listeners.onDisconnected()
         }
