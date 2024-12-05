@@ -51,6 +51,18 @@ message StopNoiseCancellationResponse {
   models.Error error = 1;
 }
 
+message Reconnection {
+  float time_seconds = 1;
+  models.WebsocketReconnectStrategy strategy = 2;
+}
+
+message Telemetry {
+  oneof data {
+    float connection_time_seconds = 1;
+    Reconnection reconnection = 2;
+  }
+}
+
 message SendStatsRequest {
   string session_id = 1;
   string subscriber_stats = 2;
@@ -58,6 +70,15 @@ message SendStatsRequest {
   string webrtc_version = 4;
   string sdk = 5;
   string sdk_version = 6;
+
+  models.InputDevices audio_devices = 7;
+  models.InputDevices video_devices = 8;
+  oneof device_state {
+    models.AndroidState android = 9;
+    models.AppleState apple = 10;
+  }
+
+  Telemetry telemetry = 11;
 }
 
 message SendStatsResponse {
