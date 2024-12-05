@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core
 
+import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.PowerManager
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
@@ -44,6 +46,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -130,6 +133,7 @@ public class Call(
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
+    private var powerManager: PowerManager? = null
 
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
@@ -265,6 +269,9 @@ public class Call(
             soundInputProcessor.currentAudioLevel.collect {
                 audioLevelOutputHelper.rampToValue(it)
             }
+        }
+        powerManager = safeCallWithDefault(null) {
+            clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
     }
 
@@ -465,6 +472,7 @@ public class Call(
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
                 remoteIceServers = iceServers,
+                powerManager = powerManager,
             )
         }
 
@@ -643,6 +651,7 @@ public class Call(
                 session.prepareRejoin()
                 this.session = RtcSession(
                     clientImpl,
+                    powerManager,
                     this,
                     sessionId,
                     clientImpl.apiKey,
@@ -694,6 +703,7 @@ public class Call(
                 session.prepareRejoin()
                 val newSession = RtcSession(
                     clientImpl,
+                    powerManager,
                     this,
                     sessionId,
                     clientImpl.apiKey,
