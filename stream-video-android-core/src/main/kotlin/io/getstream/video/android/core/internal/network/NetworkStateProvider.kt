@@ -68,8 +68,6 @@ public class NetworkStateProvider(
 
     private fun notifyListenersIfNetworkStateChanged() {
         val isNowConnected = isConnected()
-        logger.d { "[notifyListenersIfNetworkStateChanged] #network; Network state changed: isConnected: $isConnected, isNowConnected: $isNowConnected" }
-
         if (!isConnected && isNowConnected) {
             logger.d { "[notifyListenersIfNetworkStateChanged] #network; Network connected." }
             isConnected = true
