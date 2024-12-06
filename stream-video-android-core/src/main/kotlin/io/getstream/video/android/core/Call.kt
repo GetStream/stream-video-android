@@ -67,6 +67,7 @@ import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.ListTranscriptionsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.OwnCapability
@@ -74,7 +75,9 @@ import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartTranscriptionResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnpinResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
@@ -210,7 +213,7 @@ public class Call(
                 this,
                 scope,
                 clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.audioUsage,
+                clientImpl.callServiceConfig.audioUsage,
             )
         }
     }
@@ -218,16 +221,16 @@ public class Call(
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
-            logger.d { "[onConnected] no args" }
+            logger.d { "[NetworkStateListener#onConnected] #network; no args" }
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
-                    "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                fastReconnect()
+                rejoin()
             } else {
                 logger.d {
-                    "[onConnected] Reconnecting (full) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
                 rejoin()
             }
@@ -239,11 +242,11 @@ public class Call(
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
                 logger.d {
-                    "[onDisconnected] Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
                 }
                 leave()
             }
-            logger.d { "[onDisconnected] at $lastDisconnect" }
+            logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
         }
     }
 
@@ -529,7 +532,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        fastReconnect()
+                        rejoin()
                     }
 
                     else -> {
@@ -544,7 +547,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        fastReconnect()
+                        rejoin()
                     }
 
                     else -> {
@@ -1193,6 +1196,23 @@ public class Call(
         soundInputProcessor.processSoundInput(audioSample.data)
     }
 
+    fun collectUserFeedback(
+        rating: Int,
+        reason: String? = null,
+        custom: Map<String, Any>? = null,
+    ) {
+        scope.launch {
+            clientImpl.collectFeedback(
+                callType = type,
+                id = id,
+                sessionId = sessionId,
+                rating = rating,
+                reason = reason,
+                custom = custom,
+            )
+        }
+    }
+
     suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
         return suspendCancellableCoroutine { continuation ->
             var screenshotSink: VideoSink? = null
@@ -1246,6 +1266,18 @@ public class Call(
 
     fun toggleAudioProcessing(): Boolean {
         return clientImpl.toggleAudioProcessing()
+    }
+
+    suspend fun startTranscription(): Result<StartTranscriptionResponse> {
+        return clientImpl.startTranscription(type, id)
+    }
+
+    suspend fun stopTranscription(): Result<StopTranscriptionResponse> {
+        return clientImpl.stopTranscription(type, id)
+    }
+
+    suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
+        return clientImpl.listTranscription(type, id)
     }
 
     /**
@@ -1304,7 +1336,7 @@ public class Call(
 
         fun fastReconnect() {
             call.scope.launch {
-                call.fastReconnect()
+                call.rejoin()
             }
         }
     }

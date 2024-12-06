@@ -40,6 +40,7 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.SfuToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -149,6 +150,7 @@ class SfuSocketConnection(
         scope.launch {
             internalSocket.awaitConnection(connectionTimeout)
             internalSocket.connectionIdOrError().also {
+                delay(500) // Wait for the connection to settle then call `connected`
                 connected(it)
             }
         }

@@ -44,7 +44,6 @@ import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -157,7 +156,7 @@ fun CallScreen(
     var isIncomingVideoEnabled by remember { mutableStateOf(true) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
-    val me by call.state.me.collectAsState()
+    val me by call.state.me.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = connection) {
         if (connection == RealtimeConnection.Disconnected) {
@@ -339,8 +338,7 @@ fun CallScreen(
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
-                            val myself = me ?: participantsSize.firstOrNull { it.sessionId == call.sessionId }
-                            myself?.let {
+                            me?.let {
                                 FloatingParticipantVideo(
                                     call = call,
                                     participant = it,

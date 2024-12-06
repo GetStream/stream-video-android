@@ -95,6 +95,9 @@ import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.CallStateResponseFields
+import org.openapitools.client.models.CallTranscriptionFailedEvent
+import org.openapitools.client.models.CallTranscriptionStartedEvent
+import org.openapitools.client.models.CallTranscriptionStoppedEvent
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
@@ -221,8 +224,8 @@ public class CallState(
     val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
 
     /** Your own participant state */
-    public val me: StateFlow<ParticipantState?> = _participants.mapState {
-        it[call.sessionId]
+    public val me: StateFlow<ParticipantState?> = _participants.mapState { map ->
+        map[call.sessionId] ?: participants.value.find { it.isLocal }
     }
 
     /** Your own participant state */
@@ -935,6 +938,16 @@ public class CallState(
 
                 updateParticipantCounts(session = session.value)
                 updateRingingState()
+            }
+
+            is CallTranscriptionStartedEvent -> {
+                _transcribing.value = true
+            }
+            is CallTranscriptionStoppedEvent -> {
+                _transcribing.value = false
+            }
+            is CallTranscriptionFailedEvent -> {
+                _transcribing.value = false
             }
         }
     }
