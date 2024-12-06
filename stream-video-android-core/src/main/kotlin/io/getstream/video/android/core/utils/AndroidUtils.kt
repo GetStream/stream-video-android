@@ -189,7 +189,7 @@ internal fun Service.startForegroundWithServiceType(
     notification: Notification,
     trigger: String,
     foregroundServiceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
-) {
+) = safeCallWithResult {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         startForeground(notificationId, notification)
     } else {

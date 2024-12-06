@@ -44,7 +44,6 @@ import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -108,7 +107,6 @@ import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
 
@@ -153,7 +151,7 @@ fun CallScreen(
     var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
-    val me by call.state.me.collectAsState()
+    val me by call.state.me.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = connection) {
         if (connection == RealtimeConnection.Disconnected) {
@@ -335,8 +333,7 @@ fun CallScreen(
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
-                            val myself = me ?: participantsSize.firstOrNull { it.sessionId == call.sessionId }
-                            myself?.let {
+                            me?.let {
                                 FloatingParticipantVideo(
                                     call = call,
                                     participant = it,

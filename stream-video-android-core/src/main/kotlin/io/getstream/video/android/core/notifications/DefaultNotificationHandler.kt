@@ -94,7 +94,17 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(application, callId, callDisplayName)
+        CallService.showIncomingCall(
+            application,
+            callId,
+            callDisplayName,
+            notification = getRingingCallNotification(
+                RingingState.Incoming(),
+                callId,
+                callDisplayName,
+                shouldHaveContentIntent = true,
+            ),
+        )
     }
 
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
