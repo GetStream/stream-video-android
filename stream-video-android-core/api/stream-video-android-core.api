@@ -148,6 +148,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getOwnCapabilities ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getParticipantBySessionId (Ljava/lang/String;)Lio/getstream/video/android/core/ParticipantState;
 	public final fun getParticipantCounts ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getParticipantVideoEnabledOverrides ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getPermissionRequests ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getPinnedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2854,6 +2855,10 @@ public final class io/getstream/video/android/core/call/stats/model/discriminato
 
 public final class io/getstream/video/android/core/call/stats/model/discriminator/RtcReportType$Companion {
 	public final fun fromAlias (Ljava/lang/String;)Lio/getstream/video/android/core/call/stats/model/discriminator/RtcReportType;
+}
+
+public final class io/getstream/video/android/core/call/utils/TrackOverridesHandlerKt {
+	public static final field ALL_PARTICIPANTS Ljava/lang/String;
 }
 
 public abstract class io/getstream/video/android/core/call/video/BitmapVideoFilter : io/getstream/video/android/core/call/video/VideoFilter {

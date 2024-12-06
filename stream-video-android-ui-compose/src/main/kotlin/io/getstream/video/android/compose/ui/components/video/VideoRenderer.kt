@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
@@ -52,6 +53,7 @@ import io.getstream.video.android.compose.ui.components.video.config.VideoRender
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.call.utils.ALL_PARTICIPANTS
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -90,60 +92,64 @@ public fun VideoRenderer(
         videoRendererConfig.fallbackContent.invoke(call)
 
         if (video?.enabled == true) {
-            val mediaTrack = video.track
             val sessionId = video.sessionId
-            val trackType = video.type
+            val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
-            var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
+            if (isIncomingVideoEnabled(call, sessionId, videoEnabledOverrides)) {
+                val mediaTrack = video.track
+                val trackType = video.type
 
-            DisposableEffect(call, video) {
-                // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-                call.setVisibility(sessionId, trackType, true)
+                var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-                onDispose {
-                    cleanTrack(view, mediaTrack)
-                    // inform the call that we no longer want to render this video track
-                    call.setVisibility(sessionId, trackType, false)
+                DisposableEffect(call, video) {
+                    // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+                    call.setVisibility(sessionId, trackType, true)
+
+                    onDispose {
+                        cleanTrack(view, mediaTrack)
+                        // inform the call that we no longer want to render this video track
+                        call.setVisibility(sessionId, trackType, false)
+                    }
                 }
-            }
 
-            if (mediaTrack != null) {
-                Box(
-                    modifier = videoRendererConfig.modifiers.containerModifier.invoke(this),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    AndroidView(
-                        factory = { context ->
-                            StreamVideoTextureViewRenderer(context).apply {
-                                call.initRenderer(
-                                    videoRenderer = this,
-                                    sessionId = sessionId,
-                                    trackType = trackType,
-                                    onRendered = onRendered,
-                                )
-                                setMirror(videoRendererConfig.mirrorStream)
-                                setScalingType(
+                if (mediaTrack != null) {
+                    Box(
+                        modifier = videoRendererConfig.modifiers.containerModifier.invoke(this),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AndroidView(
+                            factory = { context ->
+                                StreamVideoTextureViewRenderer(context).apply {
+                                    call.initRenderer(
+                                        videoRenderer = this,
+                                        sessionId = sessionId,
+                                        trackType = trackType,
+                                        onRendered = onRendered,
+                                    )
+                                    setMirror(videoRendererConfig.mirrorStream)
+                                    setScalingType(
+                                        videoRendererConfig.scalingType.toCommonScalingType(),
+                                    )
+                                    setupVideo(mediaTrack, this)
+
+                                    view = this
+                                }
+                            },
+                            update = { v ->
+                                v.setMirror(videoRendererConfig.mirrorStream)
+                                v.setScalingType(
                                     videoRendererConfig.scalingType.toCommonScalingType(),
                                 )
-                                setupVideo(mediaTrack, this)
-
-                                view = this
-                            }
-                        },
-                        update = { v ->
-                            v.setMirror(videoRendererConfig.mirrorStream)
-                            v.setScalingType(
-                                videoRendererConfig.scalingType.toCommonScalingType(),
-                            )
-                            setupVideo(mediaTrack, v)
-                        },
-                        modifier = videoRendererConfig
-                            .modifiers
-                            .componentModifier(
-                                this,
-                            )
-                            .testTag("video_renderer"),
-                    )
+                                setupVideo(mediaTrack, v)
+                            },
+                            modifier = videoRendererConfig
+                                .modifiers
+                                .componentModifier(
+                                    this,
+                                )
+                                .testTag("video_renderer"),
+                        )
+                    }
                 }
             }
         }
@@ -186,6 +192,10 @@ public fun VideoRenderer(
         onRendered = onRendered,
     )
 }
+
+private fun isIncomingVideoEnabled(call: Call, sessionId: String, videoEnabledOverrides: Map<String, Boolean?>) =
+    (videoEnabledOverrides[sessionId] ?: videoEnabledOverrides[ALL_PARTICIPANTS]) != false
+            || call.state.me.value?.sessionId == sessionId
 
 private fun cleanTrack(
     view: VideoTextureViewRenderer?,

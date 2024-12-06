@@ -240,9 +240,10 @@ public class RtcSession internal constructor(
     )
     val trackDimensionsDebounced = trackDimensions.debounce(100)
     internal val trackOverridesHandler = TrackOverridesHandler(
-        getParticipantList = { call.state.remoteParticipants.value },
-        getParticipant = { call.state.getParticipantBySessionId(it) },
-        onOverridesUpdate = { setVideoSubscriptions() },
+        onOverridesUpdate = {
+            setVideoSubscriptions()
+            call.state._participantVideoEnabledOverrides.value = it.mapValues { it.value.visible }
+        },
         logger = logger,
     )
 

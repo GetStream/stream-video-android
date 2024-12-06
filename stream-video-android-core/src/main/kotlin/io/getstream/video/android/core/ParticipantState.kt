@@ -221,13 +221,7 @@ public data class ParticipantState(
         // _dominantSpeaker.value = participant.is_dominant_speaker. we ignore this and only handle the event
         updateAudioLevel(participant.audio_level)
         _audioEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_AUDIO)
-
-        val hasVideoTrack = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
-        _videoEnabled.value = call.session?.trackOverridesHandler?.applyOverrides(
-            participant.session_id,
-            hasVideoTrack,
-        ) ?: hasVideoTrack
-
+        _videoEnabled.value = participant.published_tracks.contains(TrackType.TRACK_TYPE_VIDEO)
         _screenSharingEnabled.value =
             participant.published_tracks.contains(TrackType.TRACK_TYPE_SCREEN_SHARE)
         _roles.value = participant.roles
