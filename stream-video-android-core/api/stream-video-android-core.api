@@ -67,8 +67,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setIncomingVideoEnabled (Ljava/lang/Boolean;Ljava/util/List;)V
 	public static synthetic fun setIncomingVideoEnabled$default (Lio/getstream/video/android/core/Call;Ljava/lang/Boolean;Ljava/util/List;ILjava/lang/Object;)V
-	public final fun setPreferredIncomingVideoResolution (Lorg/openapitools/client/models/VideoResolution;Ljava/util/List;)V
-	public static synthetic fun setPreferredIncomingVideoResolution$default (Lio/getstream/video/android/core/Call;Lorg/openapitools/client/models/VideoResolution;Ljava/util/List;ILjava/lang/Object;)V
+	public final fun setPreferredIncomingVideoResolution (Lio/getstream/video/android/core/model/PreferredVideoResolution;Ljava/util/List;)V
+	public static synthetic fun setPreferredIncomingVideoResolution$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/PreferredVideoResolution;Ljava/util/List;ILjava/lang/Object;)V
 	public final fun setSessionId (Ljava/lang/String;)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
@@ -3959,6 +3959,19 @@ public final class io/getstream/video/android/core/model/NetworkQuality$UnSpecif
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/NetworkQuality$UnSpecified;FILjava/lang/Object;)Lio/getstream/video/android/core/model/NetworkQuality$UnSpecified;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getQuality ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/PreferredVideoResolution {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lio/getstream/video/android/core/model/PreferredVideoResolution;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/PreferredVideoResolution;IIILjava/lang/Object;)Lio/getstream/video/android/core/model/PreferredVideoResolution;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeight ()I
+	public final fun getWidth ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

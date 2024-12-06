@@ -111,7 +111,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.VideoResolution
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -152,7 +151,9 @@ fun CallScreen(
     val messageScope = rememberCoroutineScope()
     var showingLandscapeControls by remember { mutableStateOf(false) }
     var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
-    var selectedIncomingVideoResolution by remember { mutableStateOf<PreferredVideoResolution?>(null) }
+    var selectedIncomingVideoResolution by remember {
+        mutableStateOf<PreferredVideoResolution?>(null)
+    }
     var isIncomingVideoEnabled by remember { mutableStateOf(true) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()

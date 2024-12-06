@@ -82,7 +82,6 @@ import org.openapitools.client.models.UpdateCallRequest
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdateUserPermissionsResponse
 import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoResolution
 import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.PeerConnection

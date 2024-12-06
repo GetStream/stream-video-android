@@ -194,8 +194,8 @@ public fun VideoRenderer(
 }
 
 private fun isIncomingVideoEnabled(call: Call, sessionId: String, videoEnabledOverrides: Map<String, Boolean?>) =
-    (videoEnabledOverrides[sessionId] ?: videoEnabledOverrides[ALL_PARTICIPANTS]) != false
-            || call.state.me.value?.sessionId == sessionId
+    (videoEnabledOverrides[sessionId] ?: videoEnabledOverrides[ALL_PARTICIPANTS]) != false ||
+        call.state.me.value?.sessionId == sessionId
 
 private fun cleanTrack(
     view: VideoTextureViewRenderer?,

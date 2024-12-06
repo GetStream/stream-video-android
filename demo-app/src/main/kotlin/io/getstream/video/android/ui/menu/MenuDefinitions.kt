@@ -50,7 +50,6 @@ import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
-import org.openapitools.client.models.VideoResolution
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -153,31 +152,41 @@ fun defaultStreamMenu(
                     title = "4K 2160p",
                     icon = Icons.Default.AspectRatio,
                     highlight = selectedIncomingVideoResolution == PreferredVideoResolution(3840, 2160),
-                    action = { onSelectIncomingVideoResolution(PreferredVideoResolution(3840, 2160)) },
+                    action = {
+                        onSelectIncomingVideoResolution(PreferredVideoResolution(3840, 2160))
+                    },
                 ),
                 ActionMenuItem(
                     title = "Full HD 1080p",
                     icon = Icons.Default.AspectRatio,
                     highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1920, 1080),
-                    action = { onSelectIncomingVideoResolution(PreferredVideoResolution(1920, 1080)) },
+                    action = {
+                        onSelectIncomingVideoResolution(PreferredVideoResolution(1920, 1080))
+                    },
                 ),
                 ActionMenuItem(
                     title = "HD 720p",
                     icon = Icons.Default.AspectRatio,
                     highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1280, 720),
-                    action = { onSelectIncomingVideoResolution(PreferredVideoResolution(1280, 720)) },
+                    action = {
+                        onSelectIncomingVideoResolution(PreferredVideoResolution(1280, 720))
+                    },
                 ),
                 ActionMenuItem(
                     title = "SD 480p",
                     icon = Icons.Default.AspectRatio,
                     highlight = selectedIncomingVideoResolution == PreferredVideoResolution(640, 480),
-                    action = { onSelectIncomingVideoResolution(PreferredVideoResolution(640, 480)) },
+                    action = {
+                        onSelectIncomingVideoResolution(PreferredVideoResolution(640, 480))
+                    },
                 ),
                 ActionMenuItem(
                     title = "Data Saver 144p",
                     icon = Icons.Default.AspectRatio,
                     highlight = selectedIncomingVideoResolution == PreferredVideoResolution(256, 144),
-                    action = { onSelectIncomingVideoResolution(PreferredVideoResolution(256, 144)) },
+                    action = {
+                        onSelectIncomingVideoResolution(PreferredVideoResolution(256, 144))
+                    },
                 ),
                 ActionMenuItem(
                     title = if (isIncomingVideoEnabled) "Disable incoming video" else "Enable incoming video",

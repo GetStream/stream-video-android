@@ -62,7 +62,6 @@ import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.VideoResolution
 import java.nio.ByteBuffer
 
 @OptIn(ExperimentalPermissionsApi::class)
