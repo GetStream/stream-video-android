@@ -17,6 +17,14 @@
 package io.getstream.video.android.core.call
 
 import android.os.Build
+import android.os.PowerManager
+import android.os.PowerManager.THERMAL_STATUS_CRITICAL
+import android.os.PowerManager.THERMAL_STATUS_EMERGENCY
+import android.os.PowerManager.THERMAL_STATUS_LIGHT
+import android.os.PowerManager.THERMAL_STATUS_MODERATE
+import android.os.PowerManager.THERMAL_STATUS_NONE
+import android.os.PowerManager.THERMAL_STATUS_SEVERE
+import android.os.PowerManager.THERMAL_STATUS_SHUTDOWN
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
@@ -68,6 +76,7 @@ import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -110,6 +119,8 @@ import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.event.SfuRequest
+import stream.video.sfu.models.AndroidState
+import stream.video.sfu.models.AndroidThermalState
 import stream.video.sfu.models.ClientDetails
 import stream.video.sfu.models.Device
 import stream.video.sfu.models.ICETrickle
@@ -184,6 +195,7 @@ data class TrackDimensions(
  */
 public class RtcSession internal constructor(
     client: StreamVideo,
+    private val powerManager: PowerManager?,
     private val call: Call,
     private val sessionId: String,
     private val apiKey: String,
@@ -1628,6 +1640,26 @@ public class RtcSession internal constructor(
 
     internal suspend fun sendCallStats(report: CallStatsReport) {
         val result = wrapAPICall {
+            val androidThermalState =
+                safeCallWithDefault(AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED) {
+                    val thermalState = powerManager?.currentThermalStatus
+                    logger.d { "[sendCallStats] #thermals state: $thermalState" }
+                    when (thermalState) {
+                        THERMAL_STATUS_NONE -> AndroidThermalState.ANDROID_THERMAL_STATE_NONE
+                        THERMAL_STATUS_LIGHT -> AndroidThermalState.ANDROID_THERMAL_STATE_LIGHT
+                        THERMAL_STATUS_MODERATE -> AndroidThermalState.ANDROID_THERMAL_STATE_MODERATE
+                        THERMAL_STATUS_SEVERE -> AndroidThermalState.ANDROID_THERMAL_STATE_SEVERE
+                        THERMAL_STATUS_CRITICAL -> AndroidThermalState.ANDROID_THERMAL_STATE_CRITICAL
+                        THERMAL_STATUS_EMERGENCY -> AndroidThermalState.ANDROID_THERMAL_STATE_EMERGENCY
+                        THERMAL_STATUS_SHUTDOWN -> AndroidThermalState.ANDROID_THERMAL_STATE_SHUTDOWN
+                        else -> AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED
+                    }
+                }
+            val powerSaving = safeCallWithDefault(false) {
+                val powerSaveMode = powerManager?.isPowerSaveMode
+                logger.d { "[sendCallStats] #powerSaveMode state: $powerSaveMode" }
+                powerSaveMode ?: false
+            }
             sfuConnectionModule.api.sendStats(
                 sendStatsRequest = SendStatsRequest(
                     session_id = sessionId,
@@ -1636,6 +1668,10 @@ public class RtcSession internal constructor(
                     webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
                     publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
                     subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
+                    android = AndroidState(
+                        thermal_state = androidThermalState,
+                        is_power_saver_mode = powerSaving,
+                    ),
                 ),
             )
         }
