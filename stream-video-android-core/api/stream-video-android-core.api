@@ -43,6 +43,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun leave ()V
 	public final fun listRecordings (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun listRecordings$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun listTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun migrate (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun muteAllUsers (ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun muteAllUsers$default (Lio/getstream/video/android/core/Call;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -73,10 +74,12 @@ public final class io/getstream/video/android/core/Call {
 	public final fun startHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startScreenSharing (Landroid/content/Intent;)V
+	public final fun startTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopLive (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopScreenSharing ()V
+	public final fun stopTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public final fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public final fun takeScreenshot (Lio/getstream/video/android/core/model/VideoTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -4228,16 +4231,18 @@ public final class io/getstream/video/android/core/notifications/DefaultNotifica
 
 public final class io/getstream/video/android/core/notifications/NotificationConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;Z)V
-	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;Z)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lio/getstream/video/android/core/notifications/NotificationHandler;
-	public final fun component4 ()Lkotlin/jvm/functions/Function0;
-	public final fun component5 ()Z
-	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;Z)Lio/getstream/video/android/core/notifications/NotificationConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;Lkotlin/jvm/functions/Function0;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public final fun component4 ()Z
+	public final fun component5 ()Lkotlin/jvm/functions/Function0;
+	public final fun component6 ()Z
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;Z)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoRegisterPushDevice ()Z
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationHandler ()Lio/getstream/video/android/core/notifications/NotificationHandler;
 	public final fun getPushDeviceGenerators ()Ljava/util/List;

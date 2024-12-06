@@ -69,6 +69,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onResume (Lio/getstream/video/android/core/Call;)V
 	public final fun onStop ()V
 	public fun onStop (Lio/getstream/video/android/core/Call;)V
+	public final fun onUserLeaveHint ()V
+	public fun onUserLeaveHint (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
