@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -559,9 +560,12 @@ public class CallState(
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
-    private val _errors: MutableStateFlow<List<ErrorEvent>> =
-        MutableStateFlow(emptyList())
+    private val _errors: MutableStateFlow<List<ErrorEvent>> = MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
+
+    internal val _participantVideoEnabledOverrides =
+        MutableStateFlow<Map<String, Boolean?>>(emptyMap())
+    val participantVideoEnabledOverrides = _participantVideoEnabledOverrides.asStateFlow()
 
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
