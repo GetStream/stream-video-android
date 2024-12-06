@@ -693,8 +693,7 @@ public class RtcSession internal constructor(
                 throw IllegalStateException(
                     "Cant send audio and video since publisher hasn't been setup to connect",
                 )
-            }
-            publisher?.let { publisher ->
+            } else {
                 // step 2 ensure all tracks are setup correctly
                 // start capturing the video
 
