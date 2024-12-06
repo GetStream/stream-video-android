@@ -224,16 +224,16 @@ public class Call(
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
-            logger.d { "[onConnected] no args" }
+            logger.d { "[NetworkStateListener#onConnected] #network; no args" }
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
-                    "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                fastReconnect()
+                rejoin()
             } else {
                 logger.d {
-                    "[onConnected] Reconnecting (full) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
                 rejoin()
             }
@@ -245,11 +245,11 @@ public class Call(
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
                 logger.d {
-                    "[onDisconnected] Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
                 }
                 leave()
             }
-            logger.d { "[onDisconnected] at $lastDisconnect" }
+            logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
         }
     }
 
@@ -539,7 +539,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        fastReconnect()
+                        rejoin()
                     }
 
                     else -> {
@@ -554,7 +554,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        fastReconnect()
+                        rejoin()
                     }
 
                     else -> {
@@ -1317,7 +1317,7 @@ public class Call(
 
         fun fastReconnect() {
             call.scope.launch {
-                call.fastReconnect()
+                call.rejoin()
             }
         }
     }

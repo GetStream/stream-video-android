@@ -195,7 +195,7 @@ public class CallHealthMonitor(
             logger.d { "[reconnect] skipping reconnect - too often" }
         } else {
             lastReconnectAt = now
-            call.fastReconnect()
+            call.rejoin()
         }
 
         reconnectInProgress = false
