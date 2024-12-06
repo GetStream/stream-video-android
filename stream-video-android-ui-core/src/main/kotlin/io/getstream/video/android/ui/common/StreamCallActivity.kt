@@ -20,6 +20,7 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -231,6 +232,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
         }
     }
 
+    public final override fun onUserLeaveHint() {
+        withCachedCall {
+            onUserLeaveHint(it)
+            super.onUserLeaveHint()
+        }
+    }
+
     public final override fun onPause() {
         withCachedCall {
             onPause(it)
@@ -352,20 +360,36 @@ public abstract class StreamCallActivity : ComponentActivity() {
     }
 
     /**
+     * Called when the activity is about to go into the background as the result of user choice. Makes sure the call object is available.
+     *
+     * @param call the call
+     */
+    public open fun onUserLeaveHint(call: Call) {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // Default PiP behavior
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE) &&
+            isConnected(call) &&
+            !isChangingConfigurations &&
+            isVideoCall(call) &&
+            !isInPictureInPictureMode
+        ) {
+            try {
+                enterPictureInPicture()
+            } catch (e: Exception) {
+                logger.e(e) { "[onUserLeaveHint] Something went wrong when entering PiP." }
+            }
+        }
+
+        logger.d { "DefaultCallActivity - Leave Hinted (call -> $call)" }
+    }
+
+    /**
      * Called when the activity is paused. Makes sure the call object is available.
      *
      * @param call the call
      */
     public open fun onPause(call: Call) {
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        // Default PiP behavior
-        if (isConnected(call) &&
-            !isChangingConfigurations &&
-            isVideoCall(call) &&
-            !isInPictureInPictureMode
-        ) {
-            enterPictureInPicture()
-        }
         logger.d { "DefaultCallActivity - Paused (call -> $call)" }
     }
 
