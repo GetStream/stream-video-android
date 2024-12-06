@@ -54,6 +54,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
@@ -76,8 +77,8 @@ internal fun SettingsMenu(
     onSelectVideoFilter: (Int) -> Unit,
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
-    selectedIncomingVideoResolution: VideoResolution?,
-    onSelectIncomingVideoResolution: (VideoResolution?) -> Unit,
+    selectedIncomingVideoResolution: PreferredVideoResolution?,
+    onSelectIncomingVideoResolution: (PreferredVideoResolution?) -> Unit,
     isIncomingVideoEnabled: Boolean,
     onToggleIncomingVideoVisibility: (Boolean) -> Unit,
     onShowCallStats: () -> Unit,

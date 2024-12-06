@@ -36,6 +36,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
@@ -1255,7 +1256,7 @@ public class Call(
      * @param sessionIds The participant session IDs to apply the resolution to. If `null`, the resolution will be applied to all participants.
      */
     fun setPreferredIncomingVideoResolution(
-        resolution: VideoResolution?,
+        resolution: PreferredVideoResolution?,
         sessionIds: List<String>? = null,
     ) {
         session?.let { session ->
