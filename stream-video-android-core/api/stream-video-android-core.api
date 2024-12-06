@@ -68,6 +68,10 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/InputAudioFilter;)V
 	public final fun setAudioProcessingEnabled (Z)V
+	public final fun setIncomingVideoEnabled (Ljava/lang/Boolean;Ljava/util/List;)V
+	public static synthetic fun setIncomingVideoEnabled$default (Lio/getstream/video/android/core/Call;Ljava/lang/Boolean;Ljava/util/List;ILjava/lang/Object;)V
+	public final fun setPreferredIncomingVideoResolution (Lio/getstream/video/android/core/model/PreferredVideoResolution;Ljava/util/List;)V
+	public static synthetic fun setPreferredIncomingVideoResolution$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/PreferredVideoResolution;Ljava/util/List;ILjava/lang/Object;)V
 	public final fun setSessionId (Ljava/lang/String;)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
@@ -149,6 +153,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getOwnCapabilities ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getParticipantBySessionId (Ljava/lang/String;)Lio/getstream/video/android/core/ParticipantState;
 	public final fun getParticipantCounts ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getParticipantVideoEnabledOverrides ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getPermissionRequests ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getPinnedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2857,6 +2862,10 @@ public final class io/getstream/video/android/core/call/stats/model/discriminato
 	public final fun fromAlias (Ljava/lang/String;)Lio/getstream/video/android/core/call/stats/model/discriminator/RtcReportType;
 }
 
+public final class io/getstream/video/android/core/call/utils/TrackOverridesHandlerKt {
+	public static final field ALL_PARTICIPANTS Ljava/lang/String;
+}
+
 public abstract class io/getstream/video/android/core/call/video/BitmapVideoFilter : io/getstream/video/android/core/call/video/VideoFilter {
 	public fun <init> ()V
 	public abstract fun applyFilter (Landroid/graphics/Bitmap;)V
@@ -3955,6 +3964,19 @@ public final class io/getstream/video/android/core/model/NetworkQuality$UnSpecif
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/NetworkQuality$UnSpecified;FILjava/lang/Object;)Lio/getstream/video/android/core/model/NetworkQuality$UnSpecified;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getQuality ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/PreferredVideoResolution {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lio/getstream/video/android/core/model/PreferredVideoResolution;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/PreferredVideoResolution;IIILjava/lang/Object;)Lio/getstream/video/android/core/model/PreferredVideoResolution;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeight ()I
+	public final fun getWidth ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

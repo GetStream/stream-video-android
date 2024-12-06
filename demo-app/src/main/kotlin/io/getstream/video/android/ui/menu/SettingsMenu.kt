@@ -54,6 +54,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
@@ -75,6 +76,10 @@ internal fun SettingsMenu(
     onSelectVideoFilter: (Int) -> Unit,
     onShowFeedback: () -> Unit,
     onNoiseCancellation: () -> Unit,
+    selectedIncomingVideoResolution: PreferredVideoResolution?,
+    onSelectIncomingVideoResolution: (PreferredVideoResolution?) -> Unit,
+    isIncomingVideoEnabled: Boolean,
+    onToggleIncomingVideoVisibility: (Boolean) -> Unit,
     onShowCallStats: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
 ) {
@@ -236,6 +241,10 @@ internal fun SettingsMenu(
                 onSwitchSfuClick = onSwitchSfuClick,
                 onShowCallStats = onShowCallStats,
                 onNoiseCancellation = onNoiseCancellation,
+                selectedIncomingVideoResolution = selectedIncomingVideoResolution,
+                onSelectIncomingVideoResolution = { onSelectIncomingVideoResolution(it) },
+                isIncomingVideoEnabled = isIncomingVideoEnabled,
+                onToggleIncomingVideoEnabled = { onToggleIncomingVideoVisibility(it) },
                 onSfuRejoinClick = onSfuRejoinClick,
                 onSfuFastReconnectClick = onSfuFastReconnectClick,
                 isScreenShareEnabled = isScreenSharing,
@@ -303,6 +312,10 @@ private fun SettingsMenuPreview() {
                 onShowFeedback = {},
                 onSelectScaleType = {},
                 onNoiseCancellation = {},
+                selectedIncomingVideoResolution = null,
+                onSelectIncomingVideoResolution = {},
+                isIncomingVideoEnabled = true,
+                onToggleIncomingVideoEnabled = {},
                 loadRecordings = { emptyList() },
             ),
         )

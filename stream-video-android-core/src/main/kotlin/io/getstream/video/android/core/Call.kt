@@ -38,6 +38,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
@@ -1287,6 +1288,34 @@ public class Call(
 
     suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
         return clientImpl.listTranscription(type, id)
+    }
+
+    /**
+     * Sets the preferred incoming video resolution.
+     *
+     * @param resolution The preferred resolution. Set to `null` to switch back to auto.
+     * @param sessionIds The participant session IDs to apply the resolution to. If `null`, the resolution will be applied to all participants.
+     */
+    fun setPreferredIncomingVideoResolution(
+        resolution: PreferredVideoResolution?,
+        sessionIds: List<String>? = null,
+    ) {
+        session?.let { session ->
+            session.trackOverridesHandler.updateOverrides(
+                sessionIds = sessionIds,
+                dimensions = resolution?.let { VideoDimension(it.width, it.height) },
+            )
+        }
+    }
+
+    /**
+     * Enables/disables incoming video feed.
+     *
+     * @param enabled Whether the video feed should be enabled or disabled. Set to `null` to switch back to auto.
+     * @param sessionIds The participant session IDs to enable/disable the video feed for. If `null`, the setting will be applied to all participants.
+     */
+    fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
+        session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
     }
 
     @InternalStreamVideoApi

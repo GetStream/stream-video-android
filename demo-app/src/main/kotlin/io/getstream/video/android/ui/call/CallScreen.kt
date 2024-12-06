@@ -94,6 +94,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.utils.isEnabled
 import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
 import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
@@ -149,6 +150,10 @@ fun CallScreen(
     val messageScope = rememberCoroutineScope()
     var showingLandscapeControls by remember { mutableStateOf(false) }
     var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
+    var selectedIncomingVideoResolution by remember {
+        mutableStateOf<PreferredVideoResolution?>(null)
+    }
+    var isIncomingVideoEnabled by remember { mutableStateOf(true) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsStateWithLifecycle()
@@ -500,6 +505,23 @@ fun CallScreen(
                 },
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
+                },
+                selectedIncomingVideoResolution = selectedIncomingVideoResolution,
+                onSelectIncomingVideoResolution = {
+                    call.setIncomingVideoEnabled(true)
+                    isIncomingVideoEnabled = true
+
+                    call.setPreferredIncomingVideoResolution(it)
+                    selectedIncomingVideoResolution = it
+
+                    isShowingSettingMenu = false
+                },
+                isIncomingVideoEnabled = isIncomingVideoEnabled,
+                onToggleIncomingVideoVisibility = {
+                    call.setIncomingVideoEnabled(it)
+                    isIncomingVideoEnabled = it
+
+                    isShowingSettingMenu = false
                 },
                 onSelectScaleType = {
                     preferredScaleType = it
