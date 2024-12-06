@@ -508,16 +508,19 @@ fun CallScreen(
                 },
                 selectedIncomingVideoResolution = selectedIncomingVideoResolution,
                 onSelectIncomingVideoResolution = {
-                    call.setPreferredIncomingVideoResolution(it)
+                    call.setIncomingVideoEnabled(true)
+                    isIncomingVideoEnabled = true
 
+                    call.setPreferredIncomingVideoResolution(it)
                     selectedIncomingVideoResolution = it
+
                     isShowingSettingMenu = false
                 },
                 isIncomingVideoEnabled = isIncomingVideoEnabled,
                 onToggleIncomingVideoVisibility = {
                     call.setIncomingVideoEnabled(it)
-
                     isIncomingVideoEnabled = it
+
                     isShowingSettingMenu = false
                 },
                 onSelectScaleType = {
