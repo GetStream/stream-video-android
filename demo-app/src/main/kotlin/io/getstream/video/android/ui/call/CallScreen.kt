@@ -44,7 +44,6 @@ import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -95,6 +94,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.utils.isEnabled
 import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
 import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
@@ -108,7 +108,6 @@ import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
 
@@ -151,9 +150,13 @@ fun CallScreen(
     val messageScope = rememberCoroutineScope()
     var showingLandscapeControls by remember { mutableStateOf(false) }
     var preferredScaleType by remember { mutableStateOf(VideoScalingType.SCALE_ASPECT_FILL) }
+    var selectedIncomingVideoResolution by remember {
+        mutableStateOf<PreferredVideoResolution?>(null)
+    }
+    var isIncomingVideoEnabled by remember { mutableStateOf(true) }
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
-    val me by call.state.me.collectAsState()
+    val me by call.state.me.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = connection) {
         if (connection == RealtimeConnection.Disconnected) {
@@ -335,8 +338,7 @@ fun CallScreen(
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
-                            val myself = me ?: participantsSize.firstOrNull { it.sessionId == call.sessionId }
-                            myself?.let {
+                            me?.let {
                                 FloatingParticipantVideo(
                                     call = call,
                                     participant = it,
@@ -503,6 +505,23 @@ fun CallScreen(
                 },
                 onNoiseCancellation = {
                     isNoiseCancellationEnabled = call.toggleAudioProcessing()
+                },
+                selectedIncomingVideoResolution = selectedIncomingVideoResolution,
+                onSelectIncomingVideoResolution = {
+                    call.setIncomingVideoEnabled(true)
+                    isIncomingVideoEnabled = true
+
+                    call.setPreferredIncomingVideoResolution(it)
+                    selectedIncomingVideoResolution = it
+
+                    isShowingSettingMenu = false
+                },
+                isIncomingVideoEnabled = isIncomingVideoEnabled,
+                onToggleIncomingVideoVisibility = {
+                    call.setIncomingVideoEnabled(it)
+                    isIncomingVideoEnabled = it
+
+                    isShowingSettingMenu = false
                 },
                 onSelectScaleType = {
                     preferredScaleType = it

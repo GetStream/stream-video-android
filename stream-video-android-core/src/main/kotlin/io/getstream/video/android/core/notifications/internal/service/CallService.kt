@@ -16,13 +16,16 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Notification
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
@@ -34,6 +37,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.StreamLog
@@ -47,6 +51,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.core.utils.safeCallWithDefault
+import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
@@ -164,60 +169,89 @@ internal open class CallService : Service() {
             intent ?: Intent(context, CallService::class.java)
         }
 
-        fun showIncomingCall(context: Context, callId: StreamCallId, callDisplayName: String?, callServiceConfiguration: CallServiceConfig = callServiceConfig()) {
+        fun showIncomingCall(
+            context: Context,
+            callId: StreamCallId,
+            callDisplayName: String?,
+            callServiceConfiguration: CallServiceConfig = callServiceConfig(),
+            notification: Notification?,
+        ) {
             val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
-
-            if (!hasActiveCall) {
-                ContextCompat.startForegroundService(
-                    context,
-                    buildStartIntent(
+            safeCallWithResult {
+                val result = if (!hasActiveCall) {
+                    ContextCompat.startForegroundService(
                         context,
-                        callId,
-                        TRIGGER_INCOMING_CALL,
-                        callDisplayName,
-                        callServiceConfiguration,
-                    ),
-                )
-            } else {
+                        buildStartIntent(
+                            context,
+                            callId,
+                            TRIGGER_INCOMING_CALL,
+                            callDisplayName,
+                            callServiceConfiguration,
+                        ),
+                    )
+                    ComponentName(context, CallService::class.java)
+                } else {
+                    context.startService(
+                        buildStartIntent(
+                            context,
+                            callId,
+                            TRIGGER_INCOMING_CALL,
+                            callDisplayName,
+                            callServiceConfiguration,
+                        ),
+                    )
+                }
+                result!!
+            }.onError {
+                // Show notification
+                StreamLog.e(TAG) { "Could not start service, showing notification only: $it" }
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+                StreamLog.i(TAG) { "Has permission: $hasPermission" }
+                StreamLog.i(TAG) { "Notification: $notification" }
+                if (hasPermission && notification != null) {
+                    NotificationManagerCompat.from(context)
+                        .notify(INCOMING_CALL_NOTIFICATION_ID, notification)
+                }
+            }
+        }
+
+        fun removeIncomingCall(
+            context: Context,
+            callId: StreamCallId,
+            config: CallServiceConfig = callServiceConfig(),
+        ) {
+            safeCallWithResult {
                 context.startService(
                     buildStartIntent(
                         context,
                         callId,
-                        TRIGGER_INCOMING_CALL,
-                        callDisplayName,
-                        callServiceConfiguration,
+                        TRIGGER_REMOVE_INCOMING_CALL,
+                        callServiceConfiguration = config,
                     ),
-                )
+                )!!
+            }.onError {
+                NotificationManagerCompat.from(context).cancel(INCOMING_CALL_NOTIFICATION_ID)
             }
         }
 
-        fun removeIncomingCall(context: Context, callId: StreamCallId, config: CallServiceConfig = callServiceConfig()) {
-            context.startService(
-                buildStartIntent(
-                    context,
-                    callId,
-                    TRIGGER_REMOVE_INCOMING_CALL,
-                    callServiceConfiguration = config,
-                ),
-            )
-        }
-
-        private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean = safeCallWithDefault(
-            true,
-        ) {
-            val activityManager = context.getSystemService(
-                Context.ACTIVITY_SERVICE,
-            ) as ActivityManager
-            val runningServices = activityManager.getRunningServices(Int.MAX_VALUE)
-            for (service in runningServices) {
-                if (serviceClass.name == service.service.className) {
-                    StreamLog.w(TAG) { "Service is running: $serviceClass" }
-                    return true
+        private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
+            safeCallWithDefault(true) {
+                val activityManager = context.getSystemService(
+                    Context.ACTIVITY_SERVICE,
+                ) as ActivityManager
+                val runningServices = activityManager.getRunningServices(Int.MAX_VALUE)
+                for (service in runningServices) {
+                    if (serviceClass.name == service.service.className) {
+                        StreamLog.w(TAG) { "Service is running: $serviceClass" }
+                        return true
+                    }
                 }
+                StreamLog.w(TAG) { "Service is NOT running: $serviceClass" }
+                return false
             }
-            StreamLog.w(TAG) { "Service is NOT running: $serviceClass" }
-            return false
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -347,7 +381,11 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun maybePromoteToForegroundService(videoClient: StreamVideoClient, notificationId: Int, trigger: String) {
+    private fun maybePromoteToForegroundService(
+        videoClient: StreamVideoClient,
+        notificationId: Int,
+        trigger: String,
+    ) {
         val hasActiveCall = videoClient.state.activeCall.value != null
         val not = if (hasActiveCall) " not" else ""
 
@@ -356,9 +394,20 @@ internal open class CallService : Service() {
         }
 
         if (!hasActiveCall) {
-            videoClient.getSettingUpCallNotification()?.let {
-                startForegroundWithServiceType(notificationId, it, trigger, serviceType)
+            videoClient.getSettingUpCallNotification()?.let { notification ->
+                startForegroundWithServiceType(
+                    notificationId,
+                    notification,
+                    trigger,
+                    serviceType,
+                )
             }
+        }
+    }
+
+    private fun justNotify(notificationId: Int, notification: Notification) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            NotificationManagerCompat.from(this).notify(notificationId, notification)
         }
     }
 
@@ -371,12 +420,12 @@ internal open class CallService : Service() {
                 notification,
                 TRIGGER_INCOMING_CALL,
                 serviceType,
-            )
+            ).onError {
+                justNotify(notificationId, notification)
+            }
         } else {
             // Else, we show a simple notification (the service was already started as a foreground service).
-            NotificationManagerCompat
-                .from(this)
-                .notify(notificationId, notification)
+            justNotify(notificationId, notification)
         }
     }
 
@@ -631,7 +680,11 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun handleIncomingCallAcceptedByMeOnAnotherDevice(acceptedByUserId: String, myUserId: String, callRingingState: RingingState) {
+    private fun handleIncomingCallAcceptedByMeOnAnotherDevice(
+        acceptedByUserId: String,
+        myUserId: String,
+        callRingingState: RingingState,
+    ) {
         // If accepted event was received, with event user being me, but current device is still ringing, it means the call was accepted on another device
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
             // So stop ringing on this device
@@ -639,7 +692,12 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun handleIncomingCallRejectedByMeOrCaller(rejectedByUserId: String, myUserId: String, createdByUserId: String?, activeCallExists: Boolean) {
+    private fun handleIncomingCallRejectedByMeOrCaller(
+        rejectedByUserId: String,
+        myUserId: String,
+        createdByUserId: String?,
+        activeCallExists: Boolean,
+    ) {
         // If rejected event was received (even from another device), with event user being me OR the caller, remove incoming call / stop service.
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
             if (activeCallExists) {

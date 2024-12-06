@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -94,6 +95,9 @@ import org.openapitools.client.models.CallSessionResponse
 import org.openapitools.client.models.CallSessionStartedEvent
 import org.openapitools.client.models.CallSettingsResponse
 import org.openapitools.client.models.CallStateResponseFields
+import org.openapitools.client.models.CallTranscriptionFailedEvent
+import org.openapitools.client.models.CallTranscriptionStartedEvent
+import org.openapitools.client.models.CallTranscriptionStoppedEvent
 import org.openapitools.client.models.CallUpdatedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
@@ -220,8 +224,8 @@ public class CallState(
     val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
 
     /** Your own participant state */
-    public val me: StateFlow<ParticipantState?> = _participants.mapState {
-        it[call.sessionId]
+    public val me: StateFlow<ParticipantState?> = _participants.mapState { map ->
+        map[call.sessionId] ?: participants.value.find { it.isLocal }
     }
 
     /** Your own participant state */
@@ -556,9 +560,12 @@ public class CallState(
     internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
     val reactions: StateFlow<List<ReactionResponse>> = _reactions
 
-    private val _errors: MutableStateFlow<List<ErrorEvent>> =
-        MutableStateFlow(emptyList())
+    private val _errors: MutableStateFlow<List<ErrorEvent>> = MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors
+
+    internal val _participantVideoEnabledOverrides =
+        MutableStateFlow<Map<String, Boolean?>>(emptyMap())
+    val participantVideoEnabledOverrides = _participantVideoEnabledOverrides.asStateFlow()
 
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
@@ -931,6 +938,16 @@ public class CallState(
 
                 updateParticipantCounts(session = session.value)
                 updateRingingState()
+            }
+
+            is CallTranscriptionStartedEvent -> {
+                _transcribing.value = true
+            }
+            is CallTranscriptionStoppedEvent -> {
+                _transcribing.value = false
+            }
+            is CallTranscriptionFailedEvent -> {
+                _transcribing.value = false
             }
         }
     }
