@@ -17,6 +17,7 @@
 package org.openapitools.client.apis
 
 
+import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -854,4 +855,15 @@ interface ProductvideoApi {
         @Body unpinRequest: UnpinRequest
     ): UnpinResponse
 
+    @POST("/video/call/{type}/{id}/start_closed_captions")
+    suspend fun startClosedCaptions(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): ResponseBody
+
+    @POST("/video/call/{type}/{id}/stop_closed_captions")
+    suspend fun stopClosedCaptions(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): ResponseBody
 }

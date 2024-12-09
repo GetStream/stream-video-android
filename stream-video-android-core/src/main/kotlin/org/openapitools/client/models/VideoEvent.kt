@@ -23,51 +23,8 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.APIError
-import org.openapitools.client.models.BlockedUserEvent
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallCreatedEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallLiveStartedEvent
-import org.openapitools.client.models.CallMemberAddedEvent
-import org.openapitools.client.models.CallMemberRemovedEvent
-import org.openapitools.client.models.CallMemberUpdatedEvent
-import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
-import org.openapitools.client.models.CallNotificationEvent
-import org.openapitools.client.models.CallParticipantResponse
-import org.openapitools.client.models.CallReactionEvent
-import org.openapitools.client.models.CallRecording
-import org.openapitools.client.models.CallRecordingFailedEvent
-import org.openapitools.client.models.CallRecordingReadyEvent
-import org.openapitools.client.models.CallRecordingStartedEvent
-import org.openapitools.client.models.CallRecordingStoppedEvent
-import org.openapitools.client.models.CallRejectedEvent
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.CallRingEvent
-import org.openapitools.client.models.CallSessionEndedEvent
-import org.openapitools.client.models.CallSessionParticipantJoinedEvent
-import org.openapitools.client.models.CallSessionParticipantLeftEvent
-import org.openapitools.client.models.CallSessionStartedEvent
-import org.openapitools.client.models.CallUpdatedEvent
-import org.openapitools.client.models.CallUserMutedEvent
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.ConnectionErrorEvent
-import org.openapitools.client.models.CustomVideoEvent
-import org.openapitools.client.models.HealthCheckEvent
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.OwnUserResponse
-import org.openapitools.client.models.PermissionRequestEvent
-import org.openapitools.client.models.ReactionResponse
-import org.openapitools.client.models.UnblockedUserEvent
-import org.openapitools.client.models.UpdatedCallPermissionsEvent
-import org.openapitools.client.models.UserResponse
-
-
-
 
 import com.squareup.moshi.FromJson
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -118,6 +75,8 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.accepted" -> CallAcceptedEvent::class.java
             "call.blocked_user" -> BlockedUserEvent::class.java
             "call.closed_caption" -> ClosedCaptionEvent::class.java
+            "call.closed_caption_started" -> ClosedCaptionStartedEvent::class.java
+            "call.closed_caption_ended" -> ClosedCaptionEndedEvent::class.java
             "call.created" -> CallCreatedEvent::class.java
             "call.deleted" -> CallDeletedEvent::class.java
             "call.ended" -> CallEndedEvent::class.java

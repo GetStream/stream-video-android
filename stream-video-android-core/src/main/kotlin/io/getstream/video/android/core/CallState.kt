@@ -71,6 +71,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
+import org.openapitools.client.models.CallClosedCaption
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallIngressResponse
@@ -98,6 +99,7 @@ import org.openapitools.client.models.CallTranscriptionFailedEvent
 import org.openapitools.client.models.CallTranscriptionStartedEvent
 import org.openapitools.client.models.CallTranscriptionStoppedEvent
 import org.openapitools.client.models.CallUpdatedEvent
+import org.openapitools.client.models.ClosedCaptionEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.EgressHLSResponse
@@ -569,6 +571,9 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
+    private val closedCaptions: MutableStateFlow<List<CallClosedCaption>> =
+        MutableStateFlow(emptyList())
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -944,6 +949,10 @@ public class CallState(
             }
             is CallTranscriptionFailedEvent -> {
                 _transcribing.value = false
+            }
+
+            is ClosedCaptionEvent -> {
+//                closedCaptions.value = (event.closedCaption)
             }
         }
     }
