@@ -508,7 +508,7 @@ public class StreamPeerConnection(
             VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
         } ?: false
         val encodingCount = if (isSvcCodec) {
-            3
+            3 // TODO-neg: videoLayers.ts#findOptimalVideolayers()
         } else {
             Math.min(
                 3,

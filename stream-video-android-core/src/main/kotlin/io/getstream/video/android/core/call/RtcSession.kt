@@ -42,7 +42,6 @@ import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
-import io.getstream.video.android.core.events.CodecNegotiationCompleteEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -1302,10 +1301,8 @@ public class RtcSession internal constructor(
                     is ChangePublishQualityEvent -> updatePublishQuality(event)
 
                     is ChangePublishOptionsEvent -> updatePublishOptions(
-                        event.changePublishOptions.publish_option,
+                        event.changePublishOptions.publish_options.first(), // TODO-neg: adapt to multiple options
                     )
-
-                    is CodecNegotiationCompleteEvent -> handleCodecNegotiationComplete?.invoke()
 
                     is TrackPublishedEvent -> {
                         updatePublishState(

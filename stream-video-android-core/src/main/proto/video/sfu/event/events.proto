@@ -77,24 +77,20 @@ message SfuEvent {
     ParticipantUpdated participant_updated = 24;
     // ParticipantMigrationComplete is sent when the participant migration is complete
     ParticipantMigrationComplete participant_migration_complete = 25;
-    // CodecNegotiationComplete is sent to signal the completion of a codec negotiation.
-    // SDKs can safely stop previous transceivers
-    CodecNegotiationComplete codec_negotiation_complete = 26;
     // ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
     ChangePublishOptions change_publish_options = 27;
   }
 }
 
 message ChangePublishOptions {
-  models.PublishOption publish_option = 1;
+  repeated models.PublishOption publish_options = 1;
+  string reason = 2;
 }
 
-message CodecNegotiationComplete {
-
+message ChangePublishOptionsComplete {
 }
 
 message ParticipantMigrationComplete{
-
 }
 
 message PinsChanged {
@@ -274,6 +270,8 @@ message AudioLevelChanged {
 
 message AudioSender {
   models.Codec codec = 2;
+  models.TrackType track_type = 3;
+  int32 publish_option_id = 4;
 }
 
 // VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
@@ -292,6 +290,8 @@ message VideoLayerSetting {
 message VideoSender {
   models.Codec codec = 2;
   repeated VideoLayerSetting layers = 3;
+  models.TrackType track_type = 4;
+  int32 publish_option_id = 5;
 }
 
 // sent to users when they need to change the quality of their video
