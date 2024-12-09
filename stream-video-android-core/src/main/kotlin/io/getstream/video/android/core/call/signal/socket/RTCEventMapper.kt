@@ -69,6 +69,8 @@ public object RTCEventMapper {
                 event.change_publish_quality,
             )
 
+            // TODO-neg: add ChangePublishOptions
+
             event.track_published != null -> with(event.track_published) {
                 TrackPublishedEvent(
                     user_id,
@@ -115,6 +117,7 @@ public object RTCEventMapper {
                     counts,
                     event.join_response.fast_reconnect_deadline_seconds,
                     event.join_response.reconnected,
+                    event.join_response.publish_options,
                 )
             }
 

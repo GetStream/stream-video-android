@@ -28,6 +28,7 @@ import stream.video.sfu.models.Error
 import stream.video.sfu.models.GoAwayReason
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
@@ -131,6 +132,7 @@ public data class JoinCallResponseEvent(
     val participantCount: ParticipantCount,
     val fastReconnectDeadlineSeconds: Int,
     val isReconnected: Boolean,
+    val publishOptions: List<PublishOption>,
 ) : SfuDataEvent()
 
 public data class CallEndedSfuEvent(

@@ -240,13 +240,13 @@ public class StreamPeerConnection(
     public fun addAudioTransceiver(
         track: MediaStreamTrack,
         streamIds: List<String>,
-    ) {
+    ): RtpTransceiver? {
         logger.i {
             "[addAudioTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
         }
         val transceiverInit = buildAudioTransceiverInit(streamIds)
 
-        audioTransceiver = connection.addTransceiver(track, transceiverInit)
+        return connection.addTransceiver(track, transceiverInit)
     }
 
     /**
@@ -281,20 +281,17 @@ public class StreamPeerConnection(
      */
     public fun addVideoTransceiver(
         track: MediaStreamTrack,
+        publishOption: PublishOption? = null,
         streamIds: List<String>,
         isScreenShare: Boolean,
-        publishOption: PublishOption? = null,
-    ) {
-        logger.d {
-            "[addVideoTransceiver] #sfu; #$typeTag; track: ${track.stringify()}, streamIds: $streamIds"
-        }
+    ): RtpTransceiver? {
         val transceiverInit = buildVideoTransceiverInit(
             streamIds,
             isScreenShare,
             publishOption,
         )
 
-        videoTransceiver = connection.addTransceiver(track, transceiverInit)
+        return connection.addTransceiver(track, transceiverInit)
     }
 
     /**
