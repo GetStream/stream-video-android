@@ -659,13 +659,16 @@ public class RtcSession internal constructor(
         }
     }
 
+    /**
+     * Updates transceiver with the new track.
+     * Stops the previous track and replaces it with the new one.
+     */
     private fun updateTransceiver(transceiver: RtpTransceiver, track: MediaStreamTrack) {
         val existingTrack = transceiver.sender?.track()
 
-        if (existingTrack != null && existingTrack == track) {
-            existingTrack.setEnabled(
-                false,
-            ) // TODO-neg: equivalent to track.stop()?
+        // Only stop the existing track if it's not the same as the new one
+        if (existingTrack != null && existingTrack != track) {
+            existingTrack.setEnabled(false) // TODO-neg: equivalent to track.stop()?
         }
         transceiver.sender?.setTrack(track, true)
     }
@@ -676,41 +679,74 @@ public class RtcSession internal constructor(
         listenToSfuSocket()
     }
 
-    private suspend fun listenToMediaChanges() {
+    private fun listenToMediaChanges() {
         coroutineScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
-                // set the mute /unmute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
 
                 if (it == DeviceStatus.Enabled) {
-//                    addTransceiver(track = call.mediaManager.videoTrack) // TODO-neg: update existing transceiver & also unpublish
+                    publishFeed(call.mediaManager.videoTrack, TrackType.TRACK_TYPE_VIDEO)
+                } else if (it == DeviceStatus.Disabled) {
+                    unpublishFeed(TrackType.TRACK_TYPE_VIDEO)
                 }
             }
         }
         coroutineScope.launch {
             call.mediaManager.microphone.status.collectLatest {
-                // set the mute /unmute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
 
                 if (it == DeviceStatus.Enabled) {
-//                    addTransceiver(track = call.mediaManager.videoTrack)
+                    publishFeed(call.mediaManager.audioTrack, TrackType.TRACK_TYPE_AUDIO)
+                } else if (it == DeviceStatus.Disabled) {
+                    unpublishFeed(TrackType.TRACK_TYPE_AUDIO)
                 }
             }
         }
 
         coroutineScope.launch {
             call.mediaManager.screenShare.status.collectLatest {
-                // set the mute /unmute status
                 setMuteState(
                     isEnabled = it == DeviceStatus.Enabled,
                     TrackType.TRACK_TYPE_SCREEN_SHARE,
                 )
 
                 if (it == DeviceStatus.Enabled) {
-//                    addTransceiver(track = call.mediaManager.videoTrack)
+                    publishFeed(call.mediaManager.screenShareTrack, TrackType.TRACK_TYPE_SCREEN_SHARE)
+                } else if (it == DeviceStatus.Disabled) {
+                    unpublishFeed(TrackType.TRACK_TYPE_SCREEN_SHARE)
                 }
             }
+        }
+    }
+
+    // TODO-neg: add KDocs and reorder these methods
+    private fun publishFeed(track: MediaStreamTrack, trackType: TrackType) {
+        // Search in storedPublishOptions because it might happen that
+        // we join the call with cam/mic off, so there are no relevant transceivers in the cache.
+        storedPublishOptions.forEach { publishOption ->
+            if (publishOption.track_type == trackType) {
+                val transceiver = transceiverCache.transceivers[publishOption]
+                // Create a clone of the track to avoid having the the same track id
+                // appear in the SDP in multiple transceivers.
+                val clonedTrack = track // TODO-neg: clone
+
+                if (transceiver == null) {
+                    addTransceiver(clonedTrack, publishOption)
+                } else {
+                    updateTransceiver(transceiver, clonedTrack)
+                }
+            }
+        }
+    }
+
+    private fun unpublishFeed(trackType: TrackType) {
+        // Search directly in cache, because we were already publishing, so we had a transceiver.
+        transceiverCache.transceivers.entries.filter { it.key.track_type == trackType }.forEach {
+            val transceiver = it.value
+            val track = transceiver.sender?.track()
+
+            track?.setEnabled(false)
         }
     }
 
@@ -733,11 +769,11 @@ public class RtcSession internal constructor(
         }
 
         val trackTypeMap = mapOf(
-            "TrackType.TRACK_TYPE_UNSPECIFIED" to TrackType.TRACK_TYPE_UNSPECIFIED,
-            "TrackType.TRACK_TYPE_AUDIO" to TrackType.TRACK_TYPE_AUDIO,
-            "TrackType.TRACK_TYPE_VIDEO" to TrackType.TRACK_TYPE_VIDEO,
-            "TrackType.TRACK_TYPE_SCREEN_SHARE" to TrackType.TRACK_TYPE_SCREEN_SHARE,
-            "TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO" to TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
+            "TRACK_TYPE_UNSPECIFIED" to TrackType.TRACK_TYPE_UNSPECIFIED,
+            "TRACK_TYPE_AUDIO" to TrackType.TRACK_TYPE_AUDIO,
+            "TRACK_TYPE_VIDEO" to TrackType.TRACK_TYPE_VIDEO,
+            "TRACK_TYPE_SCREEN_SHARE" to TrackType.TRACK_TYPE_SCREEN_SHARE,
+            "TRACK_TYPE_SCREEN_SHARE_AUDIO" to TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
@@ -776,7 +812,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    private suspend fun connectRtc() {
+    private fun connectRtc() {
 //        logger.d { "[connectRtc] #sfu; #track; no args" }
         val settings = call.state.settings.value
 
@@ -1271,7 +1307,7 @@ public class RtcSession internal constructor(
 
     private fun syncPublishOptions() {
         // TODO-neg: process events in order, not in parallel
-        // Add new transceivers for the newly received publish options
+        // Add new transceivers for the new publish options
         storedPublishOptions.forEach { publishOption ->
             // TODO-neg: first, check if track of track type is publishing
             if (!transceiverCache.transceivers.containsKey(publishOption)) {
@@ -1461,9 +1497,8 @@ public class RtcSession internal constructor(
                     call.state.replaceParticipants(participantStates)
 
                     storedPublishOptions = event.publishOptions
-                    sfuConnectionModule.socketConnection.whenConnected {
-                        connectRtc()
-                    } // TODO-neg: correct to do this here?
+                    // TODO-neg: correct to do this here?
+                    sfuConnectionModule.socketConnection.whenConnected { connectRtc() }
                 }
 
                 is SubscriberOfferEvent -> coroutineScope.launch { handleSubscriberOffer(event) }

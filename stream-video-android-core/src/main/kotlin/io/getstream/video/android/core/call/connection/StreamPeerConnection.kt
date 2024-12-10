@@ -305,12 +305,12 @@ public class StreamPeerConnection(
         publishOption: PublishOption?,
     ): RtpTransceiverInit {
         val encodings = if (isScreenShare) {
-            createScreenShareEncoding() // TODO-neg: apply bitrate (JS findOptimalScreenSharingLayers) & cache encoding
+            createScreenShareEncoding() // TODO-neg: apply publish option
         } else {
             val encodings = createEncodings(publishOption) // TODO-neg: cache encodings
             val isSvcCodec = publishOption?.codec?.let {
                 VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
-            } ?: false // TODO-neg add as PublishOption extension method
+            } ?: false // TODO-neg add as PublishOption extension method, used in other places also
 
             if (!isSvcCodec) {
                 encodings
@@ -519,7 +519,7 @@ public class StreamPeerConnection(
             publishOption?.let { encoding.maxFramerate = publishOption.fps } // TODO-neg: correct?
 
             if (isSvcCodec) {
-                encoding.scalabilityMode = publishOption?.getScalabilityMode()
+                encoding.scalabilityMode = publishOption.getScalabilityMode()
             } else {
                 encoding.scaleResolutionDownBy = factor
             }
@@ -555,19 +555,6 @@ public class StreamPeerConnection(
         )
 
         return listOf(fullQuality, halfQuality, quarterQuality)
-    }
-
-    private fun createSvcEncoding(): List<RtpParameters.Encoding> {
-        val encoding = RtpParameters.Encoding(
-            "q",
-            true,
-            1.0,
-        ).apply {
-            maxBitrateBps = maxBitRate
-            scalabilityMode = "L3T2_KEY"
-        }
-
-        return listOf(encoding)
     }
 
     private fun createScreenShareEncoding(): List<RtpParameters.Encoding> {
