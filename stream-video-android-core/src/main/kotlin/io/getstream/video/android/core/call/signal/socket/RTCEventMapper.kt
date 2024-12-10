@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.CallGrantsUpdatedEvent
+import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -69,7 +70,9 @@ public object RTCEventMapper {
                 event.change_publish_quality,
             )
 
-            // TODO-neg: add ChangePublishOptions
+            event.change_publish_options != null -> ChangePublishOptionsEvent(
+                event.change_publish_options,
+            )
 
             event.track_published != null -> with(event.track_published) {
                 TrackPublishedEvent(
