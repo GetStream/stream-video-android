@@ -53,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -428,7 +429,7 @@ fun CallScreen(
                 }
                 val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
                 Popup(
-                    alignment = Alignment.BottomCenter,
+                    alignment = BottomCenter,
                     offset = IntOffset(
                         0,
                         -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()

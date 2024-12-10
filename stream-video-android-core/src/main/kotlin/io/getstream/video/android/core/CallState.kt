@@ -571,8 +571,7 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
-    private val closedCaptions: MutableStateFlow<List<CallClosedCaption>> =
-        MutableStateFlow(emptyList())
+    val captionManager = CaptionManager()
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -952,7 +951,7 @@ public class CallState(
             }
 
             is ClosedCaptionEvent -> {
-//                closedCaptions.value = (event.closedCaption)
+                captionManager.addCaption(event)
             }
         }
     }

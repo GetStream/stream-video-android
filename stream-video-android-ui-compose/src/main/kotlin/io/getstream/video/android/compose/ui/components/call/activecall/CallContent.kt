@@ -69,6 +69,7 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LocalVideoContentSize
+import io.getstream.video.android.compose.ui.components.closedcaptions.ClosedCaptionsContainer
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -231,6 +232,8 @@ public fun CallContent(
                         showDiagnostics = false
                     }
                 }
+
+                ClosedCaptionsContainer(call)
             },
         )
     }
