@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core
 
+import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.PowerManager
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
@@ -36,6 +38,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
@@ -45,6 +48,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -67,6 +71,7 @@ import org.openapitools.client.models.GetOrCreateCallResponse
 import org.openapitools.client.models.GoLiveResponse
 import org.openapitools.client.models.JoinCallResponse
 import org.openapitools.client.models.ListRecordingsResponse
+import org.openapitools.client.models.ListTranscriptionsResponse
 import org.openapitools.client.models.MemberRequest
 import org.openapitools.client.models.MuteUsersResponse
 import org.openapitools.client.models.OwnCapability
@@ -74,7 +79,9 @@ import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartTranscriptionResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnpinResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse
@@ -128,6 +135,7 @@ public class Call(
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
+    private var powerManager: PowerManager? = null
 
     private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
@@ -210,7 +218,7 @@ public class Call(
                 this,
                 scope,
                 clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.audioUsage,
+                clientImpl.callServiceConfig.audioUsage,
             )
         }
     }
@@ -218,16 +226,16 @@ public class Call(
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
-            logger.d { "[onConnected] no args" }
+            logger.d { "[NetworkStateListener#onConnected] #network; no args" }
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
-                    "[onConnected] Reconnecting (fast) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                fastReconnect()
+                rejoin()
             } else {
                 logger.d {
-                    "[onConnected] Reconnecting (full) time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
                 rejoin()
             }
@@ -239,11 +247,11 @@ public class Call(
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
                 logger.d {
-                    "[onDisconnected] Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
                 }
                 leave()
             }
-            logger.d { "[onDisconnected] at $lastDisconnect" }
+            logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
         }
     }
 
@@ -263,6 +271,9 @@ public class Call(
             soundInputProcessor.currentAudioLevel.collect {
                 audioLevelOutputHelper.rampToValue(it)
             }
+        }
+        powerManager = safeCallWithDefault(null) {
+            clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
     }
 
@@ -463,6 +474,7 @@ public class Call(
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
                 remoteIceServers = iceServers,
+                powerManager = powerManager,
             )
         }
 
@@ -529,7 +541,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        fastReconnect()
+                        rejoin()
                     }
 
                     else -> {
@@ -544,7 +556,7 @@ public class Call(
             session?.subscriber?.state?.collect {
                 when (it) {
                     PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        fastReconnect()
+                        rejoin()
                     }
 
                     else -> {
@@ -641,6 +653,7 @@ public class Call(
                 session.prepareRejoin()
                 this.session = RtcSession(
                     clientImpl,
+                    powerManager,
                     this,
                     sessionId,
                     clientImpl.apiKey,
@@ -692,6 +705,7 @@ public class Call(
                 session.prepareRejoin()
                 val newSession = RtcSession(
                     clientImpl,
+                    powerManager,
                     this,
                     sessionId,
                     clientImpl.apiKey,
@@ -1193,6 +1207,23 @@ public class Call(
         soundInputProcessor.processSoundInput(audioSample.data)
     }
 
+    fun collectUserFeedback(
+        rating: Int,
+        reason: String? = null,
+        custom: Map<String, Any>? = null,
+    ) {
+        scope.launch {
+            clientImpl.collectFeedback(
+                callType = type,
+                id = id,
+                sessionId = sessionId,
+                rating = rating,
+                reason = reason,
+                custom = custom,
+            )
+        }
+    }
+
     suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
         return suspendCancellableCoroutine { continuation ->
             var screenshotSink: VideoSink? = null
@@ -1248,6 +1279,46 @@ public class Call(
         return clientImpl.toggleAudioProcessing()
     }
 
+    suspend fun startTranscription(): Result<StartTranscriptionResponse> {
+        return clientImpl.startTranscription(type, id)
+    }
+
+    suspend fun stopTranscription(): Result<StopTranscriptionResponse> {
+        return clientImpl.stopTranscription(type, id)
+    }
+
+    suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
+        return clientImpl.listTranscription(type, id)
+    }
+
+    /**
+     * Sets the preferred incoming video resolution.
+     *
+     * @param resolution The preferred resolution. Set to `null` to switch back to auto.
+     * @param sessionIds The participant session IDs to apply the resolution to. If `null`, the resolution will be applied to all participants.
+     */
+    fun setPreferredIncomingVideoResolution(
+        resolution: PreferredVideoResolution?,
+        sessionIds: List<String>? = null,
+    ) {
+        session?.let { session ->
+            session.trackOverridesHandler.updateOverrides(
+                sessionIds = sessionIds,
+                dimensions = resolution?.let { VideoDimension(it.width, it.height) },
+            )
+        }
+    }
+
+    /**
+     * Enables/disables incoming video feed.
+     *
+     * @param enabled Whether the video feed should be enabled or disabled. Set to `null` to switch back to auto.
+     * @param sessionIds The participant session IDs to enable/disable the video feed for. If `null`, the setting will be applied to all participants.
+     */
+    fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
+        session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
+    }
+
     /**
      * Updates the preferred publishing options for the call.
      *
@@ -1300,7 +1371,7 @@ public class Call(
 
         fun fastReconnect() {
             call.scope.launch {
-                call.fastReconnect()
+                call.rejoin()
             }
         }
     }
