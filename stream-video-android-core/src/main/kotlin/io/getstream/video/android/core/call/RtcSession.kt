@@ -59,6 +59,7 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.VideoCodec
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
@@ -105,6 +106,7 @@ import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnection.PeerConnectionState
 import org.webrtc.RTCStatsReport
+import org.webrtc.RtpParameters
 import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
@@ -115,6 +117,8 @@ import stream.video.sfu.event.LeaveCallRequest
 import stream.video.sfu.event.Migration
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.event.SfuRequest
+import stream.video.sfu.event.VideoLayerSetting
+import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.ClientDetails
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.Device
@@ -147,6 +151,7 @@ import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import kotlin.math.absoluteValue
 import kotlin.random.Random
+import kotlin.text.ifEmpty
 
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -1074,50 +1079,181 @@ public class RtcSession internal constructor(
 
     /**
      * Change the quality of video we upload when the ChangePublishQualityEvent event is received
-     * This is used for dynsacle
+     * This is used for Dynascale
      */
-    internal fun updatePublishQuality(event: ChangePublishQualityEvent) = synchronized(this) {
-        // TODO-neg: should I apply the changes done for codec prefs?
-        val sender = publisher?.connection?.transceivers?.firstOrNull {
-            it.mediaType == MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
-        }?.sender
+    internal fun updatePublishQuality(videoSenders: List<VideoSender>) = synchronized(this) {
+        dynascaleLogger.v { "[updatePublishQuality] #sfu; Handling ChangePublishQualityEvent" }
 
-        if (sender == null) {
-            dynascaleLogger.w {
-                "Request to change publishing quality not fulfilled due to missing transceivers or sender."
-            }
-            return@synchronized
-        }
+        for (videoSender in videoSenders) {
+            val sender = transceiverCache.transceivers.entries.firstOrNull {
+                it.key.track_type == TrackType.TRACK_TYPE_VIDEO && it.key.id == videoSender.publish_option_id
+            }?.value?.sender
+            val eventLayerSettingsList = videoSender.layers
 
-        val enabledRids =
-            event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate {
-                it.name to it.active
+            if (sender == null || sender.parameters == null || sender.parameters.encodings == null || eventLayerSettingsList.isEmpty()) {
+                dynascaleLogger.w {
+                    "[updatePublishQuality] #sfu; #codec-negotiation; Sender properties are null or layer settings list is empty in event."
+                }
+                return@synchronized
             }
-        dynascaleLogger.i { "enabled rids: $enabledRids}" }
-        val params = sender.parameters
-        val updatedEncodings: MutableList<Encoding> = mutableListOf()
-        var changed = false
-        for (encoding in params.encodings) {
-            val shouldEnable = enabledRids?.get(encoding.rid) ?: false
-            if (shouldEnable && encoding.active) {
-                updatedEncodings.add(encoding)
-            } else if (!shouldEnable && !encoding.active) {
-                updatedEncodings.add(encoding)
-            } else {
-                changed = true
-                encoding.active = shouldEnable
-                updatedEncodings.add(encoding)
+
+            val senderParams = sender.parameters
+            val senderCodec = senderParams.codecs.firstOrNull()
+            val isUsingSvcCodec = rtpCodecToVideoCodec(senderCodec)?.supportsSvc() ?: false
+            val updatedEncodings = mutableSetOf<Encoding>() // Used only for logging
+            var didChanges = false
+
+            for (senderEncoding in senderParams.encodings) {
+                dynascaleLogger.v { "[updatePublishQuality] #sfu; #codec-negotiation; Iteration for rid: \"${senderEncoding.rid}\"" }
+
+                // For SVC, we only have one layer (q) and often rid is omitted
+                // For non-SVC, we need to find the layer by rid (simulcast)
+                val eventLayerSettings = if (isUsingSvcCodec) {
+                    eventLayerSettingsList.firstOrNull()
+                } else {
+                    eventLayerSettingsList.firstOrNull { it.name == senderEncoding.rid }
+                }
+
+                // Enabled/disabled setting
+                updateActiveFlag(senderEncoding, eventLayerSettings).let {
+                    didChanges = it || didChanges
+                    if (it) updatedEncodings.add(senderEncoding)
+                }
+
+                // Quality settings
+                updateQualitySettings(senderEncoding, eventLayerSettings).let {
+                    didChanges = it || didChanges
+                    if (it) updatedEncodings.add(senderEncoding)
+                }
             }
-        }
-        if (changed) {
-            dynascaleLogger.i { "Updated publish quality with encodings $updatedEncodings" }
-            params.encodings.clear()
-            params.encodings.addAll(updatedEncodings)
-            sender.parameters = params
+
+            if (didChanges) {
+                logUpdatedEncodingsRids(updatedEncodings)
+
+                val didSet = sender.setParameters(senderParams)
+                dynascaleLogger.v {
+                    "[updatePublishQuality] #sfu; #codec-negotiation; Did set new parameters: $didSet"
+                }
+            }
+
+            logLayerSettings(eventLayerSettingsList, sender.parameters.encodings)
         }
     }
 
-    private val storedPublishOptions2: MutableMap<TrackType, PublishOption> = mutableMapOf() // TODO-neg: Needed because camera may be off
+    private fun rtpCodecToVideoCodec(codec: RtpParameters.Codec?): VideoCodec? =
+        if (codec == null) {
+            null
+        } else {
+            runCatching { VideoCodec.valueOf(codec.name.uppercase()) }.getOrNull().also {
+                dynascaleLogger.v {
+                    "[updatePublishQuality] #sfu; #codec-negotiation; Codec: ${it?.name}, supports SVC: ${it?.supportsSvc()}"
+                }
+            }
+        }
+
+    private fun updateActiveFlag(senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?): Boolean {
+        return if (senderEncoding.active != eventLayerSettings?.active) {
+            senderEncoding.active = eventLayerSettings?.active ?: false
+
+            dynascaleLogger.v {
+                "[updatePublishQuality][updateActiveFlag] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed active flag from ${!senderEncoding.active} to ${senderEncoding.active}"
+            }
+
+            true
+        } else {
+            false
+        }
+    }
+
+    private fun updateQualitySettings(senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?): Boolean {
+        var changed = false
+
+        eventLayerSettings?.let { settings ->
+            with(settings) {
+                if (max_bitrate > 0 && max_bitrate != (senderEncoding.maxBitrateBps ?: 0)) {
+                    dynascaleLogger.v {
+                        "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed maxBitrate from ${senderEncoding.maxBitrateBps} to $max_bitrate"
+                    }
+                    senderEncoding.maxBitrateBps = max_bitrate
+                    changed = true
+                }
+
+                if (max_framerate > 0 && max_framerate != (senderEncoding.maxFramerate ?: 0)) {
+                    dynascaleLogger.v {
+                        "[updatePublishQuality][updateQualitySettings] #sfu; rid: \"${senderEncoding.rid}\"; Changed maxFramerate from ${senderEncoding.maxFramerate} to $max_framerate"
+                    }
+                    senderEncoding.maxFramerate = max_framerate
+                    changed = true
+                }
+
+                scale_resolution_down_by.toDouble().let { scaleResolutionDownBy ->
+                    if (scaleResolutionDownBy >= 1 &&
+                        scaleResolutionDownBy != (senderEncoding.scaleResolutionDownBy ?: 0)
+                    ) {
+                        dynascaleLogger.v {
+                            "[updatePublishQuality][updateQualitySettings] #sfu; rid: \"${senderEncoding.rid}\"; Changed scaleResolutionDownBy from ${senderEncoding.scaleResolutionDownBy} to $scale_resolution_down_by"
+                        }
+                        senderEncoding.scaleResolutionDownBy = scaleResolutionDownBy
+                        changed = true
+                    }
+                }
+
+                if (scalability_mode.isNotBlank() && scalability_mode != (senderEncoding.scalabilityMode ?: "")) {
+                    dynascaleLogger.v {
+                        "[updatePublishQuality][updateQualitySettings] #sfu; rid: \"${senderEncoding.rid}\"; Changed scalabilityMode from ${senderEncoding.scalabilityMode} to $scalability_mode"
+                    }
+                    senderEncoding.scalabilityMode = scalability_mode
+                    changed = true
+                }
+            }
+        }
+
+        return changed
+    }
+
+    private fun logUpdatedEncodingsRids(updatedEncodings: Set<Encoding>) {
+        dynascaleLogger.d {
+            updatedEncodings.reversed().joinToString {
+                if (it.rid != null) it.rid.toString() else ""
+            }.let {
+                "[updatePublishQuality] #sfu; #codec-negotiation; Updated encodings: $it"
+            }
+        }
+    }
+
+    private fun logLayerSettings(
+        eventLayerSettingsList: List<VideoLayerSetting>? = null,
+        senderEncodingList: List<Encoding>,
+    ) {
+        val eventLog = eventLayerSettingsList?.joinToString(separator = "") {
+            "\n-Name: ${it.name}\n" +
+                    "active: ${it.active}\n" +
+                    "maxBitrate: ${it.max_bitrate}\n" +
+                    "maxFramerate: ${it.max_framerate}\n" +
+                    "scaleResolutionDownBy: ${it.scale_resolution_down_by}\n" +
+                    "scalabilityMode: ${it.scalability_mode.ifEmpty { "(empty)" }}"
+        }
+        val senderLog = senderEncodingList.reversed().joinToString(separator = "") {
+            "\n-Name: ${it.rid}\n" +
+                    "active: ${it.active}\n" +
+                    "maxBitrate: ${it.maxBitrateBps}\n" +
+                    "maxFramerate: ${it.maxFramerate}\n" +
+                    "scaleResolutionDownBy: ${it.scaleResolutionDownBy}\n" +
+                    "scalabilityMode: ${it.scalabilityMode}"
+        }
+
+        dynascaleLogger.v {
+            "[updatePublishQuality] #sfu; #codec-negotiation;\n" +
+                    if (eventLog == null) {
+                        ""
+                    } else {
+                        "Event layers:" +
+                                "$eventLog\n\n"
+                    } +
+                    "Sender encodings:" +
+                    senderLog
+        }
+    }
 
     private var storedPublishOptions = emptyList<PublishOption>()
     private val transceiverCache = TransceiverCache()
@@ -1333,7 +1469,7 @@ public class RtcSession internal constructor(
 
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
-                    is ChangePublishQualityEvent -> updatePublishQuality(event)
+                    is ChangePublishQualityEvent -> updatePublishQuality(event.changePublishQuality.video_senders)
 
                     is ChangePublishOptionsEvent -> updatePublishOptions(
                         event.changePublishOptions.publish_options,
