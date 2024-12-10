@@ -1447,83 +1447,79 @@ public class RtcSession internal constructor(
     fun handleEvent(event: VideoEvent) {
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is SfuDataEvent) {
-            coroutineScope.launch {
-                logger.v { "[onRtcEvent] event: $event" }
-                if (event is ChangePublishQualityEvent || event is ChangePublishOptionsEvent) {
-                    logger.d { "[handleEvent] #codec-negotiation; event: $event" }
+            logger.v { "[onRtcEvent] event: $event" }
+            if (event is ChangePublishQualityEvent || event is ChangePublishOptionsEvent) {
+                logger.d { "[handleEvent] #codec-negotiation; event: $event" }
+            }
+            when (event) {
+                is JoinCallResponseEvent -> {
+                    logger.d { "[handleEvent] #codec-negotiation; JoinResponse POs: ${event.publishOptions}" }
+
+                    val participantStates = event.callState.participants.map {
+                        call.state.getOrCreateParticipant(it)
+                    }
+                    call.state.replaceParticipants(participantStates)
+
+                    storedPublishOptions = event.publishOptions
+                    sfuConnectionModule.socketConnection.whenConnected {
+                        connectRtc()
+                    } // TODO-neg: correct to do this here?
                 }
-                when (event) {
-                    is JoinCallResponseEvent -> {
-                        logger.d { "[handleEvent] #codec-negotiation; JoinResponse POs: ${event.publishOptions}" }
 
-                        val participantStates = event.callState.participants.map {
-                            call.state.getOrCreateParticipant(it)
-                        }
-                        call.state.replaceParticipants(participantStates)
+                is SubscriberOfferEvent -> coroutineScope.launch { handleSubscriberOffer(event) }
+                // this dynascale event tells the SDK to change the quality of the video it's uploading
+                is ChangePublishQualityEvent -> updatePublishQuality(event.changePublishQuality.video_senders)
 
-                        storedPublishOptions = event.publishOptions
-                        sfuConnectionModule.socketConnection.whenConnected {
-                            connectRtc()
-                        } // TODO-neg: correct to do this here?
-                    }
+                is ChangePublishOptionsEvent -> updatePublishOptions(
+                    event.changePublishOptions.publish_options,
+                )
 
-                    is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                    // this dynascale event tells the SDK to change the quality of the video it's uploading
-                    is ChangePublishQualityEvent -> updatePublishQuality(event.changePublishQuality.video_senders)
-
-                    is ChangePublishOptionsEvent -> updatePublishOptions(
-                        event.changePublishOptions.publish_options,
+                is TrackPublishedEvent -> {
+                    updatePublishState(
+                        userId = event.userId,
+                        sessionId = event.sessionId,
+                        trackType = event.trackType,
+                        videoEnabled = true,
+                        audioEnabled = true,
                     )
+                }
 
-                    is TrackPublishedEvent -> {
-                        updatePublishState(
-                            userId = event.userId,
-                            sessionId = event.sessionId,
-                            trackType = event.trackType,
-                            videoEnabled = true,
-                            audioEnabled = true,
-                        )
-                    }
+                is TrackUnpublishedEvent -> {
+                    updatePublishState(
+                        userId = event.userId,
+                        sessionId = event.sessionId,
+                        trackType = event.trackType,
+                        videoEnabled = false,
+                        audioEnabled = false,
+                    )
+                }
 
-                    is TrackUnpublishedEvent -> {
-                        updatePublishState(
-                            userId = event.userId,
-                            sessionId = event.sessionId,
-                            trackType = event.trackType,
-                            videoEnabled = false,
-                            audioEnabled = false,
-                        )
-                    }
+                is ParticipantJoinedEvent -> {
+                    // the UI layer will automatically trigger updateParticipantsSubscriptions
+                }
 
-                    is ParticipantJoinedEvent -> {
-                        // the UI layer will automatically trigger updateParticipantsSubscriptions
-                    }
+                is ParticipantLeftEvent -> {
+                    removeParticipantTracks(event.participant)
+                    removeParticipantTrackDimensions(event.participant)
+                }
 
-                    is ParticipantLeftEvent -> {
-                        removeParticipantTracks(event.participant)
-                        removeParticipantTrackDimensions(event.participant)
-                    }
+                is ICETrickleEvent -> coroutineScope.launch { handleIceTrickle(event)} // TODO-neg: ok?
 
-                    is ICETrickleEvent -> {
-                        handleIceTrickle(event)
-                    }
+                is ICERestartEvent -> {
+                    val peerType = event.peerType
+                    when (peerType) {
+                        PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
+                            publisher?.connection?.restartIce()
+                        }
 
-                    is ICERestartEvent -> {
-                        val peerType = event.peerType
-                        when (peerType) {
-                            PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
-                                publisher?.connection?.restartIce()
-                            }
-
-                            PeerType.PEER_TYPE_SUBSCRIBER -> {
-                                subscriber?.connection?.restartIce()
-                            }
+                        PeerType.PEER_TYPE_SUBSCRIBER -> {
+                            subscriber?.connection?.restartIce()
                         }
                     }
+                }
 
-                    else -> {
-                        logger.d { "[onRtcEvent] skipped event: $event" }
-                    }
+                else -> {
+                    logger.d { "[onRtcEvent] skipped event: $event" }
                 }
             }
         }
