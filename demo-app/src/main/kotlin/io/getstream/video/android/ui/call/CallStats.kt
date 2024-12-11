@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -177,6 +178,17 @@ fun CallStats(call: Call) {
             val subscriberJitter by call.state.stats.subscriber.jitterInMs.collectAsStateWithLifecycle()
             val publisherBitrate by call.state.stats.publisher.bitrateKbps.collectAsStateWithLifecycle()
             val subscriberBitrate by call.state.stats.subscriber.bitrateKbps.collectAsStateWithLifecycle()
+            val publisherVideoCodec by call.state.stats.publisher.videoCodec.collectAsStateWithLifecycle()
+            val publisherAudioCodec by call.state.stats.publisher.audioCodec.collectAsStateWithLifecycle()
+            val codecs by remember {
+                derivedStateOf {
+                    if (publisherVideoCodec == "" || publisherAudioCodec == "") {
+                        "${publisherVideoCodec}$publisherAudioCodec"
+                    } else {
+                        "$publisherVideoCodec & $publisherAudioCodec"
+                    }
+                }
+            }
 
             LatencyOrJitter(title = "Latency", value = latency)
             Spacer(modifier = Modifier.size(16.dp))
@@ -187,6 +199,8 @@ fun CallStats(call: Call) {
             StatItem(title = "Region", value = statsReport?.local?.sfu)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish resolution", value = publishResolution)
+            Spacer(modifier = Modifier.size(16.dp))
+            StatItem(title = "Publish codecs (video & audio)", value = codecs)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish quality drop reason", value = dropReason)
             Spacer(modifier = Modifier.size(16.dp))

@@ -66,6 +66,12 @@ public class PeerConnectionStats(scope: CoroutineScope) {
 
     internal val _bitrateKbps: MutableStateFlow<Float> = MutableStateFlow(0F)
     val bitrateKbps: StateFlow<Float> = _bitrateKbps
+
+    internal val _videoCodec: MutableStateFlow<String> = MutableStateFlow("")
+    val videoCodec: StateFlow<String> = _videoCodec
+
+    internal val _audioCodec: MutableStateFlow<String> = MutableStateFlow("")
+    val audioCodec: StateFlow<String> = _audioCodec
 }
 
 public data class LocalStats(
@@ -95,7 +101,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
         if (stats == null) return
         // also see https://github.com/GetStream/stream-video-js/blob/main/packages/client/src/stats/state-store-stats-reporter.ts
 
-        val skipTypes = listOf("codec", "certificate", "data-channel")
+        val skipTypes = listOf("certificate", "data-channel")
         val trackToParticipant = call.session?.trackIdToParticipant?.value ?: emptyMap()
         val displayingAt = call.session?.trackDimensions?.value ?: emptyMap()
 
@@ -114,6 +120,12 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
             } else if (type == "outbound-rtp") {
                 val rid = stat.members["rid"] ?: "missing"
                 "$type:${stat.members["kind"]}:$rid"
+            } else if (type == "codec") {
+                (stat.members["mimeType"] as? String)?.split(
+                    "/",
+                )?.firstOrNull()?.let { audioOrVideo ->
+                    "codec:$audioOrVideo"
+                }
             } else {
                 type
             }
@@ -198,6 +210,16 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                     logger.v {
                         "[stats] #manual-quality-selection; receiving video for $participantId at $frameWidth: ${it.members["frameWidth"]} and rendering it at ${visibleAt?.dimensions?.width} visible: ${visibleAt?.visible}"
                     }
+                }
+            }
+            statGroups["codec:video"]?.firstOrNull()?.let {
+                (it.members["mimeType"] as? String)?.split("/")[1]?.let { codec ->
+                    publisher._videoCodec.value = codec
+                }
+            }
+            statGroups["codec:audio"]?.firstOrNull()?.let {
+                (it.members["mimeType"] as? String)?.split("/")[1]?.let { codec ->
+                    publisher._audioCodec.value = codec
                 }
             }
         }
