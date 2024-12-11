@@ -254,6 +254,7 @@ public class StreamPeerConnection(
      *
      * @param streamIds The list of stream IDs to bind to this transceiver.
      */
+    // TODO-neg: we should omit the encodings for audio in the transceiver
     private fun buildAudioTransceiverInit(streamIds: List<String>): RtpTransceiverInit {
         val fullQuality = RtpParameters.Encoding(
             "a",
@@ -496,14 +497,7 @@ public class StreamPeerConnection(
         val isSvcCodec = publishOption?.codec?.let {
             VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
         } ?: false
-        val encodingCount = if (isSvcCodec) {
-            3 // TODO-neg: videoLayers.ts#findOptimalVideolayers()
-        } else {
-            Math.min(
-                3,
-                publishOption?.max_spatial_layers ?: 3,
-            )
-        }
+        val encodingCount = publishOption?.max_spatial_layers ?: 3
         var factor = 1.0
 
         return allEncodings.take(encodingCount).onEach { encoding ->
@@ -517,7 +511,7 @@ public class StreamPeerConnection(
             }
 
             factor *= 2
-        }
+        }.reversed()
     }
 
     private fun createSimulcastEncodings(): List<RtpParameters.Encoding> {

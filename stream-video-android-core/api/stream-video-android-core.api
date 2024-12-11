@@ -92,8 +92,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun updatePreferredPublishOptions (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public static synthetic fun updatePreferredPublishOptions$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/core/Call$Companion {
@@ -629,11 +627,13 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 
 public final class io/getstream/video/android/core/PeerConnectionStats {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun getAudioCodec ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBitrateKbps ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getJitterInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLatency ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getQualityDropReason ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getVideoCodec ()Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public abstract interface class io/getstream/video/android/core/RealtimeConnection {
@@ -1025,8 +1025,8 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;I)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)Lorg/webrtc/RtpTransceiver;
 	public final fun addIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;Z)Lorg/webrtc/RtpTransceiver;
-	public static synthetic fun addVideoTransceiver$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;ZILjava/lang/Object;)Lorg/webrtc/RtpTransceiver;
+	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;)Lorg/webrtc/RtpTransceiver;
+	public static synthetic fun addVideoTransceiver$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;ILjava/lang/Object;)Lorg/webrtc/RtpTransceiver;
 	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;

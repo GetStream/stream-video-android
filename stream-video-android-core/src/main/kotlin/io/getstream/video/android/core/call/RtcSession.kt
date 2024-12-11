@@ -521,6 +521,13 @@ public class RtcSession internal constructor(
         var dummySubscriberSdp = ""
         var dummyPublisherSdp = ""
         var preferredPublishOptions = emptyList<PublishOption>()
+        val customPublishOptions = listOf(
+            PublishOption(
+                track_type = TrackType.TRACK_TYPE_VIDEO,
+//                codec = Codec(name = "h264", fmtp = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f"),
+                codec = Codec(name = "av1", fmtp = "level-idx=5;profile=0;tier=0"),
+            ),
+        )
 
         withDummyPeerConnections { dummyPublisher, dummySubscriber ->
             dummySubscriber?.let {
@@ -530,7 +537,7 @@ public class RtcSession internal constructor(
             dummyPublisher?.let {
                 dummyPublisherSdp = getDummySdp(it)
                 preferredPublishOptions = getPreferredPublishOptions(dummyPublisherSdp)
-//                logger.v { "[connect] #codec-negotiation; Dummy publisher SDP:\n$dummyPublisherSdp" }
+                logger.v { "[connect] #codec-negotiation; Dummy publisher SDP:\n$dummyPublisherSdp" }
             }
         }
 
@@ -542,7 +549,7 @@ public class RtcSession internal constructor(
             reconnect_details = reconnectDetails,
             subscriber_sdp = dummySubscriberSdp,
             publisher_sdp = dummyPublisherSdp,
-            preferred_publish_options = preferredPublishOptions,
+            preferred_publish_options = customPublishOptions,
         )
         logger.d { "[connect] Sending JoinRequest: $request" }
         listenToSfuSocket()
@@ -651,18 +658,22 @@ public class RtcSession internal constructor(
         publisher?.let { spc ->
             val trackType = publishOption.track_type
             when (trackType) {
-                TrackType.TRACK_TYPE_VIDEO,
-                TrackType.TRACK_TYPE_SCREEN_SHARE -> spc.addVideoTransceiver(
+                TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_SCREEN_SHARE -> {
+                    spc.addVideoTransceiver(
                         track = track,
                         publishOption = publishOption,
                         streamIds = listOf(buildTrackId(trackType)),
-                )
-                TrackType.TRACK_TYPE_AUDIO,
-                TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> spc.addAudioTransceiver(
-                    track = track,
-                    streamIds = listOf(buildTrackId(trackType)),
-                )
-                else -> null
+                    )
+                }
+                TrackType.TRACK_TYPE_AUDIO, TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> {
+                    spc.addAudioTransceiver(
+                        track = track,
+                        streamIds = listOf(buildTrackId(trackType)),
+                    )
+                }
+                else -> {
+                    null
+                }
             }.also { newTransceiver ->
                 newTransceiver?.let {
                     transceiverCache.transceivers.put(publishOption, it)
@@ -916,7 +927,7 @@ public class RtcSession internal constructor(
                 }
 
                 logger.d {
-                    "[connectRtc] #codec-negotiation; transceiver cache: ${transceiverCache.transceivers.map { "(${it.key.track_type},${it.key.id}) to ${it.value.mediaType}" }}"
+                    "[connectRtc] #codec-negotiation; transceiver cache: ${transceiverCache.transceivers.map { "(${it.key.track_type},${it.key.id}) to ${it.value.mediaType} with ${it.value.sender.parameters.encodings.joinToString { it.rid.toString() }}" }}"
                 }
             }
         }
@@ -1137,7 +1148,7 @@ public class RtcSession internal constructor(
 
         for (videoSender in videoSenders) {
             val sender = transceiverCache.transceivers.entries.firstOrNull {
-                it.key.track_type == TrackType.TRACK_TYPE_VIDEO && it.key.id == videoSender.publish_option_id
+                it.key.track_type == videoSender.track_type && it.key.id == videoSender.publish_option_id
             }?.value?.sender
             val eventLayerSettingsList = videoSender.layers
 
@@ -1850,6 +1861,7 @@ public class RtcSession internal constructor(
             val track = transceiver.sender.track()!!
             val trackType = convertKindToTrackType(track, screenShareTrack)
 
+            // TODO-neg: if I can determine the dimens of the disabled track (in updateTransceiver), I can rely on it, otherwise I'll need to cache them.
             val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
                 checkNotNull(captureResolution) {
                     "[getPublisherTracks] #codec-negotiation; Capture resolution is null"
@@ -1947,7 +1959,7 @@ public class RtcSession internal constructor(
 
         val sdpSession = SdpSession()
         sdpSession.parse(sdp)
-        val media = sdpSession.media.find { m ->
+        val media = sdpSession.media.reversed().find { m -> // TODO-neg: check this
             m.mline?.type == track.kind() &&
                 // if `msid` is not present, we assume that the track is the first one
                 (m.msid?.equals(track.id()) ?: true)
@@ -1977,6 +1989,7 @@ public class RtcSession internal constructor(
         // Even if we use SVC, we still generate three layers [f, h, q]
         // because we need to announce them to the SFU via the SetPublisher request,
         // so we use the simulcast encodings here.
+        // TODO-neg: verify captureResolution vs videoDimensions from PO
         return publisher?.createEncodings(publishOption)?.map {
             val scaleBy = it.scaleResolutionDownBy ?: 1.0
             val width = captureResolution.width.div(scaleBy)
