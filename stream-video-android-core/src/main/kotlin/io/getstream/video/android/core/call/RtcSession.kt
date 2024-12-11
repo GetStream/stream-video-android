@@ -573,7 +573,6 @@ public class RtcSession internal constructor(
             spc.addVideoTransceiver(
                 call.mediaManager.videoTrack, // TODO-neg: correct to use it here?
                 streamIds = listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
-                isScreenShare = false,
             )
             spc.addAudioTransceiver(
                 call.mediaManager.audioTrack,
@@ -652,23 +651,22 @@ public class RtcSession internal constructor(
         publisher?.let { spc ->
             val trackType = publishOption.track_type
             when (trackType) {
-                TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_SCREEN_SHARE -> {
-                    spc.addVideoTransceiver(
+                TrackType.TRACK_TYPE_VIDEO,
+                TrackType.TRACK_TYPE_SCREEN_SHARE -> spc.addVideoTransceiver(
                         track = track,
                         publishOption = publishOption,
                         streamIds = listOf(buildTrackId(trackType)),
-                        isScreenShare = trackType == TrackType.TRACK_TYPE_SCREEN_SHARE,
-                    )
-                }
-                TrackType.TRACK_TYPE_AUDIO -> spc.addAudioTransceiver(
-                    call.mediaManager.audioTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
+                )
+                TrackType.TRACK_TYPE_AUDIO,
+                TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> spc.addAudioTransceiver(
+                    track = track,
+                    streamIds = listOf(buildTrackId(trackType)),
                 )
                 else -> null
             }.also { newTransceiver ->
-                newTransceiver?.let { transceiverCache.transceivers.put(publishOption, it) }
-                logger.d {
-                    "[addTransceiver] #sfu; #codec-negotiation; Added $trackType transceiver. Is null: ${newTransceiver == null}"
+                newTransceiver?.let {
+                    transceiverCache.transceivers.put(publishOption, it)
+                    logger.d { "[addTransceiver] #sfu; #codec-negotiation; Added $trackType transceiver" }
                 }
             }
         }
@@ -741,7 +739,7 @@ public class RtcSession internal constructor(
     // TODO-neg: add KDocs and reorder these methods
     private fun publishFeed(track: MediaStreamTrack, trackType: TrackType) {
         // Search in storedPublishOptions because it might happen that
-        // we join the call with cam/mic off, so there are no relevant transceivers in the cache.
+        // we join the call with cam/mic/ss off, so there are no relevant transceivers in the cache.
         storedPublishOptions.forEach { publishOption ->
             if (publishOption.track_type == trackType) {
                 val transceiver = transceiverCache.transceivers[publishOption]
@@ -897,7 +895,7 @@ public class RtcSession internal constructor(
 
                 // render it on the surface. but we need to start this before forwarding it to the publisher
                 logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-                // TODO-neg: refactor below
+                // TODO-neg: what about SCREEN_SHARE_AUDIO?
                 storedPublishOptions.forEach {
                     if (it.track_type == TrackType.TRACK_TYPE_VIDEO && call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
                         logger.d { "[connectRtc] #codec-negotiation; Adding transceiver for PO ${it.track_type}" }
@@ -918,7 +916,7 @@ public class RtcSession internal constructor(
                 }
 
                 logger.d {
-                    "[connectRtc] #codec-negotiation; transceivers: ${transceiverCache.transceivers.map { "(${it.key.track_type},${it.key.id}) to ${it.value.mediaType}" }}"
+                    "[connectRtc] #codec-negotiation; transceiver cache: ${transceiverCache.transceivers.map { "(${it.key.track_type},${it.key.id}) to ${it.value.mediaType}" }}"
                 }
             }
         }

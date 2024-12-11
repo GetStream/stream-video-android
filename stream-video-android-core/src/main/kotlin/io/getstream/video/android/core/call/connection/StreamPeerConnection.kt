@@ -283,11 +283,9 @@ public class StreamPeerConnection(
         track: MediaStreamTrack,
         publishOption: PublishOption? = null,
         streamIds: List<String>,
-        isScreenShare: Boolean,
     ): RtpTransceiver? {
         val transceiverInit = buildVideoTransceiverInit(
             streamIds,
-            isScreenShare,
             publishOption,
         )
 
@@ -301,22 +299,16 @@ public class StreamPeerConnection(
      */
     private fun buildVideoTransceiverInit(
         streamIds: List<String>,
-        isScreenShare: Boolean,
         publishOption: PublishOption?,
     ): RtpTransceiverInit {
-        val encodings = if (isScreenShare) {
-            createScreenShareEncoding() // TODO-neg: apply publish option
-        } else {
-            val encodings = createEncodings(publishOption) // TODO-neg: cache encodings
-            val isSvcCodec = publishOption?.codec?.let {
-                VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
-            } ?: false // TODO-neg add as PublishOption extension method, used in other places also
+        val isSvcCodec = publishOption?.codec?.let {
+            VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
+        } ?: false // TODO-neg add as PublishOption extension method, used in other places also
 
-            if (!isSvcCodec) {
-                encodings
-            } else {
-                encodings.filter { it.rid == "f" }.map { it.apply { rid = "q" } }
-            }
+        val encodings = if (!isSvcCodec) {
+            createEncodings(publishOption)
+        } else {
+            createEncodings(publishOption).filter { it.rid == "f" }.map { it.apply { rid = "q" } }
         }
 
         return RtpTransceiverInit(
@@ -500,7 +492,7 @@ public class StreamPeerConnection(
     }
 
     internal fun createEncodings(publishOption: PublishOption?): List<RtpParameters.Encoding> {
-        val allEncodings = createSimulcastEncodings() // from high to low quality
+        val allEncodings = createSimulcastEncodings() // order: f, h, q
         val isSvcCodec = publishOption?.codec?.let {
             VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
         } ?: false
