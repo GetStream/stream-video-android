@@ -1233,7 +1233,7 @@ public class RtcSession internal constructor(
 
                 if (max_framerate > 0 && max_framerate != (senderEncoding.maxFramerate ?: 0)) {
                     dynascaleLogger.v {
-                        "[updatePublishQuality][updateQualitySettings] #sfu; rid: \"${senderEncoding.rid}\"; Changed maxFramerate from ${senderEncoding.maxFramerate} to $max_framerate"
+                        "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed maxFramerate from ${senderEncoding.maxFramerate} to $max_framerate"
                     }
                     senderEncoding.maxFramerate = max_framerate
                     changed = true
@@ -1244,7 +1244,7 @@ public class RtcSession internal constructor(
                         scaleResolutionDownBy != (senderEncoding.scaleResolutionDownBy ?: 0)
                     ) {
                         dynascaleLogger.v {
-                            "[updatePublishQuality][updateQualitySettings] #sfu; rid: \"${senderEncoding.rid}\"; Changed scaleResolutionDownBy from ${senderEncoding.scaleResolutionDownBy} to $scale_resolution_down_by"
+                            "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed scaleResolutionDownBy from ${senderEncoding.scaleResolutionDownBy} to $scale_resolution_down_by"
                         }
                         senderEncoding.scaleResolutionDownBy = scaleResolutionDownBy
                         changed = true
@@ -1253,7 +1253,7 @@ public class RtcSession internal constructor(
 
                 if (scalability_mode.isNotBlank() && scalability_mode != (senderEncoding.scalabilityMode ?: "")) {
                     dynascaleLogger.v {
-                        "[updatePublishQuality][updateQualitySettings] #sfu; rid: \"${senderEncoding.rid}\"; Changed scalabilityMode from ${senderEncoding.scalabilityMode} to $scalability_mode"
+                        "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed scalabilityMode from ${senderEncoding.scalabilityMode} to $scalability_mode"
                     }
                     senderEncoding.scalabilityMode = scalability_mode
                     changed = true
