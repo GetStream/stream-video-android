@@ -1320,12 +1320,13 @@ public class Call(
     }
 
     /**
-     * Updates the preferred publishing options for the call.
+     * Updates the preferred publishing options for the call. This is an experimental client feature and subject to change.
      *
      * @param videoCodec The preferred codec to use for publishing video.
      * @param maxBitrate The preferred maximum bitrate to use for publishing video.
      * @param maxSimulcastLayers The maximum number of simulcast layers to use for publishing video.
      */
+    @InternalStreamVideoApi
     fun updatePreferredPublishOptions(
         videoCodec: VideoCodec? = null,
         maxBitrate: Int? = null,

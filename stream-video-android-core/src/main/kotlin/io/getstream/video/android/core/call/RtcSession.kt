@@ -521,13 +521,6 @@ public class RtcSession internal constructor(
         var dummySubscriberSdp = ""
         var dummyPublisherSdp = ""
         var preferredPublishOptions = emptyList<PublishOption>()
-        val customPublishOptions = listOf(
-            PublishOption(
-                track_type = TrackType.TRACK_TYPE_VIDEO,
-//                codec = Codec(name = "h264", fmtp = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f"),
-                codec = Codec(name = "av1", fmtp = "level-idx=5;profile=0;tier=0"),
-            ),
-        )
 
         withDummyPeerConnections { dummyPublisher, dummySubscriber ->
             dummySubscriber?.let {
@@ -537,7 +530,7 @@ public class RtcSession internal constructor(
             dummyPublisher?.let {
                 dummyPublisherSdp = getDummySdp(it)
                 preferredPublishOptions = getPreferredPublishOptions(dummyPublisherSdp)
-                logger.v { "[connect] #codec-negotiation; Dummy publisher SDP:\n$dummyPublisherSdp" }
+//                logger.v { "[connect] #codec-negotiation; Dummy publisher SDP:\n$dummyPublisherSdp" }
             }
         }
 
@@ -549,7 +542,7 @@ public class RtcSession internal constructor(
             reconnect_details = reconnectDetails,
             subscriber_sdp = dummySubscriberSdp,
             publisher_sdp = dummyPublisherSdp,
-            preferred_publish_options = customPublishOptions,
+            preferred_publish_options = preferredPublishOptions,
         )
         logger.d { "[connect] Sending JoinRequest: $request" }
         listenToSfuSocket()
@@ -639,7 +632,7 @@ public class RtcSession internal constructor(
                 PublishOption(
                     track_type = TrackType.TRACK_TYPE_VIDEO,
                     codec = sfuCodec,
-                    bitrate = options.maxBitrate ?: 0, // TODO-neg: default values
+                    bitrate = options.maxBitrate ?: 0,
                     max_spatial_layers = options.maxSimulcastLayers ?: 0,
                 ),
             ).also {
