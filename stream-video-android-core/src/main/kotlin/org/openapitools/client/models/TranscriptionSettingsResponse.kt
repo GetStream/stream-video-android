@@ -47,7 +47,7 @@ import org.openapitools.client.infrastructure.Serializer
 data class TranscriptionSettingsResponse (
 
     @Json(name = "closed_caption_mode")
-    val closedCaptionMode: kotlin.String,
+    val closedCaptionMode: kotlin.String, //TODO Rahul, we might update the states here
 
     @Json(name = "languages")
     val languages: kotlin.collections.List<kotlin.String>,

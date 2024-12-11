@@ -52,6 +52,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ClosedCaptionState
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.tooling.extensions.toPx
@@ -60,6 +61,7 @@ import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.util.filters.SampleAudioFilter
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
@@ -186,6 +188,20 @@ internal fun SettingsMenu(
         }
     }
 
+    val closedCaptionState by  call.state.captionManager.closedCaptionState.collectAsStateWithLifecycle()
+
+    val onClosedCaptionsClick:() -> Unit = {
+        scope.launch {
+            when (closedCaptionState){
+                is ClosedCaptionState.Running-> call.stopClosedCaptions()
+                is ClosedCaptionState.Available-> call.startClosedCaptions()
+                else -> {
+                    throw Exception("This state $closedCaptionState should not invoke any ui operation")
+                }
+            }
+        }
+    }
+
     Popup(
         offset = IntOffset(
             0,
@@ -241,6 +257,8 @@ internal fun SettingsMenu(
                 isScreenShareEnabled = isScreenSharing,
                 onSelectScaleType = onSelectScaleType,
                 loadRecordings = onLoadRecordings,
+                onToggleClosedCaptions = onClosedCaptionsClick,
+                closedCaptionState = closedCaptionState
             ),
         )
     }
@@ -304,6 +322,8 @@ private fun SettingsMenuPreview() {
                 onSelectScaleType = {},
                 onNoiseCancellation = {},
                 loadRecordings = { emptyList() },
+                onToggleClosedCaptions = { },
+                closedCaptionState = ClosedCaptionState.Available
             ),
         )
     }

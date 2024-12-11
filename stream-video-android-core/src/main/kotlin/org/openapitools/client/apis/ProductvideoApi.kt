@@ -73,11 +73,13 @@ import org.openapitools.client.models.SendCallEventRequest
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartClosedCaptionResponse
 import org.openapitools.client.models.StartHLSBroadcastingResponse
 import org.openapitools.client.models.StartRecordingRequest
 import org.openapitools.client.models.StartRecordingResponse
 import org.openapitools.client.models.StartTranscriptionRequest
 import org.openapitools.client.models.StartTranscriptionResponse
+import org.openapitools.client.models.StopClosedCaptionResponse
 import org.openapitools.client.models.StopHLSBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopRecordingResponse
@@ -859,11 +861,11 @@ interface ProductvideoApi {
     suspend fun startClosedCaptions(
         @Path("type") type: String,
         @Path("id") id: String,
-    ): ResponseBody
+    ): StartClosedCaptionResponse
 
     @POST("/video/call/{type}/{id}/stop_closed_captions")
     suspend fun stopClosedCaptions(
         @Path("type") type: String,
         @Path("id") id: String,
-    ): ResponseBody
+    ): StopClosedCaptionResponse
 }

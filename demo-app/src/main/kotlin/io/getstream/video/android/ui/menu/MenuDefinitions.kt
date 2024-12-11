@@ -26,6 +26,9 @@ import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.ClosedCaptionDisabled
+import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
@@ -41,12 +44,15 @@ import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.VideoSettings
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
+import io.getstream.video.android.core.ClosedCaptionState
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -72,6 +78,8 @@ fun defaultStreamMenu(
     onSelectScaleType: (VideoScalingType) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
+    onToggleClosedCaptions: () -> Unit = {},
+    closedCaptionState: ClosedCaptionState,
 ) = buildList<MenuItem> {
     add(
         DynamicSubMenuItem(
@@ -148,6 +156,39 @@ fun defaultStreamMenu(
                 ),
             ),
         )
+    }
+
+    add(getCCActionMenu(closedCaptionState, onToggleClosedCaptions))
+}
+
+fun getCCActionMenu(
+    closedCaptionState: ClosedCaptionState,
+    onToggleClosedCaptions: () -> Unit
+): ActionMenuItem {
+    return when (closedCaptionState) {
+        is ClosedCaptionState.Available -> {
+            ActionMenuItem(
+                title = "Start Closed Caption",
+                icon = Icons.Default.ClosedCaptionOff,
+                action = onToggleClosedCaptions,
+            )
+        }
+
+        is ClosedCaptionState.Running -> {
+            ActionMenuItem(
+                title = "Stop Closed Caption",
+                icon = Icons.Default.ClosedCaption,
+                action = onToggleClosedCaptions,
+            )
+        }
+
+        is ClosedCaptionState.UnAvailable -> {
+            ActionMenuItem(
+                title = "Closed Caption are unavailable",
+                icon = Icons.Default.ClosedCaptionDisabled,
+                action = { },
+            )
+        }
     }
 }
 

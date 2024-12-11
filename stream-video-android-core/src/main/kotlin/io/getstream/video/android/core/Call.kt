@@ -74,7 +74,9 @@ import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartClosedCaptionResponse
 import org.openapitools.client.models.StartTranscriptionResponse
+import org.openapitools.client.models.StopClosedCaptionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnpinResponse
@@ -1277,6 +1279,14 @@ public class Call(
 
     suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
         return clientImpl.listTranscription(type, id)
+    }
+
+    suspend fun startClosedCaptions(): Result<StartClosedCaptionResponse> {
+        return clientImpl.startClosedCaptions(type, id)
+    }
+
+    suspend fun stopClosedCaptions(): Result<StopClosedCaptionResponse> {
+        return clientImpl.stopClosedCaptions(type, id)
     }
 
     @InternalStreamVideoApi
