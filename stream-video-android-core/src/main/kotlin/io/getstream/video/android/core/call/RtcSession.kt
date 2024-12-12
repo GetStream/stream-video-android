@@ -919,7 +919,7 @@ public class RtcSession internal constructor(
                 }
 
                 logger.d {
-                    "[connectRtc] #codec-negotiation; transceiver cache: ${transceiverCache.transceivers.map { "(${it.key.track_type},${it.key.id}) to ${it.value.mediaType} with ${it.value.sender.parameters.encodings.joinToString { it.rid.toString() }}" }}"
+                    "[connectRtc] #codec-negotiation; transceiver cache: ${transceiverCache.transceivers.map { "(${it.key.track_type},${it.key.id}) to ${it.value.mediaType} with ${it.value.sender.parameters.encodings.joinToString { "\"${it.rid}\"" }}" }}"
                 }
             }
         }
@@ -1803,7 +1803,7 @@ public class RtcSession internal constructor(
                             val result = setPublisher(request)
                             // step 5 - set the remote description
 
-                            logger.d { "[negotiate] #codec-negotiation; SetPublisher success: ${result.isSuccess}" }
+                            logger.d { "[negotiate] #codec-negotiation; SetPublisher error: ${result.errorOrNull()}" }
 
                             peerConnection.setRemoteDescription(
                                 SessionDescription(
