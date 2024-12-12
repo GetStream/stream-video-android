@@ -114,10 +114,12 @@ import org.openapitools.client.models.SendCallEventRequest
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartClosedCaptionResponse
 import org.openapitools.client.models.StartHLSBroadcastingResponse
 import org.openapitools.client.models.StartRecordingRequest
 import org.openapitools.client.models.StartTranscriptionRequest
 import org.openapitools.client.models.StartTranscriptionResponse
+import org.openapitools.client.models.StopClosedCaptionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnblockUserRequest
@@ -1113,6 +1115,18 @@ internal class StreamVideoClient internal constructor(
     suspend fun listTranscription(type: String, id: String): Result<ListTranscriptionsResponse> {
         return apiCall {
             coordinatorConnectionModule.api.listTranscriptions(type, id)
+        }
+    }
+
+    suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionResponse> {
+        return apiCall {
+            coordinatorConnectionModule.api.startClosedCaptions(type, id)
+        }
+    }
+
+    suspend fun stopClosedCaptions(type: String, id: String): Result<StopClosedCaptionResponse> {
+        return apiCall {
+            coordinatorConnectionModule.api.stopClosedCaptions(type, id)
         }
     }
 }

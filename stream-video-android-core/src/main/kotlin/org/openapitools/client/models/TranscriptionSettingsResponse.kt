@@ -47,7 +47,7 @@ import org.openapitools.client.infrastructure.Serializer
 data class TranscriptionSettingsResponse (
 
     @Json(name = "closed_caption_mode")
-    val closedCaptionMode: kotlin.String,
+    val closedCaptionMode: TranscriptionSettingsResponse.ClosedCaptionMode,
 
     @Json(name = "languages")
     val languages: kotlin.collections.List<kotlin.String>,
@@ -95,6 +95,44 @@ data class TranscriptionSettingsResponse (
             }
         }
     }
+
+    /**
+     *
+     *
+     * Values: available,disabled,autoOn
+     */
+
+    sealed class ClosedCaptionMode(val value: kotlin.String) {
+        override fun toString(): String = value
+
+        companion object {
+            fun fromString(s: kotlin.String): ClosedCaptionMode = when (s) {
+                "available" -> Available
+                "disabled" -> Disabled
+                "auto-on" -> AutoOn
+                else -> Unknown(s)
+            }
+        }
+
+        object Available : ClosedCaptionMode("available")
+        object Disabled : ClosedCaptionMode("disabled")
+        object AutoOn : ClosedCaptionMode("auto-on")
+        data class Unknown(val unknownValue: kotlin.String) : ClosedCaptionMode(unknownValue)
+
+        class ClosedCaptionModeAdapter : JsonAdapter<ClosedCaptionMode>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): ClosedCaptionMode? {
+                val s = reader.nextString() ?: return null
+                return fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: ClosedCaptionMode?) {
+                writer.value(value?.value)
+            }
+        }
+    }
+
 
 
 
