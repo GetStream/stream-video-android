@@ -608,7 +608,7 @@ public class RtcSession internal constructor(
         return if (offerResult !is Success) {
             ""
         } else {
-            mangleSdp(offerResult.value).description // TODO-neg: mangle needed here?
+            offerResult.value.description
         }
     }
 
@@ -1767,10 +1767,10 @@ public class RtcSession internal constructor(
                 }
                 return@launch
             }
-            val mangledSdp = offerResult.value // TODO-neg: remove mangle
+            val sdp = offerResult.value // TODO-neg: removed mangle (used only for sub?)
 
             // step 2 -  set the local description
-            val result = peerConnection.setLocalDescription(mangledSdp)
+            val result = peerConnection.setLocalDescription(sdp)
             if (result.isFailure) {
                 // the call health monitor will end up restarting the peer connection and recover from this
                 logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
@@ -1778,10 +1778,10 @@ public class RtcSession internal constructor(
             }
 
             // step 3 - create the list of tracks
-            val tracks = getPublisherTracks(mangledSdp.description)
+            val tracks = getPublisherTracks(sdp.description)
             val currentSfu = sfuUrl
 
-            publisherSdpOffer.value = mangledSdp
+            publisherSdpOffer.value = sdp
             synchronized(this) {
                 syncPublisherJob?.cancel()
                 syncPublisherJob = coroutineScope.launch {
@@ -1795,7 +1795,7 @@ public class RtcSession internal constructor(
                             logger.d { "[negotiate] #codec-negotiation; SetPublisher tracks: $tracks" }
 
                             val request = SetPublisherRequest(
-                                sdp = mangledSdp.description,
+                                sdp = sdp.description,
                                 session_id = sessionId,
                                 tracks = tracks,
                             )
@@ -1815,7 +1815,7 @@ public class RtcSession internal constructor(
                             result.getOrThrow()
                             break
                         } catch (cause: Throwable) {
-                            val sameValue = mangledSdp == publisherSdpOffer.value
+                            val sameValue = sdp == publisherSdpOffer.value
                             val sameSfu = currentSfu == sfuUrl
                             val isPermanent = isPermanentError(cause)
                             val willRetry =
