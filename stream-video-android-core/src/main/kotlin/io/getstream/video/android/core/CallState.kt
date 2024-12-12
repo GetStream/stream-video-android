@@ -99,6 +99,9 @@ import org.openapitools.client.models.CallTranscriptionFailedEvent
 import org.openapitools.client.models.CallTranscriptionStartedEvent
 import org.openapitools.client.models.CallTranscriptionStoppedEvent
 import org.openapitools.client.models.CallUpdatedEvent
+import org.openapitools.client.models.ClosedCaptionEndedEvent
+import org.openapitools.client.models.ClosedCaptionEvent
+import org.openapitools.client.models.ClosedCaptionStartedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.EgressHLSResponse
@@ -949,6 +952,12 @@ public class CallState(
             is CallTranscriptionFailedEvent -> {
                 _transcribing.value = false
             }
+
+            is ClosedCaptionStartedEvent,
+            is ClosedCaptionEvent,
+            is ClosedCaptionEndedEvent,
+            ->
+                call.closedCaptionManager.handleEvent(event)
         }
     }
 
@@ -1244,6 +1253,7 @@ public class CallState(
         _team.value = response.team
 
         updateRingingState()
+        call.closedCaptionManager.handleCallUpdate(response)
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

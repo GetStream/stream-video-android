@@ -32,6 +32,8 @@ import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
@@ -78,7 +80,9 @@ import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartClosedCaptionResponse
 import org.openapitools.client.models.StartTranscriptionResponse
+import org.openapitools.client.models.StopClosedCaptionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnpinResponse
@@ -264,6 +268,12 @@ public class Call(
     private var monitorSubscriberStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
+
+    /**
+     * This [ClosedCaptionManager] is responsible for handling closed captions during the call.
+     * This includes processing events related to closed captions and maintaining their state.
+     */
+    internal val closedCaptionManager = ClosedCaptionManager()
 
     init {
         scope.launch {
@@ -1288,6 +1298,18 @@ public class Call(
 
     suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
         return clientImpl.listTranscription(type, id)
+    }
+
+    suspend fun startClosedCaptions(): Result<StartClosedCaptionResponse> {
+        return clientImpl.startClosedCaptions(type, id)
+    }
+
+    suspend fun stopClosedCaptions(): Result<StopClosedCaptionResponse> {
+        return clientImpl.stopClosedCaptions(type, id)
+    }
+
+    fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
+        closedCaptionManager.updateClosedCaptionsSettings(closedCaptionsSettings)
     }
 
     /**
