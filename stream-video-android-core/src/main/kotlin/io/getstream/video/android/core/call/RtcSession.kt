@@ -1979,6 +1979,7 @@ public class RtcSession internal constructor(
 
     private fun createVideoLayers(captureResolution: CaptureFormat, publishOption: PublishOption): List<VideoLayer> {
         // TODO-neg: verify captureResolution vs videoDimensions from PO
+        // We get the list of encodings and enrich them with extra info needed for each VideoLayer
         return publisher?.createEncodings(publishOption)?.map {
             val scaleBy = it.scaleResolutionDownBy ?: 1.0
             val width = publishOption.video_dimension?.width ?: captureResolution.width

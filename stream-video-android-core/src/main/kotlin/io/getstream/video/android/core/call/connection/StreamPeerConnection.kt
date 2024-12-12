@@ -301,11 +301,23 @@ public class StreamPeerConnection(
     private fun buildVideoTransceiverInit(
         streamIds: List<String>,
         publishOption: PublishOption?,
-    ): RtpTransceiverInit = RtpTransceiverInit(
-        RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
-        streamIds,
-        createEncodings(publishOption),
-    )
+    ): RtpTransceiverInit {
+        val isSvcCodec = publishOption?.codec?.let {
+            VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
+        } ?: false // TODO-neg add as PublishOption extension method, used in other places also
+
+        val encodings = if (!isSvcCodec) {
+            createEncodings(publishOption)
+        } else {
+            createEncodings(publishOption).filter { it.rid == "f" }.map { it.apply { rid = "q" } }
+        }
+
+        return RtpTransceiverInit(
+            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
+            streamIds,
+            encodings,
+        )
+    }
 
     /**
      * Peer connection listeners.
@@ -481,75 +493,31 @@ public class StreamPeerConnection(
     }
 
     internal fun createEncodings(publishOption: PublishOption?): List<RtpParameters.Encoding> {
-        val allEncodings = createSimulcastEncodings() // order: f, h, q
+        val rids = listOf("f", "h", "q")
         val isSvcCodec = publishOption?.codec?.let {
             VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
-        } ?: false // TODO-neg add as PublishOption extension method, used in other places also
+        } ?: false
+        val encodingCount = publishOption?.max_spatial_layers ?: 3
+        var factor = 1.0
 
+        return rids.take(encodingCount).map { rid ->
+            RtpParameters.Encoding(
+                rid,
+                true,
+                factor, // TODO-neg: what to pass here?
+            ).apply {
+                maxBitrateBps = maxBitRate / factor.toInt() // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
+                maxFramerate = publishOption?.fps ?: 30
 
-        val sendEncodings = if (isSvcCodec) {
-            allEncodings.filter { it.rid == "f" }.map { it.apply { rid = "q" } }.onEach {
-                it.scalabilityMode = publishOption.getScalabilityMode()
-
-                it.maxBitrateBps = maxBitRate // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
-                it.maxFramerate = publishOption.fps
-            }
-        } else {
-            val encodingCount = publishOption?.max_spatial_layers ?: 3
-            var factor = 1.0
-
-            allEncodings.take(encodingCount).onEach {
-                it.maxBitrateBps = maxBitRate / factor.toInt() // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
-                publishOption?.let { po -> it.maxFramerate = po.fps } // TODO-neg: correct?
-                it.scaleResolutionDownBy = factor
-
+                if (isSvcCodec) {
+                    scalabilityMode = publishOption.getScalabilityMode()
+                } else {
+                    scaleResolutionDownBy = factor
+                }
+            }.also {
                 factor *= 2
-            }.reversed()
-        }
-
-        return sendEncodings
-    }
-
-    private fun createSimulcastEncodings(): List<RtpParameters.Encoding> {
-        /**
-         * We create different RTP encodings for the transceiver.
-         * Full quality, represented by "f" ID.
-         * Half quality, represented by "h" ID.
-         * Quarter quality, represented by "q" ID.
-         */
-
-        val quarterQuality = RtpParameters.Encoding(
-            "q",
-            true,
-            4.0,
-        )
-
-        val halfQuality = RtpParameters.Encoding(
-            "h",
-            true,
-            2.0,
-        )
-
-        val fullQuality = RtpParameters.Encoding(
-            "f",
-            true,
-            1.0,
-        )
-
-        return listOf(fullQuality, halfQuality, quarterQuality)
-    }
-
-    private fun createScreenShareEncoding(): List<RtpParameters.Encoding> {
-        // This is aligned with iOS
-        val encoding = RtpParameters.Encoding(
-            "q",
-            true,
-            1.0,
-        ).apply {
-            maxBitrateBps = 1_000_000
-        }
-
-        return listOf(encoding)
+            }
+        }.reversed()
     }
 
     override fun toString(): String =
