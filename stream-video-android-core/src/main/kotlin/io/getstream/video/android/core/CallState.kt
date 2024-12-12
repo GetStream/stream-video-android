@@ -20,6 +20,7 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -99,6 +100,9 @@ import org.openapitools.client.models.CallTranscriptionFailedEvent
 import org.openapitools.client.models.CallTranscriptionStartedEvent
 import org.openapitools.client.models.CallTranscriptionStoppedEvent
 import org.openapitools.client.models.CallUpdatedEvent
+import org.openapitools.client.models.ClosedCaptionEndedEvent
+import org.openapitools.client.models.ClosedCaptionEvent
+import org.openapitools.client.models.ClosedCaptionStartedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.EgressHLSResponse
@@ -573,6 +577,12 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
+    /**
+     * This [ClosedCaptionManager] is responsible for handling closed captions during the call.
+     * This includes processing events related to closed captions and maintaining their state.
+     */
+    public val closedCaptionManager = ClosedCaptionManager()
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -949,6 +959,12 @@ public class CallState(
             is CallTranscriptionFailedEvent -> {
                 _transcribing.value = false
             }
+
+            is ClosedCaptionStartedEvent,
+            is ClosedCaptionEvent,
+            is ClosedCaptionEndedEvent,
+            ->
+                closedCaptionManager.handleEvent(event)
         }
     }
 
@@ -1244,6 +1260,7 @@ public class CallState(
         _team.value = response.team
 
         updateRingingState()
+        closedCaptionManager.handleCallUpdate(response)
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

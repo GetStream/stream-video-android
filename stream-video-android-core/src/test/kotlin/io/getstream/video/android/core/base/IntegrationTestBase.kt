@@ -269,6 +269,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         settings = settings,
         egress = EgressResponse(false, emptyList(), null),
         updatedAt = now,
+        captioning = false,
     )
     return response
 }
