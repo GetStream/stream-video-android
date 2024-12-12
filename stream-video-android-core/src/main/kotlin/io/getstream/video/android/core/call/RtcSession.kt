@@ -248,6 +248,8 @@ public class RtcSession internal constructor(
     private val supervisorJob = SupervisorJob()
     private val coroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
+    internal val defaultVideoDimension = VideoDimension(1080, 2340)
+
     // participants by session id -> participant state
     private val trackPrefixToSessionIdMap =
         call.state.participants.mapState { it.associate { it.trackLookupPrefix to it.sessionId } }
@@ -1365,8 +1367,6 @@ public class RtcSession internal constructor(
     }
 
     private fun MediaStreamTrack.isPublishing() = this.state() == MediaStreamTrack.State.LIVE // TODO-neg: Use this
-
-    private val defaultVideoDimension = VideoDimension(1080, 2340)
 
     /**
      * This is called when you are look at a different set of participants
