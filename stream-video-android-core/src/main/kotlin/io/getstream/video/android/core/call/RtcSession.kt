@@ -39,7 +39,6 @@ import io.getstream.video.android.core.CallStatsReport
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.ScreenShareManager
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
@@ -1855,13 +1854,11 @@ public class RtcSession internal constructor(
             val trackType = convertKindToTrackType(track, screenShareTrack)
 
             // TODO-neg: if I can determine the dimens of the disabled track (in updateTransceiver), I can rely on it, otherwise I'll need to cache them.
-            val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
+            val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO || trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
                 checkNotNull(captureResolution) {
                     "[getPublisherTracks] #codec-negotiation; Capture resolution is null"
                 }
                 createVideoLayers(captureResolution, publishOption)
-            } else if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                createScreenShareLayers(transceiver)
             } else {
                 emptyList()
             }
@@ -1998,24 +1995,6 @@ public class RtcSession internal constructor(
                 quality = quality,
             )
         } ?: emptyList()
-    }
-
-    private fun createScreenShareLayers(transceiver: RtpTransceiver): List<VideoLayer> {
-        return transceiver.sender.parameters.encodings.map {
-            // So far we use hardcoded parameters for screen-sharing. This is aligned
-            // with iOS.
-
-            VideoLayer(
-                rid = "q",
-                video_dimension = VideoDimension(
-                    width = ScreenShareManager.screenShareResolution.width,
-                    height = ScreenShareManager.screenShareResolution.height,
-                ),
-                bitrate = ScreenShareManager.screenShareBitrate,
-                fps = ScreenShareManager.screenShareFps,
-                quality = VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
-            )
-        }
     }
 
     private fun ridToVideoQuality(rid: String?) =
