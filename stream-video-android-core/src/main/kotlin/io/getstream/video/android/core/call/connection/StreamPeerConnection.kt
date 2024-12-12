@@ -301,23 +301,11 @@ public class StreamPeerConnection(
     private fun buildVideoTransceiverInit(
         streamIds: List<String>,
         publishOption: PublishOption?,
-    ): RtpTransceiverInit {
-        val isSvcCodec = publishOption?.codec?.let {
-            VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
-        } ?: false // TODO-neg add as PublishOption extension method, used in other places also
-
-        val encodings = if (!isSvcCodec) {
-            createEncodings(publishOption)
-        } else {
-            createEncodings(publishOption).filter { it.rid == "f" }.map { it.apply { rid = "q" } }
-        }
-
-        return RtpTransceiverInit(
-            RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
-            streamIds,
-            encodings,
-        )
-    }
+    ): RtpTransceiverInit = RtpTransceiverInit(
+        RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
+        streamIds,
+        createEncodings(publishOption),
+    )
 
     /**
      * Peer connection listeners.
@@ -496,22 +484,30 @@ public class StreamPeerConnection(
         val allEncodings = createSimulcastEncodings() // order: f, h, q
         val isSvcCodec = publishOption?.codec?.let {
             VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
-        } ?: false
-        val encodingCount = publishOption?.max_spatial_layers ?: 3
-        var factor = 1.0
+        } ?: false // TODO-neg add as PublishOption extension method, used in other places also
 
-        return allEncodings.take(encodingCount).onEach { encoding ->
-            encoding.maxBitrateBps = maxBitRate / factor.toInt() // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
-            publishOption?.let { encoding.maxFramerate = publishOption.fps } // TODO-neg: correct?
 
-            if (isSvcCodec) {
-                encoding.scalabilityMode = publishOption.getScalabilityMode()
-            } else {
-                encoding.scaleResolutionDownBy = factor
+        val sendEncodings = if (isSvcCodec) {
+            allEncodings.filter { it.rid == "f" }.map { it.apply { rid = "q" } }.onEach {
+                it.scalabilityMode = publishOption.getScalabilityMode()
+
+                it.maxBitrateBps = maxBitRate // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
+                it.maxFramerate = publishOption.fps
             }
+        } else {
+            val encodingCount = publishOption?.max_spatial_layers ?: 3
+            var factor = 1.0
 
-            factor *= 2
-        }.reversed()
+            allEncodings.take(encodingCount).onEach {
+                it.maxBitrateBps = maxBitRate / factor.toInt() // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
+                publishOption?.let { po -> it.maxFramerate = po.fps } // TODO-neg: correct?
+                it.scaleResolutionDownBy = factor
+
+                factor *= 2
+            }.reversed()
+        }
+
+        return sendEncodings
     }
 
     private fun createSimulcastEncodings(): List<RtpParameters.Encoding> {

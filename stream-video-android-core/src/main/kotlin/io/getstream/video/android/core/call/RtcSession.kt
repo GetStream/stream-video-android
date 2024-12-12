@@ -1978,25 +1978,19 @@ public class RtcSession internal constructor(
     }
 
     private fun createVideoLayers(captureResolution: CaptureFormat, publishOption: PublishOption): List<VideoLayer> {
-        // We tell the SFU which resolutions we're sending.
-        // Even if we use SVC, we still generate three layers [f, h, q]
-        // because we need to announce them to the SFU via the SetPublisher request,
-        // so we use the simulcast encodings here.
         // TODO-neg: verify captureResolution vs videoDimensions from PO
         return publisher?.createEncodings(publishOption)?.map {
             val scaleBy = it.scaleResolutionDownBy ?: 1.0
-            val width = captureResolution.width.div(scaleBy)
-            val height = captureResolution.height.div(scaleBy)
-            val quality = ridToVideoQuality(it.rid)
+            val width = publishOption.video_dimension?.width ?: captureResolution.width
+            val height = publishOption.video_dimension?.height ?: captureResolution.height
+            val quality = ridToVideoQuality(it.rid ?: "")
+            val fps = publishOption.fps
 
-            // We need to divide by 1000 because the the FramerateRange is multiplied
-            // by 1000 (see javadoc).
-            val fps = (captureResolution.framerate?.max ?: 0).div(1000)
             VideoLayer(
                 rid = it.rid ?: "",
                 video_dimension = VideoDimension(
-                    width = width.toInt(),
-                    height = height.toInt(),
+                    width = width.div(scaleBy).toInt(),
+                    height = height.div(scaleBy).toInt(),
                 ),
                 bitrate = it.maxBitrateBps ?: 0,
                 fps = fps,
@@ -2025,17 +2019,9 @@ public class RtcSession internal constructor(
 
     private fun ridToVideoQuality(rid: String?) =
         when (rid) {
-            "f" -> {
-                VideoQuality.VIDEO_QUALITY_HIGH
-            }
-
-            "h" -> {
-                VideoQuality.VIDEO_QUALITY_MID
-            }
-
-            else -> {
-                VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
-            }
+            "q" -> VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
+            "h" -> VideoQuality.VIDEO_QUALITY_MID
+            else -> VideoQuality.VIDEO_QUALITY_HIGH // default to HIGH
         }
 
     /**
