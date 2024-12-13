@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.ui.join
 
-import android.provider.Settings.Global
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInClient

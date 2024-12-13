@@ -1341,7 +1341,9 @@ public class Call(
                 maxBitrate = maxBitrate,
                 maxSimulcastLayers = maxSimulcastLayers,
             )
-            logger.d { "[updatePublishOptions] Updated preferred publish options: ${state.clientVideoPublishOptions}" }
+            logger.d {
+                "[updatePublishOptions] Updated preferred publish options: ${state.clientVideoPublishOptions}"
+            }
         }
     }
 

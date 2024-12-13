@@ -19,7 +19,6 @@
 package io.getstream.video.android.ui.join
 
 import android.content.res.Configuration
-import android.provider.Settings.Global
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,7 +47,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.FeaturedVideo
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
@@ -303,7 +301,7 @@ private fun CallJoinHeader(
                         },
                         {
                             GlobalCodecChoiceState.preferredSubscribeCodec = it
-                        }
+                        },
                     )
                 }
             }
@@ -361,7 +359,7 @@ private fun JoinScreenSettingsMenu(
             FlowRow(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalArrangement = Arrangement.Center,
-                overflow = FlowRowOverflow.Visible
+                overflow = FlowRowOverflow.Visible,
             ) {
                 StreamButton(
                     modifier = Modifier.weight(1f),
@@ -406,7 +404,7 @@ private fun JoinScreenSettingsMenu(
             FlowRow(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalArrangement = Arrangement.Center,
-                overflow = FlowRowOverflow.Visible
+                overflow = FlowRowOverflow.Visible,
             ) {
                 StreamButton(
                     modifier = Modifier.weight(1f),

@@ -487,8 +487,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
         val sdkInstance = StreamVideo.instance()
         val call = sdkInstance.call(cid.type, cid.id)
         configuration.custom?.let { bundle ->
-            val preferredPublishCodec = bundle.getString(StreamCallActivityConfigStrings.EXTRA_PREFERRED_PUBLISH_CODEC, null)
-            val preferredSubscribeCodec = bundle.getString(StreamCallActivityConfigStrings.EXTRA_PREFERRED_SUBSCRIBE_CODEC, null)
+            val preferredPublishCodec = bundle.getString(
+                StreamCallActivityConfigStrings.EXTRA_PREFERRED_PUBLISH_CODEC,
+                null,
+            )
+            val preferredSubscribeCodec = bundle.getString(
+                StreamCallActivityConfigStrings.EXTRA_PREFERRED_SUBSCRIBE_CODEC,
+                null,
+            )
             preferredPublishCodec?.let {
                 call.updatePreferredPublishOptions(VideoCodec.valueOf(it))
             }

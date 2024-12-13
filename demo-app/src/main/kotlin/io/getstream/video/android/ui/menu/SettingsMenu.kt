@@ -31,7 +31,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VideoFile
@@ -223,11 +222,17 @@ internal fun SettingsMenu(
                 )
                 Spacer(Modifier.height(VideoTheme.dimens.spacingS))
                 if (GlobalCodecChoiceState.preferredPublishCodec != null) {
-                    Text(style = VideoTheme.typography.titleXs, text = "Preferred publish codec: ${GlobalCodecChoiceState.preferredPublishCodec}")
+                    Text(
+                        style = VideoTheme.typography.titleXs,
+                        text = "Preferred publish codec: ${GlobalCodecChoiceState.preferredPublishCodec}",
+                    )
                     Spacer(Modifier.height(VideoTheme.dimens.spacingS))
                 }
                 if (GlobalCodecChoiceState.preferredSubscribeCodec != null) {
-                    Text(style = VideoTheme.typography.titleXs, text = "Preferred subscribe codec: ${GlobalCodecChoiceState.preferredSubscribeCodec}")
+                    Text(
+                        style = VideoTheme.typography.titleXs,
+                        text = "Preferred subscribe codec: ${GlobalCodecChoiceState.preferredSubscribeCodec}",
+                    )
                     Spacer(Modifier.height(VideoTheme.dimens.spacingS))
                 }
                 Spacer(Modifier.height(VideoTheme.dimens.spacingS))

@@ -21,7 +21,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings.Global
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -186,21 +185,25 @@ class DeeplinkingActivity : ComponentActivity() {
                             context = this@DeeplinkingActivity,
                             cid = callId,
                             clazz = CallActivity::class.java,
-                            configuration = StreamCallActivityConfiguration().copy(custom = Bundle().apply {
-                                logger.d { "Starting StreamCallActivity with extra publish / subscribe data: ${GlobalCodecChoiceState.preferredPublishCodec}, ${GlobalCodecChoiceState.preferredSubscribeCodec}" }
-                                GlobalCodecChoiceState.preferredPublishCodec?.let { publishCodec ->
-                                    putString(
-                                        "preferredPublishCodec",
-                                        publishCodec,
-                                    )
-                                }
-                                GlobalCodecChoiceState.preferredSubscribeCodec?.let { subscribeCodec ->
-                                    putString(
-                                        "preferredSubscribeCodec",
-                                        subscribeCodec,
-                                    )
-                                }
-                            }),
+                            configuration = StreamCallActivityConfiguration().copy(
+                                custom = Bundle().apply {
+                                    logger.d {
+                                        "Starting StreamCallActivity with extra publish / subscribe data: ${GlobalCodecChoiceState.preferredPublishCodec}, ${GlobalCodecChoiceState.preferredSubscribeCodec}"
+                                    }
+                                    GlobalCodecChoiceState.preferredPublishCodec?.let { publishCodec ->
+                                        putString(
+                                            "preferredPublishCodec",
+                                            publishCodec,
+                                        )
+                                    }
+                                    GlobalCodecChoiceState.preferredSubscribeCodec?.let { subscribeCodec ->
+                                        putString(
+                                            "preferredSubscribeCodec",
+                                            subscribeCodec,
+                                        )
+                                    }
+                                },
+                            ),
                         ).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         }

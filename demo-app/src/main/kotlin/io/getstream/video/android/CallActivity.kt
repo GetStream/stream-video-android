@@ -33,7 +33,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.data.state.GlobalCodecChoiceState
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
@@ -48,10 +47,23 @@ class CallActivity : ComposeStreamCallActivity() {
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
     override val configuration: StreamCallActivityConfiguration =
-        StreamCallActivityConfiguration(closeScreenOnCallEnded = false, custom = Bundle().apply {
-            GlobalCodecChoiceState.preferredPublishCodec?.let { putString("preferredPublishCodec", it) }
-            GlobalCodecChoiceState.preferredSubscribeCodec?.let { putString("preferredSubscribeCodec", it) }
-        })
+        StreamCallActivityConfiguration(
+            closeScreenOnCallEnded = false,
+            custom = Bundle().apply {
+                GlobalCodecChoiceState.preferredPublishCodec?.let {
+                    putString(
+                        "preferredPublishCodec",
+                        it,
+                    )
+                }
+                GlobalCodecChoiceState.preferredSubscribeCodec?.let {
+                    putString(
+                        "preferredSubscribeCodec",
+                        it,
+                    )
+                }
+            },
+        )
 
     @StreamCallActivityDelicateApi
     override fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {

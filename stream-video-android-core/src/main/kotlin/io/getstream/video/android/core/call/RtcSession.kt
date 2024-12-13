@@ -536,8 +536,12 @@ public class RtcSession internal constructor(
             }
         }
 
-        logger.d { "[connect] #sfu; #codec-negotiation; preferred publish options: $preferredPublishOptions" }
-        logger.d { "[connect] #sfu; #codec-negotiation; preferred subscribe options: $preferredSubscribeOptions" }
+        logger.d {
+            "[connect] #sfu; #codec-negotiation; preferred publish options: $preferredPublishOptions"
+        }
+        logger.d {
+            "[connect] #sfu; #codec-negotiation; preferred subscribe options: $preferredSubscribeOptions"
+        }
 
         val request = JoinRequest(
             session_id = sessionId,
