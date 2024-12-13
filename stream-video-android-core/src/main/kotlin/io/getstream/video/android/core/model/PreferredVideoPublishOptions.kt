@@ -35,6 +35,13 @@ data class PreferredVideoPublishOptions(
 )
 
 /**
+ * Options to configure video subscription.
+ *
+ * @param codec The preferred video codec to use for subscribing.
+ */
+data class PreferredVideoSubscribeOptions(val codec: VideoCodec? = null)
+
+/**
  * Contains the video codecs supported by the SDK.
  *
  * @see [Call.updatePreferredPublishOptions]

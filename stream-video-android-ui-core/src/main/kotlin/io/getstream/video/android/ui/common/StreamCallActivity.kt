@@ -50,6 +50,7 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.model.VideoCodec
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
@@ -485,6 +486,16 @@ public abstract class StreamCallActivity : ComponentActivity() {
     ) {
         val sdkInstance = StreamVideo.instance()
         val call = sdkInstance.call(cid.type, cid.id)
+        configuration.custom?.let { bundle ->
+            val preferredPublishCodec = bundle.getString(StreamCallActivityConfigStrings.EXTRA_PREFERRED_PUBLISH_CODEC, null)
+            val preferredSubscribeCodec = bundle.getString(StreamCallActivityConfigStrings.EXTRA_PREFERRED_SUBSCRIBE_CODEC, null)
+            preferredPublishCodec?.let {
+                call.updatePreferredPublishOptions(VideoCodec.valueOf(it))
+            }
+            preferredSubscribeCodec?.let {
+                call.updatePreferredSubscribeOptions(VideoCodec.valueOf(it))
+            }
+        }
         onSuccess?.invoke(call)
     }
 

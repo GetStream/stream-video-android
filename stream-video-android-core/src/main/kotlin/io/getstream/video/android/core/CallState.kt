@@ -39,6 +39,7 @@ import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.PreferredVideoPublishOptions
+import io.getstream.video.android.core.model.PreferredVideoSubscribeOptions
 import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
@@ -576,6 +577,9 @@ public class CallState(
 
     internal var clientVideoPublishOptions: PreferredVideoPublishOptions =
         PreferredVideoPublishOptions()
+
+    internal var clientVideoSubscribeOptions: PreferredVideoSubscribeOptions =
+        PreferredVideoSubscribeOptions()
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }

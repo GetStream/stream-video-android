@@ -19,6 +19,7 @@
 package io.getstream.video.android.ui.join
 
 import android.content.res.Configuration
+import android.provider.Settings.Global
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +28,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowOverflow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -41,8 +45,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FeaturedVideo
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
@@ -98,6 +104,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.data.state.GlobalCodecChoiceState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -115,6 +122,9 @@ fun CallJoinScreen(
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
     LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
+    LaunchedEffect(callJoinViewModel) {
+        GlobalCodecChoiceState.clear()
+    }
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
@@ -277,42 +287,162 @@ private fun CallJoinHeader(
                     },
                     offset = popupPosition,
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .width(200.dp)
-                            .background(
-                                VideoTheme.colors.baseSheetTertiary,
-                                VideoTheme.shapes.dialog,
-                            )
-                            .padding(VideoTheme.dimens.spacingM),
-                    ) {
-                        if (showDirectCall) {
-                            StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(id = R.string.direct_call),
-                                icon = Icons.Default.Call,
-                                style = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
-                                onClick = {
-                                    showMenu = false
-                                    onDirectCallClick.invoke()
-                                },
-                            )
+                    JoinScreenSettingsMenu(
+                        showDirectCall,
+                        isProduction,
+                        {
+                            showMenu = false
+                            onDirectCallClick.invoke()
+                        },
+                        {
+                            showMenu = false
+                            onSignOutClick.invoke()
+                        },
+                        {
+                            GlobalCodecChoiceState.preferredPublishCodec = it
+                        },
+                        {
+                            GlobalCodecChoiceState.preferredSubscribeCodec = it
                         }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        if (!isProduction) {
-                            StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                icon = Icons.AutoMirrored.Filled.Logout,
-                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-                                text = stringResource(id = R.string.sign_out),
-                                onClick = {
-                                    showMenu = false
-                                    onSignOutClick()
-                                },
-                            )
-                        }
-                    }
+                    )
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun JoinScreenSettingsMenu(
+    showDirectCall: Boolean = true,
+    isProduction: Boolean = true,
+    onDirectCallClick: () -> Unit = {},
+    onSignOutClick: () -> Unit = {},
+    onPublishCodec: (String) -> Unit = {},
+    onSubscribeCodec: (String) -> Unit = {},
+) {
+    Column(
+        modifier = Modifier
+            .width(200.dp)
+            .background(
+                VideoTheme.colors.baseSheetTertiary,
+                VideoTheme.shapes.dialog,
+            )
+            .padding(VideoTheme.dimens.spacingM),
+    ) {
+        if (showDirectCall) {
+            StreamButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.direct_call),
+                icon = Icons.Default.Call,
+                style = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
+                onClick = {
+                    onDirectCallClick.invoke()
+                },
+            )
+        }
+        Spacer(modifier = Modifier.width(5.dp))
+        if (!isProduction) {
+            StreamButton(
+                modifier = Modifier.fillMaxWidth(),
+                icon = Icons.AutoMirrored.Filled.Logout,
+                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                text = stringResource(id = R.string.sign_out),
+                onClick = {
+                    onSignOutClick()
+                },
+            )
+        }
+
+        if (!isProduction) {
+            Divider(modifier = Modifier.padding(16.dp), color = VideoTheme.colors.baseSecondary)
+            Text(style = VideoTheme.typography.titleXs, text = "Publish codec")
+            Spacer(modifier = Modifier.width(16.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.Center,
+                overflow = FlowRowOverflow.Visible
+            ) {
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "AV1",
+                    onClick = {
+                        onPublishCodec("AV1")
+                    },
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "VP8",
+                    onClick = {
+                        onPublishCodec("VP8")
+                    },
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "VP9",
+                    onClick = {
+                        onPublishCodec("VP9")
+                    },
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "H264",
+                    onClick = {
+                        onPublishCodec("H264")
+                    },
+                )
+            }
+
+            Text(style = VideoTheme.typography.titleXs, text = "Subscribe codec")
+            Spacer(modifier = Modifier.width(16.dp))
+
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.Center,
+                overflow = FlowRowOverflow.Visible
+            ) {
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "AV1",
+                    onClick = {
+                        onSubscribeCodec("AV1")
+                    },
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "VP8",
+                    onClick = {
+                        onSubscribeCodec("VP8")
+                    },
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "VP9",
+                    onClick = {
+                        onSubscribeCodec("VP9")
+                    },
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                StreamButton(
+                    modifier = Modifier.weight(1f),
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                    text = "H264",
+                    onClick = {
+                        onSubscribeCodec("H264")
+                    },
+                )
             }
         }
     }
@@ -569,5 +699,14 @@ private fun CallJoinScreenHeader() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallJoinHeader(previewUsers[0], false, true, {}, {}, {})
+    }
+}
+
+@Preview
+@Composable
+private fun JoinSettingsMenuPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        JoinScreenSettingsMenu(true, false, {}, {})
     }
 }

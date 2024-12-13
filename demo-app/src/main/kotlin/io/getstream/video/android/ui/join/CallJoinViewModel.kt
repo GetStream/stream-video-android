@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui.join
 
+import android.provider.Settings.Global
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -24,6 +25,8 @@ import io.getstream.android.push.PushProvider
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.model.VideoCodec
+import io.getstream.video.android.data.state.GlobalCodecChoiceState
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
@@ -98,7 +101,15 @@ class CallJoinViewModel @Inject constructor(
         } else {
             "default" to newCallId
         }
-        return streamVideo.call(type = type, id = id)
+        val call = streamVideo.call(type = type, id = id)
+        GlobalCodecChoiceState.preferredPublishCodec?.let {
+            call.updatePreferredPublishOptions(videoCodec = VideoCodec.valueOf(it))
+        }
+        GlobalCodecChoiceState.preferredSubscribeCodec?.let {
+            call.updatePreferredSubscribeOptions(videoCodec = VideoCodec.valueOf(it))
+        }
+
+        return call
     }
 
     fun logOut() {

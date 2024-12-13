@@ -24,6 +24,8 @@ internal object StreamCallActivityConfigStrings {
     const val EXTRA_CLOSE_ON_ENDED = "close-on-ended"
     const val EXTRA_KEEP_SCREEN_ON = "keep-screen-on"
     const val EXTRA_CAN_SKIP_RATIONALE = "skip-rationale-allowed"
+    const val EXTRA_PREFERRED_PUBLISH_CODEC = "preferredPublishCodec"
+    const val EXTRA_PREFERRED_SUBSCRIBE_CODEC = "preferredSubscribeCodec"
     const val EXTRA_CUSTOM = "custom-fields"
 }
 

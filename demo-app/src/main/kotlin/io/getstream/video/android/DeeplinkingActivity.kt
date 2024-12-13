@@ -21,6 +21,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings.Global
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,9 +39,11 @@ import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.data.state.GlobalCodecChoiceState
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.config.AppConfig
@@ -89,46 +92,45 @@ class DeeplinkingActivity : ComponentActivity() {
         logger.d { "Action: ${intent?.action}" }
         logger.d { "Data: ${intent?.data}" }
 
-        val requestMultiplePermissionsLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestMultiplePermissions(),
-            ) { permissions ->
-                // Handle the permissions result here
-                if (permissions.all { it.value }) {
-                    logger.d { "All permissions granted, joining call." }
-                    // All permissions were granted
-                    // The demo app can start a meeting automatically on first application launch - this
-                    // means that we haven't yet asked for notification permissions - we should first ask for
-                    // these permissions and then proceed with the call (to prevent the video screen from
-                    // asking video&audio permissions at the same time)
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            android.Manifest.permission.POST_NOTIFICATIONS,
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        // ensure that audio & video permissions are granted
-                        joinCall(data, callId)
-                    } else {
-                        // first ask for push notification permission
-                        val manager =
-                            NotificationPermissionManager.createNotificationPermissionsManager(
-                                application = app,
-                                requestPermissionOnAppLaunch = { true },
-                                onPermissionStatus = {
-                                    // we don't care about the result for demo purposes
-                                    if (it != NotificationPermissionStatus.REQUESTED) {
-                                        joinCall(data, callId)
-                                    }
-                                },
-                            )
-                        manager.start()
-                    }
+        val requestMultiplePermissionsLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
+            // Handle the permissions result here
+            if (permissions.all { it.value }) {
+                logger.d { "All permissions granted, joining call." }
+                // All permissions were granted
+                // The demo app can start a meeting automatically on first application launch - this
+                // means that we haven't yet asked for notification permissions - we should first ask for
+                // these permissions and then proceed with the call (to prevent the video screen from
+                // asking video&audio permissions at the same time)
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.POST_NOTIFICATIONS,
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // ensure that audio & video permissions are granted
+                    joinCall(data, callId)
                 } else {
-                    logger.d { "Not all permissions were granted!" }
-                    // At least one permission was denied
-                    finish()
+                    // first ask for push notification permission
+                    val manager =
+                        NotificationPermissionManager.createNotificationPermissionsManager(
+                            application = app,
+                            requestPermissionOnAppLaunch = { true },
+                            onPermissionStatus = {
+                                // we don't care about the result for demo purposes
+                                if (it != NotificationPermissionStatus.REQUESTED) {
+                                    joinCall(data, callId)
+                                }
+                            },
+                        )
+                    manager.start()
                 }
+            } else {
+                logger.d { "Not all permissions were granted!" }
+                // At least one permission was denied
+                finish()
             }
+        }
 
         val permissions = arrayOf(
             android.Manifest.permission.CAMERA,
@@ -184,6 +186,21 @@ class DeeplinkingActivity : ComponentActivity() {
                             context = this@DeeplinkingActivity,
                             cid = callId,
                             clazz = CallActivity::class.java,
+                            configuration = StreamCallActivityConfiguration().copy(custom = Bundle().apply {
+                                logger.d { "Starting StreamCallActivity with extra publish / subscribe data: ${GlobalCodecChoiceState.preferredPublishCodec}, ${GlobalCodecChoiceState.preferredSubscribeCodec}" }
+                                GlobalCodecChoiceState.preferredPublishCodec?.let { publishCodec ->
+                                    putString(
+                                        "preferredPublishCodec",
+                                        publishCodec,
+                                    )
+                                }
+                                GlobalCodecChoiceState.preferredSubscribeCodec?.let { subscribeCodec ->
+                                    putString(
+                                        "preferredSubscribeCodec",
+                                        subscribeCodec,
+                                    )
+                                }
+                            }),
                         ).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         }

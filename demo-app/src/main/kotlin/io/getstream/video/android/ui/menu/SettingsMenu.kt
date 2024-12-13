@@ -31,6 +31,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.Card
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
@@ -55,6 +57,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.core.model.PreferredVideoResolution
+import io.getstream.video.android.data.state.GlobalCodecChoiceState
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
@@ -218,6 +221,15 @@ internal fun SettingsMenu(
                         onSelectVideoFilter(filterIndex)
                     },
                 )
+                Spacer(Modifier.height(VideoTheme.dimens.spacingS))
+                if (GlobalCodecChoiceState.preferredPublishCodec != null) {
+                    Text(style = VideoTheme.typography.titleXs, text = "Preferred publish codec: ${GlobalCodecChoiceState.preferredPublishCodec}")
+                    Spacer(Modifier.height(VideoTheme.dimens.spacingS))
+                }
+                if (GlobalCodecChoiceState.preferredSubscribeCodec != null) {
+                    Text(style = VideoTheme.typography.titleXs, text = "Preferred subscribe codec: ${GlobalCodecChoiceState.preferredSubscribeCodec}")
+                    Spacer(Modifier.height(VideoTheme.dimens.spacingS))
+                }
                 Spacer(Modifier.height(VideoTheme.dimens.spacingS))
             },
             items = defaultStreamMenu(

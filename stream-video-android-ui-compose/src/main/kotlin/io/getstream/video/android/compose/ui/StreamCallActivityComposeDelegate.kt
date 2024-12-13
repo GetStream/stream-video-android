@@ -21,12 +21,14 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -96,9 +98,12 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
      */
     override fun setContent(activity: StreamCallActivity, call: Call) {
         logger.d { "[setContent(activity, call)] invoked from compose delegate." }
+        activity.enableEdgeToEdge()
         activity.setContent {
             logger.d { "[setContent] with RootContent" }
-            activity.RootContent(call = call)
+            Box(Modifier.safeDrawingPadding()) {
+                activity.RootContent(call = call)
+            }
         }
     }
 

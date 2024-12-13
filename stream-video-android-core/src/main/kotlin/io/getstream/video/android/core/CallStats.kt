@@ -214,12 +214,16 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
             }
             statGroups["codec:video"]?.firstOrNull()?.let {
                 (it.members["mimeType"] as? String)?.split("/")[1]?.let { codec ->
-                    publisher._videoCodec.value = codec
+                    if (isPublisher) {
+                        publisher._videoCodec.value = codec
+                    }
                 }
             }
             statGroups["codec:audio"]?.firstOrNull()?.let {
                 (it.members["mimeType"] as? String)?.split("/")[1]?.let { codec ->
-                    publisher._audioCodec.value = codec
+                    if (isPublisher) {
+                        publisher._audioCodec.value = codec
+                    }
                 }
             }
         }

@@ -39,6 +39,7 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
+import io.getstream.video.android.core.model.PreferredVideoSubscribeOptions
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
@@ -1332,7 +1333,6 @@ public class Call(
         maxBitrate: Int? = null,
         maxSimulcastLayers: Int? = null,
     ) {
-        // TODO-neg: check connection value
         if (state.connection.value is RealtimeConnection.Joined) {
             logger.w { "[updatePublishOptions] Cannot update publishing options after joining the call" }
         } else {
@@ -1341,6 +1341,16 @@ public class Call(
                 maxBitrate = maxBitrate,
                 maxSimulcastLayers = maxSimulcastLayers,
             )
+            logger.d { "[updatePublishOptions] Updated preferred publish options: ${state.clientVideoPublishOptions}" }
+        }
+    }
+
+    fun updatePreferredSubscribeOptions(videoCodec: VideoCodec) {
+        if (state.connection.value is RealtimeConnection.Joined) {
+            logger.w { "[updateSubscribeOptions] Cannot update subscribing options after joining the call" }
+        } else {
+            state.clientVideoSubscribeOptions = PreferredVideoSubscribeOptions(videoCodec)
+            logger.d { "[updateSubscribeOptions] Updated preferred subscribe options: $videoCodec" }
         }
     }
 

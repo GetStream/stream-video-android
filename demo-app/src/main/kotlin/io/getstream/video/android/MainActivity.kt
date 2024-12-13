@@ -20,6 +20,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -46,6 +50,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
         // Try to read the Google Play install referrer value. We use it to deliver
         // the Call ID from the QR code link.
         @Suppress("KotlinConstantConditions")
@@ -68,14 +73,16 @@ class MainActivity : ComponentActivity() {
             val isLoggedIn = dataStore.user.firstOrNull() != null
 
             setContent {
-                VideoTheme {
-                    AppNavHost(
-                        startDestination = if (!isLoggedIn) {
-                            AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn
-                        } else {
-                            AppScreens.CallJoin.route
-                        },
-                    )
+                Box(modifier = Modifier.safeDrawingPadding()) {
+                    VideoTheme {
+                        AppNavHost(
+                            startDestination = if (!isLoggedIn) {
+                                AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn
+                            } else {
+                                AppScreens.CallJoin.route
+                            },
+                        )
+                    }
                 }
             }
         }

@@ -137,6 +137,7 @@ import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.Sdk
 import stream.video.sfu.models.SdkType
+import stream.video.sfu.models.SubscribeOption
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
@@ -522,18 +523,21 @@ public class RtcSession internal constructor(
         var dummySubscriberSdp = ""
         var dummyPublisherSdp = ""
         var preferredPublishOptions = emptyList<PublishOption>()
+        var preferredSubscribeOptions = emptyList<SubscribeOption>()
 
         withDummyPeerConnections { dummyPublisher, dummySubscriber ->
             dummySubscriber?.let {
                 dummySubscriberSdp = getDummySdp(it)
-//                logger.v { "[connect] #codec-negotiation; Dummy subscriber SDP:\n$dummySubscriberSdp" }
+                preferredSubscribeOptions = getPreferredSubscribeOptions(dummySubscriberSdp)
             }
             dummyPublisher?.let {
                 dummyPublisherSdp = getDummySdp(it)
                 preferredPublishOptions = getPreferredPublishOptions(dummyPublisherSdp)
-//                logger.v { "[connect] #codec-negotiation; Dummy publisher SDP:\n$dummyPublisherSdp" }
             }
         }
+
+        logger.d { "[connect] #sfu; #codec-negotiation; preferred publish options: $preferredPublishOptions" }
+        logger.d { "[connect] #sfu; #codec-negotiation; preferred subscribe options: $preferredSubscribeOptions" }
 
         val request = JoinRequest(
             session_id = sessionId,
@@ -544,6 +548,7 @@ public class RtcSession internal constructor(
             subscriber_sdp = dummySubscriberSdp,
             publisher_sdp = dummyPublisherSdp,
             preferred_publish_options = preferredPublishOptions,
+            preferred_subscribe_options = preferredSubscribeOptions,
         )
         logger.d { "[connect] Sending JoinRequest: $request" }
         listenToSfuSocket()
@@ -611,6 +616,35 @@ public class RtcSession internal constructor(
             ""
         } else {
             offerResult.value.description
+        }
+    }
+
+    private fun getPreferredSubscribeOptions(sdp: String): List<SubscribeOption> {
+        return call.state.clientVideoSubscribeOptions.takeIf {
+            it.codec != null
+        }?.let { options ->
+            val parsedSdp = MinimalSdpParser(sdp)
+            val sdpCodec = options.codec?.let { parsedSdp.getVideoCodec(it.name) }
+            val sfuCodec = sdpCodec?.let {
+                Codec(
+                    name = it.codecName,
+                    fmtp = it.codecFmtp,
+                    clock_rate = it.codecClockRate,
+                    payload_type = it.payloadType.toIntOrNull() ?: 0,
+                )
+            }
+
+            listOf(
+                SubscribeOption(
+                    track_type = TrackType.TRACK_TYPE_VIDEO,
+                    codecs = listOfNotNull(sfuCodec),
+                ),
+            ).also {
+                logger.d { "[getPreferredSubscribeOptions] #codec-negotiation; $it" }
+            }
+        } ?: run {
+            logger.d { "[getPreferredSubscribeOptions] #codec-negotiation; No preferred options" }
+            emptyList()
         }
     }
 
@@ -1314,6 +1348,7 @@ public class RtcSession internal constructor(
     }
 
     private var storedPublishOptions = emptyList<PublishOption>()
+    private var storedSubscribeOptions = emptyList<SubscribeOption>()
     private val transceiverCache = TransceiverCache()
 
     private fun updatePublishOptions(publishOptions: List<PublishOption>) {
