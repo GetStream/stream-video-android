@@ -29,6 +29,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -171,6 +172,11 @@ public class Call(
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
 
+    internal var runCallServiceInForeground: Boolean = clientImpl.callServiceConfig.runCallServiceInForeground
+        private set
+    internal var audioUsage: Int = clientImpl.callServiceConfig.audioUsage
+        private set
+
     /**
      * This returns the local microphone volume level. The audio volume is a linear
      * value between 0 (no sound) and 1 (maximum volume). This is not a raw output -
@@ -204,6 +210,14 @@ public class Call(
      */
     private var isDestroyed = false
 
+    @InternalStreamVideoApi
+    internal val peerConnectionFactory: StreamPeerConnectionFactory
+        get() = StreamPeerConnectionFactory(
+            context = clientImpl.context,
+            audioUsage = audioUsage,
+            audioProcessing = clientImpl.audioProcessing,
+        )
+
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
@@ -216,7 +230,7 @@ public class Call(
                 clientImpl.context,
                 this,
                 scope,
-                clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+                peerConnectionFactory.eglBase.eglBaseContext,
                 clientImpl.callServiceConfig.audioUsage,
             )
         }
@@ -354,6 +368,8 @@ public class Call(
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        runCallServiceInForeground: Boolean? = null,
+        audioUsage: Int? = null,
     ): Result<RtcSession> {
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -371,6 +387,10 @@ public class Call(
                     "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
             }
         }
+
+        runCallServiceInForeground?.let { this.runCallServiceInForeground = it }
+        audioUsage?.let { this.audioUsage = it }
+
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
         // the join flow should retry up to 3 times
@@ -866,7 +886,7 @@ public class Call(
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+            peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     val width = videoRenderer.measuredWidth
@@ -1193,7 +1213,7 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService()
+        clientImpl.state.maybeStopForegroundService(this)
         return clientImpl.accept(type, id)
     }
 
@@ -1267,15 +1287,15 @@ public class Call(
     }
 
     fun isAudioProcessingEnabled(): Boolean {
-        return clientImpl.isAudioProcessingEnabled()
+        return peerConnectionFactory.isAudioProcessingEnabled()
     }
 
     fun setAudioProcessingEnabled(enabled: Boolean) {
-        return clientImpl.setAudioProcessingEnabled(enabled)
+        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
     }
 
     fun toggleAudioProcessing(): Boolean {
-        return clientImpl.toggleAudioProcessing()
+        return peerConnectionFactory.toggleAudioProcessing()
     }
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> {

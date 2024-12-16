@@ -839,29 +839,29 @@ class MediaManagerImpl(
 
     // source & tracks
     val videoSource =
-        call.clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
+        call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
 
     val screenShareVideoSource by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
+        call.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
     }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
+    val videoTrack = call.peerConnectionFactory.makeVideoTrack(
         source = videoSource,
         trackId = UUID.randomUUID().toString(),
     )
 
     val screenShareTrack by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoTrack(
+        call.peerConnectionFactory.makeVideoTrack(
             source = screenShareVideoSource,
             trackId = UUID.randomUUID().toString(),
         )
     }
 
-    val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
+    val audioSource = call.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
+    val audioTrack = call.peerConnectionFactory.makeAudioTrack(
         source = audioSource,
         trackId = UUID.randomUUID().toString(),
     )
