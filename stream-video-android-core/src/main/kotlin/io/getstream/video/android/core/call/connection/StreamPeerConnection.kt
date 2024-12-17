@@ -27,7 +27,6 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoCodec
-import io.getstream.video.android.core.model.getScalabilityMode
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
 import io.getstream.video.android.core.utils.stringify
@@ -109,7 +108,6 @@ public class StreamPeerConnection(
 
     fun addTransceiver(trackPrefix: String, track: MediaStreamTrack, publishOption: PublishOption) =
         transceiverManager().add(connection, trackPrefix, track, publishOption)
-
 
     fun isFailedOrClosed(): Boolean {
         return when (state.value) {
@@ -304,7 +302,9 @@ public class StreamPeerConnection(
             VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
         } ?: false // TODO-neg add as PublishOption extension method, used in other places also
 
-        val encodings = publishOption?.let {transceiverManager.getEncodingsFor(publishOption) } ?: emptyList()
+        val encodings = publishOption?.let {
+            transceiverManager.getEncodingsFor(publishOption)
+        } ?: emptyList()
 
         return RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
@@ -424,12 +424,12 @@ public class StreamPeerConnection(
                     if (DEBUG_STATS) {
                         logger.v {
                             "[getStats] #sfu; #$typeTag; " +
-                                    "stats.keys: ${origin?.statsMap?.keys}"
+                                "stats.keys: ${origin?.statsMap?.keys}"
                         }
                         origin?.statsMap?.values?.forEach {
                             logger.v {
                                 "[getStats] #sfu; #$typeTag; " +
-                                        "report.type: ${it.type}, report.members: $it"
+                                    "report.type: ${it.type}, report.members: $it"
                             }
                         }
                     }

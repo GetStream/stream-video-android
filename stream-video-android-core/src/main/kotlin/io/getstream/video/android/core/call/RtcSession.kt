@@ -423,11 +423,13 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected -> call.state._connection.value =
-                        RealtimeConnection.Connected
+                    is SfuSocketState.Connected ->
+                        call.state._connection.value =
+                            RealtimeConnection.Connected
 
-                    is SfuSocketState.Connecting -> call.state._connection.value =
-                        RealtimeConnection.InProgress
+                    is SfuSocketState.Connecting ->
+                        call.state._connection.value =
+                            RealtimeConnection.InProgress
 
                     else -> {
                         // Ignore it
@@ -817,7 +819,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -918,7 +920,7 @@ public class RtcSession internal constructor(
 
                 // render it on the surface. but we need to start this before forwarding it to the publisher
                 logger.v { "[connectRtc] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-                    storedPublishOptions.forEach {
+                storedPublishOptions.forEach {
                     if (it.track_type == TrackType.TRACK_TYPE_VIDEO && call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
                         logger.d { "[connectRtc] #codec-negotiation; Adding transceiver for PO ${it.track_type}" }
                         addTransceiver(call.mediaManager.videoSource, it)
@@ -1216,7 +1218,8 @@ public class RtcSession internal constructor(
         }
 
     private fun updateActiveFlag(
-        senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?
+        senderEncoding: Encoding,
+        eventLayerSettings: VideoLayerSetting?,
     ): Boolean {
         return if (senderEncoding.active != eventLayerSettings?.active) {
             senderEncoding.active = eventLayerSettings?.active ?: false
@@ -1232,7 +1235,8 @@ public class RtcSession internal constructor(
     }
 
     private fun updateQualitySettings(
-        senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?
+        senderEncoding: Encoding,
+        eventLayerSettings: VideoLayerSetting?,
     ): Boolean {
         var changed = false
 
@@ -1255,8 +1259,10 @@ public class RtcSession internal constructor(
                 }
 
                 scale_resolution_down_by.toDouble().let { scaleResolutionDownBy ->
-                    if (scaleResolutionDownBy >= 1 && scaleResolutionDownBy != (senderEncoding.scaleResolutionDownBy
-                            ?: 0)
+                    if (scaleResolutionDownBy >= 1 && scaleResolutionDownBy != (
+                            senderEncoding.scaleResolutionDownBy
+                                ?: 0
+                            )
                     ) {
                         dynascaleLogger.v {
                             "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed scaleResolutionDownBy from ${senderEncoding.scaleResolutionDownBy} to $scale_resolution_down_by"
@@ -1266,8 +1272,10 @@ public class RtcSession internal constructor(
                     }
                 }
 
-                if (scalability_mode.isNotBlank() && scalability_mode != (senderEncoding.scalabilityMode
-                        ?: "")
+                if (scalability_mode.isNotBlank() && scalability_mode != (
+                        senderEncoding.scalabilityMode
+                            ?: ""
+                        )
                 ) {
                     dynascaleLogger.v {
                         "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed scalabilityMode from ${senderEncoding.scalabilityMode} to $scalability_mode"
@@ -1315,12 +1323,16 @@ public class RtcSession internal constructor(
     private var updatePublishOptionsJob: Job? = null
 
     private fun updatePublishOptions(publishOptions: List<PublishOption>) {
-        //updatePublishOptionsJob?.cancel()
+        // updatePublishOptionsJob?.cancel()
         updatePublishOptionsJob = coroutineScope.launch {
-            logger.d { "[updatePublishOptions] #codec-negotiation; new publishOption: ${publishOptions.joinToString()}" }
+            logger.d {
+                "[updatePublishOptions] #codec-negotiation; new publishOption: ${publishOptions.joinToString()}"
+            }
             val publisher = publisher ?: return@launch
             val transceiverManager = publisher.transceiverManager()
-            logger.d { "[updatePublishOptions] #codec-negotiation; current transcceivers: ${transceiverManager.asMap()}" }
+            logger.d {
+                "[updatePublishOptions] #codec-negotiation; current transcceivers: ${transceiverManager.asMap()}"
+            }
             publishOptions.forEach { publishOption ->
                 if (!transceiverManager.contains(publishOption) && publishOption.canPublish()) {
                     when (publishOption.track_type) {
@@ -1337,7 +1349,9 @@ public class RtcSession internal constructor(
                         }
 
                         else -> {
-                            logger.w { "[updatePublishOptions] #codec-negotiation; Unsupported track type: ${publishOption.track_type}" }
+                            logger.w {
+                                "[updatePublishOptions] #codec-negotiation; Unsupported track type: ${publishOption.track_type}"
+                            }
                         }
                     }
                 } else if (publishOption.canPublish()) {
@@ -1347,12 +1361,16 @@ public class RtcSession internal constructor(
 
             val publicOptionsKeys = publishOptions.map { transceiverManager.asKey(it) }
             val transceiversToRemove = transceiverManager.asMap().keys.filter { it !in publicOptionsKeys }
-            logger.d { "[updatePublishOptions] #codec-negotiation; transceiversToRemove: $transceiversToRemove" }
+            logger.d {
+                "[updatePublishOptions] #codec-negotiation; transceiversToRemove: $transceiversToRemove"
+            }
             transceiverManager.removeIf { key, _ ->
                 key in transceiversToRemove
             }
 
-            logger.d { "[updatePublishOptions] #codec-negotiation; new transceivers: ${transceiverManager.asMap()}" }
+            logger.d {
+                "[updatePublishOptions] #codec-negotiation; new transceivers: ${transceiverManager.asMap()}"
+            }
             storedPublishOptions = publishOptions
         }
     }
@@ -1592,7 +1610,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     /**
@@ -1947,8 +1965,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.reversed().find { m -> // TODO-neg: check this
             m.mline?.type == track.kind() &&
-                    // if `msid` is not present, we assume that the track is the first one
-                    (m.msid?.equals(track.id()) ?: true)
+                // if `msid` is not present, we assume that the track is the first one
+                (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
@@ -1971,7 +1989,8 @@ public class RtcSession internal constructor(
     }
 
     private fun createVideoLayers(
-        captureResolution: CaptureFormat, publishOption: PublishOption
+        captureResolution: CaptureFormat,
+        publishOption: PublishOption,
     ): List<VideoLayer> {
         // We get the list of encodings and enrich them with extra info needed for each VideoLayer
         return publisher?.transceiverManager()?.getEncodingsFor(publishOption)?.map { encoding ->
