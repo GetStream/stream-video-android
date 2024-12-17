@@ -84,6 +84,8 @@ public class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
+    private val transceiverManager = SenderTransceiversManager()
+
     private val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
     /**
@@ -92,33 +94,29 @@ public class StreamPeerConnection(
     public lateinit var connection: PeerConnection
         private set
 
-    /**
-     * Transceiver used to send video in different resolutions.
-     */
-    public var videoTransceiver: RtpTransceiver? = null
-        private set
-
-    /**
-     * Transceiver used to send audio.
-     */
-    public var audioTransceiver: RtpTransceiver? = null
-        private set
-
     fun isHealthy(): Boolean {
         return when (state.value) {
             PeerConnection.PeerConnectionState.NEW,
             PeerConnection.PeerConnectionState.CONNECTED,
             PeerConnection.PeerConnectionState.CONNECTING,
             -> true
+
             else -> false
         }
     }
+
+    fun transceiverManager() = transceiverManager
+
+    fun addTransceiver(trackPrefix: String, track: MediaStreamTrack, publishOption: PublishOption) =
+        transceiverManager().add(connection, trackPrefix, track, publishOption)
+
 
     fun isFailedOrClosed(): Boolean {
         return when (state.value) {
             PeerConnection.PeerConnectionState.CLOSED,
             PeerConnection.PeerConnectionState.FAILED,
             -> true
+
             else -> false
         }
     }
@@ -306,11 +304,7 @@ public class StreamPeerConnection(
             VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
         } ?: false // TODO-neg add as PublishOption extension method, used in other places also
 
-        val encodings = if (!isSvcCodec) {
-            createEncodings(publishOption)
-        } else {
-            createEncodings(publishOption).filter { it.rid == "f" }.map { it.apply { rid = "q" } }
-        }
+        val encodings = publishOption?.let {transceiverManager.getEncodingsFor(publishOption) } ?: emptyList()
 
         return RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
@@ -430,12 +424,12 @@ public class StreamPeerConnection(
                     if (DEBUG_STATS) {
                         logger.v {
                             "[getStats] #sfu; #$typeTag; " +
-                                "stats.keys: ${origin?.statsMap?.keys}"
+                                    "stats.keys: ${origin?.statsMap?.keys}"
                         }
                         origin?.statsMap?.values?.forEach {
                             logger.v {
                                 "[getStats] #sfu; #$typeTag; " +
-                                    "report.type: ${it.type}, report.members: $it"
+                                        "report.type: ${it.type}, report.members: $it"
                             }
                         }
                     }
@@ -490,34 +484,6 @@ public class StreamPeerConnection(
 
     private fun String.mungeCodecs(): String {
         return this.replace("vp9", "VP9").replace("vp8", "VP8").replace("h264", "H264")
-    }
-
-    internal fun createEncodings(publishOption: PublishOption?): List<RtpParameters.Encoding> {
-        val rids = listOf("f", "h", "q")
-        val isSvcCodec = publishOption?.codec?.let {
-            VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
-        } ?: false
-        val encodingCount = publishOption?.max_spatial_layers ?: 3
-        var factor = 1.0
-
-        return rids.take(encodingCount).map { rid ->
-            RtpParameters.Encoding(
-                rid,
-                true,
-                factor, // TODO-neg: what to pass here?
-            ).apply {
-                maxBitrateBps = maxBitRate / factor.toInt() // TODO-neg: calculate bitrate based on publishOption (JS findOptimalVideoLayers)
-                maxFramerate = publishOption?.fps ?: 30
-
-                if (isSvcCodec) {
-                    scalabilityMode = publishOption.getScalabilityMode()
-                } else {
-                    scaleResolutionDownBy = factor
-                }
-            }.also {
-                factor *= 2
-            }
-        }.reversed()
     }
 
     override fun toString(): String =

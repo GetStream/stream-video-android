@@ -44,7 +44,6 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
-import io.getstream.video.android.core.call.utils.TransceiverCache
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
@@ -107,6 +106,7 @@ import kotlinx.serialization.json.Json
 import okio.IOException
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
+import org.webrtc.AudioSource
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -118,6 +118,7 @@ import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.SessionDescription
+import org.webrtc.VideoSource
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
@@ -158,6 +159,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.text.ifEmpty
@@ -421,13 +423,11 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected ->
-                        call.state._connection.value =
-                            RealtimeConnection.Connected
+                    is SfuSocketState.Connected -> call.state._connection.value =
+                        RealtimeConnection.Connected
 
-                    is SfuSocketState.Connecting ->
-                        call.state._connection.value =
-                            RealtimeConnection.InProgress
+                    is SfuSocketState.Connecting -> call.state._connection.value =
+                        RealtimeConnection.InProgress
 
                     else -> {
                         // Ignore it
@@ -605,8 +605,10 @@ public class RtcSession internal constructor(
     }
 
     private fun cleanDummyPeerConnection(dummyPeerConnection: StreamPeerConnection?) {
-        dummyPeerConnection?.videoTransceiver?.stop()
-        dummyPeerConnection?.audioTransceiver?.stop()
+        dummyPeerConnection?.transceiverManager()?.clear()
+        dummyPeerConnection?.connection?.transceivers?.forEach {
+            it.stop()
+        }
         dummyPeerConnection?.connection?.close()
     }
 
@@ -684,50 +686,29 @@ public class RtcSession internal constructor(
     }
 
     private fun addTransceiver(
-        track: MediaStreamTrack,
+        source: VideoSource,
         publishOption: PublishOption,
     ) {
-        publisher?.let { spc ->
-            val trackType = publishOption.track_type
-            when (trackType) {
-                TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_SCREEN_SHARE -> {
-                    spc.addVideoTransceiver(
-                        track = track,
-                        publishOption = publishOption,
-                        streamIds = listOf(buildTrackId(trackType)),
-                    )
-                }
-                TrackType.TRACK_TYPE_AUDIO, TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> {
-                    spc.addAudioTransceiver(
-                        track = track,
-                        streamIds = listOf(buildTrackId(trackType)),
-                    )
-                }
-                else -> {
-                    null
-                }
-            }.also { newTransceiver ->
-                newTransceiver?.let {
-                    transceiverCache.transceivers.put(publishOption, it)
-                    logger.d { "[addTransceiver] #sfu; #codec-negotiation; Added $trackType transceiver" }
-                }
-            }
-        }
+        val prefix = call.state.me.value?.trackLookupPrefix
+        val track = toTrack(source)
+        logger.d { "[addTransceiver] #sfu; #track; track id: ${track.id()}, publishOption: $publishOption" }
+        publisher?.addTransceiver(prefix ?: "", track, publishOption)
     }
 
-    /**
-     * Updates transceiver with the new track.
-     * Stops the previous track and replaces it with the new one.
-     */
-    private fun updateTransceiver(transceiver: RtpTransceiver, track: MediaStreamTrack) {
-        val existingTrack = transceiver.sender?.track()
-
-        // Only stop the existing track if it's not the same as the new one
-        if (existingTrack != null && existingTrack != track) {
-            existingTrack.setEnabled(false) // TODO-neg: equivalent to track.stop()?
-        }
-        transceiver.sender?.setTrack(track, true)
+    private fun addTransceiver(
+        source: AudioSource,
+        publishOption: PublishOption,
+    ) {
+        val prefix = call.state.me.value?.trackLookupPrefix
+        val track = toTrack(source)
+        publisher?.addTransceiver(prefix ?: "", track, publishOption)
     }
+
+    private fun toTrack(source: VideoSource): org.webrtc.VideoTrack =
+        clientImpl.peerConnectionFactory.makeVideoTrack(source, UUID.randomUUID().toString())
+
+    private fun toTrack(source: AudioSource): org.webrtc.AudioTrack =
+        clientImpl.peerConnectionFactory.makeAudioTrack(source, UUID.randomUUID().toString())
 
     private fun setSfuConnectionModule(sfuConnectionModule: SfuConnectionModule) {
         // This is used to switch from a current SFU connection to a new migrated SFU connection
@@ -742,7 +723,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
 
                 if (it == DeviceStatus.Enabled) {
-                    publishFeed(call.mediaManager.videoTrack, TrackType.TRACK_TYPE_VIDEO)
+                    publishFeed(call.mediaManager.videoSource, TrackType.TRACK_TYPE_VIDEO)
                 } else if (it == DeviceStatus.Disabled) {
                     unpublishFeed(TrackType.TRACK_TYPE_VIDEO)
                 }
@@ -753,7 +734,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
 
                 if (it == DeviceStatus.Enabled) {
-                    publishFeed(call.mediaManager.audioTrack, TrackType.TRACK_TYPE_AUDIO)
+                    publishFeed(call.mediaManager.audioSource, TrackType.TRACK_TYPE_AUDIO)
                 } else if (it == DeviceStatus.Disabled) {
                     unpublishFeed(TrackType.TRACK_TYPE_AUDIO)
                 }
@@ -769,7 +750,7 @@ public class RtcSession internal constructor(
 
                 if (it == DeviceStatus.Enabled) {
                     publishFeed(
-                        call.mediaManager.screenShareTrack,
+                        call.mediaManager.screenShareVideoSource,
                         TrackType.TRACK_TYPE_SCREEN_SHARE,
                     )
                 } else if (it == DeviceStatus.Disabled) {
@@ -779,33 +760,33 @@ public class RtcSession internal constructor(
         }
     }
 
-    // TODO-neg: add KDocs and reorder these methods
-    private fun publishFeed(track: MediaStreamTrack, trackType: TrackType) {
-        // Search in storedPublishOptions because it might happen that
-        // we join the call with cam/mic/ss off, so there are no relevant transceivers in the cache.
+    private fun publishFeed(track: VideoSource, trackType: TrackType) {
+        val publisher = publisher ?: return
         storedPublishOptions.forEach { publishOption ->
-            if (publishOption.track_type == trackType) {
-                val transceiver = transceiverCache.transceivers[publishOption]
-                // Create a clone of the track to avoid having the the same track id
-                // appear in the SDP in multiple transceivers.
-                val clonedTrack = track // TODO-neg: clone
+            val transceiverManager = publisher.transceiverManager()
+            transceiverManager.enable(publishOption)
+            if (!transceiverManager.contains(publishOption) && trackType == publishOption.track_type) {
+                addTransceiver(track, publishOption)
+            }
+        }
+    }
 
-                if (transceiver == null) {
-                    addTransceiver(clonedTrack, publishOption)
-                } else {
-                    updateTransceiver(transceiver, clonedTrack)
-                }
+    private fun publishFeed(track: AudioSource, trackType: TrackType) {
+        val publisher = publisher ?: return
+        storedPublishOptions.forEach { publishOption ->
+            val transceiverManager = publisher.transceiverManager()
+            transceiverManager.enable(publishOption)
+            if (!transceiverManager.contains(publishOption) && trackType == publishOption.track_type) {
+                addTransceiver(track, publishOption)
             }
         }
     }
 
     private fun unpublishFeed(trackType: TrackType) {
         // Search directly in cache, because we were already publishing, so we had a transceiver.
-        transceiverCache.transceivers.entries.filter { it.key.track_type == trackType }.forEach {
-            val transceiver = it.value
-            val track = transceiver.sender?.track()
-
-            track?.setEnabled(false)
+        val publisher = publisher ?: return
+        storedPublishOptions.filter { it.track_type == trackType }.forEach {
+            publisher.transceiverManager().disable(it)
         }
     }
 
@@ -836,7 +817,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -881,10 +862,9 @@ public class RtcSession internal constructor(
         }
 
         // if we are allowed to publish, create a peer connection for it
-        val canPublish =
-            call.state.ownCapabilities.value.any {
-                it == OwnCapability.SendAudio || it == OwnCapability.SendVideo
-            }
+        val canPublish = call.state.ownCapabilities.value.any {
+            it == OwnCapability.SendAudio || it == OwnCapability.SendVideo
+        }
 
         if (canPublish) {
             publisher = createPublisher()
@@ -937,29 +917,19 @@ public class RtcSession internal constructor(
                 )
 
                 // render it on the surface. but we need to start this before forwarding it to the publisher
-                logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-                // TODO-neg: what about SCREEN_SHARE_AUDIO?
-                storedPublishOptions.forEach {
+                logger.v { "[connectRtc] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
+                    storedPublishOptions.forEach {
                     if (it.track_type == TrackType.TRACK_TYPE_VIDEO && call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
                         logger.d { "[connectRtc] #codec-negotiation; Adding transceiver for PO ${it.track_type}" }
-
-                        val clonedTrack = call.mediaManager.videoTrack // TODO-neg: clone
-                        addTransceiver(track = clonedTrack, it)
+                        addTransceiver(call.mediaManager.videoSource, it)
                     } else if (it.track_type == TrackType.TRACK_TYPE_AUDIO && call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
                         logger.d { "[connectRtc] #codec-negotiation; Adding transceiver for PO ${it.track_type}" }
-
-                        val clonedTrack = call.mediaManager.audioTrack // TODO-neg: clone
-                        addTransceiver(track = clonedTrack, it)
+                        addTransceiver(call.mediaManager.audioSource, it)
                     } else if (it.track_type == TrackType.TRACK_TYPE_SCREEN_SHARE && call.mediaManager.screenShare.status.value == DeviceStatus.Enabled) {
                         logger.d { "[connectRtc] #codec-negotiation; Adding transceiver for PO ${it.track_type}" }
-
-                        val clonedTrack = call.mediaManager.screenShareTrack // TODO-neg: clone
-                        addTransceiver(track = clonedTrack, it)
+                        call.mediaManager.screenShareTrack
+                        addTransceiver(call.mediaManager.screenShareVideoSource, it)
                     }
-                }
-
-                logger.d {
-                    "[connectRtc] #codec-negotiation; transceiver cache: ${transceiverCache.transceivers.map { "(${it.key.track_type},${it.key.id}) to ${it.value.mediaType} with ${it.value.sender.parameters.encodings.joinToString { "\"${it.rid}\"" }}" }}"
                 }
             }
         }
@@ -1177,11 +1147,9 @@ public class RtcSession internal constructor(
      */
     internal fun updatePublishQuality(videoSenders: List<VideoSender>) = synchronized(this) {
         dynascaleLogger.v { "[updatePublishQuality] #sfu; Handling ChangePublishQualityEvent" }
-
+        val publisher = publisher ?: return@synchronized
         for (videoSender in videoSenders) {
-            val sender = transceiverCache.transceivers.entries.firstOrNull {
-                it.key.track_type == videoSender.track_type && it.key.id == videoSender.publish_option_id
-            }?.value?.sender
+            val sender = publisher.transceiverManager()["${videoSender.publish_option_id}-${videoSender.track_type}"]?.sender
             val eventLayerSettingsList = videoSender.layers
 
             if (sender == null || sender.parameters == null || sender.parameters.encodings == null || eventLayerSettingsList.isEmpty()) {
@@ -1197,7 +1165,7 @@ public class RtcSession internal constructor(
             val updatedEncodings = mutableSetOf<Encoding>() // Used only for logging
             var didChanges = false
 
-            for (senderEncoding in senderParams.encodings) {
+            for (senderEncoding in senderParams.encodings.reversed()) {
                 dynascaleLogger.v {
                     "[updatePublishQuality] #sfu; #codec-negotiation; Iteration for rid: \"${senderEncoding.rid}\""
                 }
@@ -1247,7 +1215,9 @@ public class RtcSession internal constructor(
             }
         }
 
-    private fun updateActiveFlag(senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?): Boolean {
+    private fun updateActiveFlag(
+        senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?
+    ): Boolean {
         return if (senderEncoding.active != eventLayerSettings?.active) {
             senderEncoding.active = eventLayerSettings?.active ?: false
 
@@ -1261,7 +1231,9 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun updateQualitySettings(senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?): Boolean {
+    private fun updateQualitySettings(
+        senderEncoding: Encoding, eventLayerSettings: VideoLayerSetting?
+    ): Boolean {
         var changed = false
 
         eventLayerSettings?.let { settings ->
@@ -1283,8 +1255,8 @@ public class RtcSession internal constructor(
                 }
 
                 scale_resolution_down_by.toDouble().let { scaleResolutionDownBy ->
-                    if (scaleResolutionDownBy >= 1 &&
-                        scaleResolutionDownBy != (senderEncoding.scaleResolutionDownBy ?: 0)
+                    if (scaleResolutionDownBy >= 1 && scaleResolutionDownBy != (senderEncoding.scaleResolutionDownBy
+                            ?: 0)
                     ) {
                         dynascaleLogger.v {
                             "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed scaleResolutionDownBy from ${senderEncoding.scaleResolutionDownBy} to $scale_resolution_down_by"
@@ -1294,7 +1266,9 @@ public class RtcSession internal constructor(
                     }
                 }
 
-                if (scalability_mode.isNotBlank() && scalability_mode != (senderEncoding.scalabilityMode ?: "")) {
+                if (scalability_mode.isNotBlank() && scalability_mode != (senderEncoding.scalabilityMode
+                        ?: "")
+                ) {
                     dynascaleLogger.v {
                         "[updatePublishQuality][updateQualitySettings] #sfu; #codec-negotiation; rid: \"${senderEncoding.rid}\"; Changed scalabilityMode from ${senderEncoding.scalabilityMode} to $scalability_mode"
                     }
@@ -1322,90 +1296,72 @@ public class RtcSession internal constructor(
         senderEncodingList: List<Encoding>,
     ) {
         val eventLog = eventLayerSettingsList?.joinToString(separator = "") {
-            "\n-Name: ${it.name}\n" +
-                "active: ${it.active}\n" +
-                "maxBitrate: ${it.max_bitrate}\n" +
-                "maxFramerate: ${it.max_framerate}\n" +
-                "scaleResolutionDownBy: ${it.scale_resolution_down_by}\n" +
-                "scalabilityMode: ${it.scalability_mode.ifEmpty { "(empty)" }}"
+            "\n-Name: ${it.name}\n" + "active: ${it.active}\n" + "maxBitrate: ${it.max_bitrate}\n" + "maxFramerate: ${it.max_framerate}\n" + "scaleResolutionDownBy: ${it.scale_resolution_down_by}\n" + "scalabilityMode: ${it.scalability_mode.ifEmpty { "(empty)" }}"
         }
         val senderLog = senderEncodingList.reversed().joinToString(separator = "") {
-            "\n-Name: ${it.rid}\n" +
-                "active: ${it.active}\n" +
-                "maxBitrate: ${it.maxBitrateBps}\n" +
-                "maxFramerate: ${it.maxFramerate}\n" +
-                "scaleResolutionDownBy: ${it.scaleResolutionDownBy}\n" +
-                "scalabilityMode: ${it.scalabilityMode}"
+            "\n-Name: ${it.rid}\n" + "active: ${it.active}\n" + "maxBitrate: ${it.maxBitrateBps}\n" + "maxFramerate: ${it.maxFramerate}\n" + "scaleResolutionDownBy: ${it.scaleResolutionDownBy}\n" + "scalabilityMode: ${it.scalabilityMode}"
         }
 
         dynascaleLogger.v {
-            "[updatePublishQuality] #sfu; #codec-negotiation;\n" +
-                if (eventLog == null) {
-                    ""
-                } else {
-                    "Event layers:" +
-                        "$eventLog\n\n"
-                } +
-                "Sender encodings:" +
-                senderLog
+            "[updatePublishQuality] #sfu; #codec-negotiation;\n" + if (eventLog == null) {
+                ""
+            } else {
+                "Event layers:" + "$eventLog\n\n"
+            } + "Sender encodings:" + senderLog
         }
     }
 
     private var storedPublishOptions = emptyList<PublishOption>()
-    private var storedSubscribeOptions = emptyList<SubscribeOption>()
-    private val transceiverCache = TransceiverCache()
+    private var updatePublishOptionsJob: Job? = null
 
     private fun updatePublishOptions(publishOptions: List<PublishOption>) {
-        logger.d {
-            "[updatePublishOptions] #codec-negotiation; publishOption: ${publishOptions.joinToString()}"
-        }
+        //updatePublishOptionsJob?.cancel()
+        updatePublishOptionsJob = coroutineScope.launch {
+            logger.d { "[updatePublishOptions] #codec-negotiation; new publishOption: ${publishOptions.joinToString()}" }
+            val publisher = publisher ?: return@launch
+            val transceiverManager = publisher.transceiverManager()
+            logger.d { "[updatePublishOptions] #codec-negotiation; current transcceivers: ${transceiverManager.asMap()}" }
+            publishOptions.forEach { publishOption ->
+                if (!transceiverManager.contains(publishOption) && publishOption.canPublish()) {
+                    when (publishOption.track_type) {
+                        TrackType.TRACK_TYPE_AUDIO -> {
+                            addTransceiver(call.mediaManager.audioSource, publishOption)
+                        }
 
-        // TODO-neg: thread sync needed? (find used mutex)
+                        TrackType.TRACK_TYPE_VIDEO -> {
+                            addTransceiver(call.mediaManager.videoSource, publishOption)
+                        }
 
-        storedPublishOptions = publishOptions
-        syncPublishOptions()
-    }
+                        TrackType.TRACK_TYPE_SCREEN_SHARE -> {
+                            addTransceiver(call.mediaManager.screenShareVideoSource, publishOption)
+                        }
 
-    private fun syncPublishOptions() {
-        // TODO-neg: process events in order, not in parallel
-        // Add new transceivers for the new publish options
-        storedPublishOptions.forEach { publishOption ->
-            // TODO-neg: first, check if track of track type is publishing
-            if (!transceiverCache.transceivers.containsKey(publishOption)) {
-                val entry = transceiverCache.transceivers.entries.find {
-                    it.value.sender.track() != null && it.key.track_type == publishOption.track_type
-                }
-
-                entry?.let { entry ->
-                    val publishOption = entry.key
-                    val transceiver = entry.value
-
-                    transceiver.sender?.track()?.let {
-                        val clonedTrack = it // TODO-neg: clone track
-                        addTransceiver(track = clonedTrack, publishOption = publishOption)
+                        else -> {
+                            logger.w { "[updatePublishOptions] #codec-negotiation; Unsupported track type: ${publishOption.track_type}" }
+                        }
                     }
+                } else if (publishOption.canPublish()) {
+                    transceiverManager.enable(publishOption)
                 }
             }
-        }
 
-        // Stop publishing with options not required anymore
-        transceiverCache.transceivers.forEach { cacheEntry ->
-            val existsInNewPublishOptions = storedPublishOptions.any { storedPublishOption ->
-                storedPublishOption.track_type == cacheEntry.key.track_type &&
-                    storedPublishOption.id == cacheEntry.key.id
+            val publicOptionsKeys = publishOptions.map { transceiverManager.asKey(it) }
+            val transceiversToRemove = transceiverManager.asMap().keys.filter { it !in publicOptionsKeys }
+            logger.d { "[updatePublishOptions] #codec-negotiation; transceiversToRemove: $transceiversToRemove" }
+            transceiverManager.removeIf { key, _ ->
+                key in transceiversToRemove
             }
 
-            if (!existsInNewPublishOptions) {
-                val transceiver = cacheEntry.value
-
-                // TODO-neg: transceiver.sender.track()?.stop
-                val result = transceiver.sender?.setTrack(null, true)
-                logger.v { "[syncPublishOptions#] #codec-negotiation; Stop publish, setTrack result: $result" }
-            }
+            logger.d { "[updatePublishOptions] #codec-negotiation; new transceivers: ${transceiverManager.asMap()}" }
+            storedPublishOptions = publishOptions
         }
     }
-
-    private fun MediaStreamTrack.isPublishing() = this.state() == MediaStreamTrack.State.LIVE // TODO-neg: Use this
+    private fun PublishOption.canPublish(): Boolean = when (track_type) {
+        TrackType.TRACK_TYPE_AUDIO -> call.mediaManager.microphone.status.value == DeviceStatus.Enabled
+        TrackType.TRACK_TYPE_VIDEO -> call.mediaManager.camera.status.value == DeviceStatus.Enabled
+        TrackType.TRACK_TYPE_SCREEN_SHARE -> call.mediaManager.screenShare.status.value == DeviceStatus.Enabled
+        else -> false
+    }
 
     /**
      * This is called when you are look at a different set of participants
@@ -1616,8 +1572,7 @@ public class RtcSession internal constructor(
         tracks.remove(participant.session_id).also {
             if (it == null) {
                 logger.e {
-                    "[handleEvent] Failed to remove track on ParticipantLeft " +
-                        "- track ID: ${participant.session_id}). Tracks: $tracks"
+                    "[handleEvent] Failed to remove track on ParticipantLeft " + "- track ID: ${participant.session_id}). Tracks: $tracks"
                 }
             }
         }
@@ -1629,8 +1584,7 @@ public class RtcSession internal constructor(
         newTrackDimensions.remove(participant.session_id).also {
             if (it == null) {
                 logger.e {
-                    "[handleEvent] Failed to remove track dimension on ParticipantLeft " +
-                        "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
+                    "[handleEvent] Failed to remove track dimension on ParticipantLeft " + "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
                 }
             }
         }
@@ -1638,7 +1592,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     Section, basic webrtc calls
+    Section, basic webrtc calls
      */
 
     /**
@@ -1798,10 +1752,13 @@ public class RtcSession internal constructor(
         val id = Random.nextInt().absoluteValue
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
+            // Wait for any update publishing job to finish.
+            updatePublishOptionsJob?.join()
+
             // step 1 - create a local offer
             val offerResult = peerConnection.createOffer()
             if (offerResult !is Success) {
-                logger.w {
+                logger.e {
                     "[negotiate] #$id; #sfu; #${peerType.stringify()}; rejected (createOffer failed): $offerResult"
                 }
                 return@launch
@@ -1886,34 +1843,34 @@ public class RtcSession internal constructor(
         val screenShareTrack = getLocalTrack(TrackType.TRACK_TYPE_SCREEN_SHARE)
         val trackInfoList = mutableListOf<TrackInfo>()
 
-        transceiverCache.transceivers.forEach { optionEntry ->
-            val publishOption = optionEntry.key
-            val transceiver = optionEntry.value
+        val publishedTransceivers = storedPublishOptions.mapNotNull {
+            publisher?.transceiverManager()?.get(it)?.let { transceiver ->
+                Pair(it, transceiver)
+            }
+        }
+        publishedTransceivers.forEach { pair ->
+            val publishOption = pair.first
+            val transceiver = pair.second
             val track = transceiver.sender.track()!!
             val trackType = convertKindToTrackType(track, screenShareTrack)
 
             // TODO-neg: if I can determine the dimens of the disabled track (in updateTransceiver), I can rely on it, otherwise I'll need to cache them.
-            val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO || trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                checkNotNull(captureResolution) {
-                    "[getPublisherTracks] #codec-negotiation; Capture resolution is null"
+            val layers: List<VideoLayer> =
+                if (trackType == TrackType.TRACK_TYPE_VIDEO || trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
+                    checkNotNull(captureResolution) {
+                        "[getPublisherTracks] #codec-negotiation; Capture resolution is null"
+                    }
+                    createVideoLayers(captureResolution, publishOption)
+                } else {
+                    emptyList()
                 }
-                createVideoLayers(captureResolution, publishOption)
-            } else {
-                emptyList()
-            }
 
             trackInfoList.add(
                 TrackInfo(
                     track_id = track.id(),
                     track_type = trackType,
                     layers = layers,
-                    mid = transceiver.mid ?: extractMid(
-                        sdp,
-                        track,
-                        screenShareTrack,
-                        trackType,
-                        transceiverCache.transceivers.values.toList(), // TODO-neg: correct?
-                    ),
+                    mid = transceiver.mid,
                 ),
             )
         }
@@ -1990,8 +1947,8 @@ public class RtcSession internal constructor(
         sdpSession.parse(sdp)
         val media = sdpSession.media.reversed().find { m -> // TODO-neg: check this
             m.mline?.type == track.kind() &&
-                // if `msid` is not present, we assume that the track is the first one
-                (m.msid?.equals(track.id()) ?: true)
+                    // if `msid` is not present, we assume that the track is the first one
+                    (m.msid?.equals(track.id()) ?: true)
         }
 
         if (media?.mid == null) {
@@ -2013,35 +1970,39 @@ public class RtcSession internal constructor(
         return media.mid.toString()
     }
 
-    private fun createVideoLayers(captureResolution: CaptureFormat, publishOption: PublishOption): List<VideoLayer> {
-        // TODO-neg: verify captureResolution vs videoDimensions from PO
+    private fun createVideoLayers(
+        captureResolution: CaptureFormat, publishOption: PublishOption
+    ): List<VideoLayer> {
         // We get the list of encodings and enrich them with extra info needed for each VideoLayer
-        return publisher?.createEncodings(publishOption)?.map {
-            val scaleBy = it.scaleResolutionDownBy ?: 1.0
+        return publisher?.transceiverManager()?.getEncodingsFor(publishOption)?.map { encoding ->
+            logger.d { "[createVideoLayers] #codec-negotiation; encodings: $encoding" }
+            val scaleBy = encoding.scaleResolutionDownBy ?: 1.0
             val width = publishOption.video_dimension?.width ?: captureResolution.width
             val height = publishOption.video_dimension?.height ?: captureResolution.height
-            val quality = ridToVideoQuality(it.rid ?: "")
+            val isSvc = publishOption.codec?.let {
+                VideoCodec.valueOf(it.name.uppercase()).supportsSvc()
+            } ?: false
+            val quality = ridToVideoQuality(if (isSvc) "f" else encoding.rid ?: "f")
             val fps = publishOption.fps
 
             VideoLayer(
-                rid = it.rid ?: "",
+                rid = encoding.rid ?: if (isSvc) "q" else "f",
                 video_dimension = VideoDimension(
                     width = width.div(scaleBy).toInt(),
                     height = height.div(scaleBy).toInt(),
                 ),
-                bitrate = it.maxBitrateBps ?: 0,
+                bitrate = encoding.maxBitrateBps ?: 150_000,
                 fps = fps,
                 quality = quality,
             )
         } ?: emptyList()
     }
 
-    private fun ridToVideoQuality(rid: String?) =
-        when (rid) {
-            "q" -> VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
-            "h" -> VideoQuality.VIDEO_QUALITY_MID
-            else -> VideoQuality.VIDEO_QUALITY_HIGH // default to HIGH
-        }
+    private fun ridToVideoQuality(rid: String?) = when (rid) {
+        "q" -> VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
+        "h" -> VideoQuality.VIDEO_QUALITY_MID
+        else -> VideoQuality.VIDEO_QUALITY_HIGH // default to HIGH
+    }
 
     /**
      * @return [StateFlow] that holds [RtcStatsReport] that the publisher exposes.
@@ -2061,7 +2022,11 @@ public class RtcSession internal constructor(
         val result = wrapAPICall {
             val androidThermalState =
                 safeCallWithDefault(AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED) {
-                    val thermalState = powerManager?.currentThermalStatus
+                    val thermalState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        powerManager?.currentThermalStatus
+                    } else {
+                        AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED
+                    }
                     logger.d { "[sendCallStats] #thermals state: $thermalState" }
                     when (thermalState) {
                         THERMAL_STATUS_NONE -> AndroidThermalState.ANDROID_THERMAL_STATE_NONE
@@ -2179,34 +2144,31 @@ public class RtcSession internal constructor(
     // share what size and which participants we're looking at
     private suspend fun updateSubscriptions(
         request: UpdateSubscriptionsRequest,
-    ): Result<UpdateSubscriptionsResponse> =
-        wrapAPICall {
-            logger.v { "[updateSubscriptions] #sfu; #track; request $request" }
-            val result = sfuConnectionModule.api.updateSubscriptions(request)
-            result.error?.let {
-                throw RtcException(error = it, message = it.message)
-            }
-            result
+    ): Result<UpdateSubscriptionsResponse> = wrapAPICall {
+        logger.v { "[updateSubscriptions] #sfu; #track; request $request" }
+        val result = sfuConnectionModule.api.updateSubscriptions(request)
+        result.error?.let {
+            throw RtcException(error = it, message = it.message)
         }
+        result
+    }
 
     // share what size and which participants we're looking at
-    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
-        wrapAPICall {
-            val request = ICERestartRequest(
-                session_id = sessionId,
-                peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
-            )
-            sfuConnectionModule.api.iceRestart(request)
-        }
+    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> = wrapAPICall {
+        val request = ICERestartRequest(
+            session_id = sessionId,
+            peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
+        )
+        sfuConnectionModule.api.iceRestart(request)
+    }
 
-    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> =
-        wrapAPICall {
-            val request = ICERestartRequest(
-                session_id = sessionId,
-                peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
-            )
-            sfuConnectionModule.api.iceRestart(request)
-        }
+    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = wrapAPICall {
+        val request = ICERestartRequest(
+            session_id = sessionId,
+            peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+        )
+        sfuConnectionModule.api.iceRestart(request)
+    }
 
     private suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         wrapAPICall {
