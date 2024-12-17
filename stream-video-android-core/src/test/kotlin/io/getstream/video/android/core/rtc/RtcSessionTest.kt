@@ -26,7 +26,6 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,12 +42,6 @@ class RtcSessionTest : IntegrationTestBase() {
      * TODO: This test could use a mock of the client, it doesn't need the real client and could run faster
      * Integration testing is already handled in other parts of the codebase
      */
-
-    @Before
-    fun setup() {
-        // setup the mock
-        clientImpl.peerConnectionFactory = mockedPCFactory
-    }
 
     @Test
     fun `Constraints`() = runTest {
