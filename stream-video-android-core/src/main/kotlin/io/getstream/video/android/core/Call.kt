@@ -46,6 +46,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -172,11 +173,6 @@ public class Call(
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
 
-    internal var runCallServiceInForeground: Boolean = clientImpl.callServiceConfig.runCallServiceInForeground
-        private set
-    internal var audioUsage: Int = clientImpl.callServiceConfig.audioUsage
-        private set
-
     /**
      * This returns the local microphone volume level. The audio volume is a linear
      * value between 0 (no sound) and 1 (maximum volume). This is not a raw output -
@@ -210,14 +206,6 @@ public class Call(
      */
     private var isDestroyed = false
 
-    @InternalStreamVideoApi
-    internal val peerConnectionFactory: StreamPeerConnectionFactory
-        get() = StreamPeerConnectionFactory(
-            context = clientImpl.context,
-            audioUsage = audioUsage,
-            audioProcessing = clientImpl.audioProcessing,
-        )
-
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
@@ -231,10 +219,21 @@ public class Call(
                 this,
                 scope,
                 peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.callServiceConfig.audioUsage,
+                callServiceConfig.audioUsage,
             )
         }
     }
+
+    @InternalStreamVideoApi
+    internal val peerConnectionFactory: StreamPeerConnectionFactory
+        get() = StreamPeerConnectionFactory(
+            context = clientImpl.context,
+            audioUsage = callServiceConfig.audioUsage,
+            audioProcessing = clientImpl.audioProcessing,
+        )
+
+    internal var callServiceConfig = clientImpl.callServiceConfig
+        private set
 
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
@@ -368,8 +367,7 @@ public class Call(
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
-        runCallServiceInForeground: Boolean? = null,
-        audioUsage: Int? = null,
+        callServiceConfig: CallServiceConfig? = null,
     ): Result<RtcSession> {
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -388,8 +386,7 @@ public class Call(
             }
         }
 
-        runCallServiceInForeground?.let { this.runCallServiceInForeground = it }
-        audioUsage?.let { this.audioUsage = it }
+        callServiceConfig?.let { this.callServiceConfig = it }
 
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()

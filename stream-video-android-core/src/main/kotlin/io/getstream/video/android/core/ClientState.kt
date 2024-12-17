@@ -176,13 +176,13 @@ class ClientState(private val client: StreamVideo) {
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
-        if (call.runCallServiceInForeground) {
+        if (call.callServiceConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
             val serviceIntent = CallService.buildStartIntent(
                 context,
                 StreamCallId.fromCallCid(call.cid),
                 trigger,
-                callServiceConfiguration = streamVideoClient.callServiceConfig,
+                callServiceConfiguration = call.callServiceConfig,
             )
             ContextCompat.startForegroundService(context, serviceIntent)
         }
@@ -192,11 +192,11 @@ class ClientState(private val client: StreamVideo) {
      * Stop the foreground service that manages the call even when the UI is gone.
      */
     internal fun maybeStopForegroundService(call: Call) {
-        if (call.runCallServiceInForeground) {
+        if (call.callServiceConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
             val serviceIntent = CallService.buildStopIntent(
                 context,
-                callServiceConfiguration = streamVideoClient.callServiceConfig,
+                callServiceConfiguration = call.callServiceConfig,
             )
             context.stopService(serviceIntent)
         }
