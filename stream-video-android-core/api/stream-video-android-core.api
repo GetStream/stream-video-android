@@ -4324,16 +4324,18 @@ public final class io/getstream/video/android/core/notifications/internal/receiv
 
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfig {
 	public fun <init> ()V
-	public fun <init> (ZILjava/util/Map;)V
-	public synthetic fun <init> (ZILjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZILjava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (ZILjava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()I
 	public final fun component3 ()Ljava/util/Map;
-	public final fun copy (ZILjava/util/Map;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun copy (ZILjava/util/Map;Ljava/util/Map;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioUsage ()I
 	public final fun getCallServicePerType ()Ljava/util/Map;
+	public final fun getConfigPerType ()Ljava/util/Map;
 	public final fun getRunCallServiceInForeground ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -4345,6 +4347,23 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public static final fun livestreamAudioCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamGuestCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/service/CallTypeConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Class;ZI)V
+	public synthetic fun <init> (Ljava/lang/Class;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Class;
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/Class;ZI)Lio/getstream/video/android/core/notifications/internal/service/CallTypeConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallTypeConfig;Ljava/lang/Class;ZIILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallTypeConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioUsage ()I
+	public final fun getCallServiceClass ()Ljava/lang/Class;
+	public final fun getRunCallServiceInForeground ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/permission/PermissionRequest {

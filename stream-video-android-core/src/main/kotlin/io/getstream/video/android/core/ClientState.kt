@@ -145,9 +145,10 @@ class ClientState(private val client: StreamVideo) {
     }
 
     fun setActiveCall(call: Call) {
+        logger.d { "Using active call: $call" }
+        this._activeCall.value = call
         removeRingingCall()
         maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
-        this._activeCall.value = call
     }
 
     fun removeActiveCall() {
@@ -176,13 +177,13 @@ class ClientState(private val client: StreamVideo) {
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
-        if (call.callServiceConfig.runCallServiceInForeground) {
+        if (streamVideoClient.callServiceConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
             val serviceIntent = CallService.buildStartIntent(
                 context,
                 StreamCallId.fromCallCid(call.cid),
                 trigger,
-                callServiceConfiguration = call.callServiceConfig,
+                callServiceConfiguration = streamVideoClient.callServiceConfig,
             )
             ContextCompat.startForegroundService(context, serviceIntent)
         }
@@ -192,11 +193,11 @@ class ClientState(private val client: StreamVideo) {
      * Stop the foreground service that manages the call even when the UI is gone.
      */
     internal fun maybeStopForegroundService(call: Call) {
-        if (call.callServiceConfig.runCallServiceInForeground) {
+        if (streamVideoClient.callServiceConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
             val serviceIntent = CallService.buildStopIntent(
                 context,
-                callServiceConfiguration = call.callServiceConfig,
+                callServiceConfiguration = streamVideoClient.callServiceConfig,
             )
             context.stopService(serviceIntent)
         }

@@ -25,10 +25,12 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
@@ -150,7 +152,7 @@ internal class StreamVideoClient internal constructor(
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
-    internal val callServiceConfig: CallServiceConfig = callServiceConfig(),
+    callServiceConfig: CallServiceConfig = callServiceConfig(),
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
@@ -175,6 +177,31 @@ internal class StreamVideoClient internal constructor(
     internal var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
+    internal val callServiceConfig: CallServiceConfig = callServiceConfig
+        get() {
+            if (this.state.activeCall.value?.callServiceConfig != null) {
+                logger.d { "Using callServiceConfig from active call" }
+            } else {
+                logger.d { "Using default callServiceConfig" }
+            }
+            return this.state.activeCall.value?.callServiceConfig ?: field
+        }
+
+    @InternalStreamVideoApi
+    internal var peerConnectionFactory = StreamPeerConnectionFactory(
+        context = context,
+        audioUsage = callServiceConfig.audioUsage,
+        audioProcessing = audioProcessing,
+    )
+        get() {
+            if (this.state.activeCall.value?.callServiceConfig != null) {
+                logger.d { "Using PCF from active call" }
+            } else {
+                logger.d { "Using default PCF" }
+            }
+            return this.state.activeCall.value?.peerConnectionFactory ?: field
+        }
+
     public override val userId = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
@@ -194,7 +221,6 @@ internal class StreamVideoClient internal constructor(
         scope.cancel()
         // call cleanup on the active call
         val activeCall = state.activeCall.value
-        activeCall?.leave()
         // Stop the call service if it was running
         if (callServiceConfig.runCallServiceInForeground) {
             safeCall {
@@ -202,6 +228,7 @@ internal class StreamVideoClient internal constructor(
                 context.stopService(serviceIntent)
             }
         }
+        activeCall?.leave()
     }
 
     /**

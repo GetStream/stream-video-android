@@ -384,11 +384,11 @@ public class RtcSession internal constructor(
             }
         }
 
-        call.peerConnectionFactory.setAudioSampleCallback { it ->
+        call.clientImpl.peerConnectionFactory.setAudioSampleCallback { it ->
             call.processAudioSample(it)
         }
 
-        call.peerConnectionFactory.setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, sampleData ->
+        call.clientImpl.peerConnectionFactory.setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, sampleData ->
             call.audioFilter?.applyFilter(
                 audioFormat = audioFormat,
                 channelCount = channelCount,
@@ -882,7 +882,7 @@ public class RtcSession internal constructor(
     @VisibleForTesting
     public fun createSubscriber(): StreamPeerConnection {
         logger.i { "[createSubscriber] #sfu; no args" }
-        val peerConnection = call.peerConnectionFactory.makePeerConnection(
+        val peerConnection = call.clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
@@ -932,7 +932,7 @@ public class RtcSession internal constructor(
         videoTransceiverInitialized = false
         screenshareTransceiverInitialized = false
         logger.i { "[createPublisher] #sfu; no args" }
-        val publisher = call.peerConnectionFactory.makePeerConnection(
+        val publisher = call.clientImpl.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.PUBLISHER,

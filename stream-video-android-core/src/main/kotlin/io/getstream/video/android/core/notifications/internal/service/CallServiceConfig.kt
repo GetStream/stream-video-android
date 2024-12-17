@@ -41,6 +41,18 @@ public data class CallServiceConfig(
     val callServicePerType: Map<String, Class<*>> = mapOf(
         Pair(ANY_MARKER, CallService::class.java),
     ),
+    val configPerType: Map<String, CallTypeConfig> = mapOf(
+        ANY_MARKER to CallTypeConfig(
+            runCallServiceInForeground = false,
+            audioUsage = AudioAttributes.USAGE_NOTIFICATION,
+        ),
+    ),
+)
+
+public data class CallTypeConfig(
+    val callServiceClass: Class<*> = CallService::class.java,
+    val runCallServiceInForeground: Boolean = true,
+    val audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION,
 )
 
 /**
@@ -48,12 +60,7 @@ public data class CallServiceConfig(
  * Uses: `FOREGROUND_SERVICE_TYPE_PHONE_CALL`.
  */
 public fun callServiceConfig(): CallServiceConfig {
-    return CallServiceConfig(
-        runCallServiceInForeground = true,
-        callServicePerType = mapOf(
-            Pair(ANY_MARKER, CallService::class.java),
-        ),
-    )
+    return CallServiceConfig()
 }
 
 /**
@@ -66,6 +73,14 @@ public fun livestreamCallServiceConfig(): CallServiceConfig {
         callServicePerType = mapOf(
             Pair(ANY_MARKER, CallService::class.java),
             Pair("livestream", LivestreamCallService::class.java),
+        ),
+        configPerType = mapOf(
+            ANY_MARKER to CallTypeConfig(),
+            "livestream" to CallTypeConfig(
+                callServiceClass = LivestreamCallService::class.java,
+                runCallServiceInForeground = true,
+                audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+            ),
         ),
     )
 }
@@ -93,7 +108,7 @@ public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
         runCallServiceInForeground = true,
         audioUsage = AudioAttributes.USAGE_MEDIA,
         callServicePerType = mapOf(
-            Pair(ANY_MARKER, CallService::class.java),
+            Pair(ANY_MARKER, LivestreamViewerService::class.java),
             Pair("livestream", LivestreamViewerService::class.java),
         ),
     )
@@ -118,4 +133,9 @@ internal fun resolveServiceClass(callId: StreamCallId, config: CallServiceConfig
     val callType = callId.type
     val resolvedServiceClass = config.callServicePerType[callType]
     return resolvedServiceClass ?: config.callServicePerType[ANY_MARKER] ?: CallService::class.java
+}
+
+internal fun resolveCallTypeConfig(callType: String?, config: CallServiceConfig): CallTypeConfig {
+    val resolvedConfig = config.configPerType[callType]
+    return resolvedConfig ?: config.configPerType[ANY_MARKER] ?: CallTypeConfig()
 }

@@ -218,22 +218,17 @@ public class Call(
                 clientImpl.context,
                 this,
                 scope,
-                peerConnectionFactory.eglBase.eglBaseContext,
-                callServiceConfig.audioUsage,
+                clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+                clientImpl.callServiceConfig.audioUsage,
             )
         }
     }
 
-    @InternalStreamVideoApi
-    internal val peerConnectionFactory: StreamPeerConnectionFactory
-        get() = StreamPeerConnectionFactory(
-            context = clientImpl.context,
-            audioUsage = callServiceConfig.audioUsage,
-            audioProcessing = clientImpl.audioProcessing,
-        )
-
-    internal var callServiceConfig = clientImpl.callServiceConfig
+    internal var callServiceConfig: CallServiceConfig? = null
         private set
+
+    @InternalStreamVideoApi
+    internal var peerConnectionFactory: StreamPeerConnectionFactory? = null
 
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
@@ -386,7 +381,15 @@ public class Call(
             }
         }
 
-        callServiceConfig?.let { this.callServiceConfig = it }
+        callServiceConfig?.let {
+            this.callServiceConfig = it
+            this.peerConnectionFactory = StreamPeerConnectionFactory(
+                context = clientImpl.context,
+                audioUsage = it.audioUsage,
+                audioProcessing = clientImpl.audioProcessing,
+            )
+        }
+        client.state.setActiveCall(this)
 
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
@@ -503,7 +506,6 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
-        client.state.setActiveCall(this)
         monitorSession(result.value)
         return Success(value = session!!)
     }
@@ -883,7 +885,7 @@ public class Call(
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
-            peerConnectionFactory.eglBase.eglBaseContext,
+            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     val width = videoRenderer.measuredWidth
@@ -1284,15 +1286,15 @@ public class Call(
     }
 
     fun isAudioProcessingEnabled(): Boolean {
-        return peerConnectionFactory.isAudioProcessingEnabled()
+        return clientImpl.peerConnectionFactory.isAudioProcessingEnabled()
     }
 
     fun setAudioProcessingEnabled(enabled: Boolean) {
-        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
+        return clientImpl.peerConnectionFactory.setAudioProcessingEnabled(enabled)
     }
 
     fun toggleAudioProcessing(): Boolean {
-        return peerConnectionFactory.toggleAudioProcessing()
+        return clientImpl.peerConnectionFactory.toggleAudioProcessing()
     }
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> {
