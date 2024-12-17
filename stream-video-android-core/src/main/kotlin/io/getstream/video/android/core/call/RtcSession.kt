@@ -42,6 +42,8 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
+import io.getstream.video.android.core.call.connection.utils.AvailableCodec
+import io.getstream.video.android.core.call.connection.utils.computePlatformCodecs
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
@@ -79,6 +81,7 @@ import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
@@ -237,6 +240,7 @@ public class RtcSession internal constructor(
         get() = sfuConnectionModule.socketConnection
 
     private val logger by taggedLogger("Video:RtcSession")
+    private val sdpLogger by taggedLogger("Video:RtcSession:SDP")
     private val dynascaleLogger by taggedLogger("Video:RtcSession:Dynascale")
     private val clientImpl = client as StreamVideoClient
 
@@ -519,31 +523,14 @@ public class RtcSession internal constructor(
         awaitAll(subscriberAsync, publisherAsync)
     }
 
+    private val platformCodecs = mutableListOf<AvailableCodec>()
+
     suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
         logger.d { "[connect] #sfu; #track; no args" }
 
-        var dummySubscriberSdp = ""
-        var dummyPublisherSdp = ""
-        var preferredPublishOptions = emptyList<PublishOption>()
-        var preferredSubscribeOptions = emptyList<SubscribeOption>()
-
-        withDummyPeerConnections { dummyPublisher, dummySubscriber ->
-            dummySubscriber?.let {
-                dummySubscriberSdp = getDummySdp(it)
-                preferredSubscribeOptions = getPreferredSubscribeOptions(dummySubscriberSdp)
-            }
-            dummyPublisher?.let {
-                dummyPublisherSdp = getDummySdp(it)
-                preferredPublishOptions = getPreferredPublishOptions(dummyPublisherSdp)
-            }
-        }
-
-        logger.d {
-            "[connect] #sfu; #codec-negotiation; preferred publish options: $preferredPublishOptions"
-        }
-        logger.d {
-            "[connect] #sfu; #codec-negotiation; preferred subscribe options: $preferredSubscribeOptions"
-        }
+        val (subscriberSdp, subscriberPublishOptions) = throwawaySubscriberSdpAndOptions()
+        val (publisherSdp, publisherSubscribeOptions, platformCodecs) = throwawayPublisherSdpAndOptions()
+        this.platformCodecs.addAll(platformCodecs)
 
         val request = JoinRequest(
             session_id = sessionId,
@@ -551,29 +538,33 @@ public class RtcSession internal constructor(
             fast_reconnect = false,
             client_details = clientDetails,
             reconnect_details = reconnectDetails,
-            subscriber_sdp = dummySubscriberSdp,
-            publisher_sdp = dummyPublisherSdp,
-            preferred_publish_options = preferredPublishOptions,
-            preferred_subscribe_options = preferredSubscribeOptions,
+            subscriber_sdp = subscriberSdp,
+            publisher_sdp = publisherSdp,
+            preferred_publish_options = publisherSubscribeOptions,
+            preferred_subscribe_options = subscriberPublishOptions,
         )
-        logger.d { "[connect] Sending JoinRequest: $request" }
+        logger.d { "[connect] Sending JoinRequest: ${request.preferred_publish_options}" }
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
     }
 
-    private suspend fun withDummyPeerConnections(
-        action: suspend (
-            publisher: StreamPeerConnection?,
-            subscriber: StreamPeerConnection?,
-        ) -> Unit,
-    ) {
-        val dummyPublisher = createDummyPeerConnection(RtpTransceiverDirection.SEND_ONLY)
-        val dummySubscriber = createDummyPeerConnection(RtpTransceiverDirection.RECV_ONLY)
+    private suspend fun throwawayPublisherSdpAndOptions(): Triple<String, List<PublishOption>, List<AvailableCodec>> {
+        return createDummyPeerConnection(RtpTransceiverDirection.SEND_ONLY)?.let { dummyPublisher ->
+            val sdp = getDummySdp(dummyPublisher)
+            val options = getPreferredPublishOptions(sdp)
+            val platformCodecs = computePlatformCodecs(sdp)
+            cleanDummyPeerConnection(dummyPublisher)
+            Triple(sdp, options, platformCodecs)
+        } ?: Triple("", emptyList(), emptyList())
+    }
 
-        action(dummyPublisher, dummySubscriber)
-
-        cleanDummyPeerConnection(dummyPublisher)
-        cleanDummyPeerConnection(dummySubscriber)
+    private suspend fun throwawaySubscriberSdpAndOptions(): Pair<String, List<SubscribeOption>> {
+        return createDummyPeerConnection(RtpTransceiverDirection.RECV_ONLY)?.let { dummySubscriber ->
+            val sdp = getDummySdp(dummySubscriber)
+            val options = getPreferredSubscribeOptions(sdp)
+            cleanDummyPeerConnection(dummySubscriber)
+            Pair(sdp, options)
+        } ?: Pair("", emptyList())
     }
 
     private fun createDummyPeerConnection(direction: RtpTransceiverDirection): StreamPeerConnection? {
@@ -607,7 +598,7 @@ public class RtcSession internal constructor(
     }
 
     private fun cleanDummyPeerConnection(dummyPeerConnection: StreamPeerConnection?) {
-        dummyPeerConnection?.transceiverManager()?.clear()
+        dummyPeerConnection?.transceiverManager(platformCodecs)?.clear()
         dummyPeerConnection?.connection?.transceivers?.forEach {
             it.stop()
         }
@@ -660,6 +651,10 @@ public class RtcSession internal constructor(
         return call.state.clientVideoPublishOptions.takeIf {
             it.codec != null || it.maxBitrate != null || it.maxSimulcastLayers != null
         }?.let { options ->
+            val platformCodec = computePlatformCodecs(sdp)
+            val sortedCodecs = platformCodec.sortedWith(
+                compareBy({ it.name != options.codec?.name }, { it.name }, { it.payload }),
+            )
             val parsedSdp = MinimalSdpParser(sdp)
             val sdpCodec = options.codec?.let { parsedSdp.getVideoCodec(it.name) }
             val sfuCodec = sdpCodec?.let {
@@ -670,15 +665,19 @@ public class RtcSession internal constructor(
                     payload_type = it.payloadType.toIntOrNull() ?: 0,
                 )
             }
-
-            listOf(
+            sortedCodecs.map { codec ->
                 PublishOption(
                     track_type = TrackType.TRACK_TYPE_VIDEO,
-                    codec = sfuCodec,
+                    codec = Codec(
+                        name = codec.name,
+                        fmtp = codec.fmtp ?: "",
+                        clock_rate = codec.clockRate,
+                        payload_type = codec.payload,
+                    ),
                     bitrate = options.maxBitrate ?: 0,
                     max_spatial_layers = options.maxSimulcastLayers ?: 0,
-                ),
-            ).also {
+                )
+            }.also {
                 logger.d { "[getPreferredPublishOptions] #codec-negotiation; $it" }
             }
         } ?: run {
@@ -694,7 +693,7 @@ public class RtcSession internal constructor(
         val prefix = call.state.me.value?.trackLookupPrefix
         val track = toTrack(source)
         logger.d { "[addTransceiver] #sfu; #track; track id: ${track.id()}, publishOption: $publishOption" }
-        publisher?.addTransceiver(prefix ?: "", track, publishOption)
+        publisher?.addTransceiver(platformCodecs, prefix ?: "", track, publishOption)
     }
 
     private fun addTransceiver(
@@ -703,7 +702,8 @@ public class RtcSession internal constructor(
     ) {
         val prefix = call.state.me.value?.trackLookupPrefix
         val track = toTrack(source)
-        publisher?.addTransceiver(prefix ?: "", track, publishOption)
+        logger.d { "[addTransceiver] #sfu; #track; track id: ${track.id()}, publishOption: $publishOption" }
+        publisher?.addTransceiver(platformCodecs, prefix ?: "", track, publishOption)
     }
 
     private fun toTrack(source: VideoSource): org.webrtc.VideoTrack =
@@ -765,7 +765,7 @@ public class RtcSession internal constructor(
     private fun publishFeed(track: VideoSource, trackType: TrackType) {
         val publisher = publisher ?: return
         storedPublishOptions.forEach { publishOption ->
-            val transceiverManager = publisher.transceiverManager()
+            val transceiverManager = publisher.transceiverManager(platformCodecs)
             transceiverManager.enable(publishOption)
             if (!transceiverManager.contains(publishOption) && trackType == publishOption.track_type) {
                 addTransceiver(track, publishOption)
@@ -776,7 +776,7 @@ public class RtcSession internal constructor(
     private fun publishFeed(track: AudioSource, trackType: TrackType) {
         val publisher = publisher ?: return
         storedPublishOptions.forEach { publishOption ->
-            val transceiverManager = publisher.transceiverManager()
+            val transceiverManager = publisher.transceiverManager(platformCodecs)
             transceiverManager.enable(publishOption)
             if (!transceiverManager.contains(publishOption) && trackType == publishOption.track_type) {
                 addTransceiver(track, publishOption)
@@ -788,7 +788,7 @@ public class RtcSession internal constructor(
         // Search directly in cache, because we were already publishing, so we had a transceiver.
         val publisher = publisher ?: return
         storedPublishOptions.filter { it.track_type == trackType }.forEach {
-            publisher.transceiverManager().disable(it)
+            publisher.transceiverManager(platformCodecs).disable(it)
         }
     }
 
@@ -1151,7 +1151,9 @@ public class RtcSession internal constructor(
         dynascaleLogger.v { "[updatePublishQuality] #sfu; Handling ChangePublishQualityEvent" }
         val publisher = publisher ?: return@synchronized
         for (videoSender in videoSenders) {
-            val sender = publisher.transceiverManager()["${videoSender.publish_option_id}-${videoSender.track_type}"]?.sender
+            val sender = publisher.transceiverManager(
+                platformCodecs,
+            )["${videoSender.publish_option_id}-${videoSender.track_type}"]?.sender
             val eventLayerSettingsList = videoSender.layers
 
             if (sender == null || sender.parameters == null || sender.parameters.encodings == null || eventLayerSettingsList.isEmpty()) {
@@ -1320,60 +1322,62 @@ public class RtcSession internal constructor(
     }
 
     private var storedPublishOptions = emptyList<PublishOption>()
-    private var updatePublishOptionsJob: Job? = null
 
     private fun updatePublishOptions(publishOptions: List<PublishOption>) {
-        // updatePublishOptionsJob?.cancel()
-        updatePublishOptionsJob = coroutineScope.launch {
+        publisher?.let { publisher ->
             logger.d {
                 "[updatePublishOptions] #codec-negotiation; new publishOption: ${publishOptions.joinToString()}"
             }
-            val publisher = publisher ?: return@launch
-            val transceiverManager = publisher.transceiverManager()
+            val transceiverManager = publisher.transceiverManager(platformCodecs)
             logger.d {
                 "[updatePublishOptions] #codec-negotiation; current transcceivers: ${transceiverManager.asMap()}"
             }
             publishOptions.forEach { publishOption ->
                 if (!transceiverManager.contains(publishOption) && publishOption.canPublish()) {
-                    when (publishOption.track_type) {
-                        TrackType.TRACK_TYPE_AUDIO -> {
-                            addTransceiver(call.mediaManager.audioSource, publishOption)
-                        }
-
-                        TrackType.TRACK_TYPE_VIDEO -> {
-                            addTransceiver(call.mediaManager.videoSource, publishOption)
-                        }
-
-                        TrackType.TRACK_TYPE_SCREEN_SHARE -> {
-                            addTransceiver(call.mediaManager.screenShareVideoSource, publishOption)
-                        }
-
-                        else -> {
-                            logger.w {
-                                "[updatePublishOptions] #codec-negotiation; Unsupported track type: ${publishOption.track_type}"
-                            }
-                        }
-                    }
+                    addTransceiverForOption(publishOption)
                 } else if (publishOption.canPublish()) {
                     transceiverManager.enable(publishOption)
                 }
             }
 
             val publicOptionsKeys = publishOptions.map { transceiverManager.asKey(it) }
-            val transceiversToRemove = transceiverManager.asMap().keys.filter { it !in publicOptionsKeys }
+            val transceiversToRemove =
+                transceiverManager.asMap().keys.filter { it !in publicOptionsKeys }
             logger.d {
                 "[updatePublishOptions] #codec-negotiation; transceiversToRemove: $transceiversToRemove"
             }
-            transceiverManager.removeIf { key, _ ->
+            transceiverManager.disableIf { key, _ ->
                 key in transceiversToRemove
             }
-
             logger.d {
                 "[updatePublishOptions] #codec-negotiation; new transceivers: ${transceiverManager.asMap()}"
             }
             storedPublishOptions = publishOptions
         }
     }
+
+    private fun addTransceiverForOption(publishOption: PublishOption) {
+        logger.d { "[updatePublishOptions] #codec-negot - add transceiver for option: $publishOption" }
+        when (publishOption.track_type) {
+            TrackType.TRACK_TYPE_AUDIO -> {
+                addTransceiver(call.mediaManager.audioSource, publishOption)
+            }
+
+            TrackType.TRACK_TYPE_VIDEO -> {
+                addTransceiver(call.mediaManager.videoSource, publishOption)
+            }
+
+            TrackType.TRACK_TYPE_SCREEN_SHARE -> {
+                addTransceiver(call.mediaManager.screenShareVideoSource, publishOption)
+            }
+            else -> {
+                logger.w {
+                    "[updatePublishOptions] #codec-negotiation; Unsupported track type: ${publishOption.track_type}"
+                }
+            }
+        }
+    }
+
     private fun PublishOption.canPublish(): Boolean = when (track_type) {
         TrackType.TRACK_TYPE_AUDIO -> call.mediaManager.microphone.status.value == DeviceStatus.Enabled
         TrackType.TRACK_TYPE_VIDEO -> call.mediaManager.camera.status.value == DeviceStatus.Enabled
@@ -1518,7 +1522,11 @@ public class RtcSession internal constructor(
 
                     storedPublishOptions = event.publishOptions
                     // TODO-neg: correct to do this here?
-                    sfuConnectionModule.socketConnection.whenConnected { connectRtc() }
+                    sfuConnectionModule.socketConnection.whenConnected {
+                        connectRtc()
+                        delay(500)
+                        updatePublishOptions(event.publishOptions)
+                    }
                 }
 
                 is SubscriberOfferEvent -> coroutineScope.launch { handleSubscriberOffer(event) }
@@ -1771,83 +1779,85 @@ public class RtcSession internal constructor(
         logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
         coroutineScope.launch {
             // Wait for any update publishing job to finish.
-            updatePublishOptionsJob?.join()
-
-            // step 1 - create a local offer
-            val offerResult = peerConnection.createOffer()
-            if (offerResult !is Success) {
-                logger.e {
-                    "[negotiate] #$id; #sfu; #${peerType.stringify()}; rejected (createOffer failed): $offerResult"
+            safeCall {
+                // step 1 - create a local offer
+                val offerResult = peerConnection.createOffer()
+                if (offerResult !is Success) {
+                    logger.e {
+                        "[negotiate] #$id; #sfu; #${peerType.stringify()}; rejected (createOffer failed): $offerResult"
+                    }
+                    return@launch
                 }
-                return@launch
-            }
-            val sdp = offerResult.value // TODO-neg: removed mangle (used only for sub?)
+                val sdp = offerResult.value // TODO-neg: removed mangle (used only for sub?)
 
-            // step 2 -  set the local description
-            val result = peerConnection.setLocalDescription(sdp)
-            if (result.isFailure) {
-                // the call health monitor will end up restarting the peer connection and recover from this
-                logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
-                return@launch
-            }
+                // step 2 -  set the local description
+                val result = peerConnection.setLocalDescription(sdp)
+                if (result.isFailure) {
+                    // the call health monitor will end up restarting the peer connection and recover from this
+                    logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
+                    return@launch
+                }
 
-            // step 3 - create the list of tracks
-            val tracks = getPublisherTracks(sdp.description)
-            val currentSfu = sfuUrl
+                // step 3 - create the list of tracks
+                val tracks = getPublisherTracks(sdp.description)
+                val currentSfu = sfuUrl
 
-            publisherSdpOffer.value = sdp
-            synchronized(this) {
-                syncPublisherJob?.cancel()
-                syncPublisherJob = coroutineScope.launch {
-                    var attempt = 0
-                    val maxAttempts = 3
-                    val delayInMs = listOf(10L, 30L, 100L)
+                publisherSdpOffer.value = sdp
+                synchronized(this) {
+                    syncPublisherJob?.cancel()
+                    syncPublisherJob = coroutineScope.launch {
+                        var attempt = 0
+                        val maxAttempts = 3
+                        val delayInMs = listOf(10L, 30L, 100L)
 
-                    while (attempt <= maxAttempts - 1) {
-                        try {
-                            // step 4 - send the tracks and SDP
-                            logger.d { "[negotiate] #codec-negotiation; SetPublisher tracks: $tracks" }
+                        while (attempt <= maxAttempts - 1) {
+                            try {
+                                // step 4 - send the tracks and SDP
+                                logger.d { "[negotiate] #codec-negotiation; SetPublisher tracks: $tracks" }
+                                sdpLogger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; offer: \n${sdp.description}" }
+                                val request = SetPublisherRequest(
+                                    sdp = sdp.description,
+                                    session_id = sessionId,
+                                    tracks = tracks,
+                                )
 
-                            val request = SetPublisherRequest(
-                                sdp = sdp.description,
-                                session_id = sessionId,
-                                tracks = tracks,
-                            )
+                                val result = setPublisher(request)
+                                // step 5 - set the remote description
 
-                            val result = setPublisher(request)
-                            // step 5 - set the remote description
+                                logger.d { "[negotiate] #codec-negotiation; SetPublisher error: ${result.errorOrNull()}" }
 
-                            logger.d { "[negotiate] #codec-negotiation; SetPublisher error: ${result.errorOrNull()}" }
+                                val answer = result.getOrThrow()
+                                sdpLogger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; answer: \n${answer.sdp}" }
+                                peerConnection.setRemoteDescription(
+                                    SessionDescription(
+                                        SessionDescription.Type.ANSWER, answer.sdp,
+                                    ),
+                                )
 
-                            peerConnection.setRemoteDescription(
-                                SessionDescription(
-                                    SessionDescription.Type.ANSWER, result.getOrThrow().sdp,
-                                ),
-                            )
-
-                            // If successful, emit the result and break the loop
-                            result.getOrThrow()
-                            break
-                        } catch (cause: Throwable) {
-                            val sameValue = sdp == publisherSdpOffer.value
-                            val sameSfu = currentSfu == sfuUrl
-                            val isPermanent = isPermanentError(cause)
-                            val willRetry =
-                                !isPermanent && sameValue && sameSfu && attempt < maxAttempts
-
-                            logger.w {
-                                "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in ${delayInMs[attempt]} ms"
-                            }
-
-                            if (willRetry) {
-                                delay(delayInMs[attempt])
-                                attempt++
-                            } else {
-                                logger.e {
-                                    "setPublisher failed after $attempt retries, asking the call monitor to do an ice restart"
-                                }
-                                coroutineScope.launch { call.rejoin() }
+                                // If successful, emit the result and break the loop
+                                result.getOrThrow()
                                 break
+                            } catch (cause: Throwable) {
+                                val sameValue = sdp == publisherSdpOffer.value
+                                val sameSfu = currentSfu == sfuUrl
+                                val isPermanent = isPermanentError(cause)
+                                val willRetry =
+                                    !isPermanent && sameValue && sameSfu && attempt < maxAttempts
+
+                                logger.w {
+                                    "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in ${delayInMs[attempt]} ms"
+                                }
+
+                                if (willRetry) {
+                                    delay(delayInMs[attempt])
+                                    attempt++
+                                } else {
+                                    logger.e {
+                                        "setPublisher failed after $attempt retries, asking the call monitor to do an ice restart"
+                                    }
+                                    coroutineScope.launch { call.rejoin() }
+                                    break
+                                }
                             }
                         }
                     }
@@ -1862,7 +1872,7 @@ public class RtcSession internal constructor(
         val trackInfoList = mutableListOf<TrackInfo>()
 
         val publishedTransceivers = storedPublishOptions.mapNotNull {
-            publisher?.transceiverManager()?.get(it)?.let { transceiver ->
+            publisher?.transceiverManager(platformCodecs)?.get(it)?.let { transceiver ->
                 Pair(it, transceiver)
             }
         }
@@ -1993,7 +2003,7 @@ public class RtcSession internal constructor(
         publishOption: PublishOption,
     ): List<VideoLayer> {
         // We get the list of encodings and enrich them with extra info needed for each VideoLayer
-        return publisher?.transceiverManager()?.getEncodingsFor(publishOption)?.map { encoding ->
+        return publisher?.transceiverManager(platformCodecs)?.getEncodingsFor(publishOption)?.map { encoding ->
             logger.d { "[createVideoLayers] #codec-negotiation; encodings: $encoding" }
             val scaleBy = encoding.scaleResolutionDownBy ?: 1.0
             val width = publishOption.video_dimension?.width ?: captureResolution.width

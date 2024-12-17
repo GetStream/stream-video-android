@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.connection.utils.AvailableCodec
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.stats.toRtcStats
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
@@ -83,8 +84,6 @@ public class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
-    private val transceiverManager = SenderTransceiversManager()
-
     private val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
     /**
@@ -104,10 +103,17 @@ public class StreamPeerConnection(
         }
     }
 
-    fun transceiverManager() = transceiverManager
+    private lateinit var mTransceiverManager: SenderTransceiversManager
 
-    fun addTransceiver(trackPrefix: String, track: MediaStreamTrack, publishOption: PublishOption) =
-        transceiverManager().add(connection, trackPrefix, track, publishOption)
+    internal fun transceiverManager(platformCodec: List<AvailableCodec>): SenderTransceiversManager {
+        if (!::mTransceiverManager.isInitialized) {
+            mTransceiverManager = SenderTransceiversManager(platformCodec)
+        }
+        return mTransceiverManager
+    }
+
+    internal fun addTransceiver(platformCodec: List<AvailableCodec>, trackPrefix: String, track: MediaStreamTrack, publishOption: PublishOption) =
+        transceiverManager(platformCodec).add(connection, trackPrefix, track, publishOption)
 
     fun isFailedOrClosed(): Boolean {
         return when (state.value) {
@@ -303,7 +309,7 @@ public class StreamPeerConnection(
         } ?: false // TODO-neg add as PublishOption extension method, used in other places also
 
         val encodings = publishOption?.let {
-            transceiverManager.getEncodingsFor(publishOption)
+            transceiverManager(emptyList()).getEncodingsFor(publishOption)
         } ?: emptyList()
 
         return RtpTransceiverInit(

@@ -17,12 +17,14 @@
 package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.call.connection.utils.AvailableCodec
 import io.getstream.video.android.core.model.VideoCodec
 import io.getstream.video.android.core.model.getScalabilityMode
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
+import org.webrtc.RtpCapabilities.CodecCapability
 import org.webrtc.RtpParameters
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
@@ -30,7 +32,10 @@ import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import java.util.Collections
 
-class SenderTransceiversManager {
+/**
+ * A class that manages the transceivers for the sender / publisher.
+ */
+internal class SenderTransceiversManager(private val platformCodecs: List<AvailableCodec>) {
     // State
     private val logger by taggedLogger("TransceiversManager")
     private val cachedTransceivers: MutableMap<String, RtpTransceiver> =
@@ -50,15 +55,31 @@ class SenderTransceiversManager {
         trackIdPrefix: String,
         track: MediaStreamTrack,
         publishOption: PublishOption,
-    ): RtpTransceiver = synchronized(this) {
+    ): RtpTransceiver {
+        val key = publishOption.key()
         if (contains(publishOption)) {
             logger.w { "[add] Transceiver already added for $publishOption" }
-            return cachedTransceivers[publishOption.key()]!!
+            cachedTransceivers[key]!!
         }
-        logger.d { "[add] $trackIdPrefix-$track\n{${publishOption.key()} -> $publishOption" }
+        logger.d { "[add] $trackIdPrefix-$track\n{$key -> $publishOption" }
         val transceiverInit = publishOption.toTransceiverInit(trackIdPrefix)
         val transceiver = peerConnection.addTransceiver(track, transceiverInit)
-        cachedTransceivers[publishOption.key()] = transceiver
+        if (publishOption.isVideoStream()) {
+            logger.d { "[add] Platform codecs: $platformCodecs" }
+            val codecCapability = publishOption.mapToCodecCapability(platformCodecs)
+            codecCapability.also {
+                logger.d { "[add] Selected codec ${codecCapability.mimeType}" }
+                logger.d {
+                    "[add] Codec capability: ${codecCapability.preferredPayloadType} / ${codecCapability.name} / ${codecCapability.clockRate}"
+                }
+            }
+            transceiver.setCodecPreferences(
+                listOf(
+                    codecCapability,
+                ),
+            )
+        }
+        cachedTransceivers[key] = transceiver
         return transceiver
     }
 
@@ -228,7 +249,10 @@ class SenderTransceiversManager {
             // If we need  to stream SVC codec, send only the full encoding as a rid = "q"
             encodings = encodings.filter { it.rid == "f" }.map { it.apply { rid = "q" } }
         }
-
+        encodings.forEach {
+            logger.d { "[encoding] ${key()}, ${it.rid}" }
+            logger.d { "[encoding] ${key()}, ${it.scalabilityMode}" }
+        }
         return RtpTransceiverInit(
             RtpTransceiver.RtpTransceiverDirection.SEND_ONLY,
             streamIds(trackIdPrefix),
@@ -255,6 +279,38 @@ class SenderTransceiversManager {
             }
         }
     }.reversed()
+
+    private fun PublishOption.mapToCodecCapability(platformCodecs: List<AvailableCodec>): CodecCapability {
+        val platformCodecsForName =
+            safeCallWithDefault(null) { platformCodecs.groupBy { it.name }[codec?.name] }
+        val sorted = platformCodecsForName?.sortedBy { it.payload }
+        val platformCodec = sorted?.firstOrNull()
+        return CodecCapability().apply {
+            /**
+             *         public String name;
+             *         public MediaStreamTrack.MediaType kind;
+             *         public Integer clockRate;
+             *         public Integer numChannels;
+             *         public Map<String, String> parameters;
+             *         public String mimeType;
+             */
+            preferredPayloadType = platformCodec?.payload ?: codec?.payload_type ?: 9000
+            mimeType = if (isVideoStream()) {
+                "video/${platformCodec?.name ?: codec?.name}"
+            } else {
+                "audio/${platformCodec?.name ?: codec?.name}"
+            }
+            name = platformCodec?.name ?: codec?.name
+            kind = if (isVideoStream()) {
+                MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
+            } else {
+                MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
+            }
+            clockRate = platformCodec?.clockRate ?: codec?.clock_rate ?: 0
+            parameters = platformCodec?.params ?: emptyMap()
+            numChannels = platformCodec?.channels ?: 0
+        }
+    }
 
     private fun PublishOption.isVideoStream() =
         track_type == TrackType.TRACK_TYPE_VIDEO || track_type == TrackType.TRACK_TYPE_SCREEN_SHARE

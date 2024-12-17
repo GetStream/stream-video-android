@@ -1022,34 +1022,10 @@ public abstract interface class io/getstream/video/android/core/call/audio/Input
 	public abstract fun applyFilter (IIILjava/nio/ByteBuffer;)V
 }
 
-public final class io/getstream/video/android/core/call/connection/SenderTransceiversManager {
-	public fun <init> ()V
-	public final fun add (Lorg/webrtc/PeerConnection;Ljava/lang/String;Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;)Lorg/webrtc/RtpTransceiver;
-	public final fun asKey (Lstream/video/sfu/models/PublishOption;)Ljava/lang/String;
-	public final fun asList ()Ljava/util/List;
-	public final fun asMap ()Ljava/util/Map;
-	public final fun clear ()V
-	public final fun contains (Ljava/lang/String;)Z
-	public final fun contains (Lstream/video/sfu/models/PublishOption;)Z
-	public final fun disable (Ljava/lang/String;)Z
-	public final fun disable (Lstream/video/sfu/models/PublishOption;)Z
-	public final fun disableIf (Lkotlin/jvm/functions/Function2;)V
-	public final fun enable (Ljava/lang/String;)Z
-	public final fun enable (Lstream/video/sfu/models/PublishOption;)Z
-	public final fun forEach (Lkotlin/jvm/functions/Function1;)V
-	public final fun get (Ljava/lang/String;)Lorg/webrtc/RtpTransceiver;
-	public final fun get (Lstream/video/sfu/models/PublishOption;)Lorg/webrtc/RtpTransceiver;
-	public final fun getEncodingsFor (Lstream/video/sfu/models/PublishOption;)Ljava/util/List;
-	public final fun remove (Ljava/lang/String;)V
-	public final fun remove (Lstream/video/sfu/models/PublishOption;)V
-	public final fun removeIf (Lkotlin/jvm/functions/Function2;)V
-}
-
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnection : org/webrtc/PeerConnection$Observer {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;I)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)Lorg/webrtc/RtpTransceiver;
 	public final fun addIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun addTransceiver (Ljava/lang/String;Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;)Lorg/webrtc/RtpTransceiver;
 	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;)Lorg/webrtc/RtpTransceiver;
 	public static synthetic fun addVideoTransceiver$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;ILjava/lang/Object;)Lorg/webrtc/RtpTransceiver;
 	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1078,7 +1054,6 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun setLocalDescription (Lorg/webrtc/SessionDescription;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setRemoteDescription (Lorg/webrtc/SessionDescription;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
-	public final fun transceiverManager ()Lio/getstream/video/android/core/call/connection/SenderTransceiversManager;
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {

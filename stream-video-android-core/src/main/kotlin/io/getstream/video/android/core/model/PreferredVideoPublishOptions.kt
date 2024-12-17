@@ -63,4 +63,4 @@ enum class VideoCodec {
 }
 
 fun PublishOption.getScalabilityMode(): String =
-    "L${max_spatial_layers}T${max_temporal_layers}_KEY"
+    "L${max_spatial_layers}T${max_temporal_layers}"
