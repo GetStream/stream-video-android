@@ -234,7 +234,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         ),
         screensharing = ScreensharingSettingsResponse(false, false),
         transcription = TranscriptionSettingsResponse(
-            "test",
+            TranscriptionSettingsResponse.ClosedCaptionMode.Available,
             emptyList(),
             TranscriptionSettingsResponse.Mode.Available,
         ),
