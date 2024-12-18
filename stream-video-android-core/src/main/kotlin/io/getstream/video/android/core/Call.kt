@@ -81,7 +81,6 @@ import org.openapitools.client.models.SendReactionResponse
 import org.openapitools.client.models.StartTranscriptionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
-import org.openapitools.client.models.TranscriptionSettingsResponse
 import org.openapitools.client.models.UnpinResponse
 import org.openapitools.client.models.UpdateCallMembersRequest
 import org.openapitools.client.models.UpdateCallMembersResponse

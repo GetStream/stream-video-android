@@ -109,7 +109,6 @@ import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
@@ -194,12 +193,15 @@ fun CallScreen(
      * This behavior is intentional for this demo-app ONLY and designed to prioritize the "Auto-On" setting over the current state.
      *
      * Please keep this behavior in mind, as it might appear unexpected at first glance.
+     *
+     * Note: Occasionally, when `call.startTranscription()` might throw a 400 error in the demo app when Transcription is set to "Auto-On", indicating that
+     * transcription is already in progress. This is expected and can safely be ignored as it does not impact
+     * the ongoing transcription functionality.
      */
     val isCurrentlyTranscribing by call.state.transcribing.collectAsStateWithLifecycle()
 
-    LaunchedEffect(call.state.settings) {
+    LaunchedEffect(Unit) {
         call.state.settings.map { it?.transcription }
-            .distinctUntilChanged()
             .collectLatest { transcription ->
                 executeTranscriptionApis(call, isCurrentlyTranscribing, transcription)
             }
