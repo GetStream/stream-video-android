@@ -152,7 +152,7 @@ internal fun computePlatformCodecs(sdp: String): List<AvailableCodec> {
  */
 internal data class CodecBitrateTable(
     val map: Map<Int, Int>,
-    val default: Int
+    val default: Int,
 )
 
 private val bitrateLookupTable = mapOf(
@@ -163,9 +163,9 @@ private val bitrateLookupTable = mapOf(
             1080 to 2_000_000,
             720 to 1_250_000,
             540 to 750_000,
-            360 to 400_000
+            360 to 400_000,
         ),
-        default = 1_250_000
+        default = 1_250_000,
     ),
     "vp8" to CodecBitrateTable(
         mapOf(
@@ -174,9 +174,9 @@ private val bitrateLookupTable = mapOf(
             1080 to 2_000_000,
             720 to 1_250_000,
             540 to 600_000,
-            360 to 350_000
+            360 to 350_000,
         ),
-        default = 1_250_000
+        default = 1_250_000,
     ),
     "vp9" to CodecBitrateTable(
         mapOf(
@@ -185,9 +185,9 @@ private val bitrateLookupTable = mapOf(
             1080 to 1_500_000,
             720 to 1_250_000,
             540 to 500_000,
-            360 to 275_000
+            360 to 275_000,
         ),
-        default = 1_250_000
+        default = 1_250_000,
     ),
     "av1" to CodecBitrateTable(
         mapOf(
@@ -196,10 +196,10 @@ private val bitrateLookupTable = mapOf(
             1080 to 1_000_000,
             720 to 600_000,
             540 to 350_000,
-            360 to 200_000
+            360 to 200_000,
         ),
-        default = 600_000
-    )
+        default = 600_000,
+    ),
 )
 
 /**

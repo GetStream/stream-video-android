@@ -65,21 +65,6 @@ internal class SenderTransceiversManager(private val platformCodecs: List<Availa
         logger.d { "[add] $trackIdPrefix-$track\n{$key -> $publishOption" }
         val transceiverInit = publishOption.toTransceiverInit(trackIdPrefix)
         val transceiver = peerConnection.addTransceiver(track, transceiverInit)
-        if (publishOption.isVideoStream()) {
-            logger.d { "[add] Platform codecs: $platformCodecs" }
-            val codecCapability = publishOption.mapToCodecCapability(platformCodecs)
-            codecCapability.also {
-                logger.d { "[add] Selected codec ${codecCapability.mimeType}" }
-                logger.d {
-                    "[add] Codec capability: ${codecCapability.preferredPayloadType} / ${codecCapability.name} / ${codecCapability.clockRate}"
-                }
-            }
-            transceiver.setCodecPreferences(
-                listOf(
-                    codecCapability,
-                ),
-            )
-        }
         cachedTransceivers[key] = transceiver
         return transceiver
     }
@@ -282,30 +267,6 @@ internal class SenderTransceiversManager(private val platformCodecs: List<Availa
             } else {
                 scaleResolutionDownBy = factor
             }
-        }
-    }.reversed()
-
-    private fun PublishOption.mapToCodecCapability(platformCodecs: List<AvailableCodec>): CodecCapability {
-        val platformCodecsForName =
-            safeCallWithDefault(null) { platformCodecs.groupBy { it.name }[codec?.name] }
-        val sorted = platformCodecsForName?.sortedBy { it.payload }
-        val platformCodec = sorted?.firstOrNull()
-        return CodecCapability().apply {
-            preferredPayloadType = platformCodec?.payload ?: codec?.payload_type ?: 9000
-            mimeType = if (isVideoStream()) {
-                "video/${platformCodec?.name ?: codec?.name}"
-            } else {
-                "audio/${platformCodec?.name ?: codec?.name}"
-            }
-            name = platformCodec?.name ?: codec?.name
-            kind = if (isVideoStream()) {
-                MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
-            } else {
-                MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
-            }
-            clockRate = platformCodec?.clockRate ?: codec?.clock_rate ?: 0
-            parameters = platformCodec?.params ?: emptyMap()
-            numChannels = platformCodec?.channels ?: 0
         }
     }
 
