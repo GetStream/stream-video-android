@@ -235,6 +235,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             scope.launch {
                 try {
                     val result = client.connectAsync().await()
+                    if (notificationConfig.autoRegisterPushDevice) {
+                        client.registerPushDevice()
+                    }
                     result.onSuccess {
                         streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
                     }.onError {
