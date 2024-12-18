@@ -25,7 +25,6 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.RtpCapabilities.CodecCapability
 import org.webrtc.RtpParameters
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
@@ -228,6 +227,7 @@ internal class SenderTransceiversManager(private val platformCodecs: List<Availa
                 listOf("a")
             }
         val encodingCount = max_spatial_layers
+        val maxSpatialRids = mapSpatialRids(rids, max_spatial_layers)
         val factor = 1.0
         var encodings = encodings(rids, encodingCount, factor)
 
@@ -246,11 +246,21 @@ internal class SenderTransceiversManager(private val platformCodecs: List<Availa
         )
     }
 
+    private fun mapSpatialRids(rids: List<String>, maxSpatialLayers: Int): Any {
+        return rids.take(maxSpatialLayers)
+    }
+
     private fun PublishOption.encodings(
         rids: List<String>,
         encodingCount: Int,
         factor: Double,
     ) = rids.take(encodingCount).map { rid ->
+        val internalFactor = when (rid) {
+            "f" -> 1.0
+            "h" -> 1.5
+            "q" -> 2
+            else -> 1.0
+        }
         RtpParameters.Encoding(
             rid,
             true,

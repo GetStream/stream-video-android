@@ -2868,12 +2868,6 @@ public final class io/getstream/video/android/core/call/utils/TrackOverridesHand
 	public static final field ALL_PARTICIPANTS Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/call/utils/TransceiverCache {
-	public fun <init> ()V
-	public final fun getTransceivers ()Ljava/util/Map;
-	public final fun getVideoLayers ()Ljava/util/Map;
-}
-
 public abstract class io/getstream/video/android/core/call/video/BitmapVideoFilter : io/getstream/video/android/core/call/video/VideoFilter {
 	public fun <init> ()V
 	public abstract fun applyFilter (Landroid/graphics/Bitmap;)V
