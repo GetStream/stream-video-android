@@ -303,9 +303,6 @@ public class RtcSession internal constructor(
         return setTrack(sessionId, type, track)
     }
 
-    private var connectedAt: Long? = null
-    private var reconnectAt: Pair<WebsocketReconnectStrategy, Long>? = null
-
     /**
      * Connection and WebRTC.
      */
@@ -524,7 +521,6 @@ public class RtcSession internal constructor(
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
-        connectedAt = System.currentTimeMillis()
         sfuConnectionModule.socketConnection.whenConnected {
             connectRtc()
         }
