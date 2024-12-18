@@ -53,7 +53,7 @@ import java.nio.ByteBuffer
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
-    private val audioUsage: Int = defaultAudioUsage,
+    private val getAudioUsage: () -> Int,
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
 ) {
 
@@ -64,6 +64,8 @@ public class StreamPeerConnectionFactory(
     private var audioRecordDataCallback: (
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
+
+    private var audioUsage: Int = getAudioUsage()
 
     /**
      * Set to get callbacks when audio input from microphone is received.
@@ -120,7 +122,19 @@ public class StreamPeerConnectionFactory(
      * Factory that builds all the connections based on the extensive configuration provided under
      * the hood.
      */
-    private val factory by lazy {
+    private var factory: PeerConnectionFactory = createFactory()
+        get() {
+            val newAudioUsage = getAudioUsage()
+            if (audioUsage != newAudioUsage) {
+                audioUsage = newAudioUsage
+                field.dispose()
+                field = createFactory()
+            }
+
+            return field
+        }
+
+    private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .setInjectableLogger({ message, severity, label ->
@@ -151,7 +165,7 @@ public class StreamPeerConnectionFactory(
                 .createInitializationOptions(),
         )
 
-        PeerConnectionFactory.builder()
+        return PeerConnectionFactory.builder()
             .apply {
                 audioProcessing?.also { setAudioProcessingFactory(it) }
             }

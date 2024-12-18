@@ -31,6 +31,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.internal.service.livestreamGuestCallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.update
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
@@ -188,6 +190,15 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
+        val csc = livestreamGuestCallServiceConfig()
+            .update(
+                callType = "default",
+                runCallServiceInForeground = true,
+            ).update(
+                callType = "livestream",
+                runCallServiceInForeground = false,
+            )
+
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -212,6 +223,7 @@ object StreamVideoInitHelper {
             },
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
+            callServiceConfig = csc,
         ).build()
     }
 }

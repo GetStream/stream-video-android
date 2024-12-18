@@ -43,9 +43,12 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.resolveAudioUsage
+import io.getstream.video.android.core.notifications.internal.service.resolveRunCallServiceInForeground
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -178,8 +181,14 @@ internal class StreamVideoClient internal constructor(
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     @InternalStreamVideoApi
-    public var peerConnectionFactory =
-        StreamPeerConnectionFactory(context, callServiceConfig.audioUsage, audioProcessing)
+    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
+        context = context,
+        audioProcessing = audioProcessing,
+        getAudioUsage = {
+            val callType = state.activeCall.value?.type ?: ANY_MARKER
+            callServiceConfig.resolveAudioUsage(callType)
+        },
+    )
 
     public override val userId = user.id
 
@@ -200,14 +209,18 @@ internal class StreamVideoClient internal constructor(
         scope.cancel()
         // call cleanup on the active call
         val activeCall = state.activeCall.value
-        activeCall?.leave()
         // Stop the call service if it was running
-        if (callServiceConfig.runCallServiceInForeground) {
+        if (callServiceConfig.resolveRunCallServiceInForeground(activeCall?.type ?: ANY_MARKER)) {
             safeCall {
-                val serviceIntent = CallService.buildStopIntent(context, callServiceConfig)
+                val serviceIntent = CallService.buildStopIntent(
+                    context = context,
+                    callType = activeCall?.type ?: ANY_MARKER,
+                    callServiceConfiguration = callServiceConfig,
+                )
                 context.stopService(serviceIntent)
             }
         }
+        activeCall?.leave()
     }
 
     /**
