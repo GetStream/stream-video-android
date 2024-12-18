@@ -230,7 +230,7 @@ private fun DynamicMenuPreview() {
                 loadRecordings = { emptyList() },
                 transcriptionUiState = TranscriptionAvailableUiState,
                 onToggleTranscription = {},
-                transcriptionList = { emptyList() },
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
@@ -262,7 +262,7 @@ private fun DynamicMenuDebugOptionPreview() {
                 loadRecordings = { emptyList() },
                 transcriptionUiState = TranscriptionAvailableUiState,
                 onToggleTranscription = {},
-                transcriptionList = { emptyList() },
+                loadTranscriptions = { emptyList() },
             ),
         )
     }

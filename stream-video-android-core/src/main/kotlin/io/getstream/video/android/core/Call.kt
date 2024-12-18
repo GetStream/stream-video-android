@@ -270,7 +270,6 @@ public class Call(
                 audioLevelOutputHelper.rampToValue(it)
             }
         }
-        observeTranscription()
     }
 
     /** Basic crud operations */

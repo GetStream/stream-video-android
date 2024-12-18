@@ -286,7 +286,7 @@ internal fun SettingsMenu(
                 loadRecordings = onLoadRecordings,
                 transcriptionUiState = transcriptionUiState,
                 onToggleTranscription = onToggleTranscription,
-                transcriptionList = onLoadTranscriptions,
+                loadTranscriptions = onLoadTranscriptions,
             ),
         )
     }
@@ -352,7 +352,7 @@ private fun SettingsMenuPreview() {
                 loadRecordings = { emptyList() },
                 transcriptionUiState = TranscriptionAvailableUiState,
                 onToggleTranscription = {},
-                transcriptionList = { emptyList() },
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
