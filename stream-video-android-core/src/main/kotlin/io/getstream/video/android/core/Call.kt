@@ -208,6 +208,9 @@ public class Call(
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
 
+    internal var connectedAt: Long? = null
+    internal var reconnectAt: Pair<WebsocketReconnectStrategy, Long>? = null
+
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
             testInstanceProvider.mediaManagerCreator!!.invoke()
@@ -463,6 +466,7 @@ public class Call(
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
+            connectedAt = System.currentTimeMillis()
             RtcSession(
                 sessionId = this.sessionId,
                 apiKey = clientImpl.apiKey,
@@ -617,6 +621,7 @@ public class Call(
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
             )
+            reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST, System.currentTimeMillis())
             session.fastReconnect(reconnectDetails)
         } else {
             logger.e { "[reconnect] Disconnecting" }
@@ -629,6 +634,7 @@ public class Call(
      */
     suspend fun rejoin() = schedule {
         logger.d { "[rejoin] Rejoining" }
+        reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN, System.currentTimeMillis())
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
@@ -702,6 +708,7 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
+                reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE, System.currentTimeMillis())
                 val newSession = RtcSession(
                     clientImpl,
                     powerManager,

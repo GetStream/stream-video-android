@@ -137,11 +137,13 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
+import stream.video.sfu.signal.Reconnection
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SendStatsRequest
 import stream.video.sfu.signal.SetPublisherRequest
 import stream.video.sfu.signal.SetPublisherResponse
+import stream.video.sfu.signal.Telemetry
 import stream.video.sfu.signal.TrackMuteState
 import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateMuteStatesRequest
@@ -300,6 +302,9 @@ public class RtcSession internal constructor(
     private fun setLocalTrack(type: TrackType, track: MediaTrack) {
         return setTrack(sessionId, type, track)
     }
+
+    private var connectedAt: Long? = null
+    private var reconnectAt: Pair<WebsocketReconnectStrategy, Long>? = null
 
     /**
      * Connection and WebRTC.
@@ -519,6 +524,7 @@ public class RtcSession internal constructor(
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
+        connectedAt = System.currentTimeMillis()
         sfuConnectionModule.socketConnection.whenConnected {
             connectRtc()
         }
@@ -1631,6 +1637,7 @@ public class RtcSession internal constructor(
 
     internal suspend fun sendCallStats(report: CallStatsReport) {
         val result = wrapAPICall {
+            val now = System.currentTimeMillis()
             val androidThermalState =
                 safeCallWithDefault(AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED) {
                     val thermalState = powerManager?.currentThermalStatus
@@ -1663,6 +1670,22 @@ public class RtcSession internal constructor(
                         thermal_state = androidThermalState,
                         is_power_saver_mode = powerSaving,
                     ),
+                    telemetry = safeCallWithDefault(null) {
+                        if (call.connectedAt != null || call.reconnectAt != null) {
+                            Telemetry(
+                                connection_time_seconds = call.connectedAt?.let { (now - it) / 1000 }
+                                    ?.toFloat(),
+                                reconnection = call.reconnectAt?.let {
+                                    Reconnection(
+                                        time_seconds = ((now - it.second) / 1000).toFloat(),
+                                        strategy = it.first,
+                                    )
+                                },
+                            )
+                        } else {
+                            null
+                        }
+                    },
                 ),
             )
         }
