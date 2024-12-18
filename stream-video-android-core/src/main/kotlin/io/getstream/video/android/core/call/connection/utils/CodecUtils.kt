@@ -146,3 +146,74 @@ internal fun computePlatformCodecs(sdp: String): List<AvailableCodec> {
 
     return availableCodecs
 }
+
+/**
+ * A data class representing a codec bitrate table.
+ */
+internal data class CodecBitrateTable(
+    val map: Map<Int, Int>,
+    val default: Int
+)
+
+private val bitrateLookupTable = mapOf(
+    "h264" to CodecBitrateTable(
+        mapOf(
+            2160 to 5_000_000,
+            1440 to 3_000_000,
+            1080 to 2_000_000,
+            720 to 1_250_000,
+            540 to 750_000,
+            360 to 400_000
+        ),
+        default = 1_250_000
+    ),
+    "vp8" to CodecBitrateTable(
+        mapOf(
+            2160 to 5_000_000,
+            1440 to 2_750_000,
+            1080 to 2_000_000,
+            720 to 1_250_000,
+            540 to 600_000,
+            360 to 350_000
+        ),
+        default = 1_250_000
+    ),
+    "vp9" to CodecBitrateTable(
+        mapOf(
+            2160 to 3_000_000,
+            1440 to 2_000_000,
+            1080 to 1_500_000,
+            720 to 1_250_000,
+            540 to 500_000,
+            360 to 275_000
+        ),
+        default = 1_250_000
+    ),
+    "av1" to CodecBitrateTable(
+        mapOf(
+            2160 to 2_000_000,
+            1440 to 1_550_000,
+            1080 to 1_000_000,
+            720 to 600_000,
+            540 to 350_000,
+            360 to 200_000
+        ),
+        default = 600_000
+    )
+)
+
+/**
+ * Get the optimal bitrate for a given codec and frame height.
+ */
+internal fun getOptimalBitrate(codec: String, frameHeight: Int): Int {
+    val lowerCaseCodec = codec.lowercase()
+    val codecLookup = bitrateLookupTable[lowerCaseCodec]
+        ?: throw IllegalArgumentException("Unknown codec: $codec")
+
+    // Check for an exact match
+    codecLookup.map[frameHeight]?.let { return it }
+
+    // Find nearest resolution
+    val nearest = codecLookup.map.keys.minByOrNull { kotlin.math.abs(it - frameHeight) }
+    return nearest?.let { codecLookup.map[it] } ?: codecLookup.default
+}

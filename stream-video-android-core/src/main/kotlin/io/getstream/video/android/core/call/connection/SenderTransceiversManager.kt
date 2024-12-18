@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.connection.utils.AvailableCodec
+import io.getstream.video.android.core.call.connection.utils.getOptimalBitrate
 import io.getstream.video.android.core.model.VideoCodec
 import io.getstream.video.android.core.model.getScalabilityMode
 import io.getstream.video.android.core.utils.safeCall
@@ -270,7 +271,11 @@ internal class SenderTransceiversManager(private val platformCodecs: List<Availa
             true,
             factor,
         ).apply {
-            maxBitrateBps = bitrate
+            maxBitrateBps = if (isVideoStream()) {
+                codec?.name?.let { getOptimalBitrate(it, video_dimension?.height ?: 720) } ?: bitrate
+            } else {
+                bitrate
+            }
             maxFramerate = fps
             if (isSvcCodec()) {
                 scalabilityMode = getScalabilityMode()
@@ -286,14 +291,6 @@ internal class SenderTransceiversManager(private val platformCodecs: List<Availa
         val sorted = platformCodecsForName?.sortedBy { it.payload }
         val platformCodec = sorted?.firstOrNull()
         return CodecCapability().apply {
-            /**
-             *         public String name;
-             *         public MediaStreamTrack.MediaType kind;
-             *         public Integer clockRate;
-             *         public Integer numChannels;
-             *         public Map<String, String> parameters;
-             *         public String mimeType;
-             */
             preferredPayloadType = platformCodec?.payload ?: codec?.payload_type ?: 9000
             mimeType = if (isVideoStream()) {
                 "video/${platformCodec?.name ?: codec?.name}"
