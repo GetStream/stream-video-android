@@ -117,6 +117,8 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
         return when (type) {
             "call.accepted" -> CallAcceptedEvent::class.java
             "call.blocked_user" -> BlockedUserEvent::class.java
+            "call.closed_captions_started" -> ClosedCaptionStartedEvent::class.java
+            "call.closed_captions_stopped" -> ClosedCaptionEndedEvent::class.java
             "call.closed_caption" -> ClosedCaptionEvent::class.java
             "call.created" -> CallCreatedEvent::class.java
             "call.deleted" -> CallDeletedEvent::class.java

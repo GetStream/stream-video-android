@@ -57,6 +57,7 @@ import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
@@ -82,6 +83,8 @@ internal fun SettingsMenu(
     onToggleIncomingVideoVisibility: (Boolean) -> Unit,
     onShowCallStats: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
+    closedCaptionUiState: ClosedCaptionUiState,
+    onClosedCaptionsToggle: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -250,6 +253,8 @@ internal fun SettingsMenu(
                 isScreenShareEnabled = isScreenSharing,
                 onSelectScaleType = onSelectScaleType,
                 loadRecordings = onLoadRecordings,
+                onToggleClosedCaptions = onClosedCaptionsToggle,
+                closedCaptionUiState = closedCaptionUiState,
             ),
         )
     }
@@ -317,6 +322,8 @@ private fun SettingsMenuPreview() {
                 isIncomingVideoEnabled = true,
                 onToggleIncomingVideoEnabled = {},
                 loadRecordings = { emptyList() },
+                onToggleClosedCaptions = { },
+                closedCaptionUiState = ClosedCaptionUiState.Available,
             ),
         )
     }
