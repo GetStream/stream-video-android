@@ -26,8 +26,6 @@ internal const val ANY_MARKER = "ALL_CALL_TYPES"
 // API
 /**
  * Configuration class for the call foreground service.
- * @param runCallServiceInForeground If the call service should run in the foreground.
- * @param callServicePerType A map of call service per type.
  *
  * @see callServiceConfig
  * @see livestreamCallServiceConfig
@@ -36,12 +34,47 @@ internal const val ANY_MARKER = "ALL_CALL_TYPES"
  * @see audioCallServiceConfig
  */
 public data class CallServiceConfig(
-    val runCallServiceInForeground: Boolean = true,
-    val audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION,
-    val callServicePerType: Map<String, Class<*>> = mapOf(
+    // Kept for tests
+    internal val runCallServiceInForeground: Boolean = true,
+    internal val audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+    internal val callServicePerType: Map<String, Class<*>> = mapOf(
         Pair(ANY_MARKER, CallService::class.java),
     ),
+    val configs: MutableMap<String, CallTypeServiceConfig> = mutableMapOf(
+        Pair(ANY_MARKER, CallTypeServiceConfig()),
+    ),
 )
+
+public data class CallTypeServiceConfig(
+    val serviceClass: Class<*> = CallService::class.java,
+    val runCallServiceInForeground: Boolean = true,
+    val audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+)
+
+fun CallServiceConfig.resolveServiceClass(callType: String): Class<*> {
+    return resolveCallServiceConfig(callType, this).serviceClass
+}
+
+fun CallServiceConfig.resolveRunCallServiceInForeground(callType: String): Boolean {
+    return resolveCallServiceConfig(callType, this).runCallServiceInForeground
+}
+
+fun CallServiceConfig.resolveAudioUsage(callType: String): Int {
+    return resolveCallServiceConfig(callType, this).audioUsage
+}
+
+fun CallServiceConfig.update(callType: String, runCallServiceInForeground: Boolean? = null, audioUsage: Int? = null): CallServiceConfig {
+    val config = configs[callType]
+
+    config?.let {
+        configs[callType] = config.copy(
+            runCallServiceInForeground = runCallServiceInForeground ?: config.runCallServiceInForeground,
+            audioUsage = audioUsage ?: config.audioUsage,
+        )
+    }
+
+    return this
+}
 
 /**
  * Returns the default call foreground service configuration.
@@ -49,9 +82,8 @@ public data class CallServiceConfig(
  */
 public fun callServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
-        runCallServiceInForeground = true,
-        callServicePerType = mapOf(
-            Pair(ANY_MARKER, CallService::class.java),
+        configs = mutableMapOf(
+            Pair(ANY_MARKER, CallTypeServiceConfig()),
         ),
     )
 }
@@ -62,10 +94,15 @@ public fun callServiceConfig(): CallServiceConfig {
  */
 public fun livestreamCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
-        runCallServiceInForeground = true,
-        callServicePerType = mapOf(
-            Pair(ANY_MARKER, CallService::class.java),
-            Pair("livestream", LivestreamCallService::class.java),
+        configs = mutableMapOf(
+            Pair(ANY_MARKER, CallTypeServiceConfig()),
+            Pair(
+                "livestream",
+                CallTypeServiceConfig(
+                    serviceClass = LivestreamCallService::class.java,
+                    audioUsage = AudioAttributes.USAGE_MEDIA,
+                ),
+            ),
         ),
     )
 }
@@ -76,10 +113,14 @@ public fun livestreamCallServiceConfig(): CallServiceConfig {
  */
 public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
-        runCallServiceInForeground = true,
-        callServicePerType = mapOf(
-            Pair(ANY_MARKER, CallService::class.java),
-            Pair("livestream", LivestreamAudioCallService::class.java),
+        configs = mutableMapOf(
+            Pair(ANY_MARKER, CallTypeServiceConfig()),
+            Pair(
+                "livestream",
+                CallTypeServiceConfig(
+                    serviceClass = LivestreamAudioCallService::class.java,
+                ),
+            ),
         ),
     )
 }
@@ -90,11 +131,31 @@ public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
  */
 public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
-        runCallServiceInForeground = true,
-        audioUsage = AudioAttributes.USAGE_MEDIA,
-        callServicePerType = mapOf(
-            Pair(ANY_MARKER, CallService::class.java),
-            Pair("livestream", LivestreamViewerService::class.java),
+        configs = mutableMapOf(
+            Pair(
+                ANY_MARKER,
+                CallTypeServiceConfig(
+                    serviceClass = CallService::class.java,
+                    runCallServiceInForeground = true,
+                    audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+                ),
+            ),
+            Pair(
+                "default",
+                CallTypeServiceConfig(
+                    serviceClass = CallService::class.java,
+                    runCallServiceInForeground = true,
+                    audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+                ),
+            ),
+            Pair(
+                "livestream",
+                CallTypeServiceConfig(
+                    serviceClass = LivestreamViewerService::class.java,
+                    runCallServiceInForeground = true,
+                    audioUsage = AudioAttributes.USAGE_MEDIA,
+                ),
+            ),
         ),
     )
 }
@@ -105,10 +166,14 @@ public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
  */
 public fun audioCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
-        runCallServiceInForeground = true,
-        callServicePerType = mapOf(
-            Pair(ANY_MARKER, CallService::class.java),
-            Pair("audio_call", AudioCallService::class.java),
+        configs = mutableMapOf(
+            Pair(ANY_MARKER, CallTypeServiceConfig()),
+            Pair(
+                "audio_call",
+                CallTypeServiceConfig(
+                    serviceClass = AudioCallService::class.java,
+                ),
+            ),
         ),
     )
 }
@@ -118,4 +183,9 @@ internal fun resolveServiceClass(callId: StreamCallId, config: CallServiceConfig
     val callType = callId.type
     val resolvedServiceClass = config.callServicePerType[callType]
     return resolvedServiceClass ?: config.callServicePerType[ANY_MARKER] ?: CallService::class.java
+}
+
+internal fun resolveCallServiceConfig(callType: String, config: CallServiceConfig): CallTypeServiceConfig {
+    val resolvedConfig = config.configs[callType]
+    return resolvedConfig ?: config.configs[ANY_MARKER] ?: CallTypeServiceConfig()
 }

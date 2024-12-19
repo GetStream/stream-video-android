@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.resolveRunCallServiceInForeground
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -145,14 +146,16 @@ class ClientState(private val client: StreamVideo) {
     }
 
     fun setActiveCall(call: Call) {
+        this._activeCall.value = call
         removeRingingCall()
         maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
-        this._activeCall.value = call
     }
 
     fun removeActiveCall() {
-        this._activeCall.value = null
-        maybeStopForegroundService()
+        if (this._activeCall.value != null) {
+            maybeStopForegroundService(this._activeCall.value!!)
+            this._activeCall.value = null
+        }
         removeRingingCall()
     }
 
@@ -174,7 +177,7 @@ class ClientState(private val client: StreamVideo) {
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
-        if (streamVideoClient.callServiceConfig.runCallServiceInForeground) {
+        if (streamVideoClient.callServiceConfig.resolveRunCallServiceInForeground(call.type)) {
             val context = streamVideoClient.context
             val serviceIntent = CallService.buildStartIntent(
                 context,
@@ -189,11 +192,12 @@ class ClientState(private val client: StreamVideo) {
     /**
      * Stop the foreground service that manages the call even when the UI is gone.
      */
-    internal fun maybeStopForegroundService() {
-        if (streamVideoClient.callServiceConfig.runCallServiceInForeground) {
+    internal fun maybeStopForegroundService(call: Call) {
+        if (streamVideoClient.callServiceConfig.resolveRunCallServiceInForeground(call.type)) {
             val context = streamVideoClient.context
             val serviceIntent = CallService.buildStopIntent(
                 context,
+                call.type,
                 callServiceConfiguration = streamVideoClient.callServiceConfig,
             )
             context.stopService(serviceIntent)
