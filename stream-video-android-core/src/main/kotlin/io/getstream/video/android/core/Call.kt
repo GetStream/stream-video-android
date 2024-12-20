@@ -29,6 +29,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -209,17 +210,27 @@ public class Call(
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
 
+    internal val peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
+        context = clientImpl.context,
+        audioProcessing = clientImpl.audioProcessing,
+        audioUsage = clientImpl.callServiceConfig.resolveAudioUsage(type),
+    )
+
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
             testInstanceProvider.mediaManagerCreator!!.invoke()
         } else {
-            MediaManagerImpl(
+            val audioUsage = clientImpl.callServiceConfig.resolveAudioUsage(type)
+            val mm = MediaManagerImpl(
                 clientImpl.context,
                 this,
                 scope,
-                clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+                peerConnectionFactory.eglBase.eglBaseContext,
                 clientImpl.callServiceConfig.resolveAudioUsage(type),
             )
+            logger.d { "[csc] MediaManager created with audioUsage: $audioUsage" }
+
+            mm
         }
     }
 
@@ -869,7 +880,7 @@ public class Call(
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+            peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     val width = videoRenderer.measuredWidth
@@ -1270,15 +1281,15 @@ public class Call(
     }
 
     fun isAudioProcessingEnabled(): Boolean {
-        return clientImpl.isAudioProcessingEnabled()
+        return peerConnectionFactory.isAudioProcessingEnabled()
     }
 
     fun setAudioProcessingEnabled(enabled: Boolean) {
-        return clientImpl.setAudioProcessingEnabled(enabled)
+        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
     }
 
     fun toggleAudioProcessing(): Boolean {
-        return clientImpl.toggleAudioProcessing()
+        return peerConnectionFactory.toggleAudioProcessing()
     }
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> {

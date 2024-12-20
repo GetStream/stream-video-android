@@ -53,7 +53,7 @@ import java.nio.ByteBuffer
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
-    private val getAudioUsage: () -> Int,
+    private val audioUsage: Int = defaultAudioUsage,
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
 ) {
 
@@ -64,8 +64,6 @@ public class StreamPeerConnectionFactory(
     private var audioRecordDataCallback: (
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
-
-    private var audioUsage: Int = getAudioUsage()
 
     /**
      * Set to get callbacks when audio input from microphone is received.
@@ -122,17 +120,7 @@ public class StreamPeerConnectionFactory(
      * Factory that builds all the connections based on the extensive configuration provided under
      * the hood.
      */
-    private var factory: PeerConnectionFactory = createFactory()
-        get() {
-            val newAudioUsage = getAudioUsage()
-            if (audioUsage != newAudioUsage) {
-                audioUsage = newAudioUsage
-                field.dispose()
-                field = createFactory()
-            }
-
-            return field
-        }
+    private val factory: PeerConnectionFactory by lazy { createFactory() }
 
     private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
@@ -182,8 +170,8 @@ public class StreamPeerConnectionFactory(
                                 AudioAttributes.Builder().setUsage(audioUsage)
                                     .build(),
                             )
-                            audioLogger.d { "[setAudioAttributes] usage: $audioUsage" }
                         }
+                        audioLogger.d { "[csc] PCF audioUsage: $audioUsage" }
                     }
                     .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :

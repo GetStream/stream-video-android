@@ -25,12 +25,10 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
-import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
@@ -47,7 +45,6 @@ import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.resolveAudioUsage
 import io.getstream.video.android.core.notifications.internal.service.resolveRunCallServiceInForeground
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -180,15 +177,15 @@ internal class StreamVideoClient internal constructor(
     internal var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
-    @InternalStreamVideoApi
-    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
-        context = context,
-        audioProcessing = audioProcessing,
-        getAudioUsage = {
-            val callType = state.activeCall.value?.type ?: ANY_MARKER
-            callServiceConfig.resolveAudioUsage(callType)
-        },
-    )
+//    @InternalStreamVideoApi
+//    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
+//        context = context,
+//        audioProcessing = audioProcessing,
+//        getAudioUsage = {
+//            val callType = state.activeCall.value?.type ?: ANY_MARKER
+//            callServiceConfig.resolveAudioUsage(callType)
+//        },
+//    )
 
     public override val userId = user.id
 
@@ -1096,18 +1093,6 @@ internal class StreamVideoClient internal constructor(
         return apiCall {
             coordinatorConnectionModule.api.getCall(type, id, ring = true)
         }
-    }
-
-    internal fun isAudioProcessingEnabled(): Boolean {
-        return peerConnectionFactory.isAudioProcessingEnabled()
-    }
-
-    internal fun setAudioProcessingEnabled(enabled: Boolean) {
-        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
-    }
-
-    internal fun toggleAudioProcessing(): Boolean {
-        return peerConnectionFactory.toggleAudioProcessing()
     }
 
     suspend fun startTranscription(type: String, id: String, externalStorage: String? = null): Result<StartTranscriptionResponse> {
