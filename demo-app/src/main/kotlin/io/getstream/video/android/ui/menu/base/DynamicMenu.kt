@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
+import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.debugSubmenu
 import io.getstream.video.android.ui.menu.defaultStreamMenu
 import io.getstream.video.android.ui.menu.reconnectMenu
@@ -231,6 +232,9 @@ private fun DynamicMenuPreview() {
                 onToggleIncomingVideoEnabled = {},
                 onSelectScaleType = {},
                 loadRecordings = { emptyList() },
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
@@ -264,6 +268,9 @@ private fun DynamicMenuDebugOptionPreview() {
                 isIncomingVideoEnabled = true,
                 onToggleIncomingVideoEnabled = {},
                 loadRecordings = { emptyList() },
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
