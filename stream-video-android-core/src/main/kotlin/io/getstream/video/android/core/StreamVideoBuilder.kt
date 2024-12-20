@@ -27,8 +27,10 @@ import io.getstream.video.android.core.internal.module.CoordinatorConnectionModu
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.update
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -210,7 +212,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
             callServiceConfig = callServiceConfig
-                ?: callServiceConfig().copy(
+                ?: callServiceConfig().update(
+                    callType = ANY_MARKER,
                     runCallServiceInForeground = runForegroundServiceForCalls,
                     audioUsage = defaultAudioUsage,
                 ),

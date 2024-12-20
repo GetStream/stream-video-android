@@ -45,6 +45,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.notifications.internal.service.resolveAudioUsage
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -220,7 +221,7 @@ public class Call(
                 this,
                 scope,
                 clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.callServiceConfig.audioUsage,
+                clientImpl.callServiceConfig.resolveAudioUsage(type),
             )
         }
     }
@@ -374,6 +375,9 @@ public class Call(
                     "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
             }
         }
+
+        client.state.setActiveCall(this)
+
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
         // the join flow should retry up to 3 times
@@ -490,7 +494,6 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
-        client.state.setActiveCall(this)
         monitorSession(result.value)
         return Success(value = session!!)
     }
@@ -772,11 +775,11 @@ public class Call(
 
         sfuSocketReconnectionTime = null
         stopScreenSharing()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
         (client as StreamVideoClient).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
+        client.state.removeActiveCall() // Will also stop CallService
+        client.state.removeRingingCall()
         cleanup()
     }
 
@@ -1200,7 +1203,7 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService()
+        clientImpl.state.maybeStopForegroundService(call = this)
         return clientImpl.accept(type, id)
     }
 

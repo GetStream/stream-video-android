@@ -117,7 +117,7 @@ internal open class CallService : Service() {
             callDisplayName: String? = null,
             callServiceConfiguration: CallServiceConfig = callServiceConfig(),
         ): Intent {
-            val serviceClass = resolveServiceClass(callId, callServiceConfiguration)
+            val serviceClass = callServiceConfiguration.resolveServiceClass(callId.type)
             StreamLog.i(TAG) { "Resolved service class: $serviceClass" }
             val serviceIntent = Intent(context, serviceClass)
             serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, callId)
@@ -156,10 +156,12 @@ internal open class CallService : Service() {
          */
         fun buildStopIntent(
             context: Context,
+            callType: String,
             callServiceConfiguration: CallServiceConfig = callServiceConfig(),
         ) = safeCallWithDefault(Intent(context, CallService::class.java)) {
-            val intent = callServiceConfiguration.callServicePerType.firstNotNullOfOrNull {
-                val serviceClass = it.value
+            val intent = callServiceConfiguration.configs.firstNotNullOfOrNull {
+                val serviceClass = callServiceConfiguration.resolveServiceClass(callType)
+
                 if (isServiceRunning(context, serviceClass)) {
                     Intent(context, serviceClass)
                 } else {
