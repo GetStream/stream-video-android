@@ -36,9 +36,11 @@ import org.webrtc.Logging
 import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
+import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.ResolutionAdjustment
+import org.webrtc.RtpCapabilities
 import org.webrtc.SimulcastAlignedVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
@@ -247,6 +249,15 @@ public class StreamPeerConnectionFactory(
                     },
             )
             .createPeerConnectionFactory()
+    }
+
+    /**
+     * Returns the capabilities of the sender based on the [mediaType].
+     *
+     * @param mediaType The type of media we're sending.
+     */
+    fun getSenderCapabilities(mediaType: MediaStreamTrack.MediaType) : RtpCapabilities {
+        return factory.getRtpSenderCapabilities(mediaType)
     }
 
     /**

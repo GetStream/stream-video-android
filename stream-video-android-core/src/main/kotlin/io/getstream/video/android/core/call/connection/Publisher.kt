@@ -20,6 +20,7 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
+import org.webrtc.RtpCapabilities
 import org.webrtc.RtpParameters
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
@@ -205,8 +206,32 @@ internal class Publisher(
                     scaleResolutionDownBy = it.scaleResolutionDownBy
                 }
             } ?: emptyList()))
+
+        if (!isAudioTrackType(publishOption.track_type)) {
+            val capabilities = peerConnectionFactory.getSenderCapabilities(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
+            transceiver.sortVideoCodecPreferences(publishOption.codec?.name, capabilities)
+        }
+
         logger.d { "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encoding: $sendEncodings)" }
         transceiverCache.add(publishOption, transceiver)
+    }
+
+    internal fun RtpTransceiver.sortVideoCodecPreferences(targetCodec: String?, capabilities: RtpCapabilities) {
+        if (targetCodec == null) {
+            logger.w { "No target codec provided" }
+            return
+        }
+        logger.v { "Set codec preferences to $targetCodec" }
+        capabilities.codecs.forEach { codec ->
+            logger.v { "codec: ${codec.name}, ${codec.kind}, ${codec.mimeType}, ${codec.parameters}, ${codec.preferredPayloadType}" }
+        }
+        for (codec in capabilities.codecs) {
+            val name = codec.name.uppercase()
+            if (name == targetCodec.uppercase()) {
+                setCodecPreferences(listOf(codec))
+                return
+            }
+        }
     }
 
     private fun updateTransceiver(
