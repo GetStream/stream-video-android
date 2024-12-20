@@ -1,7 +1,6 @@
 package io.getstream.video.android.core.call.connection
 
 import OptimalVideoLayer
-import android.provider.MediaStore.Audio.Media
 import findOptimalVideoLayers
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
@@ -16,7 +15,6 @@ import isSvcCodec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -32,7 +30,6 @@ import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
-import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SetPublisherRequest
 import toSvcEncodings
 import toVideoLayers
@@ -64,7 +61,8 @@ internal class Publisher(
 
     private val transceiverCache = TransceiverCache()
     private val knownTrackIds = mutableSetOf<String>()
-    private val assumedFormat = CaptureFormat(1080, 720, 24, 30)
+    private val defaultScreenShareFormat = CaptureFormat(1920, 1080, 15, 15)
+    private val defaultFormat = CaptureFormat(1080, 720, 24, 30)
     private var isIceRestarting = false
 
     override fun onRenegotiationNeeded() {
@@ -94,7 +92,7 @@ internal class Publisher(
 
     private suspend fun negotiate(iceRestart: Boolean = false) {
         val offer = super.createOffer().getOrThrow()
-        val trackInfos = getAnnouncedTracks(assumedFormat, offer.description)
+        val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
 
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
@@ -187,13 +185,14 @@ internal class Publisher(
     private fun addTransceiver(
         captureFormat: CaptureFormat?, track: MediaStreamTrack, publishOption: PublishOption
     ) {
-        val videoEncodings = computeLayers(captureFormat ?: assumedFormat, track, publishOption)
+        val videoEncodings = computeLayers(captureFormat ?: defaultFormat, track, publishOption)
         val sendEncodings =
             if (!isAudioTrackType(publishOption.track_type) && isSvcCodec(publishOption.codec?.name)) {
                 toSvcEncodings(
                     videoEncodings
                 )
             } else videoEncodings
+
 
         val transceiver = connection.addTransceiver(track,
             RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, emptyList(), sendEncodings?.map {
@@ -206,7 +205,7 @@ internal class Publisher(
                     scaleResolutionDownBy = it.scaleResolutionDownBy
                 }
             } ?: emptyList()))
-        logger.d { "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()})" }
+        logger.d { "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encoding: $sendEncodings)" }
         transceiverCache.add(publishOption, transceiver)
     }
 
@@ -240,7 +239,7 @@ internal class Publisher(
 
             val track =
                 item.transceiver.sender.track() ?: newTrackFromSource(publishOption.track_type)
-            addTransceiver(captureFormat ?: assumedFormat, track, publishOption)
+            addTransceiver(captureFormat ?: defaultFormat, track, publishOption)
         }
 
         // stop publishing with options not required anymore
@@ -440,12 +439,16 @@ internal class Publisher(
     }
 
     private fun toTrackInfo(
-        captureFormat: CaptureFormat?,
+        format: CaptureFormat?,
         transceiver: RtpTransceiver,
         publishOption: PublishOption,
         sdp: String?
     ): TrackInfo {
         val track = transceiver.sender.track()!!
+        val isScreenShare = publishOption.track_type == TrackType.TRACK_TYPE_SCREEN_SHARE
+        val captureFormat = if (isScreenShare) {
+            format ?: defaultScreenShareFormat
+        } else format ?: defaultFormat
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
         val layers = if (!isAudio) {
@@ -459,6 +462,9 @@ internal class Publisher(
         transceiverCache.setLayers(publishOption, layers ?: emptyList())
         val transceiverIndex = transceiverCache.indexOf(transceiver)
 
+        //val codec = publishOption.codec?.name
+
+        //val svcLayers = if (isSvcCodec(codec)) toSvcEncodings(layers) else layers
         return TrackInfo(
             track_id = track.id(),
             layers = toVideoLayers(layers ?: emptyList()),

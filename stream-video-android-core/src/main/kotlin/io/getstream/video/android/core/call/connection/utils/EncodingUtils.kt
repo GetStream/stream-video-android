@@ -1,4 +1,5 @@
 import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.model.VideoCodec
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import stream.video.sfu.models.PublishOption
@@ -6,7 +7,9 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoLayer
 import stream.video.sfu.models.VideoQuality
+import kotlin.math.max
 
+private val logger by StreamLog.taggedLogger("VideoLayers")
 /**
  * This class represents the parameters for a single encoding (simulcast layer).
  * In JavaScript, `OptimalVideoLayer` extends `RTCRtpEncodingParameters`.
@@ -42,7 +45,7 @@ fun isSvcCodec(codecOrMimeType: String?): Boolean {
 // Converts spatial and temporal layers to scalability mode string
 fun toScalabilityMode(spatialLayers: Int, temporalLayers: Int): String {
     // Matches `LxTy_KEY` format
-    val keySuffix = if (spatialLayers > 1) "" else ""
+    val keySuffix = if (spatialLayers > 1) "_KEY" else ""
     return "L${spatialLayers}T${temporalLayers}$keySuffix"
 }
 
@@ -50,7 +53,7 @@ fun toSvcEncodings(layers: List<OptimalVideoLayer>?): List<OptimalVideoLayer>? {
     // We take the `f` layer and rename its rid to `q`.
     return layers
         ?.filter { it.rid == "f" }
-        ?.map { it.copy(rid = "q") }
+        ?.map { it.copy(rid = "q", svc = true) }
 }
 
 // Convert rid to VideoQuality
@@ -138,7 +141,7 @@ fun findOptimalVideoLayers(
     val bitrate = publishOption.bitrate
     val codec = publishOption.codec
     val fps = publishOption.fps
-    val maxSpatialLayers = publishOption.max_spatial_layers
+    val maxSpatialLayers = max(publishOption.max_spatial_layers, 1)
     val maxTemporalLayers = publishOption.max_temporal_layers
     val videoDimension = publishOption.video_dimension
 

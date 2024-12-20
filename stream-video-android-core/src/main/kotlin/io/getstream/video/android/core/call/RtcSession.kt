@@ -607,12 +607,6 @@ public class RtcSession internal constructor(
                     publisher?.publishStream(
                         newTrack,
                         TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        CaptureFormat(
-                            ScreenShareManager.screenShareResolution.width,
-                            ScreenShareManager.screenShareResolution.height,
-                            0,
-                            ScreenShareManager.screenShareFps,
-                        )
                     )
                     setLocalTrack(
                         TrackType.TRACK_TYPE_VIDEO,
