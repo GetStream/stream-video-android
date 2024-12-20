@@ -1247,9 +1247,9 @@ public class RtcSession internal constructor(
         }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
-            publisher?.addIceCandidate(iceCandidate)
+            publisher?.handleNewIceCandidate(iceCandidate)
         } else {
-            subscriber?.addIceCandidate(iceCandidate)
+            subscriber?.handleNewIceCandidate(iceCandidate)
         }
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }

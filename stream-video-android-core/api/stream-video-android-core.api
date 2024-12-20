@@ -1030,6 +1030,7 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
 	public final fun getStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getVideoTransceiver ()Lorg/webrtc/RtpTransceiver;
+	public final fun handleNewIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
 	public final fun isFailedOrClosed ()Z
 	public final fun isHealthy ()Z
