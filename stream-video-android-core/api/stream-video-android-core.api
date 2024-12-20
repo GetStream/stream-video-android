@@ -1055,8 +1055,8 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
-	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;)V
-	public synthetic fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;ILorg/webrtc/ManagedAudioProcessingFactory;)V
+	public synthetic fun <init> (Landroid/content/Context;ILorg/webrtc/ManagedAudioProcessingFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun isAudioProcessingEnabled ()Z
 	public final fun makeAudioSource (Lorg/webrtc/MediaConstraints;)Lorg/webrtc/AudioSource;
@@ -4341,9 +4341,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public static final fun livestreamAudioCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static final fun livestreamGuestCallServiceConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public static final fun resolveAudioUsage (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;)I
-	public static final fun resolveRunCallServiceInForeground (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;)Z
-	public static final fun resolveServiceClass (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;)Ljava/lang/Class;
 	public static final fun update (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 }

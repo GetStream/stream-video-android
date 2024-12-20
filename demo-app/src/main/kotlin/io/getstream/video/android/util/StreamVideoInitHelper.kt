@@ -194,9 +194,10 @@ object StreamVideoInitHelper {
             .update(
                 callType = "default",
                 runCallServiceInForeground = true,
-            ).update(
+            )
+            .update(
                 callType = "livestream",
-                runCallServiceInForeground = false,
+                runCallServiceInForeground = true,
             )
 
         return StreamVideoBuilder(
