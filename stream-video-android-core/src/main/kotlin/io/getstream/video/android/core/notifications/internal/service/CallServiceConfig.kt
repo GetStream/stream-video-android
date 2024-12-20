@@ -130,7 +130,7 @@ public fun audioCallServiceConfig(): CallServiceConfig {
  * Updates the configuration for the given call type.
  * @param callType The call type to update.
  * @param runCallServiceInForeground Whether to start the foreground service.
- * @param audioUsage The audio usage for the call service.
+ * @param audioUsage The audio usage for the call service, e.g. [AudioAttributes.USAGE_VOICE_COMMUNICATION] or [AudioAttributes.USAGE_MEDIA].
  */
 fun CallServiceConfig.update(
     callType: String,

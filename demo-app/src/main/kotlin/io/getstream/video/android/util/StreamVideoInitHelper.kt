@@ -18,6 +18,7 @@ package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.media.AudioAttributes
 import android.util.Log
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
@@ -193,7 +194,8 @@ object StreamVideoInitHelper {
         val csc = livestreamGuestCallServiceConfig()
             .update(
                 callType = "default",
-                runCallServiceInForeground = true,
+                runCallServiceInForeground = false,
+                audioUsage = AudioAttributes.USAGE_MEDIA,
             )
             .update(
                 callType = "livestream",

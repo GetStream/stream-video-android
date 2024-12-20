@@ -177,16 +177,6 @@ internal class StreamVideoClient internal constructor(
     internal var guestUserJob: Deferred<Unit>? = null
     private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
-//    @InternalStreamVideoApi
-//    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
-//        context = context,
-//        audioProcessing = audioProcessing,
-//        getAudioUsage = {
-//            val callType = state.activeCall.value?.type ?: ANY_MARKER
-//            callServiceConfig.resolveAudioUsage(callType)
-//        },
-//    )
-
     public override val userId = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")

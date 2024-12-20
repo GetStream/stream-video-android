@@ -210,7 +210,7 @@ public class Call(
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
 
-    internal val peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
+    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
         context = clientImpl.context,
         audioProcessing = clientImpl.audioProcessing,
         audioUsage = clientImpl.callServiceConfig.resolveAudioUsage(type),
@@ -220,17 +220,13 @@ public class Call(
         if (testInstanceProvider.mediaManagerCreator != null) {
             testInstanceProvider.mediaManagerCreator!!.invoke()
         } else {
-            val audioUsage = clientImpl.callServiceConfig.resolveAudioUsage(type)
-            val mm = MediaManagerImpl(
+            MediaManagerImpl(
                 clientImpl.context,
                 this,
                 scope,
                 peerConnectionFactory.eglBase.eglBaseContext,
                 clientImpl.callServiceConfig.resolveAudioUsage(type),
             )
-            logger.d { "[csc] MediaManager created with audioUsage: $audioUsage" }
-
-            mm
         }
     }
 
