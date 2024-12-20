@@ -18,6 +18,8 @@ package io.getstream.video.android.core.events
 
 import io.getstream.video.android.model.UserAudioLevel
 import org.openapitools.client.models.VideoEvent
+import stream.video.sfu.event.ChangePublishOptions
+import stream.video.sfu.event.ChangePublishOptionsComplete
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.event.SfuRequest
@@ -27,6 +29,7 @@ import stream.video.sfu.models.Error
 import stream.video.sfu.models.GoAwayReason
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
@@ -84,6 +87,10 @@ public data class ChangePublishQualityEvent(
     val changePublishQuality: ChangePublishQuality,
 ) : SfuDataEvent()
 
+public data class ChangePublishOptionsEvent(
+    val change: ChangePublishOptions
+) : SfuDataEvent()
+
 public data class TrackPublishedEvent(
     val userId: String,
     val sessionId: String,
@@ -126,6 +133,7 @@ public data class JoinCallResponseEvent(
     val participantCount: ParticipantCount,
     val fastReconnectDeadlineSeconds: Int,
     val isReconnected: Boolean,
+    val publishOptions: List<PublishOption>,
 ) : SfuDataEvent()
 
 public data class CallEndedSfuEvent(

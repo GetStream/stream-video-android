@@ -61,7 +61,7 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
  */
-public class StreamPeerConnection(
+open class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
@@ -84,14 +84,13 @@ public class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
-    private val logger by taggedLogger("Call:PeerConnection:$typeTag")
+    internal val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
     /**
      * The wrapped connection for all the WebRTC communication.
      */
     public lateinit var connection: PeerConnection
         private set
-
     /**
      * Transceiver used to send video in different resolutions.
      */

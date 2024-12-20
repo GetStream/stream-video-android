@@ -541,7 +541,7 @@ public class CameraManager(
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
     private val _availableResolutions:
-        MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+            MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         MutableStateFlow(emptyList())
     public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         _availableResolutions
@@ -840,27 +840,24 @@ class MediaManagerImpl(
     val videoSource =
         call.clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
 
-    val screenShareVideoSource by lazy {
+    val screenShareVideoSource =
         call.clientImpl.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
-    }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
+    var videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
         source = videoSource,
         trackId = UUID.randomUUID().toString(),
     )
 
-    val screenShareTrack by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoTrack(
-            source = screenShareVideoSource,
-            trackId = UUID.randomUUID().toString(),
-        )
-    }
+    var screenShareTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
+        source = screenShareVideoSource,
+        trackId = UUID.randomUUID().toString(),
+    )
 
     val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
+    var audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
         source = audioSource,
         trackId = UUID.randomUUID().toString(),
     )
