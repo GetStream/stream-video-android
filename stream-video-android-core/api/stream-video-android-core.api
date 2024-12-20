@@ -92,7 +92,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun updatePreferredSubscribeOptions (Lio/getstream/video/android/core/model/VideoCodec;)V
 }
 
 public final class io/getstream/video/android/core/Call$Companion {
@@ -628,13 +627,11 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 
 public final class io/getstream/video/android/core/PeerConnectionStats {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
-	public final fun getAudioCodec ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBitrateKbps ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getJitterInMs ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLatency ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getQualityDropReason ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getVideoCodec ()Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public abstract interface class io/getstream/video/android/core/RealtimeConnection {
@@ -1024,14 +1021,16 @@ public abstract interface class io/getstream/video/android/core/call/audio/Input
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnection : org/webrtc/PeerConnection$Observer {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;I)V
-	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)Lorg/webrtc/RtpTransceiver;
+	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;)Lorg/webrtc/RtpTransceiver;
-	public static synthetic fun addVideoTransceiver$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaStreamTrack;Lstream/video/sfu/models/PublishOption;Ljava/util/List;ILjava/lang/Object;)Lorg/webrtc/RtpTransceiver;
+	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;Z)V
 	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
 	public final fun getStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getVideoTransceiver ()Lorg/webrtc/RtpTransceiver;
+	public final fun handleNewIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
 	public final fun isFailedOrClosed ()Z
 	public final fun isHealthy ()Z
@@ -3021,17 +3020,6 @@ public final class io/getstream/video/android/core/events/CallGrantsUpdatedEvent
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/events/ChangePublishOptionsEvent : io/getstream/video/android/core/events/SfuDataEvent {
-	public fun <init> (Lstream/video/sfu/event/ChangePublishOptions;)V
-	public final fun component1 ()Lstream/video/sfu/event/ChangePublishOptions;
-	public final fun copy (Lstream/video/sfu/event/ChangePublishOptions;)Lio/getstream/video/android/core/events/ChangePublishOptionsEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/ChangePublishOptionsEvent;Lstream/video/sfu/event/ChangePublishOptions;ILjava/lang/Object;)Lio/getstream/video/android/core/events/ChangePublishOptionsEvent;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getChangePublishOptions ()Lstream/video/sfu/event/ChangePublishOptions;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/core/events/ChangePublishQualityEvent : io/getstream/video/android/core/events/SfuDataEvent {
 	public fun <init> (Lstream/video/sfu/event/ChangePublishQuality;)V
 	public final fun component1 ()Lstream/video/sfu/event/ChangePublishQuality;
@@ -3116,19 +3104,17 @@ public final class io/getstream/video/android/core/events/ICETrickleEvent : io/g
 }
 
 public final class io/getstream/video/android/core/events/JoinCallResponseEvent : io/getstream/video/android/core/events/SfuDataEvent {
-	public fun <init> (Lstream/video/sfu/models/CallState;Lio/getstream/video/android/core/events/ParticipantCount;IZLjava/util/List;)V
+	public fun <init> (Lstream/video/sfu/models/CallState;Lio/getstream/video/android/core/events/ParticipantCount;IZ)V
 	public final fun component1 ()Lstream/video/sfu/models/CallState;
 	public final fun component2 ()Lio/getstream/video/android/core/events/ParticipantCount;
 	public final fun component3 ()I
 	public final fun component4 ()Z
-	public final fun component5 ()Ljava/util/List;
-	public final fun copy (Lstream/video/sfu/models/CallState;Lio/getstream/video/android/core/events/ParticipantCount;IZLjava/util/List;)Lio/getstream/video/android/core/events/JoinCallResponseEvent;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/JoinCallResponseEvent;Lstream/video/sfu/models/CallState;Lio/getstream/video/android/core/events/ParticipantCount;IZLjava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/core/events/JoinCallResponseEvent;
+	public final fun copy (Lstream/video/sfu/models/CallState;Lio/getstream/video/android/core/events/ParticipantCount;IZ)Lio/getstream/video/android/core/events/JoinCallResponseEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/JoinCallResponseEvent;Lstream/video/sfu/models/CallState;Lio/getstream/video/android/core/events/ParticipantCount;IZILjava/lang/Object;)Lio/getstream/video/android/core/events/JoinCallResponseEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCallState ()Lstream/video/sfu/models/CallState;
 	public final fun getFastReconnectDeadlineSeconds ()I
 	public final fun getParticipantCount ()Lio/getstream/video/android/core/events/ParticipantCount;
-	public final fun getPublishOptions ()Ljava/util/List;
 	public fun hashCode ()I
 	public final fun isReconnected ()Z
 	public fun toString ()Ljava/lang/String;
@@ -3821,13 +3807,13 @@ public final class io/getstream/video/android/core/model/IceCandidate {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class io/getstream/video/android/core/model/IceCandidate$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/core/model/IceCandidate$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/IceCandidate$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/model/IceCandidate;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/model/IceCandidate;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/model/IceCandidate;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/model/IceCandidate;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -3983,27 +3969,6 @@ public final class io/getstream/video/android/core/model/NetworkQuality$UnSpecif
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/model/PreferredVideoPublishOptions {
-	public fun <init> ()V
-	public fun <init> (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lio/getstream/video/android/core/model/VideoCodec;
-	public final fun component2 ()Ljava/lang/Integer;
-	public final fun component3 ()Ljava/lang/Integer;
-	public final fun copy (Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/video/android/core/model/PreferredVideoPublishOptions;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/PreferredVideoPublishOptions;Lio/getstream/video/android/core/model/VideoCodec;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/video/android/core/model/PreferredVideoPublishOptions;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCodec ()Lio/getstream/video/android/core/model/VideoCodec;
-	public final fun getMaxBitrate ()Ljava/lang/Integer;
-	public final fun getMaxSimulcastLayers ()Ljava/lang/Integer;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/model/PreferredVideoPublishOptionsKt {
-	public static final fun getScalabilityMode (Lstream/video/sfu/models/PublishOption;)Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/core/model/PreferredVideoResolution {
 	public fun <init> (II)V
 	public final fun component1 ()I
@@ -4013,19 +3978,6 @@ public final class io/getstream/video/android/core/model/PreferredVideoResolutio
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getHeight ()I
 	public final fun getWidth ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/model/PreferredVideoSubscribeOptions {
-	public fun <init> ()V
-	public fun <init> (Lio/getstream/video/android/core/model/VideoCodec;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/model/VideoCodec;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lio/getstream/video/android/core/model/VideoCodec;
-	public final fun copy (Lio/getstream/video/android/core/model/VideoCodec;)Lio/getstream/video/android/core/model/PreferredVideoSubscribeOptions;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/PreferredVideoSubscribeOptions;Lio/getstream/video/android/core/model/VideoCodec;ILjava/lang/Object;)Lio/getstream/video/android/core/model/PreferredVideoSubscribeOptions;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCodec ()Lio/getstream/video/android/core/model/VideoCodec;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4244,17 +4196,6 @@ public final class io/getstream/video/android/core/model/UpdateUserPermissionsDa
 	public static final fun toRequest (Lio/getstream/video/android/core/model/UpdateUserPermissionsData;)Lorg/openapitools/client/models/UpdateUserPermissionsRequest;
 }
 
-public final class io/getstream/video/android/core/model/VideoCodec : java/lang/Enum {
-	public static final field AV1 Lio/getstream/video/android/core/model/VideoCodec;
-	public static final field H264 Lio/getstream/video/android/core/model/VideoCodec;
-	public static final field VP8 Lio/getstream/video/android/core/model/VideoCodec;
-	public static final field VP9 Lio/getstream/video/android/core/model/VideoCodec;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun supportsSvc ()Z
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/model/VideoCodec;
-	public static fun values ()[Lio/getstream/video/android/core/model/VideoCodec;
-}
-
 public final class io/getstream/video/android/core/model/VideoModelKt {
 	public static final fun merge (Lio/getstream/video/android/core/model/CallUser;Lio/getstream/video/android/core/model/CallUser;)Lio/getstream/video/android/core/model/CallUser;
 	public static final fun merge (Lio/getstream/video/android/core/model/CallUserState;Lio/getstream/video/android/core/model/CallUserState;)Lio/getstream/video/android/core/model/CallUserState;
@@ -4468,13 +4409,13 @@ public final class io/getstream/video/android/core/socket/ErrorResponse : java/l
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class io/getstream/video/android/core/socket/ErrorResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/core/socket/ErrorResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/ErrorResponse$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/ErrorResponse;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/ErrorResponse;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/ErrorResponse;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/ErrorResponse;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -4495,13 +4436,13 @@ public final class io/getstream/video/android/core/socket/SocketError {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class io/getstream/video/android/core/socket/SocketError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/core/socket/SocketError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/SocketError$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/SocketError;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/SocketError;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/SocketError;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/SocketError;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -5232,6 +5173,17 @@ public final class io/getstream/video/android/core/utils/MediaStream {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/utils/MinimalSdpParser {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getSdp ()Ljava/lang/String;
+	public final fun mangle (ZZZ)Ljava/lang/String;
+	public static synthetic fun mangle$default (Lio/getstream/video/android/core/utils/MinimalSdpParser;ZZZILjava/lang/Object;)Ljava/lang/String;
+	public final fun parse ()V
+	public final fun parseMLine (ILjava/lang/String;)Lio/getstream/video/android/core/utils/MediaStream;
+	public final fun parseRtpMap (ILjava/lang/String;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
+	public final fun setSdp (Ljava/lang/String;)V
+}
+
 public final class io/getstream/video/android/core/utils/NoiseCancellationUtilsKt {
 	public static final fun isAutoOn (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
 	public static final fun isAvailable (Lorg/openapitools/client/models/NoiseCancellationSettings;)Z
@@ -5240,25 +5192,19 @@ public final class io/getstream/video/android/core/utils/NoiseCancellationUtilsK
 }
 
 public final class io/getstream/video/android/core/utils/RtpMapAttribute {
-	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V
-	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()I
-	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/RtpMapAttribute;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/utils/RtpMapAttribute;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/utils/RtpMapAttribute;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCodecClockRate ()I
-	public final fun getCodecFmtp ()Ljava/lang/String;
-	public final fun getCodecName ()Ljava/lang/String;
+	public final fun getCodec ()Ljava/lang/String;
 	public final fun getIndex ()I
-	public final fun getPayloadType ()Ljava/lang/String;
-	public final fun getSdpLine ()Ljava/lang/String;
+	public final fun getLine ()Ljava/lang/String;
+	public final fun getNumber ()Ljava/lang/String;
 	public fun hashCode ()I
-	public final fun setCodecFmtp (Ljava/lang/String;)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -6532,13 +6478,13 @@ public final class io/getstream/video/android/datastore/model/StreamUserPreferen
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class io/getstream/video/android/datastore/model/StreamUserPreferences$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/datastore/model/StreamUserPreferences$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/datastore/model/StreamUserPreferences$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/datastore/model/StreamUserPreferences;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/datastore/model/StreamUserPreferences;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/datastore/model/StreamUserPreferences;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/datastore/model/StreamUserPreferences;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -6563,13 +6509,13 @@ public final class io/getstream/video/android/model/Device {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class io/getstream/video/android/model/Device$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/model/Device$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/Device$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/Device;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/Device;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/Device;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/Device;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -6598,7 +6544,7 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public final fun component4 ()Z
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lio/getstream/video/android/model/StreamCallId;
 	public static synthetic fun copy$default (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lio/getstream/video/android/model/StreamCallId;
-	public final fun describeContents ()I
+	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
@@ -6606,16 +6552,16 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public fun hashCode ()I
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public synthetic class io/getstream/video/android/model/StreamCallId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/model/StreamCallId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/StreamCallId$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/StreamCallId;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/StreamCallId;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/StreamCallId;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/StreamCallId;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -6673,13 +6619,13 @@ public final class io/getstream/video/android/model/User {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class io/getstream/video/android/model/User$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/model/User$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/User$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/User;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/User;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/User;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/User;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -6719,13 +6665,13 @@ public final class io/getstream/video/android/model/UserDevices {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class io/getstream/video/android/model/UserDevices$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final class io/getstream/video/android/model/UserDevices$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/UserDevices$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/UserDevices;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/UserDevices;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/UserDevices;)V
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/UserDevices;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -11939,16 +11885,15 @@ public final class stream/video/sfu/event/JoinRequest : com/squareup/wire/Messag
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/event/JoinRequest$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;)Lstream/video/sfu/event/JoinRequest;
-	public static synthetic fun copy$default (Lstream/video/sfu/event/JoinRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/JoinRequest;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lokio/ByteString;)Lstream/video/sfu/event/JoinRequest;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/JoinRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/JoinRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClient_details ()Lstream/video/sfu/models/ClientDetails;
 	public final fun getFast_reconnect ()Z
 	public final fun getMigration ()Lstream/video/sfu/event/Migration;
 	public final fun getPreferred_publish_options ()Ljava/util/List;
-	public final fun getPreferred_subscribe_options ()Ljava/util/List;
 	public final fun getPublisher_sdp ()Ljava/lang/String;
 	public final fun getReconnect_details ()Lstream/video/sfu/event/ReconnectDetails;
 	public final fun getSession_id ()Ljava/lang/String;
@@ -12922,26 +12867,6 @@ public final class stream/video/sfu/models/StreamQuality : com/squareup/wire/Mes
 }
 
 public final class stream/video/sfu/models/StreamQuality$Companion {
-}
-
-public final class stream/video/sfu/models/SubscribeOption : com/squareup/wire/Message {
-	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
-	public static final field Companion Lstream/video/sfu/models/SubscribeOption$Companion;
-	public fun <init> ()V
-	public fun <init> (Lstream/video/sfu/models/TrackType;Ljava/util/List;Lokio/ByteString;)V
-	public synthetic fun <init> (Lstream/video/sfu/models/TrackType;Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Lstream/video/sfu/models/TrackType;Ljava/util/List;Lokio/ByteString;)Lstream/video/sfu/models/SubscribeOption;
-	public static synthetic fun copy$default (Lstream/video/sfu/models/SubscribeOption;Lstream/video/sfu/models/TrackType;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/SubscribeOption;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCodecs ()Ljava/util/List;
-	public final fun getTrack_type ()Lstream/video/sfu/models/TrackType;
-	public fun hashCode ()I
-	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
-	public synthetic fun newBuilder ()Ljava/lang/Void;
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class stream/video/sfu/models/SubscribeOption$Companion {
 }
 
 public final class stream/video/sfu/models/TrackInfo : com/squareup/wire/Message {
