@@ -558,7 +558,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun initialiseAudioTransceiver() {
+    private fun initializeAudioTransceiver() {
         if (!audioTransceiverInitialized) {
             publisher?.let {
                 it.addAudioTransceiver(
@@ -588,7 +588,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
 
                 if (it == DeviceStatus.Enabled) {
-                    initialiseAudioTransceiver()
+                    initializeAudioTransceiver()
                 }
             }
         }
@@ -741,7 +741,7 @@ public class RtcSession internal constructor(
                     initializeVideoTransceiver()
                 }
                 if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
-                    initialiseAudioTransceiver()
+                    initializeAudioTransceiver()
                 }
                 if (call.mediaManager.screenShare.status.value == DeviceStatus.Enabled) {
                     initializeScreenshareTransceiver()
@@ -1249,9 +1249,9 @@ public class RtcSession internal constructor(
         }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
-            publisher?.addIceCandidate(iceCandidate)
+            publisher?.handleNewIceCandidate(iceCandidate)
         } else {
-            subscriber?.addIceCandidate(iceCandidate)
+            subscriber?.handleNewIceCandidate(iceCandidate)
         }
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
