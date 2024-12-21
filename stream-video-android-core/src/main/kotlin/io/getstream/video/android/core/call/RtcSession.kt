@@ -27,6 +27,7 @@ import android.os.PowerManager.THERMAL_STATUS_SEVERE
 import android.os.PowerManager.THERMAL_STATUS_SHUTDOWN
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
+import findOptimalVideoLayers
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
@@ -111,6 +112,7 @@ import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
+import org.webrtc.RtpParameters
 import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
@@ -153,6 +155,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import toVideoLayers
 import java.util.UUID
 import kotlin.math.absoluteValue
 import kotlin.random.Random
@@ -609,9 +612,9 @@ public class RtcSession internal constructor(
                         TrackType.TRACK_TYPE_SCREEN_SHARE,
                     )
                     setLocalTrack(
-                        TrackType.TRACK_TYPE_VIDEO,
+                        TrackType.TRACK_TYPE_SCREEN_SHARE,
                         VideoTrack(
-                            streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
                             video = newTrack,
                         ),
                     )
@@ -875,11 +878,14 @@ public class RtcSession internal constructor(
     }
 
     private suspend fun throwawayPublisherSdpAndOptions(): String {
-        return createDummyPeerConnection(RtpTransceiverDirection.SEND_ONLY)?.let { dummyPublisher ->
-            val sdp = getDummySdp(dummyPublisher)
-            cleanDummyPeerConnection(dummyPublisher)
-            sdp
-        } ?: ""
+        val sdp =
+            createDummyPeerConnection(RtpTransceiverDirection.SEND_ONLY)?.let { dummyPublisher ->
+                val sdp = getDummySdp(dummyPublisher)
+                cleanDummyPeerConnection(dummyPublisher)
+                sdp
+            } ?: ""
+        logger.d { "[throwawayPublisherSdpAndOptions] #sfu; sdp: \n$sdp" }
+        return sdp
     }
 
     private suspend fun throwawaySubscriberSdpAndOptions(): String {
@@ -896,7 +902,8 @@ public class RtcSession internal constructor(
         }
 
         val addTempTransceivers = { spc: StreamPeerConnection ->
-            spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
+            val init = spc.buildVideoTransceiverInit(emptyList(), false)
+            spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO, init)
             spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO)
         }
 
@@ -1084,6 +1091,7 @@ public class RtcSession internal constructor(
                     }
 
                     is ChangePublishOptionsEvent -> {
+                        logger.d { "[]changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
                         publisher?.syncPublishOptions(
                             call.mediaManager.camera.resolution.value, event.change.publish_options
                         )

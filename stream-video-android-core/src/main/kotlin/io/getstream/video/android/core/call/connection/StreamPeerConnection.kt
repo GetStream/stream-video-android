@@ -328,7 +328,7 @@ open class StreamPeerConnection(
      *
      * @param streamIds The list of stream IDs to bind to this transceiver.
      */
-    private fun buildVideoTransceiverInit(
+    internal fun buildVideoTransceiverInit(
         streamIds: List<String>,
         isScreenShare: Boolean,
     ): RtpTransceiverInit {
@@ -348,6 +348,7 @@ open class StreamPeerConnection(
                 4.0,
             ).apply {
                 maxBitrateBps = maxBitRate / 4
+                maxFramerate = 30
             }
 
             val halfQuality = RtpParameters.Encoding(
@@ -356,6 +357,7 @@ open class StreamPeerConnection(
                 2.0,
             ).apply {
                 maxBitrateBps = maxBitRate / 2
+                maxFramerate = 30
             }
 
             val fullQuality = RtpParameters.Encoding(
@@ -364,8 +366,7 @@ open class StreamPeerConnection(
                 1.0,
             ).apply {
                 maxBitrateBps = maxBitRate
-//            networkPriority = 3
-//            bitratePriority = 4.0
+                maxFramerate = 30
             }
 
             listOf(quarterQuality, halfQuality, fullQuality)

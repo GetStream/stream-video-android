@@ -1,6 +1,7 @@
 package io.getstream.video.android.core.call.connection
 
 import OptimalVideoLayer
+import defaultVideoLayers
 import findOptimalVideoLayers
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
@@ -186,37 +187,28 @@ internal class Publisher(
     private fun addTransceiver(
         captureFormat: CaptureFormat?, track: MediaStreamTrack, publishOption: PublishOption
     ) {
-        val videoEncodings = computeLayers(captureFormat ?: defaultFormat, track, publishOption)
-        val sendEncodings =
-            if (!isAudioTrackType(publishOption.track_type) && isSvcCodec(publishOption.codec?.name)) {
-                toSvcEncodings(
-                    videoEncodings
-                )
-            } else videoEncodings
-
-
-        val transceiver = connection.addTransceiver(track,
-            RtpTransceiverInit(RtpTransceiverDirection.SEND_ONLY, emptyList(), sendEncodings?.map {
-                RtpParameters.Encoding(
-                    it.rid, it.active, it.scaleResolutionDownBy
-                ).apply {
-                    maxBitrateBps = it.maxBitrate
-                    maxFramerate = it.maxFramerate
-                    scalabilityMode = it.scalabilityMode
-                    scaleResolutionDownBy = it.scaleResolutionDownBy
-                }
-            } ?: emptyList()))
-
+        val init = defaultVideoLayers(publishOption)
+        val transceiver = connection.addTransceiver(
+            track, RtpTransceiverInit(
+                RtpTransceiverDirection.SEND_ONLY,
+                emptyList(),
+                init
+            )
+        )
         if (!isAudioTrackType(publishOption.track_type)) {
-            val capabilities = peerConnectionFactory.getSenderCapabilities(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
+            val capabilities =
+                peerConnectionFactory.getSenderCapabilities(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
             transceiver.sortVideoCodecPreferences(publishOption.codec?.name, capabilities)
         }
 
-        logger.d { "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encoding: $sendEncodings)" }
+        logger.d { "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encoding: $init)" }
         transceiverCache.add(publishOption, transceiver)
     }
 
-    internal fun RtpTransceiver.sortVideoCodecPreferences(targetCodec: String?, capabilities: RtpCapabilities) {
+    internal fun RtpTransceiver.sortVideoCodecPreferences(
+        targetCodec: String?,
+        capabilities: RtpCapabilities
+    ) {
         if (targetCodec == null) {
             logger.w { "No target codec provided" }
             return
@@ -477,7 +469,7 @@ internal class Publisher(
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
         val layers = if (!isAudio) {
-            if (isTrackLive && captureFormat != null) {
+            if (isTrackLive) {
                 computeLayers(
                     captureFormat, track, publishOption
                 )
@@ -487,12 +479,11 @@ internal class Publisher(
         transceiverCache.setLayers(publishOption, layers ?: emptyList())
         val transceiverIndex = transceiverCache.indexOf(transceiver)
 
-        //val codec = publishOption.codec?.name
-
-        //val svcLayers = if (isSvcCodec(codec)) toSvcEncodings(layers) else layers
+        val codec = publishOption.codec?.name
+        val svcLayers = if (isSvcCodec(codec)) toSvcEncodings(layers) else layers
         return TrackInfo(
             track_id = track.id(),
-            layers = toVideoLayers(layers ?: emptyList()),
+            layers = toVideoLayers(svcLayers ?: emptyList()),
             track_type = publishOption.track_type,
             mid = extractMid(transceiver, transceiverIndex, sdp),
             stereo = false,
