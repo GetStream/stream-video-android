@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection
 
 import OptimalVideoLayer
@@ -22,7 +38,6 @@ import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RtpCapabilities
-import org.webrtc.RtpParameters
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
@@ -58,7 +73,7 @@ internal class Publisher(
     onStreamAdded,
     onNegotiationNeeded,
     onIceCandidate,
-    maxBitRate
+    maxBitRate,
 ) {
 
     private val transceiverCache = TransceiverCache()
@@ -111,7 +126,9 @@ internal class Publisher(
             isIceRestarting = iceRestart
             setLocalDescription(offer)
             val request = SetPublisherRequest(
-                sdp = offer.description, tracks = trackInfos, session_id = sessionId
+                sdp = offer.description,
+                tracks = trackInfos,
+                session_id = sessionId,
             )
             val response = sfuClient.setPublisher(request)
             logger.i { "Received answer: ${response.sdp}" }
@@ -185,29 +202,36 @@ internal class Publisher(
     }
 
     private fun addTransceiver(
-        captureFormat: CaptureFormat?, track: MediaStreamTrack, publishOption: PublishOption
+        captureFormat: CaptureFormat?,
+        track: MediaStreamTrack,
+        publishOption: PublishOption,
     ) {
         val init = defaultVideoLayers(publishOption)
         val transceiver = connection.addTransceiver(
-            track, RtpTransceiverInit(
+            track,
+            RtpTransceiverInit(
                 RtpTransceiverDirection.SEND_ONLY,
                 emptyList(),
-                init
-            )
+                init,
+            ),
         )
         if (!isAudioTrackType(publishOption.track_type)) {
             val capabilities =
-                peerConnectionFactory.getSenderCapabilities(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
+                peerConnectionFactory.getSenderCapabilities(
+                    MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+                )
             transceiver.sortVideoCodecPreferences(publishOption.codec?.name, capabilities)
         }
 
-        logger.d { "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encoding: $init)" }
+        logger.d {
+            "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encoding: $init)"
+        }
         transceiverCache.add(publishOption, transceiver)
     }
 
     internal fun RtpTransceiver.sortVideoCodecPreferences(
         targetCodec: String?,
-        capabilities: RtpCapabilities
+        capabilities: RtpCapabilities,
     ) {
         if (targetCodec == null) {
             logger.w { "No target codec provided" }
@@ -215,7 +239,9 @@ internal class Publisher(
         }
         logger.v { "Set codec preferences to $targetCodec" }
         capabilities.codecs.forEach { codec ->
-            logger.v { "codec: ${codec.name}, ${codec.kind}, ${codec.mimeType}, ${codec.parameters}, ${codec.preferredPayloadType}" }
+            logger.v {
+                "codec: ${codec.name}, ${codec.kind}, ${codec.mimeType}, ${codec.parameters}, ${codec.preferredPayloadType}"
+            }
         }
         for (codec in capabilities.codecs) {
             val name = codec.name.uppercase()
@@ -227,7 +253,8 @@ internal class Publisher(
     }
 
     private fun updateTransceiver(
-        transceiver: RtpTransceiver, track: MediaStreamTrack
+        transceiver: RtpTransceiver,
+        track: MediaStreamTrack,
     ) {
         /*val previousTrack = transceiver.sender.track()
         if (previousTrack != null && previousTrack != track) {
@@ -309,35 +336,6 @@ internal class Publisher(
             }
         }
         return null
-    }
-
-    private suspend fun notifyTrackMuteStateChanged(
-        mediaStream: MediaStream?, trackType: TrackType, isMuted: Boolean
-    ) {/*//sfuClient.updateMuteState(trackType, isMuted)
-
-        val key = trackTypeToParticipantStreamKey(trackType)
-        if (key == null) return
-
-        if (isMuted) {
-            state.updateParticipant(sfuClient.sessionId) { p ->
-                p.copy(
-                    publishedTracks = p.publishedTracks.filter { it != trackType },
-                    audio = if (key == "audio") null else p.audio,
-                    video = if (key == "video") null else p.video,
-                    screenShare = if (key == "screenShare") null else p.screenShare
-                )
-            }
-        } else {
-            state.updateParticipant(sfuClient.sessionId) { p ->
-                val updatedTracks = if (p.publishedTracks.contains(trackType)) p.publishedTracks else p.publishedTracks + trackType
-                when (key) {
-                    "audio" -> p.copy(publishedTracks = updatedTracks, audio = mediaStream)
-                    "video" -> p.copy(publishedTracks = updatedTracks, video = mediaStream)
-                    "screenShare" -> p.copy(publishedTracks = updatedTracks, screenShare = mediaStream)
-                    else -> p
-                }
-            }
-        }*/
     }
 
     private fun stopPublishing() {
@@ -459,22 +457,30 @@ internal class Publisher(
         format: CaptureFormat?,
         transceiver: RtpTransceiver,
         publishOption: PublishOption,
-        sdp: String?
+        sdp: String?,
     ): TrackInfo {
         val track = transceiver.sender.track()!!
         val isScreenShare = publishOption.track_type == TrackType.TRACK_TYPE_SCREEN_SHARE
         val captureFormat = if (isScreenShare) {
             format ?: defaultScreenShareFormat
-        } else format ?: defaultFormat
+        } else {
+            format ?: defaultFormat
+        }
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
         val layers = if (!isAudio) {
             if (isTrackLive) {
                 computeLayers(
-                    captureFormat, track, publishOption
+                    captureFormat,
+                    track,
+                    publishOption,
                 )
-            } else transceiverCache.getLayers(publishOption)
-        } else null
+            } else {
+                transceiverCache.getLayers(publishOption)
+            }
+        } else {
+            null
+        }
 
         transceiverCache.setLayers(publishOption, layers ?: emptyList())
         val transceiverIndex = transceiverCache.indexOf(transceiver)
@@ -487,12 +493,14 @@ internal class Publisher(
             track_type = publishOption.track_type,
             mid = extractMid(transceiver, transceiverIndex, sdp),
             stereo = false,
-            muted = !isTrackLive
+            muted = !isTrackLive,
         )
     }
 
     fun extractMid(
-        transceiver: RtpTransceiver, transceiverInitIndex: Int, sdp: String?
+        transceiver: RtpTransceiver,
+        transceiverInitIndex: Int,
+        sdp: String?,
     ): String {
         // If the transceiver already has a mid, return it
         transceiver.mid?.let { return it }
@@ -521,7 +529,9 @@ internal class Publisher(
     }
 
     private fun computeLayers(
-        format: CaptureFormat, track: MediaStreamTrack, publishOption: PublishOption
+        format: CaptureFormat,
+        track: MediaStreamTrack,
+        publishOption: PublishOption,
     ): List<OptimalVideoLayer>? {
         if (isAudioTrackType(publishOption.track_type)) return null
         return findOptimalVideoLayers(format, publishOption)
@@ -531,7 +541,7 @@ internal class Publisher(
         val maxFramerate: Int,
         val scaleResolutionDownBy: Double,
         val maxBitrate: Int,
-        val scalabilityMode: String?
+        val scalabilityMode: String?,
     )
 
     private fun VideoLayerSetting.decompose(): LayerDecomposition {
@@ -539,7 +549,7 @@ internal class Publisher(
             maxFramerate = this.max_framerate,
             scaleResolutionDownBy = this.scale_resolution_down_by.toDouble(),
             maxBitrate = this.max_bitrate,
-            scalabilityMode = this.scalability_mode
+            scalabilityMode = this.scalability_mode,
         )
     }
 }

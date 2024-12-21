@@ -43,7 +43,6 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.model.UserAudioLevel
-import stream.video.sfu.event.ChangePublishOptions
 import stream.video.sfu.event.SfuEvent
 
 public object RTCEventMapper {

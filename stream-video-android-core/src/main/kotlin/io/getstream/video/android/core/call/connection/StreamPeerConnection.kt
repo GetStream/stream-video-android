@@ -91,6 +91,7 @@ open class StreamPeerConnection(
      */
     public lateinit var connection: PeerConnection
         private set
+
     /**
      * Transceiver used to send video in different resolutions.
      */

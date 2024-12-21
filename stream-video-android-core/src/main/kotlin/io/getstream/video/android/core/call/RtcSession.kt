@@ -27,7 +27,6 @@ import android.os.PowerManager.THERMAL_STATUS_SEVERE
 import android.os.PowerManager.THERMAL_STATUS_SHUTDOWN
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
-import findOptimalVideoLayers
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
@@ -40,7 +39,6 @@ import io.getstream.video.android.core.CallStatsReport
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.ScreenShareManager
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.Publisher
@@ -73,7 +71,6 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
-import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
@@ -106,14 +103,11 @@ import kotlinx.serialization.json.Json
 import okio.IOException
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
-import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
-import org.webrtc.RtpParameters
-import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.SessionDescription
@@ -136,8 +130,6 @@ import stream.video.sfu.models.SdkType
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import stream.video.sfu.models.VideoLayer
-import stream.video.sfu.models.VideoQuality
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.ICERestartResponse
@@ -155,10 +147,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
-import toVideoLayers
 import java.util.UUID
-import kotlin.math.absoluteValue
-import kotlin.random.Random
 
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -325,7 +314,7 @@ public class RtcSession internal constructor(
     internal var publisher: Publisher? = null
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    //internal var publisher: StreamPeerConnection? = null
+    // internal var publisher: StreamPeerConnection? = null
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
@@ -373,7 +362,7 @@ public class RtcSession internal constructor(
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
-        //publisher = createPublisher()
+        // publisher = createPublisher()
 
         listenToSubscriberConnection()
         val sfuConnectionModule = SfuConnectionModule(
@@ -421,11 +410,13 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected -> call.state._connection.value =
-                        RealtimeConnection.Connected
+                    is SfuSocketState.Connected ->
+                        call.state._connection.value =
+                            RealtimeConnection.Connected
 
-                    is SfuSocketState.Connecting -> call.state._connection.value =
-                        RealtimeConnection.InProgress
+                    is SfuSocketState.Connecting ->
+                        call.state._connection.value =
+                            RealtimeConnection.InProgress
 
                     else -> {
                         // Ignore it
@@ -652,7 +643,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -930,7 +921,6 @@ public class RtcSession internal constructor(
 
     @VisibleForTesting
     internal fun createPublisher(publishOptions: List<PublishOption>): Publisher {
-
         return clientImpl.peerConnectionFactory.makePublisher(
             sessionId = sessionId,
             me = call.state.me.value!!,
@@ -1093,7 +1083,8 @@ public class RtcSession internal constructor(
                     is ChangePublishOptionsEvent -> {
                         logger.d { "[]changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
                         publisher?.syncPublishOptions(
-                            call.mediaManager.camera.resolution.value, event.change.publish_options
+                            call.mediaManager.camera.resolution.value,
+                            event.change.publish_options,
                         )
                     }
 
@@ -1183,7 +1174,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     /**

@@ -19,7 +19,6 @@ package io.getstream.video.android.core.events
 import io.getstream.video.android.model.UserAudioLevel
 import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.ChangePublishOptions
-import stream.video.sfu.event.ChangePublishOptionsComplete
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.event.SfuRequest
@@ -88,7 +87,7 @@ public data class ChangePublishQualityEvent(
 ) : SfuDataEvent()
 
 public data class ChangePublishOptionsEvent(
-    val change: ChangePublishOptions
+    val change: ChangePublishOptions,
 ) : SfuDataEvent()
 
 public data class TrackPublishedEvent(

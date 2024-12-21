@@ -256,7 +256,7 @@ public class StreamPeerConnectionFactory(
      *
      * @param mediaType The type of media we're sending.
      */
-    fun getSenderCapabilities(mediaType: MediaStreamTrack.MediaType) : RtpCapabilities {
+    fun getSenderCapabilities(mediaType: MediaStreamTrack.MediaType): RtpCapabilities {
         return factory.getRtpSenderCapabilities(mediaType)
     }
 

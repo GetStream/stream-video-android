@@ -1,9 +1,23 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.model.VideoCodec
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.RtpParameters
-import org.webrtc.RtpTransceiver
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
@@ -27,22 +41,22 @@ data class OptimalVideoLayer(
     var maxFramerate: Int? = null,
     var scalabilityMode: String? = null,
     var scaleResolutionDownBy: Double? = null,
-    val svc: Boolean = false
+    val svc: Boolean = false,
 )
 
 private val defaultBitratePerRid = mapOf(
     "q" to 300_000,
     "h" to 750_000,
-    "f" to 1_250_000
+    "f" to 1_250_000,
 )
 
 fun isSvcCodec(codecOrMimeType: String?): Boolean {
     if (codecOrMimeType == null) return false
     val lower = codecOrMimeType.lowercase()
     return lower == "vp9" ||
-            lower == "av1" ||
-            lower == "video/vp9" ||
-            lower == "video/av1"
+        lower == "av1" ||
+        lower == "video/vp9" ||
+        lower == "video/av1"
 }
 
 // Converts spatial and temporal layers to scalability mode string
@@ -76,7 +90,7 @@ fun toVideoLayers(layers: List<OptimalVideoLayer>): List<VideoLayer> {
             bitrate = it.maxBitrate,
             fps = it.maxFramerate ?: 0,
             quality = if (it.svc) VideoQuality.VIDEO_QUALITY_HIGH else ridToVideoQuality(it.rid),
-            video_dimension = VideoDimension(it.width, it.height)
+            video_dimension = VideoDimension(it.width, it.height),
         )
     }
 }
@@ -93,7 +107,7 @@ fun getComputedMaxBitrate(
     targetResolution: VideoDimension,
     currentWidth: Int,
     currentHeight: Int,
-    bitrate: Int
+    bitrate: Int,
 ): Int {
     val (targetWidth, targetHeight) = Pair(targetResolution.height, targetResolution.width)
     return if (currentWidth < targetWidth || currentHeight < targetHeight) {
@@ -108,7 +122,7 @@ fun getComputedMaxBitrate(
 
 fun withSimulcastConstraints(
     settings: VideoDimension,
-    optimalVideoLayers: List<OptimalVideoLayer>
+    optimalVideoLayers: List<OptimalVideoLayer>,
 ): List<OptimalVideoLayer> {
     val size = maxOf(settings.width, settings.height)
     val layers = when {
@@ -165,14 +179,18 @@ fun defaultVideoLayers(publishOption: PublishOption): List<RtpParameters.Encodin
     }
 
     return if (isSvcCodec(publishOption.codec?.name)) {
-        listOf(RtpParameters.Encoding(
-            "q",
-            true,
-            1.0,
-        ).apply {
-            maxBitrateBps = defaultBitratePerRid["f"] ?: defaultBitrate
-            maxFramerate = 30
-        }, halfQuality, fullQuality)
+        listOf(
+            RtpParameters.Encoding(
+                "q",
+                true,
+                1.0,
+            ).apply {
+                maxBitrateBps = defaultBitratePerRid["f"] ?: defaultBitrate
+                maxFramerate = 30
+            },
+            halfQuality,
+            fullQuality,
+        )
     } else {
         listOf(quarterQuality, halfQuality, fullQuality)
     }
@@ -180,7 +198,7 @@ fun defaultVideoLayers(publishOption: PublishOption): List<RtpParameters.Encodin
 
 fun findOptimalVideoLayers(
     captureFormat: CaptureFormat,
-    publishOption: PublishOption
+    publishOption: PublishOption,
 ): List<OptimalVideoLayer> {
     val optimalVideoLayers = mutableListOf<OptimalVideoLayer>()
     val settings = VideoDimension(captureFormat.width, captureFormat.height)
@@ -206,8 +224,14 @@ fun findOptimalVideoLayers(
         val layerHeight = (height / downscaleFactor).toInt()
         val calculatedBitrate = (maxBitrate / bitrateFactor).toInt()
         val layerBitrate =
-            if (calculatedBitrate > 0) calculatedBitrate else (defaultBitratePerRid[rid]
-                ?: 1_250_000)
+            if (calculatedBitrate > 0) {
+                calculatedBitrate
+            } else {
+                (
+                    defaultBitratePerRid[rid]
+                        ?: 1_250_000
+                    )
+            }
 
         val layer = OptimalVideoLayer(
             active = true,
@@ -215,7 +239,7 @@ fun findOptimalVideoLayers(
             width = layerWidth,
             height = layerHeight,
             maxBitrate = layerBitrate,
-            maxFramerate = fps
+            maxFramerate = fps,
         )
 
         if (svcCodec) {

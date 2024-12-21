@@ -1,7 +1,22 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection.transceivers
 
 import OptimalVideoLayer
-import io.getstream.video.android.core.call.connection.Publisher
 import org.webrtc.RtpTransceiver
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
@@ -73,7 +88,7 @@ class TransceiverCache {
     }
 
     private fun findTransceiverWith(trackType: TrackType, id: Int): TransceiverId? {
-        return cache["${id}-${trackType}"]
+        return cache["$id-$trackType"]
     }
 
     private fun findLayer(publishOption: PublishOption): TrackLayersCache? {
@@ -84,10 +99,10 @@ class TransceiverCache {
 // Helper data classes:
 data class TransceiverId(
     val publishOption: PublishOption,
-    val transceiver: RtpTransceiver
+    val transceiver: RtpTransceiver,
 )
 
 data class TrackLayersCache(
     val publishOption: PublishOption,
-    var layers: List<OptimalVideoLayer>
+    var layers: List<OptimalVideoLayer>,
 )

@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.model
 
 import io.getstream.video.android.core.Call
-import stream.video.sfu.models.PublishOption
 
 /**
  * Options to configure video publishing.
