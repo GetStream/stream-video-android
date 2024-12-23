@@ -31,7 +31,7 @@ private val logger by StreamLog.taggedLogger("VideoLayers")
  * In JavaScript, `OptimalVideoLayer` extends `RTCRtpEncodingParameters`.
  * Here we just define the fields as needed.
  */
-data class OptimalVideoLayer(
+internal data class OptimalVideoLayer(
     var active: Boolean = true,
     var rid: String,
     var width: Int = 0,
@@ -49,7 +49,7 @@ private val defaultBitratePerRid = mapOf(
     "f" to 1_250_000,
 )
 
-fun isSvcCodec(codecOrMimeType: String?): Boolean {
+internal fun isSvcCodec(codecOrMimeType: String?): Boolean {
     if (codecOrMimeType == null) return false
     val lower = codecOrMimeType.lowercase()
     return lower == "vp9" ||
@@ -59,13 +59,13 @@ fun isSvcCodec(codecOrMimeType: String?): Boolean {
 }
 
 // Converts spatial and temporal layers to scalability mode string
-fun toScalabilityMode(spatialLayers: Int, temporalLayers: Int): String {
+internal fun toScalabilityMode(spatialLayers: Int, temporalLayers: Int): String {
     // Matches `LxTy_KEY` format
     val keySuffix = if (spatialLayers > 1) "_KEY" else ""
     return "L${spatialLayers}T${temporalLayers}$keySuffix"
 }
 
-fun toSvcEncodings(layers: List<OptimalVideoLayer>?): List<OptimalVideoLayer>? {
+internal fun toSvcEncodings(layers: List<OptimalVideoLayer>?): List<OptimalVideoLayer>? {
     // We take the `f` layer and rename its rid to `q`.
     return layers
         ?.filter { it.rid == "f" }
@@ -73,7 +73,7 @@ fun toSvcEncodings(layers: List<OptimalVideoLayer>?): List<OptimalVideoLayer>? {
 }
 
 // Convert rid to VideoQuality
-fun ridToVideoQuality(rid: String?): VideoQuality {
+internal fun ridToVideoQuality(rid: String?): VideoQuality {
     return when (rid) {
         "q" -> VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
         "h" -> VideoQuality.VIDEO_QUALITY_MID
@@ -82,7 +82,7 @@ fun ridToVideoQuality(rid: String?): VideoQuality {
 }
 
 // Convert OptimalVideoLayer list to VideoLayer list
-fun toVideoLayers(layers: List<OptimalVideoLayer>): List<VideoLayer> {
+internal fun toVideoLayers(layers: List<OptimalVideoLayer>): List<VideoLayer> {
     return layers.map {
         VideoLayer(
             rid = it.rid,
@@ -94,7 +94,7 @@ fun toVideoLayers(layers: List<OptimalVideoLayer>): List<VideoLayer> {
     }
 }
 
-fun isAudioTrackType(trackType: TrackType): Boolean =
+internal fun isAudioTrackType(trackType: TrackType): Boolean =
     trackType == TrackType.TRACK_TYPE_AUDIO || trackType == TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO
 
 /**
@@ -102,7 +102,7 @@ fun isAudioTrackType(trackType: TrackType): Boolean =
  * If current resolution < target, scale bitrate proportionally down.
  * Otherwise use target bitrate.
  */
-fun getComputedMaxBitrate(
+internal fun getComputedMaxBitrate(
     targetResolution: VideoDimension,
     currentWidth: Int,
     currentHeight: Int,
@@ -119,7 +119,7 @@ fun getComputedMaxBitrate(
     }
 }
 
-fun withSimulcastConstraints(
+internal fun withSimulcastConstraints(
     settings: VideoDimension,
     optimalVideoLayers: List<OptimalVideoLayer>,
 ): List<OptimalVideoLayer> {
@@ -130,7 +130,7 @@ fun withSimulcastConstraints(
     }
 }
 
-fun defaultVideoLayers(publishOption: PublishOption): List<RtpParameters.Encoding> {
+internal fun defaultVideoLayers(publishOption: PublishOption): List<RtpParameters.Encoding> {
     val defaultBitrate = 1_250_000
     val quarterQuality = RtpParameters.Encoding(
         "q",
@@ -177,7 +177,7 @@ fun defaultVideoLayers(publishOption: PublishOption): List<RtpParameters.Encodin
     }
 }
 
-fun findOptimalVideoLayers(
+internal fun findOptimalVideoLayers(
     settings: VideoDimension,
     publishOption: PublishOption,
 ): List<OptimalVideoLayer> {

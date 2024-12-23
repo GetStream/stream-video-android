@@ -22,7 +22,6 @@ import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
-import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import kotlinx.coroutines.test.runTest

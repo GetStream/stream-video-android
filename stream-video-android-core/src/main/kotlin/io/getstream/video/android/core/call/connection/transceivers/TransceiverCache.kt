@@ -22,7 +22,7 @@ import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import java.util.Collections
 
-class TransceiverCache {
+internal class TransceiverCache {
     private val cache = Collections.synchronizedMap(linkedMapOf<String, TransceiverId>())
     private val layers = Collections.synchronizedMap(linkedMapOf<String, TrackLayersCache>())
 
@@ -96,12 +96,12 @@ class TransceiverCache {
 }
 
 // Helper data classes:
-data class TransceiverId(
+internal data class TransceiverId(
     val publishOption: PublishOption,
     val transceiver: RtpTransceiver,
 )
 
-data class TrackLayersCache(
+internal data class TrackLayersCache(
     val publishOption: PublishOption,
     var layers: List<OptimalVideoLayer>,
 )
