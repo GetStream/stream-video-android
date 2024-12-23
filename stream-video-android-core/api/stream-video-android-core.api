@@ -93,6 +93,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun unpinForEveryone (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun updateClosedCaptionsSettings (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -128,7 +129,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getBlockedUsers ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBroadcasting ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCapabilitiesByRole ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getClosedCaptionManager ()Lio/getstream/video/android/core/closedcaptions/ClosedCaptionManager;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedBy ()Lkotlinx/coroutines/flow/StateFlow;
@@ -2889,14 +2889,14 @@ public final class io/getstream/video/android/core/call/video/YuvFrame {
 
 public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionManager {
 	public fun <init> ()V
-	public fun <init> (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getCcMode ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClosedCaptioning ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClosedCaptions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleCallUpdate (Lorg/openapitools/client/models/CallResponse;)V
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
-	public final fun setConfig (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig;)V
+	public final fun updateClosedCaptionsSettings (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
 }
 
 public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig {
@@ -2912,6 +2912,23 @@ public final class io/getstream/video/android/core/closedcaptions/ClosedCaptions
 	public final fun getAutoDismissCaptions ()Z
 	public final fun getCaptionsAutoDismissTime ()J
 	public final fun getMaxCaptions ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings {
+	public fun <init> ()V
+	public fun <init> (JZI)V
+	public synthetic fun <init> (JZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun copy (JZI)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;JZIILjava/lang/Object;)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoDismissCaptions ()Z
+	public final fun getMaxVisibleCaptions ()I
+	public final fun getVisibilityDurationMs ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
