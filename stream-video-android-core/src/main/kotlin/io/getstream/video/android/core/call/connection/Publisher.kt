@@ -456,6 +456,7 @@ internal class Publisher(
             mid = extractMid(transceiver, transceiverCache.indexOf(publishOption), sdp),
             stereo = false,
             muted = !isTrackLive,
+            codec = publishOption.codec
         )
     }
 

@@ -108,6 +108,15 @@ message VideoLayer {
   VideoQuality quality = 6;
 }
 
+// SubscribeOption represents the configuration options for subscribing to a track.
+message SubscribeOption {
+  // The type of the track being subscribed (e.g., video, screenshare).
+  TrackType track_type = 1;
+
+  // The codecs supported by the subscriber for decoding tracks.
+  repeated Codec codecs = 2;
+}
+
 // PublishOption represents the configuration options for publishing a track.
 message PublishOption {
   // The type of the track being published (e.g., video, screenshare).
@@ -182,6 +191,7 @@ message TrackInfo {
   bool stereo = 8;
   bool red = 9;
   bool muted = 10;
+  Codec codec = 11;
 }
 
 enum ErrorCode {
