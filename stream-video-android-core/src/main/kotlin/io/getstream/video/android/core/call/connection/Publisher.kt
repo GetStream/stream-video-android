@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.call.connection
 
 import OptimalVideoLayer
-import defaultVideoLayers
+import computeTransceiverEncodings
 import findOptimalVideoLayers
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
@@ -49,6 +49,7 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SetPublisherRequest
+import toVideoDimension
 import toVideoLayers
 import java.util.UUID
 
@@ -78,7 +79,6 @@ internal class Publisher(
 ) {
 
     private val transceiverCache = TransceiverCache()
-    private val knownTrackIds = mutableSetOf<String>()
     private val defaultScreenShareFormat = CaptureFormat(1920, 1080, 15, 15)
     private val defaultFormat = CaptureFormat(1080, 720, 24, 30)
     private var isIceRestarting = false
@@ -143,6 +143,7 @@ internal class Publisher(
                 rejoin()
             }
             setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, response.sdp))
+            // Set ice trickle
         }
         isIceRestarting = false
     }
@@ -156,24 +157,18 @@ internal class Publisher(
         captureFormat: CaptureFormat? = null,
     ) {
         if (track.state() == MediaStreamTrack.State.ENDED) {
-            throw Exception("Can't publish a track that has ended already.")
+            logger.e { "Can't publish a track that has ended already." }
+            return
         }
 
         if (publishOptions.none { it.track_type == trackType }) {
-            throw Exception("No publish options found for $trackType")
+            logger.e { "No publish options found for $trackType" }
+            return
         }
 
         // enable the track if disabled
         if (!track.enabled()) track.setEnabled(true)
 
-        if (!knownTrackIds.contains(track.id())) {
-            knownTrackIds.add(track.id())
-        }
-
-        val option = publishOptions.find { it.track_type == trackType }
-        if (option == null) {
-            logger.w { "No publish option found for $trackType" }
-        }
         for (publishOption in publishOptions) {
             if (publishOption.track_type != trackType) continue
 
@@ -182,9 +177,8 @@ internal class Publisher(
             if (transceiver != null) {
                 safeCall { transceiver.dispose() }
                 transceiverCache.remove(publishOption)
-            } else {
-                addTransceiver(captureFormat, trackToPublish, publishOption)
             }
+            addTransceiver(captureFormat, trackToPublish, publishOption)
         }
     }
 
@@ -214,7 +208,7 @@ internal class Publisher(
         track: MediaStreamTrack,
         publishOption: PublishOption,
     ) {
-        val init = defaultVideoLayers(publishOption)
+        val init = computeTransceiverEncodings(captureFormat, publishOption)
         val transceiver = connection.addTransceiver(
             track,
             RtpTransceiverInit(
@@ -418,10 +412,6 @@ internal class Publisher(
         }
         logger.i { "Announced tracks for reconnect: $trackInfos" }
         return trackInfos
-    }
-
-    private fun CaptureFormat.toVideoDimension(): VideoDimension {
-        return VideoDimension(width, height)
     }
 
     private fun toTrackInfo(

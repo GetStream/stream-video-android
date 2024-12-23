@@ -19,21 +19,14 @@ package io.getstream.video.android.core.call.connection.transceivers
 import OptimalVideoLayer
 import org.webrtc.RtpTransceiver
 import stream.video.sfu.models.PublishOption
-import stream.video.sfu.models.TrackType
 import java.util.Collections
 
 internal class TransceiverCache {
     private val cache = Collections.synchronizedMap(linkedMapOf<String, TransceiverId>())
     private val layers = Collections.synchronizedMap(linkedMapOf<String, TrackLayersCache>())
 
-    /**
-     * An array maintaining the order of how transceivers were added
-     * to the peer connection.
-     */
-    private val transceiverOrder = mutableListOf<RtpTransceiver>()
-
     private fun PublishOption.key(): String {
-        return "$id-$track_type-${codec?.name?.let { "-$it" } ?: ""}"
+        return "$id-$track_type"
     }
 
     fun add(publishOption: PublishOption, transceiver: RtpTransceiver) {
@@ -80,14 +73,6 @@ internal class TransceiverCache {
 
     private fun findTransceiver(publishOption: PublishOption): TransceiverId? {
         return cache[publishOption.key()]
-    }
-
-    private fun findTransceiverWith(trackType: TrackType, id: Int): TransceiverId? {
-        return cache["$id-$trackType"]
-    }
-
-    private fun findTransceiverWith(trackType: TrackType, id: Int, codecName: String?): TransceiverId? {
-        return cache["$id-$trackType${codecName?.let { "-$it" } ?: ""}"]
     }
 
     private fun findLayer(publishOption: PublishOption): TrackLayersCache? {

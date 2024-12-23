@@ -16,6 +16,7 @@
 
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
+import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.RtpParameters
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
@@ -124,56 +125,60 @@ internal fun withSimulcastConstraints(
     optimalVideoLayers: List<OptimalVideoLayer>,
 ): List<OptimalVideoLayer> {
     // Re-map rid according to index
-    val ridMapping = listOf("q", "h", "f")
-    return optimalVideoLayers.mapIndexed { index, layer ->
-        layer.copy(rid = ridMapping.getOrElse(index) { "q" })
+    val size = maxOf(settings.width, settings.height)
+    val layers = when {
+        size <= 320 -> {
+            // only one layer 'f', the highest quality one
+            optimalVideoLayers.filter { it.rid == "f" }
+        }
+
+        size <= 640 -> {
+            // two layers, q and h (original had q,h,f -> remove 'f')
+            optimalVideoLayers.filter { it.rid != "q" }
+        }
+
+        else -> {
+            // three layers for sizes > 640x480
+            optimalVideoLayers
+        }
     }
+    // [q, h, f]
+    return layers.reversed()
 }
 
-internal fun defaultVideoLayers(publishOption: PublishOption): List<RtpParameters.Encoding> {
-    val defaultBitrate = 1_250_000
-    val quarterQuality = RtpParameters.Encoding(
-        "q",
-        true,
-        4.0,
-    ).apply {
-        maxBitrateBps = defaultBitratePerRid["q"] ?: (defaultBitrate / 4)
-        maxFramerate = 30
-    }
+internal fun CaptureFormat.toVideoDimension(): VideoDimension {
+    return VideoDimension(width, height)
+}
 
-    val halfQuality = RtpParameters.Encoding(
-        "h",
-        true,
-        2.0,
-    ).apply {
-        maxBitrateBps = defaultBitratePerRid["h"] ?: (defaultBitrate / 2)
-        maxFramerate = 30
-    }
-
-    val fullQuality = RtpParameters.Encoding(
-        "f",
-        true,
-        1.0,
-    ).apply {
-        maxBitrateBps = defaultBitratePerRid["f"] ?: defaultBitrate
-        maxFramerate = 30
-    }
-
-    return if (isSvcCodec(publishOption.codec?.name)) {
-        listOf(
-            RtpParameters.Encoding(
-                "q",
-                true,
-                1.0,
-            ).apply {
-                maxBitrateBps = defaultBitratePerRid["f"] ?: defaultBitrate
-                maxFramerate = 30
-            },
-            halfQuality,
-            fullQuality,
+internal fun computeTransceiverEncodings(
+    captureFormat: CaptureFormat?,
+    publishOption: PublishOption,
+): List<RtpParameters.Encoding> {
+    val settings =
+        captureFormat?.toVideoDimension() ?: publishOption.video_dimension ?: VideoDimension(
+            1280,
+            720,
         )
+    val layers = findOptimalVideoLayers(
+        settings,
+        publishOption,
+    )
+
+    val codecLayers = if (isSvcCodec(publishOption.codec?.name)) {
+        toSvcEncodings(layers) ?: emptyList()
     } else {
-        listOf(quarterQuality, halfQuality, fullQuality)
+        layers.reversed()
+    }
+
+    return codecLayers.map {
+        RtpParameters.Encoding(
+            it.rid,
+            it.active,
+            it.scaleResolutionDownBy ?: 1.0,
+        ).apply {
+            maxBitrateBps = it.maxBitrate
+            maxFramerate = it.maxFramerate ?: 30
+        }
     }
 }
 
@@ -196,7 +201,7 @@ internal fun findOptimalVideoLayers(
     var downscaleFactor = 1.0
     var bitrateFactor = 1.0
 
-    val rids = listOf("f", "h", "q")
+    val rids = listOf("f", "h", "q").take(maxSpatialLayers)
 
     for (rid in rids) {
         val layerWidth = (width / downscaleFactor).toInt()
