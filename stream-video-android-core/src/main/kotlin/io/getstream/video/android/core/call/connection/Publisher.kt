@@ -431,7 +431,7 @@ internal class Publisher(
             publishOption.video_dimension ?: defaultScreenShareFormat.toVideoDimension()
         } else {
             format?.toVideoDimension() ?: publishOption.video_dimension
-            ?: defaultFormat.toVideoDimension()
+                ?: defaultFormat.toVideoDimension()
         }
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
