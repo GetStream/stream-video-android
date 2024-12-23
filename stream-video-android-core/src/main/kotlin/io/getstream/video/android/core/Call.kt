@@ -273,7 +273,7 @@ public class Call(
      * This [ClosedCaptionManager] is responsible for handling closed captions during the call.
      * This includes processing events related to closed captions and maintaining their state.
      */
-    internal val closedCaptionManager = ClosedCaptionManager()
+    public val closedCaptionManager = ClosedCaptionManager()
 
     init {
         scope.launch {
