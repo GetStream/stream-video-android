@@ -16,7 +16,6 @@
 
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
-import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.RtpParameters
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
@@ -54,9 +53,9 @@ fun isSvcCodec(codecOrMimeType: String?): Boolean {
     if (codecOrMimeType == null) return false
     val lower = codecOrMimeType.lowercase()
     return lower == "vp9" ||
-            lower == "av1" ||
-            lower == "video/vp9" ||
-            lower == "video/av1"
+        lower == "av1" ||
+        lower == "video/vp9" ||
+        lower == "video/av1"
 }
 
 // Converts spatial and temporal layers to scalability mode string
@@ -208,9 +207,9 @@ fun findOptimalVideoLayers(
                 calculatedBitrate
             } else {
                 (
-                        defaultBitratePerRid[rid]
-                            ?: 1_250_000
-                        )
+                    defaultBitratePerRid[rid]
+                        ?: 1_250_000
+                    )
             }
 
         val layer = OptimalVideoLayer(

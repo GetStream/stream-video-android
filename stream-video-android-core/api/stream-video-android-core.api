@@ -1,6 +1,6 @@
 public final class EncodingUtilsKt {
 	public static final fun defaultVideoLayers (Lstream/video/sfu/models/PublishOption;)Ljava/util/List;
-	public static final fun findOptimalVideoLayers (Lorg/webrtc/CameraEnumerationAndroid$CaptureFormat;Lstream/video/sfu/models/PublishOption;)Ljava/util/List;
+	public static final fun findOptimalVideoLayers (Lstream/video/sfu/models/VideoDimension;Lstream/video/sfu/models/PublishOption;)Ljava/util/List;
 	public static final fun getComputedMaxBitrate (Lstream/video/sfu/models/VideoDimension;III)I
 	public static final fun isAudioTrackType (Lstream/video/sfu/models/TrackType;)Z
 	public static final fun isSvcCodec (Ljava/lang/String;)Z
@@ -1023,8 +1023,8 @@ public final class io/getstream/video/android/core/audio/StreamAudioDevice$Wired
 
 public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun cleanup ()V
-	public final fun connect (Lstream/video/sfu/event/ReconnectDetails;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun connect$default (Lio/getstream/video/android/core/call/RtcSession;Lstream/video/sfu/event/ReconnectDetails;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun connect (Lstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun connect$default (Lio/getstream/video/android/core/call/RtcSession;Lstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun createSubscriber ()Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getSfuSocketState ()Lkotlinx/coroutines/flow/StateFlow;
@@ -1143,9 +1143,8 @@ public final class io/getstream/video/android/core/call/connection/transceivers/
 	public final fun find (Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/core/call/connection/transceivers/TransceiverId;
 	public final fun get (Lstream/video/sfu/models/PublishOption;)Lorg/webrtc/RtpTransceiver;
 	public final fun getLayers (Lstream/video/sfu/models/PublishOption;)Ljava/util/List;
-	public final fun getWith (Lstream/video/sfu/models/TrackType;I)Lorg/webrtc/RtpTransceiver;
 	public final fun has (Lstream/video/sfu/models/PublishOption;)Z
-	public final fun indexOf (Lorg/webrtc/RtpTransceiver;)I
+	public final fun indexOf (Lstream/video/sfu/models/PublishOption;)I
 	public final fun items ()Ljava/util/List;
 	public final fun remove (Lstream/video/sfu/models/PublishOption;)V
 	public final fun setLayers (Lstream/video/sfu/models/PublishOption;Ljava/util/List;)V

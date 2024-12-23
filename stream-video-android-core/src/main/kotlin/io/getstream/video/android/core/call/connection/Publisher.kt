@@ -38,7 +38,6 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
-import org.webrtc.RtpCapabilities
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
@@ -50,7 +49,6 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SetPublisherRequest
-import toSvcEncodings
 import toVideoLayers
 import java.util.UUID
 
@@ -310,17 +308,21 @@ internal class Publisher(
             max_spatial_layers = 3,
             max_temporal_layers = 3,
             video_dimension = VideoDimension(1920, 1080),
-            id = publish_option_id
+            id = publish_option_id,
         )
     }
 
     suspend fun changePublishQuality(videoSender: VideoSender) {
         val (trackType, layers, publishOptionId) = videoSender.decompose()
         val enabledLayers = layers.filter { it.active }
-        logger.i { "Update publish quality ($publishOptionId-$trackType-${videoSender.codec?.name}), requested layers by SFU: $enabledLayers" }
+        logger.i {
+            "Update publish quality ($publishOptionId-$trackType-${videoSender.codec?.name}), requested layers by SFU: $enabledLayers"
+        }
 
         val sender =
-            transceiverCache.get(videoSender.toPublishOption())?.sender?.takeUnless { it.track()?.isDisposed == true }
+            transceiverCache.get(videoSender.toPublishOption())?.sender?.takeUnless {
+                it.track()?.isDisposed == true
+            }
 
         if (sender == null) {
             logger.w { "Update publish quality, no video sender found." }
@@ -434,7 +436,7 @@ internal class Publisher(
             publishOption.video_dimension ?: defaultScreenShareFormat.toVideoDimension()
         } else {
             format?.toVideoDimension() ?: publishOption.video_dimension
-            ?: defaultFormat.toVideoDimension()
+                ?: defaultFormat.toVideoDimension()
         }
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
@@ -455,7 +457,7 @@ internal class Publisher(
         transceiverCache.setLayers(publishOption, layers ?: emptyList())
 
         val codec = publishOption.codec?.name
-        val svcLayers = layers//if (isSvcCodec(codec)) toSvcEncodings(layers) else layers
+        val svcLayers = layers // if (isSvcCodec(codec)) toSvcEncodings(layers) else layers
         logger.i { "Layers for option $publishOption --> $svcLayers" }
         return TrackInfo(
             track_id = track.id(),

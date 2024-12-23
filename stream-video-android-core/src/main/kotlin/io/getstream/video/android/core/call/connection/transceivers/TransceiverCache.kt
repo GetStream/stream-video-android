@@ -32,7 +32,9 @@ class TransceiverCache {
      */
     private val transceiverOrder = mutableListOf<RtpTransceiver>()
 
-    private fun PublishOption.key(): String { return "$id-$track_type-${codec?.name?.let { "-$it" } ?: ""}" }
+    private fun PublishOption.key(): String {
+        return "$id-$track_type-${codec?.name?.let { "-$it" } ?: ""}"
+    }
 
     fun add(publishOption: PublishOption, transceiver: RtpTransceiver) {
         cache[publishOption.key()] = TransceiverId(publishOption, transceiver)

@@ -644,7 +644,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -1179,7 +1179,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-    Section, basic webrtc calls
+     Section, basic webrtc calls
      */
 
     /**
