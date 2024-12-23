@@ -105,7 +105,9 @@ class VideoLayersTest {
             OptimalVideoLayer(rid = "h", width = 200),
         )
         val result = toSvcEncodings(layers)
-        assertTrue(result!!.isEmpty())
+        assertEquals(1, result!!.size)
+        assertEquals("q", result.first().rid)
+        assertEquals(200, result.first().width)
     }
 
     @Test
@@ -198,6 +200,32 @@ class VideoLayersTest {
         assertEquals(1_250_000, fLayer.bitrate)
         assertEquals(60, fLayer.fps)
         assertEquals(VideoQuality.VIDEO_QUALITY_HIGH, fLayer.quality)
+    }
+
+    @Test
+    fun `toVideoLayers converts OptimalVideoLayer list to VideoLayer list for SVC`() = runTest {
+        val optimal = listOf(
+            OptimalVideoLayer(
+                rid = "q",
+                width = 1280,
+                height = 720,
+                maxBitrate = 2000000,
+                maxFramerate = 30,
+            ),
+        )
+
+        val result = toVideoLayers(optimal)
+        assertEquals(1, result.size)
+
+        val qLayer = result[0]
+
+        // q
+        assertEquals("q", qLayer.rid)
+        assertEquals(2000000, qLayer.bitrate)
+        assertEquals(30, qLayer.fps)
+        assertEquals(VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED, qLayer.quality)
+        assertEquals(1280, qLayer.video_dimension?.width)
+        assertEquals(720, qLayer.video_dimension?.height)
     }
 
     // endregion
@@ -294,6 +322,8 @@ class VideoLayersTest {
         // Should have 3 layers if SVC, but the first one’s rid = "q" with maxBitrateBps for "f"
         assertEquals(1, result.size)
         assertEquals("q", result[0].rid)
+        assertEquals("L2T2_KEY", result[0].scalabilityMode)
+        assertNull(result[0].scaleResolutionDownBy)
         // This first layer uses the "f" bitrates from defaultBitratePerRid or fallback
         assertEquals(2000000, result[0].maxBitrateBps)
     }
@@ -314,10 +344,13 @@ class VideoLayersTest {
 
         val result = computeTransceiverEncodings(captureFormat, publishOption)
         // 3 distinct rid: q, h, f
-        assertEquals("h", result[0].rid)
-        assertEquals("f", result[1].rid)
+        assertEquals("q", result[0].rid)
+        assertEquals("h", result[1].rid)
 
         assertEquals(500000, result[0].maxBitrateBps)
+        assertNull(result[0].scalabilityMode)
+        assertEquals(2.0, result[0].scaleResolutionDownBy)
+        assertEquals(1.0, result[1].scaleResolutionDownBy)
         assertEquals(1000000, result[1].maxBitrateBps)
     }
 
@@ -347,13 +380,13 @@ class VideoLayersTest {
         // re-maps them. Let's just check correctness:
         assertEquals(2, result.size)
         // The first in the list after constraints is "q"
-        val q = result[1]
-        val h = result[0]
+        val q = result[0]
+        val h = result[1]
 
         // Should have a scalabilityMode
         assertNotNull(q.scalabilityMode)
         assertEquals("L2T3_KEY", q.scalabilityMode) // Because 2 spacial, 3 temporal -> KEY
-
+        assertEquals("L2T3_KEY", h.scalabilityMode)
         // We can also verify maxBitrate, downscale factors, etc.
         // But for coverage, we just need to confirm they exist.
         assertEquals(500000, q.maxBitrate)
@@ -384,9 +417,13 @@ class VideoLayersTest {
         val f = result[2]
 
         // For non-SVC, we expect scaleResolutionDownBy != null
-        assertNotNull(q.scaleResolutionDownBy)
-        assertNotNull(h.scaleResolutionDownBy)
-        assertNotNull(f.scaleResolutionDownBy)
+        assertEquals(4.0, q.scaleResolutionDownBy)
+        assertEquals(2.0, h.scaleResolutionDownBy)
+        assertEquals(1.0, f.scaleResolutionDownBy)
+
+        assertEquals(500000, q.maxBitrate)
+        assertEquals(1000000, h.maxBitrate)
+        assertEquals(2000000, f.maxBitrate)
 
         // For non-SVC, we do not set scalabilityMode
         assertNull(q.scalabilityMode)

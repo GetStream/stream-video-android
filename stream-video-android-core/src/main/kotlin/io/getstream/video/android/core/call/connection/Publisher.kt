@@ -449,12 +449,9 @@ internal class Publisher(
 
         transceiverCache.setLayers(publishOption, layers ?: emptyList())
 
-        val codec = publishOption.codec?.name
-        val svcLayers = layers // if (isSvcCodec(codec)) toSvcEncodings(layers) else layers
-        logger.i { "Layers for option $publishOption --> $svcLayers" }
         return TrackInfo(
             track_id = track.id(),
-            layers = toVideoLayers(svcLayers ?: emptyList()),
+            layers = toVideoLayers(layers ?: emptyList()),
             track_type = publishOption.track_type,
             mid = extractMid(transceiver, transceiverCache.indexOf(publishOption), sdp),
             stereo = false,

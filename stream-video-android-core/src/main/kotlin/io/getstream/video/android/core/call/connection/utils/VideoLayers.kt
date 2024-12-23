@@ -54,9 +54,9 @@ internal fun isSvcCodec(codecOrMimeType: String?): Boolean {
     if (codecOrMimeType == null) return false
     val lower = codecOrMimeType.lowercase()
     return lower == "vp9" ||
-        lower == "av1" ||
-        lower == "video/vp9" ||
-        lower == "video/av1"
+            lower == "av1" ||
+            lower == "video/vp9" ||
+            lower == "video/av1"
 }
 
 // Converts spatial and temporal layers to scalability mode string
@@ -68,9 +68,16 @@ internal fun toScalabilityMode(spatialLayers: Int, temporalLayers: Int): String 
 
 internal fun toSvcEncodings(layers: List<OptimalVideoLayer>?): List<OptimalVideoLayer>? {
     // We take the `f` layer and rename its rid to `q`.
-    return layers
-        ?.filter { it.rid == "f" }
-        ?.map { it.copy(rid = "q", svc = true) }
+    val f = layers?.find { it.rid == "f" }
+    val h = layers?.find { it.rid == "h" }
+    val q = layers?.find { it.rid == "q" }
+    return f?.let {
+        listOf(it.copy(rid = "q", svc = true))
+    } ?: h?.let {
+        listOf(it.copy(rid = "q", svc = true))
+    } ?: q?.let {
+        listOf(it.copy(svc = true))
+    }
 }
 
 // Convert rid to VideoQuality
@@ -89,7 +96,7 @@ internal fun toVideoLayers(layers: List<OptimalVideoLayer>): List<VideoLayer> {
             rid = it.rid,
             bitrate = it.maxBitrate,
             fps = it.maxFramerate ?: 0,
-            quality = if (it.svc) VideoQuality.VIDEO_QUALITY_HIGH else ridToVideoQuality(it.rid),
+            quality = ridToVideoQuality(it.rid),
             video_dimension = VideoDimension(it.width, it.height),
         )
     }
@@ -143,7 +150,15 @@ internal fun withSimulcastConstraints(
         }
     }
     // [q, h, f]
-    return layers.reversed()
+    return layers.mapIndexed { index, layer ->
+        layer.copy(
+            rid = when (index) {
+                0 -> "q"
+                1 -> "h"
+                else -> "f"
+            }
+        )
+    }
 }
 
 internal fun CaptureFormat.toVideoDimension(): VideoDimension {
@@ -167,15 +182,16 @@ internal fun computeTransceiverEncodings(
     val codecLayers = if (isSvcCodec(publishOption.codec?.name)) {
         toSvcEncodings(layers) ?: emptyList()
     } else {
-        layers.reversed()
+        layers
     }
 
     return codecLayers.map {
         RtpParameters.Encoding(
             it.rid,
             it.active,
-            it.scaleResolutionDownBy ?: 1.0,
+            it.scaleResolutionDownBy,
         ).apply {
+            scalabilityMode = it.scalabilityMode
             maxBitrateBps = it.maxBitrate
             maxFramerate = it.maxFramerate ?: 30
         }
@@ -212,9 +228,9 @@ internal fun findOptimalVideoLayers(
                 calculatedBitrate
             } else {
                 (
-                    defaultBitratePerRid[rid]
-                        ?: 1_250_000
-                    )
+                        defaultBitratePerRid[rid]
+                            ?: 1_250_000
+                        )
             }
 
         val layer = OptimalVideoLayer(
