@@ -54,9 +54,9 @@ internal fun isSvcCodec(codecOrMimeType: String?): Boolean {
     if (codecOrMimeType == null) return false
     val lower = codecOrMimeType.lowercase()
     return lower == "vp9" ||
-            lower == "av1" ||
-            lower == "video/vp9" ||
-            lower == "video/av1"
+        lower == "av1" ||
+        lower == "video/vp9" ||
+        lower == "video/av1"
 }
 
 // Converts spatial and temporal layers to scalability mode string
@@ -156,7 +156,7 @@ internal fun withSimulcastConstraints(
                 0 -> "q"
                 1 -> "h"
                 else -> "f"
-            }
+            },
         )
     }
 }
@@ -228,9 +228,9 @@ internal fun findOptimalVideoLayers(
                 calculatedBitrate
             } else {
                 (
-                        defaultBitratePerRid[rid]
-                            ?: 1_250_000
-                        )
+                    defaultBitratePerRid[rid]
+                        ?: 1_250_000
+                    )
             }
 
         val layer = OptimalVideoLayer(
