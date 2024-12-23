@@ -45,10 +45,6 @@ internal class TransceiverCache {
         return get(publishOption) != null
     }
 
-    fun find(predicate: (TransceiverId) -> Boolean): TransceiverId? {
-        return cache.values.find(predicate)
-    }
-
     fun items(): List<TransceiverId> {
         return cache.values.toList().filter { it.transceiver.sender.track()?.isDisposed == false }
     }
