@@ -50,6 +50,7 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SetPublisherRequest
+import stringify
 import toVideoDimension
 import toVideoLayers
 import java.util.UUID
@@ -221,7 +222,7 @@ internal class Publisher(
             ),
         )
         logger.d {
-            "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encoding: $init)"
+            "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encodings: ${transceiver.sender?.parameters?.encodings?.joinToString { it.stringify() }})"
         }
         transceiverCache.add(publishOption, transceiver)
     }
@@ -430,7 +431,7 @@ internal class Publisher(
             publishOption.video_dimension ?: defaultScreenShareFormat.toVideoDimension()
         } else {
             format?.toVideoDimension() ?: publishOption.video_dimension
-                ?: defaultFormat.toVideoDimension()
+            ?: defaultFormat.toVideoDimension()
         }
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)

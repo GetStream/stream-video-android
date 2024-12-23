@@ -18,6 +18,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.RtpParameters
+import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
@@ -54,9 +55,9 @@ internal fun isSvcCodec(codecOrMimeType: String?): Boolean {
     if (codecOrMimeType == null) return false
     val lower = codecOrMimeType.lowercase()
     return lower == "vp9" ||
-        lower == "av1" ||
-        lower == "video/vp9" ||
-        lower == "video/av1"
+            lower == "av1" ||
+            lower == "video/vp9" ||
+            lower == "video/av1"
 }
 
 // Converts spatial and temporal layers to scalability mode string
@@ -78,6 +79,10 @@ internal fun toSvcEncodings(layers: List<OptimalVideoLayer>?): List<OptimalVideo
     } ?: q?.let {
         listOf(it.copy(svc = true))
     }
+}
+
+internal fun RtpParameters.Encoding.stringify(): String {
+    return "Encoding(rid=$rid, active=$active, scaleResolutionDownBy=$scaleResolutionDownBy, maxBitrateBps=$maxBitrateBps, maxFramerate=$maxFramerate, scalabilityMode=$scalabilityMode)"
 }
 
 // Convert rid to VideoQuality
@@ -194,6 +199,7 @@ internal fun computeTransceiverEncodings(
             scalabilityMode = it.scalabilityMode
             maxBitrateBps = it.maxBitrate
             maxFramerate = it.maxFramerate ?: 30
+            numTemporalLayers = publishOption.max_temporal_layers
         }
     }
 }
@@ -228,9 +234,9 @@ internal fun findOptimalVideoLayers(
                 calculatedBitrate
             } else {
                 (
-                    defaultBitratePerRid[rid]
-                        ?: 1_250_000
-                    )
+                        defaultBitratePerRid[rid]
+                            ?: 1_250_000
+                        )
             }
 
         val layer = OptimalVideoLayer(
