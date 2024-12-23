@@ -71,10 +71,13 @@ public class StreamPeerConnection(
     private val maxBitRate: Int,
 ) : PeerConnection.Observer {
 
-    private val setDescriptionMutex = Mutex()
+    private val localDescriptionMutex = Mutex()
+    private val remoteDescriptionMutex = Mutex()
+    private val iceCandidatesMutex = Mutex() // Not needed in current logic flow, but kept it for safety.
 
     internal var localSdp: SessionDescription? = null
     internal var remoteSdp: SessionDescription? = null
+    private val iceCandidates = mutableListOf<IceCandidate>()
     private val typeTag = type.stringify()
 
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
@@ -171,18 +174,34 @@ public class StreamPeerConnection(
      * @return An empty [Result], if the operation has been successful or not.
      */
     public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
-        logger.d { "[setRemoteDescription] #sfu; #$typeTag; answerSdp: ${sessionDescription.stringify()}" }
-
         remoteSdp = sessionDescription
+        val result: Result<Unit>
 
-        return setValue {
-            connection.setRemoteDescription(
-                it,
-                SessionDescription(
-                    sessionDescription.type,
-                    sessionDescription.description.mungeCodecs(),
-                ),
-            )
+        remoteDescriptionMutex.withLock {
+            result = setValue {
+                connection.setRemoteDescription(
+                    it,
+                    SessionDescription(
+                        sessionDescription.type,
+                        sessionDescription.description.mungeCodecs(),
+                    ),
+                )
+            }
+
+            logger.d { "[setRemoteDescription] #ice; #sfu; #$typeTag; result: $result" }
+
+            if (result.isSuccess) processIceCandidates()
+        }
+
+        return result
+    }
+
+    private suspend fun processIceCandidates() {
+        logger.d { "[processIceCandidates] #ice; #sfu; #$typeTag; count: ${iceCandidates.count()}" }
+
+        iceCandidatesMutex.withLock {
+            iceCandidates.forEach { addIceCandidate(it) }
+            iceCandidates.clear()
         }
     }
 
@@ -204,10 +223,26 @@ public class StreamPeerConnection(
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
         // This needs a mutex because parallel calls will result in:
         // SfuSocketError: subscriber PC: negotiation failed
-        return setDescriptionMutex.withLock {
+        return localDescriptionMutex.withLock {
             setValue {
                 // Never call this in parallel
                 connection.setLocalDescription(it, sdp)
+            }
+        }
+    }
+
+    public suspend fun handleNewIceCandidate(iceCandidate: IceCandidate) {
+        remoteDescriptionMutex.withLock {
+            if (connection.remoteDescription == null) {
+                logger.d {
+                    "[handleNewIceCandidate] #ice; #sfu; #$typeTag; Remote desc is null, storing candidate: $iceCandidate"
+                }
+                iceCandidatesMutex.withLock { iceCandidates.add(iceCandidate) }
+            } else {
+                logger.d {
+                    "[handleNewIceCandidate] #ice; #sfu; #$typeTag; Remote desc is set, adding candidate: $iceCandidate"
+                }
+                addIceCandidate(iceCandidate)
             }
         }
     }
@@ -443,7 +478,7 @@ public class StreamPeerConnection(
 
     // better to monitor onConnectionChange for the state
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
-        logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        logger.i { "[onIceConnectionChange] #ice; #sfu; #$typeTag; newState: $newState" }
         iceState.value = newState
         when (newState) {
             PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
