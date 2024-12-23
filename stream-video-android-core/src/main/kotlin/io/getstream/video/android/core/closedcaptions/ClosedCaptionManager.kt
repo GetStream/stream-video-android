@@ -39,18 +39,18 @@ import org.openapitools.client.models.VideoEvent
  * Manages the lifecycle, state, and configuration of closed captions for a video call.
  *
  * The [ClosedCaptionManager] is responsible for handling caption updates, maintaining caption states,
- * and auto-removing captions based on the provided [ClosedCaptionsConfig]. It ensures thread-safe
+ * and auto-removing captions based on the provided [ClosedCaptionsSettings]. It ensures thread-safe
  * operations using a [Mutex] and manages jobs for scheduled caption removal using [CoroutineScope].
  *
- * @property config The configuration that defines how closed captions are managed,
+ * @property closedCaptionsSettings The configuration that defines how closed captions are managed,
  * including auto-dismiss behavior, maximum number of captions to retain, and dismiss time.
  */
 
-class ClosedCaptionManager(private var config: ClosedCaptionsConfig = ClosedCaptionsConfig()) {
+class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSettings = ClosedCaptionsSettings()) {
 
     /**
      * Holds the current list of closed captions. This list is updated dynamically
-     * and contains at most [ClosedCaptionsConfig.maxCaptions] captions.
+     * and contains at most [ClosedCaptionsSettings.maxVisibleCaptions] captions.
      */
 
     private val _closedCaptions: MutableStateFlow<List<CallClosedCaption>> =
@@ -82,11 +82,11 @@ class ClosedCaptionManager(private var config: ClosedCaptionsConfig = ClosedCapt
     /**
      * Updates the current configuration for the closed captions manager.
      *
-     * @param newConfig The new configuration to apply. This affects behavior such as auto-dismiss
+     * @param closedCaptionsSettings The new configuration to apply. This affects behavior such as auto-dismiss
      * and the number of captions retained.
      */
-    fun setConfig(newConfig: ClosedCaptionsConfig) {
-        config = newConfig
+    fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
+        this.closedCaptionsSettings = closedCaptionsSettings
     }
 
     /**
@@ -133,10 +133,10 @@ class ClosedCaptionManager(private var config: ClosedCaptionsConfig = ClosedCapt
             mutex.withLock {
                 // Add the caption and keep the latest 3
                 _closedCaptions.value =
-                    (_closedCaptions.value + event.closedCaption).takeLast(config.maxCaptions)
+                    (_closedCaptions.value + event.closedCaption).takeLast(closedCaptionsSettings.maxVisibleCaptions)
             }
 
-            if (config.autoDismissCaptions) {
+            if (closedCaptionsSettings.autoDismissCaptions) {
                 removalJob?.cancel()
                 scheduleRemoval()
             }
@@ -144,12 +144,12 @@ class ClosedCaptionManager(private var config: ClosedCaptionsConfig = ClosedCapt
     }
 
     /**
-     * Schedules the removal of the oldest caption after the specified [ClosedCaptionsConfig.captionsAutoDismissTime].
+     * Schedules the removal of the oldest caption after the specified [ClosedCaptionsSettings.visibilityDurationMs].
      *
      */
     private fun scheduleRemoval() {
         removalJob = scope.launch {
-            delay(config.captionsAutoDismissTime)
+            delay(closedCaptionsSettings.visibilityDurationMs)
             mutex.withLock {
                 if (_closedCaptions.value.isNotEmpty()) {
                     _closedCaptions.value =
