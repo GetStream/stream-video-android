@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.connection
 
 import OptimalVideoLayer
+import androidx.annotation.VisibleForTesting
 import computeTransceiverEncodings
 import findOptimalVideoLayers
 import io.getstream.video.android.core.MediaManagerImpl
@@ -111,7 +112,8 @@ internal class Publisher(
         }
     }
 
-    private suspend fun negotiate(iceRestart: Boolean = false) {
+    @VisibleForTesting
+    public suspend fun negotiate(iceRestart: Boolean = false) {
         val offer = super.createOffer().getOrThrow()
         val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
 
@@ -203,7 +205,8 @@ internal class Publisher(
         }
     }
 
-    private fun addTransceiver(
+    @VisibleForTesting
+    public fun addTransceiver(
         captureFormat: CaptureFormat?,
         track: MediaStreamTrack,
         publishOption: PublishOption,

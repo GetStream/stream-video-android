@@ -41,11 +41,6 @@ import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
-import stream.video.sfu.event.ChangePublishQuality
-import stream.video.sfu.event.VideoLayerSetting
-import stream.video.sfu.event.VideoSender
-import stream.video.sfu.models.Participant
-import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.UpdateMuteStatesRequest
 import java.io.IOException
 import java.io.InterruptedIOException
