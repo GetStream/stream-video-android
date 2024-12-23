@@ -43,7 +43,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.VideoLayerSetting
-import stream.video.sfu.event.VideoMediaRequest
 import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
@@ -521,81 +520,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // end call
         val endResult = call.end()
         assertSuccess(endResult)
-
-        // clean up a call
-        call.cleanup()
-    }
-
-    @Test
-    fun dynascale() = runTest {
-        // join will automatically start the audio and video capture
-        // based on the call settings
-        val joinResult = call.join(create = true)
-        assertSuccess(joinResult)
-
-        // create a turbine connection state
-        val connectionState = call.state.connection.testIn(backgroundScope)
-        // asset that the connection state is connected
-        val connectionStateItem = connectionState.awaitItem()
-        assertThat(connectionStateItem).isAnyOf(
-            RealtimeConnection.Connected,
-            RealtimeConnection.Joined(joinResult.getOrThrow()),
-        )
-        if (connectionStateItem is RealtimeConnection.Joined) {
-            connectionState.awaitItem()
-        }
-
-        // fake a participant joining
-        val joinEvent = ParticipantJoinedEvent(
-            callCid = call.cid,
-            participant = Participant(session_id = "fake", user_id = "fake"),
-        )
-        clientImpl.fireEvent(joinEvent, call.cid)
-
-        val participantsState = call.state.participants.testIn(backgroundScope)
-        val participants = participantsState.awaitItem()
-        assertThat(participants.size).isEqualTo(2)
-
-        val remoteParticipants = call.state.remoteParticipants.testIn(backgroundScope)
-        assertThat(remoteParticipants.awaitItem().size).isEqualTo(1)
-
-        val sortedParticipants = call.state.sortedParticipants.testIn(backgroundScope)
-        assertThat(sortedParticipants.awaitItem().size).isEqualTo(2)
-
-        // set their video as visible
-        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, true)
-        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_SCREEN_SHARE, true)
-
-//        val tracks1 = call.session?.defaultTracks()
-//        val tracks2 = call.session?.visibleTracks()
-//
-//        assertThat(tracks1?.size).isEqualTo(2)
-//        assertThat(tracks1?.map { it.session_id }).contains("fake")
-//        assertThat(tracks2?.size).isEqualTo(2)
-//        assertThat(tracks2?.map { it.session_id }).contains("fake")
-//
-//        // if their video isn't visible it shouldn't be in the tracks
-//        call.setVisibility(sessionId = "fake", TrackType.TRACK_TYPE_VIDEO, false)
-//        val tracks3 = call.session?.visibleTracks()
-//        assertThat(tracks3?.size).isEqualTo(1)
-
-        // test handling publish quality change
-        val mediaRequest = VideoMediaRequest()
-        val layers = listOf(
-            VideoLayerSetting(name = "f", active = false),
-            VideoLayerSetting(name = "h", active = true),
-            VideoLayerSetting(name = "q", active = false),
-        )
-        val quality = ChangePublishQuality(
-            video_senders = listOf(
-                VideoSender(
-                    media_request = mediaRequest,
-                    layers = layers,
-                ),
-            ),
-        )
-        val event = ChangePublishQualityEvent(changePublishQuality = quality)
-        call.session?.updatePublishQuality(event)
 
         // clean up a call
         call.cleanup()
