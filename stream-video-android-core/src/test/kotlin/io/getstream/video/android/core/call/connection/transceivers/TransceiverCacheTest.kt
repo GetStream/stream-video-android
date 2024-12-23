@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection.transceivers
 
 import OptimalVideoLayer
@@ -5,7 +21,11 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.webrtc.RtpReceiver
@@ -127,7 +147,7 @@ class TransceiverCacheTest {
         val index1 = cache.indexOf(publishOption1)
         val index2 = cache.indexOf(publishOption2)
         val indexUnknown = cache.indexOf(
-            publishOption1.copy(id = 3) // different key
+            publishOption1.copy(id = 3), // different key
         )
 
         assertEquals(0, index1)
@@ -152,10 +172,10 @@ class TransceiverCacheTest {
     @Test
     fun `test setLayers overwrites existing layers`() = runTest {
         val oldLayers = listOf(
-            OptimalVideoLayer(rid = "old", width = 640, height = 360, maxBitrate = 200_000)
+            OptimalVideoLayer(rid = "old", width = 640, height = 360, maxBitrate = 200_000),
         )
         val newLayers = listOf(
-            OptimalVideoLayer(rid = "new", width = 1920, height = 1080, maxBitrate = 1_000_000)
+            OptimalVideoLayer(rid = "new", width = 1920, height = 1080, maxBitrate = 1_000_000),
         )
 
         // Set old layers
