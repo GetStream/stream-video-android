@@ -260,6 +260,7 @@ internal class Publisher(
             try {
                 transceiver?.stop()
                 transceiver?.dispose()
+                transceiverCache.remove(option)
             } catch (e: Exception) {
                 logger.w { "Transceiver for option ${option.id}-${option.track_type}" }
             }
