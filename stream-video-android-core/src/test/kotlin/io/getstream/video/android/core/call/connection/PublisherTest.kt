@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection
 
 import io.getstream.result.Result
@@ -66,7 +82,7 @@ class PublisherTest {
         max_spatial_layers = 1,
         max_temporal_layers = 1,
         codec = null,
-        video_dimension = VideoDimension(1280, 720)
+        video_dimension = VideoDimension(1280, 720),
     )
 
     private val audioPublishOption = PublishOption(
@@ -77,7 +93,7 @@ class PublisherTest {
         max_spatial_layers = 1,
         max_temporal_layers = 1,
         codec = null,
-        video_dimension = null
+        video_dimension = null,
     )
     //endregion
 
@@ -115,22 +131,24 @@ class PublisherTest {
         every { mockPeerConnection.close() } just runs
 
         // Construct a "real" Publisher but spy it, so we can mock or verify inherited calls.
-        publisher = spyk(Publisher(
-            localParticipant = mockParticipantState,
-            mediaManager = mockMediaManager,
-            peerConnectionFactory = mockPeerConnectionFactory,
-            publishOptions = listOf(videoPublishOption, audioPublishOption),
-            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-            type = StreamPeerType.PUBLISHER,
-            mediaConstraints = MediaConstraints(),
-            onStreamAdded = null,
-            onNegotiationNeeded = { _, _ -> },
-            onIceCandidate = null,
-            maxBitRate = 1_500_000,
-            sfuClient = mockSignalServerService,
-            sessionId = "session-id",
-            rejoin = { }
-        )) {
+        publisher = spyk(
+            Publisher(
+                localParticipant = mockParticipantState,
+                mediaManager = mockMediaManager,
+                peerConnectionFactory = mockPeerConnectionFactory,
+                publishOptions = listOf(videoPublishOption, audioPublishOption),
+                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                type = StreamPeerType.PUBLISHER,
+                mediaConstraints = MediaConstraints(),
+                onStreamAdded = null,
+                onNegotiationNeeded = { _, _ -> },
+                onIceCandidate = null,
+                maxBitRate = 1_500_000,
+                sfuClient = mockSignalServerService,
+                sessionId = "session-id",
+                rejoin = { },
+            ),
+        ) {
             every { connection } returns mockPeerConnection
         }
 
@@ -144,7 +162,7 @@ class PublisherTest {
         // Mock the SFU server's setPublisher call to return a "successful" answer
         coEvery { mockSignalServerService.setPublisher(any()) } returns SetPublisherResponse(
             sdp = fakeSdpAnswer.description,
-            error = null
+            error = null,
         )
     }
 
@@ -189,7 +207,6 @@ class PublisherTest {
         }
     }
 
-
     @Test
     fun `unpublishStream stops and disposes matching transceiver`() = runTest {
         // We'll manually publish an AUDIO transceiver
@@ -198,7 +215,7 @@ class PublisherTest {
                 every { kind() } returns "audio"
                 every { state() } returns MediaStreamTrack.State.LIVE
             },
-            trackType = TrackType.TRACK_TYPE_AUDIO
+            trackType = TrackType.TRACK_TYPE_AUDIO,
         )
 
         // Now unpublish it:

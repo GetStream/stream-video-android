@@ -22,8 +22,6 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
-import io.getstream.video.android.core.events.ChangePublishQualityEvent
-import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
