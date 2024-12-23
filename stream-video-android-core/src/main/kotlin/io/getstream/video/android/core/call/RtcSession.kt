@@ -506,7 +506,7 @@ public class RtcSession internal constructor(
         awaitAll(subscriberAsync, publisherAsync)
     }
 
-    suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
+    suspend fun connect(reconnectDetails: ReconnectDetails? = null, options: List<PublishOption>? = null) {
         logger.i { "[connect] #sfu; #track; no args" }
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
@@ -515,6 +515,7 @@ public class RtcSession internal constructor(
             token = sfuToken,
             fast_reconnect = false,
             client_details = clientDetails,
+            preferred_publish_options = options ?: emptyList(),
             reconnect_details = reconnectDetails,
         )
         logger.d { "Connecting RTC, $request" }
@@ -643,7 +644,7 @@ public class RtcSession internal constructor(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -894,7 +895,7 @@ public class RtcSession internal constructor(
 
         val addTempTransceivers = { spc: StreamPeerConnection ->
             val init = spc.buildVideoTransceiverInit(emptyList(), false)
-            spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO, init)
+            spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
             spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO)
         }
 
@@ -933,7 +934,11 @@ public class RtcSession internal constructor(
             onStreamAdded = { addStream(it) },
             onNegotiationNeeded = { _, _ -> },
             onIceCandidate = ::sendIceCandidate,
-        )
+        ) {
+            coroutineScope.launch {
+                call.rejoin()
+            }
+        }
     }
 
     private fun buildTrackId(trackTypeVideo: TrackType): String {
@@ -1081,7 +1086,7 @@ public class RtcSession internal constructor(
                     }
 
                     is ChangePublishOptionsEvent -> {
-                        logger.d { "[]changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
+                        logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
                         publisher?.syncPublishOptions(
                             call.mediaManager.camera.resolution.value,
                             event.change.publish_options,
@@ -1174,7 +1179,7 @@ public class RtcSession internal constructor(
     }
 
     /**
-     Section, basic webrtc calls
+    Section, basic webrtc calls
      */
 
     /**
@@ -1571,6 +1576,7 @@ public class RtcSession internal constructor(
             session_id = sessionId,
             token = sfuToken,
             client_details = clientDetails,
+            preferred_publish_options = publisher?.currentOptions() ?: emptyList(),
             reconnect_details = reconnectDetails,
         )
         logger.d { "Connecting RTC, $request" }

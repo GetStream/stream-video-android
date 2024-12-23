@@ -32,25 +32,18 @@ class TransceiverCache {
      */
     private val transceiverOrder = mutableListOf<RtpTransceiver>()
 
-    private fun PublishOption.key(): String { return "$id-$track_type" }
+    private fun PublishOption.key(): String { return "$id-$track_type-${codec?.name?.let { "-$it" } ?: ""}" }
 
     fun add(publishOption: PublishOption, transceiver: RtpTransceiver) {
         cache[publishOption.key()] = TransceiverId(publishOption, transceiver)
-        transceiverOrder.add(transceiver)
     }
 
     fun remove(publishOption: PublishOption) {
-        val transceiver = findTransceiver(publishOption)
         cache.remove(publishOption.key())
-        transceiverOrder.remove(transceiver?.transceiver)
     }
 
     fun get(publishOption: PublishOption): RtpTransceiver? {
         return findTransceiver(publishOption)?.transceiver
-    }
-
-    fun getWith(trackType: TrackType, id: Int): RtpTransceiver? {
-        return findTransceiverWith(trackType, id)?.transceiver
     }
 
     fun has(publishOption: PublishOption): Boolean {
@@ -65,8 +58,8 @@ class TransceiverCache {
         return cache.values.toList().filter { it.transceiver.sender.track()?.isDisposed == false }
     }
 
-    fun indexOf(transceiver: RtpTransceiver): Int {
-        return transceiverOrder.indexOf(transceiver)
+    fun indexOf(publishOption: PublishOption): Int {
+        return cache.values.indexOfFirst { it.publishOption.key() == publishOption.key() }
     }
 
     fun getLayers(publishOption: PublishOption): List<OptimalVideoLayer>? {
@@ -89,6 +82,10 @@ class TransceiverCache {
 
     private fun findTransceiverWith(trackType: TrackType, id: Int): TransceiverId? {
         return cache["$id-$trackType"]
+    }
+
+    private fun findTransceiverWith(trackType: TrackType, id: Int, codecName: String?): TransceiverId? {
+        return cache["$id-$trackType${codecName?.let { "-$it" } ?: ""}"]
     }
 
     private fun findLayer(publishOption: PublishOption): TrackLayersCache? {

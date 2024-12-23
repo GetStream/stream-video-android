@@ -54,9 +54,9 @@ fun isSvcCodec(codecOrMimeType: String?): Boolean {
     if (codecOrMimeType == null) return false
     val lower = codecOrMimeType.lowercase()
     return lower == "vp9" ||
-        lower == "av1" ||
-        lower == "video/vp9" ||
-        lower == "video/av1"
+            lower == "av1" ||
+            lower == "video/vp9" ||
+            lower == "video/av1"
 }
 
 // Converts spatial and temporal layers to scalability mode string
@@ -124,27 +124,9 @@ fun withSimulcastConstraints(
     settings: VideoDimension,
     optimalVideoLayers: List<OptimalVideoLayer>,
 ): List<OptimalVideoLayer> {
-    val size = maxOf(settings.width, settings.height)
-    val layers = when {
-        size <= 320 -> {
-            // only one layer 'f', the highest quality one
-            optimalVideoLayers.filter { it.rid == "f" }
-        }
-
-        size <= 640 -> {
-            // two layers, q and h (original had q,h,f -> remove 'f')
-            optimalVideoLayers.filter { it.rid != "f" }
-        }
-
-        else -> {
-            // three layers for sizes > 640x480
-            optimalVideoLayers
-        }
-    }
-
     // Re-map rid according to index
     val ridMapping = listOf("q", "h", "f")
-    return layers.mapIndexed { index, layer ->
+    return optimalVideoLayers.mapIndexed { index, layer ->
         layer.copy(rid = ridMapping.getOrElse(index) { "q" })
     }
 }
@@ -197,16 +179,15 @@ fun defaultVideoLayers(publishOption: PublishOption): List<RtpParameters.Encodin
 }
 
 fun findOptimalVideoLayers(
-    captureFormat: CaptureFormat,
+    settings: VideoDimension,
     publishOption: PublishOption,
 ): List<OptimalVideoLayer> {
     val optimalVideoLayers = mutableListOf<OptimalVideoLayer>()
-    val settings = VideoDimension(captureFormat.width, captureFormat.height)
     val width = settings.width
     val height = settings.height
-
     val bitrate = publishOption.bitrate
     val codec = publishOption.codec
+    val svcCodec = isSvcCodec(codec?.name)
     val fps = publishOption.fps
     val maxSpatialLayers = max(publishOption.max_spatial_layers, 1)
     val maxTemporalLayers = publishOption.max_temporal_layers
@@ -215,9 +196,8 @@ fun findOptimalVideoLayers(
     val maxBitrate = getComputedMaxBitrate(videoDimension ?: settings, height, width, bitrate)
     var downscaleFactor = 1.0
     var bitrateFactor = 1.0
-    val svcCodec = isSvcCodec(codec?.name)
 
-    val rids = listOf("f", "h", "q").take(maxSpatialLayers)
+    val rids = listOf("f", "h", "q")
 
     for (rid in rids) {
         val layerWidth = (width / downscaleFactor).toInt()
@@ -228,9 +208,9 @@ fun findOptimalVideoLayers(
                 calculatedBitrate
             } else {
                 (
-                    defaultBitratePerRid[rid]
-                        ?: 1_250_000
-                    )
+                        defaultBitratePerRid[rid]
+                            ?: 1_250_000
+                        )
             }
 
         val layer = OptimalVideoLayer(

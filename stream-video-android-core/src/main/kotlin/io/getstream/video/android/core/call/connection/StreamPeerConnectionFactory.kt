@@ -316,6 +316,7 @@ public class StreamPeerConnectionFactory(
         maxPublishingBitrate: Int = 1_200_000,
         sfuClient: SignalServerService,
         sessionId: String,
+        rejoin: () -> Unit = {}
     ): Publisher {
         val peerConnection = Publisher(
             sessionId = sessionId,
@@ -331,6 +332,7 @@ public class StreamPeerConnectionFactory(
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidate,
             maxBitRate = maxPublishingBitrate,
+            rejoin = rejoin,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
