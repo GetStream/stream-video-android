@@ -101,6 +101,7 @@ public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
         configs = mutableMapOf(
             Pair(ANY_MARKER, CallTypeServiceConfig()),
             Pair("default", CallTypeServiceConfig()),
+            Pair("audio_call", CallTypeServiceConfig(AudioCallService::class.java)),
             Pair(
                 "livestream",
                 CallTypeServiceConfig(
