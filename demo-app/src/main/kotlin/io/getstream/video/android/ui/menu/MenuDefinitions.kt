@@ -21,6 +21,7 @@ import android.os.Build
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MobileScreenShare
 import androidx.compose.material.icons.automirrored.filled.ReadMore
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
@@ -54,6 +55,8 @@ import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -83,6 +86,9 @@ fun defaultStreamMenu(
     onSelectScaleType: (VideoScalingType) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
+    transcriptionUiState: TranscriptionUiState,
+    onToggleTranscription: suspend () -> Unit,
+    loadTranscriptions: suspend () -> List<MenuItem>,
     onToggleClosedCaptions: () -> Unit = {},
     closedCaptionUiState: ClosedCaptionUiState,
 ) = buildList<MenuItem> {
@@ -202,6 +208,34 @@ fun defaultStreamMenu(
             ),
         ),
     )
+
+    when (transcriptionUiState) {
+        is TranscriptionAvailableUiState, TranscriptionStoppedUiState -> {
+            add(
+                ActionMenuItem(
+                    title = transcriptionUiState.text,
+                    icon = transcriptionUiState.icon,
+                    highlight = transcriptionUiState.highlight,
+                    action = {
+                        GlobalScope.launch {
+                            onToggleTranscription.invoke()
+                        }
+                    },
+                ),
+            )
+
+            add(
+                DynamicSubMenuItem(
+                    title = "List Transcriptions",
+                    icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                    itemsLoader = loadTranscriptions,
+                ),
+            )
+        }
+
+        else -> {}
+    }
+
     add(getCCActionMenu(closedCaptionUiState, onToggleClosedCaptions))
     if (showDebugOptions) {
         add(
