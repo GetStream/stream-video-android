@@ -129,6 +129,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getBlockedUsers ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBroadcasting ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCapabilitiesByRole ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getCcMode ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClosedCaptions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedAt ()Lkotlinx/coroutines/flow/StateFlow;
