@@ -44,7 +44,9 @@ import androidx.navigation.NavController
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
@@ -158,6 +160,8 @@ private fun LiveHostContent(
             }
         },
         bottomBar = {
+            val isCameraEnabled by call.camera.isEnabled.collectAsState()
+
             Row {
                 Button(
                     colors = ButtonDefaults.buttonColors(
@@ -174,6 +178,14 @@ private fun LiveHostContent(
                         text = if (backstage) "Start Broadcast" else "Stop Broadcast",
                         color = Color.White,
                     )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                ToggleCameraAction(isCameraEnabled = isCameraEnabled) {
+                    call.camera.setEnabled(it.isEnabled)
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                FlipCameraAction {
+                    call.camera.flip()
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 LeaveCallAction {
