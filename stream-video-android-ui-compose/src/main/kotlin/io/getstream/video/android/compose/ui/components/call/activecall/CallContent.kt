@@ -233,7 +233,6 @@ public fun CallContent(
                         showDiagnostics = false
                     }
                 }
-
                 closedCaptionUi(call)
             },
         )

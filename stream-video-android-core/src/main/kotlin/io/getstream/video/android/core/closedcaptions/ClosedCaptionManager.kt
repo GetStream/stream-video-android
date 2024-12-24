@@ -35,6 +35,10 @@ import org.openapitools.client.models.ClosedCaptionStartedEvent
 import org.openapitools.client.models.TranscriptionSettingsResponse.ClosedCaptionMode
 import org.openapitools.client.models.VideoEvent
 
+private fun ClosedCaptionEvent.key(): String {
+    return "${closedCaption.speakerId}/${closedCaption.startTime.toEpochSecond()}"
+}
+
 /**
  * Manages the lifecycle, state, and configuration of closed captions for a video call.
  *
@@ -156,8 +160,7 @@ class ClosedCaptionManager(
     private fun addCaption(event: ClosedCaptionEvent) {
         scope.launch {
             mutex.withLock {
-                val uniqueKey = "${event.closedCaption.speakerId}/${event.closedCaption.startTime.toEpochSecond()}"
-
+                val uniqueKey = event.key()
                 if (uniqueKey !in seenKeys) {
                     // Add the caption and keep the latest 2
                     _closedCaptions.value =

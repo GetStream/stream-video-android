@@ -58,7 +58,7 @@ import org.openapitools.client.models.CallClosedCaption
 @Preview
 @Composable
 public fun ClosedCaptionListDemo() {
-    val config = ClosedCaptionsDefaults.config
+    val config = ClosedCaptionsDefaults.streamThemeConfig()
     ClosedCaptionList(
         arrayListOf(
             ClosedCaptionUiModel("Rahul", "This is closed captions text in Call Content"),
@@ -141,7 +141,7 @@ public fun ClosedCaptionList(
             .fillMaxWidth()
             .padding(config.boxPadding),
         userScrollEnabled = false,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
     ) {
         itemsIndexed(captions.takeLast(config.maxVisibleCaptions)) { index, item ->
             ClosedCaptionUi(item, index != captions.size - 1, config)
