@@ -57,6 +57,17 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
         MutableStateFlow(emptyList())
     val closedCaptions: StateFlow<List<CallClosedCaption>> = _closedCaptions.asStateFlow()
 
+    /**
+     *  Holds the current closed caption mode for the video call. This object contains information about closed
+     *  captioning feature availability. This state is updated dynamically based on the server's transcription
+     *  setting which is [org.openapitools.client.models.TranscriptionSettingsResponse.closedCaptionMode]
+     *
+     *  Possible values:
+     *  - [ClosedCaptionMode.Available]: Closed captions are available and can be enabled.
+     *  - [ClosedCaptionMode.Disabled]: Closed captions are explicitly disabled.
+     *  - [ClosedCaptionMode.AutoOn]: Closed captions are automatically enabled as soon as user joins the call
+     *  - [ClosedCaptionMode.Unknown]: Represents an unrecognized or unsupported mode.
+     */
     private val _ccMode =
         MutableStateFlow<ClosedCaptionMode>(ClosedCaptionMode.Disabled)
     val ccMode: StateFlow<ClosedCaptionMode> = _ccMode.asStateFlow()
@@ -85,7 +96,7 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
      * @param closedCaptionsSettings The new configuration to apply. This affects behavior such as auto-dismiss
      * and the number of captions retained.
      */
-    fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
+    internal fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
         this.closedCaptionsSettings = closedCaptionsSettings
     }
 
@@ -95,7 +106,7 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
      *
      * @param callResponse The response containing transcription and caption settings for the call.
      */
-    fun handleCallUpdate(callResponse: CallResponse) {
+    internal fun handleCallUpdate(callResponse: CallResponse) {
         _closedCaptioning.value = callResponse.captioning
         _ccMode.value = callResponse.settings.transcription.closedCaptionMode
     }
