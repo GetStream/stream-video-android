@@ -32,6 +32,7 @@ import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -267,6 +268,12 @@ public class Call(
     private var monitorSubscriberStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
+
+    /**
+     * This [ClosedCaptionManager] is responsible for handling closed captions during the call.
+     * This includes processing events related to closed captions and maintaining their state.
+     */
+    public val closedCaptionManager = ClosedCaptionManager()
 
     init {
         scope.launch {
@@ -1302,7 +1309,7 @@ public class Call(
     }
 
     fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
-        state.closedCaptionManager.updateClosedCaptionsSettings(closedCaptionsSettings)
+        closedCaptionManager.updateClosedCaptionsSettings(closedCaptionsSettings)
     }
 
     /**

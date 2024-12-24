@@ -48,7 +48,7 @@ public object ClosedCaptionsDefaults {
         boxPadding = 12.dp,
         speakerColor = Color.Yellow,
         textColor = Color.White,
-        maxVisibleCaptions = 2,
+        maxVisibleCaptions = 3,
         roundedCornerShape = 16.dp,
     )
 }
@@ -79,7 +79,7 @@ public object ClosedCaptionsDefaults {
  *     boxPadding = 16.dp,
  *     speakerColor = Color.Cyan,
  *     textColor = Color.Green,
- *     maxVisibleCaptions = 2,
+ *     maxVisibleCaptions = 5,
  *     roundedCornerShape = 12.dp,
  * )
  * ```
@@ -91,6 +91,6 @@ public data class ClosedCaptionsThemeConfig(
     val boxPadding: Dp = 12.dp,
     val speakerColor: Color = Color.Yellow,
     val textColor: Color = Color.White,
-    val maxVisibleCaptions: Int = 2,
+    val maxVisibleCaptions: Int = 3,
     val roundedCornerShape: Dp = 16.dp,
 )
