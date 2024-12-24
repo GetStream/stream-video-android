@@ -1114,6 +1114,17 @@ public final class io/getstream/video/android/core/call/state/ChooseLayout : io/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/call/state/ClosedCaptionsAction : io/getstream/video/android/core/call/state/CallAction {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lio/getstream/video/android/core/call/state/ClosedCaptionsAction;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/state/ClosedCaptionsAction;ZILjava/lang/Object;)Lio/getstream/video/android/core/call/state/ClosedCaptionsAction;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun isEnabled ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
 public class io/getstream/video/android/core/call/state/CustomAction : io/getstream/video/android/core/call/state/CallAction {
 	public fun <init> (Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -2916,6 +2927,23 @@ public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionM
 	public final fun getClosedCaptioning ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClosedCaptions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
+}
+
+public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig {
+	public fun <init> ()V
+	public fun <init> (JZI)V
+	public synthetic fun <init> (JZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun copy (JZI)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig;JZIILjava/lang/Object;)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoDismissCaptions ()Z
+	public final fun getCaptionsAutoDismissTime ()J
+	public final fun getMaxCaptions ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings {

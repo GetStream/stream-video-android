@@ -27,6 +27,9 @@ import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.ClosedCaptionDisabled
+import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
@@ -47,6 +50,7 @@ import androidx.compose.material.icons.filled.VideocamOff
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.model.PreferredVideoResolution
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
@@ -85,6 +89,8 @@ fun defaultStreamMenu(
     transcriptionUiState: TranscriptionUiState,
     onToggleTranscription: suspend () -> Unit,
     loadTranscriptions: suspend () -> List<MenuItem>,
+    onToggleClosedCaptions: () -> Unit = {},
+    closedCaptionUiState: ClosedCaptionUiState,
 ) = buildList<MenuItem> {
     add(
         DynamicSubMenuItem(
@@ -202,25 +208,6 @@ fun defaultStreamMenu(
             ),
         ),
     )
-    if (showDebugOptions) {
-        add(
-            SubMenuItem(
-                title = "Debug options",
-                icon = Icons.AutoMirrored.Default.ReadMore,
-                items = debugSubmenu(
-                    codecList,
-                    onCodecSelected,
-                    onToggleAudioFilterClick,
-                    onRestartSubscriberIceClick,
-                    onRestartPublisherIceClick,
-                    onSwitchSfuClick,
-                    onSfuRejoinClick,
-                    onSfuFastReconnectClick,
-                    onSelectScaleType,
-                ),
-            ),
-        )
-    }
 
     when (transcriptionUiState) {
         is TranscriptionAvailableUiState, TranscriptionStoppedUiState -> {
@@ -247,6 +234,58 @@ fun defaultStreamMenu(
         }
 
         else -> {}
+    }
+
+    add(getCCActionMenu(closedCaptionUiState, onToggleClosedCaptions))
+    if (showDebugOptions) {
+        add(
+            SubMenuItem(
+                title = "Debug options",
+                icon = Icons.AutoMirrored.Default.ReadMore,
+                items = debugSubmenu(
+                    codecList,
+                    onCodecSelected,
+                    onToggleAudioFilterClick,
+                    onRestartSubscriberIceClick,
+                    onRestartPublisherIceClick,
+                    onSwitchSfuClick,
+                    onSfuRejoinClick,
+                    onSfuFastReconnectClick,
+                    onSelectScaleType,
+                ),
+            ),
+        )
+    }
+}
+
+fun getCCActionMenu(
+    closedCaptionUiState: ClosedCaptionUiState,
+    onToggleClosedCaptions: () -> Unit,
+): ActionMenuItem {
+    return when (closedCaptionUiState) {
+        is ClosedCaptionUiState.Available -> {
+            ActionMenuItem(
+                title = "Start Closed Caption",
+                icon = Icons.Default.ClosedCaptionOff,
+                action = onToggleClosedCaptions,
+            )
+        }
+
+        is ClosedCaptionUiState.Running -> {
+            ActionMenuItem(
+                title = "Stop Closed Caption",
+                icon = Icons.Default.ClosedCaption,
+                action = onToggleClosedCaptions,
+            )
+        }
+
+        is ClosedCaptionUiState.UnAvailable -> {
+            ActionMenuItem(
+                title = "Closed Caption are unavailable",
+                icon = Icons.Default.ClosedCaptionDisabled,
+                action = { },
+            )
+        }
     }
 }
 
