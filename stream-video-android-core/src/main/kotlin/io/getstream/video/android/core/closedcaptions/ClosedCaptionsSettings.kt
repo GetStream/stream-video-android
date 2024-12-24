@@ -28,8 +28,6 @@ private const val DEFAULT_CAPTIONS_AUTO_DISMISS_TIME_MS = 2700L
  * If set to `false`, captions will remain visible indefinitely.
  *
  * @param maxVisibleCaptions The maximum number of closed captions to retain in the [ClosedCaptionManager.closedCaptions] flow.
- * Must be greater than or equal to [io.getstream.video.android.compose.ui.components.closedcaptions.ClosedCaptionsThemeConfig.maxVisibleCaptions]
- * to ensure the UI has sufficient data to render.
  *
  */
 

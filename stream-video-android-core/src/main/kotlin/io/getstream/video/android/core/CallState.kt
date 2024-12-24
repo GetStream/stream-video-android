@@ -20,6 +20,8 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -72,6 +74,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
+import org.openapitools.client.models.CallClosedCaption
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallIngressResponse
@@ -576,6 +579,24 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
+    /**
+     * This [ClosedCaptionManager] is responsible for handling closed captions during the call.
+     * This includes processing events related to closed captions and maintaining their state.
+     */
+    internal val closedCaptionManager = ClosedCaptionManager()
+
+    /**
+     * Tracks whether closed captioning is currently active for the call.
+     * True if captioning is ongoing, false otherwise.
+     */
+    public val isCaptioning: StateFlow<Boolean> = closedCaptionManager.closedCaptioning
+
+    /**
+     * Holds the current list of closed captions. This list is updated dynamically
+     * and contains at most [ClosedCaptionsSettings.maxVisibleCaptions] captions.
+     */
+    public val closedCaptions: StateFlow<List<CallClosedCaption>> = closedCaptionManager.closedCaptions
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -957,7 +978,7 @@ public class CallState(
             is ClosedCaptionEvent,
             is ClosedCaptionEndedEvent,
             ->
-                call.closedCaptionManager.handleEvent(event)
+                closedCaptionManager.handleEvent(event)
         }
     }
 
@@ -1253,7 +1274,7 @@ public class CallState(
         _team.value = response.team
 
         updateRingingState()
-        call.closedCaptionManager.handleCallUpdate(response)
+        closedCaptionManager.handleCallUpdate(response)
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

@@ -15,7 +15,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getAudioFilter ()Lio/getstream/video/android/core/call/audio/InputAudioFilter;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
-	public final fun getClosedCaptionManager ()Lio/getstream/video/android/core/closedcaptions/ClosedCaptionManager;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getLocalMicrophoneAudioLevel ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
@@ -130,6 +129,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getBlockedUsers ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBroadcasting ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCapabilitiesByRole ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getClosedCaptions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedBy ()Lkotlinx/coroutines/flow/StateFlow;
@@ -180,6 +180,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getUpdatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasPermission (Ljava/lang/String;)Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isCaptioning ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isReconnecting ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun markSpeakingAsMuted ()V
 	public final fun pin (Ljava/lang/String;Ljava/lang/String;)V
@@ -2895,9 +2896,7 @@ public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionM
 	public final fun getCcMode ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClosedCaptioning ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getClosedCaptions ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun handleCallUpdate (Lorg/openapitools/client/models/CallResponse;)V
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
-	public final fun updateClosedCaptionsSettings (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
 }
 
 public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionsConfig {

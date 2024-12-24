@@ -96,7 +96,7 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
      * @param closedCaptionsSettings The new configuration to apply. This affects behavior such as auto-dismiss
      * and the number of captions retained.
      */
-    fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
+    internal fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
         this.closedCaptionsSettings = closedCaptionsSettings
     }
 
@@ -106,7 +106,7 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
      *
      * @param callResponse The response containing transcription and caption settings for the call.
      */
-    fun handleCallUpdate(callResponse: CallResponse) {
+    internal fun handleCallUpdate(callResponse: CallResponse) {
         _closedCaptioning.value = callResponse.captioning
         _ccMode.value = callResponse.settings.transcription.closedCaptionMode
     }
