@@ -22,7 +22,6 @@ import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
-import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import kotlinx.coroutines.test.runTest
@@ -65,13 +64,6 @@ class RtcSessionTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Create a publisher peer connection`() = runTest {
-        val joinResult = call.join()
-        assertSuccess(joinResult)
-        val publisher = call.session!!.createPublisher()
-    }
-
-    @Test
     fun `Offer and Answer cycle`() = runTest {
         // Join the call
         val joinResult = call.join()
@@ -95,23 +87,6 @@ class RtcSessionTest : IntegrationTestBase() {
         // subscriber trickle
         val subscriberTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
         call.session?.handleIceTrickle(subscriberTrickle)
-    }
-
-    @Test
-    @Ignore
-    fun `onNegotiationNeeded`() = runTest {
-        // Join the call
-        val joinResult = call.join()
-        assertSuccess(joinResult)
-        waitForNextEvent<SFUConnectedEvent>()
-        Truth.assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
-        val publisher = call.session!!.createPublisher()!!
-        call.session?.onNegotiationNeeded(
-            publisher,
-            StreamPeerType.PUBLISHER,
-        )
-
-        // TODO verify local and remote description were set
     }
 
     @Test

@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.CallGrantsUpdatedEvent
+import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -69,6 +70,10 @@ public object RTCEventMapper {
                 event.change_publish_quality,
             )
 
+            event.change_publish_options != null -> ChangePublishOptionsEvent(
+                event.change_publish_options,
+            )
+
             event.track_published != null -> with(event.track_published) {
                 TrackPublishedEvent(
                     user_id,
@@ -115,6 +120,7 @@ public object RTCEventMapper {
                     counts,
                     event.join_response.fast_reconnect_deadline_seconds,
                     event.join_response.reconnected,
+                    event.join_response.publish_options,
                 )
             }
 

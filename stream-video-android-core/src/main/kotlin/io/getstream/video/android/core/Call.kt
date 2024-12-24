@@ -646,6 +646,7 @@ public class Call(
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 val session = this.session!!
+                val currentOptions = this.session?.publisher?.currentOptions()
                 logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
 
                 this.sessionId = UUID.randomUUID().toString()
@@ -673,7 +674,7 @@ public class Call(
                         ice.toIceServer()
                     },
                 )
-                this.session?.connect(reconnectDetails)
+                this.session?.connect(reconnectDetails, currentOptions)
                 session.cleanup()
                 monitorSession(joinResponse.value)
             } else {
@@ -697,6 +698,7 @@ public class Call(
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 val session = this.session!!
+                val currentOptions = this.session?.publisher?.currentOptions()
                 val oldSfuUrl = session.sfuUrl
                 logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
 
@@ -728,7 +730,7 @@ public class Call(
                 )
                 val oldSession = this.session
                 this.session = newSession
-                this.session?.connect(reconnectDetails)
+                this.session?.connect(reconnectDetails, currentOptions)
                 monitorSession(joinResponse.value)
                 oldSession?.leaveWithReason("migrating")
                 oldSession?.cleanup()
@@ -1368,7 +1370,7 @@ public class Call(
 
         fun fastReconnect() {
             call.scope.launch {
-                call.rejoin()
+                call.fastReconnect()
             }
         }
     }

@@ -1407,12 +1407,12 @@ class SdpSession {
                 }
                 val tryMid = SdpGrammar.tryParseMid(value)
                 if (tryMid != null) {
-                    if (lastMedia != null) lastMedia.mid = tryMid else mid = tryMid
+                    if (lastMedia != null) lastMedia.mid = tryMid
                     return
                 }
                 val tryMsid = SdpGrammar.tryParseMsid(value)
                 if (tryMsid != null) {
-                    if (lastMedia != null) lastMedia.msid = tryMsid else msid = tryMsid
+                    if (lastMedia != null) lastMedia.msid = tryMsid
                     return
                 }
                 val tryPtime = SdpGrammar.tryParsePtime(value)
