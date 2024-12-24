@@ -1101,6 +1101,11 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun ChatDialogAction-_8q-z2c (Landroidx/compose/ui/Modifier;ZLjava/lang/Integer;Landroidx/compose/ui/graphics/vector/ImageVector;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ClosedCaptionsToggleActionKt {
+	public static final fun ClosedCaptionsToggleAction-PBJxc4c (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ClosedCaptionsToggleActionPreview (Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$AcceptCallActionKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$AcceptCallActionKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -1117,6 +1122,13 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ChatDialogActionKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ChatDialogActionKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ClosedCaptionsToggleActionKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ClosedCaptionsToggleActionKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;

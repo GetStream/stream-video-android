@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.ui.closedcaptions
 
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -24,7 +23,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.StreamColors
-import java.util.stream.Stream
 
 /**
  * Provides default configurations for the Closed Captions UI.

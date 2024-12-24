@@ -1114,6 +1114,17 @@ public final class io/getstream/video/android/core/call/state/ChooseLayout : io/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/call/state/ClosedCaptionsAction : io/getstream/video/android/core/call/state/CallAction {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lio/getstream/video/android/core/call/state/ClosedCaptionsAction;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/state/ClosedCaptionsAction;ZILjava/lang/Object;)Lio/getstream/video/android/core/call/state/ClosedCaptionsAction;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun isEnabled ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
 public class io/getstream/video/android/core/call/state/CustomAction : io/getstream/video/android/core/call/state/CallAction {
 	public fun <init> (Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

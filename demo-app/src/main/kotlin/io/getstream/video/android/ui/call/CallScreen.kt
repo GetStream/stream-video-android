@@ -107,7 +107,6 @@ import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState.Available.toClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsContainer
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsDefaults
-import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsThemeConfig
 import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
@@ -439,7 +438,9 @@ fun CallScreen(
                             } else {
                                 ClosedCaptionsContainer(
                                     call,
-                                    ClosedCaptionsDefaults.streamThemeConfig().copy(yOffset = (-80).dp),
+                                    ClosedCaptionsDefaults.streamThemeConfig().copy(
+                                        yOffset = (-80).dp,
+                                    ),
                                     closedCaptionUiState,
                                 )
                             }
