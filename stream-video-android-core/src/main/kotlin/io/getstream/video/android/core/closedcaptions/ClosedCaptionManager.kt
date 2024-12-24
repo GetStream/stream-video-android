@@ -39,14 +39,18 @@ import org.openapitools.client.models.VideoEvent
  * Manages the lifecycle, state, and configuration of closed captions for a video call.
  *
  * The [ClosedCaptionManager] is responsible for handling caption updates, maintaining caption states,
- * and auto-removing captions based on the provided [ClosedCaptionsSettings]. It ensures thread-safe
+ * auto-removing and deduplicating captions based on the provided [ClosedCaptionsSettings] and [ClosedCaptionDeduplicationConfig]. It ensures thread-safe
  * operations using a [Mutex] and manages jobs for scheduled caption removal using [CoroutineScope].
  *
  * @property closedCaptionsSettings The configuration that defines how closed captions are managed,
  * including auto-dismiss behavior, maximum number of captions to retain, and dismiss time.
  */
 
-class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSettings = ClosedCaptionsSettings()) {
+class ClosedCaptionManager(
+    private var closedCaptionsSettings: ClosedCaptionsSettings = ClosedCaptionsSettings(),
+    private var closedCaptionDeduplicationConfig: ClosedCaptionDeduplicationConfig =
+        ClosedCaptionDeduplicationConfig(),
+) {
 
     /**
      * Holds the current list of closed captions. This list is updated dynamically
@@ -56,6 +60,16 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
     private val _closedCaptions: MutableStateFlow<List<CallClosedCaption>> =
         MutableStateFlow(emptyList())
     val closedCaptions: StateFlow<List<CallClosedCaption>> = _closedCaptions.asStateFlow()
+
+    /**
+     * A set to track unique keys for deduplication, preventing duplicate captions.
+     */
+    private val seenKeys: MutableSet<String> = mutableSetOf()
+
+    /**
+     * A job to manage the periodic cleanup of outdated or excess keys in seenKeys.
+     */
+    private var seenKeysCleanupJob: Job? = null
 
     /**
      *  Holds the current closed caption mode for the video call. This object contains information about closed
@@ -82,7 +96,7 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
     /**
      * Manages the job responsible for automatically removing closed captions after a delay.
      */
-    private var removalJob: Job? = null
+    private var removeCaptionsJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     /**
@@ -142,14 +156,24 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
     private fun addCaption(event: ClosedCaptionEvent) {
         scope.launch {
             mutex.withLock {
-                // Add the caption and keep the latest 3
-                _closedCaptions.value =
-                    (_closedCaptions.value + event.closedCaption).takeLast(closedCaptionsSettings.maxVisibleCaptions)
+                val uniqueKey = "${event.closedCaption.speakerId}/${event.closedCaption.startTime.toEpochSecond()}"
+
+                if (uniqueKey !in seenKeys) {
+                    // Add the caption and keep the latest 2
+                    _closedCaptions.value =
+                        (_closedCaptions.value + event.closedCaption).takeLast(closedCaptionsSettings.maxVisibleCaptions)
+
+                    seenKeys.add(uniqueKey)
+                }
             }
 
             if (closedCaptionsSettings.autoDismissCaptions) {
-                removalJob?.cancel()
+                removeCaptionsJob?.cancel()
                 scheduleRemoval()
+            }
+
+            if (closedCaptionDeduplicationConfig.autoRemoveDuplicateCaptions) {
+                startCleanupTask()
             }
         }
     }
@@ -159,7 +183,7 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
      *
      */
     private fun scheduleRemoval() {
-        removalJob = scope.launch {
+        removeCaptionsJob = scope.launch {
             delay(closedCaptionsSettings.visibilityDurationMs)
             mutex.withLock {
                 if (_closedCaptions.value.isNotEmpty()) {
@@ -170,6 +194,33 @@ class ClosedCaptionManager(private var closedCaptionsSettings: ClosedCaptionsSet
             if (_closedCaptions.value.isNotEmpty()) {
                 scheduleRemoval() // Continue scheduling removal for remaining captions
             }
+        }
+    }
+
+    /**
+     * Starts cleanup task to empty [seenKeys] it will run after [ClosedCaptionDeduplicationConfig.duplicateCleanupFrequencyMs]
+     */
+    private fun startCleanupTask() {
+        if (seenKeysCleanupJob?.isActive == true) return
+
+        seenKeysCleanupJob = scope.launch {
+            while (_closedCaptions.value.isNotEmpty()) {
+                delay(closedCaptionDeduplicationConfig.duplicateCleanupFrequencyMs)
+                mutex.withLock {
+                    cleanUpSeenKeys()
+                }
+            }
+            seenKeysCleanupJob?.cancel()
+        }
+    }
+
+    /**
+     * Remove the seen keys based on [ClosedCaptionDeduplicationConfig.captionSplitFactor]
+     */
+    private fun cleanUpSeenKeys() {
+        if (seenKeys.size > 1) {
+            val itemsToRemove = seenKeys.size / closedCaptionDeduplicationConfig.captionSplitFactor
+            seenKeys.removeAll(seenKeys.asSequence().take(itemsToRemove).toSet())
         }
     }
 }

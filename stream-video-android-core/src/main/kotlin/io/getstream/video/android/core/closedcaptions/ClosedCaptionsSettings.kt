@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.closedcaptions
 
 private const val DEFAULT_CAPTIONS_AUTO_DISMISS_TIME_MS = 2700L
+private const val DEFAULT_DUPLICATE_CAPTIONS_AUTO_CLEANUP_TIME_MS = 30_000L // Every 30 seconds
 
 /**
  * Configuration for managing closed captions in the [ClosedCaptionManager].
@@ -35,4 +36,22 @@ data class ClosedCaptionsSettings(
     val visibilityDurationMs: Long = DEFAULT_CAPTIONS_AUTO_DISMISS_TIME_MS,
     val autoDismissCaptions: Boolean = true,
     val maxVisibleCaptions: Int = 2, // Default to keep the latest 2 captions
+)
+
+/**
+ * Configuration for managing deduplication of captions in the [ClosedCaptionManager].
+ *
+ * @param duplicateCleanupFrequencyMs The duration (in milliseconds) after which [ClosedCaptionManager.seenKeys] will be automatically removed.
+ * Set to  [DEFAULT_DUPLICATE_CAPTIONS_AUTO_CLEANUP_TIME_MS] by default.
+ *
+ * @param autoRemoveDuplicateCaptions Determines whether client sdk should be deduplicate closed captions or not
+ *
+ * @param captionSplitFactor Factor to determine how many items to clean (e.g., 2 means clean half)
+ *
+ */
+
+data class ClosedCaptionDeduplicationConfig(
+    val duplicateCleanupFrequencyMs: Long = DEFAULT_DUPLICATE_CAPTIONS_AUTO_CLEANUP_TIME_MS,
+    val autoRemoveDuplicateCaptions: Boolean = true,
+    val captionSplitFactor: Int = 2,
 )
