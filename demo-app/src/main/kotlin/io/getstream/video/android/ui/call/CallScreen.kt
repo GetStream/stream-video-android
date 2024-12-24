@@ -77,6 +77,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamIconToggleBut
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ClosedCaptionsToggleAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
@@ -102,6 +103,10 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState.Available.toClosedCaptionUiState
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsContainer
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsDefaults
 import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
@@ -174,6 +179,43 @@ fun CallScreen(
         PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 16.dp)
     } else {
         PaddingValues(0.dp)
+    }
+
+    /**
+     * Logic to Closed Captions UI State and render UI accordingly
+     */
+
+    val ccMode by call.state.ccMode.collectAsStateWithLifecycle()
+    val captioning by call.state.isCaptioning.collectAsStateWithLifecycle()
+
+    var closedCaptionUiState: ClosedCaptionUiState by remember {
+        mutableStateOf(ccMode.toClosedCaptionUiState())
+    }
+
+    val updateClosedCaptionUiState: (ClosedCaptionUiState) -> Unit = { newState ->
+        closedCaptionUiState = newState
+    }
+
+    val onLocalClosedCaptionsClick: () -> Unit = {
+        scope.launch {
+            when (closedCaptionUiState) {
+                is ClosedCaptionUiState.Running -> {
+                    updateClosedCaptionUiState(ClosedCaptionUiState.Available)
+                }
+                is ClosedCaptionUiState.Available -> {
+                    if (captioning) {
+                        updateClosedCaptionUiState(ClosedCaptionUiState.Running)
+                    } else {
+                        call.startClosedCaptions()
+                    }
+                }
+                else -> {
+                    throw Exception(
+                        "This state $closedCaptionUiState should not invoke any ui operation",
+                    )
+                }
+            }
+        }
     }
 
     VideoTheme {
@@ -258,6 +300,13 @@ fun CallScreen(
                                         isShowingSettings = !isShowingSettingMenu,
                                         onCallAction = {
                                             isShowingSettingMenu = !isShowingSettingMenu
+                                        },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    ClosedCaptionsToggleAction(
+                                        active = closedCaptionUiState == ClosedCaptionUiState.Running,
+                                        onCallAction = {
+                                            onLocalClosedCaptionsClick.invoke()
                                         },
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
@@ -377,6 +426,23 @@ fun CallScreen(
                                 if (visibility) {
                                     ChatOverly(messages = messages)
                                 }
+                            }
+                        },
+                        closedCaptionUi = { call ->
+                            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                ClosedCaptionsContainer(
+                                    call,
+                                    ClosedCaptionsDefaults.streamThemeConfig(),
+                                    closedCaptionUiState,
+                                )
+                            } else {
+                                ClosedCaptionsContainer(
+                                    call,
+                                    ClosedCaptionsDefaults.streamThemeConfig().copy(
+                                        yOffset = (-80).dp,
+                                    ),
+                                    closedCaptionUiState,
+                                )
                             }
                         },
                     )
@@ -531,6 +597,8 @@ fun CallScreen(
                     isShowingStats = true
                     isShowingSettingMenu = false
                 },
+                closedCaptionUiState = closedCaptionUiState,
+                onClosedCaptionsToggle = onLocalClosedCaptionsClick,
             )
         }
 
