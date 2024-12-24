@@ -16,18 +16,16 @@
 
 package io.getstream.video.android.tutorial.livestream
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import io.getstream.log.Priority
-import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.GEO
@@ -67,11 +65,11 @@ fun LiveAudience(
 
     // step3 - join a call, which type is `default` and id is `123`.
     val call = client.call("livestream", callId)
-    LaunchCallPermissions(call = call) {
-        val result = call.join()
-        result.onError {
-            Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
-        }
+
+    LaunchedEffect(call) {
+        call.microphone.setEnabled(false, fromUser = true)
+        call.camera.setEnabled(false, fromUser = true)
+        call.join()
     }
 
     Box {
