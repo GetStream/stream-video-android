@@ -109,6 +109,9 @@ data class CallResponse (
     @Json(name = "settings")
     val settings: CallSettingsResponse,
 
+    @Json(name = "captioning")
+    val captioning: kotlin.Boolean,
+
     @Json(name = "transcribing")
     val transcribing: kotlin.Boolean,
 
