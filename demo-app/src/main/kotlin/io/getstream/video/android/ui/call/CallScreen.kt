@@ -185,8 +185,8 @@ fun CallScreen(
      * Logic to Closed Captions UI State and render UI accordingly
      */
 
-    val ccMode by call.state.closedCaptionManager.ccMode.collectAsStateWithLifecycle()
-    val captioning by call.state.closedCaptionManager.closedCaptioning.collectAsStateWithLifecycle()
+    val ccMode by call.state.ccMode.collectAsStateWithLifecycle()
+    val captioning by call.state.isCaptioning.collectAsStateWithLifecycle()
 
     var closedCaptionUiState: ClosedCaptionUiState by remember {
         mutableStateOf(ccMode.toClosedCaptionUiState())

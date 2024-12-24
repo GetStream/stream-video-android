@@ -98,7 +98,7 @@ public fun ClosedCaptionsContainer(
             ClosedCaptionListDemo()
         }
     } else {
-        val closedCaptions by call.state.closedCaptionManager.closedCaptions
+        val closedCaptions by call.state.closedCaptions
             .collectAsStateWithLifecycle()
 
         if (closedCaptionUiState == ClosedCaptionUiState.Running && closedCaptions.isNotEmpty()) {
