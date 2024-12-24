@@ -72,11 +72,13 @@ import org.openapitools.client.models.SendCallEventRequest
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartClosedCaptionResponse
 import org.openapitools.client.models.StartHLSBroadcastingResponse
 import org.openapitools.client.models.StartRecordingRequest
 import org.openapitools.client.models.StartRecordingResponse
 import org.openapitools.client.models.StartTranscriptionRequest
 import org.openapitools.client.models.StartTranscriptionResponse
+import org.openapitools.client.models.StopClosedCaptionResponse
 import org.openapitools.client.models.StopHLSBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopRecordingResponse
@@ -854,4 +856,39 @@ interface ProductvideoApi {
         @Body unpinRequest: UnpinRequest
     ): UnpinResponse
 
+
+    /**
+     * Start CC for a call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [StartClosedCaptionResponse]
+     */
+    @POST("/video/call/{type}/{id}/start_closed_captions")
+    suspend fun startClosedCaptions(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): StartClosedCaptionResponse
+
+
+    /**
+     * Stops CC for a call
+     * Responses:
+     *  - 201: Successful response
+     *  - 400: Bad request
+     *  - 429: Too many requests
+     *
+     * @param type
+     * @param id
+     * @return [StopClosedCaptionResponse]
+     */
+    @POST("/video/call/{type}/{id}/stop_closed_captions")
+    suspend fun stopClosedCaptions(
+        @Path("type") type: String,
+        @Path("id") id: String,
+    ): StopClosedCaptionResponse
 }
