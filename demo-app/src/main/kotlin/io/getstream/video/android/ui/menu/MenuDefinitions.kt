@@ -202,6 +202,7 @@ fun defaultStreamMenu(
             ),
         ),
     )
+    add(getCCActionMenu(closedCaptionUiState, onToggleClosedCaptions))
     if (showDebugOptions) {
         add(
             SubMenuItem(
@@ -221,8 +222,6 @@ fun defaultStreamMenu(
             ),
         )
     }
-
-    add(getCCActionMenu(closedCaptionUiState, onToggleClosedCaptions))
 }
 
 fun getCCActionMenu(
