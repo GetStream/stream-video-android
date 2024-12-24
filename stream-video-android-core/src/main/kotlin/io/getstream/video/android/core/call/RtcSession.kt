@@ -1667,16 +1667,19 @@ public class RtcSession internal constructor(
                         is_power_saver_mode = powerSaving,
                     ),
                     telemetry = safeCallWithDefault(null) {
-                        if (call.connectedAt != null || call.reconnectAt != null) {
+                        if (call.reconnectAt != null) {
                             Telemetry(
-                                connection_time_seconds = call.connectedAt?.let { (now - it) / 1000 }
-                                    ?.toFloat(),
                                 reconnection = call.reconnectAt?.let {
                                     Reconnection(
                                         time_seconds = ((now - it.second) / 1000).toFloat(),
                                         strategy = it.first,
                                     )
                                 },
+                            )
+                        } else if (call.connectedAt != null) {
+                            Telemetry(
+                                connection_time_seconds = call.connectedAt?.let { (now - it) / 1000 }
+                                    ?.toFloat(),
                             )
                         } else {
                             null

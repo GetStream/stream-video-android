@@ -75,10 +75,12 @@ public final class io/getstream/video/android/core/Call {
 	public final fun setSessionId (Ljava/lang/String;)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
+	public final fun startClosedCaptions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startScreenSharing (Landroid/content/Intent;)V
 	public final fun startTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun stopClosedCaptions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopLive (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -91,6 +93,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun unpinForEveryone (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun update (Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lorg/openapitools/client/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun updateClosedCaptionsSettings (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
 	public final fun updateMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -126,6 +129,8 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getBlockedUsers ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBroadcasting ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCapabilitiesByRole ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getCcMode ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getClosedCaptions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedBy ()Lkotlinx/coroutines/flow/StateFlow;
@@ -176,6 +181,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getUpdatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasPermission (Ljava/lang/String;)Lkotlinx/coroutines/flow/StateFlow;
+	public final fun isCaptioning ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isReconnecting ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun markSpeakingAsMuted ()V
 	public final fun pin (Ljava/lang/String;Ljava/lang/String;)V
@@ -2883,6 +2889,50 @@ public class io/getstream/video/android/core/call/video/VideoFilter {
 public final class io/getstream/video/android/core/call/video/YuvFrame {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/video/YuvFrame;
 	public final fun bitmapFromVideoFrame (Lorg/webrtc/VideoFrame;)Landroid/graphics/Bitmap;
+}
+
+public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionDeduplicationConfig {
+	public fun <init> ()V
+	public fun <init> (JZI)V
+	public synthetic fun <init> (JZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun copy (JZI)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionDeduplicationConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionDeduplicationConfig;JZIILjava/lang/Object;)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionDeduplicationConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoRemoveDuplicateCaptions ()Z
+	public final fun getCaptionSplitFactor ()I
+	public final fun getDuplicateCleanupFrequencyMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionManager {
+	public fun <init> ()V
+	public fun <init> (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;Lio/getstream/video/android/core/closedcaptions/ClosedCaptionDeduplicationConfig;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;Lio/getstream/video/android/core/closedcaptions/ClosedCaptionDeduplicationConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCcMode ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getClosedCaptioning ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getClosedCaptions ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
+}
+
+public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings {
+	public fun <init> ()V
+	public fun <init> (JZI)V
+	public synthetic fun <init> (JZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun copy (JZI)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;JZIILjava/lang/Object;)Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoDismissCaptions ()Z
+	public final fun getMaxVisibleCaptions ()I
+	public final fun getVisibilityDurationMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/dispatchers/DispatcherProvider {
@@ -6752,9 +6802,11 @@ public abstract interface class org/openapitools/client/apis/ProductvideoApi {
 	public abstract fun requestPermission (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/RequestPermissionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendCallEvent (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendCallEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendVideoReaction (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/SendReactionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun startClosedCaptions (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startHLSBroadcasting (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startRecording (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/StartRecordingRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startTranscription (Ljava/lang/String;Ljava/lang/String;Lorg/openapitools/client/models/StartTranscriptionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun stopClosedCaptions (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopHLSBroadcasting (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopLive (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopRecording (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -7691,21 +7743,22 @@ public final class org/openapitools/client/models/CallRequest {
 }
 
 public final class org/openapitools/client/models/CallResponse {
-	public fun <init> (ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;)V
-	public synthetic fun <init> (ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;)V
+	public synthetic fun <init> (ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component10 ()Lorg/openapitools/client/models/CallIngressResponse;
 	public final fun component11 ()Z
 	public final fun component12 ()Lorg/openapitools/client/models/CallSettingsResponse;
 	public final fun component13 ()Z
-	public final fun component14 ()Ljava/lang/String;
-	public final fun component15 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component14 ()Z
+	public final fun component15 ()Ljava/lang/String;
 	public final fun component16 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component17 ()Lorg/openapitools/client/models/CallSessionResponse;
-	public final fun component18 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component19 ()Ljava/lang/String;
+	public final fun component17 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component18 ()Lorg/openapitools/client/models/CallSessionResponse;
+	public final fun component19 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component2 ()Ljava/util/List;
-	public final fun component20 ()Lorg/openapitools/client/models/ThumbnailResponse;
+	public final fun component20 ()Ljava/lang/String;
+	public final fun component21 ()Lorg/openapitools/client/models/ThumbnailResponse;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component5 ()Lorg/openapitools/client/models/UserResponse;
@@ -7713,11 +7766,12 @@ public final class org/openapitools/client/models/CallResponse {
 	public final fun component7 ()Ljava/util/Map;
 	public final fun component8 ()Lorg/openapitools/client/models/EgressResponse;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;)Lorg/openapitools/client/models/CallResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallResponse;ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallResponse;
+	public final fun copy (ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;)Lorg/openapitools/client/models/CallResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/CallResponse;ZLjava/util/List;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/UserResponse;Ljava/lang/String;Ljava/util/Map;Lorg/openapitools/client/models/EgressResponse;Ljava/lang/String;Lorg/openapitools/client/models/CallIngressResponse;ZLorg/openapitools/client/models/CallSettingsResponse;ZZLjava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Lorg/openapitools/client/models/CallSessionResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/openapitools/client/models/ThumbnailResponse;ILjava/lang/Object;)Lorg/openapitools/client/models/CallResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackstage ()Z
 	public final fun getBlockedUserIds ()Ljava/util/List;
+	public final fun getCaptioning ()Z
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun getCreatedBy ()Lorg/openapitools/client/models/UserResponse;
@@ -8478,6 +8532,24 @@ public final class org/openapitools/client/models/ChannelResponse {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/ClosedCaptionEndedEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
+	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lorg/openapitools/client/models/ClosedCaptionEndedEvent;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/ClosedCaptionEndedEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/ClosedCaptionEndedEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCallCID ()Ljava/lang/String;
+	public final fun getCallCid ()Ljava/lang/String;
+	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public fun getEventType ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/ClosedCaptionEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/openapitools/client/models/CallClosedCaption;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Lorg/openapitools/client/models/CallClosedCaption;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -8491,6 +8563,24 @@ public final class org/openapitools/client/models/ClosedCaptionEvent : org/opena
 	public fun getCallCID ()Ljava/lang/String;
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getClosedCaption ()Lorg/openapitools/client/models/CallClosedCaption;
+	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public fun getEventType ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/ClosedCaptionStartedEvent : org/openapitools/client/models/VideoEvent, org/openapitools/client/models/WSCallEvent {
+	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lorg/openapitools/client/models/ClosedCaptionStartedEvent;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/ClosedCaptionStartedEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/ClosedCaptionStartedEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCallCID ()Ljava/lang/String;
+	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public fun getEventType ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
@@ -10360,6 +10450,17 @@ public final class org/openapitools/client/models/SortParam {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/openapitools/client/models/StartClosedCaptionResponse {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/StartClosedCaptionResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/StartClosedCaptionResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/StartClosedCaptionResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class org/openapitools/client/models/StartHLSBroadcastingResponse {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -10441,6 +10542,17 @@ public final class org/openapitools/client/models/StatsOptions {
 	public static synthetic fun copy$default (Lorg/openapitools/client/models/StatsOptions;IILjava/lang/Object;)Lorg/openapitools/client/models/StatsOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReportingIntervalMs ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/StopClosedCaptionResponse {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/StopClosedCaptionResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/StopClosedCaptionResponse;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/StopClosedCaptionResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -10636,16 +10748,58 @@ public final class org/openapitools/client/models/TranscriptionSettingsRequest$M
 }
 
 public final class org/openapitools/client/models/TranscriptionSettingsResponse {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;)V
-	public final fun component1 ()Ljava/lang/String;
+	public fun <init> (Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;Ljava/util/List;Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;)V
+	public final fun component1 ()Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;
 	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;)Lorg/openapitools/client/models/TranscriptionSettingsResponse;
-	public static synthetic fun copy$default (Lorg/openapitools/client/models/TranscriptionSettingsResponse;Ljava/lang/String;Ljava/util/List;Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;ILjava/lang/Object;)Lorg/openapitools/client/models/TranscriptionSettingsResponse;
+	public final fun copy (Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;Ljava/util/List;Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;)Lorg/openapitools/client/models/TranscriptionSettingsResponse;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/TranscriptionSettingsResponse;Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;Ljava/util/List;Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;ILjava/lang/Object;)Lorg/openapitools/client/models/TranscriptionSettingsResponse;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getClosedCaptionMode ()Ljava/lang/String;
+	public final fun getClosedCaptionMode ()Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;
 	public final fun getLanguages ()Ljava/util/List;
 	public final fun getMode ()Lorg/openapitools/client/models/TranscriptionSettingsResponse$Mode;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode {
+	public static final field Companion Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getValue ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$AutoOn : org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$AutoOn;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Available : org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Available;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$ClosedCaptionModeAdapter : com/squareup/moshi/JsonAdapter {
+	public fun <init> ()V
+	public synthetic fun fromJson (Lcom/squareup/moshi/JsonReader;)Ljava/lang/Object;
+	public fun fromJson (Lcom/squareup/moshi/JsonReader;)Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;
+	public synthetic fun toJson (Lcom/squareup/moshi/JsonWriter;Ljava/lang/Object;)V
+	public fun toJson (Lcom/squareup/moshi/JsonWriter;Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;)V
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Companion {
+	public final fun fromString (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Disabled : org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode {
+	public static final field INSTANCE Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Disabled;
+}
+
+public final class org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Unknown : org/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Unknown;
+	public static synthetic fun copy$default (Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Unknown;Ljava/lang/String;ILjava/lang/Object;)Lorg/openapitools/client/models/TranscriptionSettingsResponse$ClosedCaptionMode$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUnknownValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
