@@ -47,6 +47,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
+import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.debugSubmenu
 import io.getstream.video.android.ui.menu.defaultStreamMenu
 import io.getstream.video.android.ui.menu.reconnectMenu
@@ -232,6 +233,9 @@ private fun DynamicMenuPreview() {
                 onToggleIncomingVideoEnabled = {},
                 onSelectScaleType = {},
                 loadRecordings = { emptyList() },
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
                 onToggleClosedCaptions = {},
                 closedCaptionUiState = ClosedCaptionUiState.Available,
             ),
@@ -269,6 +273,9 @@ private fun DynamicMenuDebugOptionPreview() {
                 loadRecordings = { emptyList() },
                 onToggleClosedCaptions = {},
                 closedCaptionUiState = ClosedCaptionUiState.Available,
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
