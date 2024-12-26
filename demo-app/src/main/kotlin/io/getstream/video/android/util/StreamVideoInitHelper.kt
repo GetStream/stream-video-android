@@ -30,10 +30,11 @@ import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.core.notifications.internal.service.livestreamGuestCallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.update
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
@@ -191,6 +192,21 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
+        val callServiceConfigRegistry = CallServiceConfigRegistry()
+
+        callServiceConfigRegistry.createConfigRegistry {
+            register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
+
+            update(CallType.Default.name) {
+                setAudioUsage(AudioAttributes.USAGE_MEDIA)
+                setRunCallServiceInForeground(true)
+            }
+
+            update(CallType.Livestream.name) {
+                setRunCallServiceInForeground(true)
+            }
+        }
+
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -215,16 +231,7 @@ object StreamVideoInitHelper {
             },
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-            callServiceConfig = livestreamGuestCallServiceConfig()
-                .update(
-                    callType = "default",
-                    runCallServiceInForeground = true,
-                    audioUsage = AudioAttributes.USAGE_MEDIA,
-                )
-                .update(
-                    callType = "livestream",
-                    runCallServiceInForeground = true,
-                ),
+            callServiceConfigRegistry = callServiceConfigRegistry,
         ).build()
     }
 }

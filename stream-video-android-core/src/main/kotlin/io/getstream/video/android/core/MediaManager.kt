@@ -654,39 +654,43 @@ public class CameraManager(
      * Capture is called whenever you call enable()
      */
     internal fun startCapture() = synchronized(this) {
-        if (isCapturingVideo) {
-            stopCapture()
+        safeCall {
+            if (isCapturingVideo) {
+                stopCapture()
+            }
+
+            val selectedDevice = _selectedDevice.value ?: return
+            val selectedResolution = resolution.value ?: return
+
+            // setup the camera 2 capturer
+            videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
+
+            // initialize it
+            videoCapturer.initialize(
+                surfaceTextureHelper,
+                mediaManager.context,
+                mediaManager.videoSource.capturerObserver,
+            )
+
+            // and start capture
+            videoCapturer.startCapture(
+                selectedResolution.width,
+                selectedResolution.height,
+                selectedResolution.framerate.max,
+            )
+            isCapturingVideo = true
         }
-
-        val selectedDevice = _selectedDevice.value ?: return
-        val selectedResolution = resolution.value ?: return
-
-        // setup the camera 2 capturer
-        videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
-
-        // initialize it
-        videoCapturer.initialize(
-            surfaceTextureHelper,
-            mediaManager.context,
-            mediaManager.videoSource.capturerObserver,
-        )
-
-        // and start capture
-        videoCapturer.startCapture(
-            selectedResolution.width,
-            selectedResolution.height,
-            selectedResolution.framerate.max,
-        )
-        isCapturingVideo = true
     }
 
     /**
      * Stops capture if it's running
      */
     internal fun stopCapture() = synchronized(this) {
-        if (isCapturingVideo) {
-            videoCapturer.stopCapture()
-            isCapturingVideo = false
+        safeCall {
+            if (isCapturingVideo) {
+                videoCapturer.stopCapture()
+                isCapturingVideo = false
+            }
         }
     }
 

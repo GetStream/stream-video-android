@@ -46,7 +46,6 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.notifications.internal.service.resolveAudioUsage
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -213,7 +212,7 @@ public class Call(
     internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
         context = clientImpl.context,
         audioProcessing = clientImpl.audioProcessing,
-        audioUsage = clientImpl.callServiceConfig.resolveAudioUsage(type),
+        audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
     )
 
     internal val mediaManager by lazy {
@@ -225,7 +224,7 @@ public class Call(
                 this,
                 scope,
                 peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.callServiceConfig.resolveAudioUsage(type),
+                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             )
         }
     }

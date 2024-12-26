@@ -43,9 +43,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.resolveRunCallServiceInForeground
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -152,7 +150,7 @@ internal class StreamVideoClient internal constructor(
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
-    internal val callServiceConfig: CallServiceConfig = callServiceConfig(),
+    internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
@@ -197,12 +195,14 @@ internal class StreamVideoClient internal constructor(
         // call cleanup on the active call
         val activeCall = state.activeCall.value
         // Stop the call service if it was running
-        if (callServiceConfig.resolveRunCallServiceInForeground(activeCall?.type ?: ANY_MARKER)) {
+
+        val callConfig = callServiceConfigRegistry.get(activeCall?.type ?: ANY_MARKER)
+        val runCallServiceInForeground = callConfig.runCallServiceInForeground
+        if (runCallServiceInForeground) {
             safeCall {
                 val serviceIntent = CallService.buildStopIntent(
                     context = context,
-                    callType = activeCall?.type ?: ANY_MARKER,
-                    callServiceConfiguration = callServiceConfig,
+                    callServiceConfiguration = callConfig,
                 )
                 context.stopService(serviceIntent)
             }
