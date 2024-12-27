@@ -32,6 +32,7 @@ import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
@@ -78,7 +79,9 @@ import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
+import org.openapitools.client.models.StartClosedCaptionResponse
 import org.openapitools.client.models.StartTranscriptionResponse
+import org.openapitools.client.models.StopClosedCaptionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnpinResponse
@@ -207,6 +210,9 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
+
+    internal var connectedAt: Long? = null
+    internal var reconnectAt: Pair<WebsocketReconnectStrategy, Long>? = null
 
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
@@ -463,6 +469,7 @@ public class Call(
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
+            connectedAt = System.currentTimeMillis()
             RtcSession(
                 sessionId = this.sessionId,
                 apiKey = clientImpl.apiKey,
@@ -617,6 +624,7 @@ public class Call(
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
             )
+            reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST, System.currentTimeMillis())
             session.fastReconnect(reconnectDetails)
         } else {
             logger.e { "[reconnect] Disconnecting" }
@@ -629,6 +637,7 @@ public class Call(
      */
     suspend fun rejoin() = schedule {
         logger.d { "[rejoin] Rejoining" }
+        reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN, System.currentTimeMillis())
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
@@ -702,6 +711,7 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
+                reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE, System.currentTimeMillis())
                 val newSession = RtcSession(
                     clientImpl,
                     powerManager,
@@ -1288,6 +1298,18 @@ public class Call(
 
     suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
         return clientImpl.listTranscription(type, id)
+    }
+
+    suspend fun startClosedCaptions(): Result<StartClosedCaptionResponse> {
+        return clientImpl.startClosedCaptions(type, id)
+    }
+
+    suspend fun stopClosedCaptions(): Result<StopClosedCaptionResponse> {
+        return clientImpl.stopClosedCaptions(type, id)
+    }
+
+    fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
+        state.closedCaptionManager.updateClosedCaptionsSettings(closedCaptionsSettings)
     }
 
     /**

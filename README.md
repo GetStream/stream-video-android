@@ -147,35 +147,25 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [X] Improve Compose UI SDK performance by marking WebRTC models as stable.
 - [X] Development token to support a development environment
 
-### 1.0.0 milestone - April
+### 1.0.0 milestone
 
 - [X] Blur & AI video filters
 - [X] Analytics and stats for calls
 - [X] New `StreamCallActivity` for easier integration 
 
-### 1.1.0 milestone - June
+### 1.1.0 milestone
+- [X] Noise cancelling support
+- [X] Session timers
+- [X] Transcriptions
+- [X] Manual quality selection
 
-- [ ] Android Telecom framework integration
-- [ ] Noise cancelling support
-- [ ] Waiting rooms
-- [ ] Session timers
-- [ ] Closed Captions and multi language support for transcriptions
-
-### After 1.1 release
+### After 1.1.x release
 - [ ] Test coverage
-- [ ] Dynascale 2.0 (depending backend support)
-- [ ] Testing on more devices
+- [ ] Support for closed captions
+- [ ] Android Telecom framework integration
+- [ ] Codec negotiation
+- [ ] Setup testing infrastructure (more devices)
 - [ ] Camera controls
-- [ ] Tap to focus
-- [ ] Breakout rooms
-
-
-### Dynascale 2.0
-
-- currently we support selecting which of the 3 layers you want to send: f, h and q. in addition we should support:
-- changing the resolution of the f track
-- changing the codec that's used from VP8 to h264 or vice versa
-- detecting when webrtc changes the resolution of the f track, and notifying the server about it (if needed)
 
 ## 💼 We are hiring!
 

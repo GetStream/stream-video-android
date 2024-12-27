@@ -110,6 +110,11 @@ internal class MoshiVideoParser : VideoParser {
             )
             .add(
                 lenientAdapter(
+                    org.openapitools.client.models.TranscriptionSettingsResponse.ClosedCaptionMode.ClosedCaptionModeAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
                     org.openapitools.client.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter(),
                 ),
             ).add(

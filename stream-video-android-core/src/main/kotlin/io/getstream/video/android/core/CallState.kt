@@ -20,6 +20,8 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -72,6 +74,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.BlockedUserEvent
 import org.openapitools.client.models.CallAcceptedEvent
+import org.openapitools.client.models.CallClosedCaption
 import org.openapitools.client.models.CallCreatedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallIngressResponse
@@ -99,6 +102,9 @@ import org.openapitools.client.models.CallTranscriptionFailedEvent
 import org.openapitools.client.models.CallTranscriptionStartedEvent
 import org.openapitools.client.models.CallTranscriptionStoppedEvent
 import org.openapitools.client.models.CallUpdatedEvent
+import org.openapitools.client.models.ClosedCaptionEndedEvent
+import org.openapitools.client.models.ClosedCaptionEvent
+import org.openapitools.client.models.ClosedCaptionStartedEvent
 import org.openapitools.client.models.ConnectedEvent
 import org.openapitools.client.models.CustomVideoEvent
 import org.openapitools.client.models.EgressHLSResponse
@@ -115,6 +121,7 @@ import org.openapitools.client.models.QueryCallMembersResponse
 import org.openapitools.client.models.ReactionResponse
 import org.openapitools.client.models.StartHLSBroadcastingResponse
 import org.openapitools.client.models.StopLiveResponse
+import org.openapitools.client.models.TranscriptionSettingsResponse.ClosedCaptionMode
 import org.openapitools.client.models.UnblockedUserEvent
 import org.openapitools.client.models.UpdateCallResponse
 import org.openapitools.client.models.UpdatedCallPermissionsEvent
@@ -573,6 +580,37 @@ public class CallState(
 
     internal var acceptedOnThisDevice: Boolean = false
 
+    /**
+     * This [ClosedCaptionManager] is responsible for handling closed captions during the call.
+     * This includes processing events related to closed captions and maintaining their state.
+     */
+    internal val closedCaptionManager = ClosedCaptionManager()
+
+    /**
+     * Tracks whether closed captioning is currently active for the call.
+     * True if captioning is ongoing, false otherwise.
+     */
+    public val isCaptioning: StateFlow<Boolean> = closedCaptionManager.closedCaptioning
+
+    /**
+     * Holds the current list of closed captions. This list is updated dynamically
+     * and contains at most [ClosedCaptionsSettings.maxVisibleCaptions] captions.
+     */
+    public val closedCaptions: StateFlow<List<CallClosedCaption>> = closedCaptionManager.closedCaptions
+
+    /**
+     *  Holds the current closed caption mode for the video call. This object contains information about closed
+     *  captioning feature availability. This state is updated dynamically based on the server's transcription
+     *  setting which is [org.openapitools.client.models.TranscriptionSettingsResponse.closedCaptionMode]
+     *
+     *  Possible values:
+     *  - [ClosedCaptionMode.Available]: Closed captions are available and can be enabled.
+     *  - [ClosedCaptionMode.Disabled]: Closed captions are explicitly disabled.
+     *  - [ClosedCaptionMode.AutoOn]: Closed captions are automatically enabled as soon as user joins the call
+     *  - [ClosedCaptionMode.Unknown]: Represents an unrecognized or unsupported mode.
+     */
+    val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -949,6 +987,12 @@ public class CallState(
             is CallTranscriptionFailedEvent -> {
                 _transcribing.value = false
             }
+
+            is ClosedCaptionStartedEvent,
+            is ClosedCaptionEvent,
+            is ClosedCaptionEndedEvent,
+            ->
+                closedCaptionManager.handleEvent(event)
         }
     }
 
@@ -1244,6 +1288,7 @@ public class CallState(
         _team.value = response.team
 
         updateRingingState()
+        closedCaptionManager.handleCallUpdate(response)
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

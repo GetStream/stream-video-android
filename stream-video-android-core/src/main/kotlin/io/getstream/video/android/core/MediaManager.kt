@@ -586,13 +586,12 @@ public class CameraManager(
     }
 
     fun disable(fromUser: Boolean = true) {
+        if (fromUser) _status.value = DeviceStatus.Disabled
+
         if (isCapturingVideo) {
             // 1. update our local state
             // 2. update the track enabled status
             // 3. Rtc listens and sends the update mute state request
-            if (fromUser) {
-                _status.value = DeviceStatus.Disabled
-            }
             mediaManager.videoTrack.trySetEnabled(false)
             videoCapturer.stopCapture()
             isCapturingVideo = false

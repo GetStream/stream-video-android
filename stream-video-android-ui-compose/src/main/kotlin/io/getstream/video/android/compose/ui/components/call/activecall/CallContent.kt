@@ -95,6 +95,7 @@ import io.getstream.video.android.mock.previewCall
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param enableInPictureInPicture If the user has engaged in Picture-In-Picture mode.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
+ * @param closedCaptionUi You can pass your composable lambda here to render Closed Captions
  */
 @Composable
 public fun CallContent(
@@ -149,6 +150,7 @@ public fun CallContent(
     enableInPictureInPicture: Boolean = true,
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     enableDiagnostics: Boolean = false,
+    closedCaptionUi: @Composable (Call) -> Unit = {},
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
@@ -231,6 +233,7 @@ public fun CallContent(
                         showDiagnostics = false
                     }
                 }
+                closedCaptionUi(call)
             },
         )
     }
