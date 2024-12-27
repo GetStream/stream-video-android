@@ -14,6 +14,7 @@ io.getstream.video.android.core.call.stats.model
 io.getstream.video.android.core.call.stats.model.discriminator
 io.getstream.video.android.core.call.utils
 io.getstream.video.android.core.call.video
+io.getstream.video.android.core.closedcaptions
 io.getstream.video.android.core.dispatchers
 io.getstream.video.android.core.errors
 io.getstream.video.android.core.events
