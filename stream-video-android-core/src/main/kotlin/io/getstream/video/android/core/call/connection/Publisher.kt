@@ -227,7 +227,7 @@ internal class Publisher(
                 "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encodings: ${transceiver.sender?.parameters?.encodings?.joinToString { it.stringify() }})"
             }
             transceiverCache.add(publishOption, transceiver)
-        }  catch (e: Exception) {
+        } catch (e: Exception) {
             logger.e(e) { "Failed to add transceiver for ${publishOption.track_type}" }
         }
     }
