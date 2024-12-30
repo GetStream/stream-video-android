@@ -77,6 +77,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamIconToggleBut
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ClosedCaptionsToggleAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
@@ -102,14 +103,21 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState.Available.toClosedCaptionUiState
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsContainer
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsDefaults
 import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
+import org.openapitools.client.models.TranscriptionSettingsResponse
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -174,6 +182,71 @@ fun CallScreen(
         PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 16.dp)
     } else {
         PaddingValues(0.dp)
+    }
+
+    /**
+     * Logic to Closed Captions UI State and render UI accordingly
+     */
+
+    val ccMode by call.state.ccMode.collectAsStateWithLifecycle()
+    val captioning by call.state.isCaptioning.collectAsStateWithLifecycle()
+
+    var closedCaptionUiState: ClosedCaptionUiState by remember {
+        mutableStateOf(ccMode.toClosedCaptionUiState())
+    }
+
+    val updateClosedCaptionUiState: (ClosedCaptionUiState) -> Unit = { newState ->
+        closedCaptionUiState = newState
+    }
+
+    val onLocalClosedCaptionsClick: () -> Unit = {
+        scope.launch {
+            when (closedCaptionUiState) {
+                is ClosedCaptionUiState.Running -> {
+                    updateClosedCaptionUiState(ClosedCaptionUiState.Available)
+                }
+                is ClosedCaptionUiState.Available -> {
+                    if (captioning) {
+                        updateClosedCaptionUiState(ClosedCaptionUiState.Running)
+                    } else {
+                        call.startClosedCaptions()
+                    }
+                }
+                else -> {
+                    throw Exception(
+                        "This state $closedCaptionUiState should not invoke any ui operation",
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * AUTO START/STOP TRANSCRIPTION LOGIC
+     *
+     * This code handles the automatic transcription logic, ensuring transcription starts or stops
+     * based on the current settings and state. While it usually behaves as expected, consider the following scenario:
+     *
+     * - Transcription is set to "Auto-On" in the settings.
+     * - The current transcription state (`isCurrentlyTranscribing`) is `false` because it was toggled by a participant.
+     * - A new participant joins the call.
+     *
+     * In this scenario, the transcription will automatically start, overriding the previous `false` state.
+     * This behavior is intentional for this demo-app ONLY and designed to prioritize the "Auto-On" setting over the current state.
+     *
+     * Please keep this behavior in mind, as it might appear unexpected at first glance.
+     *
+     * Note: Occasionally, when `call.startTranscription()` might throw a 400 error in the demo app when Transcription is set to "Auto-On", indicating that
+     * transcription is already in progress. This is expected and can safely be ignored as it does not impact
+     * the ongoing transcription functionality.
+     */
+    val isCurrentlyTranscribing by call.state.transcribing.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        call.state.settings.map { it?.transcription }
+            .collectLatest { transcription ->
+                executeTranscriptionApis(call, isCurrentlyTranscribing, transcription)
+            }
     }
 
     VideoTheme {
@@ -258,6 +331,13 @@ fun CallScreen(
                                         isShowingSettings = !isShowingSettingMenu,
                                         onCallAction = {
                                             isShowingSettingMenu = !isShowingSettingMenu
+                                        },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    ClosedCaptionsToggleAction(
+                                        active = closedCaptionUiState == ClosedCaptionUiState.Running,
+                                        onCallAction = {
+                                            onLocalClosedCaptionsClick.invoke()
                                         },
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
@@ -377,6 +457,23 @@ fun CallScreen(
                                 if (visibility) {
                                     ChatOverly(messages = messages)
                                 }
+                            }
+                        },
+                        closedCaptionUi = { call ->
+                            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                                ClosedCaptionsContainer(
+                                    call,
+                                    ClosedCaptionsDefaults.streamThemeConfig(),
+                                    closedCaptionUiState,
+                                )
+                            } else {
+                                ClosedCaptionsContainer(
+                                    call,
+                                    ClosedCaptionsDefaults.streamThemeConfig().copy(
+                                        yOffset = (-80).dp,
+                                    ),
+                                    closedCaptionUiState,
+                                )
                             }
                         },
                     )
@@ -531,6 +628,8 @@ fun CallScreen(
                     isShowingStats = true
                     isShowingSettingMenu = false
                 },
+                closedCaptionUiState = closedCaptionUiState,
+                onClosedCaptionsToggle = onLocalClosedCaptionsClick,
             )
         }
 
@@ -612,6 +711,27 @@ fun CallScreen(
             )
         }
     }
+}
+
+/**
+ * Executes the transcription APIs based on the current transcription state and settings.
+ *
+ * - Stops transcription if the mode is "Disabled" and transcription is currently active.
+ * - Starts transcription if the mode is "Auto-On" and transcription is not currently active.
+ * - Takes no action for other scenarios.
+ */
+private suspend fun executeTranscriptionApis(
+    call: Call,
+    transcribing: Boolean,
+    transcriptionSettingsResponse:
+    TranscriptionSettingsResponse?,
+) {
+    val mode = transcriptionSettingsResponse?.mode
+    if (mode == TranscriptionSettingsResponse.Mode.Disabled && transcribing) {
+        call.stopTranscription()
+    } else if (mode == TranscriptionSettingsResponse.Mode.AutoOn && !transcribing) {
+        call.startTranscription()
+    } else { }
 }
 
 @Composable
