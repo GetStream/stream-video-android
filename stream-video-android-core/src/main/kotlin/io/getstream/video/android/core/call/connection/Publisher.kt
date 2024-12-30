@@ -159,6 +159,7 @@ internal class Publisher(
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
     ) {
+        logger.i { "Publishing track: $trackType" }
         if (track.state() == MediaStreamTrack.State.ENDED) {
             logger.e { "Can't publish a track that has ended already." }
             return
@@ -213,18 +214,22 @@ internal class Publisher(
         publishOption: PublishOption,
     ) {
         val init = computeTransceiverEncodings(captureFormat, publishOption)
-        val transceiver = connection.addTransceiver(
-            track,
-            RtpTransceiverInit(
-                RtpTransceiverDirection.SEND_ONLY,
-                emptyList(),
-                init,
-            ),
-        )
-        logger.d {
-            "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encodings: ${transceiver.sender?.parameters?.encodings?.joinToString { it.stringify() }})"
+        try {
+            val transceiver = connection.addTransceiver(
+                track,
+                RtpTransceiverInit(
+                    RtpTransceiverDirection.SEND_ONLY,
+                    emptyList(),
+                    init,
+                ),
+            )
+            logger.d {
+                "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encodings: ${transceiver.sender?.parameters?.encodings?.joinToString { it.stringify() }})"
+            }
+            transceiverCache.add(publishOption, transceiver)
+        }  catch (e: Exception) {
+            logger.e(e) { "Failed to add transceiver for ${publishOption.track_type}" }
         }
-        transceiverCache.add(publishOption, transceiver)
     }
 
     fun syncPublishOptions(captureFormat: CaptureFormat?, publishOptions: List<PublishOption>) {

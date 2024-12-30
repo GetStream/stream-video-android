@@ -173,6 +173,9 @@ internal fun computeTransceiverEncodings(
     captureFormat: CaptureFormat?,
     publishOption: PublishOption,
 ): List<RtpParameters.Encoding> {
+    if (isAudioTrackType(publishOption.track_type)) {
+        return emptyList()
+    }
     val settings =
         captureFormat?.toVideoDimension() ?: publishOption.video_dimension ?: VideoDimension(
             1280,
