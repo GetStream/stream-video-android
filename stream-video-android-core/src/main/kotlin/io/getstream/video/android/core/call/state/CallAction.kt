@@ -89,6 +89,10 @@ public data class Settings(
     val isEnabled: Boolean,
 ) : CallAction
 
+public data class ClosedCaptionsAction(
+    val isEnabled: Boolean,
+) : CallAction
+
 /**
  * Action to show a reaction popup.
  */
