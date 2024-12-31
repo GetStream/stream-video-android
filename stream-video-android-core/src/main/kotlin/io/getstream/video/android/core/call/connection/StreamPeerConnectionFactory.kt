@@ -120,7 +120,9 @@ public class StreamPeerConnectionFactory(
      * Factory that builds all the connections based on the extensive configuration provided under
      * the hood.
      */
-    private val factory by lazy {
+    private val factory: PeerConnectionFactory by lazy { createFactory() }
+
+    private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .setInjectableLogger({ message, severity, label ->
@@ -151,7 +153,7 @@ public class StreamPeerConnectionFactory(
                 .createInitializationOptions(),
         )
 
-        PeerConnectionFactory.builder()
+        return PeerConnectionFactory.builder()
             .apply {
                 audioProcessing?.also { setAudioProcessingFactory(it) }
             }
@@ -168,8 +170,8 @@ public class StreamPeerConnectionFactory(
                                 AudioAttributes.Builder().setUsage(audioUsage)
                                     .build(),
                             )
-                            audioLogger.d { "[setAudioAttributes] usage: $audioUsage" }
                         }
+                        audioLogger.d { "[csc] PCF audioUsage: $audioUsage" }
                     }
                     .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :

@@ -26,27 +26,37 @@ internal const val ANY_MARKER = "ALL_CALL_TYPES"
 // API
 /**
  * Configuration class for the call foreground service.
- * @param runCallServiceInForeground If the call service should run in the foreground.
- * @param callServicePerType A map of call service per type.
+ * @param serviceClass Name of the service to run
  *
  * @see callServiceConfig
  * @see livestreamCallServiceConfig
  * @see livestreamAudioCallServiceConfig
  * @see livestreamGuestCallServiceConfig
  * @see audioCallServiceConfig
+ *
  */
 public data class CallServiceConfig(
     val runCallServiceInForeground: Boolean = true,
     val audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+    @Deprecated(
+        "This property will be removed soon. Please use CallServiceConfigRegistry",
+        ReplaceWith("CallServiceConfigRegistry"),
+    )
     val callServicePerType: Map<String, Class<*>> = mapOf(
         Pair(ANY_MARKER, CallService::class.java),
     ),
+    val serviceClass: Class<*> = CallService::class.java,
 )
 
 /**
  * Returns the default call foreground service configuration.
  * Uses: `FOREGROUND_SERVICE_TYPE_PHONE_CALL`.
  */
+
+@Deprecated(
+    "Please use DefaultCallConfigurations.default",
+    ReplaceWith("DefaultCallConfigurations.default"),
+)
 public fun callServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
         runCallServiceInForeground = true,
@@ -60,6 +70,10 @@ public fun callServiceConfig(): CallServiceConfig {
  * Returns a foreground service configuration appropriate for livestream hosts.
  * Uses: `FOREGROUND_SERVICE_TYPE_CAMERA` and `FOREGROUND_SERVICE_TYPE_MICROPHONE`.
  */
+@Deprecated(
+    "Please use DefaultCallConfigurations.livestream",
+    ReplaceWith("DefaultCallConfigurations.livestream"),
+)
 public fun livestreamCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
         runCallServiceInForeground = true,
@@ -74,6 +88,10 @@ public fun livestreamCallServiceConfig(): CallServiceConfig {
  * Returns a foreground service configuration appropriate for audio-only livestream hosts.
  * Uses: `FOREGROUND_SERVICE_TYPE_MICROPHONE`.
  */
+@Deprecated(
+    "Please use DefaultCallConfigurations.livestreamAudioCall",
+    replaceWith = ReplaceWith("DefaultCallConfigurations.livestreamAudioCall"),
+)
 public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
         runCallServiceInForeground = true,
@@ -88,6 +106,10 @@ public fun livestreamAudioCallServiceConfig(): CallServiceConfig {
  * Returns a foreground service configuration appropriate for livestream viewers.
  * Uses: `FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK`.
  */
+@Deprecated(
+    "Please use DefaultCallConfigurations.livestreamGuestCall",
+    ReplaceWith("DefaultCallConfigurations.livestreamGuestCall"),
+)
 public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
         runCallServiceInForeground = true,
@@ -103,6 +125,10 @@ public fun livestreamGuestCallServiceConfig(): CallServiceConfig {
  * Returns a foreground service configuration appropriate for audio-only calls.
  * Uses: `FOREGROUND_SERVICE_TYPE_MICROPHONE`.
  */
+@Deprecated(
+    "Please use DefaultCallConfigurations.audioCall",
+    ReplaceWith("DefaultCallConfigurations.audioCall"),
+)
 public fun audioCallServiceConfig(): CallServiceConfig {
     return CallServiceConfig(
         runCallServiceInForeground = true,
@@ -114,6 +140,10 @@ public fun audioCallServiceConfig(): CallServiceConfig {
 }
 
 // Internal
+@Deprecated(
+    "Will be removed soon, use CallServiceConfigRegistry.get()",
+    ReplaceWith("CallServiceConfigRegistry.get()"),
+)
 internal fun resolveServiceClass(callId: StreamCallId, config: CallServiceConfig): Class<*> {
     val callType = callId.type
     val resolvedServiceClass = config.callServicePerType[callType]
