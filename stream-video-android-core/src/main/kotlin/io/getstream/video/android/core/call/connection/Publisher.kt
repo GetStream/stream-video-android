@@ -81,7 +81,7 @@ internal class Publisher(
 ) {
 
     private val transceiverCache = TransceiverCache()
-    private val defaultScreenShareFormat = CaptureFormat(1920, 1080, 15, 15)
+    private val defaultScreenShareFormat = CaptureFormat(1080, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1080, 720, 24, 30)
     private var isIceRestarting = false
 
