@@ -94,7 +94,7 @@ class CallServiceConfigRegistry {
     fun register(callType: String, configure: CallServiceConfigBuilder.() -> Unit) {
         val builder = CallServiceConfigBuilder()
         builder.configure()
-        configs[callType] = builder.build()
+        register(callType, builder.build())
     }
 
     /**
@@ -113,7 +113,7 @@ class CallServiceConfigRegistry {
 
     fun register(map: Map<CallType, CallServiceConfig>) {
         map.forEach {
-            configs[it.key.name] = it.value
+            register(it.key.name, it.value)
         }
     }
 
