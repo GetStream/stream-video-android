@@ -106,7 +106,6 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             clientImpl = client as StreamVideoClient
             clientImpl.testSessionId = UUID.randomUUID().toString()
             // always mock the peer connection factory, it can't work in unit tests
-            clientImpl.peerConnectionFactory = mockedPCFactory
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
             Call.testInstanceProvider.rtcSessionCreator = { mockk(relaxed = true) }
             // Connect to the WS if needed
@@ -144,6 +143,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             IntegrationTestState.call!!
         } else {
             val call = client.call("default", randomUUID())
+            call.peerConnectionFactory = mockedPCFactory
             IntegrationTestState.call = call
             runBlocking {
                 val result = call.create()
