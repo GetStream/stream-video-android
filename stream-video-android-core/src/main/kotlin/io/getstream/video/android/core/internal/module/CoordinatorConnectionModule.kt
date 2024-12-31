@@ -64,7 +64,9 @@ internal class CoordinatorConnectionModule(
     }
 
     // API
-    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(HeadersInterceptor(context))
+    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
+        HeadersInterceptor(context),
+    )
         .addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = loggingLevel.httpLoggingLevel.level

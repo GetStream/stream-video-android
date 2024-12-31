@@ -72,9 +72,9 @@ internal class HeadersInterceptor(context: Context) : Interceptor {
             }.getOrNull() ?: "StandAloneInstall"
 
             return (
-                    "$appName / $versionName($versionCode); $installerName; ($manufacturer; " +
-                            "$model; SDK $version; Android $versionRelease)"
-                    )
+                "$appName / $versionName($versionCode); $installerName; ($manufacturer; " +
+                    "$model; SDK $version; Android $versionRelease)"
+                )
                 .sanitize()
         }
     }
