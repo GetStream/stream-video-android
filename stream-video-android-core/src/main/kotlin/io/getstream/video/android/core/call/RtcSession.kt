@@ -537,7 +537,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
 
                 if (it == DeviceStatus.Enabled) {
-                    val newTrack = clientImpl.peerConnectionFactory.makeVideoTrack(
+                    val newTrack = call.peerConnectionFactory.makeVideoTrack(
                         call.mediaManager.videoSource,
                         UUID.randomUUID().toString(),
                     )
@@ -565,7 +565,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
 
                 if (it == DeviceStatus.Enabled) {
-                    val newTrack = clientImpl.peerConnectionFactory.makeAudioTrack(
+                    val newTrack = call.peerConnectionFactory.makeAudioTrack(
                         call.mediaManager.audioSource,
                         UUID.randomUUID().toString(),
                     )
@@ -595,7 +595,7 @@ public class RtcSession internal constructor(
                 )
                 if (it == DeviceStatus.Enabled) {
                     val newTrack =
-                        clientImpl.peerConnectionFactory.makeVideoTrack(
+                        call.peerConnectionFactory.makeVideoTrack(
                             call.mediaManager.screenShareVideoSource,
                             UUID.randomUUID().toString(),
                         )
@@ -899,7 +899,7 @@ public class RtcSession internal constructor(
             spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO)
         }
 
-        return clientImpl.peerConnectionFactory.makePeerConnection(
+        return call.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = PeerConnection.RTCConfiguration(emptyList()),
             type = if (direction == RtpTransceiverDirection.SEND_ONLY) {
