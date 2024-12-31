@@ -190,11 +190,20 @@ internal fun BoxScope.PortraitVideoRenderer(
     if (callParticipants.size in 2..4) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
-        if (currentLocal != null || LocalInspectionMode.current) {
+        if (currentLocal != null) {
             floatingVideoRenderer?.invoke(this, call, parentSize)
                 ?: DefaultFloatingParticipantVideo(
                     call = call,
                     me = currentLocal!!,
+                    callParticipants = callParticipants,
+                    parentSize = parentSize,
+                    style = style,
+                )
+        } else if (LocalInspectionMode.current) {
+            floatingVideoRenderer?.invoke(this, call, parentSize)
+                ?: DefaultFloatingParticipantVideo(
+                    call = call,
+                    me = callParticipants.first(),
                     callParticipants = callParticipants,
                     parentSize = parentSize,
                     style = style,

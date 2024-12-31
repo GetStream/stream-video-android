@@ -558,7 +558,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun initialiseAudioTransceiver() {
+    private fun initializeAudioTransceiver() {
         if (!audioTransceiverInitialized) {
             publisher?.let {
                 it.addAudioTransceiver(
@@ -588,7 +588,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
 
                 if (it == DeviceStatus.Enabled) {
-                    initialiseAudioTransceiver()
+                    initializeAudioTransceiver()
                 }
             }
         }
@@ -741,7 +741,7 @@ public class RtcSession internal constructor(
                     initializeVideoTransceiver()
                 }
                 if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
-                    initialiseAudioTransceiver()
+                    initializeAudioTransceiver()
                 }
                 if (call.mediaManager.screenShare.status.value == DeviceStatus.Enabled) {
                     initializeScreenshareTransceiver()
@@ -1249,9 +1249,9 @@ public class RtcSession internal constructor(
         }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
-            publisher?.addIceCandidate(iceCandidate)
+            publisher?.handleNewIceCandidate(iceCandidate)
         } else {
-            subscriber?.addIceCandidate(iceCandidate)
+            subscriber?.handleNewIceCandidate(iceCandidate)
         }
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
@@ -1667,16 +1667,19 @@ public class RtcSession internal constructor(
                         is_power_saver_mode = powerSaving,
                     ),
                     telemetry = safeCallWithDefault(null) {
-                        if (call.connectedAt != null || call.reconnectAt != null) {
+                        if (call.reconnectAt != null) {
                             Telemetry(
-                                connection_time_seconds = call.connectedAt?.let { (now - it) / 1000 }
-                                    ?.toFloat(),
                                 reconnection = call.reconnectAt?.let {
                                     Reconnection(
                                         time_seconds = ((now - it.second) / 1000).toFloat(),
                                         strategy = it.first,
                                     )
                                 },
+                            )
+                        } else if (call.connectedAt != null) {
+                            Telemetry(
+                                connection_time_seconds = call.connectedAt?.let { (now - it) / 1000 }
+                                    ?.toFloat(),
                             )
                         } else {
                             null

@@ -57,9 +57,11 @@ import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
+import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
@@ -82,6 +84,8 @@ internal fun SettingsMenu(
     onToggleIncomingVideoVisibility: (Boolean) -> Unit,
     onShowCallStats: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
+    closedCaptionUiState: ClosedCaptionUiState,
+    onClosedCaptionsToggle: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -191,6 +195,48 @@ internal fun SettingsMenu(
         }
     }
 
+    val isCurrentlyTranscribing by call.state.transcribing.collectAsStateWithLifecycle()
+    val settings by call.state.settings.collectAsStateWithLifecycle()
+
+    // Use the manager to determine the UI state
+    val transcriptionUiStateManager =
+        TranscriptionUiStateManager(isCurrentlyTranscribing, settings)
+    val transcriptionUiState = transcriptionUiStateManager.getUiState()
+
+    val onToggleTranscription: suspend () -> Unit = {
+        when (transcriptionUiState) {
+            TranscriptionAvailableUiState -> call.startTranscription()
+            TranscriptionStoppedUiState -> call.stopTranscription()
+            else -> {
+                throw IllegalStateException(
+                    "Toggling of transcription should not work in state: $transcriptionUiState",
+                )
+            }
+        }
+    }
+
+    val onLoadTranscriptions: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
+        when (it) {
+            is PermissionStatus.Granted -> {
+                {
+                    call.listTranscription().getOrNull()?.transcriptions?.map {
+                        ActionMenuItem(
+                            title = it.filename,
+                            icon = Icons.Default.VideoFile, // TODO Rahul check this later
+                            action = {
+                                context.downloadFile(it.url, it.filename)
+                                onDismissed()
+                            },
+                        )
+                    } ?: emptyList()
+                }
+            }
+            is PermissionStatus.Denied -> {
+                { emptyList() }
+            }
+        }
+    }
+
     Popup(
         offset = IntOffset(
             0,
@@ -250,6 +296,11 @@ internal fun SettingsMenu(
                 isScreenShareEnabled = isScreenSharing,
                 onSelectScaleType = onSelectScaleType,
                 loadRecordings = onLoadRecordings,
+                onToggleClosedCaptions = onClosedCaptionsToggle,
+                closedCaptionUiState = closedCaptionUiState,
+                transcriptionUiState = transcriptionUiState,
+                onToggleTranscription = onToggleTranscription,
+                loadTranscriptions = onLoadTranscriptions,
             ),
         )
     }
@@ -317,6 +368,11 @@ private fun SettingsMenuPreview() {
                 isIncomingVideoEnabled = true,
                 onToggleIncomingVideoEnabled = {},
                 loadRecordings = { emptyList() },
+                onToggleClosedCaptions = { },
+                closedCaptionUiState = ClosedCaptionUiState.Available,
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
