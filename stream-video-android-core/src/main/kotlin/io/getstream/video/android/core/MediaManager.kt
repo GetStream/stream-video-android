@@ -654,39 +654,43 @@ public class CameraManager(
      * Capture is called whenever you call enable()
      */
     internal fun startCapture() = synchronized(this) {
-        if (isCapturingVideo) {
-            stopCapture()
+        safeCall {
+            if (isCapturingVideo) {
+                stopCapture()
+            }
+
+            val selectedDevice = _selectedDevice.value ?: return
+            val selectedResolution = resolution.value ?: return
+
+            // setup the camera 2 capturer
+            videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
+
+            // initialize it
+            videoCapturer.initialize(
+                surfaceTextureHelper,
+                mediaManager.context,
+                mediaManager.videoSource.capturerObserver,
+            )
+
+            // and start capture
+            videoCapturer.startCapture(
+                selectedResolution.width,
+                selectedResolution.height,
+                selectedResolution.framerate.max,
+            )
+            isCapturingVideo = true
         }
-
-        val selectedDevice = _selectedDevice.value ?: return
-        val selectedResolution = resolution.value ?: return
-
-        // setup the camera 2 capturer
-        videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
-
-        // initialize it
-        videoCapturer.initialize(
-            surfaceTextureHelper,
-            mediaManager.context,
-            mediaManager.videoSource.capturerObserver,
-        )
-
-        // and start capture
-        videoCapturer.startCapture(
-            selectedResolution.width,
-            selectedResolution.height,
-            selectedResolution.framerate.max,
-        )
-        isCapturingVideo = true
     }
 
     /**
      * Stops capture if it's running
      */
     internal fun stopCapture() = synchronized(this) {
-        if (isCapturingVideo) {
-            videoCapturer.stopCapture()
-            isCapturingVideo = false
+        safeCall {
+            if (isCapturingVideo) {
+                videoCapturer.stopCapture()
+                isCapturingVideo = false
+            }
         }
     }
 
@@ -838,29 +842,29 @@ class MediaManagerImpl(
 
     // source & tracks
     val videoSource =
-        call.clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
+        call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
 
     val screenShareVideoSource by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
+        call.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
     }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
+    val videoTrack = call.peerConnectionFactory.makeVideoTrack(
         source = videoSource,
         trackId = UUID.randomUUID().toString(),
     )
 
     val screenShareTrack by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoTrack(
+        call.peerConnectionFactory.makeVideoTrack(
             source = screenShareVideoSource,
             trackId = UUID.randomUUID().toString(),
         )
     }
 
-    val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
+    val audioSource = call.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
+    val audioTrack = call.peerConnectionFactory.makeAudioTrack(
         source = audioSource,
         trackId = UUID.randomUUID().toString(),
     )
