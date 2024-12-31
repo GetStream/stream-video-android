@@ -145,9 +145,3 @@ internal class TokenUtilsTest(
 }
 
 private val charPool: CharArray = (('a'..'z') + ('A'..'Z') + ('0'..'9')).toCharArray()
-
-private fun randomString(size: Int = 20): String = buildString(capacity = size) {
-    repeat(size) {
-        append(charPool.random())
-    }
-}

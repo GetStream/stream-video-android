@@ -69,6 +69,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onResume (Lio/getstream/video/android/core/Call;)V
 	public final fun onStop ()V
 	public fun onStop (Lio/getstream/video/android/core/Call;)V
+	public final fun onUserLeaveHint ()V
+	public fun onUserLeaveHint (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
@@ -163,6 +165,13 @@ public final class io/getstream/video/android/ui/common/util/ResourcesKt {
 }
 
 public abstract interface annotation class io/getstream/video/android/ui/common/util/StreamCallActivityDelicateApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class io/getstream/video/android/ui/common/util/StreamVideoExperimentalApi : java/lang/annotation/Annotation {
+	public abstract fun message ()Ljava/lang/String;
+}
+
+public abstract interface annotation class io/getstream/video/android/ui/common/util/StreamVideoUiDelicateApi : java/lang/annotation/Annotation {
 }
 
 public final class io/getstream/video/android/ui/common/view/ParticipantContentView : android/widget/LinearLayout {

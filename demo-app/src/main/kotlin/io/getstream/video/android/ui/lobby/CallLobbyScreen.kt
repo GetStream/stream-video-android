@@ -73,6 +73,7 @@ import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewUsers
@@ -270,10 +271,9 @@ private fun CallLobbyBody(
 private fun LobbyDescription(
     callLobbyViewModel: CallLobbyViewModel,
 ) {
-    val session by callLobbyViewModel.call.state.session.collectAsState()
-    val participantsSize = session?.participants?.size ?: 0
+    val participantCounts by callLobbyViewModel.call.state.participantCounts.collectAsState()
 
-    LobbyDescriptionContent(participantsSize = participantsSize) {
+    LobbyDescriptionContent(participantCounts = participantCounts) {
         callLobbyViewModel.handleUiEvent(
             CallLobbyEvent.JoinCall,
         )
@@ -281,12 +281,16 @@ private fun LobbyDescription(
 }
 
 @Composable
-private fun LobbyDescriptionContent(participantsSize: Int, onClick: () -> Unit) {
-    val text = if (participantsSize > 0) {
+private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClick: () -> Unit) {
+    val totalParticipants = participantCounts?.total ?: 0
+    val anonParticipants = participantCounts?.anonymous ?: 0
+
+    val text = if (totalParticipants != 0) {
         Pair(
             stringResource(
                 id = R.string.join_call_description,
-                participantsSize,
+                totalParticipants,
+                anonParticipants,
             ),
             stringResource(id = R.string.join_call),
         )
@@ -384,8 +388,7 @@ private fun CallLobbyBodyPreview() {
             onToggleMicrophone = {},
             onToggleCamera = {},
         ) {
-            LobbyDescriptionContent(participantsSize = 0) {
-            }
+            LobbyDescriptionContent(participantCounts = ParticipantCount(1, 1)) {}
         }
     }
 }

@@ -40,6 +40,7 @@ import org.openapitools.client.infrastructure.Serializer
  *
  *
  * @param acceptedBy
+ * @param anonymousParticipantCount
  * @param id
  * @param missedBy
  * @param participants
@@ -57,6 +58,9 @@ data class CallSessionResponse (
 
     @Json(name = "accepted_by")
     val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
+
+    @Json(name = "anonymous_participant_count")
+    val anonymousParticipantCount: kotlin.Int,
 
     @Json(name = "id")
     val id: kotlin.String,

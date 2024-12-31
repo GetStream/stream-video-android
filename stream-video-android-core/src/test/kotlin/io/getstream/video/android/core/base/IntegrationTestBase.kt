@@ -23,7 +23,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.mockk.MockKAnnotations
@@ -57,6 +57,7 @@ import org.openapitools.client.models.VideoEvent
 import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -71,7 +72,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
     lateinit var client: StreamVideo
 
     /** Implementation of the client for more access to interals */
-    internal lateinit var clientImpl: StreamVideoImpl
+    internal lateinit var clientImpl: StreamVideoClient
 
     /** Tracks all events received by the client during a test */
     lateinit var events: MutableList<VideoEvent>
@@ -102,12 +103,11 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
 
         if (IntegrationTestState.client == null) {
             client = builder.build()
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
+            clientImpl.testSessionId = UUID.randomUUID().toString()
             // always mock the peer connection factory, it can't work in unit tests
-            clientImpl.peerConnectionFactory = mockedPCFactory
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
             Call.testInstanceProvider.rtcSessionCreator = { mockk(relaxed = true) }
-
             // Connect to the WS if needed
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests
@@ -121,7 +121,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             IntegrationTestState.client = client
         } else {
             client = IntegrationTestState.client!!
-            clientImpl = client as StreamVideoImpl
+            clientImpl = client as StreamVideoClient
         }
 
         // monitor for events
@@ -143,6 +143,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             IntegrationTestState.call!!
         } else {
             val call = client.call("default", randomUUID())
+            call.peerConnectionFactory = mockedPCFactory
             IntegrationTestState.call = call
             runBlocking {
                 val result = call.create()
@@ -233,7 +234,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         ),
         screensharing = ScreensharingSettingsResponse(false, false),
         transcription = TranscriptionSettingsResponse(
-            "test",
+            TranscriptionSettingsResponse.ClosedCaptionMode.Available,
             emptyList(),
             TranscriptionSettingsResponse.Mode.Available,
         ),
@@ -268,6 +269,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         settings = settings,
         egress = EgressResponse(false, emptyList(), null),
         updatedAt = now,
+        captioning = false,
     )
     return response
 }

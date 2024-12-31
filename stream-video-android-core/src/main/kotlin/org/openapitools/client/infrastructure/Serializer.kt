@@ -44,6 +44,7 @@ object Serializer {
         .add(org.openapitools.client.models.RecordSettingsRequest.Quality.QualityAdapter())
         .add(org.openapitools.client.models.TranscriptionSettingsRequest.Mode.ModeAdapter())
         .add(org.openapitools.client.models.TranscriptionSettingsResponse.Mode.ModeAdapter())
+        .add(org.openapitools.client.models.TranscriptionSettingsResponse.ClosedCaptionMode.ClosedCaptionModeAdapter())
         .add(org.openapitools.client.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter())
         .add(org.openapitools.client.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter())
         .add(BigDecimalAdapter())

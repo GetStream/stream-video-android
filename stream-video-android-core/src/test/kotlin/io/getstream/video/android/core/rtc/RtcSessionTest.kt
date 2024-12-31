@@ -47,7 +47,7 @@ class RtcSessionTest : IntegrationTestBase() {
     @Before
     fun setup() {
         // setup the mock
-        clientImpl.peerConnectionFactory = mockedPCFactory
+        call.peerConnectionFactory = mockedPCFactory
     }
 
     @Test

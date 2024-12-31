@@ -20,6 +20,7 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -91,7 +92,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             context: Context,
             cid: StreamCallId,
             members: List<String> = defaultExtraMembers,
-            leaveWhenLastInCall: Boolean = true,
+            leaveWhenLastInCall: Boolean = DEFAULT_LEAVE_WHEN_LAST,
             action: String? = null,
             clazz: Class<T>,
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
@@ -179,6 +180,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     // Platform restriction
     public final override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        onPreCreate(savedInstanceState, null)
         logger.d { "Entered [onCreate(Bundle?)" }
         initializeCallOrFail(
             savedInstanceState,
@@ -227,6 +229,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
         super.onResume()
         withCachedCall {
             onResume(it)
+        }
+    }
+
+    public final override fun onUserLeaveHint() {
+        withCachedCall {
+            onUserLeaveHint(it)
+            super.onUserLeaveHint()
         }
     }
 
@@ -351,20 +360,36 @@ public abstract class StreamCallActivity : ComponentActivity() {
     }
 
     /**
+     * Called when the activity is about to go into the background as the result of user choice. Makes sure the call object is available.
+     *
+     * @param call the call
+     */
+    public open fun onUserLeaveHint(call: Call) {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // Default PiP behavior
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE) &&
+            isConnected(call) &&
+            !isChangingConfigurations &&
+            isVideoCall(call) &&
+            !isInPictureInPictureMode
+        ) {
+            try {
+                enterPictureInPicture()
+            } catch (e: Exception) {
+                logger.e(e) { "[onUserLeaveHint] Something went wrong when entering PiP." }
+            }
+        }
+
+        logger.d { "DefaultCallActivity - Leave Hinted (call -> $call)" }
+    }
+
+    /**
      * Called when the activity is paused. Makes sure the call object is available.
      *
      * @param call the call
      */
     public open fun onPause(call: Call) {
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        // Default PiP behavior
-        if (isConnected(call) &&
-            !isChangingConfigurations &&
-            isVideoCall(call) &&
-            !isInPictureInPictureMode
-        ) {
-            enterPictureInPicture()
-        }
         logger.d { "DefaultCallActivity - Paused (call -> $call)" }
     }
 
@@ -698,10 +723,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val total = call.state.participantCounts.value?.total
-                logger.d { "Participant left, remaining: $total" }
-                if (total != null && total <= 2) {
-                    onLastParticipant(call)
+                val connectionState = call.state.connection.value
+                if (connectionState == RealtimeConnection.Disconnected) {
+                    val total = call.state.participantCounts.value?.total
+                    logger.d { "Participant left, remaining: $total" }
+                    if (total != null && total <= 2) {
+                        onLastParticipant(call)
+                    }
                 }
             }
         }
@@ -775,11 +803,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
         if (cid == null) {
             val e = IllegalArgumentException("CallActivity started without call ID.")
-            logger.e(
-                e,
-            ) { "Failed to initialize call because call ID is not found in the intent. $intent" }
-            onError?.let {
-            } ?: throw e
+
+            logger.e(e) {
+                "Failed to initialize call because call ID is not found in the intent. $intent"
+            }
+
+            onError?.invoke(e) ?: throw e
+
             // Finish
             return
         }

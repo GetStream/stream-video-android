@@ -43,6 +43,13 @@ public sealed class DisconnectCause {
     ) : DisconnectCause()
 
     /**
+     * Happens when Web Socket connection is not available.
+     */
+    public object WebSocketNotAvailable : DisconnectCause() {
+        override fun toString(): String = "WebSocketNotAvailable"
+    }
+
+    /**
      * Happens when disconnection has been done intentionally. E.g. we release connection when app went to background.
      */
     public data object ConnectionReleased : DisconnectCause() { override fun toString(): String = "ConnectionReleased" }

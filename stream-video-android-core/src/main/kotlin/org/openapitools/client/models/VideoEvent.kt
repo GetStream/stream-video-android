@@ -117,6 +117,8 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
         return when (type) {
             "call.accepted" -> CallAcceptedEvent::class.java
             "call.blocked_user" -> BlockedUserEvent::class.java
+            "call.closed_captions_started" -> ClosedCaptionStartedEvent::class.java
+            "call.closed_captions_stopped" -> ClosedCaptionEndedEvent::class.java
             "call.closed_caption" -> ClosedCaptionEvent::class.java
             "call.created" -> CallCreatedEvent::class.java
             "call.deleted" -> CallDeletedEvent::class.java
@@ -141,6 +143,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.rejected" -> CallRejectedEvent::class.java
             "call.ring" -> CallRingEvent::class.java
             "call.session_ended" -> CallSessionEndedEvent::class.java
+            "call.session_participant_count_updated" -> CallSessionParticipantCountsUpdatedEvent::class.java
             "call.session_participant_joined" -> CallSessionParticipantJoinedEvent::class.java
             "call.session_participant_left" -> CallSessionParticipantLeftEvent::class.java
             "call.session_started" -> CallSessionStartedEvent::class.java
@@ -163,8 +166,14 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "user.reactivated" -> UserReactivatedEvent::class.java
             "user.unbanned" -> UserUnbannedEvent::class.java
             "user.updated" -> UserUpdatedEvent::class.java
-            else -> throw UnsupportedVideoEventException(type)
+            else -> UnsupportedVideoEvent::class.java
         }
+    }
+}
+
+class UnsupportedVideoEvent(val type: String) : VideoEvent() {
+    override fun getEventType(): String {
+        return type
     }
 }
 
