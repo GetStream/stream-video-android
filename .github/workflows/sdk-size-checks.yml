@@ -3,6 +3,11 @@ name: SDK size checks
 on:
   pull_request:
 
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   METRICS_PROJECT: "stream-video-android-metrics"
   MODULES: "stream-video-android-core stream-video-android-ui-xml stream-video-android-ui-compose"
