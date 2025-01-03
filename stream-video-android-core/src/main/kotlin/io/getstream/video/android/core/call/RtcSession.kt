@@ -97,7 +97,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -1729,7 +1728,7 @@ public class RtcSession internal constructor(
         }
     }
 
-    private suspend fun parseError(e: Throwable): Failure {
+    private fun parseError(e: Throwable): Failure {
         return Failure(
             io.getstream.result.Error.ThrowableError(
                 "CallClientImpl error needs to be handled",
@@ -1909,11 +1908,11 @@ public class RtcSession internal constructor(
         stateJob?.cancel()
         eventJob?.cancel()
         errorJob?.cancel()
-        runBlocking {
+        coroutineScope.launch {
             sfuConnectionModule.socketConnection.disconnect()
+            publisher?.connection?.close()
+            subscriber?.connection?.close()
         }
-        publisher?.connection?.close()
-        subscriber?.connection?.close()
     }
 
     internal fun prepareReconnect() {
