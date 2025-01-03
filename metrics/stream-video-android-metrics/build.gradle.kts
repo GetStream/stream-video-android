@@ -10,6 +10,9 @@ android {
 
     defaultConfig {
         minSdk = Configuration.minSdk
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     buildTypes {
