@@ -66,6 +66,10 @@ android {
     namespace = "io.getstream.video.android.core"
     compileSdk = Configuration.compileSdk
 
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
+
     defaultConfig {
         minSdk = Configuration.minSdk
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -185,13 +189,15 @@ dependencies {
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
 
-
     // datastore
     api(libs.androidx.datastore)
     api(libs.androidx.datastore.core)
 
     // crypto
     implementation(libs.tink)
+
+    // desugar
+    coreLibraryDesugaring(libs.desugar)
 
     // unit tests
     testImplementation(libs.junit)
