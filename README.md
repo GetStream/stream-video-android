@@ -10,9 +10,9 @@
 
 <div align="center">
 
-![stream-video-android-core](https://img.shields.io/badge/stream--video--android--core-3.04%20MB-lightgreen)
-![stream-video-android-ui-xml](https://img.shields.io/badge/stream--video--android--ui--xml-7.90%20MB-lightgreen)
-![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-7.90%20MB-lightgreen)
+![stream-video-android-core](https://img.shields.io/badge/stream--video--android--core-15.89%20MB-lightgreen)
+![stream-video-android-ui-xml](https://img.shields.io/badge/stream--video--android--ui--xml-21.70%20MB-lightgreen)
+![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-21.68%20MB-lightgreen)
 
 </div>
 

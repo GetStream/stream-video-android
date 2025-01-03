@@ -1,6 +1,12 @@
 {
   "debug": {
+    "stream-video-android-core": 17544,
+    "stream-video-android-ui-xml": 25200,
+    "stream-video-android-ui-compose": 26772
   },
   "release": {
+    "stream-video-android-core": 16276,
+    "stream-video-android-ui-xml": 22228,
+    "stream-video-android-ui-compose": 22208
   }
 }
