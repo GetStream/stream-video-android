@@ -119,7 +119,6 @@ import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.TranscriptionSettingsResponse
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CallScreen(
     call: Call,
@@ -205,6 +204,7 @@ fun CallScreen(
                 is ClosedCaptionUiState.Running -> {
                     updateClosedCaptionUiState(ClosedCaptionUiState.Available)
                 }
+
                 is ClosedCaptionUiState.Available -> {
                     if (captioning) {
                         updateClosedCaptionUiState(ClosedCaptionUiState.Running)
@@ -212,6 +212,7 @@ fun CallScreen(
                         call.startClosedCaptions()
                     }
                 }
+
                 else -> {
                     throw Exception(
                         "This state $closedCaptionUiState should not invoke any ui operation",
@@ -353,7 +354,7 @@ fun CallScreen(
                                                 Icons.Default.RadioButtonChecked,
                                             ),
                                             onAction = {
-                                                GlobalScope.launch {
+                                                scope.launch {
                                                     if (isRecording) {
                                                         showEndRecordingDialog = true
                                                     } else {
@@ -697,7 +698,7 @@ fun CallScreen(
                     "End",
                     VideoTheme.styles.buttonStyles.alertButtonStyle(),
                 ) {
-                    GlobalScope.launch {
+                    scope.launch {
                         call.stopRecording()
                     }
                     showEndRecordingDialog = false
@@ -731,7 +732,8 @@ private suspend fun executeTranscriptionApis(
         call.stopTranscription()
     } else if (mode == TranscriptionSettingsResponse.Mode.AutoOn && !transcribing) {
         call.startTranscription()
-    } else { }
+    } else {
+    }
 }
 
 @Composable
