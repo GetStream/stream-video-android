@@ -464,6 +464,7 @@ internal class Publisher(
             stereo = false,
             muted = !isTrackLive,
             codec = publishOption.codec,
+            publish_option_id = publishOption.id,
         )
     }
 

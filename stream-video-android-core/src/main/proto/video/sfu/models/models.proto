@@ -192,6 +192,7 @@ message TrackInfo {
   bool red = 9;
   bool muted = 10;
   Codec codec = 11;
+  int32 publish_option_id = 12;
 }
 
 enum ErrorCode {

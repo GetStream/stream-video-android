@@ -1310,11 +1310,6 @@ public class RtcSession internal constructor(
         }
     }
 
-    internal fun getPublisherTracks(sdp: String): List<TrackInfo> {
-        val captureFormat = call.mediaManager.camera.resolution.value
-        return publisher?.getAnnouncedTracks(captureFormat, sdp) ?: emptyList()
-    }
-
     internal fun getPublisherTracksForReconnect(): List<TrackInfo> {
         return publisher?.getAnnouncedTracksForReconnect() ?: emptyList()
     }
