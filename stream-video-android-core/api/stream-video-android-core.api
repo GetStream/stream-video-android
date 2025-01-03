@@ -13191,16 +13191,17 @@ public final class stream/video/sfu/models/TrackInfo : com/squareup/wire/Message
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/models/TrackInfo$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;Lokio/ByteString;)Lstream/video/sfu/models/TrackInfo;
-	public static synthetic fun copy$default (Lstream/video/sfu/models/TrackInfo;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/TrackInfo;
+	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;)Lstream/video/sfu/models/TrackInfo;
+	public static synthetic fun copy$default (Lstream/video/sfu/models/TrackInfo;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/TrackInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCodec ()Lstream/video/sfu/models/Codec;
 	public final fun getDtx ()Z
 	public final fun getLayers ()Ljava/util/List;
 	public final fun getMid ()Ljava/lang/String;
 	public final fun getMuted ()Z
+	public final fun getPublish_option_id ()I
 	public final fun getRed ()Z
 	public final fun getStereo ()Z
 	public final fun getTrack_id ()Ljava/lang/String;
