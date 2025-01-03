@@ -192,21 +192,6 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
-        val callServiceConfigRegistry = CallServiceConfigRegistry()
-
-        callServiceConfigRegistry.createConfigRegistry {
-            register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
-
-            update(CallType.Default.name) {
-                setAudioUsage(AudioAttributes.USAGE_MEDIA)
-                setRunCallServiceInForeground(true)
-            }
-
-            update(CallType.Livestream.name) {
-                setRunCallServiceInForeground(true)
-            }
-        }
-
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -231,7 +216,7 @@ object StreamVideoInitHelper {
             },
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-            callServiceConfigRegistry = callServiceConfigRegistry,
+            callServiceConfigRegistry = CallServiceConfigRegistry(),
         ).build()
     }
 }
