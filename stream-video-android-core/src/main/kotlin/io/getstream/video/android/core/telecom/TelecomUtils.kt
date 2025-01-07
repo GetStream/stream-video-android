@@ -22,7 +22,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
@@ -56,6 +56,7 @@ internal object TelecomCompat {
                                     context.applicationContext,
                                     StreamCallId.fromCallCid(streamCall.cid),
                                     callDisplayName,
+                                    notification = null, // TODO-Telecom: Add notification
                                 )
                             },
                         )
@@ -102,8 +103,11 @@ internal object TelecomCompat {
             callsInPlace(onEnabled, InvocationKind.AT_MOST_ONCE)
         }
 
-        (StreamVideo.instanceOrNull() as? StreamVideoImpl)?.let { streamVideoImpl ->
-            if (streamVideoImpl.runForegroundService) onEnabled()
+        (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoClient ->
+            val callConfig = streamVideoClient.callServiceConfigRegistry.get(
+                "default",
+            ) // TODO-Telecom: Use call.type
+            if (callConfig.runCallServiceInForeground) onEnabled()
         }
     }
 
@@ -192,7 +196,6 @@ internal object TelecomCompat {
             // Use Twilio AudioSwitch
             AudioSwitchHandler(
                 context = context.applicationContext,
-                preferSpeakerphone = true,
                 deviceListener = listener,
             )
         },

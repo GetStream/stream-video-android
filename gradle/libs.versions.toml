@@ -20,6 +20,8 @@ androidxLifecycle = "2.8.6"
 androidxStartup = "1.2.0"
 androidxActivity = "1.9.2"
 androidxDataStore = "1.1.1"
+androidxCoreTelecom = "1.0.0-beta01"
+
 googleService = "4.4.2"
 
 androidxComposeBom = "2024.11.00"

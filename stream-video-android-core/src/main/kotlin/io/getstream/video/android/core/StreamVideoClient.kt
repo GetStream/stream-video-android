@@ -54,7 +54,6 @@ import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.telecom.TelecomHandler
-import io.getstream.video.android.core.utils.DebugInfo
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeCall

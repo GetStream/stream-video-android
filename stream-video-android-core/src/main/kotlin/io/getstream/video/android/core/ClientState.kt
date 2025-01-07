@@ -21,10 +21,9 @@ import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.telecom.TelecomCallState
 import io.getstream.video.android.core.telecom.TelecomCompat
-import io.getstream.video.android.core.utils.safeCall
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -156,7 +155,7 @@ class ClientState(private val client: StreamVideo) {
             removeRingingCall(willTransitionToOngoing = true)
         } else {
             TelecomCompat.changeCallState(
-                clientImpl.context,
+                streamVideoClient.context,
                 TelecomCallState.ONGOING,
                 call,
             )
@@ -165,7 +164,7 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeActiveCall() {
         _activeCall.value?.let { call ->
-            TelecomCompat.unregisterCall(clientImpl.context, call)
+            TelecomCompat.unregisterCall(streamVideoClient.context, call)
             _activeCall.value = null
         }
     }
@@ -177,7 +176,7 @@ class ClientState(private val client: StreamVideo) {
         }
 
         TelecomCompat.changeCallState(
-            clientImpl.context,
+            streamVideoClient.context,
             if (ringingState is RingingState.Incoming) {
                 TelecomCallState.INCOMING
             } else {
@@ -193,12 +192,12 @@ class ClientState(private val client: StreamVideo) {
 
             if (willTransitionToOngoing) {
                 TelecomCompat.changeCallState(
-                    clientImpl.context,
+                    streamVideoClient.context,
                     TelecomCallState.ONGOING,
                     call = call,
                 )
             } else {
-                TelecomCompat.unregisterCall(clientImpl.context, call)
+                TelecomCompat.unregisterCall(streamVideoClient.context, call)
             }
         }
     }

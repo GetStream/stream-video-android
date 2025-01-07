@@ -37,7 +37,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoImpl
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.RejectReason
@@ -209,17 +209,17 @@ internal class TelecomHandler private constructor(
         } else {
             logger.d { "[postNotification] Call ID: ${telecomCall.streamCall.id}, state: ${telecomCall.state}" }
 
-            (streamVideo as? StreamVideoImpl)?.let { streamVideo ->
+            (streamVideo as? StreamVideoClient)?.let { streamVideo ->
                 val notification = when (telecomCall.state) {
                     TelecomCallState.INCOMING -> {
                         logger.d { "[postNotification] Creating incoming notification" }
 
-                        playCallSound(streamVideo.sounds.incomingCallSound)
+//                        playCallSound(streamVideo.sounds.ringingConfig.incomingCallSoundUri) // TODO-Telecom: reuse service sounds
 
                         streamVideo.getRingingCallNotification(
                             ringingState = RingingState.Incoming(),
                             callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
-                            incomingCallDisplayName = telecomCall.attributes.displayName.toString(),
+                            callDisplayName = telecomCall.attributes.displayName.toString(),
                             shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                         )
                     }
@@ -232,7 +232,7 @@ internal class TelecomHandler private constructor(
                         }
 
                         if (isOutgoingCall) {
-                            playCallSound(streamVideo.sounds.outgoingCallSound)
+//                            playCallSound(streamVideo.sounds.outgoingCallSound) // TODO-Telecom: reuse service sounds
                         } else {
                             stopCallSound()
                         }
