@@ -31,9 +31,13 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,21 +65,28 @@ fun LiveHost(
 ) {
     val context = LocalContext.current
 
+    var isInitialized by remember { mutableStateOf(false) }
+
     // Step 1 - Update call settings via callConfigRegistry
-    client.state.callConfigRegistry.register(
-        DefaultCallConfigurations.getLivestreamCallServiceConfig(),
-    )
-
-    // Step 2 - join a call, which type is `default` and id is `123`.
-    val call = client.call("livestream", callId)
-
-    LaunchCallPermissions(call = call) {
-        val result = call.join(create = true)
-        result.onError {
-            Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
-        }
+    LaunchedEffect(Unit) {
+        client.state.callConfigRegistry.register(
+            DefaultCallConfigurations.getLivestreamCallServiceConfig(),
+        )
+        isInitialized = true
     }
-    LiveHostContent(navController, call)
+
+    if (isInitialized) {
+        // Step 2 - join a call, which type is `default` and id is `123`.
+        val call = client.call("livestream", callId)
+
+        LaunchCallPermissions(call = call) {
+            val result = call.join(create = true)
+            result.onError {
+                Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
+            }
+        }
+        LiveHostContent(navController, call)
+    }
 }
 
 @Composable

@@ -20,6 +20,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,33 +41,38 @@ fun LiveAudience(
     client: StreamVideo,
 ) {
     val context = LocalContext.current
+    var isInitialized by remember { mutableStateOf(false) }
 
-    // Step 1 - Update call settings via callConfigRegistry
-    client.state.callConfigRegistry.register(
-        DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
-    )
-
-    // Step 2 - join a call, which type is `default` and id is `123`.
+    // Step 1 - Create a call object with type livestream
     val call = client.call("livestream", callId)
 
-    LaunchedEffect(call) {
+    LaunchedEffect(Unit) {
+        // Step 2 - Update call settings via callConfigRegistry
+        client.state.callConfigRegistry.register(
+            DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
+        )
+
         call.microphone.setEnabled(false, fromUser = true)
         call.camera.setEnabled(false, fromUser = true)
+        // Step 3 - Join the call
         call.join()
+        isInitialized = true
     }
 
-    Box {
-        LivestreamPlayer(call = call)
-        CallAppBar(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(end = 16.dp, top = 16.dp),
-            call = call,
-            centerContent = { },
-            onCallAction = {
-                call.leave()
-                navController.popBackStack()
-            },
-        )
+    if (isInitialized) {
+        Box {
+            LivestreamPlayer(call = call)
+            CallAppBar(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(end = 16.dp, top = 16.dp),
+                call = call,
+                centerContent = { },
+                onCallAction = {
+                    call.leave()
+                    navController.popBackStack()
+                },
+            )
+        }
     }
 }
