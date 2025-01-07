@@ -16,8 +16,14 @@
 
 package io.getstream.video.android.compose.ui
 
+import android.app.KeyguardManager
+import android.os.Build
+import android.os.Bundle
+import android.os.PersistableBundle
+import android.view.WindowManager
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 /**
  * Default [StreamCallActivity] for use with compose.
@@ -27,4 +33,24 @@ public open class ComposeStreamCallActivity : StreamCallActivity() {
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> =
         StreamCallActivityComposeDelegate()
+
+    @StreamCallActivityDelicateApi
+    override fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        enableDisplayOnLockScreen()
+        super.onPreCreate(savedInstanceState, persistentState)
+    }
+
+    private fun enableDisplayOnLockScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            val keyguardManager = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
+            keyguardManager?.requestDismissKeyguard(this, null)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                        WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
+    }
 }
