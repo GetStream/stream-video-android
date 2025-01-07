@@ -42,6 +42,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
@@ -74,7 +75,7 @@ public open class DefaultNotificationHandler(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Call:NotificationHandler")
-    private val intentResolver = DefaultStreamIntentResolver(application)
+    val intentResolver = DefaultStreamIntentResolver(application)
     protected val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -193,7 +194,7 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    private fun getIncomingCallNotification(
+    override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
@@ -205,7 +206,6 @@ public open class DefaultNotificationHandler(
         // screen instead - but this needs to be handled by the application.
         // The default behaviour is that all notification are high priority
         val showAsHighPriority = !hideRingingNotificationInForeground || !isInForeground()
-
         val channelId = application.getString(
             if (showAsHighPriority) {
                 R.string.stream_video_incoming_call_notification_channel_id
@@ -214,6 +214,35 @@ public open class DefaultNotificationHandler(
             },
         )
 
+        createIncomingCallChannel(channelId, showAsHighPriority)
+
+        return getNotification {
+            priority = NotificationCompat.PRIORITY_HIGH
+            setContentTitle(callerName)
+            setContentText(
+                application.getString(R.string.stream_video_incoming_call_notification_description),
+            )
+            setChannelId(channelId)
+            setOngoing(true)
+            setCategory(NotificationCompat.CATEGORY_CALL)
+            setFullScreenIntent(fullScreenPendingIntent, true)
+            if (shouldHaveContentIntent) {
+                setContentIntent(fullScreenPendingIntent)
+            } else {
+                val emptyIntent = PendingIntent.getActivity(
+                    application,
+                    0,
+                    Intent(),
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
+                setContentIntent(emptyIntent)
+                setAutoCancel(false)
+            }
+            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
+        }
+    }
+
+    open fun createIncomingCallChannel(channelId: String, showAsHighPriority: Boolean) {
         maybeCreateChannel(
             channelId = channelId,
             context = application,
@@ -242,31 +271,6 @@ public open class DefaultNotificationHandler(
                 }
             },
         )
-
-        return getNotification {
-            priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle(callerName)
-            setContentText(
-                application.getString(R.string.stream_video_incoming_call_notification_description),
-            )
-            setChannelId(channelId)
-            setOngoing(true)
-            setCategory(NotificationCompat.CATEGORY_CALL)
-            setFullScreenIntent(fullScreenPendingIntent, true)
-            if (shouldHaveContentIntent) {
-                setContentIntent(fullScreenPendingIntent)
-            } else {
-                val emptyIntent = PendingIntent.getActivity(
-                    application,
-                    0,
-                    Intent(),
-                    PendingIntent.FLAG_IMMUTABLE,
-                )
-                setContentIntent(emptyIntent)
-                setAutoCancel(false)
-            }
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
-        }
     }
 
     override fun onNotification(callId: StreamCallId, callDisplayName: String) {
@@ -323,19 +327,8 @@ public open class DefaultNotificationHandler(
         val ongoingCallsChannelId = application.getString(
             R.string.stream_video_ongoing_call_notification_channel_id,
         )
-        maybeCreateChannel(
-            channelId = ongoingCallsChannelId,
-            context = application,
-            configure = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    name = application.getString(
-                        R.string.stream_video_ongoing_call_notification_channel_title,
-                    )
-                    description =
-                        application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
-                }
-            },
-        )
+
+        createOnGoingChannel(ongoingCallsChannelId)
 
         if (hangUpIntent == null) {
             logger.e { "End call intent is null, not showing notification!" }
@@ -350,7 +343,7 @@ public open class DefaultNotificationHandler(
                 if (onClickIntent != null) {
                     it.setContentIntent(onClickIntent)
                 } else {
-                    logger.w { "Ongoing intent is null .click on the ongoing call notification will not work." }
+                    logger.w { "Ongoing intent is null. Clicking on the ongoing call notification will not work." }
                 }
             }
             .setContentTitle(
@@ -373,6 +366,22 @@ public open class DefaultNotificationHandler(
                 remoteParticipantCount,
             )
             .build()
+    }
+
+    open fun createOnGoingChannel(ongoingCallsChannelId: String) {
+        maybeCreateChannel(
+            channelId = ongoingCallsChannelId,
+            context = application,
+            configure = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    name = application.getString(
+                        R.string.stream_video_ongoing_call_notification_channel_title,
+                    )
+                    description =
+                        application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
+                }
+            },
+        )
     }
 
     override fun getNotificationUpdates(
@@ -456,7 +465,7 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    private fun maybeCreateChannel(
+    open fun maybeCreateChannel(
         channelId: String,
         context: Context,
         configure: NotificationChannel.() -> Unit = {
@@ -477,7 +486,7 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    private fun showNotificationCallNotification(
+    open fun showNotificationCallNotification(
         notificationPendingIntent: PendingIntent,
         callDisplayName: String,
         notificationId: Int,
@@ -489,7 +498,7 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    private fun showMissedCallNotification(
+    open fun showMissedCallNotification(
         notificationPendingIntent: PendingIntent,
         callDisplayName: String,
         notificationId: Int,
@@ -500,7 +509,7 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    private fun showLiveCallNotification(
+    open fun showLiveCallNotification(
         liveCallPendingIntent: PendingIntent,
         callDisplayName: String,
         notificationId: Int,
@@ -521,7 +530,7 @@ public open class DefaultNotificationHandler(
         notificationManager.notify(notificationId, notification)
     }
 
-    private fun getNotification(
+    open fun getNotification(
         builder: NotificationCompat.Builder.() -> Unit,
     ): Notification {
         return NotificationCompat.Builder(application, getChannelId())
@@ -531,7 +540,7 @@ public open class DefaultNotificationHandler(
             .build()
     }
 
-    private fun NotificationCompat.Builder.addHangUpAction(
+    open fun NotificationCompat.Builder.addHangUpAction(
         hangUpIntent: PendingIntent,
         callDisplayName: String,
         remoteParticipantCount: Int,
@@ -565,17 +574,11 @@ public open class DefaultNotificationHandler(
                 ),
             )
         } else {
-            addAction(
-                NotificationCompat.Action.Builder(
-                    null,
-                    application.getString(R.string.stream_video_call_notification_action_leave),
-                    hangUpIntent,
-                ).build(),
-            )
+            addAction(getLeaveAction(hangUpIntent))
         }
     }
 
-    private fun NotificationCompat.Builder.addCallActions(
+    open fun NotificationCompat.Builder.addCallActions(
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
         callDisplayName: String?,
@@ -601,24 +604,36 @@ public open class DefaultNotificationHandler(
                 ),
             )
         } else {
-            addAction(
-                NotificationCompat.Action.Builder(
-                    null,
-                    application.getString(R.string.stream_video_call_notification_action_accept),
-                    acceptCallPendingIntent,
-                ).build(),
-            )
-            addAction(
-                NotificationCompat.Action.Builder(
-                    null,
-                    application.getString(R.string.stream_video_call_notification_action_reject),
-                    rejectCallPendingIntent,
-                ).build(),
-            )
+            addAction(getAcceptAction(acceptCallPendingIntent))
+            addAction(getRejectAction(rejectCallPendingIntent))
         }
     }
 
-    private fun isInForeground(): Boolean {
+    open fun getLeaveAction(intent: PendingIntent): NotificationCompat.Action {
+        return NotificationCompat.Action.Builder(
+            null,
+            application.getString(R.string.stream_video_call_notification_action_leave),
+            intent,
+        ).build()
+    }
+
+    open fun getAcceptAction(intent: PendingIntent): NotificationCompat.Action {
+        return NotificationCompat.Action.Builder(
+            null,
+            application.getString(R.string.stream_video_call_notification_action_accept),
+            intent,
+        ).build()
+    }
+
+    open fun getRejectAction(intent: PendingIntent): NotificationCompat.Action {
+        return NotificationCompat.Action.Builder(
+            null,
+            application.getString(R.string.stream_video_call_notification_action_reject),
+            intent,
+        ).build()
+    }
+
+    open fun isInForeground(): Boolean {
         val appProcessInfo = ActivityManager.RunningAppProcessInfo()
         ActivityManager.getMyMemoryState(appProcessInfo)
         return (
