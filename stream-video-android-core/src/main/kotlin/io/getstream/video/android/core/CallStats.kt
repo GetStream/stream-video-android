@@ -195,8 +195,8 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                 val received = it.members["framesReceived"] as? Long
                 val duration = it.members["totalFramesDuration"] as? Long
                 if (participantId != null) {
-                    logger.i {
-                        "receiving video for $participantId at $frameWidth: ${it.members["frameWidth"]} and rendering it at ${visibleAt?.dimensions?.width} visible: ${visibleAt?.visible}"
+                    logger.v {
+                        "[stats] #manual-quality-selection; receiving video for $participantId at $frameWidth: ${it.members["frameWidth"]} and rendering it at ${visibleAt?.dimensions?.width} visible: ${visibleAt?.visible}"
                     }
                 }
             }

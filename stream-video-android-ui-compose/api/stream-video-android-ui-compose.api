@@ -42,6 +42,11 @@ public abstract interface class io/getstream/video/android/compose/permission/Vi
 	public abstract fun launchPermissionRequest ()V
 }
 
+public final class io/getstream/video/android/compose/pip/PictureInPictureKt {
+	public static final fun isInPictureInPictureMode (Landroid/content/Context;)Z
+	public static final fun rememberIsInPipMode (Landroidx/compose/runtime/Composer;I)Z
+}
+
 public abstract interface class io/getstream/video/android/compose/state/ui/internal/CallParticipantInfoMode {
 }
 
@@ -260,6 +265,12 @@ public final class io/getstream/video/android/compose/theme/StreamDimens$Compani
 	public final fun defaultDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
 }
 
+public final class io/getstream/video/android/compose/theme/StreamRippleConfiguration {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/compose/theme/StreamRippleConfiguration;
+	public final fun default (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/RippleConfiguration;
+}
+
 public final class io/getstream/video/android/compose/theme/StreamShapes {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamShapes$Companion;
@@ -295,7 +306,7 @@ public abstract interface class io/getstream/video/android/compose/theme/StreamT
 	public fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamColors;
 	public fun getDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
 	public fun getReactionMapper (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/core/mapper/ReactionMapper;
-	public fun getRippleTheme (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/ripple/RippleTheme;
+	public fun getRippleConfiguration (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/RippleConfiguration;
 	public fun getShapes (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamShapes;
 	public fun getStyles (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;
 	public fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamTypography;
@@ -350,7 +361,7 @@ public final class io/getstream/video/android/compose/theme/VideoTheme : io/gets
 }
 
 public final class io/getstream/video/android/compose/theme/VideoThemeKt {
-	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/material/ripple/RippleTheme;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Lio/getstream/video/android/compose/theme/StreamRippleConfiguration;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {
@@ -1033,7 +1044,7 @@ public final class io/getstream/video/android/compose/ui/components/call/activec
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/CallContentKt {
-	public static final fun CallContent (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;Lio/getstream/video/android/compose/permission/VideoPermissionsState;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function6;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;ZLkotlin/jvm/functions/Function3;ZLandroidx/compose/runtime/Composer;III)V
+	public static final fun CallContent (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;Lio/getstream/video/android/compose/permission/VideoPermissionsState;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function6;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;ZLkotlin/jvm/functions/Function3;ZLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/ComposableSingletons$AudioCallContentKt {
@@ -1048,14 +1059,16 @@ public final class io/getstream/video/android/compose/ui/components/call/activec
 	public static field lambda-1 Lkotlin/jvm/functions/Function6;
 	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public static field lambda-3 Lkotlin/jvm/functions/Function3;
-	public static field lambda-4 Lkotlin/jvm/functions/Function2;
+	public static field lambda-4 Lkotlin/jvm/functions/Function3;
 	public static field lambda-5 Lkotlin/jvm/functions/Function2;
+	public static field lambda-6 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function6;
 	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-4$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-5$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-6$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/internal/ComposableSingletons$InviteUsersDialogKt {
@@ -1088,6 +1101,11 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun ChatDialogAction-_8q-z2c (Landroidx/compose/ui/Modifier;ZLjava/lang/Integer;Landroidx/compose/ui/graphics/vector/ImageVector;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ClosedCaptionsToggleActionKt {
+	public static final fun ClosedCaptionsToggleAction-PBJxc4c (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ClosedCaptionsToggleActionPreview (Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$AcceptCallActionKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$AcceptCallActionKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -1104,6 +1122,13 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ChatDialogActionKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ChatDialogActionKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ClosedCaptionsToggleActionKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ClosedCaptionsToggleActionKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
@@ -1338,8 +1363,8 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ParticipantVideoKt {
 	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 	public static final fun ParticipantLabel (Landroidx/compose/foundation/layout/BoxScope;Ljava/lang/String;ZLandroidx/compose/ui/Alignment;ZZFLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
-	public static final fun ParticipantVideo (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function6;Landroidx/compose/runtime/Composer;II)V
-	public static final fun ParticipantVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantVideo (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function6;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ParticipantVideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ParticipantsLayoutKt {
@@ -1846,6 +1871,7 @@ public final class io/getstream/video/android/compose/ui/components/video/Compos
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {
+	public static final fun VideoRenderer (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Media;Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public static final fun VideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Media;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
@@ -1865,5 +1891,98 @@ public final class io/getstream/video/android/compose/ui/components/video/VideoS
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
 	public static fun values ()[Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/config/ComposableSingletons$VideoRendererConfigKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/video/config/ComposableSingletons$VideoRendererConfigKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;
+	public final fun component3 ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public final fun component4 ()Lkotlin/jvm/functions/Function3;
+	public final fun copy (ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFallbackContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getMirrorStream ()Z
+	public final fun getModifiers ()Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;
+	public final fun getScalingType ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;
+	public final fun component3 ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public final fun component4 ()Lkotlin/jvm/functions/Function3;
+	public final fun copy (ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;ZLio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigCreationScope;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFallbackContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getMirrorStream ()Z
+	public final fun getModifiers ()Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;
+	public final fun getVideoScalingType ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public fun hashCode ()I
+	public final fun setFallbackContent (Lkotlin/jvm/functions/Function3;)V
+	public final fun setMirrorStream (Z)V
+	public final fun setModifiers (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;)V
+	public final fun setVideoScalingType (Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/config/VideoRendererConfigKt {
+	public static final fun videoComponentModifiers (Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;
+	public static final fun videoRenderConfig (Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
+	public static synthetic fun videoRenderConfig$default (Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/config/VideoRendererModifierScope {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function1;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifierScope;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifierScope;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifierScope;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComponentModifier ()Lkotlin/jvm/functions/Function1;
+	public final fun getContainerModifier ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun setComponentModifier (Lkotlin/jvm/functions/Function1;)V
+	public final fun setContainerModifier (Lkotlin/jvm/functions/Function1;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function1;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererModifiersConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getComponentModifier ()Lkotlin/jvm/functions/Function1;
+	public final fun getContainerModifier ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

@@ -28,25 +28,6 @@ jobs:
       - name: spotless
         run: ./gradlew spotlessCheck --scan
 
-  vale:
-    name: Vale doc linter
-    if: ${{ false }}  # disable for now
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: errata-ai/vale-action@reviewdog
-        with:
-          # added, diff_context, file, nofilter
-          filter_mode: nofilter
-          # github-pr-check, github-pr-review, github-check
-          reporter: github-pr-check
-          fail_on_error: true
-          files: docusaurus
-        env:
-          # Required, set by GitHub actions automatically:
-          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
   api_check:
     name: API check
     runs-on: ubuntu-latest
@@ -120,13 +101,13 @@ jobs:
           ./gradlew :stream-video-android-core:testDebugUnitTest --scan --stacktrace
 
       - name: Unit tests core results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: unit-tests-core-results
           path: stream-video-android-core/build/reports/tests/testDebugUnitTest/index.html
 
       - name: Unit tests compose results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: unit-tests-compose-results
           path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html

@@ -46,8 +46,11 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
+import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.debugSubmenu
 import io.getstream.video.android.ui.menu.defaultStreamMenu
+import io.getstream.video.android.ui.menu.reconnectMenu
 
 /**
  * A composable capable of loading a menu based on a list structure of menu items and sub menus.
@@ -217,12 +220,24 @@ private fun DynamicMenuPreview() {
                 onToggleAudioFilterClick = { },
                 onRestartSubscriberIceClick = { },
                 onRestartPublisherIceClick = { },
-                onKillSfuWsClick = { },
+                onSfuRejoinClick = { },
+                onSfuFastReconnectClick = {},
                 onSwitchSfuClick = { },
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onNoiseCancellation = {},
+                selectedIncomingVideoResolution = null,
+                onSelectIncomingVideoResolution = {},
+                isIncomingVideoEnabled = true,
+                onToggleIncomingVideoEnabled = {},
+                onSelectScaleType = {},
                 loadRecordings = { emptyList() },
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
+                onToggleClosedCaptions = {},
+                closedCaptionUiState = ClosedCaptionUiState.Available,
             ),
         )
     }
@@ -243,12 +258,24 @@ private fun DynamicMenuDebugOptionPreview() {
                 onToggleAudioFilterClick = { },
                 onRestartSubscriberIceClick = { },
                 onRestartPublisherIceClick = { },
-                onKillSfuWsClick = { },
+                onSfuRejoinClick = { },
+                onSfuFastReconnectClick = {},
                 onSwitchSfuClick = { },
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onSelectScaleType = { },
+                onNoiseCancellation = {},
+                selectedIncomingVideoResolution = null,
+                onSelectIncomingVideoResolution = {},
+                isIncomingVideoEnabled = true,
+                onToggleIncomingVideoEnabled = {},
                 loadRecordings = { emptyList() },
+                onToggleClosedCaptions = {},
+                closedCaptionUiState = ClosedCaptionUiState.Available,
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
@@ -262,10 +289,28 @@ private fun DynamicMenuDebugPreview() {
             items = debugSubmenu(
                 codecList = emptyList(),
                 onCodecSelected = {},
-                onKillSfuWsClick = { },
+                onSfuRejoinClick = { },
+                onSfuFastReconnectClick = {},
                 onRestartPublisherIceClick = { },
                 onRestartSubscriberIceClick = { },
                 onToggleAudioFilterClick = { },
+                onSelectScaleType = { },
+                onSwitchSfuClick = { },
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun DynamicMenuReconnectPreview() {
+    VideoTheme {
+        DynamicMenu(
+            items = reconnectMenu(
+                onSfuRejoinClick = { },
+                onSfuFastReconnectClick = {},
+                onRestartPublisherIceClick = { },
+                onRestartSubscriberIceClick = { },
                 onSwitchSfuClick = { },
             ),
         )

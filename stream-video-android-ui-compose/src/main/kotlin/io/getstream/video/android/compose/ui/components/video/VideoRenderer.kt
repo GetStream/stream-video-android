@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(StreamVideoUiDelicateApi::class)
+
 package io.getstream.video.android.compose.ui.components.video
 
 import androidx.compose.foundation.Image
@@ -43,17 +45,116 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
+import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.call.utils.ALL_PARTICIPANTS
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
+import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+
+@Composable
+public fun VideoRenderer(
+    modifier: Modifier = Modifier,
+    call: Call,
+    video: ParticipantState.Media?,
+    videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
+    onRendered: (VideoTextureViewRenderer) -> Unit = {},
+) {
+    Box(
+        modifier = modifier
+            .testTag("video_renderer_container"),
+    ) {
+        if (LocalInspectionMode.current) {
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag("video_renderer"),
+                painter = painterResource(
+                    id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
+                ),
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+            )
+            return
+        }
+
+        // Show avatar always behind the video.
+        videoRendererConfig.fallbackContent.invoke(call)
+
+        if (video?.enabled == true) {
+            val sessionId = video.sessionId
+            val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
+
+            if (isIncomingVideoEnabled(call, sessionId, videoEnabledOverrides)) {
+                val mediaTrack = video.track
+                val trackType = video.type
+
+                var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
+
+                DisposableEffect(call, video) {
+                    // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+                    call.setVisibility(sessionId, trackType, true)
+
+                    onDispose {
+                        cleanTrack(view, mediaTrack)
+                        // inform the call that we no longer want to render this video track
+                        call.setVisibility(sessionId, trackType, false)
+                    }
+                }
+
+                if (mediaTrack != null) {
+                    Box(
+                        modifier = videoRendererConfig.modifiers.containerModifier.invoke(this),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        AndroidView(
+                            factory = { context ->
+                                StreamVideoTextureViewRenderer(context).apply {
+                                    call.initRenderer(
+                                        videoRenderer = this,
+                                        sessionId = sessionId,
+                                        trackType = trackType,
+                                        onRendered = onRendered,
+                                    )
+                                    setMirror(videoRendererConfig.mirrorStream)
+                                    setScalingType(
+                                        videoRendererConfig.scalingType.toCommonScalingType(),
+                                    )
+                                    setupVideo(mediaTrack, this)
+
+                                    view = this
+                                }
+                            },
+                            update = { v ->
+                                v.setMirror(videoRendererConfig.mirrorStream)
+                                v.setScalingType(
+                                    videoRendererConfig.scalingType.toCommonScalingType(),
+                                )
+                                setupVideo(mediaTrack, v)
+                            },
+                            modifier = videoRendererConfig
+                                .modifiers
+                                .componentModifier(
+                                    this,
+                                )
+                                .testTag("video_renderer"),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 /**
  * Renders a single video track based on the call state.
@@ -65,6 +166,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param onRendered An interface that will be invoked when the video is rendered.
  */
+@Deprecated("Use VideoRenderer which accepts `videoConfig` instead.")
 @Composable
 public fun VideoRenderer(
     call: Call,
@@ -79,65 +181,21 @@ public fun VideoRenderer(
     },
     onRendered: (VideoTextureViewRenderer) -> Unit = {},
 ) {
-    if (LocalInspectionMode.current) {
-        Image(
-            modifier = modifier
-                .fillMaxSize()
-                .testTag("video_renderer"),
-            painter = painterResource(
-                id = io.getstream.video.android.ui.common.R.drawable.stream_video_call_sample,
-            ),
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-        )
-        return
-    }
-
-    // Show avatar always behind the video.
-    videoFallbackContent.invoke(call)
-
-    if (video?.enabled == true) {
-        val mediaTrack = video.track
-        val sessionId = video.sessionId
-        val trackType = video.type
-
-        var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
-
-        DisposableEffect(call, video) {
-            // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-            call.setVisibility(sessionId, trackType, true)
-
-            onDispose {
-                cleanTrack(view, mediaTrack)
-                // inform the call that we no longer want to render this video track
-                call.setVisibility(sessionId, trackType, false)
-            }
-        }
-
-        if (mediaTrack != null) {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                AndroidView(
-                    factory = { context ->
-                        StreamVideoTextureViewRenderer(context).apply {
-                            call.initRenderer(
-                                videoRenderer = this,
-                                sessionId = sessionId,
-                                trackType = trackType,
-                                onRendered = onRendered,
-                            )
-                            setScalingType(scalingType = videoScalingType.toCommonScalingType())
-                            setupVideo(mediaTrack, this)
-
-                            view = this
-                        }
-                    },
-                    update = { v -> setupVideo(mediaTrack, v) },
-                    modifier = modifier.testTag("video_renderer"),
-                )
-            }
-        }
-    }
+    VideoRenderer(
+        call = call,
+        video = video,
+        modifier = modifier,
+        videoRendererConfig = videoRenderConfig {
+            this.videoScalingType = videoScalingType
+            this.fallbackContent = videoFallbackContent
+        },
+        onRendered = onRendered,
+    )
 }
+
+private fun isIncomingVideoEnabled(call: Call, sessionId: String, videoEnabledOverrides: Map<String, Boolean?>) =
+    (videoEnabledOverrides[sessionId] ?: videoEnabledOverrides[ALL_PARTICIPANTS]) != false ||
+        call.state.me.value?.sessionId == sessionId
 
 private fun cleanTrack(
     view: VideoTextureViewRenderer?,
@@ -171,7 +229,7 @@ private fun setupVideo(
 }
 
 @Composable
-private fun DefaultMediaTrackFallbackContent(
+internal fun DefaultMediaTrackFallbackContent(
     modifier: Modifier,
     call: Call,
 ) {

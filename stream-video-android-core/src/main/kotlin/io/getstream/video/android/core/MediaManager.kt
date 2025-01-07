@@ -39,16 +39,17 @@ import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.VideoSettingsResponse
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.EglBase
+import org.webrtc.MediaStreamTrack
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
 import stream.video.sfu.models.VideoDimension
@@ -94,6 +95,8 @@ class SpeakerManager(
     private val _speakerPhoneEnabled = MutableStateFlow(true)
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
+    internal var selectedBeforeSpeaker: StreamAudioDevice? = null
+
     internal fun enable(fromUser: Boolean = true) {
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
@@ -135,23 +138,26 @@ class SpeakerManager(
      * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
      * */
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
-        microphoneManager.setup()
-        val devices = devices.value
-        val selectedBeforeSpeaker = selectedDevice.value
-        if (enable) {
-            val speaker = devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-            _speakerPhoneEnabled.value = true
-            microphoneManager.select(speaker)
-        } else {
-            _speakerPhoneEnabled.value = false
-            // swap back to the old one
-            val defaultFallbackFromType = defaultFallback?.let {
-                devices.filterIsInstance(defaultFallback::class.java)
-            }?.firstOrNull()
-            val fallback = defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                it !is StreamAudioDevice.Speakerphone
+        microphoneManager.enforceSetup {
+            val devices = devices.value
+            if (enable) {
+                val speaker =
+                    devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
+                selectedBeforeSpeaker = selectedDevice.value
+                _speakerPhoneEnabled.value = true
+                microphoneManager.select(speaker)
+            } else {
+                _speakerPhoneEnabled.value = false
+                // swap back to the old one
+                val defaultFallbackFromType = defaultFallback?.let {
+                    devices.filterIsInstance(defaultFallback::class.java)
+                }?.firstOrNull()
+                val fallback =
+                    defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
+                        it !is StreamAudioDevice.Speakerphone
+                    }
+                microphoneManager.select(fallback)
             }
-            microphoneManager.select(fallback)
         }
     }
 
@@ -159,12 +165,13 @@ class SpeakerManager(
      * Set the volume as a percentage, 0-100
      */
     fun setVolume(volumePercentage: Int) {
-        microphoneManager.setup()
-        microphoneManager.audioManager?.let {
-            val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
-            val level = max / 100 * volumePercentage
-            _volume.value = volumePercentage
-            it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
+        microphoneManager.enforceSetup {
+            microphoneManager.audioManager?.let {
+                val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
+                val level = max / 100 * volumePercentage
+                _volume.value = volumePercentage
+                it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
+            }
         }
     }
 
@@ -278,7 +285,8 @@ class ScreenShareManager(
 
     private fun startScreenShare(mediaProjectionPermissionResultData: Intent) {
         mediaManager.scope.launch {
-            this@ScreenShareManager.mediaProjectionPermissionResultData = mediaProjectionPermissionResultData
+            this@ScreenShareManager.mediaProjectionPermissionResultData =
+                mediaProjectionPermissionResultData
 
             // Screen sharing requires a foreground service with foregroundServiceType "mediaProjection" to be started first.
             // We can wait for the service to be ready by binding to it and then starting the
@@ -326,7 +334,6 @@ class ScreenShareManager(
  */
 class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
-    val preferSpeakerphone: Boolean,
     val audioUsage: Int,
 ) {
     // Internal data
@@ -363,7 +370,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Enabled
             }
-            mediaManager.audioTrack.setEnabled(true)
+            mediaManager.audioTrack.trySetEnabled(true)
         }
     }
 
@@ -392,7 +399,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            mediaManager.audioTrack.setEnabled(false)
+            mediaManager.audioTrack.trySetEnabled(false)
         }
     }
 
@@ -403,7 +410,6 @@ class MicrophoneManager(
         enforceSetup {
             if (enabled) {
                 enable(fromUser = fromUser)
-                mediaManager.speaker.setEnabled(enabled = false, fromUser = false)
             } else {
                 disable(fromUser = fromUser)
             }
@@ -416,7 +422,7 @@ class MicrophoneManager(
     fun select(device: StreamAudioDevice?) {
         enforceSetup {
             logger.i { "selecting device $device" }
-            ifAudioHandlerInitialized { it.selectDevice(device) }
+            ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
             _selectedDevice.value = device
         }
     }
@@ -437,13 +443,15 @@ class MicrophoneManager(
     fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
 
     // Internal logic
-    internal fun setup() {
+    internal fun setup(onAudioDevicesUpdate: (() -> Unit)? = null) {
+        var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
+
         if (setupCompleted) {
-            // Already setup, return
+            capturedOnAudioDevicesUpdate?.invoke()
+            capturedOnAudioDevicesUpdate = null
+
             return
         }
-
-        logger.i { "[setup]" }
 
         audioManager = mediaManager.context.getSystemService()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -476,13 +484,9 @@ class MicrophoneManager(
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
-        setupCompleted = true
     }
 
-    private inline fun <T> enforceSetup(actual: () -> T): T {
-        setup()
-        return actual.invoke()
-    }
+    internal fun enforceSetup(actual: () -> Unit) = setup(onAudioDevicesUpdate = actual)
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
@@ -565,7 +569,7 @@ public class CameraManager(
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
-        mediaManager.videoTrack.setEnabled(true)
+        mediaManager.videoTrack.trySetEnabled(true)
         startCapture()
     }
 
@@ -592,14 +596,13 @@ public class CameraManager(
     }
 
     fun disable(fromUser: Boolean = true) {
+        if (fromUser) _status.value = DeviceStatus.Disabled
+
         if (isCapturingVideo) {
             // 1. update our local state
             // 2. update the track enabled status
             // 3. Rtc listens and sends the update mute state request
-            if (fromUser) {
-                _status.value = DeviceStatus.Disabled
-            }
-            mediaManager.videoTrack.setEnabled(false)
+            mediaManager.videoTrack.trySetEnabled(false)
             videoCapturer.stopCapture()
             isCapturingVideo = false
         }
@@ -626,25 +629,30 @@ public class CameraManager(
                 CameraDirection.Back -> CameraDirection.Front
             }
             val device = devices.firstOrNull { it.direction == newDirection }
-            device?.let { select(it.id, false) }
+            device?.let { select(it.id, triggeredByFlip = true) }
 
             videoCapturer.switchCamera(null)
         }
     }
 
-    fun select(deviceId: String, startCapture: Boolean = false) {
+    fun select(deviceId: String, triggeredByFlip: Boolean = false) {
+        if (!triggeredByFlip) {
+            stopCapture()
+            if (!::devices.isInitialized) initDeviceList()
+        }
+
         val selectedDevice = devices.firstOrNull { it.id == deviceId }
         if (selectedDevice != null) {
             _direction.value = selectedDevice.direction ?: CameraDirection.Back
             _selectedDevice.value = selectedDevice
-            _availableResolutions.value =
-                selectedDevice.supportedFormats?.toList() ?: emptyList()
+            _availableResolutions.value = selectedDevice.supportedFormats?.toList() ?: emptyList()
             _resolution.value = selectDesiredResolution(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
 
-            if (startCapture) {
+            if (!triggeredByFlip) {
+                setup(force = true)
                 startCapture()
             }
         }
@@ -655,40 +663,44 @@ public class CameraManager(
     /**
      * Capture is called whenever you call enable()
      */
-    internal fun startCapture() {
-        val selectedDevice = _selectedDevice.value ?: return
-        val selectedResolution = resolution.value ?: return
+    internal fun startCapture() = synchronized(this) {
+        safeCall {
+            if (isCapturingVideo) {
+                stopCapture()
+            }
 
-        // setup the camera 2 capturer
-        videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
+            val selectedDevice = _selectedDevice.value ?: return
+            val selectedResolution = resolution.value ?: return
 
-        // initialize it
-        runBlocking(mediaManager.scope.coroutineContext) {
+            // setup the camera 2 capturer
+            videoCapturer = Camera2Capturer(mediaManager.context, selectedDevice.id, null)
+
+            // initialize it
             videoCapturer.initialize(
                 surfaceTextureHelper,
                 mediaManager.context,
                 mediaManager.videoSource.capturerObserver,
             )
-        }
 
-        // and start capture
-        runBlocking(mediaManager.scope.coroutineContext) {
+            // and start capture
             videoCapturer.startCapture(
                 selectedResolution.width,
                 selectedResolution.height,
                 selectedResolution.framerate.max,
             )
+            isCapturingVideo = true
         }
-        isCapturingVideo = true
     }
 
     /**
      * Stops capture if it's running
      */
-    internal fun stopCapture() {
-        if (isCapturingVideo) {
-            videoCapturer.stopCapture()
-            isCapturingVideo = false
+    internal fun stopCapture() = synchronized(this) {
+        safeCall {
+            if (isCapturingVideo) {
+                videoCapturer.stopCapture()
+                isCapturingVideo = false
+            }
         }
     }
 
@@ -696,14 +708,13 @@ public class CameraManager(
      * Handle the setup of the camera manager and enumerator
      * You should only call this once the permissions have been granted
      */
-    internal fun setup() {
-        if (setupCompleted) {
+    internal fun setup(force: Boolean = false) {
+        if (setupCompleted && !force) {
             return
         }
-        cameraManager = mediaManager.context.getSystemService()
-        enumerator = Camera2Enumerator(mediaManager.context)
-        val cameraIds = cameraManager?.cameraIdList ?: emptyArray()
-        devices = sortDevices(cameraIds, cameraManager, enumerator)
+
+        initDeviceList()
+
         val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
         val selectedDevice = devicesMatchingDirection.firstOrNull()
         if (selectedDevice != null) {
@@ -720,6 +731,13 @@ public class CameraManager(
             )
             setupCompleted = true
         }
+    }
+
+    private fun initDeviceList() {
+        cameraManager = mediaManager.context.getSystemService()
+        enumerator = Camera2Enumerator(mediaManager.context)
+        val cameraIds = cameraManager?.cameraIdList ?: emptyArray()
+        devices = sortDevices(cameraIds, cameraManager, enumerator)
     }
 
     /**
@@ -834,35 +852,35 @@ class MediaManagerImpl(
 
     // source & tracks
     val videoSource =
-        call.clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
+        call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
 
     val screenShareVideoSource by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
+        call.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
     }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val videoTrack = call.clientImpl.peerConnectionFactory.makeVideoTrack(
+    val videoTrack = call.peerConnectionFactory.makeVideoTrack(
         source = videoSource,
         trackId = UUID.randomUUID().toString(),
     )
 
     val screenShareTrack by lazy {
-        call.clientImpl.peerConnectionFactory.makeVideoTrack(
+        call.peerConnectionFactory.makeVideoTrack(
             source = screenShareVideoSource,
             trackId = UUID.randomUUID().toString(),
         )
     }
 
-    val audioSource = call.clientImpl.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
+    val audioSource = call.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val audioTrack = call.clientImpl.peerConnectionFactory.makeAudioTrack(
+    val audioTrack = call.peerConnectionFactory.makeAudioTrack(
         source = audioSource,
         trackId = UUID.randomUUID().toString(),
     )
 
     internal val camera = CameraManager(this, eglBaseContext)
-    internal val microphone = MicrophoneManager(this, preferSpeakerphone = true, audioUsage)
+    internal val microphone = MicrophoneManager(this, audioUsage)
     internal val speaker = SpeakerManager(this, microphone)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
@@ -876,3 +894,5 @@ class MediaManagerImpl(
         microphone.cleanup()
     }
 }
+
+fun MediaStreamTrack.trySetEnabled(enabled: Boolean) = safeCall { setEnabled(enabled) }

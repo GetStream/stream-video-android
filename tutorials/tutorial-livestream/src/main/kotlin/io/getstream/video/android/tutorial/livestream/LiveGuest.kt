@@ -16,48 +16,54 @@
 
 package io.getstream.video.android.tutorial.livestream
 
-import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import io.getstream.video.android.compose.permission.LaunchCallPermissions
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
-import io.getstream.video.android.core.GEO
-import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserType
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 
 @Composable
-fun LiveAudience() {
-    val userId = "!anon-Ben_Skywalker"
-    val callId = "dE8AsD5Qxqrt"
+fun LiveAudience(
+    navController: NavController,
+    callId: String,
+    client: StreamVideo,
+) {
+    val context = LocalContext.current
 
-    // step1 - create a user.
-    val user = User(
-        type = UserType.Anonymous,
-        id = userId, // any string
-        name = "Tutorial", // name and image are used in the UI
-        role = "guest",
+    // Step 1 - Update call settings via callConfigRegistry
+    client.state.callConfigRegistry.register(
+        DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
     )
 
-    // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
-    val context = LocalContext.current
-    val client = StreamVideoBuilder(
-        context = context,
-        apiKey = "k436tyde94hj", // demo API key
-        geo = GEO.GlobalEdgeNetwork,
-        user = user,
-        token = "",
-        ensureSingleInstance = false,
-    ).build()
-
-    // step3 - join a call, which type is `default` and id is `123`.
+    // Step 2 - join a call, which type is `default` and id is `123`.
     val call = client.call("livestream", callId)
-    LaunchCallPermissions(call = call) {
-        val result = call.join()
-        result.onError {
-            Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
-        }
+
+    LaunchedEffect(call) {
+        call.microphone.setEnabled(false, fromUser = true)
+        call.camera.setEnabled(false, fromUser = true)
+        call.join()
     }
 
-    LivestreamPlayer(call = call)
+    Box {
+        LivestreamPlayer(call = call)
+        CallAppBar(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(end = 16.dp, top = 16.dp),
+            call = call,
+            centerContent = { },
+            onCallAction = {
+                call.leave()
+                navController.popBackStack()
+            },
+        )
+    }
 }

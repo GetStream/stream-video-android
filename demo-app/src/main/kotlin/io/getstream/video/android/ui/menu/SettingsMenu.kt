@@ -39,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,28 +50,42 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.call.audio.AudioFilter
+import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
+import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
+import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
+import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 internal fun SettingsMenu(
     call: Call,
     selectedVideoFilter: Int,
     showDebugOptions: Boolean,
+    noiseCancellationFeatureEnabled: Boolean,
+    noiseCancellationEnabled: Boolean,
     onDismissed: () -> Unit,
     onSelectVideoFilter: (Int) -> Unit,
     onShowFeedback: () -> Unit,
+    onNoiseCancellation: () -> Unit,
+    selectedIncomingVideoResolution: PreferredVideoResolution?,
+    onSelectIncomingVideoResolution: (PreferredVideoResolution?) -> Unit,
+    isIncomingVideoEnabled: Boolean,
+    onToggleIncomingVideoVisibility: (Boolean) -> Unit,
     onShowCallStats: () -> Unit,
+    onSelectScaleType: (VideoScalingType) -> Unit,
+    closedCaptionUiState: ClosedCaptionUiState,
+    onClosedCaptionsToggle: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -105,7 +118,7 @@ internal fun SettingsMenu(
 
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
-            call.audioFilter = object : AudioFilter {
+            call.audioFilter = object : InputAudioFilter {
                 override fun applyFilter(
                     audioFormat: Int,
                     channelCount: Int,
@@ -133,17 +146,23 @@ internal fun SettingsMenu(
         Toast.makeText(context, "Restart Publisher Ice", Toast.LENGTH_SHORT).show()
     }
 
-    val onKillSfuWsClick: () -> Unit = {
-        call.debug.doFullReconnection()
+    val onSfuRejoinClick: () -> Unit = {
+        call.debug.rejoin()
         onDismissed.invoke()
         Toast.makeText(context, "Killing SFU WS. Should trigger reconnect...", Toast.LENGTH_SHORT)
             .show()
     }
 
     val onSwitchSfuClick: () -> Unit = {
-        call.debug.switchSfu()
+        call.debug.migrate()
         onDismissed.invoke()
         Toast.makeText(context, "Switch sfu", Toast.LENGTH_SHORT).show()
+    }
+
+    val onSfuFastReconnectClick: () -> Unit = {
+        call.debug.fastReconnect()
+        onDismissed.invoke()
+        Toast.makeText(context, "Fast Reconnect SFU", Toast.LENGTH_SHORT).show()
     }
 
     val codecInfos = remember {
@@ -162,6 +181,48 @@ internal fun SettingsMenu(
                         ActionMenuItem(
                             title = it.filename,
                             icon = Icons.Default.VideoFile,
+                            action = {
+                                context.downloadFile(it.url, it.filename)
+                                onDismissed()
+                            },
+                        )
+                    } ?: emptyList()
+                }
+            }
+            is PermissionStatus.Denied -> {
+                { emptyList() }
+            }
+        }
+    }
+
+    val isCurrentlyTranscribing by call.state.transcribing.collectAsStateWithLifecycle()
+    val settings by call.state.settings.collectAsStateWithLifecycle()
+
+    // Use the manager to determine the UI state
+    val transcriptionUiStateManager =
+        TranscriptionUiStateManager(isCurrentlyTranscribing, settings)
+    val transcriptionUiState = transcriptionUiStateManager.getUiState()
+
+    val onToggleTranscription: suspend () -> Unit = {
+        when (transcriptionUiState) {
+            TranscriptionAvailableUiState -> call.startTranscription()
+            TranscriptionStoppedUiState -> call.stopTranscription()
+            else -> {
+                throw IllegalStateException(
+                    "Toggling of transcription should not work in state: $transcriptionUiState",
+                )
+            }
+        }
+    }
+
+    val onLoadTranscriptions: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
+        when (it) {
+            is PermissionStatus.Granted -> {
+                {
+                    call.listTranscription().getOrNull()?.transcriptions?.map {
+                        ActionMenuItem(
+                            title = it.filename,
+                            icon = Icons.Default.VideoFile, // TODO Rahul check this later
                             action = {
                                 context.downloadFile(it.url, it.filename)
                                 onDismissed()
@@ -207,6 +268,8 @@ internal fun SettingsMenu(
             },
             items = defaultStreamMenu(
                 showDebugOptions = showDebugOptions,
+                noiseCancellationFeatureEnabled = noiseCancellationFeatureEnabled,
+                noiseCancellationEnabled = noiseCancellationEnabled,
                 codecList = codecInfos,
                 availableDevices = availableDevices,
                 onDeviceSelected = {
@@ -218,14 +281,26 @@ internal fun SettingsMenu(
                 },
                 onShowFeedback = onShowFeedback,
                 onToggleScreenShare = onScreenShareClick,
-                onKillSfuWsClick = onKillSfuWsClick,
                 onRestartPublisherIceClick = onRestartPublisherIceClick,
                 onRestartSubscriberIceClick = onRestartSubscriberIceClick,
                 onToggleAudioFilterClick = onToggleAudioFilterClick,
                 onSwitchSfuClick = onSwitchSfuClick,
                 onShowCallStats = onShowCallStats,
+                onNoiseCancellation = onNoiseCancellation,
+                selectedIncomingVideoResolution = selectedIncomingVideoResolution,
+                onSelectIncomingVideoResolution = { onSelectIncomingVideoResolution(it) },
+                isIncomingVideoEnabled = isIncomingVideoEnabled,
+                onToggleIncomingVideoEnabled = { onToggleIncomingVideoVisibility(it) },
+                onSfuRejoinClick = onSfuRejoinClick,
+                onSfuFastReconnectClick = onSfuFastReconnectClick,
                 isScreenShareEnabled = isScreenSharing,
+                onSelectScaleType = onSelectScaleType,
                 loadRecordings = onLoadRecordings,
+                onToggleClosedCaptions = onClosedCaptionsToggle,
+                closedCaptionUiState = closedCaptionUiState,
+                transcriptionUiState = transcriptionUiState,
+                onToggleTranscription = onToggleTranscription,
+                loadTranscriptions = onLoadTranscriptions,
             ),
         )
     }
@@ -280,12 +355,24 @@ private fun SettingsMenuPreview() {
                 onToggleAudioFilterClick = { },
                 onRestartSubscriberIceClick = { },
                 onRestartPublisherIceClick = { },
-                onKillSfuWsClick = { },
+                onSfuRejoinClick = { },
+                onSfuFastReconnectClick = {},
                 onSwitchSfuClick = { },
                 availableDevices = emptyList(),
                 onDeviceSelected = {},
                 onShowFeedback = {},
+                onSelectScaleType = {},
+                onNoiseCancellation = {},
+                selectedIncomingVideoResolution = null,
+                onSelectIncomingVideoResolution = {},
+                isIncomingVideoEnabled = true,
+                onToggleIncomingVideoEnabled = {},
                 loadRecordings = { emptyList() },
+                onToggleClosedCaptions = { },
+                closedCaptionUiState = ClosedCaptionUiState.Available,
+                transcriptionUiState = TranscriptionAvailableUiState,
+                onToggleTranscription = {},
+                loadTranscriptions = { emptyList() },
             ),
         )
     }

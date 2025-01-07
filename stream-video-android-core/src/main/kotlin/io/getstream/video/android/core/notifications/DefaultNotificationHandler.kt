@@ -36,15 +36,22 @@ import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 public open class DefaultNotificationHandler(
     private val application: Application,
@@ -114,7 +121,7 @@ public open class DefaultNotificationHandler(
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        incomingCallDisplayName: String,
+        callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? {
         return if (ringingState is RingingState.Incoming) {
@@ -127,7 +134,7 @@ public open class DefaultNotificationHandler(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
-                    incomingCallDisplayName,
+                    callDisplayName,
                     shouldHaveContentIntent,
                 )
             } else {
@@ -139,9 +146,10 @@ public open class DefaultNotificationHandler(
             val endCallPendingIntent = intentResolver.searchEndCallPendingIntent(callId)
 
             if (outgoingCallPendingIntent != null && endCallPendingIntent != null) {
-                getOutgoingCallNotification(
-                    outgoingCallPendingIntent,
-                    endCallPendingIntent,
+                getOngoingCallNotification(
+                    callId,
+                    callDisplayName,
+                    isOutgoingCall = true,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -189,7 +197,7 @@ public open class DefaultNotificationHandler(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callDisplayName: String,
+        callerName: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification {
         // if the app is in foreground then don't interrupt the user with a high priority
@@ -237,13 +245,12 @@ public open class DefaultNotificationHandler(
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle(callDisplayName)
+            setContentTitle(callerName)
             setContentText(
-                application.getString(R.string.stream_video_incoming_call_notification_title),
+                application.getString(R.string.stream_video_incoming_call_notification_description),
             )
             setChannelId(channelId)
             setOngoing(true)
-            setAutoCancel(false)
             setCategory(NotificationCompat.CATEGORY_CALL)
             setFullScreenIntent(fullScreenPendingIntent, true)
             if (shouldHaveContentIntent) {
@@ -256,53 +263,9 @@ public open class DefaultNotificationHandler(
                     PendingIntent.FLAG_IMMUTABLE,
                 )
                 setContentIntent(emptyIntent)
+                setAutoCancel(false)
             }
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
-        }
-    }
-
-    private fun getOutgoingCallNotification(
-        outgoingCallPendingIntent: PendingIntent,
-        endCallPendingIntent: PendingIntent,
-    ): Notification {
-        val channelId = application.getString(
-            R.string.stream_video_outgoing_call_notification_channel_id,
-        )
-        maybeCreateChannel(
-            channelId = channelId,
-            context = application,
-            configure = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    name = application.getString(
-                        R.string.stream_video_outgoing_call_notification_channel_title,
-                    )
-                    description = application.getString(
-                        R.string.stream_video_outgoing_call_notification_channel_description,
-                    )
-                }
-            },
-        )
-
-        return getNotification {
-            setContentTitle(
-                application.getString(R.string.stream_video_outgoing_call_notification_title),
-            )
-            setContentText(
-                application.getString(
-                    R.string.stream_video_ongoing_call_notification_description,
-                ),
-            )
-            setChannelId(channelId)
-            setOngoing(true)
-            setContentIntent(outgoingCallPendingIntent)
-            setCategory(NotificationCompat.CATEGORY_CALL)
-            addAction(
-                NotificationCompat.Action.Builder(
-                    android.R.drawable.ic_menu_close_clear_cancel,
-                    application.getString(R.string.stream_video_call_notification_action_cancel),
-                    endCallPendingIntent,
-                ).build(),
-            )
+            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
         }
     }
 
@@ -330,14 +293,26 @@ public open class DefaultNotificationHandler(
             } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
     }
 
-    override fun getOngoingCallNotification(callId: StreamCallId, isOutgoingCall: Boolean): Notification? {
-        val notificationId = callId.hashCode()
+    override fun getOngoingCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String?,
+        isOutgoingCall: Boolean,
+        remoteParticipantCount: Int,
+    ): Notification? {
+        val notificationId = callId.hashCode() // Notification ID
 
         // Intents
-        val ongoingCallIntent = intentResolver.searchOngoingCallPendingIntent(
-            callId,
-            notificationId,
-        )
+        val onClickIntent = if (isOutgoingCall) {
+            intentResolver.searchOutgoingCallPendingIntent(
+                callId,
+                notificationId,
+            )
+        } else {
+            intentResolver.searchOngoingCallPendingIntent(
+                callId,
+                notificationId,
+            )
+        }
         val hangUpIntent = if (isOutgoingCall) {
             intentResolver.searchRejectCallPendingIntent(callId)
         } else {
@@ -363,7 +338,7 @@ public open class DefaultNotificationHandler(
         )
 
         if (hangUpIntent == null) {
-            logger.e { "Hang-up intent is null, not showing notification!" }
+            logger.e { "End call intent is null, not showing notification!" }
             return null
         }
 
@@ -372,23 +347,113 @@ public open class DefaultNotificationHandler(
             .setSmallIcon(notificationIconRes)
             .also {
                 // If the intent is configured, clicking the notification will return to the call
-                if (ongoingCallIntent != null) {
-                    it.setContentIntent(ongoingCallIntent)
-                    it.setFullScreenIntent(ongoingCallIntent, false)
+                if (onClickIntent != null) {
+                    it.setContentIntent(onClickIntent)
                 } else {
-                    logger.w { "Ongoing intent is null. Clicking on the ongoing call notification will not work." }
+                    logger.w { "Ongoing intent is null .click on the ongoing call notification will not work." }
                 }
             }
             .setContentTitle(
-                application.getString(R.string.stream_video_ongoing_call_notification_title),
+                if (isOutgoingCall) {
+                    application.getString(R.string.stream_video_outgoing_call_notification_title)
+                } else {
+                    application.getString(R.string.stream_video_ongoing_call_notification_title)
+                },
             )
             .setContentText(
                 application.getString(R.string.stream_video_ongoing_call_notification_description),
             )
             .setAutoCancel(false)
             .setOngoing(true)
-            .addHangupAction(hangUpIntent)
+            .addHangUpAction(
+                hangUpIntent,
+                callDisplayName ?: application.getString(
+                    R.string.stream_video_ongoing_call_notification_title,
+                ),
+                remoteParticipantCount,
+            )
             .build()
+    }
+
+    override fun getNotificationUpdates(
+        coroutineScope: CoroutineScope,
+        call: Call,
+        localUser: User,
+        onUpdate: (Notification) -> Unit,
+    ) {
+        coroutineScope.launch {
+            var latestRemoteParticipantCount = -1
+
+            // Monitor call state and remote participants
+            combine(
+                call.state.ringingState,
+                call.state.members,
+                call.state.remoteParticipants,
+            ) { ringingState, members, remoteParticipants ->
+                Triple(ringingState, members, remoteParticipants)
+            }
+                .distinctUntilChanged()
+                .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
+                .collectLatest { state ->
+                    val ringingState = state.first
+                    val members = state.second
+                    val remoteParticipants = state.third
+
+                    if (ringingState is RingingState.Outgoing) {
+                        val remoteMembersCount = members.size - 1
+
+                        val callDisplayName = if (remoteMembersCount != 1) {
+                            application.getString(
+                                R.string.stream_video_outgoing_call_notification_title,
+                            )
+                        } else {
+                            members.firstOrNull { member ->
+                                member.user.id != localUser.id
+                            }?.user?.name ?: "Unknown"
+                        }
+
+                        getOngoingCallNotification(
+                            callId = StreamCallId.fromCallCid(call.cid),
+                            callDisplayName = callDisplayName,
+                            isOutgoingCall = true,
+                            remoteParticipantCount = remoteMembersCount,
+                        )?.let {
+                            onUpdate(it)
+                        }
+                    } else if (ringingState is RingingState.Active) {
+                        // If number of remote participants increased or decreased
+                        if (remoteParticipants.size != latestRemoteParticipantCount) {
+                            latestRemoteParticipantCount = remoteParticipants.size
+
+                            val callDisplayName = if (remoteParticipants.isEmpty()) {
+                                // If no remote participants, get simple call notification title
+                                application.getString(
+                                    R.string.stream_video_ongoing_call_notification_title,
+                                )
+                            } else {
+                                if (remoteParticipants.size > 1) {
+                                    // If more than 1 remote participant, get group call notification title
+                                    application.getString(
+                                        R.string.stream_video_ongoing_group_call_notification_title,
+                                    )
+                                } else {
+                                    // If 1 remote participant, get the name of the remote participant
+                                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+                                }
+                            }
+
+                            // Use latest call display name in notification
+                            getOngoingCallNotification(
+                                callId = StreamCallId.fromCallCid(call.cid),
+                                callDisplayName = callDisplayName,
+                                remoteParticipantCount = remoteParticipants.size,
+                            )?.let {
+                                onUpdate(it)
+                            }
+                        }
+                    }
+                }
+        }
     }
 
     private fun maybeCreateChannel(
@@ -447,25 +512,6 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    private fun showIncomingCallNotification(
-        fullScreenPendingIntent: PendingIntent,
-        acceptCallPendingIntent: PendingIntent,
-        rejectCallPendingIntent: PendingIntent,
-        callDisplayName: String,
-        notificationId: Int = INCOMING_CALL_NOTIFICATION_ID,
-    ) {
-        showNotification(notificationId) {
-            priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle("Incoming call")
-            setContentText(callDisplayName)
-            setOngoing(false)
-            setContentIntent(fullScreenPendingIntent)
-            setFullScreenIntent(fullScreenPendingIntent, true)
-            setCategory(NotificationCompat.CATEGORY_CALL)
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callDisplayName)
-        }
-    }
-
     @SuppressLint("MissingPermission")
     private fun showNotification(
         notificationId: Int,
@@ -485,26 +531,37 @@ public open class DefaultNotificationHandler(
             .build()
     }
 
-    private fun NotificationCompat.Builder.addHangupAction(
-        rejectCallPendingIntent: PendingIntent,
+    private fun NotificationCompat.Builder.addHangUpAction(
+        hangUpIntent: PendingIntent,
+        callDisplayName: String,
+        remoteParticipantCount: Int,
     ): NotificationCompat.Builder = apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 CallStyle.forOngoingCall(
                     Person.Builder()
-                        .setName(
-                            application.getString(
-                                R.string.stream_video_ongoing_call_notification_title,
-                            ),
-                        )
-                        .setIcon(
-                            IconCompat.createWithResource(
-                                application,
-                                R.drawable.stream_video_ic_logo,
-                            ),
-                        )
+                        .setName(callDisplayName)
+                        .apply {
+                            if (remoteParticipantCount == 0) {
+                                // Just one user in the call
+                                setIcon(
+                                    IconCompat.createWithResource(
+                                        application,
+                                        R.drawable.stream_video_ic_user,
+                                    ),
+                                )
+                            } else if (remoteParticipantCount > 1) {
+                                // More than one user in the call
+                                setIcon(
+                                    IconCompat.createWithResource(
+                                        application,
+                                        R.drawable.stream_video_ic_user_group,
+                                    ),
+                                )
+                            }
+                        }
                         .build(),
-                    rejectCallPendingIntent,
+                    hangUpIntent,
                 ),
             )
         } else {
@@ -512,7 +569,7 @@ public open class DefaultNotificationHandler(
                 NotificationCompat.Action.Builder(
                     null,
                     application.getString(R.string.stream_video_call_notification_action_leave),
-                    rejectCallPendingIntent,
+                    hangUpIntent,
                 ).build(),
             )
         }
@@ -521,13 +578,23 @@ public open class DefaultNotificationHandler(
     private fun NotificationCompat.Builder.addCallActions(
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        personName: String,
+        callDisplayName: String?,
     ): NotificationCompat.Builder = apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 CallStyle.forIncomingCall(
                     Person.Builder()
-                        .setName(personName) // Used as contentTitle
+                        .setName(callDisplayName ?: "Unknown")
+                        .apply {
+                            if (callDisplayName == null) {
+                                setIcon(
+                                    IconCompat.createWithResource(
+                                        application,
+                                        R.drawable.stream_video_ic_user,
+                                    ),
+                                )
+                            }
+                        }
                         .build(),
                     rejectCallPendingIntent,
                     acceptCallPendingIntent,

@@ -21,6 +21,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.NotificationChannelCompat
@@ -103,14 +104,20 @@ internal class StreamScreenShareService : Service() {
             )
         }
 
-        startForegroundWithServiceType(NOTIFICATION_ID, builder.build(), TRIGGER_SHARE_SCREEN)
+        startForegroundWithServiceType(
+            NOTIFICATION_ID,
+            builder.build(),
+            TRIGGER_SHARE_SCREEN,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION,
+        )
         return super.onStartCommand(intent, flags, startId)
     }
 
     companion object {
         internal const val NOTIFICATION_ID = 43534
         internal const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
-        internal const val BROADCAST_CANCEL_ACTION = "io.getstream.video.android.action.CANCEL_SCREEN_SHARE"
+        internal const val BROADCAST_CANCEL_ACTION =
+            "io.getstream.video.android.action.CANCEL_SCREEN_SHARE"
         internal const val INTENT_EXTRA_CALL_ID = "io.getstream.video.android.intent-extra.call_cid"
         internal const val TRIGGER_SHARE_SCREEN = "share_screen"
 

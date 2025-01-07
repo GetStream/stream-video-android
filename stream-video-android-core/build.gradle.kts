@@ -167,6 +167,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
+    implementation(libs.ituDate)
+
     implementation(libs.moshi)
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
@@ -178,6 +180,7 @@ dependencies {
 
     // Stream
     api(libs.stream.result)
+    api(libs.stream.result.call)
     api(libs.stream.log.android)
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)

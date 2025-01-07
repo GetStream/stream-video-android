@@ -34,6 +34,8 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ServiceCompat
 import io.getstream.log.StreamLog
+import io.getstream.result.Error
+import io.getstream.result.Result
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
@@ -140,16 +142,20 @@ internal inline fun safeCall(exceptionLogTag: String = "SafeCall", block: () -> 
  * @param default the default value to return in case of an exception.
  * @param block the suspending function to call.
  */
-internal suspend fun <T> safeSuspendingCall(default: T, block: suspend () -> T): T {
+internal suspend fun <T> safeSuspendingCallWithDefault(
+    default: T,
+    defaultProvider: ((exception: Throwable) -> T)? = null,
+    block: suspend () -> T,
+): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
     return try {
         block()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         // Handle or log the exception here
         StreamLog.e("SafeSuspendingCall", e) { "Exception occurred: ${e.message}" }
-        default
+        safeCallWithDefault(default) { defaultProvider?.invoke(e) ?: default }
     }
 }
 
@@ -159,7 +165,7 @@ internal suspend fun <T> safeSuspendingCall(default: T, block: suspend () -> T):
  * @param default the default value to return in case of an exception.
  * @param block the function to call.
  */
-inline fun <T> safeCall(default: T, block: () -> T): T {
+internal inline fun <T> safeCallWithDefault(default: T, block: () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -183,14 +189,15 @@ internal fun Service.startForegroundWithServiceType(
     notificationId: Int,
     notification: Notification,
     trigger: String,
-) {
+    foregroundServiceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+) = safeCallWithResult {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         startForeground(notificationId, notification)
     } else {
         val beforeOrAfterAndroid14Type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
         } else {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+            foregroundServiceType
         }
 
         ServiceCompat.startForeground(
@@ -198,11 +205,43 @@ internal fun Service.startForegroundWithServiceType(
             notificationId,
             notification,
             when (trigger) {
-                TRIGGER_ONGOING_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+                TRIGGER_ONGOING_CALL -> foregroundServiceType
                 TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> beforeOrAfterAndroid14Type
                 TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
                 else -> beforeOrAfterAndroid14Type
             },
         )
+    }
+}
+
+/**
+ * Safely call a function and handle exceptions while returning a [Result].
+ */
+internal inline fun <T : Any> safeCallWithResult(block: () -> T): Result<T> {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    return try {
+        Result.Success(block())
+    } catch (e: Exception) {
+        // Handle or log the exception here
+        StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
+        Result.Failure(Error.ThrowableError("Safe call failed", e))
+    }
+}
+
+/**
+ * Safely call a function and handle exceptions while returning a [Result].
+ */
+internal suspend fun <T : Any> safeSuspendingCallWithResult(block: suspend () -> T): Result<T> {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    return try {
+        Result.Success(block())
+    } catch (e: Exception) {
+        // Handle or log the exception here
+        StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
+        Result.Failure(Error.ThrowableError("Safe call failed", e))
     }
 }

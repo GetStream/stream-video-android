@@ -13,7 +13,7 @@ buildscript {
 plugins {
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.kotlin.android) apply false
-  alias(libs.plugins.compose.compiler) apply false
+  // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
   alias(libs.plugins.kotlin.serialization) apply false
   alias(libs.plugins.kotlin.compatibility.validator) apply false
   alias(libs.plugins.ksp) apply false
@@ -63,9 +63,15 @@ apply(from = "${rootDir}/scripts/publish-root.gradle")
 //}
 
 afterEvaluate {
-  println("Running Add Pre Commit Git Hook Script on Build")
-  exec {
-    commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
-  }
-  println("Added pre-push Git Hook Script.")
+    println("Running Add Pre Commit Git Hook Script on Build")
+    exec {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            // Windows-specific command
+            commandLine("cmd", "/c", "copy", ".\\scripts\\git-hooks\\pre-push", ".\\.git\\hooks")
+        } else {
+            // Unix-based systems
+            commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
+        }
+    }
+    println("Added pre-push Git Hook Script.")
 }

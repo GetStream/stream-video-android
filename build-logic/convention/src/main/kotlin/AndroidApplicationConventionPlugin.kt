@@ -1,4 +1,6 @@
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
+import io.getstream.video.configureFlavors
 import io.getstream.video.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project

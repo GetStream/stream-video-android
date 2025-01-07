@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import androidx.compose.runtime.Stable
+import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.AudioTrack
@@ -55,8 +56,10 @@ public data class ParticipantState(
     var trackLookupPrefix: String = "",
 ) {
 
+    private val logger by taggedLogger("ParticipantState")
+
     val isLocal by lazy {
-        sessionId == call.session?.sessionId
+        sessionId == call.sessionId
     }
 
     /** video track */
@@ -198,6 +201,11 @@ public data class ParticipantState(
 
     internal val _roles = MutableStateFlow<List<String>>(emptyList())
     val roles: StateFlow<List<String>> = _roles
+
+    fun setVideoTrack(track: VideoTrack?) {
+        logger.i { "[setVideoTrack] #sfu; #track; userId: ${userId.value} track: $track" }
+        _videoTrack.value = track
+    }
 
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id

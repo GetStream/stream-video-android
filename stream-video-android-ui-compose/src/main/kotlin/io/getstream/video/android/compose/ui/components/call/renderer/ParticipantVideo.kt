@@ -82,7 +82,10 @@ import io.getstream.video.android.compose.ui.components.indicator.GenericIndicat
 import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
@@ -92,6 +95,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 import kotlinx.coroutines.delay
 
 /**
@@ -125,6 +129,7 @@ public fun ParticipantVideo(
                 .height(VideoTheme.dimens.componentHeightM),
         )
     },
+    scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -194,6 +199,7 @@ public fun ParticipantVideo(
         ParticipantVideoRenderer(
             call = call,
             participant = participant,
+            scalingType = scalingType,
             videoFallbackContent = videoFallbackContent,
         )
 
@@ -219,12 +225,15 @@ public fun ParticipantVideo(
  *
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
+ * @param scalingType The scaling type for the video renderer.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
+@OptIn(StreamVideoUiDelicateApi::class)
 @Composable
 public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
+    scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -246,11 +255,24 @@ public fun ParticipantVideoRenderer(
     }
 
     val video by participant.video.collectAsStateWithLifecycle()
-
+    val cameraDirection by call.camera.direction.collectAsStateWithLifecycle()
+    val me by call.state.me.collectAsStateWithLifecycle()
+    val mirror by remember(cameraDirection) {
+        mutableStateOf(
+            cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId,
+        )
+    }
+    val videoRendererConfig = remember(mirror, scalingType, videoFallbackContent) {
+        videoRenderConfig {
+            mirrorStream = mirror
+            this.videoScalingType = scalingType
+            this.fallbackContent = videoFallbackContent
+        }
+    }
     VideoRenderer(
         call = call,
         video = video,
-        videoFallbackContent = videoFallbackContent,
+        videoRendererConfig = videoRendererConfig,
     )
 }
 

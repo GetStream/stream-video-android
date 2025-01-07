@@ -27,9 +27,10 @@ import io.getstream.video.android.core.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
-import org.webrtc.DefaultVideoDecoderFactory
+import org.webrtc.DefaultBlacklistedVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.Logging
+import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
@@ -45,13 +46,15 @@ import java.nio.ByteBuffer
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
  *
- * @param context Used to build the underlying native components for the factory.
- * @param audioUsage signal to the system how the audio tracks are used.
+ * @property context Used to build the underlying native components for the factory.
+ * @property audioUsage signal to the system how the audio tracks are used.
+ * @property audioProcessing Factory that provides audio processing capabilities.
  * Set this to [AudioAttributes.USAGE_MEDIA] if you want the audio track to behave like media, useful for livestreaming scenarios.
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
     private val audioUsage: Int = defaultAudioUsage,
+    private var audioProcessing: ManagedAudioProcessingFactory? = null,
 ) {
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
@@ -98,9 +101,7 @@ public class StreamPeerConnectionFactory(
      * Default video decoder factory used to unpack video from the remote tracks.
      */
     private val videoDecoderFactory by lazy {
-        DefaultVideoDecoderFactory(
-            eglBase.eglBaseContext,
-        )
+        DefaultBlacklistedVideoDecoderFactory(eglBase.eglBaseContext)
     }
 
     /**
@@ -109,9 +110,9 @@ public class StreamPeerConnectionFactory(
     private val videoEncoderFactory by lazy {
         SimulcastAlignedVideoEncoderFactory(
             eglBase.eglBaseContext,
-            enableIntelVp8Encoder = true,
-            enableH264HighProfile = true,
-            resolutionAdjustment = ResolutionAdjustment.MULTIPLE_OF_16,
+            true,
+            true,
+            ResolutionAdjustment.MULTIPLE_OF_16,
         )
     }
 
@@ -119,7 +120,9 @@ public class StreamPeerConnectionFactory(
      * Factory that builds all the connections based on the extensive configuration provided under
      * the hood.
      */
-    private val factory by lazy {
+    private val factory: PeerConnectionFactory by lazy { createFactory() }
+
+    private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
                 .setInjectableLogger({ message, severity, label ->
@@ -150,7 +153,10 @@ public class StreamPeerConnectionFactory(
                 .createInitializationOptions(),
         )
 
-        PeerConnectionFactory.builder()
+        return PeerConnectionFactory.builder()
+            .apply {
+                audioProcessing?.also { setAudioProcessingFactory(it) }
+            }
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
             .setAudioDeviceModule(
@@ -164,8 +170,8 @@ public class StreamPeerConnectionFactory(
                                 AudioAttributes.Builder().setUsage(audioUsage)
                                     .build(),
                             )
-                            audioLogger.d { "[setAudioAttributes] usage: $audioUsage" }
                         }
+                        audioLogger.d { "[csc] PCF audioUsage: $audioUsage" }
                     }
                     .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :
@@ -354,4 +360,28 @@ public class StreamPeerConnectionFactory(
         source: AudioSource,
         trackId: String,
     ): AudioTrack = factory.createAudioTrack(trackId, source)
+
+    /**
+     * True if the audio processing is enabled, false otherwise.
+     */
+    public fun isAudioProcessingEnabled(): Boolean {
+        return audioProcessing?.isEnabled ?: false
+    }
+
+    /**
+     * Sets the audio processing on or off.
+     */
+    public fun setAudioProcessingEnabled(enabled: Boolean) {
+        audioProcessing?.isEnabled = enabled
+    }
+
+    /**
+     * Toggles the audio processing on and off.
+     */
+    public fun toggleAudioProcessing(): Boolean {
+        return audioProcessing?.let {
+            it.isEnabled = !it.isEnabled
+            it.isEnabled
+        } ?: false
+    }
 }

@@ -20,10 +20,12 @@ import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Rational
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
@@ -71,7 +73,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         private const val EXTRA_MEMBERS_ARRAY: String = "members_extra"
 
         // Extra default values
-        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = true
+        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = false
         private val defaultExtraMembers = emptyList<String>()
         private val logger by taggedLogger("DefaultCallActivity")
 
@@ -230,6 +232,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
         }
     }
 
+    public final override fun onUserLeaveHint() {
+        withCachedCall {
+            onUserLeaveHint(it)
+            super.onUserLeaveHint()
+        }
+    }
+
     public final override fun onPause() {
         withCachedCall {
             onPause(it)
@@ -344,8 +353,34 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call
      */
     public open fun onResume(call: Call) {
-        // No - op
+        if (configuration.canKeepScreenOn) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
         logger.d { "DefaultCallActivity - Resumed (call -> $call)" }
+    }
+
+    /**
+     * Called when the activity is about to go into the background as the result of user choice. Makes sure the call object is available.
+     *
+     * @param call the call
+     */
+    public open fun onUserLeaveHint(call: Call) {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        // Default PiP behavior
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE) &&
+            isConnected(call) &&
+            !isChangingConfigurations &&
+            isVideoCall(call) &&
+            !isInPictureInPictureMode
+        ) {
+            try {
+                enterPictureInPicture()
+            } catch (e: Exception) {
+                logger.e(e) { "[onUserLeaveHint] Something went wrong when entering PiP." }
+            }
+        }
+
+        logger.d { "DefaultCallActivity - Leave Hinted (call -> $call)" }
     }
 
     /**
@@ -354,9 +389,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call the call
      */
     public open fun onPause(call: Call) {
-        if (isVideoCall(call) && !isInPictureInPictureMode) {
-            enterPictureInPicture()
-        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         logger.d { "DefaultCallActivity - Paused (call -> $call)" }
     }
 
@@ -383,7 +416,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call the call
      */
     public open fun onStop(call: Call) {
-        // Extension point only.
+        // No-op
         logger.d { "Default activity - stopped (call -> $call)" }
     }
 
@@ -399,8 +432,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
     // Decision making
     @StreamCallActivityDelicateApi
-    public open fun isVideoCall(call: Call): Boolean =
-        call.hasCapability(OwnCapability.SendVideo)
+    public open fun isVideoCall(call: Call): Boolean {
+        return call.hasCapability(OwnCapability.SendVideo) || call.isVideoEnabled()
+    }
 
     // Picture in picture (for Video calls)
     /**
@@ -689,10 +723,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val total = call.state.participantCounts.value?.total
-                logger.d { "Participant left, remaining: $total" }
-                if (total != null && total <= 2) {
-                    onLastParticipant(call)
+                val connectionState = call.state.connection.value
+                if (connectionState == RealtimeConnection.Disconnected) {
+                    val total = call.state.participantCounts.value?.total
+                    logger.d { "Participant left, remaining: $total" }
+                    if (total != null && total <= 2) {
+                        onLastParticipant(call)
+                    }
                 }
             }
         }
@@ -738,6 +775,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
                     onSuccessFinish.invoke(call)
                 }
             }
+
             is RealtimeConnection.Failed -> {
                 lifecycleScope.launch {
                     val conn = state as? RealtimeConnection.Failed
@@ -746,6 +784,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
                     onErrorFinish.invoke(throwable)
                 }
             }
+
             else -> {
                 // No-op
             }
@@ -764,11 +803,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
         if (cid == null) {
             val e = IllegalArgumentException("CallActivity started without call ID.")
-            logger.e(
-                e,
-            ) { "Failed to initialize call because call ID is not found in the intent. $intent" }
-            onError?.let {
-            } ?: throw e
+
+            logger.e(e) {
+                "Failed to initialize call because call ID is not found in the intent. $intent"
+            }
+
+            onError?.invoke(e) ?: throw e
+
             // Finish
             return
         }
@@ -845,6 +886,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun isConnected(call: Call): Boolean =
+        when (call.state.connection.value) {
+            RealtimeConnection.Disconnected -> false
+            RealtimeConnection.PreJoin -> false
+            is RealtimeConnection.Failed -> false
+            else -> true
+        }
 
     private suspend fun <A : Any> Result<A>.onOutcome(
         call: Call,

@@ -48,7 +48,7 @@ public class CallHealthMonitor(
 ) {
     private val logger by taggedLogger("Call:HealthMonitor")
 
-    private val network by lazy { call.clientImpl.connectionModule.networkStateProvider }
+    private val network by lazy { call.clientImpl.coordinatorConnectionModule.networkStateProvider }
 
     private val supervisorJob = SupervisorJob()
     private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
@@ -156,8 +156,6 @@ public class CallHealthMonitor(
                     return@launch
                 }
             }
-
-            scope.launch { reconnect(false) }
         }
     }
 
@@ -197,7 +195,7 @@ public class CallHealthMonitor(
             logger.d { "[reconnect] skipping reconnect - too often" }
         } else {
             lastReconnectAt = now
-            call.reconnect(forceRestart = forceRestart)
+            call.rejoin()
         }
 
         reconnectInProgress = false
@@ -205,14 +203,14 @@ public class CallHealthMonitor(
 
     // monitor the network state since it's faster to detect recovered network sometimes
     internal val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
-        override fun onConnected() {
+        override suspend fun onConnected() {
             logger.i { "network connected, running check to see if we should reconnect" }
             scope.launch {
                 check()
             }
         }
 
-        override fun onDisconnected() {
+        override suspend fun onDisconnected() {
             val connectionState = call.state._connection.value
             logger.i {
                 "network disconnected. connection is $connectionState marking the connection as reconnecting"

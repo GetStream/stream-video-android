@@ -69,6 +69,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onResume (Lio/getstream/video/android/core/Call;)V
 	public final fun onStop ()V
 	public fun onStop (Lio/getstream/video/android/core/Call;)V
+	public final fun onUserLeaveHint ()V
+	public fun onUserLeaveHint (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
@@ -80,15 +82,17 @@ public final class io/getstream/video/android/ui/common/StreamCallActivity$Compa
 
 public final class io/getstream/video/android/ui/common/StreamCallActivityConfiguration {
 	public fun <init> ()V
-	public fun <init> (ZZZLandroid/os/Bundle;)V
-	public synthetic fun <init> (ZZZLandroid/os/Bundle;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZZZLandroid/os/Bundle;)V
+	public synthetic fun <init> (ZZZZLandroid/os/Bundle;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Z
 	public final fun component3 ()Z
-	public final fun component4 ()Landroid/os/Bundle;
-	public final fun copy (ZZZLandroid/os/Bundle;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
-	public static synthetic fun copy$default (Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ZZZLandroid/os/Bundle;ILjava/lang/Object;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public final fun component4 ()Z
+	public final fun component5 ()Landroid/os/Bundle;
+	public final fun copy (ZZZZLandroid/os/Bundle;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public static synthetic fun copy$default (Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ZZZZLandroid/os/Bundle;ILjava/lang/Object;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCanKeepScreenOn ()Z
 	public final fun getCanSkiPermissionRationale ()Z
 	public final fun getCloseScreenOnCallEnded ()Z
 	public final fun getCloseScreenOnError ()Z
@@ -141,7 +145,9 @@ public abstract interface class io/getstream/video/android/ui/common/permission/
 
 public final class io/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
 	public fun <init> (Landroid/content/Context;)V
+	public fun onSurfaceTextureAvailable (Landroid/graphics/SurfaceTexture;II)V
 	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
+	public fun onSurfaceTextureSizeChanged (Landroid/graphics/SurfaceTexture;II)V
 }
 
 public final class io/getstream/video/android/ui/common/util/ColorUtilsKt {
@@ -159,6 +165,13 @@ public final class io/getstream/video/android/ui/common/util/ResourcesKt {
 }
 
 public abstract interface annotation class io/getstream/video/android/ui/common/util/StreamCallActivityDelicateApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class io/getstream/video/android/ui/common/util/StreamVideoExperimentalApi : java/lang/annotation/Annotation {
+	public abstract fun message ()Ljava/lang/String;
+}
+
+public abstract interface annotation class io/getstream/video/android/ui/common/util/StreamVideoUiDelicateApi : java/lang/annotation/Annotation {
 }
 
 public final class io/getstream/video/android/ui/common/view/ParticipantContentView : android/widget/LinearLayout {

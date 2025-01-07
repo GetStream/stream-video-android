@@ -71,16 +71,13 @@ public class StreamPeerConnection(
     private val maxBitRate: Int,
 ) : PeerConnection.Observer {
 
-    private val setDescriptionMutex = Mutex()
-
-    private val goodStates = listOf(
-        PeerConnection.PeerConnectionState.NEW, // New is good, means we're not using it yet
-        PeerConnection.PeerConnectionState.CONNECTED,
-        PeerConnection.PeerConnectionState.CONNECTING,
-    )
+    private val localDescriptionMutex = Mutex()
+    private val remoteDescriptionMutex = Mutex()
+    private val iceCandidatesMutex = Mutex() // Not needed in current logic flow, but kept it for safety.
 
     internal var localSdp: SessionDescription? = null
     internal var remoteSdp: SessionDescription? = null
+    private val iceCandidates = mutableListOf<IceCandidate>()
     private val typeTag = type.stringify()
 
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
@@ -108,7 +105,22 @@ public class StreamPeerConnection(
         private set
 
     fun isHealthy(): Boolean {
-        return state.value in goodStates
+        return when (state.value) {
+            PeerConnection.PeerConnectionState.NEW,
+            PeerConnection.PeerConnectionState.CONNECTED,
+            PeerConnection.PeerConnectionState.CONNECTING,
+            -> true
+            else -> false
+        }
+    }
+
+    fun isFailedOrClosed(): Boolean {
+        return when (state.value) {
+            PeerConnection.PeerConnectionState.CLOSED,
+            PeerConnection.PeerConnectionState.FAILED,
+            -> true
+            else -> false
+        }
     }
 
     init {
@@ -162,18 +174,34 @@ public class StreamPeerConnection(
      * @return An empty [Result], if the operation has been successful or not.
      */
     public suspend fun setRemoteDescription(sessionDescription: SessionDescription): Result<Unit> {
-        logger.d { "[setRemoteDescription] #sfu; #$typeTag; answerSdp: ${sessionDescription.stringify()}" }
-
         remoteSdp = sessionDescription
+        val result: Result<Unit>
 
-        return setValue {
-            connection.setRemoteDescription(
-                it,
-                SessionDescription(
-                    sessionDescription.type,
-                    sessionDescription.description.mungeCodecs(),
-                ),
-            )
+        remoteDescriptionMutex.withLock {
+            result = setValue {
+                connection.setRemoteDescription(
+                    it,
+                    SessionDescription(
+                        sessionDescription.type,
+                        sessionDescription.description.mungeCodecs(),
+                    ),
+                )
+            }
+
+            logger.d { "[setRemoteDescription] #ice; #sfu; #$typeTag; result: $result" }
+
+            if (result.isSuccess) processIceCandidates()
+        }
+
+        return result
+    }
+
+    private suspend fun processIceCandidates() {
+        logger.d { "[processIceCandidates] #ice; #sfu; #$typeTag; count: ${iceCandidates.count()}" }
+
+        iceCandidatesMutex.withLock {
+            iceCandidates.forEach { addIceCandidate(it) }
+            iceCandidates.clear()
         }
     }
 
@@ -195,10 +223,26 @@ public class StreamPeerConnection(
         logger.d { "[setLocalDescription] #sfu; #$typeTag; offerSdp: ${sessionDescription.stringify()}" }
         // This needs a mutex because parallel calls will result in:
         // SfuSocketError: subscriber PC: negotiation failed
-        return setDescriptionMutex.withLock {
+        return localDescriptionMutex.withLock {
             setValue {
                 // Never call this in parallel
                 connection.setLocalDescription(it, sdp)
+            }
+        }
+    }
+
+    public suspend fun handleNewIceCandidate(iceCandidate: IceCandidate) {
+        remoteDescriptionMutex.withLock {
+            if (connection.remoteDescription == null) {
+                logger.d {
+                    "[handleNewIceCandidate] #ice; #sfu; #$typeTag; Remote desc is null, storing candidate: $iceCandidate"
+                }
+                iceCandidatesMutex.withLock { iceCandidates.add(iceCandidate) }
+            } else {
+                logger.d {
+                    "[handleNewIceCandidate] #ice; #sfu; #$typeTag; Remote desc is set, adding candidate: $iceCandidate"
+                }
+                addIceCandidate(iceCandidate)
             }
         }
     }
@@ -369,7 +413,7 @@ public class StreamPeerConnection(
      * @param stream The stream that contains audio or video.
      */
     override fun onAddStream(stream: MediaStream?) {
-        logger.i { "[onAddStream] #sfu; #$typeTag; stream: $stream" }
+        logger.w { "[onAddStream] #sfu; #track; #$typeTag; stream: $stream" }
         if (stream != null) {
             onStreamAdded?.invoke(stream)
         }
@@ -383,15 +427,21 @@ public class StreamPeerConnection(
      * @param mediaStreams The streams that were added containing their appropriate tracks.
      */
     override fun onAddTrack(receiver: RtpReceiver?, mediaStreams: Array<out MediaStream>?) {
-        logger.i { "[onAddTrack] #sfu; #$typeTag; receiver: $receiver, mediaStreams: $mediaStreams" }
+        logger.i {
+            "[onAddTrack] #sfu; #track; #$typeTag; receiver: $receiver, mediaStreams: $mediaStreams"
+        }
         mediaStreams?.forEach { mediaStream ->
-            logger.v { "[onAddTrack] #sfu; #$typeTag; mediaStream: $mediaStream" }
+            logger.v { "[onAddTrack] #sfu; #track; #$typeTag; mediaStream: $mediaStream" }
             mediaStream.audioTracks?.forEach { remoteAudioTrack ->
-                logger.v { "[onAddTrack] #sfu; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}" }
+                logger.v {
+                    "[onAddTrack] #sfu; #track; #$typeTag; remoteAudioTrack: ${remoteAudioTrack.stringify()}"
+                }
                 remoteAudioTrack.setEnabled(true)
             }
             mediaStream.videoTracks?.forEach { remoteVideoTrack ->
-                logger.v { "[onAddTrack] #sfu; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}" }
+                logger.v {
+                    "[onAddTrack] #sfu; #track; #$typeTag; remoteVideoTrack: ${remoteVideoTrack.stringify()}"
+                }
                 remoteVideoTrack.setEnabled(true)
             }
             onStreamAdded?.invoke(mediaStream)
@@ -411,7 +461,9 @@ public class StreamPeerConnection(
      *
      * @param stream The stream that was removed from the connection.
      */
-    override fun onRemoveStream(stream: MediaStream?) {}
+    override fun onRemoveStream(stream: MediaStream?) {
+        logger.v { "[onRemoveStream] #sfu; #track; #$typeTag; stream: $stream" }
+    }
 
     /**
      * Triggered when the connection state changes.  Used to start and stop the stats observing.
@@ -426,7 +478,7 @@ public class StreamPeerConnection(
 
     // better to monitor onConnectionChange for the state
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
-        logger.i { "[onIceConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        logger.i { "[onIceConnectionChange] #ice; #sfu; #$typeTag; newState: $newState" }
         iceState.value = newState
         when (newState) {
             PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
@@ -474,7 +526,7 @@ public class StreamPeerConnection(
      */
 
     override fun onRemoveTrack(receiver: RtpReceiver?) {
-        logger.i { "[onRemoveTrack] #sfu; #$typeTag; receiver: $receiver" }
+        logger.i { "[onRemoveTrack] #sfu; #track; #$typeTag; receiver: $receiver" }
     }
 
     override fun onSignalingChange(newState: PeerConnection.SignalingState?) {

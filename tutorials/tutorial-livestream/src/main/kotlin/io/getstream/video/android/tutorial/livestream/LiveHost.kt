@@ -19,9 +19,12 @@ package io.getstream.video.android.tutorial.livestream
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -37,45 +40,33 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import io.getstream.log.Priority
+import androidx.navigation.NavController
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.model.User
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import kotlinx.coroutines.launch
 
 @Composable
-fun LiveHost() {
+fun LiveHost(
+    navController: NavController,
+    callId: String,
+    client: StreamVideo,
+) {
     val context = LocalContext.current
-    val userId = "Darth_Krayt"
-    val userToken = StreamVideo.devToken(userId)
-    val callId = "dE8AsD5Qxqrt"
 
-    // step1 - create a user.
-    val user = User(
-        id = userId, // any string
-        name = "Tutorial", // name and image are used in the UI
-        role = "admin",
+    // Step 1 - Update call settings via callConfigRegistry
+    client.state.callConfigRegistry.register(
+        DefaultCallConfigurations.getLivestreamCallServiceConfig(),
     )
 
-    // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
-    val client = StreamVideoBuilder(
-        context = context,
-        apiKey = "k436tyde94hj", // demo API key
-        geo = GEO.GlobalEdgeNetwork,
-        user = user,
-        token = userToken,
-        ensureSingleInstance = false,
-        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-    ).build()
-
-    // step3 - join a call, which type is `default` and id is `123`.
+    // Step 2 - join a call, which type is `default` and id is `123`.
     val call = client.call("livestream", callId)
 
     LaunchCallPermissions(call = call) {
@@ -84,11 +75,14 @@ fun LiveHost() {
             Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
         }
     }
-    LiveHostContent(call)
+    LiveHostContent(navController, call)
 }
 
 @Composable
-private fun LiveHostContent(call: Call) {
+private fun LiveHostContent(
+    navController: NavController,
+    call: Call,
+) {
     LaunchCallPermissions(call = call)
 
     val connection by call.state.connection.collectAsState()
@@ -146,21 +140,38 @@ private fun LiveHostContent(call: Call) {
             }
         },
         bottomBar = {
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = VideoTheme.colors.brandPrimary,
-                    backgroundColor = VideoTheme.colors.brandPrimary,
-                ),
-                onClick = {
-                    scope.launch {
-                        if (backstage) call.goLive() else call.stopLive()
-                    }
-                },
-            ) {
-                Text(
-                    text = if (backstage) "Start Broadcast" else "Stop Broadcast",
-                    color = Color.White,
-                )
+            val isCameraEnabled by call.camera.isEnabled.collectAsState()
+
+            Row {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = VideoTheme.colors.brandPrimary,
+                        backgroundColor = VideoTheme.colors.brandPrimary,
+                    ),
+                    onClick = {
+                        scope.launch {
+                            if (backstage) call.goLive() else call.stopLive()
+                        }
+                    },
+                ) {
+                    Text(
+                        text = if (backstage) "Start Broadcast" else "Stop Broadcast",
+                        color = Color.White,
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                ToggleCameraAction(isCameraEnabled = isCameraEnabled) {
+                    call.camera.setEnabled(it.isEnabled)
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                FlipCameraAction {
+                    call.camera.flip()
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                LeaveCallAction {
+                    call.leave()
+                    navController.popBackStack()
+                }
             }
         },
     ) {

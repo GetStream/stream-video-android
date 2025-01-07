@@ -42,17 +42,15 @@ public interface AudioHandler {
     public fun selectDevice(audioDevice: StreamAudioDevice?)
 }
 
-public class AudioSwitchHandler constructor(
+public class AudioSwitchHandler(
     private val context: Context,
-    val preferSpeakerphone: Boolean,
-    var deviceListener: DeviceListener,
+    private var deviceListener: DeviceListener,
 ) : AudioHandler {
 
     private val logger by taggedLogger(TAG)
 
     private var audioSwitch: AudioSwitch? = null
 
-    // AudioSwitch is not threadsafe, so all calls should be done on the main thread.
     private val handler = Handler(Looper.getMainLooper())
 
     override fun start() {
@@ -63,15 +61,9 @@ public class AudioSwitchHandler constructor(
             val devices = mutableListOf(
                 AudioDevice.WiredHeadset::class.java,
                 AudioDevice.BluetoothHeadset::class.java,
+                AudioDevice.Earpiece::class.java,
+                AudioDevice.Speakerphone::class.java,
             )
-
-            if (preferSpeakerphone) {
-                devices.add(AudioDevice.Speakerphone::class.java)
-                devices.add(AudioDevice.Earpiece::class.java)
-            } else {
-                devices.add(AudioDevice.Earpiece::class.java)
-                devices.add(AudioDevice.Speakerphone::class.java)
-            }
 
             handler.post {
                 val switch = AudioSwitch(

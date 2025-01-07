@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.openapitools.client.models.VideoEvent
 
 /**
- * The main interface to control the Video calls. [StreamVideoImpl] implements this interface.
+ * The main interface to control the Video calls. [StreamVideoClient] implements this interface.
  */
 @Stable
 public interface StreamVideo : NotificationHandler {
@@ -198,35 +198,37 @@ public interface StreamVideo : NotificationHandler {
                             "install a new exception handler: $streamVideo"
                     }
                 }
+                isInstalled = true
                 internalStreamVideo = streamVideo
             }
         }
 
         /**
-         * Builds a detailed header of information we track around the SDK, Android OS, API Level, device name and
-         * vendor and more.
+         * Builds the client information header (X-Stream-Client) that will be added to requests.
          *
-         * @return String formatted header that contains all the information.
+         * @return Header value as a string.
          */
         internal fun buildSdkTrackingHeaders(): String {
-            val clientInformation = "stream-video-android-${BuildConfig.STREAM_VIDEO_VERSION}"
+            val streamVideoVersion = "stream-video-android-${BuildConfig.STREAM_VIDEO_VERSION}"
+            val os = "|os=Android ${Build.VERSION.RELEASE}"
+            val apiVersion = "|api_version=${Build.VERSION.SDK_INT}"
+            val deviceVendor = "|device_vendor=${Build.MANUFACTURER}"
+            val deviceModel = "|device_model=${Build.MODEL}"
+            val appName = buildAppName()
 
-            val buildModel = Build.MODEL
-            val deviceManufacturer = Build.MANUFACTURER
-            val apiLevel = Build.VERSION.SDK_INT
-            val osName = "Android ${Build.VERSION.RELEASE}"
-
-            return clientInformation +
-                "|os=$osName" +
-                "|api_version=$apiLevel" +
-                "|device_vendor=$deviceManufacturer" +
-                "|device_model=$buildModel"
+            return streamVideoVersion + os + apiVersion + deviceVendor + deviceModel + appName
         }
+
+        private fun buildAppName(): String =
+            (internalStreamVideo as? StreamVideoClient)?.let { streamVideoImpl ->
+                "|app_name=" + (streamVideoImpl.appName ?: streamVideoImpl.context.packageName)
+            } ?: ""
 
         /**
          * Uninstall a previous [StreamVideo] instance.
          */
         public fun removeClient() {
+            isInstalled = false
             internalStreamVideo?.cleanup()
             internalStreamVideo = null
         }

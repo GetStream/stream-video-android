@@ -18,6 +18,7 @@ package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.media.AudioAttributes
 import android.util.Log
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
@@ -29,13 +30,18 @@ import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
+import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -186,6 +192,21 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
+        val callServiceConfigRegistry = CallServiceConfigRegistry()
+
+        callServiceConfigRegistry.createConfigRegistry {
+            register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
+
+            update(CallType.Default.name) {
+                setAudioUsage(AudioAttributes.USAGE_MEDIA)
+                setRunCallServiceInForeground(true)
+            }
+
+            update(CallType.Livestream.name) {
+                setRunCallServiceInForeground(true)
+            }
+        }
+
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -198,14 +219,19 @@ object StreamVideoInitHelper {
                     FirebasePushDeviceGenerator(providerName = "firebase"),
                 ),
             ),
-            tokenProvider = {
-                val email = user.custom?.get("email")
-                val authData = StreamService.instance.getAuthData(
-                    environment = AppConfig.currentEnvironment.value!!.env,
-                    userId = email,
-                )
-                authData.token
+            tokenProvider = object : TokenProvider {
+                override suspend fun loadToken(): String {
+                    val email = user.custom?.get("email")
+                    val authData = StreamService.instance.getAuthData(
+                        environment = AppConfig.currentEnvironment.value!!.env,
+                        userId = email,
+                    )
+                    return authData.token
+                }
             },
+            appName = "Stream Video Demo App",
+            audioProcessing = NoiseCancellation(context),
+            callServiceConfigRegistry = callServiceConfigRegistry,
         ).build()
     }
 }

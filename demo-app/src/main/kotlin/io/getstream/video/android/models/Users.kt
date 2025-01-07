@@ -18,6 +18,11 @@ package io.getstream.video.android.models
 
 import io.getstream.video.android.model.User
 
+data class UserCredentials(val userId: String, val apiKey: String, val token: String)
+
+public val User.Companion.builtInCredentials: Map<String, UserCredentials>
+    get() = mapOf()
+
 public fun User.Companion.builtInUsers(): List<User> {
     return listOf(
         User(
