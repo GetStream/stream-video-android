@@ -42,8 +42,6 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
-import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.notifications.internal.DefaultStreamIntentResolver
 import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -342,6 +340,7 @@ public open class DefaultNotificationHandler(
                 // If the intent is configured, clicking the notification will return to the call
                 if (onClickIntent != null) {
                     it.setContentIntent(onClickIntent)
+                    it.setFullScreenIntent(onClickIntent, false)
                 } else {
                     logger.w { "Ongoing intent is null. Clicking on the ongoing call notification will not work." }
                 }
