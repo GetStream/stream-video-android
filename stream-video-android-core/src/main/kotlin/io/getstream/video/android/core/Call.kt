@@ -28,6 +28,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuUrlOverride
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
@@ -472,9 +473,14 @@ public class Call(
             return result as Failure
         }
         val sfuToken = result.value.credentials.token
-        val sfuUrl = result.value.credentials.server.url
-        val sfuWsUrl = result.value.credentials.server.wsEndpoint
-        val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
+        val sfuUrl = SfuUrlOverride.url?.takeIf { it.isNotEmpty() }?.let {
+            "http://$it/twirp"
+        } ?: result.value.credentials.server.url
+
+        val sfuWsUrl = SfuUrlOverride.url?.takeIf { it.isNotEmpty() }?.let {
+            "ws://$it/ws"
+        } ?: result.value.credentials.server.wsEndpoint
+        val iceServers = result.value.credentials.iceServers.map { it.toIceServer(result.value.credentials.server.edgeName, SfuUrlOverride.url) }
 
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
@@ -680,7 +686,10 @@ public class Call(
                     cred.server.wsEndpoint,
                     cred.token,
                     cred.iceServers.map { ice ->
-                        ice.toIceServer()
+                        ice.toIceServer(
+                            cred.server.edgeName,
+                            SfuUrlOverride.url
+                        )
                     },
                 )
                 this.session?.connect(reconnectDetails, currentOptions)
@@ -734,7 +743,10 @@ public class Call(
                     cred.server.wsEndpoint,
                     cred.token,
                     cred.iceServers.map { ice ->
-                        ice.toIceServer()
+                        ice.toIceServer(
+                            cred.server.edgeName,
+                            SfuUrlOverride.url
+                        )
                     },
                 )
                 val oldSession = this.session

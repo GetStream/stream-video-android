@@ -98,6 +98,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.core.call.SfuUrlOverride
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -468,11 +469,33 @@ private fun JoinCallForm(
             ),
         )
     }
+    var sfuUrl by remember {
+        mutableStateOf(
+            TextFieldValue(
+                SfuUrlOverride.url ?: "",
+            ),
+        )
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
     ) {
+        StreamTextField(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            onValueChange = {
+                sfuUrl = it
+                SfuUrlOverride.url = it.text
+            },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Email,
+            ),
+            style = VideoTheme.styles.textFieldStyles.defaultTextField(),
+            value = sfuUrl,
+            placeholder = stringResource(id = R.string.join_call_call_id_hint),
+        )
         StreamTextField(
             modifier = Modifier
                 .weight(1f)

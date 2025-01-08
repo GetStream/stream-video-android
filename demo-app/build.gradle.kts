@@ -280,7 +280,7 @@ dependencies {
     implementation(libs.okhttp)
 
     // Memory detection
-    debugImplementation(libs.leakCanary)
+    //debugImplementation(libs.leakCanary)
 
     baselineProfile(project(":benchmark"))
 }

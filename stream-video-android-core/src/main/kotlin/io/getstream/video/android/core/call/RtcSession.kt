@@ -1624,3 +1624,7 @@ public class RtcSession internal constructor(
         }
     }
 }
+
+public object SfuUrlOverride {
+    var url: String? = "172.20.10.7:3031"
+}

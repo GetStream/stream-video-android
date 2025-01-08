@@ -27,9 +27,15 @@ public data class IceServer(
     val password: String,
 ) : Serializable
 
-internal fun ICEServer.toIceServer(): IceServer {
+internal fun ICEServer.toIceServer(edgeName: String, overrideIp: String?): IceServer {
     return IceServer(
-        urls = urls,
+        urls = if (!overrideIp.isNullOrEmpty()) {
+            urls.map {
+                it.replace(edgeName, overrideIp.split(":").first())
+            }
+        } else {
+            urls
+        },
         username = username,
         password = password,
     )

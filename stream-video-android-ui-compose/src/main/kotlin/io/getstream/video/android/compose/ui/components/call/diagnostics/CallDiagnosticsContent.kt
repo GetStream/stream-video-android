@@ -215,8 +215,12 @@ private fun LazyListScope.SubscriberDiagnosticsContent(
         Text("SUBSCRIBER", color = Color.Orange, fontWeight = FontWeight.Bold)
     }
     if (stats.isEmpty()) return
-    val videoToParticipant = call.state.remoteParticipants.value.associate {
-        it.videoTrack.value?.video?.id() to it.userNameOrId.value
+    val videoToParticipant = try {
+        call.state.remoteParticipants.value.associate {
+            it.videoTrack.value?.video?.id() to it.userNameOrId.value
+        }
+    } catch (e: Exception) {
+        emptyMap()
     }
     val audioToParticipant = call.state.remoteParticipants.value.associate {
         it.audioTrack.value?.audio?.id() to it.userNameOrId.value
