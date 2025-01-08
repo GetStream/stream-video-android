@@ -20,6 +20,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -70,6 +73,9 @@ class MainActivity : ComponentActivity() {
             setContent {
                 VideoTheme {
                     AppNavHost(
+                        modifier = Modifier
+                            .background(VideoTheme.colors.baseSheetPrimary)
+                            .systemBarsPadding(),
                         startDestination = if (!isLoggedIn) {
                             AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn
                         } else {
