@@ -480,7 +480,9 @@ public class Call(
         val sfuWsUrl = SfuUrlOverride.url?.takeIf { it.isNotEmpty() }?.let {
             "ws://$it/ws"
         } ?: result.value.credentials.server.wsEndpoint
-        val iceServers = result.value.credentials.iceServers.map { it.toIceServer(result.value.credentials.server.edgeName, SfuUrlOverride.url) }
+        val iceServers = result.value.credentials.iceServers.map {
+            it.toIceServer(result.value.credentials.server.edgeName, SfuUrlOverride.url)
+        }
 
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
@@ -688,7 +690,7 @@ public class Call(
                     cred.iceServers.map { ice ->
                         ice.toIceServer(
                             cred.server.edgeName,
-                            SfuUrlOverride.url
+                            SfuUrlOverride.url,
                         )
                     },
                 )
@@ -745,7 +747,7 @@ public class Call(
                     cred.iceServers.map { ice ->
                         ice.toIceServer(
                             cred.server.edgeName,
-                            SfuUrlOverride.url
+                            SfuUrlOverride.url,
                         )
                     },
                 )

@@ -1031,6 +1031,12 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public static synthetic fun updateTrackDimensions$default (Lio/getstream/video/android/core/call/RtcSession;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;ILjava/lang/Object;)V
 }
 
+public final class io/getstream/video/android/core/call/SfuUrlOverride {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/SfuUrlOverride;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun setUrl (Ljava/lang/String;)V
+}
+
 public final class io/getstream/video/android/core/call/TrackDimensions {
 	public fun <init> (Lstream/video/sfu/models/VideoDimension;Z)V
 	public synthetic fun <init> (Lstream/video/sfu/models/VideoDimension;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
