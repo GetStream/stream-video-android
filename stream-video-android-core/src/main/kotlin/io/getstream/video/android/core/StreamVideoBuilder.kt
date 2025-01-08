@@ -86,7 +86,7 @@ import java.net.ConnectException
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
  * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
- * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
+ * @property callServiceConfigRegistry A registry for managing call configurations related to the call type like default, livestream or audio_call mapped with call services configuration like whether to run foreground service or not. See [CallServiceConfigRegistry].
  *
  * @see build
  * @see ClientState.connection
