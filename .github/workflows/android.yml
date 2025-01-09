@@ -3,15 +3,24 @@ name: Android CI
 on:
   push:
     branches: [ main ]
+
   pull_request:
     branches:
       - '**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
   BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
   BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
   BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
   lint:
@@ -20,11 +29,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3.1.0
-      - name: Set up JDK
-        uses: actions/setup-java@v3.6.0
-        with:
-          distribution: adopt
-          java-version: 17
+      - uses: ./.github/actions/setup-java
       - name: spotless
         run: ./gradlew spotlessCheck --scan
 
@@ -34,11 +39,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3.1.0
-      - name: Set up JDK
-        uses: actions/setup-java@v3.6.0
-        with:
-          distribution: adopt
-          java-version: 17
+      - uses: ./.github/actions/setup-java
       - name: API check
         run: ./gradlew apiCheck --scan
 
@@ -47,21 +48,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: set up JDK
-        uses: actions/setup-java@v3.6.0
-        with:
-          distribution: adopt
-          java-version: 17
+      - uses: ./.github/actions/setup-java
 
-      - name: Cache Gradle and wrapper
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - uses: ./.github/actions/gradle-cache
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
@@ -79,21 +68,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: set up JDK
-        uses: actions/setup-java@v3.6.0
-        with:
-          distribution: adopt
-          java-version: 17
+      - uses: ./.github/actions/setup-java
 
-      - name: Cache Gradle and wrapper
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - uses: ./.github/actions/gradle-cache
 
       - name: Run unit tests
         run: |
@@ -112,21 +89,26 @@ jobs:
           name: unit-tests-compose-results
           path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html
 
+      - uses: ./.github/actions/setup-ruby
+
+      - name: Sonar
+        run: bundle exec fastlane run_sonar_analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   androidTest-GMD:
     name: Android Test with GMD
     if: ${{ false }}  # disable for now
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 55
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3.6.0
-        with:
-          distribution: 'zulu'
-          java-version: 17
+      - uses: ./.github/actions/setup-java
+
+      - uses: ./.github/actions/enable-kvm
 
       # Sets gradle up
       - name: Setup Gradle
