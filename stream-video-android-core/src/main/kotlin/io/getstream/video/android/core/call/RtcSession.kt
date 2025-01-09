@@ -97,11 +97,12 @@ import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
-import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
@@ -147,6 +148,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import java.util.Collections
 import java.util.UUID
 
 /**
@@ -506,7 +508,10 @@ public class RtcSession internal constructor(
         awaitAll(subscriberAsync, publisherAsync)
     }
 
-    suspend fun connect(reconnectDetails: ReconnectDetails? = null, options: List<PublishOption>? = null) {
+    suspend fun connect(
+        reconnectDetails: ReconnectDetails? = null,
+        options: List<PublishOption>? = null,
+    ) {
         logger.i { "[connect] #sfu; #track; no args" }
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
@@ -594,11 +599,10 @@ public class RtcSession internal constructor(
                     TrackType.TRACK_TYPE_SCREEN_SHARE,
                 )
                 if (it == DeviceStatus.Enabled) {
-                    val newTrack =
-                        call.peerConnectionFactory.makeVideoTrack(
-                            call.mediaManager.screenShareVideoSource,
-                            UUID.randomUUID().toString(),
-                        )
+                    val newTrack = call.peerConnectionFactory.makeVideoTrack(
+                        call.mediaManager.screenShareVideoSource,
+                        UUID.randomUUID().toString(),
+                    )
                     publisher?.publishStream(
                         newTrack,
                         TrackType.TRACK_TYPE_SCREEN_SHARE,
@@ -686,11 +690,6 @@ public class RtcSession internal constructor(
         // turn of the speaker if needed
         if (settings?.audio?.speakerDefaultOn == false) {
             call.speaker.setVolume(0)
-        }
-
-        // if we are allowed to publish, create a peer connection for it
-        val canPublish = call.state.ownCapabilities.value.any {
-            it == OwnCapability.SendAudio || it == OwnCapability.SendVideo
         }
         // update the peer state
         coroutineScope.launch {
@@ -1081,6 +1080,7 @@ public class RtcSession internal constructor(
                         call.state.replaceParticipants(participantStates)
                         sfuConnectionModule.socketConnection.whenConnected {
                             publisher = createPublisher(event.publishOptions)
+                            processPendingPublisherEvents()
                             connectRtc()
                         }
                     }
@@ -1090,7 +1090,9 @@ public class RtcSession internal constructor(
                         publisher?.syncPublishOptions(
                             call.mediaManager.camera.resolution.value,
                             event.change.publish_options,
-                        )
+                        ) ?: let {
+                            publisherPendingEvents.add(event)
+                        }
                     }
 
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
@@ -1138,7 +1140,9 @@ public class RtcSession internal constructor(
                         val peerType = event.peerType
                         when (peerType) {
                             PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
-                                publisher?.restartIce()
+                                publisher?.restartIce() ?: let {
+                                    publisherPendingEvents.add(event)
+                                }
                             }
 
                             PeerType.PEER_TYPE_SUBSCRIBER -> {
@@ -1154,6 +1158,39 @@ public class RtcSession internal constructor(
             }
         }
     }
+
+    private val publisherPendingEventsMutex = Mutex(false)
+    private suspend fun RtcSession.processPendingPublisherEvents() =
+        publisherPendingEventsMutex.withLock {
+            logger.v {
+                "[processPendingPublisherEvents] #sfu; #track; publisherPendingEvents: $publisherPendingEvents"
+            }
+            for (pendingEvent in publisherPendingEvents) {
+                when (pendingEvent) {
+                    is ICETrickleEvent -> {
+                        handleIceTrickle(pendingEvent)
+                    }
+
+                    is ICERestartEvent -> {
+                        publisher?.restartIce()
+                    }
+
+                    is ChangePublishOptionsEvent -> {
+                        publisher?.syncPublishOptions(
+                            call.mediaManager.camera.resolution.value,
+                            pendingEvent.change.publish_options,
+                        )
+                    }
+
+                    else -> {
+                        logger.w { "Unknown event type: $pendingEvent" }
+                    }
+                }
+            }
+            publisherPendingEvents.clear()
+        }
+
+    private val publisherPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
 
     private fun removeParticipantTracks(participant: Participant) {
         tracks.remove(participant.session_id).also {
@@ -1207,6 +1244,13 @@ public class RtcSession internal constructor(
      * Triggered whenever we receive new ice candidate from the SFU
      */
     suspend fun handleIceTrickle(event: ICETrickleEvent) {
+        if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED && publisher == null) {
+            logger.v {
+                "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; publisher is null, adding to pending"
+            }
+            publisherPendingEvents.add(event)
+            return
+        }
         logger.d {
             "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}"
         }
