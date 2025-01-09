@@ -1,9 +1,6 @@
 if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
-    apply plugin: 'jacoco'
+    apply plugin: "org.jetbrains.kotlinx.kover"
     apply plugin: "org.sonarqube"
-
-    def testTask = "testDebugUnitTest"
-    def jacocoResults = "${buildDir}/reports/jacoco/report.xml"
 
     if (hasProperty('android')) {
         android {
@@ -17,46 +14,18 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
         }
     }
 
-    afterEvaluate {
-        tasks.withType(Test).configureEach {
-            jacoco.includeNoLocationClasses = true
-            jacoco.excludes = [
-                'jdk.internal.*',
-                'androidx.core.*',
-                'com.android.*',
-                'android.*'
-            ]
-        }
-
-        tasks.register("testCoverage", JacocoReport) {
-            dependsOn testTask
-
-            reports {
-                xml.required.set(true)
-                xml.outputLocation.set(file(jacocoResults))
+    kover {
+        reports {
+            verify {
+                warningInsteadOfFailure = true
             }
-
-            executionData.setFrom(fileTree(dir: buildDir, includes: [
-                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
-            ]))
-
-            sourceDirectories.setFrom(files([
-                "src/main/kotlin"
-            ]))
-
-            classDirectories.setFrom(files([
-                fileTree(
-                    dir: "${buildDir}/tmp/kotlin-classes/debug",
-                    excludes: rootProject.ext.sonar.excludeFilter
-                )
-            ]))
         }
     }
 
     sonarqube {
         properties {
-            property "sonar.junit.reportPaths", "${buildDir}/test-results/${testTask}"
-            property "sonar.coverage.jacoco.xmlReportPaths", jacocoResults
+            property "sonar.junit.reportPaths", "${buildDir}/test-results/testDebugUnitTest"
+            property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/kover/report.xml"
             property "sonar.sources", "src/main/kotlin"
         }
     }

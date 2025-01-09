@@ -37,6 +37,7 @@ plugins {
   alias(libs.plugins.play.publisher) apply false
   alias(libs.plugins.baseline.profile) apply false
   alias(libs.plugins.sonarqube) apply false
+  alias(libs.plugins.kover) apply false
 }
 
 subprojects {

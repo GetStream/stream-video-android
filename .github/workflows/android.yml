@@ -74,8 +74,8 @@ jobs:
 
       - name: Run unit tests
         run: |
-          ./gradlew :stream-video-android-ui-compose:testDebugUnitTest :stream-video-android-ui-compose:testCoverage --scan --stacktrace
-          ./gradlew :stream-video-android-core:testDebugUnitTest :stream-video-android-core:testCoverage --scan --stacktrace
+          ./gradlew :stream-video-android-ui-compose:koverXmlReport --scan --stacktrace
+          ./gradlew :stream-video-android-core:koverXmlReport --scan --stacktrace
 
       - name: Unit tests core results
         uses: actions/upload-artifact@v4
