@@ -411,7 +411,9 @@ internal open class CallService : Service() {
 
     @SuppressLint("MissingPermission")
     private fun showIncomingCall(notificationId: Int, notification: Notification) {
-        if (callId == null) { // If there isn't another call in progress (callId is set in onStartCommand())
+        val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
+
+        if (!hasActiveCall) { // If there isn't another call in progress
             // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
             startForegroundWithServiceType(
                 notificationId,
