@@ -179,10 +179,17 @@ internal class Publisher(
             val trackToPublish = newTrackFromSource(publishOption.track_type)
             val transceiver = transceiverCache.get(publishOption)
             if (transceiver != null) {
-                safeCall { transceiver.dispose() }
-                transceiverCache.remove(publishOption)
+                try {
+                    transceiver.sender?.setTrack(trackToPublish, true)
+                } catch (e: Exception) {
+                    // Fallback if anything happens with the sender
+                    logger.w { "Failed to set track for ${publishOption.track_type}, creating new transceiver" }
+                    transceiverCache.remove(publishOption)
+                    addTransceiver(captureFormat, trackToPublish, publishOption)
+                }
+            } else {
+                addTransceiver(captureFormat, trackToPublish, publishOption)
             }
-            addTransceiver(captureFormat, trackToPublish, publishOption)
         }
     }
 
