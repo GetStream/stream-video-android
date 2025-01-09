@@ -212,8 +212,8 @@ public class Call(
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
 
-    internal var connectedAt: Long? = null
-    internal var reconnectAt: Pair<WebsocketReconnectStrategy, Long>? = null
+    internal var connectStartTime = 0L
+    internal var reconnectStartTime = 0L
 
     internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
         context = clientImpl.context,
@@ -452,8 +452,9 @@ public class Call(
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
-        // step 1. call the join endpoint to get a list of SFUs
+        connectStartTime = System.currentTimeMillis()
 
+        // step 1. call the join endpoint to get a list of SFUs
         val locationResult = clientImpl.getCachedLocation()
         if (locationResult !is Success) {
             return locationResult as Failure
@@ -479,7 +480,6 @@ public class Call(
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
-            connectedAt = System.currentTimeMillis()
             RtcSession(
                 sessionId = this.sessionId,
                 apiKey = clientImpl.apiKey,
@@ -503,11 +503,12 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
+
         monitorSession(result.value)
         return Success(value = session!!)
     }
 
-    private suspend fun Call.monitorSession(result: JoinCallResponse) {
+    private fun Call.monitorSession(result: JoinCallResponse) {
         sfuEvents?.cancel()
         sfuListener?.cancel()
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
@@ -583,7 +584,7 @@ public class Call(
         network.subscribe(listener)
     }
 
-    private suspend fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
+    private fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
         callStatsReportingJob?.cancel()
         callStatsReportingJob = scope.launch {
             // Wait a bit before we start capturing stats
@@ -591,29 +592,35 @@ public class Call(
 
             while (isActive) {
                 delay(reportingIntervalMs)
-
-                val publisherStats = session?.getPublisherStats()
-                val subscriberStats = session?.getSubscriberStats()
-                state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
-                state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
-                state.stats.updateLocalStats()
-                val local = state.stats._local.value
-
-                val report = CallStatsReport(
-                    publisher = publisherStats,
-                    subscriber = subscriberStats,
-                    local = local,
-                    stateStats = state.stats,
+                session?.sendCallStats(
+                    report = collectStats(),
                 )
-                statsReport.value = report
-                statLatencyHistory.value += report.stateStats.publisher.latency.value
-                if (statLatencyHistory.value.size > 20) {
-                    statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
-                }
-
-                session?.sendCallStats(report)
             }
         }
+    }
+
+    internal suspend fun collectStats(): CallStatsReport {
+        val publisherStats = session?.getPublisherStats()
+        val subscriberStats = session?.getSubscriberStats()
+        state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
+        state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
+        state.stats.updateLocalStats()
+        val local = state.stats._local.value
+
+        val report = CallStatsReport(
+            publisher = publisherStats,
+            subscriber = subscriberStats,
+            local = local,
+            stateStats = state.stats,
+        )
+
+        statsReport.value = report
+        statLatencyHistory.value += report.stateStats.publisher.latency.value
+        if (statLatencyHistory.value.size > 20) {
+            statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
+        }
+
+        return report
     }
 
     /**
@@ -624,6 +631,8 @@ public class Call(
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
+            reconnectStartTime = System.currentTimeMillis()
+
             val session = session!!
             val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
             val reconnectDetails = ReconnectDetails(
@@ -633,7 +642,6 @@ public class Call(
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
             )
-            reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST, System.currentTimeMillis())
             session.fastReconnect(reconnectDetails)
         } else {
             logger.e { "[reconnect] Disconnecting" }
@@ -646,10 +654,11 @@ public class Call(
      */
     suspend fun rejoin() = schedule {
         logger.d { "[rejoin] Rejoining" }
-        reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN, System.currentTimeMillis())
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
+            reconnectStartTime = System.currentTimeMillis()
+
             val joinResponse = joinRequest(location = it)
             if (joinResponse is Success) {
                 // switch to the new SFU
@@ -701,6 +710,8 @@ public class Call(
         logger.d { "[migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
+            reconnectStartTime = System.currentTimeMillis()
+
             val joinResponse = joinRequest(location = it)
             if (joinResponse is Success) {
                 // switch to the new SFU
@@ -720,7 +731,6 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
-                reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE, System.currentTimeMillis())
                 val newSession = RtcSession(
                     clientImpl,
                     powerManager,
