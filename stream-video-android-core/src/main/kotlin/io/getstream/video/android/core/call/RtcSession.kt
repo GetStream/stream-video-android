@@ -523,6 +523,24 @@ public class RtcSession internal constructor(
         sfuConnectionModule.socketConnection.connect(request)
         sfuConnectionModule.socketConnection.whenConnected {
             connectRtc()
+            sendConnectionTimeStats(reconnectDetails?.strategy)
+        }
+    }
+
+    private suspend fun sendConnectionTimeStats(reconnectStrategy: WebsocketReconnectStrategy? = null) {
+        if (reconnectStrategy == null) {
+            sendCallStats(
+                report = call.collectStats(),
+                connectionTimeSeconds = (System.currentTimeMillis() - call.connectStartTime) / 1000f,
+            )
+        } else {
+            sendCallStats(
+                report = call.collectStats(),
+                reconnectionTimeSeconds = Pair(
+                    (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
+                    reconnectStrategy,
+                ),
+            )
         }
     }
 
@@ -1631,9 +1649,12 @@ public class RtcSession internal constructor(
         return subscriber?.getStats()
     }
 
-    internal suspend fun sendCallStats(report: CallStatsReport) {
+    internal suspend fun sendCallStats(
+        report: CallStatsReport,
+        connectionTimeSeconds: Float? = null,
+        reconnectionTimeSeconds: Pair<Float, WebsocketReconnectStrategy>? = null,
+    ) {
         val result = wrapAPICall {
-            val now = System.currentTimeMillis()
             val androidThermalState =
                 safeCallWithDefault(AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED) {
                     val thermalState = powerManager?.currentThermalStatus
@@ -1667,19 +1688,16 @@ public class RtcSession internal constructor(
                         is_power_saver_mode = powerSaving,
                     ),
                     telemetry = safeCallWithDefault(null) {
-                        if (call.reconnectAt != null) {
+                        if (connectionTimeSeconds != null) {
                             Telemetry(
-                                reconnection = call.reconnectAt?.let {
-                                    Reconnection(
-                                        time_seconds = ((now - it.second) / 1000).toFloat(),
-                                        strategy = it.first,
-                                    )
-                                },
+                                connection_time_seconds = connectionTimeSeconds.toFloat(),
                             )
-                        } else if (call.connectedAt != null) {
+                        } else if (reconnectionTimeSeconds != null) {
                             Telemetry(
-                                connection_time_seconds = call.connectedAt?.let { (now - it) / 1000 }
-                                    ?.toFloat(),
+                                reconnection = Reconnection(
+                                    time_seconds = reconnectionTimeSeconds.first.toFloat(),
+                                    strategy = reconnectionTimeSeconds.second,
+                                ),
                             )
                         } else {
                             null
@@ -1691,7 +1709,7 @@ public class RtcSession internal constructor(
 
         logger.d {
             "sendStats: " + when (result) {
-                is Success -> "Success"
+                is Success -> "Success. Response: ${result.value}. Telemetry: connectionTimeSeconds: $connectionTimeSeconds, reconnectionTimeSeconds: ${reconnectionTimeSeconds?.first}, strategy: ${reconnectionTimeSeconds?.second}"
                 is Failure -> "Failure. Reason: ${result.value.message}"
             }
         }
@@ -1898,6 +1916,15 @@ public class RtcSession internal constructor(
                 } else {
                     subscriber?.connection?.restartIce()
                     publisher?.connection?.restartIce()
+
+                    sendCallStats(
+                        report = call.collectStats(),
+                        reconnectionTimeSeconds = Pair(
+                            (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                        ),
+                    )
+
                     setVideoSubscriptions(true)
                 }
             }
