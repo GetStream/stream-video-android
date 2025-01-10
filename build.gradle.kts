@@ -51,7 +51,9 @@ subprojects {
   }
 
   // TODO - re-enable the core module once coordinator is stable
-  if (name.startsWith("stream-video-android") && !name.startsWith("stream-video-android-core")) {
+  if (name.startsWith("stream-video-android")
+      && !name.startsWith("stream-video-android-core")
+      && !name.contains("metrics")) {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
       kotlinOptions.freeCompilerArgs += listOf(
         "-Xexplicit-api=strict"

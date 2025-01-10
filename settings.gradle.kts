@@ -44,6 +44,9 @@ include(":tutorials:tutorial-audio")
 include(":tutorials:tutorial-livestream")
 include(":tutorials:tutorial-ringing")
 
+// Support
+include(":metrics:stream-video-android-metrics")
+
 buildCache {
     local {
         isEnabled = !System.getenv().containsKey("CI")
