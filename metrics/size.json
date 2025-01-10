@@ -1,0 +1,12 @@
+{
+  "debug": {
+    "stream-video-android-core": 0,
+    "stream-video-android-ui-xml": 0,
+    "stream-video-android-ui-compose": 0
+  },
+  "release": {
+    "stream-video-android-core": 0,
+    "stream-video-android-ui-xml": 0,
+    "stream-video-android-ui-compose": 0
+  }
+}
