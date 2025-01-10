@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.connection.transceivers
 
-import OptimalVideoLayer
+import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
