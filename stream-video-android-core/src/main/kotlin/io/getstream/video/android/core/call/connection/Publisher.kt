@@ -16,21 +16,24 @@
 
 package io.getstream.video.android.core.call.connection
 
-import OptimalVideoLayer
 import androidx.annotation.VisibleForTesting
-import computeTransceiverEncodings
-import findOptimalVideoLayers
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
+import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
+import io.getstream.video.android.core.call.connection.utils.computeTransceiverEncodings
+import io.getstream.video.android.core.call.connection.utils.findOptimalVideoLayers
+import io.getstream.video.android.core.call.connection.utils.isAudioTrackType
+import io.getstream.video.android.core.call.connection.utils.isSvcCodec
+import io.getstream.video.android.core.call.connection.utils.stringify
+import io.getstream.video.android.core.call.connection.utils.toVideoDimension
+import io.getstream.video.android.core.call.connection.utils.toVideoLayers
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import isAudioTrackType
-import isSvcCodec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -50,9 +53,6 @@ import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SetPublisherRequest
-import stringify
-import toVideoDimension
-import toVideoLayers
 import java.util.UUID
 
 internal class Publisher(

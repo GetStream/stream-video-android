@@ -16,14 +16,8 @@
 
 package io.getstream.video.android.core.call.connection.utils
 
-import OptimalVideoLayer
-import computeTransceiverEncodings
-import findOptimalVideoLayers
-import getComputedMaxBitrate
 import io.mockk.every
 import io.mockk.mockk
-import isAudioTrackType
-import isSvcCodec
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -32,16 +26,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.webrtc.CameraEnumerationAndroid
-import ridToVideoQuality
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.VideoQuality
-import toScalabilityMode
-import toSvcEncodings
-import toVideoLayers
-import withSimulcastConstraints
 
 /**
  * Test suite for video-layers-related functions.

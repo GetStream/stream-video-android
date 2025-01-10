@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+package io.getstream.video.android.core.call.connection.utils
+
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
