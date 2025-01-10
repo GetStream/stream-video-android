@@ -1101,7 +1101,6 @@ public class RtcSession internal constructor(
                             publisher = createPublisher(event.publishOptions)
                             processPendingPublisherEvents()
                             connectRtc()
-                            //sendConnectionTimeStats(reconnectDetails?.strategy)
                         }
                     }
 
