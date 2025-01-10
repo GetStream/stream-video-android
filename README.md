@@ -16,8 +16,6 @@
 
 </div>
 
-> **Note:** The SDK sizes reflect the potential addition if none of its internal dependencies are already in your app. In most cases, the actual impact will be smaller but may vary according to the device CPU architecture.
-
 This is the official Android SDK for [Stream Video](https://getstream.io/video?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss), a service for building video calls, audio rooms, and live-streaming applications. This library includes both a low-level video SDK and a set of reusable UI components.
 Most users start with the Compose UI components and fall back to the lower-level API when they want to customize things.
 
