@@ -39,6 +39,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -97,6 +98,7 @@ public open class DefaultNotificationHandler(
             application,
             callId,
             callDisplayName,
+            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
             notification = getRingingCallNotification(
                 RingingState.Incoming(),
                 callId,
