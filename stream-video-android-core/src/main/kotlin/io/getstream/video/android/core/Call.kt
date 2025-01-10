@@ -384,9 +384,6 @@ public class Call(
                     "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
             }
         }
-
-        client.state.setActiveCall(this)
-
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
         // the join flow should retry up to 3 times
@@ -503,7 +500,7 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
-
+        client.state.setActiveCall(this)
         monitorSession(result.value)
         return Success(value = session!!)
     }

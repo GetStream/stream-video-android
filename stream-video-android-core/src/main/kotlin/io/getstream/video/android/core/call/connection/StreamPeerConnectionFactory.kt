@@ -171,7 +171,6 @@ public class StreamPeerConnectionFactory(
                                     .build(),
                             )
                         }
-                        audioLogger.d { "[csc] PCF audioUsage: $audioUsage" }
                     }
                     .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :

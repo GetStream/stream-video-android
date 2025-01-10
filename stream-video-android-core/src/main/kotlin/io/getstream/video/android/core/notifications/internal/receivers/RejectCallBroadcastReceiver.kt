@@ -21,6 +21,7 @@ import android.content.Intent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService
@@ -42,6 +43,10 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
             is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
         }
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
-        CallService.removeIncomingCall(context, StreamCallId.fromCallCid(call.cid))
+        CallService.removeIncomingCall(
+            context,
+            StreamCallId.fromCallCid(call.cid),
+            StreamVideo.instance().state.callConfigRegistry.get(call.type),
+        )
     }
 }
