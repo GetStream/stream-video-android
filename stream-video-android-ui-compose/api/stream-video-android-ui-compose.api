@@ -375,6 +375,7 @@ public class io/getstream/video/android/compose/ui/ComposeStreamCallActivity : i
 	public static final field $stable I
 	public fun <init> ()V
 	public fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
+	public fun onPreCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;)V
 }
 
 public class io/getstream/video/android/compose/ui/StreamCallActivityComposeDelegate : io/getstream/video/android/compose/ui/StreamCallActivityComposeUi {
