@@ -71,7 +71,9 @@ dependencies {
 
     "stream-video-android-core-streamImplementation"(project(":stream-video-android-core"))
 
+    "stream-video-android-ui-xml-baselineImplementation"(project(":stream-video-android-core"))
     "stream-video-android-ui-xml-streamImplementation"(project(":stream-video-android-ui-xml"))
 
+    "stream-video-android-ui-compose-baselineImplementation"(project(":stream-video-android-core"))
     "stream-video-android-ui-compose-streamImplementation"(project(":stream-video-android-ui-compose"))
 }
