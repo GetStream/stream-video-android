@@ -46,7 +46,7 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
         CallService.removeIncomingCall(
             context,
             StreamCallId.fromCallCid(call.cid),
-            StreamVideo.instance().state.callConfigRegistry.get(call.type)
+            StreamVideo.instance().state.callConfigRegistry.get(call.type),
         )
     }
 }
