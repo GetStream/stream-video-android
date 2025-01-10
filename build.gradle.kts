@@ -1,11 +1,20 @@
 apply(plugin = "io.github.gradle-nexus.publish-plugin")
 apply(plugin = "org.jetbrains.dokka")
+apply(from = "${rootDir}/scripts/sonar.gradle")
 
 buildscript {
   repositories {
     google()
     mavenCentral()
     maven("https://plugins.gradle.org/m2/")
+  }
+
+  dependencies {
+    // TODO: Remove this workaround after AGP 8.9.0 is released
+    // Workaround for integrate sonarqube plugin with AGP
+    // It looks like will be fixed after AGP 8.9.0-alpha04 is released
+    // https://issuetracker.google.com/issues/380600747?pli=1
+    classpath("org.bouncycastle:bcutil-jdk18on:1.79")
   }
 }
 
@@ -27,6 +36,8 @@ plugins {
   alias(libs.plugins.hilt) apply false
   alias(libs.plugins.play.publisher) apply false
   alias(libs.plugins.baseline.profile) apply false
+  alias(libs.plugins.sonarqube) apply false
+  alias(libs.plugins.kover) apply false
 }
 
 subprojects {
@@ -47,6 +58,8 @@ subprojects {
       )
     }
   }
+
+  apply(from = "${rootDir}/scripts/coverage.gradle")
 }
 
 tasks.register("clean")

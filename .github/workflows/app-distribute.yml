@@ -12,11 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          distribution: adopt
-          java-version: 17
+      - uses: ./.github/actions/setup-java
       - name: Prepare environment
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
