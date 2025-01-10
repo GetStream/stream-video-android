@@ -75,8 +75,8 @@
         <activity
             android:name=".CallActivity"
             android:supportsPictureInPicture="true"
-            android:showOnLockScreen="true"
             android:showWhenLocked="true"
+            android:turnScreenOn="true"
             android:launchMode="singleTop"
             android:exported="false">
             <intent-filter android:priority="1">
