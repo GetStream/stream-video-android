@@ -31,6 +31,7 @@ import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
@@ -47,6 +48,19 @@ class CallActivity : ComposeStreamCallActivity() {
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
     override val configuration: StreamCallActivityConfiguration =
         StreamCallActivityConfiguration(closeScreenOnCallEnded = false)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        if (intent.action == NotificationHandler.ACTION_ACCEPT_CALL) {
+            val activeCall = StreamVideo.instance().state.activeCall.value
+            if (activeCall != null) {
+                leave(activeCall)
+                finish()
+                startActivity(intent)
+            }
+        }
+    }
 
     @StreamCallActivityDelicateApi
     override fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {

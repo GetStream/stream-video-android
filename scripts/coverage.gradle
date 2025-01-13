@@ -1,0 +1,32 @@
+if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
+    apply plugin: "org.jetbrains.kotlinx.kover"
+    apply plugin: "org.sonarqube"
+
+    if (hasProperty('android')) {
+        android {
+            buildTypes {
+                debug {
+                    testCoverageEnabled = true
+                    enableUnitTestCoverage = true
+                    enableAndroidTestCoverage true
+                }
+            }
+        }
+    }
+
+    kover {
+        reports {
+            verify {
+                warningInsteadOfFailure = true
+            }
+        }
+    }
+
+    sonarqube {
+        properties {
+            property "sonar.junit.reportPaths", "${buildDir}/test-results/testDebugUnitTest"
+            property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/kover/reportDebug.xml"
+            property "sonar.sources", "src/main/kotlin"
+        }
+    }
+}
