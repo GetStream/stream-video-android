@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.connection
 
-import android.provider.MediaStore.Video
 import io.getstream.result.Result
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
@@ -24,7 +23,6 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverId
 import io.getstream.video.android.core.model.StreamPeerType
-import io.getstream.video.android.core.utils.SdpSession
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -294,7 +292,7 @@ class PublisherTest {
         val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
         every { mockPeerConnection.addTransceiver(mockVideoTrack, any()) } returns mockTransceiver
         every { mockTransceiverCache.items() } returns listOf(
-            TransceiverId(videoPublishOption, mockTransceiver)
+            TransceiverId(videoPublishOption, mockTransceiver),
         )
 
         // Publish
@@ -319,7 +317,7 @@ class PublisherTest {
         // 1) Verify that initially, currentOptions is empty (assuming we haven't published any track).
         assertTrue(
             publisher.currentOptions().isEmpty(),
-            "Expected currentOptions() to be empty before any track is published."
+            "Expected currentOptions() to be empty before any track is published.",
         )
 
         // 2) Mock a video track & transceiver so that a transceiver is created when we publish.
@@ -333,7 +331,7 @@ class PublisherTest {
         every {
             mockPeerConnection.addTransceiver(
                 mockVideoTrack,
-                any<RtpTransceiver.RtpTransceiverInit>()
+                any<RtpTransceiver.RtpTransceiverInit>(),
             )
         } returns mockTransceiver
 
@@ -385,7 +383,7 @@ class PublisherTest {
         every {
             mockPeerConnection.addTransceiver(
                 mockAudioTrack,
-                any()
+                any(),
             )
         } returns mockAudioTransceiver
 
@@ -411,8 +409,9 @@ class PublisherTest {
                 1280,
                 720,
                 24,
-                30
-            ), newPublishOptions
+                30,
+            ),
+            newPublishOptions,
         )
 
         coVerify {
@@ -425,8 +424,9 @@ class PublisherTest {
                 1280,
                 720,
                 24,
-                30
-            ), newPublishOptions2
+                30,
+            ),
+            newPublishOptions2,
         )
         assertEquals(2, newPublishOptions2.size)
         coVerifyOrder {
@@ -448,7 +448,7 @@ class PublisherTest {
         every {
             mockPeerConnection.addTransceiver(
                 mockVideoTrack,
-                any<RtpTransceiver.RtpTransceiverInit>()
+                any<RtpTransceiver.RtpTransceiverInit>(),
             )
         } returns mockTransceiver
         every {
@@ -493,7 +493,7 @@ class PublisherTest {
                 "r1",
                 true,
                 2.0,
-            )
+            ),
         )
         val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
         val mockSender = mockk<RtpSender>(relaxed = true)
@@ -514,7 +514,7 @@ class PublisherTest {
                     max_framerate = 30,
                     scale_resolution_down_by = 1.0f,
                     max_bitrate = 600_000,
-                    scalability_mode = "L3T3"
+                    scalability_mode = "L3T3",
                 ),
                 VideoLayerSetting(
                     name = "r1",
@@ -522,9 +522,9 @@ class PublisherTest {
                     max_framerate = 15,
                     scale_resolution_down_by = 2.0f,
                     max_bitrate = 300_000,
-                    scalability_mode = "L3T2"
-                )
-            )
+                    scalability_mode = "L3T2",
+                ),
+            ),
         )
 
         publisher.changePublishQuality(newSender)
@@ -532,7 +532,7 @@ class PublisherTest {
         coVerify {
             mockTransceiverCache.get(videoPublishOption)
         }
-        //Note: Difficult to mock parameters with mockk
+        // Note: Difficult to mock parameters with mockk
     }
 
     @Test
@@ -590,7 +590,7 @@ class PublisherTest {
         val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
         every { mockPeerConnection.addTransceiver(mockVideoTrack, any()) } returns mockTransceiver
         every { mockTransceiverCache.items() } returns listOf(
-            TransceiverId(videoPublishOption, mockTransceiver)
+            TransceiverId(videoPublishOption, mockTransceiver),
         )
         every { mockTransceiverCache.get(videoPublishOption) } returns mockTransceiver
         publisher.publishStream(mockVideoTrack, TrackType.TRACK_TYPE_VIDEO)
