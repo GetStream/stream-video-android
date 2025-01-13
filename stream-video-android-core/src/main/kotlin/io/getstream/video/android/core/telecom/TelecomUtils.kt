@@ -21,11 +21,13 @@ import android.content.Context
 import android.os.Build
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler.getRingingCallNotification
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 import kotlin.contracts.ExperimentalContracts
@@ -56,7 +58,14 @@ internal object TelecomCompat {
                                     context.applicationContext,
                                     StreamCallId.fromCallCid(streamCall.cid),
                                     callDisplayName,
-                                    notification = null, // TODO-Telecom: Add notification
+                                    notification = callId?.let {
+                                        getRingingCallNotification(
+                                            RingingState.Incoming(),
+                                            callId,
+                                            callDisplayName,
+                                            shouldHaveContentIntent = true,
+                                        )
+                                    },
                                 )
                             },
                         )
