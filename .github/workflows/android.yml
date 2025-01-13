@@ -100,18 +100,14 @@ jobs:
     name: Android Test with GMD
     runs-on: ubuntu-latest
     timeout-minutes: 55
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3.1.0
 
       - uses: ./.github/actions/setup-java
 
       - uses: ./.github/actions/enable-kvm
 
-      # Sets gradle up
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2.7
+      - uses: ./.github/actions/gradle-cache
 
       # Cleans managed device if previously settle and space currently is not available
       - name: Clean Managed Devices
@@ -119,4 +115,3 @@ jobs:
 
       - name: Run instrumented tests with GMD
         run: ./gradlew pixel2api31DebugAndroidTest -Dorg.gradle.workers.max=1 -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=60
-
