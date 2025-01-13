@@ -353,7 +353,7 @@ public class StreamPeerConnectionFactory(
      * @param observer Handler used to observe different states of the connection.
      * @return [PeerConnection] that's fully set up.
      */
-    private fun makePeerConnectionInternal(
+    internal fun makePeerConnectionInternal(
         configuration: PeerConnection.RTCConfiguration,
         observer: PeerConnection.Observer?,
     ): PeerConnection {
