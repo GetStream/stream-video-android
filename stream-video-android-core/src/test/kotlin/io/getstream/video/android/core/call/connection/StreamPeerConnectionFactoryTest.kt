@@ -1,27 +1,43 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection
 
 import android.content.Context
+import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.api.SignalServerService
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
-import io.getstream.video.android.core.MediaManagerImpl
-import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.api.SignalServerService
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertNotNull
-import junit.framework.TestCase.assertTrue
-import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.PeerConnection.Observer
 import org.webrtc.PeerConnectionFactory
 import stream.video.sfu.models.PublishOption
@@ -55,7 +71,6 @@ class StreamPeerConnectionFactoryTest {
         factory = spyk(StreamPeerConnectionFactory(mockContext))
         // Mock the internal WebRTC PeerConnectionFactory
         mockInternalFactory = mockk(relaxed = true)
-
 
         // Mock a PeerConnection to return from makePeerConnectionInternal
         mockPeerConnection = mockk(relaxed = true)
@@ -102,7 +117,7 @@ class StreamPeerConnectionFactoryTest {
             maxPublishingBitrate = 1_200_000,
             sfuClient = mockSignalServerService,
             sessionId = "fake-session-id",
-            rejoin = {}
+            rejoin = {},
         )
 
         assertNotNull("Publisher should not be null", publisher)
@@ -111,7 +126,7 @@ class StreamPeerConnectionFactoryTest {
         assertEquals(
             "Publisher.connection should match the mocked PeerConnection",
             mockPeerConnection,
-            publisher.connection
+            publisher.connection,
         )
 
         // Verify that makePeerConnectionInternal was called with the config and 'observer' = publisher
