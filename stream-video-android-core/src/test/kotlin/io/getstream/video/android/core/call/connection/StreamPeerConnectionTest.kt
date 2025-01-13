@@ -26,6 +26,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.spyk
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -35,6 +36,9 @@ import org.junit.After
 import org.junit.Before
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
+import org.webrtc.RtpParameters.Encoding
+import org.webrtc.RtpTransceiver.RtpTransceiverDirection
+import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import kotlin.test.Test
@@ -146,5 +150,111 @@ class StreamPeerConnectionTest {
         streamPeerConnection.initialize(peerConnection)
         val result = streamPeerConnection.createAnswer()
         assertTrue("Should succeed", result is Result.Success)
+    }
+
+    @Test
+    fun `buildVideoTransceiverInit camera has three encodings q,h,f`() = runTest {
+        // We'll create a StreamPeerConnection with a known maxBitRate
+        val peerConnection = object : StreamPeerConnection(
+            coroutineScope = testScope, // or any TestScope
+            type = io.getstream.video.android.core.model.StreamPeerType.PUBLISHER,
+            mediaConstraints = org.webrtc.MediaConstraints(),
+            onStreamAdded = null,
+            onNegotiationNeeded = null,
+            onIceCandidate = null,
+            maxBitRate = 2_000_000, // set an explicit maxBitRate
+        ) {}
+
+        val streamIds = listOf("camera-stream-id")
+        val init = peerConnection.buildVideoTransceiverInit(
+            streamIds = streamIds,
+            isScreenShare = false, // camera scenario
+        )
+
+        // Check direction
+        assertEquals(
+            "Direction should be SEND_ONLY",
+            RtpTransceiverDirection.SEND_ONLY,
+            init.actualDirection(),
+        )
+        // Check stream IDs
+        // Expect 3 encodings: q, h, f
+        val encodings = init.actualEncodings()
+        assertEquals("Should have three encodings for camera", 3, encodings?.size)
+
+        val (q, h, f) = encodings!!
+        // Check q
+        assertEquals("Wrong rid for q", "q", q.rid)
+        assertTrue("q should be active", q.active)
+        // 2_000_000 / 4 => 500,000
+        assertEquals("Wrong quarter maxBitrateBps", 500_000, q.maxBitrateBps)
+        assertEquals("Wrong q maxFramerate", 30, q.maxFramerate)
+
+        // Check h
+        assertEquals("Wrong rid for h", "h", h.rid)
+        assertTrue("h should be active", h.active)
+        // 2_000_000 / 2 => 1,000,000
+        assertEquals("Wrong half maxBitrateBps", 1_000_000, h.maxBitrateBps)
+        assertEquals("Wrong h maxFramerate", 30, h.maxFramerate)
+
+        // Check f
+        assertEquals("Wrong rid for f", "f", f.rid)
+        assertTrue("f should be active", f.active)
+        // full => 2,000,000
+        assertEquals("Wrong full maxBitrateBps", 2_000_000, f.maxBitrateBps)
+        assertEquals("Wrong f maxFramerate", 30, f.maxFramerate)
+    }
+
+    @Test
+    fun `buildVideoTransceiverInit screenshare has one encoding q`() = runTest {
+        val peerConnection = object : StreamPeerConnection(
+            coroutineScope = testScope,
+            type = io.getstream.video.android.core.model.StreamPeerType.SUBSCRIBER,
+            mediaConstraints = org.webrtc.MediaConstraints(),
+            onStreamAdded = null,
+            onNegotiationNeeded = null,
+            onIceCandidate = null,
+            maxBitRate = 2_000_000, // We'll set 2M, but screenshare uses 1M
+        ) {}
+
+        val streamIds = listOf("screen-stream-id")
+        val init = peerConnection.buildVideoTransceiverInit(
+            streamIds = streamIds,
+            isScreenShare = true,
+        )
+
+        assertEquals(
+            "Direction should be SEND_ONLY",
+            init.actualDirection(),
+            RtpTransceiverDirection.SEND_ONLY,
+        )
+
+        // Expect 1 encoding: q
+        val encodings = init.actualEncodings()
+        assertEquals("Should have one encoding for screenshare", 1, encodings?.size)
+
+        val q = encodings!![0]
+        assertEquals("Wrong rid for screenshare", "q", q.rid)
+        assertTrue("q should be active", q.active)
+        // Hard-coded to 1,000,000 for screenshare
+        assertEquals("Wrong screenshare maxBitrateBps", 1_000_000, q.maxBitrateBps)
+        // No explicit frame rate is set in the code for screenshare
+        assertEquals("Screenshare maxFramerate default", null, q.maxFramerate)
+    }
+
+    // Utils
+
+    fun RtpTransceiverInit.actualDirection(): RtpTransceiverDirection? {
+        val directionField = RtpTransceiverInit::class.java.getDeclaredField("direction")
+        directionField.isAccessible = true
+        val actualDirection = directionField.get(this) as? RtpTransceiverDirection
+        return actualDirection
+    }
+
+    fun RtpTransceiverInit.actualEncodings(): List<Encoding>? {
+        val encodingsField = RtpTransceiverInit::class.java.getDeclaredField("sendEncodings")
+        encodingsField.isAccessible = true
+        val actualEncodings = encodingsField.get(this) as? List<Encoding>
+        return actualEncodings
     }
 }
