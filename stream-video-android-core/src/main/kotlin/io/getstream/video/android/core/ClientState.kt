@@ -151,9 +151,12 @@ class ClientState(private val client: StreamVideo) {
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
 
-        if (ringingCall.value != null) {
+        val isRinging = _ringingCall.value != null
+        if (isRinging) {
+            // We're setting an active call after accepting a ringing call
             removeRingingCall(willTransitionToOngoing = true)
         } else {
+            // We're setting a normal/non-ringing active call
             TelecomCompat.changeCallState(
                 streamVideoClient.context,
                 TelecomCallState.ONGOING,
@@ -171,9 +174,6 @@ class ClientState(private val client: StreamVideo) {
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
-        if (ringingState is RingingState.Outgoing) {
-            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
-        }
 
         TelecomCompat.changeCallState(
             streamVideoClient.context,
