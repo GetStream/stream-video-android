@@ -70,6 +70,7 @@ internal class Publisher(
     private val sfuClient: SignalServerService,
     private val sessionId: String,
     private val rejoin: () -> Unit,
+    private val transceiverCache: TransceiverCache = TransceiverCache(),
 ) : StreamPeerConnection(
     coroutineScope,
     type,
@@ -79,8 +80,6 @@ internal class Publisher(
     onIceCandidate,
     maxBitRate,
 ) {
-
-    private val transceiverCache = TransceiverCache()
     private val defaultScreenShareFormat = CaptureFormat(1080, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1080, 720, 24, 30)
     private var isIceRestarting = false
@@ -462,7 +461,6 @@ internal class Publisher(
         }
 
         transceiverCache.setLayers(publishOption, layers ?: emptyList())
-
         return TrackInfo(
             track_id = track.id(),
             layers = toVideoLayers(layers ?: emptyList()),
