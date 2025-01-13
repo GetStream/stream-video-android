@@ -153,10 +153,10 @@ class ClientState(private val client: StreamVideo) {
     }
 
     fun removeActiveCall() {
-        if (this._activeCall.value != null) {
-            maybeStopForegroundService(this._activeCall.value!!)
-            this._activeCall.value = null
+        _activeCall.value?.let {
+            maybeStopForegroundService(it)
         }
+        this._activeCall.value = null
         removeRingingCall()
     }
 
@@ -170,8 +170,8 @@ class ClientState(private val client: StreamVideo) {
     }
 
     fun removeRingingCall() {
-        if (ringingCall.value != null) {
-            maybeStopForegroundService(this.ringingCall.value!!)
+        ringingCall.value?.let {
+            maybeStopForegroundService(it)
         }
         _ringingCall.value = null
     }
