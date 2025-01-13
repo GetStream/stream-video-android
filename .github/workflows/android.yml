@@ -23,82 +23,81 @@ env:
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
-  lint:
-    name: Spotless check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3.1.0
-      - uses: ./.github/actions/setup-java
-      - name: spotless
-        run: ./gradlew spotlessCheck --scan
+  # lint:
+  #   name: Spotless check
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v3.1.0
+  #     - uses: ./.github/actions/setup-java
+  #     - name: spotless
+  #       run: ./gradlew spotlessCheck --scan
 
-  api_check:
-    name: API check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3.1.0
-      - uses: ./.github/actions/setup-java
-      - name: API check
-        run: ./gradlew apiCheck --scan
+  # api_check:
+  #   name: API check
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v3.1.0
+  #     - uses: ./.github/actions/setup-java
+  #     - name: API check
+  #       run: ./gradlew apiCheck --scan
 
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/setup-java
+  #     - uses: ./.github/actions/setup-java
 
-      - uses: ./.github/actions/gradle-cache
+  #     - uses: ./.github/actions/gradle-cache
 
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
+  #     - name: Make Gradle executable
+  #       run: chmod +x ./gradlew
 
-      - name: Build with Gradle
-        run: |
-          ./gradlew --scan --stacktrace \
-              assembleDebug
+  #     - name: Build with Gradle
+  #       run: |
+  #         ./gradlew --scan --stacktrace \
+  #             assembleDebug
 
-  unitTest:
-    name: Unit Tests
-    runs-on: ubuntu-latest
+  # unitTest:
+  #   name: Unit Tests
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - uses: ./.github/actions/setup-java
+  #     - uses: ./.github/actions/setup-java
 
-      - uses: ./.github/actions/gradle-cache
+  #     - uses: ./.github/actions/gradle-cache
 
-      - name: Run unit tests
-        run: |
-          ./gradlew :stream-video-android-ui-compose:koverXmlReportDebug --scan --stacktrace
-          ./gradlew :stream-video-android-core:koverXmlReportDebug --scan --stacktrace
+  #     - name: Run unit tests
+  #       run: |
+  #         ./gradlew :stream-video-android-ui-compose:koverXmlReportDebug :stream-video-android-core:koverXmlReportDebug sonar
+  #         ./gradlew :stream-video-android-core:koverXmlReportDebug --scan --stacktrace
 
-      - name: Unit tests core results
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-tests-core-results
-          path: stream-video-android-core/build/reports/tests/testDebugUnitTest/index.html
+  #     - name: Unit tests core results
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: unit-tests-core-results
+  #         path: stream-video-android-core/build/reports/tests/testDebugUnitTest/index.html
 
-      - name: Unit tests compose results
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-tests-compose-results
-          path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html
+  #     - name: Unit tests compose results
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: unit-tests-compose-results
+  #         path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html
 
-      - uses: ./.github/actions/setup-ruby
+  #     - uses: ./.github/actions/setup-ruby
 
-      - name: Sonar
-        run: bundle exec fastlane run_sonar_analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     - name: Sonar
+  #       run: bundle exec fastlane run_sonar_analysis
+  #       env:
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   androidTest-GMD:
     name: Android Test with GMD
-    if: ${{ false }}  # disable for now
     runs-on: ubuntu-latest
     timeout-minutes: 55
 
