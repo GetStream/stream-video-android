@@ -4,16 +4,12 @@ import android.content.Context
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.webrtc.MediaConstraints
@@ -21,19 +17,13 @@ import org.webrtc.PeerConnection
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
-import io.getstream.video.android.core.call.connection.Publisher
-import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.call.video.FilterVideoProcessor
-import io.getstream.video.android.core.model.StreamPeerType
-import org.webrtc.AudioSource
-import org.webrtc.AudioTrack
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertTrue
 import org.webrtc.ManagedAudioProcessingFactory
-import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection.Observer
 import org.webrtc.PeerConnectionFactory
-import org.webrtc.RtpCapabilities
-import org.webrtc.VideoSource
-import org.webrtc.VideoTrack
 import stream.video.sfu.models.PublishOption
 
 class StreamPeerConnectionFactoryTest {
