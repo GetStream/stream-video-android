@@ -206,7 +206,8 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
     internal val clientImpl: StreamVideoClient = client as StreamVideoClient,
     private val supervisorJob: CompletableJob = SupervisorJob(),
-    private val coroutineScope: CoroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
+    private val coroutineScope: CoroutineScope =
+        CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
     private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
         SfuConnectionModule(
             context = clientImpl.context,

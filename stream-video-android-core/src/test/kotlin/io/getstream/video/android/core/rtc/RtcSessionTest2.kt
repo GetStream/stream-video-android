@@ -1,17 +1,30 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.rtc
 
 import android.graphics.ColorSpace.match
-import io.getstream.video.android.core.CallState
-import io.getstream.video.android.core.call.RtcSession
-import io.mockk.mockk
-
-
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.events.ICETrickleEvent
@@ -27,6 +40,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import junit.framework.TestCase.assertEquals
@@ -86,7 +100,7 @@ class RtcSessionTest2 {
         every { mockCall.peerConnectionFactory } returns mockk(relaxed = true) {
             every {
                 makePeerConnection(
-                    any(), any(), any(), any()
+                    any(), any(), any(), any(),
                 )
             } returns mockk(relaxed = true) {}
         }
@@ -103,7 +117,7 @@ class RtcSessionTest2 {
 
     @Test
     fun `rtcSession constructor creates a subscriber StreamPeerConnection`() = runTest(
-        UnconfinedTestDispatcher()
+        UnconfinedTestDispatcher(),
     ) {
         // Given
         val sessionId = "test-session-id"
@@ -130,7 +144,7 @@ class RtcSessionTest2 {
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
-            )
+            ),
         )
 
         // Then
@@ -141,7 +155,7 @@ class RtcSessionTest2 {
     @Test
     fun `connect calls socketConnection_connect with JoinRequest and sets state to Connected`() =
         runTest(
-            UnconfinedTestDispatcher()
+            UnconfinedTestDispatcher(),
         ) {
             // Given
             val sessionId = "test-session-id"
@@ -175,17 +189,19 @@ class RtcSessionTest2 {
             // Then
             // We verify that connect(...) was actually called on the socket with any JoinRequest
             coVerify {
-                sfuSocketModule.socketConnection.connect(match { request ->
-                    // Optionally, we can be more strict about checking the session_id, etc.
-                    request.session_id == sessionId && request.token == sfuToken
-                })
+                sfuSocketModule.socketConnection.connect(
+                    match { request ->
+                        // Optionally, we can be more strict about checking the session_id, etc.
+                        request.session_id == sessionId && request.token == sfuToken
+                    },
+                )
             }
         }
 
     @Test
     fun `handleSubscriberOffer sets remoteDescription, creates answer, sets localDescription`() =
         runTest(
-            UnconfinedTestDispatcher()
+            UnconfinedTestDispatcher(),
         ) {
             // Given: an RtcSession with a non-null subscriber
             val sessionId = "test-session-id"
@@ -209,7 +225,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { mockk(relaxed = true) },
-                )
+                ),
             )
             val subscriber = rtcSession.subscriber
             assertNotNull("Subscriber must not be null", subscriber)
@@ -219,31 +235,35 @@ class RtcSessionTest2 {
                 sdp = fakeSdpOffer,
             )
             coEvery { subscriber!!.setRemoteDescription(any()) } returns io.getstream.result.Result.Success(
-                Unit
+                Unit,
             )
             coEvery { subscriber!!.createAnswer() } returns io.getstream.result.Result.Success(
-                SessionDescription(SessionDescription.Type.ANSWER, "fake-answer-sdp")
+                SessionDescription(SessionDescription.Type.ANSWER, "fake-answer-sdp"),
             )
             coEvery { subscriber!!.setLocalDescription(any()) } returns io.getstream.result.Result.Success(
-                Unit
+                Unit,
             )
             val mockApi = rtcSession.sfuConnectionModule.api
             coEvery { mockApi.sendAnswer(any()) } returns SendAnswerResponse(
-                error = null
+                error = null,
             )
 
             rtcSession.handleSubscriberOffer(offerEvent)
 
             coVerify {
-                subscriber!!.setRemoteDescription(match {
-                    it.description.contains("fake-offer-sdp") && it.type == SessionDescription.Type.OFFER
-                })
+                subscriber!!.setRemoteDescription(
+                    match {
+                        it.description.contains("fake-offer-sdp") && it.type == SessionDescription.Type.OFFER
+                    },
+                )
             }
             coVerify { subscriber!!.createAnswer() }
             coVerify {
-                subscriber!!.setLocalDescription(match {
-                    it.description.contains("fake-answer-sdp") && it.type == SessionDescription.Type.ANSWER
-                })
+                subscriber!!.setLocalDescription(
+                    match {
+                        it.description.contains("fake-answer-sdp") && it.type == SessionDescription.Type.ANSWER
+                    },
+                )
             }
         }
 
@@ -276,14 +296,14 @@ class RtcSessionTest2 {
                 user_id = "user-123",
                 track_type = TrackType.TRACK_TYPE_VIDEO,
                 dimension = rtcSession.defaultVideoDimension,
-                session_id = "session-123"
+                session_id = "session-123",
             )
             val spySession = spyk(rtcSession) {
                 every { defaultTracks() } returns listOf(mockTrackSub)
             }
             val mockApi = spySession.sfuConnectionModule.api
             coEvery { mockApi.updateSubscriptions(any()) } returns UpdateSubscriptionsResponse(
-                error = null // success scenario
+                error = null, // success scenario
             )
 
             // When
@@ -293,12 +313,16 @@ class RtcSessionTest2 {
             val currentSubs = spySession.subscriptions.value
             assertEquals("Should have 1 track from defaultTracks()", 1, currentSubs.size)
             assertEquals(
-                "Should match our mock track subscription", mockTrackSub, currentSubs.first()
+                "Should match our mock track subscription",
+                mockTrackSub,
+                currentSubs.first(),
             )
             coVerify {
-                mockApi.updateSubscriptions(match { req ->
-                    req.session_id == sessionId && req.tracks.size == 1 && req.tracks.first() == mockTrackSub
-                })
+                mockApi.updateSubscriptions(
+                    match { req ->
+                        req.session_id == sessionId && req.tracks.size == 1 && req.tracks.first() == mockTrackSub
+                    },
+                )
             }
         }
 
@@ -326,7 +350,7 @@ class RtcSessionTest2 {
         // A typical ICETrickleEvent with peerType = PUBLISHER_UNSPECIFIED
         val event = ICETrickleEvent(
             candidate = """{"sdpMid":"0","sdpMLineIndex":0,"candidate":"fake-candidate"}""",
-            peerType = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED
+            peerType = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
             // other fields if needed
         )
 
@@ -337,7 +361,7 @@ class RtcSessionTest2 {
         // The event should be added to publisherPendingEvents
         assertTrue(
             "publisherPendingEvents should contain the ICETrickleEvent",
-            event in rtcSession.publisherPendingEvents
+            event in rtcSession.publisherPendingEvents,
         )
         // No call to subscriber or publisher handleNewIceCandidate
         // We can do a negative verify on subscriber or log checks, but typically verifying there's no error is enough.
@@ -369,8 +393,9 @@ class RtcSessionTest2 {
             "sdpMid": "0",
             "sdpMLineIndex": 0,
             "candidate": "candidate-data",
-            "usernameFragment": "fake-username-frag"}""".trimIndent(),
-                peerType = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED
+            "usernameFragment": "fake-username-frag"}
+                """.trimIndent(),
+                peerType = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
             )
 
             // When
@@ -378,11 +403,13 @@ class RtcSessionTest2 {
 
             // Then
             coVerify {
-                mockPublisher.handleNewIceCandidate(match { it.candidate.contains("candidate-data") })
+                mockPublisher.handleNewIceCandidate(
+                    match { it.candidate.contains("candidate-data") },
+                )
             }
             assertTrue(
                 "publisherPendingEvents should be empty",
-                rtcSession.publisherPendingEvents.isEmpty()
+                rtcSession.publisherPendingEvents.isEmpty(),
             )
         }
 
@@ -405,7 +432,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { mockk(relaxed = true) },
-                )
+                ),
             )
             val mockSubscriber = mockk<StreamPeerConnection>(relaxed = true)
             rtcSession.subscriber = mockSubscriber
@@ -417,8 +444,9 @@ class RtcSessionTest2 {
             "sdpMid": "0",
             "sdpMLineIndex": 0,
             "candidate": "candidate-data",
-            "usernameFragment": "fake-username-frag"}""".trimIndent(),
-                peerType = PeerType.PEER_TYPE_SUBSCRIBER
+            "usernameFragment": "fake-username-frag"}
+                """.trimIndent(),
+                peerType = PeerType.PEER_TYPE_SUBSCRIBER,
             )
 
             // When
@@ -430,10 +458,9 @@ class RtcSessionTest2 {
             }
             assertTrue(
                 "publisherPendingEvents should be empty",
-                rtcSession.publisherPendingEvents.isEmpty()
+                rtcSession.publisherPendingEvents.isEmpty(),
             )
         }
-
 
     @Test
     fun `cleanup disconnects SFU, closes peer connections, and clears tracks`() = runTest {
@@ -462,7 +489,7 @@ class RtcSessionTest2 {
         coJustRun { mockSocketConnection.disconnect() }
         rtcSession.tracks["user-remote-sessionId"] = mutableMapOf(
             TrackType.TRACK_TYPE_AUDIO to AudioTrack("remote-audio-id", mockk(relaxed = true)),
-            TrackType.TRACK_TYPE_VIDEO to VideoTrack("remote-video-id", mockk(relaxed = true))
+            TrackType.TRACK_TYPE_VIDEO to VideoTrack("remote-video-id", mockk(relaxed = true)),
         )
 
         // When
