@@ -78,6 +78,7 @@ import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -203,6 +204,20 @@ public class RtcSession internal constructor(
     internal var sfuWsUrl: String,
     internal var sfuToken: String,
     internal var remoteIceServers: List<IceServer>,
+    internal val clientImpl: StreamVideoClient = client as StreamVideoClient,
+    private val supervisorJob: CompletableJob = SupervisorJob(),
+    private val coroutineScope: CoroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
+    private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
+        SfuConnectionModule(
+            context = clientImpl.context,
+            apiKey = apiKey,
+            apiUrl = sfuUrl,
+            wssUrl = sfuWsUrl,
+            connectionTimeoutInMs = 2000L,
+            userToken = sfuToken,
+            lifecycle = lifecycle,
+        )
+    },
 ) {
 
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
@@ -225,7 +240,6 @@ public class RtcSession internal constructor(
 
     private val logger by taggedLogger("Video:RtcSession")
     private val dynascaleLogger by taggedLogger("Video:RtcSession:Dynascale")
-    private val clientImpl = client as StreamVideoClient
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
@@ -235,8 +249,6 @@ public class RtcSession internal constructor(
         )
 
     // run all calls on a supervisor job so we can easily cancel them
-    private val supervisorJob = SupervisorJob()
-    private val coroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     internal val defaultVideoDimension = VideoDimension(1080, 2340)
 
@@ -354,8 +366,13 @@ public class RtcSession internal constructor(
         MutableStateFlow<SfuSocketState>(SfuSocketState.Disconnected.Stopped)
     val sfuSocketState = _sfuSfuSocketState.asStateFlow()
 
+    /**
+     * Check if the SDK is initialized.
+     */
+    internal fun isSDKInitialized() = StreamVideo.isInstalled
+
     init {
-        if (!StreamVideo.isInstalled) {
+        if (!isSDKInitialized()) {
             throw IllegalArgumentException(
                 "SDK hasn't been initialised yet - can't start a RtcSession",
             )
@@ -367,15 +384,7 @@ public class RtcSession internal constructor(
         // publisher = createPublisher()
 
         listenToSubscriberConnection()
-        val sfuConnectionModule = SfuConnectionModule(
-            context = clientImpl.context,
-            apiKey = apiKey,
-            apiUrl = sfuUrl,
-            wssUrl = sfuWsUrl,
-            connectionTimeoutInMs = 2000L,
-            userToken = sfuToken,
-            lifecycle = lifecycle,
-        )
+        val sfuConnectionModule: SfuConnectionModule = sfuConnectionModuleProvider.invoke()
         setSfuConnectionModule(sfuConnectionModule)
         listenToSfuSocket()
         coroutineScope.launch {
@@ -772,7 +781,7 @@ public class RtcSession internal constructor(
 
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
-        publisher?.connection?.close()
+        publisher?.close(true)
 
         subscriber = null
         publisher = null
@@ -1209,7 +1218,7 @@ public class RtcSession internal constructor(
             publisherPendingEvents.clear()
         }
 
-    private val publisherPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
+    internal val publisherPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
 
     private fun removeParticipantTracks(participant: Participant) {
         tracks.remove(participant.session_id).also {
@@ -1499,7 +1508,7 @@ public class RtcSession internal constructor(
     }
 
     // reply to when we get an offer from the SFU
-    private suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
+    internal suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {
             val result = sfuConnectionModule.api.sendAnswer(request)
             result.error?.let {

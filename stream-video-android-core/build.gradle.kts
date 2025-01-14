@@ -194,6 +194,8 @@ dependencies {
     implementation(libs.tink)
 
     // unit tests
+    testImplementation(libs.stream.result)
+    testImplementation(libs.stream.result.call)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)

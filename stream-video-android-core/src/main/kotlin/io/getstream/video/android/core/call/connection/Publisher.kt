@@ -301,7 +301,9 @@ internal class Publisher(
     private fun stopPublishing() {
         logger.d { "Stopping publishing all tracks" }
         this.transceiverCache.items().forEach { transceiverId ->
-            transceiverId.transceiver.stop()
+            safeCall {
+                transceiverId.transceiver.stop()
+            }
         }
     }
 

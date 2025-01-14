@@ -140,7 +140,7 @@ public class Call(
     private var callStatsReportingJob: Job? = null
     private var powerManager: PowerManager? = null
 
-    private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+    internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
