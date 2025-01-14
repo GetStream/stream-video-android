@@ -1211,7 +1211,6 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
-        clientImpl.state.maybeStopForegroundService(call = this)
         return clientImpl.accept(type, id)
     }
 
