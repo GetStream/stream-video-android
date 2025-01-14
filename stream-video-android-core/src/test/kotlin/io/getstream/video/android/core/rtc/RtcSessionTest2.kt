@@ -59,7 +59,6 @@ import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.TrackSubscriptionDetails
-import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
 class RtcSessionTest2 {
 
@@ -292,7 +291,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { mockk(relaxed = true) },
-                )
+                ),
             )
             val mockTrackSub = TrackSubscriptionDetails(
                 user_id = "user-123",
