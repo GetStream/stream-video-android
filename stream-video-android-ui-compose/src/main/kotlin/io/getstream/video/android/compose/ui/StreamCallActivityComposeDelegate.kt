@@ -235,7 +235,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         granted: List<String>,
         notGranted: List<String>,
     ) {
-        if (!showRationale && configuration.canSkiPermissionRationale) {
+        if (!showRationale && configuration.canSkipPermissionRationale) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
             finish()
         } else {

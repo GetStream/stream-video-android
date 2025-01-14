@@ -36,7 +36,7 @@ public data class StreamCallActivityConfiguration(
     /** When the call has ended for any reason, close the screen */
     val closeScreenOnCallEnded: Boolean = true,
     /** When set to false, the activity will simply ignore the `showRationale` from the system and show the rationale screen anyway. */
-    val canSkiPermissionRationale: Boolean = true,
+    val canSkipPermissionRationale: Boolean = true,
     /** When set to true, the activity will keep the screen on. */
     val canKeepScreenOn: Boolean = true,
     /**
@@ -62,7 +62,7 @@ public fun Bundle.extractStreamActivityConfig(): StreamCallActivityConfiguration
         closeScreenOnError = closeScreenOnError,
         closeScreenOnCallEnded = closeScreenOnCallEnded,
         canKeepScreenOn = canKeepScreenOn,
-        canSkiPermissionRationale = canSkipPermissionRationale,
+        canSkipPermissionRationale = canSkipPermissionRationale,
         custom = custom,
     )
 }
@@ -76,7 +76,7 @@ public fun StreamCallActivityConfiguration.toBundle(): Bundle {
     bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_CLOSE_ON_ENDED, closeScreenOnCallEnded)
     bundle.putBoolean(
         StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE,
-        canSkiPermissionRationale,
+        canSkipPermissionRationale,
     )
     bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_KEEP_SCREEN_ON, canKeepScreenOn)
     bundle.putBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM, custom)
