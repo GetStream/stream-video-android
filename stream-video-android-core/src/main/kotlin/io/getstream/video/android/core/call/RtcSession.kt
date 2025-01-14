@@ -1541,7 +1541,7 @@ public class RtcSession internal constructor(
     }
 
     // share what size and which participants we're looking at
-    private suspend fun updateSubscriptions(
+    internal suspend fun updateSubscriptions(
         request: UpdateSubscriptionsRequest,
     ): Result<UpdateSubscriptionsResponse> = wrapAPICall {
         logger.v { "[updateSubscriptions] #sfu; #track; request $request" }
