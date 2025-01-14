@@ -614,7 +614,7 @@ class PublisherTest {
         val videoSender = VideoSender(
             track_type = TrackType.TRACK_TYPE_VIDEO,
             codec = Codec(96, "VP8"),
-            layers = listOf()
+            layers = listOf(),
         )
 
         // When
@@ -634,7 +634,7 @@ class PublisherTest {
             maxFramerate = 30,
             maxBitrate = 300_000,
             scaleResolutionDownBy = 1.0,
-            scalabilityMode = "L3T2"
+            scalabilityMode = "L3T2",
         )
         every { mockRtpSender.parameters } returns mockParams
         val mockTransceiver = mockk<TransceiverId>(relaxed = true)
@@ -643,7 +643,7 @@ class PublisherTest {
         val videoSender = VideoSender(
             track_type = TrackType.TRACK_TYPE_VIDEO,
             codec = Codec(96, "VP8"),
-            layers = listOf()
+            layers = listOf(),
         )
 
         // When
@@ -664,7 +664,7 @@ class PublisherTest {
             scaleResolutionDownBy = 1.0,
             scalabilityMode = "L3T2",
             codec = vp9Codec(),
-            maxBitrate = 300_000
+            maxBitrate = 300_000,
         )
         every { mockRtpSender.parameters } returns singleEnc
         val mockTransceiver = mockk<TransceiverId>(relaxed = true)
@@ -676,12 +676,12 @@ class PublisherTest {
             max_framerate = 30,
             scale_resolution_down_by = 1.0f,
             max_bitrate = 300_000,
-            scalability_mode = "L3T2"
+            scalability_mode = "L3T2",
         )
         val videoSender = VideoSender(
             track_type = TrackType.TRACK_TYPE_VIDEO,
             codec = Codec(98, "VP9", clock_rate = 9000, fmtp = ""),
-            layers = listOf(matchingLayer)
+            layers = listOf(matchingLayer),
         )
 
         // When
@@ -710,25 +710,27 @@ class PublisherTest {
             max_framerate = 15,
             scale_resolution_down_by = 2.0f,
             max_bitrate = 300_000,
-            scalability_mode = "L3T2"
+            scalability_mode = "L3T2",
         )
         val videoSender = VideoSender(
             track_type = TrackType.TRACK_TYPE_VIDEO,
             codec = Codec(100, "VP9"),
-            layers = listOf(layer)
+            layers = listOf(layer),
         )
 
         // When
         publisher.changePublishQuality(videoSender)
 
         // Then
-        verify { mockRtpSender.parameters = match {
-            it.encodings[0].active &&
+        verify {
+            mockRtpSender.parameters = match {
+                it.encodings[0].active &&
                     it.encodings[0].maxBitrateBps == 300_000 &&
                     it.encodings[0].maxFramerate == 15 &&
                     it.encodings[0].scaleResolutionDownBy == 2.0 &&
                     it.encodings[0].scalabilityMode == "L3T2"
-        } }
+            }
+        }
     }
 
     @Test
@@ -741,7 +743,7 @@ class PublisherTest {
             maxFramerate = 30,
             scaleResolutionDownBy = 1.0,
             scalabilityMode = "L3T2",
-            maxBitrate = 300_000
+            maxBitrate = 300_000,
         )
         every { mockRtpSender.parameters } returns params
         val mockTransceiver = mockk<TransceiverId>(relaxed = true)
@@ -757,21 +759,23 @@ class PublisherTest {
                     max_framerate = 24,
                     scale_resolution_down_by = 1.0f,
                     max_bitrate = 150_000,
-                    scalability_mode = "L3T3"
-                )
-            )
+                    scalability_mode = "L3T3",
+                ),
+            ),
         )
 
         // When
         publisher.changePublishQuality(videoSender)
 
         // Then
-        verify { mockRtpSender.parameters = match {
-            it.encodings[0].active &&
+        verify {
+            mockRtpSender.parameters = match {
+                it.encodings[0].active &&
                     it.encodings[0].maxBitrateBps == 150_000 &&
                     it.encodings[0].maxFramerate == 24 &&
                     it.encodings[0].scalabilityMode == "L3T3"
-        } }
+            }
+        }
     }
     //endregion
 
@@ -844,12 +848,12 @@ class PublisherTest {
         scaleResolutionDownBy: Double = 1.0,
         scalabilityMode: String? = null,
         codec: RtpParameters.Codec? = null,
-        maxBitrate: Int
+        maxBitrate: Int,
     ): RtpParameters {
         val enc = RtpParameters.Encoding(
             rid ?: "",
             active,
-            1.0
+            1.0,
         )
         enc.maxFramerate = maxFramerate
         enc.scaleResolutionDownBy = scaleResolutionDownBy
@@ -862,7 +866,7 @@ class PublisherTest {
             RtpParameters.Rtcp::class.java,
             MutableList::class.java, // for headerExtensions
             MutableList::class.java, // for encodings
-            MutableList::class.java  // for codecs
+            MutableList::class.java, // for codecs
         )
         constructor.isAccessible = true
 
@@ -872,7 +876,7 @@ class PublisherTest {
             null, // Rtcp object or null
             emptyList<HeaderExtension>(), // headerExtensions
             mutableListOf(enc), // encodings
-            codec?.let { mutableListOf(codec) } ?: mutableListOf<Codec>()  // codecs
+            codec?.let { mutableListOf(codec) } ?: mutableListOf<Codec>(), // codecs
         ) as RtpParameters
         return rtpParameters
     }
@@ -887,7 +891,7 @@ class PublisherTest {
         kind: MediaStreamTrack.MediaType = MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
         clockRate: Int? = 90000,
         numChannels: Int? = null,
-        parameters: Map<String, String> = emptyMap()
+        parameters: Map<String, String> = emptyMap(),
     ): RtpParameters.Codec {
         val constructor: Constructor<RtpParameters.Codec> = RtpParameters.Codec::class.java
             .getDeclaredConstructor(
@@ -896,7 +900,7 @@ class PublisherTest {
                 MediaStreamTrack.MediaType::class.java,
                 Int::class.javaObjectType,
                 Int::class.javaObjectType,
-                Map::class.java
+                Map::class.java,
             )
         constructor.isAccessible = true
 
@@ -906,7 +910,7 @@ class PublisherTest {
             kind,
             clockRate,
             numChannels,
-            parameters
+            parameters,
         )
     }
 
@@ -920,7 +924,7 @@ class PublisherTest {
             kind = MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
             clockRate = 90000,
             numChannels = null,
-            parameters = mapOf("profile-level-id" to "42E01F")
+            parameters = mapOf("profile-level-id" to "42E01F"),
         )
     }
 
@@ -934,7 +938,7 @@ class PublisherTest {
             kind = MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
             clockRate = 90000,
             numChannels = null,
-            parameters = mapOf()
+            parameters = mapOf(),
         )
     }
     //endregion

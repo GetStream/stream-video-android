@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.connection
 
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
