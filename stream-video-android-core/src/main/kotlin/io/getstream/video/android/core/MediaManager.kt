@@ -469,6 +469,10 @@ class MicrophoneManager(
 
                     _devices.value = devices
                     _selectedDevice.value = selected
+
+                    capturedOnAudioDevicesUpdate?.invoke()
+                    capturedOnAudioDevicesUpdate = null
+                    setupCompleted = true
                 },
             ).also {
                 it.start()
