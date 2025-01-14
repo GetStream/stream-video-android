@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.connection
 
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
@@ -42,6 +43,7 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
+import org.webrtc.RtpParameters
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
@@ -347,10 +349,30 @@ internal class Publisher(
             return
         }
 
+        params.encodings.forEach {
+            println("Encoding: ${it.stringify()}")
+        }
+
         val codecInUse = params.codecs.firstOrNull()
         val usesSvcCodec = codecInUse != null && isSvcCodec(codecInUse.name)
-        var changed = false
+        val changed = updateEncodings(params, usesSvcCodec, enabledLayers)
 
+        val activeLayers = params.encodings.filter { it.active }
+        if (!changed) {
+            logger.i { "Update publish quality, no change: $activeLayers" }
+            return
+        }
+
+        sender.parameters = params
+        logger.i { "Update publish quality, enabled rids: $activeLayers" }
+    }
+
+    internal fun updateEncodings(
+        params: RtpParameters,
+        usesSvcCodec: Boolean,
+        enabledLayers: List<VideoLayerSetting>,
+    ): Boolean {
+        var changed = false
         for (encoder in params.encodings) {
             val layer = if (usesSvcCodec) {
                 enabledLayers.firstOrNull()
@@ -385,15 +407,7 @@ internal class Publisher(
                 changed = true
             }
         }
-
-        val activeLayers = params.encodings.filter { it.active }
-        if (!changed) {
-            logger.i { "Update publish quality, no change: $activeLayers" }
-            return
-        }
-
-        sender.parameters = params
-        logger.i { "Update publish quality, enabled rids: $activeLayers" }
+        return changed
     }
 
     suspend fun restartIce() {

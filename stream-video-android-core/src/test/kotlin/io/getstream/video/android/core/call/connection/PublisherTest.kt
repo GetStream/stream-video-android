@@ -51,6 +51,7 @@ import org.webrtc.MediaConstraints
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
+import org.webrtc.RtpParameters.HeaderExtension
 import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
@@ -62,6 +63,7 @@ import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SetPublisherResponse
+import java.lang.reflect.Constructor
 import kotlin.test.assertTrue
 
 class PublisherTest {
@@ -604,6 +606,175 @@ class PublisherTest {
     }
     //endregion
 
+    // change publish quality region
+    @Test
+    fun `changePublishQuality does nothing if sender is null`() = runTest {
+        // Given
+        every { mockTransceiverCache.get(any()) } returns null
+        val videoSender = VideoSender(
+            track_type = TrackType.TRACK_TYPE_VIDEO,
+            codec = Codec(96, "VP8"),
+            layers = listOf()
+        )
+
+        // When
+        publisher.changePublishQuality(videoSender)
+
+        // Then
+        coVerify(exactly = 0) { publisher.updateEncodings(any(), any(), any()) }
+    }
+
+    @Test
+    fun `changePublishQuality does not do an update if encodings is empty`() = runTest {
+        // Given
+        val mockRtpSender = mockk<RtpSender>(relaxed = true)
+        val mockParams = buildRtpParams(
+            rid = "",
+            active = true,
+            maxFramerate = 30,
+            maxBitrate = 300_000,
+            scaleResolutionDownBy = 1.0,
+            scalabilityMode = "L3T2"
+        )
+        every { mockRtpSender.parameters } returns mockParams
+        val mockTransceiver = mockk<TransceiverId>(relaxed = true)
+        every { mockTransceiver.transceiver.sender } returns mockRtpSender
+        every { mockTransceiverCache.get(any()) } returns mockTransceiver.transceiver
+        val videoSender = VideoSender(
+            track_type = TrackType.TRACK_TYPE_VIDEO,
+            codec = Codec(96, "VP8"),
+            layers = listOf()
+        )
+
+        // When
+        publisher.changePublishQuality(videoSender)
+
+        // Then
+        coVerify(exactly = 0) { publisher.updateEncodings(any(), any(), any()) }
+    }
+
+    @Test
+    fun `changePublishQuality same settings no change and does not set parameters`() = runTest {
+        // Given
+        val mockRtpSender = mockk<RtpSender>(relaxed = true)
+        val singleEnc = buildRtpParams(
+            rid = "f",
+            active = true,
+            maxFramerate = 30,
+            scaleResolutionDownBy = 1.0,
+            scalabilityMode = "L3T2",
+            codec = vp9Codec(),
+            maxBitrate = 300_000
+        )
+        every { mockRtpSender.parameters } returns singleEnc
+        val mockTransceiver = mockk<TransceiverId>(relaxed = true)
+        every { mockTransceiver.transceiver.sender } returns mockRtpSender
+        every { mockTransceiverCache.get(any()) } returns mockTransceiver.transceiver
+        val matchingLayer = VideoLayerSetting(
+            name = "f",
+            active = true,
+            max_framerate = 30,
+            scale_resolution_down_by = 1.0f,
+            max_bitrate = 300_000,
+            scalability_mode = "L3T2"
+        )
+        val videoSender = VideoSender(
+            track_type = TrackType.TRACK_TYPE_VIDEO,
+            codec = Codec(98, "VP9", clock_rate = 9000, fmtp = ""),
+            layers = listOf(matchingLayer)
+        )
+
+        // When
+        publisher.changePublishQuality(videoSender)
+
+        // Then
+        coVerify(exactly = 0) { mockRtpSender.parameters = any() }
+    }
+
+    @Test
+    fun `changePublishQuality single encoding picks first layer if rid missing`() = runTest {
+        // Given
+        val mockRtpSender = mockk<RtpSender>(relaxed = true)
+        val singleEnc = buildRtpParams(
+            rid = "",
+            active = true,
+            maxBitrate = 300_000,
+        )
+        every { mockRtpSender.parameters } returns singleEnc
+        val mockTransceiver = mockk<TransceiverId>(relaxed = true)
+        every { mockTransceiver.transceiver.sender } returns mockRtpSender
+        every { mockTransceiverCache.get(any()) } returns mockTransceiver.transceiver
+        val layer = VideoLayerSetting(
+            name = "someRid",
+            active = true,
+            max_framerate = 15,
+            scale_resolution_down_by = 2.0f,
+            max_bitrate = 300_000,
+            scalability_mode = "L3T2"
+        )
+        val videoSender = VideoSender(
+            track_type = TrackType.TRACK_TYPE_VIDEO,
+            codec = Codec(100, "VP9"),
+            layers = listOf(layer)
+        )
+
+        // When
+        publisher.changePublishQuality(videoSender)
+
+        // Then
+        verify { mockRtpSender.parameters = match {
+            it.encodings[0].active &&
+                    it.encodings[0].maxBitrateBps == 300_000 &&
+                    it.encodings[0].maxFramerate == 15 &&
+                    it.encodings[0].scaleResolutionDownBy == 2.0 &&
+                    it.encodings[0].scalabilityMode == "L3T2"
+        } }
+    }
+
+    @Test
+    fun `changePublishQuality usesSvcCodec updates only first encoding`() = runTest {
+        // Given
+        val mockRtpSender = mockk<RtpSender>(relaxed = true)
+        val params = buildRtpParams(
+            rid = "",
+            active = true,
+            maxFramerate = 30,
+            scaleResolutionDownBy = 1.0,
+            scalabilityMode = "L3T2",
+            maxBitrate = 300_000
+        )
+        every { mockRtpSender.parameters } returns params
+        val mockTransceiver = mockk<TransceiverId>(relaxed = true)
+        every { mockTransceiver.transceiver.sender } returns mockRtpSender
+        every { mockTransceiverCache.get(any()) } returns mockTransceiver.transceiver
+        val videoSender = VideoSender(
+            track_type = TrackType.TRACK_TYPE_VIDEO,
+            codec = Codec(100, "VP9"),
+            layers = listOf(
+                VideoLayerSetting(
+                    name = "A",
+                    active = true,
+                    max_framerate = 24,
+                    scale_resolution_down_by = 1.0f,
+                    max_bitrate = 150_000,
+                    scalability_mode = "L3T3"
+                )
+            )
+        )
+
+        // When
+        publisher.changePublishQuality(videoSender)
+
+        // Then
+        verify { mockRtpSender.parameters = match {
+            it.encodings[0].active &&
+                    it.encodings[0].maxBitrateBps == 150_000 &&
+                    it.encodings[0].maxFramerate == 24 &&
+                    it.encodings[0].scalabilityMode == "L3T3"
+        } }
+    }
+    //endregion
+
     //region-mid
     @Test
     fun `has existing transceiverMid`() = runTest {
@@ -662,6 +833,109 @@ class PublisherTest {
 
         val result = publisher.extractMid(tx, -1, sdp)
         assertEquals("Should return empty if no media matches track", "", result)
+    }
+    //endregion
+
+    // region utils
+    private fun buildRtpParams(
+        rid: String?,
+        active: Boolean,
+        maxFramerate: Int = 0,
+        scaleResolutionDownBy: Double = 1.0,
+        scalabilityMode: String? = null,
+        codec: RtpParameters.Codec? = null,
+        maxBitrate: Int
+    ): RtpParameters {
+        val enc = RtpParameters.Encoding(
+            rid ?: "",
+            active,
+            1.0
+        )
+        enc.maxFramerate = maxFramerate
+        enc.scaleResolutionDownBy = scaleResolutionDownBy
+        enc.scalabilityMode = scalabilityMode
+        enc.minBitrateBps = maxBitrate
+        enc.maxBitrateBps = maxBitrate
+        val constructor = RtpParameters::class.java.getDeclaredConstructor(
+            String::class.java,
+            RtpParameters.DegradationPreference::class.java,
+            RtpParameters.Rtcp::class.java,
+            MutableList::class.java, // for headerExtensions
+            MutableList::class.java, // for encodings
+            MutableList::class.java  // for codecs
+        )
+        constructor.isAccessible = true
+
+        val rtpParameters = constructor.newInstance(
+            "fake-transaction-id",
+            null, // or a real DegradationPreference
+            null, // Rtcp object or null
+            emptyList<HeaderExtension>(), // headerExtensions
+            mutableListOf(enc), // encodings
+            codec?.let { mutableListOf(codec) } ?: mutableListOf<Codec>()  // codecs
+        ) as RtpParameters
+        return rtpParameters
+    }
+
+    /**
+     * Uses reflection to create a [RtpParameters.Codec] instance, bypassing the private/package-private
+     * constructor. Adjust argument defaults or values as needed.
+     */
+    fun createCodecViaReflection(
+        payloadType: Int = 96,
+        name: String = "VP8",
+        kind: MediaStreamTrack.MediaType = MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+        clockRate: Int? = 90000,
+        numChannels: Int? = null,
+        parameters: Map<String, String> = emptyMap()
+    ): RtpParameters.Codec {
+        val constructor: Constructor<RtpParameters.Codec> = RtpParameters.Codec::class.java
+            .getDeclaredConstructor(
+                Int::class.javaPrimitiveType,
+                String::class.java,
+                MediaStreamTrack.MediaType::class.java,
+                Int::class.javaObjectType,
+                Int::class.javaObjectType,
+                Map::class.java
+            )
+        constructor.isAccessible = true
+
+        return constructor.newInstance(
+            payloadType,
+            name,
+            kind,
+            clockRate,
+            numChannels,
+            parameters
+        )
+    }
+
+    /**
+     * Example usage for VP8
+     */
+    fun vp8Codec(): RtpParameters.Codec {
+        return createCodecViaReflection(
+            payloadType = 96,
+            name = "VP8",
+            kind = MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+            clockRate = 90000,
+            numChannels = null,
+            parameters = mapOf("profile-level-id" to "42E01F")
+        )
+    }
+
+    /**
+     * Example usage for VP9
+     */
+    fun vp9Codec(): RtpParameters.Codec {
+        return createCodecViaReflection(
+            payloadType = 98,
+            name = "VP9",
+            kind = MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
+            clockRate = 90000,
+            numChannels = null,
+            parameters = mapOf()
+        )
     }
     //endregion
 }
