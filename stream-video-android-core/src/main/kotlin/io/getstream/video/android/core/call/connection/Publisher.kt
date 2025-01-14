@@ -348,10 +348,6 @@ internal class Publisher(
             return
         }
 
-        params.encodings.forEach {
-            println("Encoding: ${it.stringify()}")
-        }
-
         val codecInUse = params.codecs.firstOrNull()
         val usesSvcCodec = codecInUse != null && isSvcCodec(codecInUse.name)
         val changed = updateEncodings(params, usesSvcCodec, enabledLayers)

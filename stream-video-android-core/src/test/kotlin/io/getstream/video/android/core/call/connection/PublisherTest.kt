@@ -628,7 +628,7 @@ class PublisherTest {
     fun `changePublishQuality does not do an update if encodings is empty`() = runTest {
         // Given
         val mockRtpSender = mockk<RtpSender>(relaxed = true)
-        val mockParams = buildRtpParams(
+        val mockParams = buildEmptyEncodingParameters(
             rid = "",
             active = true,
             maxFramerate = 30,
@@ -880,6 +880,47 @@ class PublisherTest {
         ) as RtpParameters
         return rtpParameters
     }
+
+    fun buildEmptyEncodingParameters(
+            rid: String?,
+            active: Boolean,
+            maxFramerate: Int = 0,
+            scaleResolutionDownBy: Double = 1.0,
+            scalabilityMode: String? = null,
+            codec: RtpParameters.Codec? = null,
+            maxBitrate: Int,
+        ): RtpParameters {
+            val enc = RtpParameters.Encoding(
+                rid ?: "",
+                active,
+                1.0,
+            )
+            enc.maxFramerate = maxFramerate
+            enc.scaleResolutionDownBy = scaleResolutionDownBy
+            enc.scalabilityMode = scalabilityMode
+            enc.minBitrateBps = maxBitrate
+            enc.maxBitrateBps = maxBitrate
+            val constructor = RtpParameters::class.java.getDeclaredConstructor(
+                String::class.java,
+                RtpParameters.DegradationPreference::class.java,
+                RtpParameters.Rtcp::class.java,
+                MutableList::class.java, // for headerExtensions
+                MutableList::class.java, // for encodings
+                MutableList::class.java, // for codecs
+            )
+            constructor.isAccessible = true
+
+            val rtpParameters = constructor.newInstance(
+                "fake-transaction-id",
+                null, // or a real DegradationPreference
+                null, // Rtcp object or null
+                emptyList<HeaderExtension>(), // headerExtensions
+                emptyList<RtpParameters.Encoding>(), // encodings
+                codec?.let { mutableListOf(codec) } ?: mutableListOf<Codec>(), // codecs
+            ) as RtpParameters
+            return rtpParameters
+        }
+
 
     /**
      * Uses reflection to create a [RtpParameters.Codec] instance, bypassing the private/package-private
