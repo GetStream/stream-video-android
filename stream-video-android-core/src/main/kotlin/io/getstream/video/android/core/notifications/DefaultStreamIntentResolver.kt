@@ -160,7 +160,7 @@ public class DefaultStreamIntentResolver(val context: Context) {
     ): PendingIntent? = searchBroadcastPendingIntent(Intent(ACTION_REJECT_CALL), callId)
 
     /**
-     * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
+     * Searches for a broadcast receiver that can consume the [ACTION_LEAVE_CALL] intent to reject
      * a call from the Stream Server.
      *
      * @param callId The ID of the call.
