@@ -219,7 +219,7 @@ internal open class CallService : Service() {
         fun removeIncomingCall(
             context: Context,
             callId: StreamCallId,
-            config: CallServiceConfig = DefaultCallConfigurations.default,
+            callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
         ) {
             safeCallWithResult {
                 context.startService(
@@ -227,7 +227,7 @@ internal open class CallService : Service() {
                         context,
                         callId,
                         TRIGGER_REMOVE_INCOMING_CALL,
-                        callServiceConfiguration = config,
+                        callServiceConfiguration = callServiceConfiguration,
                     ),
                 )!!
             }.onError {

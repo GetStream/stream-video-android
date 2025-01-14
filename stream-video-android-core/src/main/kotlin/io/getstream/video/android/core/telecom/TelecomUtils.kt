@@ -29,6 +29,7 @@ import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler.getRingingCallNotification
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.model.StreamCallId
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -44,7 +45,7 @@ internal object TelecomCompat {
         callDisplayName: String = "Unknown",
         isIncomingCall: Boolean = false,
     ) {
-        withCall(call, callId) { streamCall ->
+        withCall(call, callId) { streamCall, callConfig ->
             checkTelecomSupport(
                 context = context,
                 onSupported = { telecomHandler ->
@@ -52,23 +53,22 @@ internal object TelecomCompat {
                 },
                 onNotSupported = {
                     if (isIncomingCall) {
-                        checkForegroundServiceEnabled(
-                            onEnabled = {
-                                CallService.showIncomingCall(
-                                    context.applicationContext,
-                                    StreamCallId.fromCallCid(streamCall.cid),
-                                    callDisplayName,
-                                    notification = callId?.let {
-                                        getRingingCallNotification(
-                                            RingingState.Incoming(),
-                                            callId,
-                                            callDisplayName,
-                                            shouldHaveContentIntent = true,
-                                        )
-                                    },
-                                )
-                            },
-                        )
+                        ifForegroundServiceEnabled(callConfig) {
+                            CallService.showIncomingCall(
+                                context.applicationContext,
+                                StreamCallId.fromCallCid(streamCall.cid),
+                                callDisplayName,
+                                callServiceConfiguration = callConfig,
+                                notification = callId?.let {
+                                    getRingingCallNotification(
+                                        RingingState.Incoming(),
+                                        callId,
+                                        callDisplayName,
+                                        shouldHaveContentIntent = true,
+                                    )
+                                },
+                            )
+                        }
                     }
                 },
             )
@@ -77,20 +77,29 @@ internal object TelecomCompat {
 
     private inline fun withCall(
         call: StreamCall?,
-        callId: StreamCallId?,
-        doAction: (Call) -> Unit,
+        callId: StreamCallId? = null,
+        doAction: (Call, CallServiceConfig) -> Unit,
     ) {
         contract {
             callsInPlace(doAction, InvocationKind.AT_MOST_ONCE)
         }
 
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+
         when {
-            call != null -> call
-
-            callId != null -> StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
-
+            streamVideo != null && call != null -> Pair(streamVideo, call)
+            streamVideo != null && callId != null -> Pair(
+                streamVideo,
+                streamVideo.call(callId.type, callId.id),
+            )
             else -> null
-        }?.let { doAction(it) }
+        }?.let {
+            val client = it.first
+            val streamCall = it.second
+            val callConfig = client.callServiceConfigRegistry.get(streamCall.type)
+
+            doAction(streamCall, callConfig)
+        }
     }
 
     private inline fun <T> checkTelecomSupport(
@@ -107,21 +116,16 @@ internal object TelecomCompat {
         return TelecomHandler.getInstance(context)?.let(onSupported) ?: onNotSupported()
     }
 
-    private inline fun checkForegroundServiceEnabled(onEnabled: () -> Unit) {
+    private inline fun ifForegroundServiceEnabled(callConfig: CallServiceConfig, onEnabled: () -> Unit) {
         contract {
             callsInPlace(onEnabled, InvocationKind.AT_MOST_ONCE)
         }
 
-        (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoClient ->
-            val callConfig = streamVideoClient.callServiceConfigRegistry.get(
-                "default",
-            ) // TODO-Telecom: Use call.type
-            if (callConfig.runCallServiceInForeground) onEnabled()
-        }
+        if (callConfig.runCallServiceInForeground) onEnabled()
     }
 
     fun changeCallState(context: Context, newState: TelecomCallState, call: StreamCall? = null, callId: StreamCallId? = null) {
-        withCall(call, callId) { streamCall ->
+        withCall(call, callId) { streamCall, callConfig ->
             checkTelecomSupport(
                 context = context,
                 onSupported = { telecomHandler ->
@@ -129,22 +133,21 @@ internal object TelecomCompat {
                 },
                 onNotSupported = {
                     if (newState == TelecomCallState.OUTGOING || newState == TelecomCallState.ONGOING) {
-                        checkForegroundServiceEnabled(
-                            onEnabled = {
-                                ContextCompat.startForegroundService(
+                        ifForegroundServiceEnabled(callConfig) {
+                            ContextCompat.startForegroundService(
+                                context,
+                                CallService.buildStartIntent(
                                     context,
-                                    CallService.buildStartIntent(
-                                        context,
-                                        StreamCallId.fromCallCid(streamCall.cid),
-                                        if (newState == TelecomCallState.OUTGOING) {
-                                            CallService.TRIGGER_OUTGOING_CALL
-                                        } else {
-                                            CallService.TRIGGER_ONGOING_CALL
-                                        },
-                                    ),
-                                )
-                            },
-                        )
+                                    StreamCallId.fromCallCid(streamCall.cid),
+                                    if (newState == TelecomCallState.OUTGOING) {
+                                        CallService.TRIGGER_OUTGOING_CALL
+                                    } else {
+                                        CallService.TRIGGER_ONGOING_CALL
+                                    },
+                                    callServiceConfiguration = callConfig,
+                                ),
+                            )
+                        }
                     }
                 },
             )
@@ -156,28 +159,32 @@ internal object TelecomCompat {
         call: StreamCall,
         isIncomingCall: Boolean = false,
     ) {
-        checkTelecomSupport(
-            context = context,
-            onSupported = { telecomHandler ->
-                telecomHandler.unregisterCall(call)
-            },
-            onNotSupported = {
-                checkForegroundServiceEnabled(
-                    onEnabled = {
+        withCall(call) { streamCall, callConfig ->
+            checkTelecomSupport(
+                context = context,
+                onSupported = { telecomHandler ->
+                    telecomHandler.unregisterCall(call)
+                },
+                onNotSupported = {
+                    ifForegroundServiceEnabled(callConfig) {
                         if (isIncomingCall) {
                             CallService.removeIncomingCall(
                                 context,
                                 StreamCallId.fromCallCid(call.cid),
+                                callServiceConfiguration = callConfig,
                             )
                         } else {
                             context.stopService(
-                                CallService.buildStopIntent(context.applicationContext),
+                                CallService.buildStopIntent(
+                                    context = context.applicationContext,
+                                    callServiceConfiguration = callConfig,
+                                ),
                             )
                         }
-                    },
-                )
-            },
-        )
+                    }
+                },
+            )
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.O)
