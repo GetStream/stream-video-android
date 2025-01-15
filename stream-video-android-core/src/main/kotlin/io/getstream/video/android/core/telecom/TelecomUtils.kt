@@ -48,7 +48,7 @@ internal object TelecomCompat {
             checkTelecomSupport(
                 context = context,
                 onSupported = { telecomHandler ->
-                    telecomHandler.registerCall(streamCall, isIncomingCall)
+                    telecomHandler.registerCall(streamCall, callConfig, isIncomingCall)
                 },
                 onNotSupported = {
                     if (isIncomingCall) {

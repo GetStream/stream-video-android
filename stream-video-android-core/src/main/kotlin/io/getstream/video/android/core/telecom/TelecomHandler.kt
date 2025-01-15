@@ -126,7 +126,11 @@ internal class TelecomHandler private constructor(
         streamVideo = StreamVideo.instanceOrNull()
     }
 
-    fun registerCall(call: StreamCall, wasTriggeredByIncomingNotification: Boolean = false) {
+    fun registerCall(
+        call: StreamCall,
+        callConfig: CallServiceConfig,
+        wasTriggeredByIncomingNotification: Boolean = false,
+    ) {
         logger.d {
             "[registerCall] Call ID: ${call.id}, wasTriggeredByIncomingNotification: $wasTriggeredByIncomingNotification"
         }
@@ -139,6 +143,7 @@ internal class TelecomHandler private constructor(
             calls[call.cid] = TelecomCall(
                 streamCall = call,
                 state = TelecomCallState.IDLE,
+                config = callConfig,
                 parentScope = telecomHandlerScope,
             )
 
@@ -228,6 +233,12 @@ internal class TelecomHandler private constructor(
 
                     TelecomCallState.OUTGOING, TelecomCallState.ONGOING -> {
                         val isOutgoingCall = telecomCall.state == TelecomCallState.OUTGOING
+                        val getNotification = {
+                            streamVideo.getOngoingCallNotification(
+                                callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
+                                isOutgoingCall = isOutgoingCall,
+                            )
+                        }
 
                         logger.d {
                             "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
@@ -242,11 +253,6 @@ internal class TelecomHandler private constructor(
                             callSoundPlayer.stopCallSound()
                             if (telecomCall.config.runCallServiceInForeground) getNotification() else null
                         }
-
-                        streamVideo.getOngoingCallNotification(
-                            callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
-                            isOutgoingCall = isOutgoingCall,
-                        )
                     }
 
                     else -> {
@@ -261,7 +267,7 @@ internal class TelecomHandler private constructor(
                     NotificationManagerCompat
                         .from(applicationContext)
                         .notify(telecomCall.notificationId, it)
-                }
+                } ?: cancelNotification(telecomCall.notificationId)
             }
         }
     }
@@ -323,6 +329,7 @@ internal class TelecomHandler private constructor(
 private class TelecomCall(
     val streamCall: StreamCall,
     var state: TelecomCallState,
+    val config: CallServiceConfig,
     val parentScope: CoroutineScope,
 ) {
 
