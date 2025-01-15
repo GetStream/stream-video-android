@@ -20,6 +20,9 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.os.Build
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
@@ -33,14 +36,17 @@ import org.webrtc.Logging
 import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
+import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.ResolutionAdjustment
+import org.webrtc.RtpCapabilities
 import org.webrtc.SimulcastAlignedVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import stream.video.sfu.models.PublishOption
 import java.nio.ByteBuffer
 
 /**
@@ -247,6 +253,15 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
+     * Returns the capabilities of the sender based on the [mediaType].
+     *
+     * @param mediaType The type of media we're sending.
+     */
+    fun getSenderCapabilities(mediaType: MediaStreamTrack.MediaType): RtpCapabilities {
+        return factory.getRtpSenderCapabilities(mediaType)
+    }
+
+    /**
      * Builds a [StreamPeerConnection] that wraps the WebRTC [PeerConnection] and exposes several
      * helpful handlers.
      *
@@ -289,6 +304,47 @@ public class StreamPeerConnectionFactory(
         return peerConnection
     }
 
+    internal fun makePublisher(
+        me: ParticipantState,
+        mediaManager: MediaManagerImpl,
+        publishOptions: List<PublishOption>,
+        coroutineScope: CoroutineScope,
+        configuration: PeerConnection.RTCConfiguration,
+        mediaConstraints: MediaConstraints,
+        onStreamAdded: ((MediaStream) -> Unit)? = null,
+        onNegotiationNeeded: (StreamPeerConnection, StreamPeerType) -> Unit,
+        onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)? = null,
+        maxPublishingBitrate: Int = 1_200_000,
+        sfuClient: SignalServerService,
+        sessionId: String,
+        rejoin: () -> Unit = {},
+    ): Publisher {
+        val peerConnection = Publisher(
+            sessionId = sessionId,
+            sfuClient = sfuClient,
+            peerConnectionFactory = this,
+            localParticipant = me,
+            mediaManager = mediaManager,
+            publishOptions = publishOptions,
+            coroutineScope = coroutineScope,
+            type = StreamPeerType.PUBLISHER,
+            mediaConstraints = mediaConstraints,
+            onStreamAdded = onStreamAdded,
+            onNegotiationNeeded = onNegotiationNeeded,
+            onIceCandidate = onIceCandidate,
+            maxBitRate = maxPublishingBitrate,
+            rejoin = rejoin,
+        )
+        val connection = makePeerConnectionInternal(
+            configuration = configuration,
+            observer = peerConnection,
+        )
+        webRtcLogger.d { "type ${StreamPeerType.PUBLISHER} $peerConnection is now monitoring $connection" }
+        peerConnection.initialize(connection)
+
+        return peerConnection
+    }
+
     /**
      * Builds a [PeerConnection] internally that connects to the server and is able to send and
      * receive tracks.
@@ -297,7 +353,7 @@ public class StreamPeerConnectionFactory(
      * @param observer Handler used to observe different states of the connection.
      * @return [PeerConnection] that's fully set up.
      */
-    private fun makePeerConnectionInternal(
+    internal fun makePeerConnectionInternal(
         configuration: PeerConnection.RTCConfiguration,
         observer: PeerConnection.Observer?,
     ): PeerConnection {

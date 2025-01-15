@@ -184,6 +184,7 @@ message JoinRequest {
 
   ReconnectDetails reconnect_details = 7;
   repeated models.PublishOption preferred_publish_options = 9;
+  repeated models.SubscribeOption preferred_subscribe_options = 10;
 }
 
 message ReconnectDetails {
