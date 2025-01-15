@@ -2,7 +2,7 @@
 <html class="no-js">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>onNegotiationNeeded</title>
+    <title>getLivestreamGuestCallServiceConfig</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
     <script>document.documentElement.classList.replace("no-js","js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.2.0
+            <div class="library-version">1.3.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -58,15 +58,15 @@
                 <div class="sidebar--inner" id="sideMenu"></div>
             </div>
             <div id="main">
-<div class="main-content" data-page-type="member" id="content" pageids="stream-video-android-core::io.getstream.video.android.core.call/RtcSession/onNegotiationNeeded/#io.getstream.video.android.core.call.connection.StreamPeerConnection#io.getstream.video.android.core.model.StreamPeerType/PointingToDeclaration//-1625990423">
-  <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.core.call</a><span class="delimiter">/</span><a href="index.html">RtcSession</a><span class="delimiter">/</span><span class="current">onNegotiationNeeded</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="stream-video-android-core::io.getstream.video.android.core.notifications.internal.service/DefaultCallConfigurations/getLivestreamGuestCallServiceConfig/#/PointingToDeclaration//-1625990423">
+  <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.core.notifications.internal.service</a><span class="delimiter">/</span><a href="index.html">DefaultCallConfigurations</a><span class="delimiter">/</span><span class="current">getLivestreamGuestCallServiceConfig</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>on</span><wbr><span>Negotiation</span><wbr><span><span>Needed</span></span></h1>
+    <h1 class="cover"><span>get</span><wbr><span>Livestream</span><wbr><span>Guest</span><wbr><span>Call</span><wbr><span>Service</span><wbr><span><span>Config</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/VisibleForTesting.html"><span class="token annotation builtin">VisibleForTesting</span></a></div></div><span class="token keyword">fun </span><a href="on-negotiation-needed.html"><span class="token function">onNegotiationNeeded</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">peerConnection<span class="token operator">: </span><a href="../../io.getstream.video.android.core.call.connection/-stream-peer-connection/index.html">StreamPeerConnection</a><span class="token punctuation">, </span></span><span class="parameter ">peerType<span class="token operator">: </span><a href="../../io.getstream.video.android.core.model/-stream-peer-type/index.html">StreamPeerType</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/negotiationneeded_event</p><p class="paragraph">Is called whenever a negotiation is needed. Common examples include</p><ul><li><p class="paragraph">Adding a new media stream</p></li><li><p class="paragraph">Adding an audio Stream</p></li><li><p class="paragraph">A screenshare track is started</p></li></ul><p class="paragraph">Creates a new SDP</p><ul><li><p class="paragraph">And sets it on the localDescription</p></li><li><p class="paragraph">Enables video simulcast</p></li><li><p class="paragraph">calls setPublisher</p></li><li><p class="paragraph">sets setRemoteDescription</p></li></ul><p class="paragraph">Retry behaviour is to retry 3 times quickly as long as</p><ul><li><p class="paragraph">the sfu didn't change</p></li><li><p class="paragraph">the sdp didn't change If that fails ask the call monitor to do an ice restart</p></li></ul></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-livestream-guest-call-service-config.html"><span class="token function">getLivestreamGuestCallServiceConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="../../io.getstream.video.android.core.call/-call-type/index.html">CallType</a><span class="token punctuation">, </span><a href="../-call-service-config/index.html">CallServiceConfig</a><span class="token operator">&gt;</span></div><p class="paragraph">Retrieves a map of livestream guest call configurations.</p><p class="paragraph">This includes configurations for any marker, audio calls, and livestream guest calls. Modifies the livestream configuration to run in the foreground and use media audio.</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">A map where the keys are [CallType` values and the values are <a href="../-call-service-config/index.html">CallServiceConfig</a> instances.</p></span></div></div>
 </div>
       <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
       </div>
             </div>
         </div>
