@@ -8,6 +8,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
+  BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
+  BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
+  BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
   METRICS_PROJECT: "stream-video-android-metrics"
   MODULES: "stream-video-android-core stream-video-android-ui-xml stream-video-android-ui-compose"
   VARIANTS: "debug release"
@@ -78,12 +82,15 @@ jobs:
         run: |
           git fetch origin $BRANCH_NAME
           git checkout $BRANCH_NAME
-          
+
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"         
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add $METRICS_FILE README.md
-          git commit -m "[skip ci] Update SDK sizes" || echo "No changes to commit"
+          git commit -m "Update SDK sizes
+
+
+          skip-checks: true" || echo "No changes to commit"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
