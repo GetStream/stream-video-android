@@ -21,11 +21,9 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
-import androidx.annotation.RawRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -41,6 +39,8 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -64,6 +64,7 @@ import org.openapitools.client.models.OwnCapability
 internal class TelecomHandler private constructor(
     private val applicationContext: Context,
     private val callManager: CallsManager,
+    private val callSoundPlayer: CallSoundPlayer,
 ) {
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
@@ -74,8 +75,6 @@ internal class TelecomHandler private constructor(
     private val telecomHandlerScope = CoroutineScope(
         DispatcherProvider.Default + SupervisorJob() + exceptionHandler,
     )
-    private var mediaPlayer: MediaPlayer? = null
-
     companion object {
         @Volatile
         private var instance: TelecomHandler? = null
@@ -87,6 +86,7 @@ internal class TelecomHandler private constructor(
                         TelecomHandler(
                             applicationContext = applicationContext,
                             callManager = CallsManager(applicationContext),
+                            callSoundPlayer = CallSoundPlayer(applicationContext),
                         ).also { telecomHandler ->
                             instance = telecomHandler
                         }
@@ -214,7 +214,9 @@ internal class TelecomHandler private constructor(
                     TelecomCallState.INCOMING -> {
                         logger.d { "[postNotification] Creating incoming notification" }
 
-//                        playCallSound(streamVideo.sounds.ringingConfig.incomingCallSoundUri) // TODO-Telecom: reuse service sounds
+                        callSoundPlayer.playCallSound(
+                            streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                        )
 
                         streamVideo.getRingingCallNotification(
                             ringingState = RingingState.Incoming(),
@@ -232,9 +234,13 @@ internal class TelecomHandler private constructor(
                         }
 
                         if (isOutgoingCall) {
-//                            playCallSound(streamVideo.sounds.outgoingCallSound) // TODO-Telecom: reuse service sounds
+                            callSoundPlayer.playCallSound(
+                                streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
+                            )
+                            getNotification()
                         } else {
-                            stopCallSound()
+                            callSoundPlayer.stopCallSound()
+                            if (telecomCall.config.runCallServiceInForeground) getNotification() else null
                         }
 
                         streamVideo.getOngoingCallNotification(
@@ -269,52 +275,6 @@ internal class TelecomHandler private constructor(
             ) == PackageManager.PERMISSION_GRANTED
         }
 
-    private fun playCallSound(@RawRes sound: Int?) {
-        if (mediaPlayer == null) mediaPlayer = MediaPlayer()
-
-        sound?.let {
-            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
-                mediaPlayer?.let {
-                    if (!it.isPlaying) {
-                        setMediaPlayerDataSource(it, sound)
-                        it.start()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, @RawRes resId: Int) {
-        mediaPlayer.reset()
-        val afd = applicationContext.resources.openRawResourceFd(resId)
-        if (afd != null) {
-            mediaPlayer.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-            afd.close()
-        }
-        mediaPlayer.isLooping = true
-        mediaPlayer.prepare()
-    }
-
-    private fun stopCallSound() {
-        safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
-            if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
-            mediaPlayer?.release()
-            mediaPlayer = null
-        }
-    }
-
-    fun unregisterCall(call: StreamCall) {
-        logger.i { "[unregisterCall]" }
-
-        calls.remove(call.cid)?.let { telecomCall ->
-            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
-                stopCallSound()
-                cancelNotification(telecomCall.notificationId)
-                telecomCall.cleanUp()
-            }
-        }
-    }
-
     private fun cancelNotification(notificationId: Int) {
         logger.d { "[cancelNotification]" }
         NotificationManagerCompat.from(applicationContext).cancel(notificationId)
@@ -342,7 +302,20 @@ internal class TelecomHandler private constructor(
 
         calls.forEach { unregisterCall(it.value.streamCall) }
         telecomHandlerScope.cancel()
+        callSoundPlayer.cleanAudioResources()
         instance = null
+    }
+
+    fun unregisterCall(call: StreamCall) {
+        logger.i { "[unregisterCall]" }
+
+        calls.remove(call.cid)?.let { telecomCall ->
+            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+                callSoundPlayer.stopCallSound()
+                cancelNotification(telecomCall.notificationId)
+                telecomCall.cleanUp()
+            }
+        }
     }
 }
 

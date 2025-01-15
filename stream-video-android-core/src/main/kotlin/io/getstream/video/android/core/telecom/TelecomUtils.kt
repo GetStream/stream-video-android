@@ -37,7 +37,6 @@ import kotlin.contracts.contract
 
 @OptIn(ExperimentalContracts::class)
 internal object TelecomCompat {
-
     fun registerCall(
         context: Context,
         call: StreamCall? = null,
