@@ -41,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
@@ -49,44 +48,25 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Le
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.notifications.internal.service.livestreamCallServiceConfig
-import io.getstream.video.android.model.User
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import kotlinx.coroutines.launch
 
 @Composable
 fun LiveHost(
     navController: NavController,
     callId: String,
+    client: StreamVideo,
 ) {
     val context = LocalContext.current
-    val userId = "Darth_Krayt"
-    val userToken = StreamVideo.devToken(userId)
 
-    // step1 - create a user.
-    val user = User(
-        id = userId, // any string
-        name = "Tutorial", // name and image are used in the UI
-        role = "admin",
+    // Step 1 - Update call settings via callConfigRegistry
+    client.state.callConfigRegistry.register(
+        DefaultCallConfigurations.getLivestreamCallServiceConfig(),
     )
 
-    // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
-    val client = StreamVideoBuilder(
-        context = context,
-        apiKey = "k436tyde94hj", // demo API key
-        geo = GEO.GlobalEdgeNetwork,
-        user = user,
-        token = userToken,
-        ensureSingleInstance = false,
-        callServiceConfig = livestreamCallServiceConfig(),
-        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-    ).build()
-
-    // step3 - join a call, which type is `default` and id is `123`.
+    // Step 2 - join a call, which type is `default` and id is `123`.
     val call = client.call("livestream", callId)
 
     LaunchCallPermissions(call = call) {

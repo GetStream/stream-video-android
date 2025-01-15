@@ -61,7 +61,7 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
  */
-public class StreamPeerConnection(
+open class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
@@ -84,7 +84,7 @@ public class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
-    private val logger by taggedLogger("Call:PeerConnection:$typeTag")
+    internal val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
     /**
      * The wrapped connection for all the WebRTC communication.
@@ -329,7 +329,7 @@ public class StreamPeerConnection(
      *
      * @param streamIds The list of stream IDs to bind to this transceiver.
      */
-    private fun buildVideoTransceiverInit(
+    internal fun buildVideoTransceiverInit(
         streamIds: List<String>,
         isScreenShare: Boolean,
     ): RtpTransceiverInit {
@@ -349,6 +349,7 @@ public class StreamPeerConnection(
                 4.0,
             ).apply {
                 maxBitrateBps = maxBitRate / 4
+                maxFramerate = 30
             }
 
             val halfQuality = RtpParameters.Encoding(
@@ -357,6 +358,7 @@ public class StreamPeerConnection(
                 2.0,
             ).apply {
                 maxBitrateBps = maxBitRate / 2
+                maxFramerate = 30
             }
 
             val fullQuality = RtpParameters.Encoding(
@@ -365,8 +367,7 @@ public class StreamPeerConnection(
                 1.0,
             ).apply {
                 maxBitrateBps = maxBitRate
-//            networkPriority = 3
-//            bitratePriority = 4.0
+                maxFramerate = 30
             }
 
             listOf(quarterQuality, halfQuality, fullQuality)

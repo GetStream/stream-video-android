@@ -39,9 +39,9 @@ import io.getstream.video.android.core.CallStatsReport
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.ScreenShareManager
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
@@ -49,6 +49,7 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
 import io.getstream.video.android.core.events.CallEndedSfuEvent
+import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
@@ -70,15 +71,14 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
-import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
-import io.getstream.video.android.core.utils.mangleSdpUtil
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -98,20 +98,20 @@ import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
-import org.openapitools.client.models.OwnCapability
 import org.openapitools.client.models.VideoEvent
-import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
-import org.webrtc.RtpParameters.Encoding
 import org.webrtc.RtpTransceiver
+import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
@@ -126,13 +126,12 @@ import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.OS
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
+import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.Sdk
 import stream.video.sfu.models.SdkType
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import stream.video.sfu.models.VideoLayer
-import stream.video.sfu.models.VideoQuality
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.ICERestartResponse
@@ -150,8 +149,8 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
-import kotlin.math.absoluteValue
-import kotlin.random.Random
+import java.util.Collections
+import java.util.UUID
 
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -205,6 +204,21 @@ public class RtcSession internal constructor(
     internal var sfuWsUrl: String,
     internal var sfuToken: String,
     internal var remoteIceServers: List<IceServer>,
+    internal val clientImpl: StreamVideoClient = client as StreamVideoClient,
+    private val supervisorJob: CompletableJob = SupervisorJob(),
+    private val coroutineScope: CoroutineScope =
+        CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
+    private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
+        SfuConnectionModule(
+            context = clientImpl.context,
+            apiKey = apiKey,
+            apiUrl = sfuUrl,
+            wssUrl = sfuWsUrl,
+            connectionTimeoutInMs = 2000L,
+            userToken = sfuToken,
+            lifecycle = lifecycle,
+        )
+    },
 ) {
 
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
@@ -227,7 +241,6 @@ public class RtcSession internal constructor(
 
     private val logger by taggedLogger("Video:RtcSession")
     private val dynascaleLogger by taggedLogger("Video:RtcSession:Dynascale")
-    private val clientImpl = client as StreamVideoClient
 
     internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
 
@@ -237,8 +250,6 @@ public class RtcSession internal constructor(
         )
 
     // run all calls on a supervisor job so we can easily cancel them
-    private val supervisorJob = SupervisorJob()
-    private val coroutineScope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     internal val defaultVideoDimension = VideoDimension(1080, 2340)
 
@@ -315,8 +326,10 @@ public class RtcSession internal constructor(
     /** subscriber peer connection is used for subs */
     public var subscriber: StreamPeerConnection? = null
 
+    internal var publisher: Publisher? = null
+
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    internal var publisher: StreamPeerConnection? = null
+    // internal var publisher: StreamPeerConnection? = null
 
     private val mediaConstraints: MediaConstraints by lazy {
         buildMediaConstraints()
@@ -354,8 +367,13 @@ public class RtcSession internal constructor(
         MutableStateFlow<SfuSocketState>(SfuSocketState.Disconnected.Stopped)
     val sfuSocketState = _sfuSfuSocketState.asStateFlow()
 
+    /**
+     * Check if the SDK is initialized.
+     */
+    internal fun isSDKInitialized() = StreamVideo.isInstalled
+
     init {
-        if (!StreamVideo.isInstalled) {
+        if (!isSDKInitialized()) {
             throw IllegalArgumentException(
                 "SDK hasn't been initialised yet - can't start a RtcSession",
             )
@@ -364,18 +382,10 @@ public class RtcSession internal constructor(
 
         // step 1 setup the peer connections
         subscriber = createSubscriber()
-        publisher = createPublisher()
+        // publisher = createPublisher()
 
         listenToSubscriberConnection()
-        val sfuConnectionModule = SfuConnectionModule(
-            context = clientImpl.context,
-            apiKey = apiKey,
-            apiUrl = sfuUrl,
-            wssUrl = sfuWsUrl,
-            connectionTimeoutInMs = 2000L,
-            userToken = sfuToken,
-            lifecycle = lifecycle,
-        )
+        val sfuConnectionModule: SfuConnectionModule = sfuConnectionModuleProvider.invoke()
         setSfuConnectionModule(sfuConnectionModule)
         listenToSfuSocket()
         coroutineScope.launch {
@@ -386,11 +396,11 @@ public class RtcSession internal constructor(
             }
         }
 
-        clientImpl.peerConnectionFactory.setAudioSampleCallback { it ->
+        call.peerConnectionFactory.setAudioSampleCallback { it ->
             call.processAudioSample(it)
         }
 
-        clientImpl.peerConnectionFactory.setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, sampleData ->
+        call.peerConnectionFactory.setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, sampleData ->
             call.audioFilter?.applyFilter(
                 audioFormat = audioFormat,
                 channelCount = channelCount,
@@ -508,66 +518,49 @@ public class RtcSession internal constructor(
         awaitAll(subscriberAsync, publisherAsync)
     }
 
-    suspend fun connect(reconnectDetails: ReconnectDetails? = null) {
+    suspend fun connect(
+        reconnectDetails: ReconnectDetails? = null,
+        options: List<PublishOption>? = null,
+    ) {
         logger.i { "[connect] #sfu; #track; no args" }
         val request = JoinRequest(
-            subscriber_sdp = getSubscriberSdp().description,
+            subscriber_sdp = throwawaySubscriberSdpAndOptions(),
+            publisher_sdp = throwawayPublisherSdpAndOptions(),
             session_id = sessionId,
             token = sfuToken,
             fast_reconnect = false,
             client_details = clientDetails,
+            preferred_publish_options = options ?: emptyList(),
             reconnect_details = reconnectDetails,
         )
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
         sfuConnectionModule.socketConnection.whenConnected {
-            connectRtc()
+            sendConnectionTimeStats(reconnectDetails?.strategy)
         }
     }
 
-    private fun initializeVideoTransceiver() {
-        if (!videoTransceiverInitialized) {
-            publisher?.let {
-                it.addVideoTransceiver(
-                    call.mediaManager.videoTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_VIDEO)),
-                    isScreenShare = false,
-                )
-                videoTransceiverInitialized = true
-            }
+    private suspend fun sendConnectionTimeStats(reconnectStrategy: WebsocketReconnectStrategy? = null) {
+        if (reconnectStrategy == null) {
+            sendCallStats(
+                report = call.collectStats(),
+                connectionTimeSeconds = (System.currentTimeMillis() - call.connectStartTime) / 1000f,
+            )
+        } else {
+            sendCallStats(
+                report = call.collectStats(),
+                reconnectionTimeSeconds = Pair(
+                    (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
+                    reconnectStrategy,
+                ),
+            )
         }
     }
-
     private fun setSfuConnectionModule(sfuConnectionModule: SfuConnectionModule) {
         // This is used to switch from a current SFU connection to a new migrated SFU connection
         this@RtcSession.sfuConnectionModule = sfuConnectionModule
         listenToSfuSocket()
-    }
-
-    private fun initializeScreenshareTransceiver() {
-        if (!screenshareTransceiverInitialized) {
-            publisher?.let {
-                it.addVideoTransceiver(
-                    call.mediaManager.screenShareTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)),
-                    isScreenShare = true,
-                )
-                screenshareTransceiverInitialized = true
-            }
-        }
-    }
-
-    private fun initializeAudioTransceiver() {
-        if (!audioTransceiverInitialized) {
-            publisher?.let {
-                it.addAudioTransceiver(
-                    call.mediaManager.audioTrack,
-                    listOf(buildTrackId(TrackType.TRACK_TYPE_AUDIO)),
-                )
-                audioTransceiverInitialized = true
-            }
-        }
     }
 
     private suspend fun listenToMediaChanges() {
@@ -578,17 +571,51 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
 
                 if (it == DeviceStatus.Enabled) {
-                    initializeVideoTransceiver()
+                    val newTrack = call.peerConnectionFactory.makeVideoTrack(
+                        call.mediaManager.videoSource,
+                        UUID.randomUUID().toString(),
+                    )
+                    publisher?.publishStream(
+                        newTrack,
+                        TrackType.TRACK_TYPE_VIDEO,
+                        call.mediaManager.camera.resolution.value,
+                    )
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_VIDEO,
+                        VideoTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
+                            video = newTrack,
+                        ),
+                    )
+                } else {
+                    publisher?.unpublishStream(TrackType.TRACK_TYPE_VIDEO, false)
                 }
             }
         }
+
         coroutineScope.launch {
             call.mediaManager.microphone.status.collectLatest {
                 // set the mute /unumute status
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
 
                 if (it == DeviceStatus.Enabled) {
-                    initializeAudioTransceiver()
+                    val newTrack = call.peerConnectionFactory.makeAudioTrack(
+                        call.mediaManager.audioSource,
+                        UUID.randomUUID().toString(),
+                    )
+                    publisher?.publishStream(
+                        newTrack,
+                        TrackType.TRACK_TYPE_AUDIO,
+                    )
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_AUDIO,
+                        AudioTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                            audio = newTrack,
+                        ),
+                    )
+                } else {
+                    publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO, false)
                 }
             }
         }
@@ -600,9 +627,24 @@ public class RtcSession internal constructor(
                     isEnabled = it == DeviceStatus.Enabled,
                     TrackType.TRACK_TYPE_SCREEN_SHARE,
                 )
-
                 if (it == DeviceStatus.Enabled) {
-                    initializeScreenshareTransceiver()
+                    val newTrack = call.peerConnectionFactory.makeVideoTrack(
+                        call.mediaManager.screenShareVideoSource,
+                        UUID.randomUUID().toString(),
+                    )
+                    publisher?.publishStream(
+                        newTrack,
+                        TrackType.TRACK_TYPE_SCREEN_SHARE,
+                    )
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_SCREEN_SHARE,
+                        VideoTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
+                            video = newTrack,
+                        ),
+                    )
+                } else {
+                    publisher?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE, false)
                 }
             }
         }
@@ -678,26 +720,6 @@ public class RtcSession internal constructor(
         if (settings?.audio?.speakerDefaultOn == false) {
             call.speaker.setVolume(0)
         }
-
-        // if we are allowed to publish, create a peer connection for it
-        val canPublish =
-            call.state.ownCapabilities.value.any {
-                it == OwnCapability.SendAudio || it == OwnCapability.SendVideo
-            }
-
-        if (canPublish) {
-            publisher = createPublisher()
-        } else {
-            // enable the publisher if you receive the send audio or send video capability
-            coroutineScope.launch {
-                call.state.ownCapabilities.collect {
-                    if (it.any { it == OwnCapability.SendAudio || it == OwnCapability.SendVideo }) {
-                        publisher = createPublisher()
-                    }
-                }
-            }
-        }
-
         // update the peer state
         coroutineScope.launch {
             // call update participant subscriptions debounced
@@ -707,48 +729,6 @@ public class RtcSession internal constructor(
                 }
             }
         }
-
-        if (canPublish) {
-            if (publisher == null) {
-                throw IllegalStateException(
-                    "Cant send audio and video since publisher hasn't been setup to connect",
-                )
-            } else {
-                // step 2 ensure all tracks are setup correctly
-                // start capturing the video
-
-                // step 4 add the audio track to the publisher
-                setLocalTrack(
-                    TrackType.TRACK_TYPE_AUDIO,
-                    AudioTrack(
-                        streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
-                        audio = call.mediaManager.audioTrack,
-                    ),
-                )
-
-                // step 5 create the video track
-                setLocalTrack(
-                    TrackType.TRACK_TYPE_VIDEO,
-                    VideoTrack(
-                        streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
-                        video = call.mediaManager.videoTrack,
-                    ),
-                )
-
-                // render it on the surface. but we need to start this before forwarding it to the publisher
-                logger.v { "[createUserTracks] #sfu; videoTrack: ${call.mediaManager.videoTrack.stringify()}" }
-                if (call.mediaManager.camera.status.value == DeviceStatus.Enabled) {
-                    initializeVideoTransceiver()
-                }
-                if (call.mediaManager.microphone.status.value == DeviceStatus.Enabled) {
-                    initializeAudioTransceiver()
-                }
-                if (call.mediaManager.screenShare.status.value == DeviceStatus.Enabled) {
-                    initializeScreenshareTransceiver()
-                }
-            }
-        }
-
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
         listenToMediaChanges()
 
@@ -802,7 +782,7 @@ public class RtcSession internal constructor(
 
         // cleanup the publisher and subcriber peer connections
         subscriber?.connection?.close()
-        publisher?.connection?.close()
+        publisher?.close(true)
 
         subscriber = null
         publisher = null
@@ -884,7 +864,7 @@ public class RtcSession internal constructor(
     @VisibleForTesting
     public fun createSubscriber(): StreamPeerConnection {
         logger.i { "[createSubscriber] #sfu; no args" }
-        val peerConnection = clientImpl.peerConnectionFactory.makePeerConnection(
+        val peerConnection = call.peerConnectionFactory.makePeerConnection(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
@@ -908,44 +888,85 @@ public class RtcSession internal constructor(
         return peerConnection
     }
 
-    private suspend fun getSubscriberSdp(): SessionDescription {
-        subscriber?.let { it ->
-            val result = it.createOffer()
-
-            return if (result is Success) {
-                mangleSdp(result.value)
-            } else {
-                throw Error("Couldn't create a generic SDP, create offer failed")
-            }
-        } ?: throw Error("Couldn't create a generic SDP, subscriber isn't setup")
+    private suspend fun getDummySdp(dummyPeerConnection: StreamPeerConnection): String {
+        val offerResult = dummyPeerConnection.createOffer()
+        return if (offerResult !is Success) {
+            ""
+        } else {
+            offerResult.value.description
+        }
     }
 
-    private fun mangleSdp(sdp: SessionDescription): SessionDescription {
-        val settings = call.state.settings.value
-        val red = settings?.audio?.redundantCodingEnabled ?: true
-        val opus = settings?.audio?.opusDtxEnabled ?: true
+    private suspend fun throwawayPublisherSdpAndOptions(): String {
+        val sdp =
+            createDummyPeerConnection(RtpTransceiverDirection.SEND_ONLY)?.let { dummyPublisher ->
+                val sdp = getDummySdp(dummyPublisher)
+                cleanDummyPeerConnection(dummyPublisher)
+                sdp
+            } ?: ""
+        logger.d { "[throwawayPublisherSdpAndOptions] #sfu; sdp: \n$sdp" }
+        return sdp
+    }
 
-        return mangleSdpUtil(sdp, red, opus)
+    private suspend fun throwawaySubscriberSdpAndOptions(): String {
+        return createDummyPeerConnection(RtpTransceiverDirection.RECV_ONLY)?.let { dummySubscriber ->
+            val sdp = getDummySdp(dummySubscriber)
+            cleanDummyPeerConnection(dummySubscriber)
+            sdp
+        } ?: ""
+    }
+
+    private fun createDummyPeerConnection(direction: RtpTransceiverDirection): StreamPeerConnection? {
+        if (direction != RtpTransceiverDirection.SEND_ONLY && direction != RtpTransceiverDirection.RECV_ONLY) {
+            return null
+        }
+
+        val addTempTransceivers = { spc: StreamPeerConnection ->
+            val init = spc.buildVideoTransceiverInit(emptyList(), false)
+            spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
+            spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO)
+        }
+
+        return call.peerConnectionFactory.makePeerConnection(
+            coroutineScope = coroutineScope,
+            configuration = PeerConnection.RTCConfiguration(emptyList()),
+            type = if (direction == RtpTransceiverDirection.SEND_ONLY) {
+                StreamPeerType.PUBLISHER
+            } else {
+                StreamPeerType.SUBSCRIBER
+            },
+            mediaConstraints = MediaConstraints(),
+        ).apply {
+            addTempTransceivers(this)
+        }
+    }
+
+    private fun cleanDummyPeerConnection(dummyPeerConnection: StreamPeerConnection?) {
+        dummyPeerConnection?.connection?.transceivers?.forEach {
+            it.stop()
+        }
+        dummyPeerConnection?.connection?.close()
     }
 
     @VisibleForTesting
-    fun createPublisher(): StreamPeerConnection {
-        audioTransceiverInitialized = false
-        videoTransceiverInitialized = false
-        screenshareTransceiverInitialized = false
-        logger.i { "[createPublisher] #sfu; no args" }
-        val publisher = clientImpl.peerConnectionFactory.makePeerConnection(
-            coroutineScope = coroutineScope,
+    internal fun createPublisher(publishOptions: List<PublishOption>): Publisher {
+        return call.peerConnectionFactory.makePublisher(
+            sessionId = sessionId,
+            me = call.state.me.value!!,
+            sfuClient = sfuConnectionModule.api,
+            mediaManager = call.mediaManager,
             configuration = connectionConfiguration,
-            type = StreamPeerType.PUBLISHER,
-            mediaConstraints = MediaConstraints(),
-            onNegotiationNeeded = ::onNegotiationNeeded,
-            onIceCandidateRequest = ::sendIceCandidate,
-            maxPublishingBitrate = call.state.settings.value?.video?.targetResolution?.bitrate
-                ?: 1_200_000,
-        )
-        logger.i { "[createPublisher] #sfu; publisher: $publisher" }
-        return publisher
+            publishOptions = publishOptions,
+            coroutineScope = coroutineScope,
+            mediaConstraints = mediaConstraints,
+            onStreamAdded = { addStream(it) },
+            onNegotiationNeeded = { _, _ -> },
+            onIceCandidate = ::sendIceCandidate,
+        ) {
+            coroutineScope.launch {
+                call.rejoin()
+            }
+        }
     }
 
     private fun buildTrackId(trackTypeVideo: TrackType): String {
@@ -954,50 +975,6 @@ public class RtcSession internal constructor(
         val trackPrefix = call.state.me.value?.trackLookupPrefix
         val old = "$trackPrefix:$trackType:${(Math.random() * 100).toInt()}"
         return old // UUID.randomUUID().toString()
-    }
-
-    /**
-     * Change the quality of video we upload when the ChangePublishQualityEvent event is received
-     * This is used for dynsacle
-     */
-    internal fun updatePublishQuality(event: ChangePublishQualityEvent) = synchronized(this) {
-        val sender = publisher?.connection?.transceivers?.firstOrNull {
-            it.mediaType == MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
-        }?.sender
-
-        if (sender == null) {
-            dynascaleLogger.w {
-                "Request to change publishing quality not fulfilled due to missing transceivers or sender."
-            }
-            return@synchronized
-        }
-
-        val enabledRids =
-            event.changePublishQuality.video_senders.firstOrNull()?.layers?.associate {
-                it.name to it.active
-            }
-        dynascaleLogger.i { "enabled rids: $enabledRids}" }
-        val params = sender.parameters
-        val updatedEncodings: MutableList<Encoding> = mutableListOf()
-        var changed = false
-        for (encoding in params.encodings) {
-            val shouldEnable = enabledRids?.get(encoding.rid) ?: false
-            if (shouldEnable && encoding.active) {
-                updatedEncodings.add(encoding)
-            } else if (!shouldEnable && !encoding.active) {
-                updatedEncodings.add(encoding)
-            } else {
-                changed = true
-                encoding.active = shouldEnable
-                updatedEncodings.add(encoding)
-            }
-        }
-        if (changed) {
-            dynascaleLogger.i { "Updated publish quality with encodings $updatedEncodings" }
-            params.encodings.clear()
-            params.encodings.addAll(updatedEncodings)
-            sender.parameters = params
-        }
     }
 
     /**
@@ -1130,11 +1107,30 @@ public class RtcSession internal constructor(
                             call.state.getOrCreateParticipant(it)
                         }
                         call.state.replaceParticipants(participantStates)
+                        sfuConnectionModule.socketConnection.whenConnected {
+                            publisher = createPublisher(event.publishOptions)
+                            processPendingPublisherEvents()
+                            connectRtc()
+                        }
+                    }
+
+                    is ChangePublishOptionsEvent -> {
+                        logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
+                        publisher?.syncPublishOptions(
+                            call.mediaManager.camera.resolution.value,
+                            event.change.publish_options,
+                        ) ?: let {
+                            publisherPendingEvents.add(event)
+                        }
                     }
 
                     is SubscriberOfferEvent -> handleSubscriberOffer(event)
                     // this dynascale event tells the SDK to change the quality of the video it's uploading
-                    is ChangePublishQualityEvent -> updatePublishQuality(event)
+                    is ChangePublishQualityEvent -> {
+                        event.changePublishQuality.video_senders.forEach {
+                            publisher?.changePublishQuality(it)
+                        }
+                    }
 
                     is TrackPublishedEvent -> {
                         updatePublishState(
@@ -1173,7 +1169,9 @@ public class RtcSession internal constructor(
                         val peerType = event.peerType
                         when (peerType) {
                             PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
-                                publisher?.connection?.restartIce()
+                                publisher?.restartIce() ?: let {
+                                    publisherPendingEvents.add(event)
+                                }
                             }
 
                             PeerType.PEER_TYPE_SUBSCRIBER -> {
@@ -1190,12 +1188,44 @@ public class RtcSession internal constructor(
         }
     }
 
+    private val publisherPendingEventsMutex = Mutex(false)
+    private suspend fun RtcSession.processPendingPublisherEvents() =
+        publisherPendingEventsMutex.withLock {
+            logger.v {
+                "[processPendingPublisherEvents] #sfu; #track; publisherPendingEvents: $publisherPendingEvents"
+            }
+            for (pendingEvent in publisherPendingEvents) {
+                when (pendingEvent) {
+                    is ICETrickleEvent -> {
+                        handleIceTrickle(pendingEvent)
+                    }
+
+                    is ICERestartEvent -> {
+                        publisher?.restartIce()
+                    }
+
+                    is ChangePublishOptionsEvent -> {
+                        publisher?.syncPublishOptions(
+                            call.mediaManager.camera.resolution.value,
+                            pendingEvent.change.publish_options,
+                        )
+                    }
+
+                    else -> {
+                        logger.w { "Unknown event type: $pendingEvent" }
+                    }
+                }
+            }
+            publisherPendingEvents.clear()
+        }
+
+    internal val publisherPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
+
     private fun removeParticipantTracks(participant: Participant) {
         tracks.remove(participant.session_id).also {
             if (it == null) {
                 logger.e {
-                    "[handleEvent] Failed to remove track on ParticipantLeft " +
-                        "- track ID: ${participant.session_id}). Tracks: $tracks"
+                    "[handleEvent] Failed to remove track on ParticipantLeft " + "- track ID: ${participant.session_id}). Tracks: $tracks"
                 }
             }
         }
@@ -1207,8 +1237,7 @@ public class RtcSession internal constructor(
         newTrackDimensions.remove(participant.session_id).also {
             if (it == null) {
                 logger.e {
-                    "[handleEvent] Failed to remove track dimension on ParticipantLeft " +
-                        "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
+                    "[handleEvent] Failed to remove track dimension on ParticipantLeft " + "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
                 }
             }
         }
@@ -1244,6 +1273,13 @@ public class RtcSession internal constructor(
      * Triggered whenever we receive new ice candidate from the SFU
      */
     suspend fun handleIceTrickle(event: ICETrickleEvent) {
+        if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED && publisher == null) {
+            logger.v {
+                "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; publisher is null, adding to pending"
+            }
+            publisherPendingEvents.add(event)
+            return
+        }
         logger.d {
             "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}"
         }
@@ -1287,7 +1323,7 @@ public class RtcSession internal constructor(
             }
             return
         }
-        val answerSdp = mangleSdp(answerResult.value)
+        val answerSdp = answerResult.value
         logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
 
         // step 3 - set local description
@@ -1347,275 +1383,9 @@ public class RtcSession internal constructor(
         }
     }
 
-    internal val publisherSdpOffer = MutableStateFlow<SessionDescription?>(null)
-
-    /**
-     * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/negotiationneeded_event
-     *
-     * Is called whenever a negotiation is needed. Common examples include
-     * - Adding a new media stream
-     * - Adding an audio Stream
-     * - A screenshare track is started
-     *
-     * Creates a new SDP
-     * - And sets it on the localDescription
-     * - Enables video simulcast
-     * - calls setPublisher
-     * - sets setRemoteDescription
-     *
-     * Retry behaviour is to retry 3 times quickly as long as
-     * - the sfu didn't change
-     * - the sdp didn't change
-     * If that fails ask the call monitor to do an ice restart
-     */
-    @VisibleForTesting
-    fun onNegotiationNeeded(
-        peerConnection: StreamPeerConnection,
-        peerType: StreamPeerType,
-    ) {
-        val id = Random.nextInt().absoluteValue
-        logger.d { "[negotiate] #$id; #sfu; #${peerType.stringify()}; peerConnection: $peerConnection" }
-        coroutineScope.launch {
-            // step 1 - create a local offer
-            val offerResult = peerConnection.createOffer()
-            if (offerResult !is Success) {
-                logger.w {
-                    "[negotiate] #$id; #sfu; #${peerType.stringify()}; rejected (createOffer failed): $offerResult"
-                }
-                return@launch
-            }
-            val mangledSdp = mangleSdp(offerResult.value)
-
-            // step 2 -  set the local description
-            val result = peerConnection.setLocalDescription(mangledSdp)
-            if (result.isFailure) {
-                // the call health monitor will end up restarting the peer connection and recover from this
-                logger.w { "[negotiate] #$id; #sfu; #${peerType.stringify()}; setLocalDescription failed: $result" }
-                return@launch
-            }
-
-            // step 3 - create the list of tracks
-            val tracks = getPublisherTracks(mangledSdp.description)
-            val currentSfu = sfuUrl
-
-            publisherSdpOffer.value = mangledSdp
-            synchronized(this) {
-                syncPublisherJob?.cancel()
-                syncPublisherJob = coroutineScope.launch {
-                    var attempt = 0
-                    val maxAttempts = 3
-                    val delayInMs = listOf(10L, 30L, 100L)
-
-                    while (attempt <= maxAttempts - 1) {
-                        try {
-                            // step 4 - send the tracks and SDP
-                            val request = SetPublisherRequest(
-                                sdp = mangledSdp.description,
-                                session_id = sessionId,
-                                tracks = tracks,
-                            )
-
-                            val result = setPublisher(request)
-                            // step 5 - set the remote description
-
-                            peerConnection.setRemoteDescription(
-                                SessionDescription(
-                                    SessionDescription.Type.ANSWER, result.getOrThrow().sdp,
-                                ),
-                            )
-
-                            // If successful, emit the result and break the loop
-                            result.getOrThrow()
-                            break
-                        } catch (cause: Throwable) {
-                            val sameValue = mangledSdp == publisherSdpOffer.value
-                            val sameSfu = currentSfu == sfuUrl
-                            val isPermanent = isPermanentError(cause)
-                            val willRetry =
-                                !isPermanent && sameValue && sameSfu && attempt < maxAttempts
-
-                            logger.w {
-                                "onNegotationNeeded setPublisher failed $cause, retry attempt: $attempt. will retry $willRetry in ${delayInMs[attempt]} ms"
-                            }
-
-                            if (willRetry) {
-                                delay(delayInMs[attempt])
-                                attempt++
-                            } else {
-                                logger.e {
-                                    "setPublisher failed after $attempt retries, asking the call monitor to do an ice restart"
-                                }
-                                coroutineScope.launch { call.rejoin() }
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    internal fun getPublisherTracksForReconnect(): List<TrackInfo> {
+        return publisher?.getAnnouncedTracksForReconnect() ?: emptyList()
     }
-
-    internal fun getPublisherTracks(sdp: String): List<TrackInfo> {
-        val captureResolution = call.camera.resolution.value
-        val screenShareTrack = getLocalTrack(TrackType.TRACK_TYPE_SCREEN_SHARE)
-
-        val transceivers = publisher?.connection?.transceivers?.toList() ?: emptyList()
-        val tracks = transceivers.filter {
-            it.direction == RtpTransceiver.RtpTransceiverDirection.SEND_ONLY && it.sender?.track() != null
-        }.map { transceiver ->
-            val track = transceiver.sender.track()!!
-
-            val trackType = convertKindToTrackType(track, screenShareTrack)
-
-            val layers: List<VideoLayer> = if (trackType == TrackType.TRACK_TYPE_VIDEO) {
-                checkNotNull(captureResolution) {
-                    throw IllegalStateException(
-                        "video capture needs to be enabled before adding the local track",
-                    )
-                }
-                createVideoLayers(transceiver, captureResolution)
-            } else if (trackType == TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                createScreenShareLayers(transceiver)
-            } else {
-                emptyList()
-            }
-
-            TrackInfo(
-                track_id = track.id(),
-                track_type = trackType,
-                layers = layers,
-                mid = transceiver.mid ?: extractMid(
-                    sdp,
-                    track,
-                    screenShareTrack,
-                    trackType,
-                    transceivers,
-                ),
-            )
-        }
-        return tracks
-    }
-
-    private fun convertKindToTrackType(track: MediaStreamTrack, screenShareTrack: MediaTrack?) =
-        when (track.kind()) {
-            "audio" -> TrackType.TRACK_TYPE_AUDIO
-            "screen" -> TrackType.TRACK_TYPE_SCREEN_SHARE
-            "video" -> {
-                // video tracks and screenshare tracks in webrtc are both video
-                // (the "screen" track type doesn't seem to be used).
-                if (screenShareTrack?.asVideoTrack()?.video?.id() == track.id()) {
-                    TrackType.TRACK_TYPE_SCREEN_SHARE
-                } else {
-                    TrackType.TRACK_TYPE_VIDEO
-                }
-            }
-
-            else -> TrackType.TRACK_TYPE_UNSPECIFIED
-        }
-
-    private fun extractMid(
-        sdp: String?,
-        track: MediaStreamTrack,
-        screenShareTrack: MediaTrack?,
-        trackType: TrackType,
-        transceivers: List<RtpTransceiver>,
-    ): String {
-        if (sdp.isNullOrBlank()) {
-            logger.w { "[extractMid] No SDP found. Returning empty mid" }
-            return ""
-        }
-
-        logger.d {
-            "[extractMid] No 'mid' found for track. Trying to find it from the Offer SDP"
-        }
-
-        val sdpSession = SdpSession()
-        sdpSession.parse(sdp)
-        val media = sdpSession.media.find { m ->
-            m.mline?.type == track.kind() &&
-                // if `msid` is not present, we assume that the track is the first one
-                (m.msid?.equals(track.id()) ?: true)
-        }
-
-        if (media?.mid == null) {
-            logger.d {
-                "[extractMid] No mid found in SDP for track type ${track.kind()} and id ${track.id()}. Attempting to find a heuristic mid"
-            }
-
-            val heuristicMid = transceivers.firstOrNull {
-                convertKindToTrackType(track, screenShareTrack) == trackType
-            }
-            if (heuristicMid != null) {
-                return heuristicMid.mid
-            }
-
-            logger.d { "[extractMid] No heuristic mid found. Returning empty mid" }
-            return ""
-        }
-
-        return media.mid.toString()
-    }
-
-    private fun createVideoLayers(
-        transceiver: RtpTransceiver,
-        captureResolution: CaptureFormat,
-    ): List<VideoLayer> {
-        // we tell the Sfu which resolutions we're sending
-        return transceiver.sender.parameters.encodings.map {
-            val scaleBy = it.scaleResolutionDownBy ?: 1.0
-            val width = captureResolution.width.div(scaleBy) ?: 0
-            val height = captureResolution.height.div(scaleBy) ?: 0
-            val quality = ridToVideoQuality(it.rid)
-
-            // We need to divide by 1000 because the the FramerateRange is multiplied
-            // by 1000 (see javadoc).
-            val fps = (captureResolution.framerate?.max ?: 0).div(1000)
-
-            VideoLayer(
-                rid = it.rid ?: "",
-                video_dimension = VideoDimension(
-                    width = width.toInt(),
-                    height = height.toInt(),
-                ),
-                bitrate = it.maxBitrateBps ?: 0,
-                fps = fps,
-                quality = quality,
-            )
-        }
-    }
-
-    private fun createScreenShareLayers(transceiver: RtpTransceiver): List<VideoLayer> {
-        return transceiver.sender.parameters.encodings.map {
-            // So far we use hardcoded parameters for screen-sharing. This is aligned
-            // with iOS.
-
-            VideoLayer(
-                rid = "q",
-                video_dimension = VideoDimension(
-                    width = ScreenShareManager.screenShareResolution.width,
-                    height = ScreenShareManager.screenShareResolution.height,
-                ),
-                bitrate = ScreenShareManager.screenShareBitrate,
-                fps = ScreenShareManager.screenShareFps,
-                quality = VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED,
-            )
-        }
-    }
-
-    private fun ridToVideoQuality(rid: String?) =
-        when (rid) {
-            "f" -> {
-                VideoQuality.VIDEO_QUALITY_HIGH
-            }
-
-            "h" -> {
-                VideoQuality.VIDEO_QUALITY_MID
-            }
-
-            else -> {
-                VideoQuality.VIDEO_QUALITY_LOW_UNSPECIFIED
-            }
-        }
 
     /**
      * @return [StateFlow] that holds [RtcStatsReport] that the publisher exposes.
@@ -1631,9 +1401,12 @@ public class RtcSession internal constructor(
         return subscriber?.getStats()
     }
 
-    internal suspend fun sendCallStats(report: CallStatsReport) {
+    internal suspend fun sendCallStats(
+        report: CallStatsReport,
+        connectionTimeSeconds: Float? = null,
+        reconnectionTimeSeconds: Pair<Float, WebsocketReconnectStrategy>? = null,
+    ) {
         val result = wrapAPICall {
-            val now = System.currentTimeMillis()
             val androidThermalState =
                 safeCallWithDefault(AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED) {
                     val thermalState = powerManager?.currentThermalStatus
@@ -1667,19 +1440,16 @@ public class RtcSession internal constructor(
                         is_power_saver_mode = powerSaving,
                     ),
                     telemetry = safeCallWithDefault(null) {
-                        if (call.reconnectAt != null) {
+                        if (connectionTimeSeconds != null) {
                             Telemetry(
-                                reconnection = call.reconnectAt?.let {
-                                    Reconnection(
-                                        time_seconds = ((now - it.second) / 1000).toFloat(),
-                                        strategy = it.first,
-                                    )
-                                },
+                                connection_time_seconds = connectionTimeSeconds.toFloat(),
                             )
-                        } else if (call.connectedAt != null) {
+                        } else if (reconnectionTimeSeconds != null) {
                             Telemetry(
-                                connection_time_seconds = call.connectedAt?.let { (now - it) / 1000 }
-                                    ?.toFloat(),
+                                reconnection = Reconnection(
+                                    time_seconds = reconnectionTimeSeconds.first.toFloat(),
+                                    strategy = reconnectionTimeSeconds.second,
+                                ),
                             )
                         } else {
                             null
@@ -1691,7 +1461,7 @@ public class RtcSession internal constructor(
 
         logger.d {
             "sendStats: " + when (result) {
-                is Success -> "Success"
+                is Success -> "Success. Response: ${result.value}. Telemetry: connectionTimeSeconds: $connectionTimeSeconds, reconnectionTimeSeconds: ${reconnectionTimeSeconds?.first}, strategy: ${reconnectionTimeSeconds?.second}"
                 is Failure -> "Failure. Reason: ${result.value.message}"
             }
         }
@@ -1739,7 +1509,7 @@ public class RtcSession internal constructor(
     }
 
     // reply to when we get an offer from the SFU
-    private suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
+    internal suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
         wrapAPICall {
             val result = sfuConnectionModule.api.sendAnswer(request)
             result.error?.let {
@@ -1771,36 +1541,33 @@ public class RtcSession internal constructor(
     }
 
     // share what size and which participants we're looking at
-    private suspend fun updateSubscriptions(
+    internal suspend fun updateSubscriptions(
         request: UpdateSubscriptionsRequest,
-    ): Result<UpdateSubscriptionsResponse> =
-        wrapAPICall {
-            logger.v { "[updateSubscriptions] #sfu; #track; request $request" }
-            val result = sfuConnectionModule.api.updateSubscriptions(request)
-            result.error?.let {
-                throw RtcException(error = it, message = it.message)
-            }
-            result
+    ): Result<UpdateSubscriptionsResponse> = wrapAPICall {
+        logger.v { "[updateSubscriptions] #sfu; #track; request $request" }
+        val result = sfuConnectionModule.api.updateSubscriptions(request)
+        result.error?.let {
+            throw RtcException(error = it, message = it.message)
         }
+        result
+    }
 
     // share what size and which participants we're looking at
-    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
-        wrapAPICall {
-            val request = ICERestartRequest(
-                session_id = sessionId,
-                peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
-            )
-            sfuConnectionModule.api.iceRestart(request)
-        }
+    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> = wrapAPICall {
+        val request = ICERestartRequest(
+            session_id = sessionId,
+            peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
+        )
+        sfuConnectionModule.api.iceRestart(request)
+    }
 
-    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> =
-        wrapAPICall {
-            val request = ICERestartRequest(
-                session_id = sessionId,
-                peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
-            )
-            sfuConnectionModule.api.iceRestart(request)
-        }
+    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = wrapAPICall {
+        val request = ICERestartRequest(
+            session_id = sessionId,
+            peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
+        )
+        sfuConnectionModule.api.iceRestart(request)
+    }
 
     private suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         wrapAPICall {
@@ -1861,13 +1628,7 @@ public class RtcSession internal constructor(
     internal fun currentSfuInfo(): Triple<String, List<TrackSubscriptionDetails>, List<TrackInfo>> {
         val previousSessionId = sessionId
         val currentSubscriptions = subscriptions.value
-        val publisherTracks = publisher?.let { pub ->
-            if (pub.connection.remoteDescription != null) {
-                getPublisherTracks(pub.connection.localDescription.description)
-            } else {
-                null
-            }
-        } ?: emptyList()
+        val publisherTracks = getPublisherTracksForReconnect()
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
@@ -1878,10 +1639,12 @@ public class RtcSession internal constructor(
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
         val request = JoinRequest(
-            subscriber_sdp = getSubscriberSdp().description,
+            subscriber_sdp = throwawaySubscriberSdpAndOptions(),
+            publisher_sdp = throwawayPublisherSdpAndOptions(),
             session_id = sessionId,
             token = sfuToken,
             client_details = clientDetails,
+            preferred_publish_options = publisher?.currentOptions() ?: emptyList(),
             reconnect_details = reconnectDetails,
         )
         logger.d { "Connecting RTC, $request" }
@@ -1897,7 +1660,15 @@ public class RtcSession internal constructor(
                     call.rejoin()
                 } else {
                     subscriber?.connection?.restartIce()
-                    publisher?.connection?.restartIce()
+                    publisher?.restartIce()
+
+                    sendCallStats(
+                        report = call.collectStats(),
+                        reconnectionTimeSeconds = Pair(
+                            (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                        ),
+                    )
                     setVideoSubscriptions(true)
                 }
             }
@@ -1912,7 +1683,7 @@ public class RtcSession internal constructor(
         runBlocking {
             sfuConnectionModule.socketConnection.disconnect()
         }
-        publisher?.connection?.close()
+        publisher?.close(true)
         subscriber?.connection?.close()
     }
 

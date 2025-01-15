@@ -115,9 +115,9 @@ internal open class CallService : Service() {
             callId: StreamCallId,
             trigger: String,
             callDisplayName: String? = null,
-            callServiceConfiguration: CallServiceConfig = callServiceConfig(),
+            callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
         ): Intent {
-            val serviceClass = resolveServiceClass(callId, callServiceConfiguration)
+            val serviceClass = callServiceConfiguration.serviceClass
             StreamLog.i(TAG) { "Resolved service class: $serviceClass" }
             val serviceIntent = Intent(context, serviceClass)
             serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, callId)
@@ -156,24 +156,22 @@ internal open class CallService : Service() {
          */
         fun buildStopIntent(
             context: Context,
-            callServiceConfiguration: CallServiceConfig = callServiceConfig(),
+            callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
         ) = safeCallWithDefault(Intent(context, CallService::class.java)) {
-            val intent = callServiceConfiguration.callServicePerType.firstNotNullOfOrNull {
-                val serviceClass = it.value
-                if (isServiceRunning(context, serviceClass)) {
-                    Intent(context, serviceClass)
-                } else {
-                    null
-                }
+            val serviceClass = callServiceConfiguration.serviceClass
+
+            if (isServiceRunning(context, serviceClass)) {
+                Intent(context, serviceClass)
+            } else {
+                Intent(context, CallService::class.java)
             }
-            intent ?: Intent(context, CallService::class.java)
         }
 
         fun showIncomingCall(
             context: Context,
             callId: StreamCallId,
             callDisplayName: String?,
-            callServiceConfiguration: CallServiceConfig = callServiceConfig(),
+            callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
             notification: Notification?,
         ) {
             val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
@@ -221,7 +219,7 @@ internal open class CallService : Service() {
         fun removeIncomingCall(
             context: Context,
             callId: StreamCallId,
-            config: CallServiceConfig = callServiceConfig(),
+            config: CallServiceConfig = DefaultCallConfigurations.default,
         ) {
             safeCallWithResult {
                 context.startService(
@@ -413,7 +411,9 @@ internal open class CallService : Service() {
 
     @SuppressLint("MissingPermission")
     private fun showIncomingCall(notificationId: Int, notification: Notification) {
-        if (callId == null) { // If there isn't another call in progress (callId is set in onStartCommand())
+        val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
+
+        if (!hasActiveCall) { // If there isn't another call in progress
             // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
             startForegroundWithServiceType(
                 notificationId,

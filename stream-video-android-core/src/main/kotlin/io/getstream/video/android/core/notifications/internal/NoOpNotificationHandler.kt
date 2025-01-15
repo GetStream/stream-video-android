@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
+import android.app.PendingIntent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -29,6 +30,15 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
+
+    override fun getIncomingCallNotification(
+        fullScreenPendingIntent: PendingIntent,
+        acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
+        callerName: String?,
+        shouldHaveContentIntent: Boolean,
+    ): Notification? = null
+
     override fun getOngoingCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,

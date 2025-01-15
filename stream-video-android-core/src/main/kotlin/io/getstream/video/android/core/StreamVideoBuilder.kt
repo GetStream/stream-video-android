@@ -23,12 +23,14 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.StreamLog
 import io.getstream.log.android.AndroidStreamLogger
 import io.getstream.log.streamLog
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -75,8 +77,8 @@ import java.net.ConnectException
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
- * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true)
- * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig].
+ * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true). (Deprecated) Use `callServiceConfigRegistry` instead.
+ * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
@@ -84,6 +86,7 @@ import java.net.ConnectException
  * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
  * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
+ * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
  *
  * @see build
  * @see ClientState.connection
@@ -107,8 +110,19 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val connectionTimeoutInMs: Long = 10000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
+    @Deprecated(
+        "Use 'callServiceConfigRegistry' instead",
+        replaceWith = ReplaceWith("callServiceConfigRegistry"),
+        level = DeprecationLevel.WARNING,
+    )
     private val runForegroundServiceForCalls: Boolean = true,
+    @Deprecated(
+        "Use 'callServiceConfigRegistry' instead",
+        replaceWith = ReplaceWith("callServiceConfigRegistry"),
+        level = DeprecationLevel.WARNING,
+    )
     private val callServiceConfig: CallServiceConfig? = null,
+    private val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val crashOnMissingPermission: Boolean = false,
@@ -197,6 +211,18 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             deviceTokenStorage = deviceTokenStorage,
         )
 
+        // Set default call configuration
+        callServiceConfigRegistry.createConfigRegistry {
+            register(
+                CallType.AnyMarker.name,
+                DefaultCallConfigurations.default
+                    .copy(
+                        runCallServiceInForeground = runForegroundServiceForCalls,
+                        audioUsage = defaultAudioUsage,
+                    ),
+            )
+        }
+
         // Create the client
         val client = StreamVideoClient(
             context = context,
@@ -209,11 +235,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
-            callServiceConfig = callServiceConfig
-                ?: callServiceConfig().copy(
-                    runCallServiceInForeground = runForegroundServiceForCalls,
-                    audioUsage = defaultAudioUsage,
-                ),
+            callServiceConfigRegistry = callServiceConfigRegistry,
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,

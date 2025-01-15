@@ -29,6 +29,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -139,7 +140,7 @@ public class Call(
     private var callStatsReportingJob: Job? = null
     private var powerManager: PowerManager? = null
 
-    private val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+    internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
@@ -211,8 +212,14 @@ public class Call(
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
 
-    internal var connectedAt: Long? = null
-    internal var reconnectAt: Pair<WebsocketReconnectStrategy, Long>? = null
+    internal var connectStartTime = 0L
+    internal var reconnectStartTime = 0L
+
+    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
+        context = clientImpl.context,
+        audioProcessing = clientImpl.audioProcessing,
+        audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+    )
 
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
@@ -222,8 +229,8 @@ public class Call(
                 clientImpl.context,
                 this,
                 scope,
-                clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.callServiceConfig.audioUsage,
+                peerConnectionFactory.eglBase.eglBaseContext,
+                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             )
         }
     }
@@ -442,8 +449,9 @@ public class Call(
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
-        // step 1. call the join endpoint to get a list of SFUs
+        connectStartTime = System.currentTimeMillis()
 
+        // step 1. call the join endpoint to get a list of SFUs
         val locationResult = clientImpl.getCachedLocation()
         if (locationResult !is Success) {
             return locationResult as Failure
@@ -469,7 +477,6 @@ public class Call(
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
-            connectedAt = System.currentTimeMillis()
             RtcSession(
                 sessionId = this.sessionId,
                 apiKey = clientImpl.apiKey,
@@ -498,7 +505,7 @@ public class Call(
         return Success(value = session!!)
     }
 
-    private suspend fun Call.monitorSession(result: JoinCallResponse) {
+    private fun Call.monitorSession(result: JoinCallResponse) {
         sfuEvents?.cancel()
         sfuListener?.cancel()
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
@@ -574,7 +581,7 @@ public class Call(
         network.subscribe(listener)
     }
 
-    private suspend fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
+    private fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
         callStatsReportingJob?.cancel()
         callStatsReportingJob = scope.launch {
             // Wait a bit before we start capturing stats
@@ -582,29 +589,35 @@ public class Call(
 
             while (isActive) {
                 delay(reportingIntervalMs)
-
-                val publisherStats = session?.getPublisherStats()
-                val subscriberStats = session?.getSubscriberStats()
-                state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
-                state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
-                state.stats.updateLocalStats()
-                val local = state.stats._local.value
-
-                val report = CallStatsReport(
-                    publisher = publisherStats,
-                    subscriber = subscriberStats,
-                    local = local,
-                    stateStats = state.stats,
+                session?.sendCallStats(
+                    report = collectStats(),
                 )
-                statsReport.value = report
-                statLatencyHistory.value += report.stateStats.publisher.latency.value
-                if (statLatencyHistory.value.size > 20) {
-                    statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
-                }
-
-                session?.sendCallStats(report)
             }
         }
+    }
+
+    internal suspend fun collectStats(): CallStatsReport {
+        val publisherStats = session?.getPublisherStats()
+        val subscriberStats = session?.getSubscriberStats()
+        state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
+        state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
+        state.stats.updateLocalStats()
+        val local = state.stats._local.value
+
+        val report = CallStatsReport(
+            publisher = publisherStats,
+            subscriber = subscriberStats,
+            local = local,
+            stateStats = state.stats,
+        )
+
+        statsReport.value = report
+        statLatencyHistory.value += report.stateStats.publisher.latency.value
+        if (statLatencyHistory.value.size > 20) {
+            statLatencyHistory.value = statLatencyHistory.value.takeLast(20)
+        }
+
+        return report
     }
 
     /**
@@ -615,6 +628,8 @@ public class Call(
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
+            reconnectStartTime = System.currentTimeMillis()
+
             val session = session!!
             val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
             val reconnectDetails = ReconnectDetails(
@@ -624,7 +639,6 @@ public class Call(
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
             )
-            reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST, System.currentTimeMillis())
             session.fastReconnect(reconnectDetails)
         } else {
             logger.e { "[reconnect] Disconnecting" }
@@ -637,15 +651,17 @@ public class Call(
      */
     suspend fun rejoin() = schedule {
         logger.d { "[rejoin] Rejoining" }
-        reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN, System.currentTimeMillis())
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
+            reconnectStartTime = System.currentTimeMillis()
+
             val joinResponse = joinRequest(location = it)
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 val session = this.session!!
+                val currentOptions = this.session?.publisher?.currentOptions()
                 logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
 
                 this.sessionId = UUID.randomUUID().toString()
@@ -673,7 +689,7 @@ public class Call(
                         ice.toIceServer()
                     },
                 )
-                this.session?.connect(reconnectDetails)
+                this.session?.connect(reconnectDetails, currentOptions)
                 session.cleanup()
                 monitorSession(joinResponse.value)
             } else {
@@ -692,11 +708,14 @@ public class Call(
         logger.d { "[migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
+            reconnectStartTime = System.currentTimeMillis()
+
             val joinResponse = joinRequest(location = it)
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 val session = this.session!!
+                val currentOptions = this.session?.publisher?.currentOptions()
                 val oldSfuUrl = session.sfuUrl
                 logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
 
@@ -711,7 +730,6 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
-                reconnectAt = Pair(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE, System.currentTimeMillis())
                 val newSession = RtcSession(
                     clientImpl,
                     powerManager,
@@ -728,7 +746,7 @@ public class Call(
                 )
                 val oldSession = this.session
                 this.session = newSession
-                this.session?.connect(reconnectDetails)
+                this.session?.connect(reconnectDetails, currentOptions)
                 monitorSession(joinResponse.value)
                 oldSession?.leaveWithReason("migrating")
                 oldSession?.cleanup()
@@ -775,11 +793,11 @@ public class Call(
 
         sfuSocketReconnectionTime = null
         stopScreenSharing()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
         (client as StreamVideoClient).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
+        client.state.removeActiveCall() // Will also stop CallService
+        client.state.removeRingingCall()
         cleanup()
     }
 
@@ -876,7 +894,7 @@ public class Call(
 
         // Note this comes from peerConnectionFactory.eglBase
         videoRenderer.init(
-            clientImpl.peerConnectionFactory.eglBase.eglBaseContext,
+            peerConnectionFactory.eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     val width = videoRenderer.measuredWidth
@@ -1203,7 +1221,7 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService()
+        clientImpl.state.maybeStopForegroundService(call = this)
         return clientImpl.accept(type, id)
     }
 
@@ -1277,15 +1295,15 @@ public class Call(
     }
 
     fun isAudioProcessingEnabled(): Boolean {
-        return clientImpl.isAudioProcessingEnabled()
+        return peerConnectionFactory.isAudioProcessingEnabled()
     }
 
     fun setAudioProcessingEnabled(enabled: Boolean) {
-        return clientImpl.setAudioProcessingEnabled(enabled)
+        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
     }
 
     fun toggleAudioProcessing(): Boolean {
-        return clientImpl.toggleAudioProcessing()
+        return peerConnectionFactory.toggleAudioProcessing()
     }
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> {
@@ -1368,7 +1386,7 @@ public class Call(
 
         fun fastReconnect() {
             call.scope.launch {
-                call.rejoin()
+                call.fastReconnect()
             }
         }
     }

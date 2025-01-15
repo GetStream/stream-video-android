@@ -194,6 +194,8 @@ dependencies {
     implementation(libs.tink)
 
     // unit tests
+    testImplementation(libs.stream.result)
+    testImplementation(libs.stream.result.call)
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.mockk)
@@ -206,6 +208,10 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.kotlinx.coroutines.debug)
     testImplementation(libs.kotlinx.serialization.converter)
+    testImplementation(libs.retrofit)
+    testImplementation(libs.retrofit.moshi)
+    testImplementation(libs.retrofit.scalars)
+    testImplementation(libs.retrofit.wire.converter)
 
     // instrument tests
     androidTestImplementation(libs.stream.log.android)

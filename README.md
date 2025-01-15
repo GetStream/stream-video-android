@@ -8,6 +8,14 @@
   <a href="https://search.maven.org/search?q=stream-video-android"><img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-core.svg?label=Maven%20Central" /></a>
 </p>
 
+<div align="center">
+
+![stream-video-android-core](https://img.shields.io/badge/stream--video--android--core-10.94%20MB-lightgreen)
+![stream-video-android-ui-xml](https://img.shields.io/badge/stream--video--android--ui--xml-5.79%20MB-lightgreen)
+![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-5.78%20MB-lightgreen)
+
+</div>
+
 This is the official Android SDK for [Stream Video](https://getstream.io/video?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss), a service for building video calls, audio rooms, and live-streaming applications. This library includes both a low-level video SDK and a set of reusable UI components.
 Most users start with the Compose UI components and fall back to the lower-level API when they want to customize things.
 
