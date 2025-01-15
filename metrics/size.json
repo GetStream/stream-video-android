@@ -7,6 +7,6 @@
   "release": {
     "stream-video-android-core": 11204,
     "stream-video-android-ui-xml": 5936,
-    "stream-video-android-ui-compose": 5928
+    "stream-video-android-ui-compose": 0
   }
 }
