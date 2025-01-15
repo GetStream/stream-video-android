@@ -477,16 +477,8 @@ class MicrophoneManager(
             ).also {
                 it.start()
             }
-
-//            audioHandler =
-//                AudioSwitchHandler(mediaManager.context, preferSpeakerphone) { devices, selected ->
-//                    logger.i { "audio devices. selected $selected, available devices are $devices" }
-//                    _devices.value = devices.map { it.fromAudio() }
-//                    _selectedDevice.value = selected?.fromAudio()
-//                }
-//
         } else {
-            logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
+            logger.d { "[MediaManager#setup] usage is MEDIA, won't handle device switch" }
         }
     }
 
