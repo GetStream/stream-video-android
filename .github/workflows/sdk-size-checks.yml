@@ -1,4 +1,4 @@
-name: SDK size
+name: SDK size checks
 
 on:
   pull_request:
@@ -10,15 +10,12 @@ concurrency:
 env:
   METRICS_PROJECT: "stream-video-android-metrics"
   MODULES: "stream-video-android-core stream-video-android-ui-xml stream-video-android-ui-compose"
-  VARIANTS: "debug release"
   METRICS_FILE: "metrics/size.json"
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   MAX_TOLERANCE: 500
   FINE_TOLERANCE: 250
 
 jobs:
-  sdk-size:
-    name: Update and compare SDK sizes
+  compare-sdk-sizes:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,76 +26,16 @@ jobs:
         with:
           key-prefix: gradle-build
 
-      - name: Assemble for metrics
-        run: ./gradlew :metrics:$METRICS_PROJECT:assemble
+      - name: Assemble release for metrics
+        run: ./gradlew :metrics:$METRICS_PROJECT:assembleRelease
 
-      - name: Update size metrics
+      - name: Get current SDK sizes
         run: |
-          # Create temporary JSON file
-          echo '{}' > metrics.json
-
-          # Calculate sizes
-          for module in $MODULES; do
-            for variant in $VARIANTS; do
-              baselineFile="metrics/$METRICS_PROJECT/build/outputs/apk/$module-baseline/$variant/$METRICS_PROJECT-$module-baseline-$variant.apk"
-              streamFile="metrics/$METRICS_PROJECT/build/outputs/apk/$module-stream/$variant/$METRICS_PROJECT-$module-stream-$variant.apk"
-
-              # Ensure files exist
-              if [[ -f "$baselineFile" && -f "$streamFile" ]]; then
-                baselineSize=$(du -k "$baselineFile" | awk '{print $1}')
-                streamSize=$(du -k "$streamFile" | awk '{print $1}')
-                size=$((streamSize - baselineSize))
-              else
-                echo "Warning: $baselineFile or $streamFile not found. Setting size to 0."
-                size=0
-              fi
-          
-              # Update JSON
-              jq --arg module "$module" --arg variant "$variant" --argjson size "$size" \
-                ".\"$variant\".\"$module\" = $size" metrics.json > temp.json && mv temp.json metrics.json
-            done
-          done
-
-          # Validate Generated JSON
-          jq . metrics.json
-          
-          # Move temporary JSON file to the final file
-          mv metrics.json $METRICS_FILE
-
-      - name: Update size badges
-        run: |
-          for module in $MODULES; do
-            size=$(jq --arg module "$module" ".release.\"$module\"" $METRICS_FILE)
-            sizeInMb=$(echo "scale=2; $size / 1024" | bc)
-            badgeUrl="https://img.shields.io/badge/${module//-/--}-$sizeInMb%20MB-lightgreen"
-            sed -i "s|!\[$module\](.*)|![$module](${badgeUrl})|" README.md
-          done
-
-      - name: Commit changes
-        run: |
-          git fetch origin $BRANCH_NAME
-          git checkout $BRANCH_NAME
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"         
-
-          git add $METRICS_FILE README.md
-          git commit -m "[skip ci] Update SDK sizes" || echo "No changes to commit"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ env.BRANCH_NAME }}
-
-      - name: Get baseline SDK sizes
-        run: |
-          # Reads the baseline SDK sizes from develop branch
+          # Reads current SDK sizes from the metrics file
           # and define to a variable using a compact JSON format
-          # so it can be exported for the next job steps
-          curl -sSL https://raw.githubusercontent.com/${{ github.event.pull_request.head.repo.full_name }}/${{ github.event.pull_request.base.ref }}/metrics/size.json -o baseline.json
-          BASELINE_SDK_SIZES=$(jq -c .release baseline.json)
-          echo "BASELINE_SDK_SIZES=$BASELINE_SDK_SIZES" >> $GITHUB_ENV
+          # so it can be exported for the next job step
+          CURRENT_SDK_SIZES=$(jq -c .release $METRICS_FILE)
+          echo "CURRENT_SDK_SIZES=$CURRENT_SDK_SIZES" >> $GITHUB_ENV
 
       - name: Calculate PR branch SDK sizes
         run: |
@@ -125,7 +62,7 @@ jobs:
           script: |
             const maxTolerance = process.env.MAX_TOLERANCE
             const fineTolerance = process.env.FINE_TOLERANCE
-            const baselineSdkSizes = process.env.BASELINE_SDK_SIZES ? JSON.parse(process.env.BASELINE_SDK_SIZES) : {};
+            const currentSdkSizes = process.env.CURRENT_SDK_SIZES ? JSON.parse(process.env.CURRENT_SDK_SIZES) : {};
             const prSdkSizes = JSON.parse(process.env.PR_SDK_SIZES);
             const commentHeader = '## SDK Size Comparison 📏';
 
@@ -139,10 +76,10 @@ jobs:
             `;
             
             Object.keys(prSdkSizes).forEach(sdk => {
-              const baselineSize = baselineSdkSizes[sdk] || 0;
+              const currentSize = currentSdkSizes[sdk] || 0;
               const prSize = prSdkSizes[sdk];
-              const diff = prSize - baselineSize;
-              const baselineSizeInMb = (baselineSize / 1024).toFixed(2);
+              const diff = prSize - currentSize;
+              const currentSizeInMb = (currentSize / 1024).toFixed(2);
               const prSizeInMb = (prSize / 1024).toFixed(2);
               const diffInMb = (diff / 1024).toFixed(2);
 
@@ -155,7 +92,7 @@ jobs:
                 status = "🟡";
               }
 
-              commentBody += `| ${sdk} | ${baselineSizeInMb} MB | ${prSizeInMb} MB | ${diffInMb} MB | ${status} |\n`;
+              commentBody += `| ${sdk} | ${currentSizeInMb} MB | ${prSizeInMb} MB | ${diffInMb} MB | ${status} |\n`;
             });
             
             // Post or update the PR comment
