@@ -76,13 +76,11 @@ import java.net.ConnectException
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
- * @property runForegroundServiceForCalls If set to true, when there is an active call the SDK will run a foreground service to keep the process alive. (default: true). (Deprecated) Use `callServiceConfigRegistry` instead.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [Sounds].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
- * @property audioUsage Used to signal to the system how to treat the audio tracks (voip or media).
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
  * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
@@ -114,23 +112,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         replaceWith = ReplaceWith("callServiceConfigRegistry"),
         level = DeprecationLevel.WARNING,
     )
-    private val runForegroundServiceForCalls: Boolean = true,
-    @Deprecated(
-        "Use 'callServiceConfigRegistry' instead",
-        replaceWith = ReplaceWith("callServiceConfigRegistry"),
-        level = DeprecationLevel.WARNING,
-    )
     private val callServiceConfig: CallServiceConfig? = null,
     private val callServiceConfigRegistry: CallServiceConfigRegistry? = null,
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
-    @Deprecated(
-        message = "This property is ignored. Set audioUsage in the callServiceConfig parameter.",
-        level = DeprecationLevel.WARNING,
-    )
-    private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
