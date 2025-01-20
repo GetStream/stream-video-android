@@ -30,7 +30,6 @@ import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
-import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -122,7 +121,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         level = DeprecationLevel.WARNING,
     )
     private val callServiceConfig: CallServiceConfig? = null,
-    private val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
+    private val callServiceConfigRegistry: CallServiceConfigRegistry? = null,
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val crashOnMissingPermission: Boolean = false,
@@ -211,16 +210,25 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             deviceTokenStorage = deviceTokenStorage,
         )
 
-        // Set default call configuration
-        callServiceConfigRegistry.createConfigRegistry {
-            register(
-                CallType.AnyMarker.name,
-                DefaultCallConfigurations.default
-                    .copy(
-                        runCallServiceInForeground = runForegroundServiceForCalls,
-                        audioUsage = defaultAudioUsage,
-                    ),
-            )
+        // Set call configuration
+        var callConfigRegistry = if (callServiceConfigRegistry != null) {
+            callServiceConfigRegistry
+        } else {
+            CallServiceConfigRegistry().apply {
+                callServiceConfig?.let { legacyCallConfig ->
+                    legacyCallConfig.callServicePerType.forEach {
+                        CallType.fromName(it.key)?.let { callType ->
+                            register(callType.name) {
+                                setServiceClass(it.value)
+                                setRunCallServiceInForeground(
+                                    legacyCallConfig.runCallServiceInForeground,
+                                )
+                                setAudioUsage(legacyCallConfig.audioUsage)
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Create the client
@@ -235,7 +243,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
-            callServiceConfigRegistry = callServiceConfigRegistry,
+            callServiceConfigRegistry = callConfigRegistry,
             testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
