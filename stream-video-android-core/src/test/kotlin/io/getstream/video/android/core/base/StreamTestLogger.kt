@@ -16,16 +16,25 @@
 
 package io.getstream.video.android.core.base
 
+import io.getstream.log.KotlinStreamLogger
 import io.getstream.log.Priority
-import io.getstream.log.kotlin.KotlinStreamLogger
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * A logger that prints to stdout
  */
 internal class StreamTestLogger : KotlinStreamLogger() {
+    public override val now: () -> LocalDateTime = {
+        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    }
 
     override fun log(priority: Priority, tag: String, message: String, throwable: Throwable?) {
         if (throwable != null) {
         }
     }
+
+    override fun install(minPriority: Priority, maxTagLength: Int) {}
 }

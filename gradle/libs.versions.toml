@@ -49,8 +49,8 @@ itu = "1.7.3"
 streamWebRTC = "1.3.6"
 streamNoiseCancellation = "1.0.2"
 streamResult = "1.3.0"
-streamChat = "6.5.1"
-streamLog = "1.1.4"
+streamChat = "6.9.0"
+streamLog = "1.3.1"
 streamPush = "1.1.8"
 
 androidxTest = "1.5.2"
@@ -152,7 +152,6 @@ stream-result = { group = "io.getstream", name = "stream-result", version.ref = 
 stream-result-call = { group = "io.getstream", name = "stream-result-call", version.ref = "streamResult" }
 
 stream-log = { group = "io.getstream", name = "stream-log", version.ref = "streamLog" }
-stream-log-android = { group = "io.getstream", name = "stream-log-android", version.ref = "streamLog" }
 stream-push = { group = "io.getstream", name = "stream-android-push", version.ref = "streamPush" }
 stream-push-delegate = { group = "io.getstream", name = "stream-android-push-delegate", version.ref = "streamPush" }
 stream-push-firebase = { group = "io.getstream", name = "stream-android-push-firebase", version.ref = "streamPush" }
