@@ -50,7 +50,7 @@ dependencies {
     api(project(":stream-video-android-ui-core"))
 
     // androidx
-    implementation(libs.stream.log.android)
+    implementation(libs.stream.log)
 
     // compose
     implementation(libs.androidx.activity.compose)
