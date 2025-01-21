@@ -10,7 +10,7 @@
 
 <div align="center">
 
-![stream-video-android-core](https://img.shields.io/badge/stream--video--android--core-10.94%20MB-lightgreen)
+![stream-video-android-core](https://img.shields.io/badge/stream--video--android--core-11.06%20MB-lightgreen)
 ![stream-video-android-ui-xml](https://img.shields.io/badge/stream--video--android--ui--xml-5.79%20MB-lightgreen)
 ![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-5.78%20MB-lightgreen)
 
