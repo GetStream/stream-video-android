@@ -20,9 +20,13 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.base.TestBase
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.errors.VideoErrorCode
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
@@ -239,5 +243,73 @@ class ClientAndAuthTest : TestBase() {
         }
         val deferred = clientImpl.connectAsync()
         deferred.join()
+    }
+
+    @Test
+    fun build_withRegistryCallConfigAndNoLegacyCallConfig_usesRegistryInternally() {
+        StreamVideo.removeClient()
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = authData!!.apiKey,
+            user = testData.users["thierry"]!!,
+            token = authData!!.token,
+            callServiceConfigRegistry = CallServiceConfigRegistry().apply {
+                register(CallType.Default.name) {
+                    setRunCallServiceInForeground(testData.callConfigRegistryRunService)
+                    setAudioUsage(testData.callConfigRegistryAudioUsage)
+                }
+            },
+        ).build()
+
+        val config = client.state.callConfigRegistry.get(CallType.Default.name)
+
+        assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
+        assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
+    }
+
+    @Test
+    fun build_withLegacyCallConfigAndNoRegistryCallConfig_usesLegacyInternally() {
+        StreamVideo.removeClient()
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = authData!!.apiKey,
+            user = testData.users["thierry"]!!,
+            token = authData!!.token,
+            callServiceConfig = callServiceConfig().copy(
+                runCallServiceInForeground = testData.callConfigLegacyRunService,
+                audioUsage = testData.callConfigLegacyAudioUsage,
+            ),
+        ).build()
+
+        val config = client.state.callConfigRegistry.get(CallType.Default.name)
+
+        assertEquals(testData.callConfigLegacyRunService, config.runCallServiceInForeground)
+        assertEquals(testData.callConfigLegacyAudioUsage, config.audioUsage)
+    }
+
+    @Test
+    fun build_withBothRegistryCallConfigAndLegacyCallConfig_usesRegistryInternally() {
+        StreamVideo.removeClient()
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = authData!!.apiKey,
+            user = testData.users["thierry"]!!,
+            token = authData!!.token,
+            callServiceConfig = callServiceConfig().copy(
+                runCallServiceInForeground = testData.callConfigLegacyRunService,
+                audioUsage = testData.callConfigLegacyAudioUsage,
+            ),
+            callServiceConfigRegistry = CallServiceConfigRegistry().apply {
+                register(CallType.Default.name) {
+                    setRunCallServiceInForeground(testData.callConfigRegistryRunService)
+                    setAudioUsage(testData.callConfigRegistryAudioUsage)
+                }
+            },
+        ).build()
+
+        val config = client.state.callConfigRegistry.get(CallType.Default.name)
+
+        assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
+        assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
     }
 }
