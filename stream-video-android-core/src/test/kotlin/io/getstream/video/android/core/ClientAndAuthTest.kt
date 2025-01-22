@@ -265,6 +265,8 @@ class ClientAndAuthTest : TestBase() {
 
         assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
         assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
+
+        client.cleanup()
     }
 
     @Test
@@ -285,6 +287,8 @@ class ClientAndAuthTest : TestBase() {
 
         assertEquals(testData.callConfigLegacyRunService, config.runCallServiceInForeground)
         assertEquals(testData.callConfigLegacyAudioUsage, config.audioUsage)
+
+        client.cleanup()
     }
 
     @Test
@@ -311,5 +315,7 @@ class ClientAndAuthTest : TestBase() {
 
         assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
         assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
+
+        client.cleanup()
     }
 }
