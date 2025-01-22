@@ -102,6 +102,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
 //        }
 
         if (IntegrationTestState.client == null) {
+            StreamVideo.removeClient()
             client = builder.build()
             clientImpl = client as StreamVideoClient
             clientImpl.testSessionId = UUID.randomUUID().toString()

@@ -248,6 +248,7 @@ class ClientAndAuthTest : TestBase() {
     @Test
     fun build_withRegistryCallConfigAndNoLegacyCallConfig_usesRegistryInternally() {
         StreamVideo.removeClient()
+
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
@@ -265,13 +266,12 @@ class ClientAndAuthTest : TestBase() {
 
         assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
         assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
-
-        client.cleanup()
     }
 
     @Test
     fun build_withLegacyCallConfigAndNoRegistryCallConfig_usesLegacyInternally() {
         StreamVideo.removeClient()
+
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
@@ -287,13 +287,12 @@ class ClientAndAuthTest : TestBase() {
 
         assertEquals(testData.callConfigLegacyRunService, config.runCallServiceInForeground)
         assertEquals(testData.callConfigLegacyAudioUsage, config.audioUsage)
-
-        client.cleanup()
     }
 
     @Test
     fun build_withBothRegistryCallConfigAndLegacyCallConfig_usesRegistryInternally() {
         StreamVideo.removeClient()
+
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
@@ -315,7 +314,5 @@ class ClientAndAuthTest : TestBase() {
 
         assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
         assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
-
-        client.cleanup()
     }
 }
