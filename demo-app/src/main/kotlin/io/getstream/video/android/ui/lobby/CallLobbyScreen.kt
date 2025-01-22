@@ -88,7 +88,7 @@ fun CallLobbyScreen(
     onBack: () -> Unit,
 ) {
     LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
-    val isLoading by callLobbyViewModel.isLoading.collectAsState()
+    val isLoading by callLobbyViewModel.isLoading.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by callLobbyViewModel.microphoneEnabled.collectAsStateWithLifecycle()
     val isCameraEnabled by callLobbyViewModel.cameraEnabled.collectAsStateWithLifecycle()
     val call by remember {
@@ -271,7 +271,7 @@ private fun CallLobbyBody(
 private fun LobbyDescription(
     callLobbyViewModel: CallLobbyViewModel,
 ) {
-    val participantCounts by callLobbyViewModel.call.state.participantCounts.collectAsState()
+    val participantCounts by callLobbyViewModel.call.state.participantCounts.collectAsStateWithLifecycle()
 
     LobbyDescriptionContent(participantCounts = participantCounts) {
         callLobbyViewModel.handleUiEvent(

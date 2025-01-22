@@ -18,18 +18,11 @@ package io.getstream.video.android.compose.utils
 
 import androidx.annotation.DimenRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.ui.common.util.getFloatResource
 
 @Composable
 internal fun textSizeResource(@DimenRes id: Int): TextUnit {
     return dimensionResource(id = id).value.sp
-}
-
-@Composable
-internal fun floatResource(@DimenRes id: Int): Float {
-    return LocalContext.current.getFloatResource(id)
 }
