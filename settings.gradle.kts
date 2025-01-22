@@ -16,6 +16,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
+        maven(url = "https://oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 
