@@ -198,25 +198,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         // Set call configuration
-        var callConfigRegistry = if (callServiceConfigRegistry != null) {
-            callServiceConfigRegistry
-        } else {
-            CallServiceConfigRegistry().apply {
-                callServiceConfig?.let { legacyCallConfig ->
-                    legacyCallConfig.callServicePerType.forEach {
-                        CallType.fromName(it.key)?.let { callType ->
-                            register(callType.name) {
-                                setServiceClass(it.value)
-                                setRunCallServiceInForeground(
-                                    legacyCallConfig.runCallServiceInForeground,
-                                )
-                                setAudioUsage(legacyCallConfig.audioUsage)
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        var callConfigRegistry = createCallConfigurationRegistry(
+            callServiceConfigRegistry,
+            callServiceConfig,
+        )
 
         // Create the client
         val client = StreamVideoClient(
@@ -277,6 +262,31 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         StreamVideo.install(client)
 
         return client
+    }
+
+    internal fun createCallConfigurationRegistry(
+        callServiceConfigRegistry: CallServiceConfigRegistry? = null,
+        callServiceConfig: CallServiceConfig? = null,
+    ): CallServiceConfigRegistry {
+        return if (callServiceConfigRegistry != null) {
+            callServiceConfigRegistry
+        } else {
+            CallServiceConfigRegistry().apply {
+                callServiceConfig?.let { legacyCallConfig ->
+                    legacyCallConfig.callServicePerType.forEach {
+                        CallType.fromName(it.key)?.let { callType ->
+                            register(callType.name) {
+                                setServiceClass(it.value)
+                                setRunCallServiceInForeground(
+                                    legacyCallConfig.runCallServiceInForeground,
+                                )
+                                setAudioUsage(legacyCallConfig.audioUsage)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
