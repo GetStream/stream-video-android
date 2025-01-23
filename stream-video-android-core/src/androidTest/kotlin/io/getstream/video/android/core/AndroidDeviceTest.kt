@@ -222,7 +222,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     fun getSupportedCodecs(): List<VideoCodecInfo> {
-        val rootEglBase = clientImpl.peerConnectionFactory.eglBase
+        val rootEglBase = call.peerConnectionFactory.eglBase
         val encoderFactory = DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, true)
         val decoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
 
@@ -245,9 +245,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val filterVideoProcessor =
             FilterVideoProcessor({ call.videoFilter }, { call.camera.surfaceTextureHelper })
         val videoSource =
-            clientImpl.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
+            call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
         assertThat(videoSource).isNotNull()
-        val audioSource = clientImpl.peerConnectionFactory.makeAudioSource(audioConstraints)
+        val audioSource = call.peerConnectionFactory.makeAudioSource(audioConstraints)
         assertThat(audioSource).isNotNull()
     }
 
