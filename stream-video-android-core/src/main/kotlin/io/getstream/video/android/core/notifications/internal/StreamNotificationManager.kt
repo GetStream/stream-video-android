@@ -57,7 +57,7 @@ internal class StreamNotificationManager private constructor(
         logger.d { "[registerPushDevice] no args" }
         // first get a push device generator that works for this device
         notificationConfig.pushDeviceGenerators
-            .firstOrNull { it.isValidForThisDevice(context) }
+            .firstOrNull { it.isValidForThisDevice() }
             ?.let { generator ->
                 generator.onPushDeviceGeneratorSelected()
                 generator.asyncGeneratePushDevice { generatedDevice ->

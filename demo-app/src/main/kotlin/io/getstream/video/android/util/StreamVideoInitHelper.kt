@@ -198,7 +198,10 @@ object StreamVideoInitHelper {
             ensureSingleInstance = false,
             notificationConfig = NotificationConfig(
                 pushDeviceGenerators = listOf(
-                    FirebasePushDeviceGenerator(providerName = "firebase"),
+                    FirebasePushDeviceGenerator(
+                        context = context,
+                        providerName = "firebase",
+                    ),
                 ),
             ),
             tokenProvider = object : TokenProvider {
