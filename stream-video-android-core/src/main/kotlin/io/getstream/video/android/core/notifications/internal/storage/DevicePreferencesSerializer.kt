@@ -30,7 +30,7 @@ internal object DevicePreferencesSerializer : Serializer<DevicePreferences?> {
 
     override suspend fun readFrom(input: InputStream): DevicePreferences? {
         val userInput = input.readBytes()
-        if (userInput.isEmpty()) return null
+        if (userInput.isEmpty()) return DevicePreferences()
         return ProtoBuf.decodeFromByteArray(DevicePreferences.serializer(), userInput)
     }
 
