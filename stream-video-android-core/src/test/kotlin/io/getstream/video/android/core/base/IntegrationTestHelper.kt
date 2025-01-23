@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.base
 
 import android.content.Context
+import android.media.AudioAttributes
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.android.model.User
 
@@ -43,6 +44,11 @@ public class IntegrationTestHelper {
         a=mediaclk:direct=0
         a=sync-time:0
     """.trimIndent()
+
+    val callConfigLegacyRunService = false
+    val callConfigLegacyAudioUsage = AudioAttributes.USAGE_MEDIA
+    val callConfigRegistryRunService = true
+    val callConfigRegistryAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 
     init {
         // TODO: generate token from build vars
