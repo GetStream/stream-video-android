@@ -52,22 +52,20 @@ internal object TelecomCompat {
                 },
                 onNotSupported = {
                     if (isIncomingCall) {
-                        ifForegroundServiceEnabled(callConfig) {
-                            CallService.showIncomingCall(
-                                context.applicationContext,
-                                StreamCallId.fromCallCid(streamCall.cid),
-                                callDisplayName,
-                                callServiceConfiguration = callConfig,
-                                notification = callId?.let {
-                                    getRingingCallNotification(
-                                        RingingState.Incoming(),
-                                        callId,
-                                        callDisplayName,
-                                        shouldHaveContentIntent = true,
-                                    )
-                                },
-                            )
-                        }
+                        CallService.showIncomingCall(
+                            context.applicationContext,
+                            StreamCallId.fromCallCid(streamCall.cid),
+                            callDisplayName,
+                            callServiceConfiguration = callConfig,
+                            notification = callId?.let {
+                                getRingingCallNotification(
+                                    RingingState.Incoming(),
+                                    callId,
+                                    callDisplayName,
+                                    shouldHaveContentIntent = true,
+                                )
+                            },
+                        )
                     }
                 },
             )
