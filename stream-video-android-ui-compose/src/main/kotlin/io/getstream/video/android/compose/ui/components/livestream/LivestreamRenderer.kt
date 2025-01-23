@@ -27,7 +27,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +38,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
@@ -52,7 +52,7 @@ internal fun LivestreamRenderer(
     enablePausing: Boolean,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
 ) {
-    val livestream by call.state.livestream.collectAsState()
+    val livestream by call.state.livestream.collectAsStateWithLifecycle()
     var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
     var isPaused by rememberSaveable { mutableStateOf(false) }
 

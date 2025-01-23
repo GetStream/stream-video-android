@@ -67,5 +67,5 @@
 # Prevent R8 from stripping notification-handling classes.
 -keep class io.getstream.video.android.core.notifications.internal.VideoPushDelegate { *; }
 -keep class io.getstream.android.push.delegate.PushDelegate { *; }
--keep class io.getstream.android.push.delegate.PushDelegateProvider { *; }
+-keep class io.getstream.android.push.delegate.AndroidPushDelegateProvider { *; }
 -keep class io.getstream.android.push.permissions.PushPermissionsInitializer { *; }

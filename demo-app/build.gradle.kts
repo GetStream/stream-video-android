@@ -221,7 +221,7 @@ dependencies {
     implementation(libs.stream.chat.ui.utils)
 
     implementation(libs.stream.push.firebase)
-    implementation(libs.stream.log.android)
+    implementation(libs.stream.log)
 
     implementation(libs.androidx.material)
     implementation(libs.androidx.core.ktx)
