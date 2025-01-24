@@ -21,44 +21,26 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
-import android.telecom.DisconnectCause
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.core.telecom.CallAttributesCompat
-import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallEndpointCompat
 import androidx.core.telecom.CallsManager
-import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
-import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallRejectedEvent
-import org.openapitools.client.models.OwnCapability
 
 @TargetApi(Build.VERSION_CODES.O)
 internal class TelecomHandler private constructor(
@@ -75,6 +57,7 @@ internal class TelecomHandler private constructor(
     private val telecomHandlerScope = CoroutineScope(
         DispatcherProvider.Default + SupervisorJob() + exceptionHandler,
     )
+
     companion object {
         @Volatile
         private var instance: TelecomHandler? = null
@@ -195,7 +178,7 @@ internal class TelecomHandler private constructor(
                             onSetInactive = telecomToStreamEventBridge::onSetInactive,
                             block = {
                                 telecomCall.callControlScope = this
-                                streamToTelecomEventBridge.onEvent(this)
+                                streamToTelecomEventBridge.processEvents(callControlScope = this)
 
                                 logger.i { "[changeCallState] Added call to Telecom" }
                             },
@@ -324,189 +307,3 @@ internal class TelecomHandler private constructor(
         }
     }
 }
-
-@RequiresApi(Build.VERSION_CODES.O)
-private class TelecomCall(
-    val streamCall: StreamCall,
-    var state: TelecomCallState,
-    val config: CallServiceConfig,
-    val parentScope: CoroutineScope,
-) {
-
-    val notificationId = streamCall.cid.hashCode()
-
-    val attributes: CallAttributesCompat
-        get() = CallAttributesCompat(
-            displayName = streamCall.state.createdBy.value?.userNameOrId ?: "Unknown",
-            address = Uri.parse("https://getstream.io/video/join/${streamCall.cid}"),
-            direction = if (state == TelecomCallState.INCOMING) {
-                CallAttributesCompat.DIRECTION_INCOMING
-            } else {
-                CallAttributesCompat.DIRECTION_OUTGOING
-            },
-            callType = mediaType,
-        )
-
-    val mediaType: Int
-        get() = if (streamCall.hasCapability(OwnCapability.SendVideo)) {
-            CallAttributesCompat.CALL_TYPE_VIDEO_CALL
-        } else {
-            CallAttributesCompat.CALL_TYPE_AUDIO_CALL
-        }
-
-    var callControlScope: CallControlScope? = null
-        set(value) {
-            field = value
-            value?.let(::publishDevices)
-        }
-
-    var deviceListener: DeviceListener? = null
-        set(value) {
-            field = value
-            value?.let(::collectDevices)
-        }
-
-    private val localScope = CoroutineScope(parentScope.coroutineContext + Job())
-    private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
-
-    private fun publishDevices(callControlScope: CallControlScope) {
-        with(callControlScope) {
-            combine(availableEndpoints, currentCallEndpoint) { available, current ->
-                Pair(available.map { it.toStreamAudioDevice() }, current.toStreamAudioDevice())
-            }
-                .distinctUntilChanged()
-                .onEach { devicePair ->
-                    devices.value = devicePair
-
-                    StreamLog.d(TELECOM_LOG_TAG) {
-                        with(devicePair) {
-                            "[TelecomCall#publishDevices] Published devices. Available: ${first.map { it.name }}, selected: ${second.name}"
-                        }
-                    }
-                }
-                .launchIn(this)
-        }
-    }
-
-    private fun collectDevices(listener: DeviceListener) {
-        devices
-            .onEach { devicePair ->
-                devicePair?.let { pair ->
-                    with(pair) {
-                        listener(first, second)
-
-                        StreamLog.d(TELECOM_LOG_TAG) {
-                            "[TelecomCall#collectDevices] Collected devices. Available: ${first.map { it.name }}, selected: ${second.name}"
-                        }
-                    }
-                }
-            }
-            .launchIn(localScope)
-    }
-
-    fun cleanUp() {
-        StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#cleanUp]" }
-
-        runBlocking {
-            disconnect()
-            localScope.cancel()
-        }
-    }
-
-    suspend fun disconnect() {
-        callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-            StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#disconnect] Disconnect result: $result" }
-        }
-    }
-}
-
-internal enum class TelecomCallState {
-    IDLE,
-    INCOMING,
-    OUTGOING,
-    ONGOING,
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-private fun CallEndpointCompat.toStreamAudioDevice(): StreamAudioDevice = when (this.type) {
-    CallEndpointCompat.TYPE_BLUETOOTH -> StreamAudioDevice.BluetoothHeadset(telecomDevice = this)
-    CallEndpointCompat.TYPE_EARPIECE -> StreamAudioDevice.Earpiece(telecomDevice = this)
-    CallEndpointCompat.TYPE_SPEAKER -> StreamAudioDevice.Speakerphone(telecomDevice = this)
-    CallEndpointCompat.TYPE_WIRED_HEADSET -> StreamAudioDevice.WiredHeadset(telecomDevice = this)
-    else -> StreamAudioDevice.Earpiece()
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-private class TelecomToStreamEventBridge(telecomCall: TelecomCall) {
-    // TODO-Telecom: review SDK methods that are called here and take results into account
-
-    private val logger by taggedLogger(TELECOM_LOG_TAG)
-    private val streamCall = telecomCall.streamCall
-
-    suspend fun onAnswer(callType: Int) {
-        logger.d { "[TelecomToStreamEventBridge#onAnswer]" }
-        streamCall.accept()
-        streamCall.join()
-    }
-
-    suspend fun onDisconnect(cause: DisconnectCause) {
-        logger.d { "[TelecomToStreamEventBridge#onDisconnect]" }
-        streamCall.leave()
-    }
-
-    suspend fun onSetActive() {
-        logger.d { "[TelecomToStreamEventBridge#onSetActive]" }
-        streamCall.join()
-    }
-
-    suspend fun onSetInactive() {
-        logger.d { "[TelecomToStreamEventBridge#onSetInactive]" }
-        streamCall.leave()
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-private class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) {
-    private val logger by taggedLogger(TELECOM_LOG_TAG)
-
-    private val streamCall = telecomCall.streamCall
-    fun onEvent(callControlScope: CallControlScope) {
-        streamCall.subscribeFor(
-            CallAcceptedEvent::class.java,
-            CallRejectedEvent::class.java,
-            CallEndedEvent::class.java,
-        ) { event ->
-            logger.d { "[StreamToTelecomEventMapper#onEvent] Received event: ${event.getEventType()}" }
-
-            with(callControlScope) {
-                launch {
-                    when (event) {
-                        is CallAcceptedEvent -> {
-                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#answer" }
-                            answer(telecomCall.mediaType)
-                        }
-                        is CallRejectedEvent -> {
-                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
-                            disconnect(
-                                DisconnectCause(
-                                    when (event.reason) {
-                                        RejectReason.Cancel.alias -> DisconnectCause.LOCAL
-                                        RejectReason.Decline.alias -> DisconnectCause.REJECTED
-                                        else -> DisconnectCause.REMOTE
-                                    },
-                                ),
-                            )
-                            event.reason
-                        }
-                        is CallEndedEvent -> {
-                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
-                            disconnect(DisconnectCause(DisconnectCause.LOCAL))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-internal const val TELECOM_LOG_TAG = "StreamVideo:Telecom"
