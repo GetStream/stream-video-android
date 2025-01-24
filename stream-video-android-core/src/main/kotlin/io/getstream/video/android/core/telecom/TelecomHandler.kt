@@ -226,7 +226,7 @@ internal class TelecomHandler private constructor(
                         streamVideo.getRingingCallNotification(
                             ringingState = RingingState.Incoming(),
                             callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
-                            callDisplayName = telecomCall.attributes.displayName.toString(),
+                            callInfo = telecomCall.attributes.displayName.toString(),
                             shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                         )
                     }

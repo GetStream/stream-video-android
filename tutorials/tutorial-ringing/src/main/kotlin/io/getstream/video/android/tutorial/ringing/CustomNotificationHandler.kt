@@ -32,16 +32,16 @@ class CustomNotificationHandler(
     hideRingingNotificationInForeground = true,
 ) {
 
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        super.onRingingCall(callId, callDisplayName)
+    override fun onIncomingCall(callId: StreamCallId, callerName: String) {
+        super.onIncomingCall(callId, callerName)
     }
 
     @SuppressLint("MissingPermission")
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onMissedCall(callId: StreamCallId, callerName: String) {
         val notification = NotificationCompat.Builder(application, getChannelId())
             .setSmallIcon(R.drawable.round_call_missed_24)
             .setContentIntent(buildContentIntent())
-            .setContentTitle("Tutorial Missed Call from $callDisplayName")
+            .setContentTitle("Tutorial Missed Call from $callerName")
             .setAutoCancel(true)
             .build()
         notificationManager.notify(callId.hashCode(), notification)

@@ -41,7 +41,7 @@ internal object TelecomCompat {
         context: Context,
         call: StreamCall? = null,
         callId: StreamCallId? = null,
-        callDisplayName: String = "Unknown",
+        callInfo: String = "Unknown",
         isIncomingCall: Boolean = false,
     ) {
         withCall(call, callId) { streamCall, callConfig ->
@@ -55,13 +55,13 @@ internal object TelecomCompat {
                         CallService.showIncomingCall(
                             context.applicationContext,
                             StreamCallId.fromCallCid(streamCall.cid),
-                            callDisplayName,
+                            callInfo,
                             callServiceConfiguration = callConfig,
                             notification = callId?.let {
                                 getRingingCallNotification(
                                     RingingState.Incoming(),
                                     callId,
-                                    callDisplayName,
+                                    callInfo,
                                     shouldHaveContentIntent = true,
                                 )
                             },

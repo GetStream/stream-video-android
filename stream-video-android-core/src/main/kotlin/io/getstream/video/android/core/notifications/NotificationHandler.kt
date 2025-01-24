@@ -29,36 +29,36 @@ public interface NotificationHandler : NotificationPermissionHandler {
     /**
      * Configures incoming call push notification behavior.
      * @param callId An instance of [StreamCallId] representing the call identifier.
-     * @param callDisplayName The name of the caller.
+     * @param callerName The name of the caller.
      */
-    fun onRingingCall(callId: StreamCallId, callDisplayName: String)
+    fun onIncomingCall(callId: StreamCallId, callerName: String)
 
     /**
      * Configures missed call push notification behavior.
      * @param callId An instance of [StreamCallId] representing the call identifier.
-     * @param callDisplayName The name of the caller.
+     * @param callerName The name of the caller.
      */
-    fun onMissedCall(callId: StreamCallId, callDisplayName: String)
+    fun onMissedCall(callId: StreamCallId, callerName: String)
 
     /**
      * Configures live started push notification behavior.
      * @param callId An instance of [StreamCallId] representing the call identifier.
-     * @param callDisplayName The name of the call creator.
+     * @param callCreatorName The name of the call creator.
      */
-    fun onLiveCall(callId: StreamCallId, callDisplayName: String)
+    fun onLiveCall(callId: StreamCallId, callCreatorName: String)
 
     /**
      * Configures generic push notification behavior.
      * @param callId An instance of [StreamCallId] representing the call identifier.
-     * @param callDisplayName The name of the call creator.
+     * @param callCreatorName The name of the call creator.
      */
-    fun onNotification(callId: StreamCallId, callDisplayName: String)
+    fun onNotification(callId: StreamCallId, callCreatorName: String)
 
     /**
      * Customizes the [Notification] to be displayed for incoming and outgoing ringing calls.
      * @param ringingState The state of the ringing call, see [RingingState.Incoming] and [RingingState.Outgoing].
      * @param callId An instance of [StreamCallId] representing the call identifier.
-     * @param callDisplayName Call information that can be displayed as the primary content of the notification.
+     * @param callInfo Call information that can be displayed as the primary content of the notification.
      * @param shouldHaveContentIntent If the notification should have a content intent set. Used when the notification is clicked.
      *
      * @return A nullable [Notification].
@@ -66,7 +66,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
     fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String? = null,
+        callInfo: String? = null,
         shouldHaveContentIntent: Boolean = true,
     ): Notification?
 
@@ -75,7 +75,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
      * @param fullScreenPendingIntent A high-priority intent that launches an activity in full-screen mode, bypassing the lock screen.
      * @param acceptCallPendingIntent The intent triggered when accepting the call from the notification.
      * @param rejectCallPendingIntent The intent triggered when rejecting the call from the notification.
-     * @param callerName Call information that can be displayed as the primary content of the notification.
+     * @param callInfo Call information that can be displayed as the primary content of the notification.
      * @param shouldHaveContentIntent If the notification should have a content intent set. Used when the notification is clicked.
      *
      * @return A nullable [Notification].
@@ -84,14 +84,14 @@ public interface NotificationHandler : NotificationPermissionHandler {
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callerName: String?,
+        callInfo: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification?
 
     /**
      * Customizes the [Notification] to be displayed for ongoing calls. Outgoing calls are also considered ongoing, see the [isOutgoingCall] parameter.
      * @param callId An instance of [StreamCallId] representing the call identifier.
-     * @param callDisplayName Call information that can be displayed as the primary content of the notification.
+     * @param callInfo Call information that can be displayed as the primary content of the notification.
      * @param isOutgoingCall True if the call is outgoing.
      * @param remoteParticipantCount Number of remote participant. Can be used to further customize the notification.
      *
@@ -99,7 +99,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
      */
     fun getOngoingCallNotification(
         callId: StreamCallId,
-        callDisplayName: String? = null,
+        callInfo: String? = null,
         isOutgoingCall: Boolean = false,
         remoteParticipantCount: Int = 0,
     ): Notification?

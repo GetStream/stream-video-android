@@ -280,7 +280,7 @@ internal open class CallService : Service() {
                 TRIGGER_ONGOING_CALL -> Pair(
                     first = streamVideo.getOngoingCallNotification(
                         callId = intentCallId,
-                        callDisplayName = intentCallDisplayName,
+                        callInfo = intentCallDisplayName,
                     ),
                     second = intentCallId.hashCode(),
                 )
@@ -289,7 +289,7 @@ internal open class CallService : Service() {
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
                         callId = intentCallId,
-                        callDisplayName = intentCallDisplayName,
+                        callInfo = intentCallDisplayName,
                         shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID,
@@ -299,7 +299,7 @@ internal open class CallService : Service() {
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Outgoing(),
                         callId = intentCallId,
-                        callDisplayName = getString(
+                        callInfo = getString(
                             R.string.stream_video_outgoing_call_notification_title,
                         ),
                     ),

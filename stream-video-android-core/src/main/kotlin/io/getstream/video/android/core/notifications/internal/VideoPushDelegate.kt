@@ -67,7 +67,7 @@ internal class VideoPushDelegate(
 
     private suspend fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
-        getStreamVideo("ring-type-notification")?.onRingingCall(callId, callDisplayName)
+        getStreamVideo("ring-type-notification")?.onIncomingCall(callId, callDisplayName)
     }
 
     private suspend fun handleMissedType(callId: StreamCallId, payload: Map<String, Any?>) {

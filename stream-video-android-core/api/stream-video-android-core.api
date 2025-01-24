@@ -4428,6 +4428,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun isInForeground ()Z
 	public fun maybeCreateChannel (Ljava/lang/String;Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun maybeCreateChannel$default (Lio/getstream/video/android/core/notifications/DefaultNotificationHandler;Ljava/lang/String;Landroid/content/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public fun onIncomingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onMissedCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
@@ -4435,7 +4436,6 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun onPermissionGranted ()V
 	public fun onPermissionRationale ()V
 	public fun onPermissionRequested ()V
-	public fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun showLiveCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;I)V
 	public fun showMissedCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;I)V
 	public fun showNotificationCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;I)V
@@ -4507,10 +4507,10 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public abstract fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public abstract fun onIncomingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onMissedCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
-	public abstract fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/core/notifications/NotificationHandler$Companion {

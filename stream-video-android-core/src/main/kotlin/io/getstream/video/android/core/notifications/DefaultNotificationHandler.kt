@@ -91,18 +91,18 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onIncomingCall(callId: StreamCallId, callerName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
 
         TelecomCompat.registerCall(
             application,
             callId = callId,
-            callDisplayName = callDisplayName,
+            callInfo = callerName,
             isIncomingCall = true,
         )
     }
 
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onMissedCall(callId: StreamCallId, callerName: String) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
         val notificationId = callId.hashCode()
         val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
@@ -112,7 +112,7 @@ public open class DefaultNotificationHandler(
             }
         showMissedCallNotification(
             intent,
-            callDisplayName,
+            callerName,
             notificationId,
         )
     }
@@ -120,7 +120,7 @@ public open class DefaultNotificationHandler(
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String?,
+        callInfo: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? {
         return if (ringingState is RingingState.Incoming) {
@@ -133,7 +133,7 @@ public open class DefaultNotificationHandler(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
-                    callDisplayName,
+                    callInfo,
                     shouldHaveContentIntent,
                 )
             } else {
@@ -147,7 +147,7 @@ public open class DefaultNotificationHandler(
             if (outgoingCallPendingIntent != null && endCallPendingIntent != null) {
                 getOngoingCallNotification(
                     callId,
-                    callDisplayName,
+                    callInfo,
                     isOutgoingCall = true,
                 )
             } else {
@@ -196,7 +196,7 @@ public open class DefaultNotificationHandler(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callerName: String?,
+        callInfo: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification {
         // if the app is in foreground then don't interrupt the user with a high priority
@@ -216,7 +216,7 @@ public open class DefaultNotificationHandler(
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle(callerName)
+            setContentTitle(callInfo)
             setContentText(
                 application.getString(R.string.stream_video_incoming_call_notification_description),
             )
@@ -236,7 +236,7 @@ public open class DefaultNotificationHandler(
                 setContentIntent(emptyIntent)
                 setAutoCancel(false)
             }
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
+            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callInfo)
         }
     }
 
@@ -271,25 +271,25 @@ public open class DefaultNotificationHandler(
         )
     }
 
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+    override fun onNotification(callId: StreamCallId, callCreatorName: String) {
         val notificationId = callId.hashCode()
         intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
             ?.let { notificationPendingIntent ->
                 showNotificationCallNotification(
                     notificationPendingIntent,
-                    callDisplayName,
+                    callCreatorName,
                     notificationId,
                 )
             } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
     }
 
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onLiveCall(callId: StreamCallId, callCreatorName: String) {
         val notificationId = callId.hashCode()
         intentResolver.searchLiveCallPendingIntent(callId, notificationId)
             ?.let { liveCallPendingIntent ->
                 showLiveCallNotification(
                     liveCallPendingIntent,
-                    callDisplayName,
+                    callCreatorName,
                     notificationId,
                 )
             } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
@@ -297,7 +297,7 @@ public open class DefaultNotificationHandler(
 
     override fun getOngoingCallNotification(
         callId: StreamCallId,
-        callDisplayName: String?,
+        callInfo: String?,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? {
@@ -359,7 +359,7 @@ public open class DefaultNotificationHandler(
             .setOngoing(true)
             .addHangUpAction(
                 hangUpIntent,
-                callDisplayName ?: application.getString(
+                callInfo ?: application.getString(
                     R.string.stream_video_ongoing_call_notification_title,
                 ),
                 remoteParticipantCount,
@@ -422,7 +422,7 @@ public open class DefaultNotificationHandler(
 
                         getOngoingCallNotification(
                             callId = StreamCallId.fromCallCid(call.cid),
-                            callDisplayName = callDisplayName,
+                            callInfo = callDisplayName,
                             isOutgoingCall = true,
                             remoteParticipantCount = remoteMembersCount,
                         )?.let {
@@ -453,7 +453,7 @@ public open class DefaultNotificationHandler(
                             // Use latest call display name in notification
                             getOngoingCallNotification(
                                 callId = StreamCallId.fromCallCid(call.cid),
-                                callDisplayName = callDisplayName,
+                                callInfo = callDisplayName,
                                 remoteParticipantCount = remoteParticipants.size,
                             )?.let {
                                 onUpdate(it)
