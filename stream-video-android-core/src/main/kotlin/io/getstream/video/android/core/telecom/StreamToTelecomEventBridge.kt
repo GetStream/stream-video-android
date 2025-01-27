@@ -21,6 +21,7 @@ import android.telecom.DisconnectCause
 import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallControlScope
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.REJECT_REASON_TIMEOUT
 import io.getstream.video.android.core.model.RejectReason
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
@@ -64,6 +65,7 @@ internal class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) 
                                     when (event.reason) {
                                         RejectReason.Cancel.alias -> DisconnectCause.LOCAL
                                         RejectReason.Decline.alias -> DisconnectCause.REJECTED
+                                        REJECT_REASON_TIMEOUT -> DisconnectCause.MISSED
                                         else -> DisconnectCause.REMOTE
                                     },
                                 ),

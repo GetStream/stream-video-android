@@ -1476,4 +1476,4 @@ private fun getCallingMethod(): String {
     }
 }
 
-private const val REJECT_REASON_TIMEOUT = "timeout"
+internal const val REJECT_REASON_TIMEOUT = "timeout"
