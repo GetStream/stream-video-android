@@ -373,9 +373,9 @@ public class Call(
             clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
         if (!permissionPass) {
-            logger.w {
+            logger.d {
                 "\n[Call.join()] called without having the required permissions.\n" +
-                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                    "This will work only if you set [runCallServiceInForeground = false] in StreamVideoBuilder.build().\n" +
                     "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
                     "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
                     "otherwise the service will fail to start, resulting in a crash.\n" +
