@@ -5337,7 +5337,7 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 
 public final class io/getstream/video/android/core/sounds/CallSoundPlayer {
 	public fun <init> (Landroid/content/Context;)V
-	public final fun cleanAudioResources ()V
+	public final fun cleanUpAudioResources ()V
 	public final fun playCallSound (Landroid/net/Uri;)V
 	public final fun stopCallSound ()V
 }

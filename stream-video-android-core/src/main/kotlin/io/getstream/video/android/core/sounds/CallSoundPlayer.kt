@@ -151,7 +151,7 @@ class CallSoundPlayer(private val context: Context) {
         }
     }
 
-    fun cleanAudioResources() {
+    fun cleanUpAudioResources() {
         synchronized(this) {
             logger.d { "[cleanAudioResources] Cleaning audio resources" }
 

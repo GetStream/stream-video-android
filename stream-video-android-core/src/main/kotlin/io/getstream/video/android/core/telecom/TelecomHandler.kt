@@ -291,7 +291,7 @@ internal class TelecomHandler private constructor(
 
         calls.forEach { unregisterCall(it.value.streamCall) }
         telecomHandlerScope.cancel()
-        callSoundPlayer.cleanAudioResources()
+        callSoundPlayer.cleanUpAudioResources()
         instance = null
     }
 

@@ -30,6 +30,7 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler.getRingingCallNotification
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -52,20 +53,22 @@ internal object TelecomCompat {
                 },
                 onNotSupported = {
                     if (isIncomingCall) {
-                        CallService.showIncomingCall(
-                            context.applicationContext,
-                            StreamCallId.fromCallCid(streamCall.cid),
-                            callInfo,
-                            callServiceConfiguration = callConfig,
-                            notification = callId?.let {
-                                getRingingCallNotification(
-                                    RingingState.Incoming(),
-                                    callId,
-                                    callInfo,
-                                    shouldHaveContentIntent = true,
-                                )
-                            },
-                        )
+                        safeCall {
+                            CallService.showIncomingCall(
+                                context.applicationContext,
+                                StreamCallId.fromCallCid(streamCall.cid),
+                                callInfo,
+                                callServiceConfiguration = callConfig,
+                                notification = callId?.let {
+                                    getRingingCallNotification(
+                                        RingingState.Incoming(),
+                                        callId,
+                                        callInfo,
+                                        shouldHaveContentIntent = true,
+                                    )
+                                },
+                            )
+                        }
                     }
                 },
             )
@@ -121,7 +124,12 @@ internal object TelecomCompat {
         if (callConfig.runCallServiceInForeground) onEnabled()
     }
 
-    fun changeCallState(context: Context, newState: TelecomCallState, call: StreamCall? = null, callId: StreamCallId? = null) {
+    fun changeCallState(
+        context: Context,
+        newState: TelecomCallState,
+        call: StreamCall? = null,
+        callId: StreamCallId? = null,
+    ) {
         withCall(call, callId) { streamCall, callConfig ->
             checkTelecomSupport(
                 context = context,
@@ -131,19 +139,21 @@ internal object TelecomCompat {
                 onNotSupported = {
                     if (newState == TelecomCallState.OUTGOING || newState == TelecomCallState.ONGOING) {
                         ifForegroundServiceEnabled(callConfig) {
-                            ContextCompat.startForegroundService(
-                                context,
-                                CallService.buildStartIntent(
+                            safeCall {
+                                ContextCompat.startForegroundService(
                                     context,
-                                    StreamCallId.fromCallCid(streamCall.cid),
-                                    if (newState == TelecomCallState.OUTGOING) {
-                                        CallService.TRIGGER_OUTGOING_CALL
-                                    } else {
-                                        CallService.TRIGGER_ONGOING_CALL
-                                    },
-                                    callServiceConfiguration = callConfig,
-                                ),
-                            )
+                                    CallService.buildStartIntent(
+                                        context,
+                                        StreamCallId.fromCallCid(streamCall.cid),
+                                        if (newState == TelecomCallState.OUTGOING) {
+                                            CallService.TRIGGER_OUTGOING_CALL
+                                        } else {
+                                            CallService.TRIGGER_ONGOING_CALL
+                                        },
+                                        callServiceConfiguration = callConfig,
+                                    ),
+                                )
+                            }
                         }
                     }
                 },
@@ -164,19 +174,21 @@ internal object TelecomCompat {
                 },
                 onNotSupported = {
                     ifForegroundServiceEnabled(callConfig) {
-                        if (isIncomingCall) {
-                            CallService.removeIncomingCall(
-                                context,
-                                StreamCallId.fromCallCid(call.cid),
-                                callServiceConfiguration = callConfig,
-                            )
-                        } else {
-                            context.stopService(
-                                CallService.buildStopIntent(
-                                    context = context.applicationContext,
+                        safeCall {
+                            if (isIncomingCall) {
+                                CallService.removeIncomingCall(
+                                    context,
+                                    StreamCallId.fromCallCid(call.cid),
                                     callServiceConfiguration = callConfig,
-                                ),
-                            )
+                                )
+                            } else {
+                                context.stopService(
+                                    CallService.buildStopIntent(
+                                        context = context.applicationContext,
+                                        callServiceConfiguration = callConfig,
+                                    ),
+                                )
+                            }
                         }
                     }
                 },
@@ -229,12 +241,12 @@ internal object TelecomCompat {
                                 CallService.buildStopIntent(
                                     context = context.applicationContext,
                                     callServiceConfiguration = callConfig,
-                                )
+                                ),
                             )
                         }
                     }
                 }
-            }
+            },
         )
     }
 }

@@ -691,7 +691,7 @@ internal open class CallService : Service() {
         unregisterToggleCameraBroadcastReceiver()
 
         // Call sounds
-        callSoundPlayer?.cleanAudioResources()
+        callSoundPlayer?.cleanUpAudioResources()
 
         // Stop any jobs
         serviceScope.cancel()
