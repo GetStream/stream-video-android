@@ -282,8 +282,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // Installs Stream Video instance
         StreamVideo.install(client)
 
-        client.telecomHandler = TelecomHandler.getInstance(context)
-
         return client
     }
 }

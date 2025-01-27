@@ -213,4 +213,28 @@ internal object TelecomCompat {
             )
         },
     )
+
+    fun cleanUp(context: Context, activeCall: StreamCall?) {
+        checkTelecomSupport(
+            context = context,
+            onSupported = { telecomHandler ->
+                telecomHandler.cleanUp()
+            },
+            onNotSupported = {
+                // If call is null, the lambda will not execute
+                withCall(activeCall) { streamCall, callConfig ->
+                    ifForegroundServiceEnabled(callConfig) {
+                        safeCall {
+                            context.stopService(
+                                CallService.buildStopIntent(
+                                    context = context.applicationContext,
+                                    callServiceConfiguration = callConfig,
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        )
+    }
 }
