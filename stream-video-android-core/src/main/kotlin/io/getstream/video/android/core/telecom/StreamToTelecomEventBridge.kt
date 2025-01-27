@@ -39,16 +39,26 @@ internal class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) 
             CallRejectedEvent::class.java,
             CallEndedEvent::class.java,
         ) { event ->
-            logger.d { "[StreamToTelecomEventMapper#onEvent] Received event: ${event.getEventType()}" }
+            logger.d { "[StreamToTelecomEventBridge#onEvent] Received event: ${event.getEventType()}" }
+
             with(callControlScope) {
                 launch {
                     when (event) {
                         is CallAcceptedEvent -> {
-                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#answer" }
-                            answer(telecomCall.mediaType)
+                            answer(telecomCall.mediaType).let {
+                                logger.d { "[StreamToTelecomEventBridge#onEvent] Answered with result: $it" }
+                            }
                         }
                         is CallRejectedEvent -> {
-                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
+                            logger.d { "[StreamToTelecomEventBridge#onEvent] Reject reason: ${event.reason}" }
+
+                            /*
+                            Possible values for DisconnectCause:
+                            LOCAL - Disconnected because of a local user-initiated action, such as hanging up.
+                            REMOTE - Disconnected because the remote party hung up an ongoing call, or because an outgoing call was not answered by the remote party.
+                            REJECTED - Disconnected because the user rejected an incoming call.
+                            MISSED - Disconnected because there was no response to an incoming call.
+                             */
                             disconnect(
                                 DisconnectCause(
                                     when (event.reason) {
@@ -57,12 +67,14 @@ internal class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) 
                                         else -> DisconnectCause.REMOTE
                                     },
                                 ),
-                            )
-                            event.reason
+                            ).let {
+                                logger.d { "[StreamToTelecomEventBridge#onEvent] Disconnected with result: $it" }
+                            }
                         }
                         is CallEndedEvent -> {
-                            logger.d { "[StreamToTelecomEventBridge#onEvent] Will call CallControlScope#disconnect" }
-                            disconnect(DisconnectCause(DisconnectCause.LOCAL))
+                            disconnect(DisconnectCause(DisconnectCause.REMOTE)).let {
+                                logger.d { "[StreamToTelecomEventBridge#onEvent] Disconnected with result: $it" }
+                            }
                         }
                     }
                 }
