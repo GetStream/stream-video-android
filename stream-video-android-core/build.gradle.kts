@@ -181,7 +181,7 @@ dependencies {
     // Stream
     api(libs.stream.result)
     api(libs.stream.result.call)
-    api(libs.stream.log.android)
+    api(libs.stream.log)
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
@@ -215,7 +215,7 @@ dependencies {
     testImplementation(libs.retrofit.wire.converter)
 
     // instrument tests
-    androidTestImplementation(libs.stream.log.android)
+    androidTestImplementation(libs.stream.log)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.truth)

@@ -10,6 +10,7 @@ android {
 
     defaultConfig {
         minSdk = Configuration.minSdk
+        versionCode = 1
         ndk {
             abiFilters += "armeabi-v7a"
         }
