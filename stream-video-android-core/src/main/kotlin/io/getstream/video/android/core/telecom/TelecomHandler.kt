@@ -33,6 +33,8 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.sounds.CallSoundPlayer
+import io.getstream.video.android.core.telecom.bridge.streamtotelecom.StreamToTelecomEventBridgeFactory
+import io.getstream.video.android.core.telecom.bridge.telecomtostream.TelecomToStreamEventBridgeFactory
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -47,6 +49,8 @@ internal class TelecomHandler private constructor(
     private val applicationContext: Context,
     private val callManager: CallsManager,
     private val callSoundPlayer: CallSoundPlayer,
+    private val telecomToStreamEventBridgeFactory: TelecomToStreamEventBridgeFactory,
+    private val streamToTelecomEventBridgeFactory: StreamToTelecomEventBridgeFactory,
 ) {
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
@@ -62,7 +66,11 @@ internal class TelecomHandler private constructor(
         @Volatile
         private var instance: TelecomHandler? = null
 
-        fun getInstance(context: Context): TelecomHandler? {
+        fun getInstance(
+            context: Context,
+            telecomToStreamEventBridgeFactory: TelecomToStreamEventBridgeFactory,
+            streamToTelecomEventBridgeFactory: StreamToTelecomEventBridgeFactory,
+        ): TelecomHandler? {
             return instance ?: synchronized(this) {
                 context.applicationContext.let { applicationContext ->
                     if (isSupported(applicationContext)) {
@@ -70,6 +78,8 @@ internal class TelecomHandler private constructor(
                             applicationContext = applicationContext,
                             callManager = CallsManager(applicationContext),
                             callSoundPlayer = CallSoundPlayer(applicationContext),
+                            telecomToStreamEventBridgeFactory = telecomToStreamEventBridgeFactory,
+                            streamToTelecomEventBridgeFactory = streamToTelecomEventBridgeFactory,
                         ).also { telecomHandler ->
                             instance = telecomHandler
                         }
@@ -162,8 +172,8 @@ internal class TelecomHandler private constructor(
                 postNotification(it)
             }
 
-            val telecomToStreamEventBridge = TelecomToStreamEventBridge(telecomCall)
-            val streamToTelecomEventBridge = StreamToTelecomEventBridge(telecomCall)
+            val telecomToStreamEventBridge = telecomToStreamEventBridgeFactory.create(telecomCall)
+            val streamToTelecomEventBridge = streamToTelecomEventBridgeFactory.create(telecomCall)
 
             telecomHandlerScope.launch {
                 safeCall(exceptionLogTag = TELECOM_LOG_TAG) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.telecom
+package io.getstream.video.android.core.telecom.bridge.streamtotelecom
 
 import android.os.Build
 import android.telecom.DisconnectCause
@@ -23,35 +23,47 @@ import androidx.core.telecom.CallControlScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.REJECT_REASON_TIMEOUT
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.telecom.TELECOM_LOG_TAG
+import io.getstream.video.android.core.telecom.TelecomCall
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.CallAcceptedEvent
 import org.openapitools.client.models.CallEndedEvent
 import org.openapitools.client.models.CallRejectedEvent
 import kotlin.getValue
 
-@RequiresApi(Build.VERSION_CODES.O)
-internal class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) {
+internal fun defaultStreamToTelecomEventBridgeFactory(): StreamToTelecomEventBridgeFactory {
+    return DefaultStreamToTelecomEventBridgeFactory()
+}
+
+internal class DefaultStreamToTelecomEventBridgeFactory : StreamToTelecomEventBridgeFactory {
+    override fun create(telecomCall: TelecomCall): StreamToTelecomEventBridge {
+        return DefaultStreamToTelecomEventBridge(telecomCall)
+    }
+}
+
+internal class DefaultStreamToTelecomEventBridge(private val telecomCall: TelecomCall) : StreamToTelecomEventBridge {
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private val streamCall = telecomCall.streamCall
 
-    fun processEvents(callControlScope: CallControlScope) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun processEvents(callControlScope: CallControlScope) {
         streamCall.subscribeFor(
             CallAcceptedEvent::class.java,
             CallRejectedEvent::class.java,
             CallEndedEvent::class.java,
         ) { event ->
-            logger.d { "[StreamToTelecomEventBridge#onEvent] Received event: ${event.getEventType()}" }
+            logger.d { "[DefaultStreamToTelecomEventBridge#onEvent] Received event: ${event.getEventType()}" }
 
             with(callControlScope) {
                 launch {
                     when (event) {
                         is CallAcceptedEvent -> {
                             answer(telecomCall.mediaType).let {
-                                logger.d { "[StreamToTelecomEventBridge#onEvent] Answered with result: $it" }
+                                logger.d { "[DefaultStreamToTelecomEventBridge#onEvent] Answered with result: $it" }
                             }
                         }
                         is CallRejectedEvent -> {
-                            logger.d { "[StreamToTelecomEventBridge#onEvent] Reject reason: ${event.reason}" }
+                            logger.d { "[DefaultStreamToTelecomEventBridge#onEvent] Reject reason: ${event.reason}" }
 
                             /*
                             Possible values for DisconnectCause:
@@ -70,12 +82,12 @@ internal class StreamToTelecomEventBridge(private val telecomCall: TelecomCall) 
                                     },
                                 ),
                             ).let {
-                                logger.d { "[StreamToTelecomEventBridge#onEvent] Disconnected with result: $it" }
+                                logger.d { "[DefaultStreamToTelecomEventBridge#onEvent] Disconnected with result: $it" }
                             }
                         }
                         is CallEndedEvent -> {
                             disconnect(DisconnectCause(DisconnectCause.REMOTE)).let {
-                                logger.d { "[StreamToTelecomEventBridge#onEvent] Disconnected with result: $it" }
+                                logger.d { "[DefaultStreamToTelecomEventBridge#onEvent] Disconnected with result: $it" }
                             }
                         }
                     }

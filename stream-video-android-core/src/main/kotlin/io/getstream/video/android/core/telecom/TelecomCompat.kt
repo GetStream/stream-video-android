@@ -30,6 +30,8 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler.getRingingCallNotification
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.telecom.bridge.streamtotelecom.defaultStreamToTelecomEventBridgeFactory
+import io.getstream.video.android.core.telecom.bridge.telecomtostream.defaultTelecomToStreamEventBridgeFactory
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlin.contracts.ExperimentalContracts
@@ -113,7 +115,11 @@ internal object TelecomCompat {
         }
 
         // getInstance() returns null if the device doesn't support Telecom
-        return TelecomHandler.getInstance(context)?.let(onSupported) ?: onNotSupported()
+        return TelecomHandler.getInstance(
+            context = context,
+            telecomToStreamEventBridgeFactory = defaultTelecomToStreamEventBridgeFactory(),
+            streamToTelecomEventBridgeFactory = defaultStreamToTelecomEventBridgeFactory(),
+        )?.let(onSupported) ?: onNotSupported()
     }
 
     private inline fun ifForegroundServiceEnabled(callConfig: CallServiceConfig, onEnabled: () -> Unit) {
