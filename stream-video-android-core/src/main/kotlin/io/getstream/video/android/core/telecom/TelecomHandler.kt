@@ -41,6 +41,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -281,7 +282,21 @@ internal class TelecomHandler private constructor(
 
     fun setDeviceListener(call: StreamCall, listener: DeviceListener) {
         logger.d { "[setDeviceListener] Call ID: ${call.id}" }
+
         calls[call.cid]?.deviceListener = listener
+        sendInitialEndpoints(listener)
+    }
+
+    private fun sendInitialEndpoints(listener: DeviceListener) {
+        telecomHandlerScope.launch {
+            val devices = try {
+                callManager.getAvailableStartingCallEndpoints().first().map { it.toStreamAudioDevice() }
+            } catch (e: Exception) {
+                logger.w { "[setDeviceListener] Error when collecting endpoints: ${e.message}" }
+                emptyList()
+            }
+            listener(devices, null)
+        }
     }
 
     fun selectDevice(call: StreamCall, device: CallEndpointCompat) {
