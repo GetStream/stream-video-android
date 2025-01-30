@@ -29,6 +29,13 @@ internal enum class TelecomCallState {
     ONGOING,
 }
 
+enum class TelecomEvent {
+    ANSWER,
+    DISCONNECT,
+    SET_ACTIVE,
+    SET_INACTIVE,
+}
+
 internal typealias StreamCall = Call
 
 internal typealias DeviceListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit

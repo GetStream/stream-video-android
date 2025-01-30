@@ -5370,6 +5370,16 @@ public final class io/getstream/video/android/core/sounds/Sounds {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/telecom/TelecomEvent : java/lang/Enum {
+	public static final field ANSWER Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static final field DISCONNECT Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static final field SET_ACTIVE Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static final field SET_INACTIVE Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static fun values ()[Lio/getstream/video/android/core/telecom/TelecomEvent;
+}
+
 public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
 	public static final fun shouldShowRequestPermissionsRationale (Landroid/app/Activity;[Ljava/lang/String;)Z
 }

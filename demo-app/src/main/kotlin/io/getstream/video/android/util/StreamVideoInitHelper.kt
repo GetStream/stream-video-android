@@ -225,7 +225,7 @@ object StreamVideoInitHelper {
             audioProcessing = NoiseCancellation(context),
             callServiceConfigRegistry = CallServiceConfigRegistry().apply {
                 register(CallType.Default.name) {
-//                    setRunCallServiceInForeground(false)
+                    setRunCallServiceInForeground(false)
 //                    setAudioUsage(AudioAttributes.USAGE_MEDIA)
                 }
                 register(CallType.AudioCall.name) {

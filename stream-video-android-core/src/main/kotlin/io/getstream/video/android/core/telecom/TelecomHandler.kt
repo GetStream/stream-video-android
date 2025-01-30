@@ -33,8 +33,6 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.sounds.CallSoundPlayer
-import io.getstream.video.android.core.telecom.bridge.streamtotelecom.StreamToTelecomEventBridgeFactory
-import io.getstream.video.android.core.telecom.bridge.telecomtostream.TelecomToStreamEventBridgeFactory
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -50,8 +48,6 @@ internal class TelecomHandler private constructor(
     private val applicationContext: Context,
     private val callManager: CallsManager,
     private val callSoundPlayer: CallSoundPlayer,
-    private val telecomToStreamEventBridgeFactory: TelecomToStreamEventBridgeFactory,
-    private val streamToTelecomEventBridgeFactory: StreamToTelecomEventBridgeFactory,
 ) {
     private val logger by taggedLogger(TELECOM_LOG_TAG)
     private var streamVideo: StreamVideo? = null
@@ -67,11 +63,7 @@ internal class TelecomHandler private constructor(
         @Volatile
         private var instance: TelecomHandler? = null
 
-        fun getInstance(
-            context: Context,
-            telecomToStreamEventBridgeFactory: TelecomToStreamEventBridgeFactory,
-            streamToTelecomEventBridgeFactory: StreamToTelecomEventBridgeFactory,
-        ): TelecomHandler? {
+        fun getInstance(context: Context): TelecomHandler? {
             return instance ?: synchronized(this) {
                 context.applicationContext.let { applicationContext ->
                     if (isSupported(applicationContext)) {
@@ -79,8 +71,6 @@ internal class TelecomHandler private constructor(
                             applicationContext = applicationContext,
                             callManager = CallsManager(applicationContext),
                             callSoundPlayer = CallSoundPlayer(applicationContext),
-                            telecomToStreamEventBridgeFactory = telecomToStreamEventBridgeFactory,
-                            streamToTelecomEventBridgeFactory = streamToTelecomEventBridgeFactory,
                         ).also { telecomHandler ->
                             instance = telecomHandler
                         }
@@ -136,7 +126,6 @@ internal class TelecomHandler private constructor(
         } else {
             calls[call.cid] = TelecomCall(
                 streamCall = call,
-                state = TelecomCallState.IDLE,
                 config = callConfig,
                 parentScope = telecomHandlerScope,
             )
@@ -164,17 +153,12 @@ internal class TelecomHandler private constructor(
             val cause = if (telecomCall == null) "call not registered" else "same state"
             logger.i { "[changeCallState] Ignoring method call: $cause" }
         } else {
-            val wasPreviouslyAdded: Boolean
-
-            telecomCall.apply {
-                wasPreviouslyAdded = state == TelecomCallState.INCOMING || state == TelecomCallState.OUTGOING
-                state = newState
-            }.also {
-                postNotification(it)
+            var wasPreviouslyAdded = false
+            with(telecomCall) {
+                wasPreviouslyAdded = (state == TelecomCallState.INCOMING || state == TelecomCallState.OUTGOING)
+                updateState(newState)
+                postNotification(this)
             }
-
-            val telecomToStreamEventBridge = telecomToStreamEventBridgeFactory.create(telecomCall)
-            val streamToTelecomEventBridge = streamToTelecomEventBridgeFactory.create(telecomCall)
 
             telecomHandlerScope.launch {
                 safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
@@ -183,14 +167,20 @@ internal class TelecomHandler private constructor(
                     } else {
                         callManager.addCall(
                             callAttributes = telecomCall.attributes,
-                            onAnswer = telecomToStreamEventBridge::onAnswer,
-                            onDisconnect = telecomToStreamEventBridge::onDisconnect,
-                            onSetActive = telecomToStreamEventBridge::onSetActive,
-                            onSetInactive = telecomToStreamEventBridge::onSetInactive,
+                            onAnswer = {
+                                telecomCall.handleTelecomEvent(TelecomEvent.ANSWER)
+                            },
+                            onDisconnect = {
+                                telecomCall.handleTelecomEvent(TelecomEvent.DISCONNECT)
+                            },
+                            onSetActive = {
+                                telecomCall.handleTelecomEvent(TelecomEvent.SET_ACTIVE)
+                            },
+                            onSetInactive = {
+                                telecomCall.handleTelecomEvent(TelecomEvent.SET_INACTIVE)
+                            },
                             block = {
                                 telecomCall.callControlScope = this
-                                streamToTelecomEventBridge.processEvents(callControlScope = this)
-
                                 logger.i { "[changeCallState] Added call to Telecom" }
                             },
                         )
@@ -228,14 +218,14 @@ internal class TelecomHandler private constructor(
                     TelecomCallState.OUTGOING, TelecomCallState.ONGOING -> {
                         val isOutgoingCall = telecomCall.state == TelecomCallState.OUTGOING
                         val getNotification = {
+                            logger.d {
+                                "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
+                            }
+
                             streamVideo.getOngoingCallNotification(
                                 callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
                                 isOutgoingCall = isOutgoingCall,
                             )
-                        }
-
-                        logger.d {
-                            "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
                         }
 
                         if (isOutgoingCall) {
@@ -256,7 +246,7 @@ internal class TelecomHandler private constructor(
                 }
 
                 notification?.let {
-                    logger.i { "[postNotification] Posting ${telecomCall.state.toString().lowercase()} notification" }
+                    logger.i { "[postNotification] Posting ${telecomCall.state} notification" }
 
                     NotificationManagerCompat
                         .from(applicationContext)
@@ -283,7 +273,7 @@ internal class TelecomHandler private constructor(
     fun setDeviceListener(call: StreamCall, listener: DeviceListener) {
         logger.d { "[setDeviceListener] Call ID: ${call.id}" }
 
-        calls[call.cid]?.deviceListener = listener
+        calls[call.cid]?.deviceListener = listener // TODO-Telecom: re-check device listener flow, incl Lobby
         sendInitialEndpoints(listener)
     }
 

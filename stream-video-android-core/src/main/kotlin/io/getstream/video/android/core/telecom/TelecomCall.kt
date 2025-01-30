@@ -33,16 +33,19 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.OwnCapability
 
 @RequiresApi(Build.VERSION_CODES.O)
 internal class TelecomCall(
     val streamCall: StreamCall,
-    var state: TelecomCallState,
     val config: CallServiceConfig,
     val parentScope: CoroutineScope,
 ) {
+    var state = TelecomCallState.IDLE
+        private set
+
     val notificationId = streamCall.cid.hashCode()
 
     val attributes: CallAttributesCompat
@@ -79,6 +82,65 @@ internal class TelecomCall(
     private val localScope = CoroutineScope(parentScope.coroutineContext + Job())
     private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 
+    fun updateState(newState: TelecomCallState) {
+        val joined = TelecomCallState.IDLE to TelecomCallState.ONGOING
+        val answered = TelecomCallState.INCOMING to TelecomCallState.ONGOING
+        val accepted = TelecomCallState.OUTGOING to TelecomCallState.ONGOING
+        val transition = state to newState
+        state = newState
+
+        StreamLog.d(TELECOM_LOG_TAG) { "[updateState] New state: $state" }
+
+        callControlScope?.let {
+            it.launch {
+                when (transition) {
+                    joined, accepted -> it.setActive().let { result ->
+                        StreamLog.d(TELECOM_LOG_TAG) { "[updateState] Set active: $result" }
+                    }
+
+                    answered -> it.answer(mediaType).let { result ->
+                        StreamLog.d(TELECOM_LOG_TAG) { "[updateState] Answered: $result" }
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun handleTelecomEvent(event: TelecomEvent) {
+        StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#handleTelecomEvent] event: $event" }
+
+        when (event) {
+            TelecomEvent.ANSWER -> {
+                streamCall.accept()
+                streamCall.join()
+            }
+            TelecomEvent.DISCONNECT -> {
+                streamCall.leave()
+            }
+            TelecomEvent.SET_ACTIVE -> {
+                streamCall.join()
+            }
+            TelecomEvent.SET_INACTIVE -> {
+                streamCall.leave()
+            }
+        }
+    }
+
+    fun cleanUp() {
+        StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#cleanUp]" }
+
+        runBlocking {
+            disconnect()
+            localScope.cancel()
+        }
+    }
+
+    private suspend fun disconnect() {
+        callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
+            StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#disconnect] Disconnect result: $result" }
+        }
+    }
+
     private fun publishDevices(callControlScope: CallControlScope) {
         with(callControlScope) {
             combine(availableEndpoints, currentCallEndpoint) { available, current ->
@@ -112,20 +174,5 @@ internal class TelecomCall(
                 }
             }
             .launchIn(localScope)
-    }
-
-    fun cleanUp() {
-        StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#cleanUp]" }
-
-        runBlocking {
-            disconnect()
-            localScope.cancel()
-        }
-    }
-
-    suspend fun disconnect() {
-        callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-            StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#disconnect] Disconnect result: $result" }
-        }
     }
 }
