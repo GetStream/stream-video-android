@@ -196,8 +196,6 @@ internal class TelecomHandler private constructor(
             logger.e { "[postNotification] POST_NOTIFICATIONS permission missing" }
             return
         } else {
-            logger.d { "[postNotification] Call ID: ${telecomCall.streamCall.id}, state: ${telecomCall.state}" }
-
             (streamVideo as? StreamVideoClient)?.let { streamVideo ->
                 val notification = when (telecomCall.state) {
                     TelecomCallState.INCOMING -> {
@@ -273,7 +271,7 @@ internal class TelecomHandler private constructor(
     fun setDeviceListener(call: StreamCall, listener: DeviceListener) {
         logger.d { "[setDeviceListener] Call ID: ${call.id}" }
 
-        calls[call.cid]?.deviceListener = listener // TODO-Telecom: re-check device listener flow, incl Lobby
+        calls[call.cid]?.deviceListener = listener
         sendInitialEndpoints(listener)
     }
 

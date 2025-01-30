@@ -41,7 +41,7 @@ import org.openapitools.client.models.OwnCapability
 internal class TelecomCall(
     val streamCall: StreamCall,
     val config: CallServiceConfig,
-    val parentScope: CoroutineScope,
+    val parentScope: CoroutineScope, // Used to collect devices before having a CallControlScope
 ) {
     var state = TelecomCallState.IDLE
         private set
