@@ -154,17 +154,18 @@ internal class TelecomHandler private constructor(
             logger.i { "[changeCallState] Ignoring method call: $cause" }
         } else {
             var wasPreviouslyAdded = false
+
             with(telecomCall) {
                 wasPreviouslyAdded = (state == TelecomCallState.INCOMING || state == TelecomCallState.OUTGOING)
                 updateState(newState)
                 postNotification(this)
             }
 
-            telecomHandlerScope.launch {
-                safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
-                    if (wasPreviouslyAdded) {
-                        logger.i { "[changeCallState] Call was already added to Telecom, skipping CallsManager#addCall()" }
-                    } else {
+            if (wasPreviouslyAdded) {
+                logger.i { "[changeCallState] Call was already added to Telecom, skipping CallsManager#addCall()" }
+            } else {
+                telecomHandlerScope.launch {
+                    safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
                         callManager.addCall(
                             callAttributes = telecomCall.attributes,
                             onAnswer = {
@@ -272,10 +273,10 @@ internal class TelecomHandler private constructor(
         logger.d { "[setDeviceListener] Call ID: ${call.id}" }
 
         calls[call.cid]?.deviceListener = listener
-        sendInitialEndpoints(listener)
+        sendInitialDevices(listener)
     }
 
-    private fun sendInitialEndpoints(listener: DeviceListener) {
+    private fun sendInitialDevices(listener: DeviceListener) {
         telecomHandlerScope.launch {
             val devices = try {
                 callManager.getAvailableStartingCallEndpoints().first().map { it.toStreamAudioDevice() }

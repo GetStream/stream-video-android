@@ -80,6 +80,7 @@ internal class TelecomCall(
         }
 
     private val localScope = CoroutineScope(parentScope.coroutineContext + Job())
+
     private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 
     fun updateState(newState: TelecomCallState) {
@@ -142,22 +143,23 @@ internal class TelecomCall(
     }
 
     private fun publishDevices(callControlScope: CallControlScope) {
-        with(callControlScope) {
-            combine(availableEndpoints, currentCallEndpoint) { available, current ->
-                Pair(available.map { it.toStreamAudioDevice() }, current.toStreamAudioDevice())
-            }
-                .distinctUntilChanged()
-                .onEach { devicePair ->
-                    devices.value = devicePair
+        combine(
+            callControlScope.availableEndpoints,
+            callControlScope.currentCallEndpoint,
+        ) { availableDevices, currentDevice ->
+            availableDevices.map { it.toStreamAudioDevice() } to currentDevice.toStreamAudioDevice()
+        }
+            .distinctUntilChanged()
+            .onEach { devicePair ->
+                devices.value = devicePair
 
-                    StreamLog.d(TELECOM_LOG_TAG) {
-                        with(devicePair) {
-                            "[TelecomCall#publishDevices] Published devices. Available: ${first.map { it.name }}, selected: ${second.name}"
-                        }
+                StreamLog.d(TELECOM_LOG_TAG) {
+                    with(devicePair) {
+                        "[TelecomCall#publishDevices] Published devices. Available: ${first.map { it.name }}, selected: ${second.name}"
                     }
                 }
-                .launchIn(this)
-        }
+            }
+            .launchIn(callControlScope)
     }
 
     private fun collectDevices(listener: DeviceListener) {
