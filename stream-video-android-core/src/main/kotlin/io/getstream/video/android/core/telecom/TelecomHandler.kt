@@ -41,7 +41,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @TargetApi(Build.VERSION_CODES.O)
 internal class TelecomHandler private constructor(
@@ -300,7 +299,7 @@ internal class TelecomHandler private constructor(
         }
     }
 
-    fun cleanUp() = runBlocking {
+    fun cleanUp() = {
         logger.d { "[cleanUp]" }
 
         calls.forEach { unregisterCall(it.value.streamCall) }

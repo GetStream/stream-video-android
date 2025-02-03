@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.openapitools.client.models.OwnCapability
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -130,15 +129,15 @@ internal class TelecomCall(
     fun cleanUp() {
         StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#cleanUp]" }
 
-        runBlocking {
-            disconnect()
-            localScope.cancel()
-        }
-    }
-
-    private suspend fun disconnect() {
-        callControlScope?.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-            StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#disconnect] Disconnect result: $result" }
+        localScope.cancel()
+        callControlScope?.let {
+            it.launch {
+                it.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
+                    StreamLog.d(
+                        TELECOM_LOG_TAG,
+                    ) { "[TelecomCall#cleanUp] Disconnect result: $result" }
+                }
+            }
         }
     }
 
