@@ -43,7 +43,12 @@ internal class TelecomCall(
     val parentScope: CoroutineScope, // Used to collect devices before having a CallControlScope
 ) {
     var state = TelecomCallState.IDLE
-        private set
+        set(value) {
+            previousState = field
+            field = value
+        }
+
+    var previousState = TelecomCallState.IDLE
 
     val notificationId = streamCall.cid.hashCode()
 
@@ -82,24 +87,23 @@ internal class TelecomCall(
 
     private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 
-    fun updateState(newState: TelecomCallState) {
+    fun updateTelecomState() {
         val joined = TelecomCallState.IDLE to TelecomCallState.ONGOING
         val answered = TelecomCallState.INCOMING to TelecomCallState.ONGOING
         val accepted = TelecomCallState.OUTGOING to TelecomCallState.ONGOING
-        val transition = state to newState
-        state = newState
+        val transition = previousState to state
 
-        StreamLog.d(TELECOM_LOG_TAG) { "[updateState] New state: $state" }
+        StreamLog.d(TELECOM_LOG_TAG) { "[updateTelecomState] Transition: $transition" }
 
         callControlScope?.let {
             it.launch {
                 when (transition) {
                     joined, accepted -> it.setActive().let { result ->
-                        StreamLog.d(TELECOM_LOG_TAG) { "[updateState] Set active: $result" }
+                        StreamLog.d(TELECOM_LOG_TAG) { "[updateTelecomState] Set active: $result" }
                     }
 
                     answered -> it.answer(mediaType).let { result ->
-                        StreamLog.d(TELECOM_LOG_TAG) { "[updateState] Answered: $result" }
+                        StreamLog.d(TELECOM_LOG_TAG) { "[updateTelecomState] Answered: $result" }
                     }
                 }
             }

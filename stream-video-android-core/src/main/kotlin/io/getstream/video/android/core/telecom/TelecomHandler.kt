@@ -152,16 +152,14 @@ internal class TelecomHandler private constructor(
             val cause = if (telecomCall == null) "call not registered" else "same state"
             logger.i { "[changeCallState] Ignoring method call: $cause" }
         } else {
-            var wasPreviouslyAdded = false
+            telecomCall.state = newState
+            postNotification(telecomCall)
 
-            with(telecomCall) {
-                wasPreviouslyAdded = (state == TelecomCallState.INCOMING || state == TelecomCallState.OUTGOING)
-                updateState(newState)
-                postNotification(this)
-            }
+            val wasPreviouslyAdded = telecomCall.previousState in listOf(TelecomCallState.INCOMING, TelecomCallState.OUTGOING)
 
             if (wasPreviouslyAdded) {
                 logger.i { "[changeCallState] Call was already added to Telecom, skipping CallsManager#addCall()" }
+                telecomCall.updateTelecomState()
             } else {
                 telecomHandlerScope.launch {
                     safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
@@ -181,6 +179,7 @@ internal class TelecomHandler private constructor(
                             },
                             block = {
                                 telecomCall.callControlScope = this
+                                telecomCall.updateTelecomState()
                                 logger.i { "[changeCallState] Added call to Telecom" }
                             },
                         )
