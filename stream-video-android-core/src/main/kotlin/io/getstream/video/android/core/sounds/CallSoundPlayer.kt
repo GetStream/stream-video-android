@@ -30,16 +30,10 @@ import io.getstream.log.taggedLogger
 
 class CallSoundPlayer(private val context: Context) {
     private val logger by taggedLogger("CallSoundPlayer")
-    private var mediaPlayer: MediaPlayer? = null
+    private val mediaPlayer: MediaPlayer by lazy { MediaPlayer() }
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
     private var ringtone: Ringtone? = null
-
-    init {
-        synchronized(this) {
-            if (mediaPlayer == null) mediaPlayer = MediaPlayer()
-        }
-    }
 
     fun playCallSound(soundUri: Uri?) {
         try {
@@ -59,7 +53,12 @@ class CallSoundPlayer(private val context: Context) {
 
     private fun requestAudioFocus(onGranted: () -> Unit) {
         if (audioManager == null) {
-            audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
+                audioManager = it
+            } ?: run {
+                logger.d { "[requestAudioFocus] Error getting AudioManager system service" }
+                return
+            }
         }
 
         val isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -107,7 +106,7 @@ class CallSoundPlayer(private val context: Context) {
 
     private fun playWithMediaPlayer(soundUri: Uri?) {
         soundUri?.let {
-            mediaPlayer?.let { mediaPlayer ->
+            mediaPlayer.let { mediaPlayer ->
                 if (!mediaPlayer.isPlaying) {
                     setMediaPlayerDataSource(mediaPlayer, soundUri)
                     mediaPlayer.start()
@@ -133,7 +132,7 @@ class CallSoundPlayer(private val context: Context) {
                     if (ringtone?.isPlaying == true) ringtone?.stop()
                 } else {
                     logger.d { "[stopCallSound] Stopping MediaPlayer sound" }
-                    if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
+                    if (mediaPlayer.isPlaying == true) mediaPlayer.stop()
                 }
             } catch (e: Exception) {
                 logger.d { "[stopCallSound] Error stopping call sound: ${e.message}" }
@@ -158,8 +157,7 @@ class CallSoundPlayer(private val context: Context) {
             if (ringtone?.isPlaying == true) ringtone?.stop()
             ringtone = null
 
-            mediaPlayer?.release()
-            mediaPlayer = null
+            mediaPlayer.release()
 
             audioManager = null
             audioFocusRequest = null
