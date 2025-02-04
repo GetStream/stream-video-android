@@ -27,6 +27,7 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.openapitools.client.models.OwnCapability
 import kotlin.getValue
 
@@ -93,6 +95,14 @@ internal class TelecomCall(
 
     private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 
+    private var activeCallSettings: ActiveCallSettings? = null
+
+    data class ActiveCallSettings(
+        val cameraEnabled: Boolean,
+        val microphoneEnabled: Boolean,
+        val speakerVolume: Int,
+    )
+
     fun updateTelecomState() {
         val joined = TelecomCallState.IDLE to TelecomCallState.ONGOING
         val answered = TelecomCallState.INCOMING to TelecomCallState.ONGOING
@@ -121,17 +131,31 @@ internal class TelecomCall(
 
         when (event) {
             TelecomEvent.ANSWER -> {
-                streamCall.accept()
-                streamCall.join()
+                withContext(Dispatchers.IO) {
+                    streamCall.accept().map { streamCall.join() }
+                }
             }
             TelecomEvent.DISCONNECT -> {
                 streamCall.leave()
+                cleanUp()
             }
             TelecomEvent.SET_ACTIVE -> {
-                streamCall.join()
+                activeCallSettings?.let {
+                    streamCall.camera.setEnabled(it.cameraEnabled, true)
+                    streamCall.microphone.setEnabled(it.microphoneEnabled, true)
+                    streamCall.speaker.setVolume(it.speakerVolume)
+                }
             }
             TelecomEvent.SET_INACTIVE -> {
-                streamCall.leave()
+                activeCallSettings = ActiveCallSettings(
+                    cameraEnabled = streamCall.camera.isEnabled.value,
+                    microphoneEnabled = streamCall.microphone.isEnabled.value,
+                    speakerVolume = streamCall.speaker.volume.value ?: 0,
+                )
+
+                streamCall.camera.disable()
+                streamCall.microphone.disable()
+                streamCall.speaker.setVolume(0)
             }
         }
     }
