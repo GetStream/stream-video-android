@@ -48,5 +48,3 @@ internal fun CallEndpointCompat.toStreamAudioDevice(): StreamAudioDevice = when 
     CallEndpointCompat.TYPE_WIRED_HEADSET -> StreamAudioDevice.WiredHeadset(telecomDevice = this)
     else -> StreamAudioDevice.Earpiece()
 }
-
-internal const val TELECOM_LOG_TAG = "StreamVideo:Telecom"

@@ -48,12 +48,16 @@ internal class TelecomHandler private constructor(
     private val callManager: CallsManager,
     private val callSoundPlayer: CallSoundPlayer,
 ) {
-    private val logger by taggedLogger(TELECOM_LOG_TAG)
+    private val logger by taggedLogger(TAG)
+
     private var streamVideo: StreamVideo? = null
+
     private val calls = mutableMapOf<String, TelecomCall>()
+
     private val exceptionHandler = CoroutineExceptionHandler { _, ex ->
-        logger.e(ex) { "[telecomHandlerScope]" }
+        logger.e(ex) { "[telecomHandlerScope] #telecom;" }
     }
+
     private val telecomHandlerScope = CoroutineScope(
         DispatcherProvider.Default + SupervisorJob() + exceptionHandler,
     )
@@ -97,9 +101,9 @@ internal class TelecomHandler private constructor(
     }
 
     init {
-        logger.d { "[init]" }
+        logger.d { "[init] #telecom;" }
 
-        safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+        safeCall(exceptionLogTag = TAG) {
             callManager.registerAppWithTelecom(
                 capabilities = CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING and
                     CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING,
@@ -115,13 +119,13 @@ internal class TelecomHandler private constructor(
         wasTriggeredByIncomingNotification: Boolean = false,
     ) {
         logger.d {
-            "[registerCall] Call ID: ${call.id}, wasTriggeredByIncomingNotification: $wasTriggeredByIncomingNotification"
+            "[registerCall] #telecom; Call ID: ${call.id}, wasTriggeredByIncomingNotification: $wasTriggeredByIncomingNotification"
         }
 
         if (wasTriggeredByIncomingNotification) prepareIncomingCall(call)
 
         if (calls.contains(call.cid)) {
-            logger.i { "[registerCall] Call already registered, ignoring" }
+            logger.i { "[registerCall] #telecom; Call already registered, ignoring" }
         } else {
             calls[call.cid] = TelecomCall(
                 streamCall = call,
@@ -129,12 +133,12 @@ internal class TelecomHandler private constructor(
                 parentScope = telecomHandlerScope,
             )
 
-            logger.d { "[registerCall] New call registered" }
+            logger.d { "[registerCall] #telecom; New call registered" }
         }
     }
 
     private fun prepareIncomingCall(call: StreamCall) {
-        logger.d { "[prepareIncomingCall]" }
+        logger.d { "[prepareIncomingCall] #telecom;" }
 
         telecomHandlerScope.launch {
             streamVideo?.connectIfNotAlreadyConnected()
@@ -146,11 +150,11 @@ internal class TelecomHandler private constructor(
     fun changeCallState(call: StreamCall, newState: TelecomCallState) {
         val telecomCall = calls[call.cid]
 
-        logger.i { "[changeCallState] currentState: ${telecomCall?.state}, newState: $newState" }
+        logger.i { "[changeCallState] #telecom; currentState: ${telecomCall?.state}, newState: $newState" }
 
         if (telecomCall == null || telecomCall.state == newState) {
             val cause = if (telecomCall == null) "call not registered" else "same state"
-            logger.i { "[changeCallState] Ignoring method call: $cause" }
+            logger.i { "[changeCallState] #telecom; Ignoring method call: $cause" }
         } else {
             telecomCall.state = newState
             postNotification(telecomCall)
@@ -158,11 +162,11 @@ internal class TelecomHandler private constructor(
             val wasPreviouslyAdded = telecomCall.previousState in listOf(TelecomCallState.INCOMING, TelecomCallState.OUTGOING)
 
             if (wasPreviouslyAdded) {
-                logger.i { "[changeCallState] Call was already added to Telecom, skipping CallsManager#addCall()" }
+                logger.i { "[changeCallState] #telecom; Call was already added to Telecom, skipping addCall()" }
                 telecomCall.updateTelecomState()
             } else {
                 telecomHandlerScope.launch {
-                    safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+                    safeCall(exceptionLogTag = TAG) {
                         callManager.addCall(
                             callAttributes = telecomCall.attributes,
                             onAnswer = {
@@ -180,7 +184,7 @@ internal class TelecomHandler private constructor(
                             block = {
                                 telecomCall.callControlScope = this
                                 telecomCall.updateTelecomState()
-                                logger.i { "[changeCallState] Added call to Telecom" }
+                                logger.i { "[changeCallState] #telecom; Added call to Telecom" }
                             },
                         )
                     }
@@ -192,13 +196,13 @@ internal class TelecomHandler private constructor(
     @SuppressLint("MissingPermission")
     private fun postNotification(telecomCall: TelecomCall) {
         if (!hasNotificationsPermission()) {
-            logger.e { "[postNotification] POST_NOTIFICATIONS permission missing" }
+            logger.e { "[postNotification] #telecom; POST_NOTIFICATIONS permission missing" }
             return
         } else {
             (streamVideo as? StreamVideoClient)?.let { streamVideo ->
                 val notification = when (telecomCall.state) {
                     TelecomCallState.INCOMING -> {
-                        logger.d { "[postNotification] Creating incoming notification" }
+                        logger.d { "[postNotification] #telecom; Creating incoming notification" }
 
                         callSoundPlayer.playCallSound(
                             streamVideo.sounds.ringingConfig.incomingCallSoundUri,
@@ -216,7 +220,7 @@ internal class TelecomHandler private constructor(
                         val isOutgoingCall = telecomCall.state == TelecomCallState.OUTGOING
                         val getNotification = {
                             logger.d {
-                                "[postNotification] Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
+                                "[postNotification] #telecom; Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
                             }
 
                             streamVideo.getOngoingCallNotification(
@@ -237,13 +241,13 @@ internal class TelecomHandler private constructor(
                     }
 
                     else -> {
-                        logger.w { "[postNotification] Will not post any notification" }
+                        logger.w { "[postNotification] #telecom; Will not post any notification" }
                         null
                     }
                 }
 
                 notification?.let {
-                    logger.i { "[postNotification] Posting ${telecomCall.state} notification" }
+                    logger.i { "[postNotification] #telecom; Posting ${telecomCall.state} notification" }
 
                     NotificationManagerCompat
                         .from(applicationContext)
@@ -263,12 +267,12 @@ internal class TelecomHandler private constructor(
         }
 
     private fun cancelNotification(notificationId: Int) {
-        logger.d { "[cancelNotification]" }
+        logger.d { "[cancelNotification] #telecom;" }
         NotificationManagerCompat.from(applicationContext).cancel(notificationId)
     }
 
     fun setDeviceListener(call: StreamCall, listener: DeviceListener) {
-        logger.d { "[setDeviceListener] Call ID: ${call.id}" }
+        logger.d { "[setDeviceListener] #telecom; Call ID: ${call.id}" }
 
         calls[call.cid]?.deviceListener = listener
         sendInitialDevices(listener)
@@ -279,7 +283,7 @@ internal class TelecomHandler private constructor(
             val devices = try {
                 callManager.getAvailableStartingCallEndpoints().first().map { it.toStreamAudioDevice() }
             } catch (e: Exception) {
-                logger.w { "[setDeviceListener] Error when collecting endpoints: ${e.message}" }
+                logger.w { "[setDeviceListener] #telecom; Error when collecting endpoints: ${e.message}" }
                 emptyList()
             }
             listener(devices, null)
@@ -291,7 +295,7 @@ internal class TelecomHandler private constructor(
             with(it) {
                 launch {
                     requestEndpointChange(device).let { result ->
-                        logger.d { "[selectDevice] New device: ${device.name}, requestEndpointChange result: $result" }
+                        logger.d { "[selectDevice] #telecom; New device: ${device.name}, change result: $result" }
                     }
                 }
             }
@@ -299,7 +303,7 @@ internal class TelecomHandler private constructor(
     }
 
     fun cleanUp() = {
-        logger.d { "[cleanUp]" }
+        logger.d { "[cleanUp] #telecom;" }
 
         calls.forEach { unregisterCall(it.value.streamCall) }
         telecomHandlerScope.cancel()
@@ -308,10 +312,10 @@ internal class TelecomHandler private constructor(
     }
 
     fun unregisterCall(call: StreamCall) {
-        logger.i { "[unregisterCall]" }
+        logger.i { "[unregisterCall] #telecom;" }
 
         calls.remove(call.cid)?.let { telecomCall ->
-            safeCall(exceptionLogTag = TELECOM_LOG_TAG) {
+            safeCall(exceptionLogTag = TAG) {
                 callSoundPlayer.stopCallSound()
                 cancelNotification(telecomCall.notificationId)
                 telecomCall.cleanUp()
@@ -319,3 +323,5 @@ internal class TelecomHandler private constructor(
         }
     }
 }
+
+private const val TAG = "StreamVideo:TelecomHandler"

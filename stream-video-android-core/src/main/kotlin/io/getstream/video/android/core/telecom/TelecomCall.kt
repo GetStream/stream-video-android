@@ -22,7 +22,7 @@ import android.telecom.DisconnectCause
 import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
-import io.getstream.log.StreamLog
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.openapitools.client.models.OwnCapability
+import kotlin.getValue
 
 @RequiresApi(Build.VERSION_CODES.O)
 internal class TelecomCall(
@@ -42,6 +43,8 @@ internal class TelecomCall(
     val config: CallServiceConfig,
     val parentScope: CoroutineScope, // Used to collect devices before having a CallControlScope
 ) {
+    private val logger by taggedLogger("StreamVideo:TelecomCall")
+
     var state = TelecomCallState.IDLE
         set(value) {
             previousState = field
@@ -93,17 +96,17 @@ internal class TelecomCall(
         val accepted = TelecomCallState.OUTGOING to TelecomCallState.ONGOING
         val transition = previousState to state
 
-        StreamLog.d(TELECOM_LOG_TAG) { "[updateTelecomState] Transition: $transition" }
+        logger.d { "[updateTelecomState] #telecom; Transition: $transition" }
 
         callControlScope?.let {
             it.launch {
                 when (transition) {
                     joined, accepted -> it.setActive().let { result ->
-                        StreamLog.d(TELECOM_LOG_TAG) { "[updateTelecomState] Set active: $result" }
+                        logger.d { "[updateTelecomState] #telecom; Set active: $result" }
                     }
 
                     answered -> it.answer(mediaType).let { result ->
-                        StreamLog.d(TELECOM_LOG_TAG) { "[updateTelecomState] Answered: $result" }
+                        logger.d { "[updateTelecomState] #telecom; Answered: $result" }
                     }
                 }
             }
@@ -111,7 +114,7 @@ internal class TelecomCall(
     }
 
     suspend fun handleTelecomEvent(event: TelecomEvent) {
-        StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#handleTelecomEvent] event: $event" }
+        logger.d { "[handleTelecomEvent] #telecom; event: $event" }
 
         when (event) {
             TelecomEvent.ANSWER -> {
@@ -131,15 +134,13 @@ internal class TelecomCall(
     }
 
     fun cleanUp() {
-        StreamLog.d(TELECOM_LOG_TAG) { "[TelecomCall#cleanUp]" }
+        logger.d { "[cleanUp] #telecom;" }
 
         localScope.cancel()
         callControlScope?.let {
             it.launch {
                 it.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-                    StreamLog.d(
-                        TELECOM_LOG_TAG,
-                    ) { "[TelecomCall#cleanUp] Disconnect result: $result" }
+                    logger.d { "[cleanUp] #telecom; Disconnect result: $result" }
                 }
             }
         }
@@ -156,9 +157,9 @@ internal class TelecomCall(
             .onEach { devicePair ->
                 devices.value = devicePair
 
-                StreamLog.d(TELECOM_LOG_TAG) {
+                logger.d {
                     with(devicePair) {
-                        "[TelecomCall#publishDevices] Published devices. Available: ${first.map { it.name }}, selected: ${second.name}"
+                        "[publishDevices] #telecom; Published devices. Available: ${first.map { it.name }}, selected: ${second.name}"
                     }
                 }
             }
@@ -172,8 +173,8 @@ internal class TelecomCall(
                     with(pair) {
                         listener(first, second)
 
-                        StreamLog.d(TELECOM_LOG_TAG) {
-                            "[TelecomCall#collectDevices] Collected devices. Available: ${first.map { it.name }}, selected: ${second.name}"
+                        logger.d {
+                            "[collectDevices] #telecom; Collected devices. Available: ${first.map { it.name }}, selected: ${second.name}"
                         }
                     }
                 }
