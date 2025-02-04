@@ -19,6 +19,7 @@ package io.getstream.video.android.core.telecom
 import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
+import android.app.Notification
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -246,12 +247,24 @@ internal class TelecomHandler private constructor(
                     }
                 }
 
-                notification?.let {
-                    logger.i { "[postNotification] #telecom; Posting ${telecomCall.state} notification" }
+                notification?.let { notification ->
+                    val notify: (Notification) -> Unit = {
+                        logger.i { "[postNotification] #telecom; Posting ${telecomCall.state} notification" }
+                        NotificationManagerCompat
+                            .from(applicationContext)
+                            .notify(telecomCall.notificationId, it)
+                    }
 
-                    NotificationManagerCompat
-                        .from(applicationContext)
-                        .notify(telecomCall.notificationId, it)
+                    notify(notification)
+
+                    observeNotificationUpdates(
+                        telecomCall = telecomCall,
+                        streamVideo = streamVideo,
+                        onUpdate = { updatedNotification ->
+                            logger.d { "[postNotification] #telecom; Updating notification" }
+                            notify(updatedNotification)
+                        },
+                    )
                 } ?: cancelNotification(telecomCall.notificationId)
             }
         }
@@ -269,6 +282,23 @@ internal class TelecomHandler private constructor(
     private fun cancelNotification(notificationId: Int) {
         logger.d { "[cancelNotification] #telecom;" }
         NotificationManagerCompat.from(applicationContext).cancel(notificationId)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun observeNotificationUpdates(
+        telecomCall: TelecomCall,
+        streamVideo: StreamVideoClient,
+        onUpdate: (Notification) -> Unit,
+    ) {
+        if (streamVideo.enableCallNotificationUpdates && telecomCall.notificationUpdatesJob == null) {
+            telecomCall.notificationUpdatesJob = streamVideo.getNotificationUpdates(
+                telecomCall.localScope,
+                telecomCall.streamCall,
+                streamVideo.user,
+            ) { updatedNotification -> onUpdate(updatedNotification) }
+
+            logger.d { "[observeNotificationUpdates] #telecom; Added job" }
+        }
     }
 
     fun setDeviceListener(call: StreamCall, listener: DeviceListener) {

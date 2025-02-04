@@ -46,6 +46,7 @@ import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -388,80 +389,96 @@ public open class DefaultNotificationHandler(
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
-    ) {
-        coroutineScope.launch {
-            var latestRemoteParticipantCount = -1
+    ): Job = coroutineScope.launch {
+        var latestRemoteParticipantCount = -1
 
-            // Monitor call state and remote participants
-            combine(
-                call.state.ringingState,
-                call.state.members,
-                call.state.remoteParticipants,
-            ) { ringingState, members, remoteParticipants ->
-                Triple(ringingState, members, remoteParticipants)
-            }
-                .distinctUntilChanged()
-                .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
-                .collectLatest { state ->
-                    val ringingState = state.first
-                    val members = state.second
-                    val remoteParticipants = state.third
+        // Monitor call state and remote participants
+        combine(
+            call.state.ringingState,
+            call.state.members,
+            call.state.remoteParticipants,
+        ) { ringingState, members, remoteParticipants ->
+            Triple(ringingState, members, remoteParticipants)
+        }
+            .distinctUntilChanged()
+            .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
+            .collectLatest { state ->
+                logger.d {
+                    "#telecom-notif; Updating notification: ${StreamCallId.fromCallCid(
+                        call.cid,
+                    ).hashCode()}"
+                }
 
-                    if (ringingState is RingingState.Outgoing) {
-                        val remoteMembersCount = members.size - 1
+                val ringingState = state.first
+                val members = state.second
+                val remoteParticipants = state.third
 
-                        val callDisplayName = if (remoteMembersCount != 1) {
+                if (ringingState is RingingState.Outgoing) {
+                    val remoteMembersCount = members.size - 1
+
+                    val callDisplayName = if (remoteMembersCount != 1) {
+                        application.getString(
+                            R.string.stream_video_outgoing_call_notification_title,
+                        )
+                    } else {
+                        members.firstOrNull { member ->
+                            member.user.id != localUser.id
+                        }?.user?.name ?: "Unknown"
+                    }
+
+                    getOngoingCallNotification(
+                        callId = StreamCallId.fromCallCid(call.cid),
+                        callInfo = callDisplayName,
+                        isOutgoingCall = true,
+                        remoteParticipantCount = remoteMembersCount,
+                    )?.let {
+                        onUpdate(it)
+                    }
+                } else if (ringingState is RingingState.Active) {
+                    logger.d { "#telecom-notif; State is Active" }
+
+                    // If number of remote participants increased or decreased
+                    if (remoteParticipants.size != latestRemoteParticipantCount) {
+                        latestRemoteParticipantCount = remoteParticipants.size
+
+                        val callDisplayName = if (remoteParticipants.isEmpty()) {
+                            logger.d { "#telecom-notif; remoteParticipants.isEmpty()" }
+
+                            // If no remote participants, get simple call notification title
                             application.getString(
-                                R.string.stream_video_outgoing_call_notification_title,
+                                R.string.stream_video_ongoing_call_notification_title,
                             )
                         } else {
-                            members.firstOrNull { member ->
-                                member.user.id != localUser.id
-                            }?.user?.name ?: "Unknown"
+                            if (remoteParticipants.size > 1) {
+                                logger.d { "#telecom-notif; remoteParticipants.size > 1" }
+
+                                // If more than 1 remote participant, get group call notification title
+                                application.getString(
+                                    R.string.stream_video_ongoing_group_call_notification_title,
+                                )
+                            } else {
+                                logger.d { "#telecom-notif; one remote" }
+
+                                // If 1 remote participant, get the name of the remote participant
+                                remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+                            }
                         }
 
+                        // Use latest call display name in notification
                         getOngoingCallNotification(
                             callId = StreamCallId.fromCallCid(call.cid),
                             callInfo = callDisplayName,
-                            isOutgoingCall = true,
-                            remoteParticipantCount = remoteMembersCount,
+                            remoteParticipantCount = remoteParticipants.size,
                         )?.let {
+                            logger.d {
+                                "#telecom-notif; callInfo: $callDisplayName, remoteParticipantCount: ${remoteParticipants.size}"
+                            }
+
                             onUpdate(it)
-                        }
-                    } else if (ringingState is RingingState.Active) {
-                        // If number of remote participants increased or decreased
-                        if (remoteParticipants.size != latestRemoteParticipantCount) {
-                            latestRemoteParticipantCount = remoteParticipants.size
-
-                            val callDisplayName = if (remoteParticipants.isEmpty()) {
-                                // If no remote participants, get simple call notification title
-                                application.getString(
-                                    R.string.stream_video_ongoing_call_notification_title,
-                                )
-                            } else {
-                                if (remoteParticipants.size > 1) {
-                                    // If more than 1 remote participant, get group call notification title
-                                    application.getString(
-                                        R.string.stream_video_ongoing_group_call_notification_title,
-                                    )
-                                } else {
-                                    // If 1 remote participant, get the name of the remote participant
-                                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
-                                }
-                            }
-
-                            // Use latest call display name in notification
-                            getOngoingCallNotification(
-                                callId = StreamCallId.fromCallCid(call.cid),
-                                callInfo = callDisplayName,
-                                remoteParticipantCount = remoteParticipants.size,
-                            )?.let {
-                                onUpdate(it)
-                            }
                         }
                     }
                 }
-        }
+            }
     }
 
     open fun maybeCreateChannel(

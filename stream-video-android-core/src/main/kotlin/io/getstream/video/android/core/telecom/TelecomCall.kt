@@ -25,6 +25,7 @@ import androidx.core.telecom.CallControlScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -53,7 +54,9 @@ internal class TelecomCall(
 
     var previousState = TelecomCallState.IDLE
 
-    val notificationId = streamCall.cid.hashCode()
+    val notificationId = StreamCallId.fromCallCid(streamCall.cid).hashCode()
+
+    var notificationUpdatesJob: Job? = null
 
     val attributes: CallAttributesCompat
         get() = CallAttributesCompat(
@@ -86,7 +89,7 @@ internal class TelecomCall(
             value?.let(::collectDevices)
         }
 
-    private val localScope = CoroutineScope(parentScope.coroutineContext + Job())
+    val localScope = CoroutineScope(parentScope.coroutineContext + Job())
 
     private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 

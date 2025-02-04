@@ -24,6 +24,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 internal object NoOpNotificationHandler : NotificationHandler {
     override fun onIncomingCall(callId: StreamCallId, callerName: String) { /* NoOp */ }
@@ -57,7 +58,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
-    ) { /* NoOp */ }
+    ): Job = Job()
 
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }

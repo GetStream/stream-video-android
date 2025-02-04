@@ -24,6 +24,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 public interface NotificationHandler : NotificationPermissionHandler {
     /**
@@ -118,7 +119,7 @@ public interface NotificationHandler : NotificationPermissionHandler {
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
-    )
+    ): Job
 
     /**
      * Customizes the temporary [Notification] that is displayed while setting up the call, i.e. until another notification is shown.
