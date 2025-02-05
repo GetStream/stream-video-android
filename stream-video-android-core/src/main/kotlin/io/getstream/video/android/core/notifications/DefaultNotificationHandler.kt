@@ -403,12 +403,6 @@ public open class DefaultNotificationHandler(
             .distinctUntilChanged()
             .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
             .collectLatest { state ->
-                logger.d {
-                    "#telecom-notif; Updating notification: ${StreamCallId.fromCallCid(
-                        call.cid,
-                    ).hashCode()}"
-                }
-
                 val ringingState = state.first
                 val members = state.second
                 val remoteParticipants = state.third
@@ -435,30 +429,22 @@ public open class DefaultNotificationHandler(
                         onUpdate(it)
                     }
                 } else if (ringingState is RingingState.Active) {
-                    logger.d { "#telecom-notif; State is Active" }
-
                     // If number of remote participants increased or decreased
                     if (remoteParticipants.size != latestRemoteParticipantCount) {
                         latestRemoteParticipantCount = remoteParticipants.size
 
                         val callDisplayName = if (remoteParticipants.isEmpty()) {
-                            logger.d { "#telecom-notif; remoteParticipants.isEmpty()" }
-
                             // If no remote participants, get simple call notification title
                             application.getString(
                                 R.string.stream_video_ongoing_call_notification_title,
                             )
                         } else {
                             if (remoteParticipants.size > 1) {
-                                logger.d { "#telecom-notif; remoteParticipants.size > 1" }
-
                                 // If more than 1 remote participant, get group call notification title
                                 application.getString(
                                     R.string.stream_video_ongoing_group_call_notification_title,
                                 )
                             } else {
-                                logger.d { "#telecom-notif; one remote" }
-
                                 // If 1 remote participant, get the name of the remote participant
                                 remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
                             }
@@ -470,10 +456,6 @@ public open class DefaultNotificationHandler(
                             callInfo = callDisplayName,
                             remoteParticipantCount = remoteParticipants.size,
                         )?.let {
-                            logger.d {
-                                "#telecom-notif; callInfo: $callDisplayName, remoteParticipantCount: ${remoteParticipants.size}"
-                            }
-
                             onUpdate(it)
                         }
                     }

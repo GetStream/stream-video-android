@@ -203,7 +203,6 @@ object StreamVideoInitHelper {
                         providerName = "firebase",
                     ),
                 ),
-                enableCallNotificationUpdates = false,
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {
