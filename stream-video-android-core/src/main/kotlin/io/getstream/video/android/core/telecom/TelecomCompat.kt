@@ -75,14 +75,12 @@ internal object TelecomCompat {
         }
     }
 
-    private inline fun withCall(
+    private fun withCall(
         call: StreamCall?,
         callId: StreamCallId? = null,
         doAction: (Call, CallServiceConfig) -> Unit,
     ) {
-        contract {
-            callsInPlace(doAction, InvocationKind.AT_MOST_ONCE)
-        }
+        // Not inline fun because it is stubbed in tests
 
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
 
