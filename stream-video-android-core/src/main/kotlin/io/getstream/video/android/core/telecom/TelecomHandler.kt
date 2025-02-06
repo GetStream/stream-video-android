@@ -23,6 +23,7 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.telecom.CallEndpointCompat
@@ -44,7 +45,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @TargetApi(Build.VERSION_CODES.O)
-internal class TelecomHandler private constructor(
+internal class TelecomHandler
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+internal constructor(
     private val applicationContext: Context,
     private val callManager: CallsManager,
     private val callSoundPlayer: CallSoundPlayer,
