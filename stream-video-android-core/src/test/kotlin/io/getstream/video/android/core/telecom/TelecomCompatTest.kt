@@ -53,15 +53,7 @@ class TelecomCompatTest {
         every { streamCall.cid } returns "default:123"
 
         every {
-            spyTelecomCompat["withCall"](
-                streamCall, callId,
-                any<
-                    (
-                        Call,
-                        CallServiceConfig,
-                    ) -> Unit,
-                    >(),
-            )
+            spyTelecomCompat["withCall"](streamCall, callId, any<(Call, CallServiceConfig) -> Unit>())
         } answers {
             val doActionLambda = arg<(Call, CallServiceConfig) -> Unit>(2)
             doActionLambda.invoke(streamCall, callConfig)
@@ -77,8 +69,10 @@ class TelecomCompatTest {
     }
 
     @Test
-    fun registerCall_whenTelecomSupported_usesTelecomHandler() {
-        every { TelecomHandler.getInstance(context) } returns mockTelecomHandler
+    fun registerCall_telecomSupported_usesTelecomHandler() {
+        every {
+            TelecomHandler.getInstance(context)
+        } returns mockTelecomHandler // getInstance() returns null if the device doesn't support Telecom
         val isIncomingCall = false
 
         spyTelecomCompat.registerCall(context, streamCall, callId, callInfo, isIncomingCall)
@@ -86,24 +80,30 @@ class TelecomCompatTest {
         verify(exactly = 1) {
             mockTelecomHandler.registerCall(streamCall, any<CallServiceConfig>(), isIncomingCall)
         }
-        verify(exactly = 0) { CallService.showIncomingCall(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) {
+            CallService.showIncomingCall(any(), any(), any(), any(), any())
+        }
     }
 
     @Test
-    fun registerCall_withTelecomNotSupportedAndIncomingCall_usesCallService() {
-        every { TelecomHandler.getInstance(context) } returns null
+    fun registerCall_telecomNotSupportedAndIncomingCall_usesCallService() {
+        every {
+            TelecomHandler.getInstance(context)
+        } returns null // getInstance() returns null if the device doesn't support Telecom
         val isIncomingCall = true
 
         spyTelecomCompat.registerCall(context, streamCall, callId, callInfo, isIncomingCall)
 
-        verify(exactly = 0) { mockTelecomHandler.registerCall(any(), any(), isIncomingCall) }
+        verify(exactly = 0) {
+            mockTelecomHandler.registerCall(any(), any(), isIncomingCall)
+        }
         verify(exactly = 1) {
             CallService.showIncomingCall(any<Context>(), callId, callInfo, callConfig, any())
         }
     }
 
     @Test
-    fun registerCall_withTelecomNotSupportedAndWithoutIncomingCall_doesNotCallAnything() {
+    fun registerCall_telecomNotSupportedAndNotIncomingCall_doesNotCallAnything() {
         every { TelecomHandler.getInstance(context) } returns null
         val isIncomingCall = false
 
