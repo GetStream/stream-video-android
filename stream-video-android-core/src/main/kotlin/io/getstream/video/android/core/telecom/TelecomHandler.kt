@@ -203,72 +203,79 @@ internal constructor(
             logger.e { "[postNotification] #telecom; POST_NOTIFICATIONS permission missing" }
             return
         } else {
-            (streamVideo as? StreamVideoClient)?.let { streamVideo ->
-                val notification = when (telecomCall.state) {
-                    TelecomCallState.INCOMING -> {
-                        logger.d { "[postNotification] #telecom; Creating incoming notification" }
+            val streamVideo = streamVideo as? StreamVideoClient ?: return
 
-                        callSoundPlayer.playCallSound(
-                            streamVideo.sounds.ringingConfig.incomingCallSoundUri,
-                        )
+            val notificationToPost = when (telecomCall.state) {
+                TelecomCallState.INCOMING -> {
+                    logger.d { "[postNotification] #telecom; Creating incoming notification" }
 
-                        streamVideo.getRingingCallNotification(
-                            ringingState = RingingState.Incoming(),
-                            callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
-                            callInfo = telecomCall.attributes.displayName.toString(),
-                            shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
-                        )
-                    }
+                    callSoundPlayer.playCallSound(
+                        streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                    )
 
-                    TelecomCallState.OUTGOING, TelecomCallState.ONGOING -> {
-                        val isOutgoingCall = telecomCall.state == TelecomCallState.OUTGOING
-                        val getNotification = {
-                            logger.d {
-                                "[postNotification] #telecom; Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
-                            }
-
-                            streamVideo.getOngoingCallNotification(
-                                callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
-                                isOutgoingCall = isOutgoingCall,
-                            )
-                        }
-
-                        if (isOutgoingCall) {
-                            callSoundPlayer.playCallSound(
-                                streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
-                            )
-                            getNotification()
-                        } else {
-                            callSoundPlayer.stopCallSound()
-                            if (telecomCall.config.runCallServiceInForeground) getNotification() else null
-                        }
-                    }
-
-                    else -> {
-                        logger.w { "[postNotification] #telecom; Will not post any notification" }
-                        null
-                    }
+                    streamVideo.getRingingCallNotification(
+                        ringingState = RingingState.Incoming(),
+                        callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
+                        callInfo = telecomCall.attributes.displayName.toString(),
+                        shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
+                    )
                 }
 
-                notification?.let { notification ->
-                    val notify: (Notification) -> Unit = {
-                        logger.i { "[postNotification] #telecom; Posting ${telecomCall.state} notification" }
-                        NotificationManagerCompat
-                            .from(applicationContext)
-                            .notify(telecomCall.notificationId, it)
+                TelecomCallState.OUTGOING, TelecomCallState.ONGOING -> {
+                    val isOutgoingCall = telecomCall.state == TelecomCallState.OUTGOING
+                    val getNotification = {
+                        logger.d {
+                            "[postNotification] #telecom; Creating ${if (isOutgoingCall) "outgoing" else "ongoing"} notification"
+                        }
+
+                        streamVideo.getOngoingCallNotification(
+                            callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
+                            isOutgoingCall = isOutgoingCall,
+                        )
                     }
 
-                    notify(notification)
+                    if (isOutgoingCall) {
+                        val outgoingCallSound = streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+                        callSoundPlayer.playCallSound(outgoingCallSound)
+                    } else {
+                        callSoundPlayer.stopCallSound()
+                    }
 
-                    observeNotificationUpdates(
-                        telecomCall = telecomCall,
-                        streamVideo = streamVideo,
-                        onUpdate = { updatedNotification ->
-                            logger.d { "[postNotification] #telecom; Updating notification" }
-                            notify(updatedNotification)
-                        },
-                    )
-                } ?: cancelNotification(telecomCall.notificationId)
+                    getNotification()
+                }
+
+                else -> {
+                    logger.w { "[postNotification] #telecom; Will not post any notification" }
+                    null
+                }
+            }
+
+            notificationToPost?.let { notification ->
+                val notify: (Notification) -> Unit = {
+                    logger.i { "[postNotification] #telecom; Posting ${telecomCall.state} notification" }
+                    NotificationManagerCompat
+                        .from(applicationContext)
+                        .notify(telecomCall.notificationId, it)
+                }
+
+                if (telecomCall.state == TelecomCallState.INCOMING) {
+                    notify(notification)
+                } else {
+                    if (telecomCall.config.runCallServiceInForeground) {
+                        notify(notification)
+
+                        maybeObserveNotificationUpdates(
+                            telecomCall = telecomCall,
+                            streamVideo = streamVideo,
+                            onUpdate = { updatedNotification ->
+                                logger.d { "[postNotification] #telecom; Updating notification" }
+                                notify(updatedNotification)
+                            },
+                        )
+                    } else {
+                        cancelNotification(telecomCall.notificationId)
+                    }
+                }
             }
         }
     }
@@ -288,7 +295,7 @@ internal constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun observeNotificationUpdates(
+    private fun maybeObserveNotificationUpdates(
         telecomCall: TelecomCall,
         streamVideo: StreamVideoClient,
         onUpdate: (Notification) -> Unit,
