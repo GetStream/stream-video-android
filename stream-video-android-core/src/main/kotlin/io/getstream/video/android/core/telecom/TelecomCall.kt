@@ -22,6 +22,10 @@ import android.os.Build
 import android.telecom.DisconnectCause
 import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallAttributesCompat
+import androidx.core.telecom.CallAttributesCompat.Companion.DIRECTION_INCOMING
+import androidx.core.telecom.CallAttributesCompat.Companion.DIRECTION_OUTGOING
+import androidx.core.telecom.CallAttributesCompat.Companion.SUPPORTS_SET_INACTIVE
+import androidx.core.telecom.CallAttributesCompat.Companion.SUPPORTS_STREAM
 import androidx.core.telecom.CallControlScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.StreamAudioDevice
@@ -68,11 +72,12 @@ internal class TelecomCall(
             displayName = streamCall.state.createdBy.value?.userNameOrId ?: "Unknown",
             address = Uri.parse("https://getstream.io/video/join/${streamCall.cid}"),
             direction = if (state == TelecomCallState.INCOMING) {
-                CallAttributesCompat.DIRECTION_INCOMING
+                DIRECTION_INCOMING
             } else {
-                CallAttributesCompat.DIRECTION_OUTGOING
+                DIRECTION_OUTGOING // The only other state is OUTGOING
             },
             callType = mediaType,
+            callCapabilities = SUPPORTS_SET_INACTIVE or SUPPORTS_STREAM,
         )
 
     val mediaType: Int
