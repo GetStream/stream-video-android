@@ -21,6 +21,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallEndpointCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.model.StreamCallId
 
 internal enum class TelecomCallState {
     IDLE,
@@ -35,6 +36,8 @@ enum class TelecomEvent {
     SET_ACTIVE,
     SET_INACTIVE,
 }
+
+internal fun Call.buildStreamCallId() = StreamCallId.fromCallCid(this.cid)
 
 internal typealias StreamCall = Call
 

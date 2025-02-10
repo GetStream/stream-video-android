@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.telecom
 
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
@@ -24,8 +25,9 @@ import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallControlScope
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,6 +44,7 @@ import kotlin.getValue
 
 @RequiresApi(Build.VERSION_CODES.O)
 internal class TelecomCall(
+    val context: Context,
     val streamCall: StreamCall,
     val config: CallServiceConfig,
     val parentScope: CoroutineScope, // Used to collect devices before having a CallControlScope
@@ -56,7 +59,7 @@ internal class TelecomCall(
 
     var previousState = TelecomCallState.IDLE
 
-    val notificationId = StreamCallId.fromCallCid(streamCall.cid).hashCode()
+    val notificationId = streamCall.buildStreamCallId().hashCode()
 
     var notificationUpdatesJob: Job? = null
 
@@ -132,12 +135,20 @@ internal class TelecomCall(
         when (event) {
             TelecomEvent.ANSWER -> {
                 withContext(Dispatchers.IO) {
-                    streamCall.accept().map { streamCall.join() }
+                    streamCall.accept().map {
+                        DefaultStreamIntentResolver(context)
+                            .searchAcceptCallPendingIntent(streamCall.buildStreamCallId())?.send()
+                        streamCall.join()
+                    }
                 }
             }
             TelecomEvent.DISCONNECT -> {
-                streamCall.leave()
-                cleanUp()
+                if (state == TelecomCallState.INCOMING) {
+                    withContext(Dispatchers.IO) { streamCall.reject(RejectReason.Decline) }
+                    streamCall.leave() // Will trigger TelecomHandler#unregisterCall
+                } else {
+                    streamCall.leave()
+                }
             }
             TelecomEvent.SET_ACTIVE -> {
                 activeCallSettings?.let {
@@ -161,8 +172,6 @@ internal class TelecomCall(
     }
 
     fun cleanUp() {
-        logger.d { "[cleanUp] #telecom;" }
-
         localScope.cancel()
         callControlScope?.let {
             it.launch {

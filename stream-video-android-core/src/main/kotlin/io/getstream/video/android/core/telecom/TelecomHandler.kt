@@ -36,7 +36,6 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCall
-import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -132,6 +131,7 @@ internal constructor(
             logger.i { "[registerCall] #telecom; Call already registered, ignoring" }
         } else {
             calls[call.cid] = TelecomCall(
+                context = applicationContext,
                 streamCall = call,
                 config = callConfig,
                 parentScope = telecomHandlerScope,
@@ -215,7 +215,7 @@ internal constructor(
 
                     streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
-                        callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
+                        callId = telecomCall.streamCall.buildStreamCallId(),
                         callInfo = telecomCall.attributes.displayName.toString(),
                         shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
                     )
@@ -229,7 +229,7 @@ internal constructor(
                         }
 
                         streamVideo.getOngoingCallNotification(
-                            callId = StreamCallId.fromCallCid(telecomCall.streamCall.cid),
+                            callId = telecomCall.streamCall.buildStreamCallId(),
                             isOutgoingCall = isOutgoingCall,
                         )
                     }
