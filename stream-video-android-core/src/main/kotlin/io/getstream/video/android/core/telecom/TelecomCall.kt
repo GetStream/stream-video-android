@@ -63,7 +63,7 @@ internal class TelecomCall(
 
     var previousState = TelecomCallState.IDLE
 
-    val notificationId = streamCall.buildStreamCallId().hashCode()
+    val notificationId = streamCall.cid.hashCode()
 
     var notificationUpdatesJob: Job? = null
 
