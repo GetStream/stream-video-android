@@ -300,11 +300,11 @@ internal constructor(
         streamVideo: StreamVideoClient,
         onUpdate: (Notification) -> Unit,
     ) {
-        if (streamVideo.enableCallNotificationUpdates && telecomCall.notificationUpdatesJob == null) {
-            telecomCall.notificationUpdatesJob = streamVideo.getNotificationUpdates(
-                telecomCall.localScope,
-                telecomCall.streamCall,
-                streamVideo.user,
+        if (streamVideo.enableCallNotificationUpdates && telecomCall.notificationUpdateJob == null) {
+            telecomCall.notificationUpdateJob = streamVideo.getNotificationUpdates(
+                coroutineScope = telecomCall.localScope,
+                call = telecomCall.streamCall,
+                localUser = streamVideo.user,
             ) { updatedNotification -> onUpdate(updatedNotification) }
 
             logger.d { "[observeNotificationUpdates] #telecom; Added job" }

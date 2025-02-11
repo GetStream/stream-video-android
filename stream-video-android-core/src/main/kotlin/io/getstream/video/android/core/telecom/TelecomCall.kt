@@ -65,7 +65,7 @@ internal class TelecomCall(
 
     val notificationId = streamCall.cid.hashCode()
 
-    var notificationUpdatesJob: Job? = null
+    var notificationUpdateJob: Job? = null
 
     val attributes: CallAttributesCompat
         get() = CallAttributesCompat(
