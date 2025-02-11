@@ -796,7 +796,9 @@ public class Call(
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall(willTransitionToOngoing = false)
+        if (state.ringingState.value is RingingState.Outgoing) {
+            client.state.removeRingingCall(willTransitionToOngoing = false)
+        }
         cleanup()
     }
 
@@ -1216,7 +1218,7 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "[accept] #ringing; no args" }
+        logger.d { "[accept] #ringing; #telecom; no args" }
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall(willTransitionToOngoing = true)

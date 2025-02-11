@@ -154,7 +154,9 @@ internal constructor(
     fun changeCallState(call: StreamCall, newState: TelecomCallState) {
         val telecomCall = calls[call.cid]
 
-        logger.i { "[changeCallState] #telecom; currentState: ${telecomCall?.state}, newState: $newState" }
+        logger.i {
+            "[changeCallState] #telecom; currentState: ${telecomCall?.state}, newState: $newState, call ID: ${call.id}"
+        }
 
         if (telecomCall == null || telecomCall.state == newState) {
             val cause = if (telecomCall == null) "call not registered" else "same state"
@@ -188,7 +190,7 @@ internal constructor(
                             block = {
                                 telecomCall.callControlScope = this
                                 telecomCall.updateTelecomState()
-                                logger.i { "[changeCallState] #telecom; Added call to Telecom" }
+                                logger.i { "[changeCallState] #telecom; Added call to Telecom, call ID: ${call.id}" }
                             },
                         )
                     }
@@ -342,7 +344,7 @@ internal constructor(
         }
     }
 
-    fun cleanUp() = {
+    fun cleanUp() {
         logger.d { "[cleanUp] #telecom;" }
 
         calls.forEach { unregisterCall(it.value.streamCall) }
@@ -352,7 +354,7 @@ internal constructor(
     }
 
     fun unregisterCall(call: StreamCall) {
-        logger.i { "[unregisterCall] #telecom;" }
+        logger.i { "[unregisterCall] #telecom; Call ID: ${call.id}" }
 
         calls.remove(call.cid)?.let { telecomCall ->
             safeCall(exceptionLogTag = TAG) {

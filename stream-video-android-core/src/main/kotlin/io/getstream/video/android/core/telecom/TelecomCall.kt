@@ -181,7 +181,7 @@ internal class TelecomCall(
         callControlScope?.let {
             it.launch {
                 it.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
-                    logger.d { "[cleanUp] #telecom; Disconnect result: $result" }
+                    logger.d { "[cleanUp] #telecom; Disconnect result: $result, call ID: ${streamCall.id}" }
                 }
             }
         }

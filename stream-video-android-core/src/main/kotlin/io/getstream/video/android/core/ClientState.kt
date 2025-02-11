@@ -167,6 +167,7 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeActiveCall() {
         _activeCall.value?.let { call ->
+            logger.d { "[removeActiveCall] #ringing; #telecom; Call ID: ${call.id}" }
             TelecomCompat.unregisterCall(streamVideoClient.context, call)
             _activeCall.value = null
         }
@@ -188,6 +189,10 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeRingingCall(willTransitionToOngoing: Boolean) {
         _ringingCall.value?.let { call ->
+            logger.d {
+                "[removeRingingCall] #telecom; willTransitionToOutgoing: $willTransitionToOngoing, call ID: ${call.id}"
+            }
+
             _ringingCall.value = null
 
             if (willTransitionToOngoing) {
