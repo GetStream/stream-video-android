@@ -464,7 +464,7 @@ class MicrophoneManager(
                 call = mediaManager.call,
                 listener = { devices, selected ->
                     logger.i {
-                        "[setup] listenForDevices. Selected: ${selected?.name}, available: ${devices.map { it.name }}"
+                        "[setup] #telecom; listenForDevices. Selected: ${selected?.name}, available: ${devices.map { it.name }}"
                     }
 
                     _devices.value = devices

@@ -70,7 +70,7 @@ class TelecomHandlerTest {
         every { streamCall.cid } returns "default:123"
 
         telecomCall = spyk(
-            TelecomCall(streamCall = streamCall, config = callConfig, parentScope = coroutineScope),
+            TelecomCall(context = context, streamCall = streamCall, config = callConfig),
         )
 
         mockkObject(StreamVideo)

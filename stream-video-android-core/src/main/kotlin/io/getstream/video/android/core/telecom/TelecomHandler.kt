@@ -42,6 +42,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @TargetApi(Build.VERSION_CODES.O)
 internal class TelecomHandler
@@ -53,7 +54,7 @@ internal constructor(
 ) {
     private val logger by taggedLogger(TAG)
 
-    private var streamVideo: StreamVideo? = null
+    private var streamVideo: StreamVideo? = StreamVideo.instanceOrNull()
 
     private val calls = mutableMapOf<String, TelecomCall>()
 
@@ -112,8 +113,6 @@ internal constructor(
                     CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING,
             )
         }
-
-        streamVideo = StreamVideo.instanceOrNull()
     }
 
     fun registerCall(
@@ -134,7 +133,6 @@ internal constructor(
                 context = applicationContext,
                 streamCall = call,
                 config = callConfig,
-                parentScope = telecomHandlerScope,
             )
 
             logger.d { "[registerCall] #telecom; New call registered" }
@@ -145,8 +143,10 @@ internal constructor(
         logger.d { "[prepareIncomingCall] #telecom;" }
 
         telecomHandlerScope.launch {
-            streamVideo?.connectIfNotAlreadyConnected()
-            call.get()
+            withContext(DispatcherProvider.IO) {
+                streamVideo?.connectIfNotAlreadyConnected()
+                call.get()
+            }
             streamVideo?.state?.addRingingCall(call, RingingState.Incoming())
         }
     }
@@ -304,7 +304,7 @@ internal constructor(
     ) {
         if (streamVideo.enableCallNotificationUpdates && telecomCall.notificationUpdateJob == null) {
             telecomCall.notificationUpdateJob = streamVideo.getNotificationUpdates(
-                coroutineScope = telecomCall.localScope,
+                coroutineScope = telecomHandlerScope, // Improvement: use callControlScope (but not always available here)
                 call = telecomCall.streamCall,
                 localUser = streamVideo.user,
             ) { updatedNotification -> onUpdate(updatedNotification) }

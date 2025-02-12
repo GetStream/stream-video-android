@@ -28,15 +28,11 @@ import androidx.core.telecom.CallAttributesCompat.Companion.SUPPORTS_SET_INACTIV
 import androidx.core.telecom.CallAttributesCompat.Companion.SUPPORTS_STREAM
 import androidx.core.telecom.CallControlScope
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -51,7 +47,6 @@ internal class TelecomCall(
     val context: Context,
     val streamCall: StreamCall,
     val config: CallServiceConfig,
-    val parentScope: CoroutineScope, // Used to collect devices before having a CallControlScope
 ) {
     private val logger by taggedLogger("StreamVideo:TelecomCall")
 
@@ -94,14 +89,6 @@ internal class TelecomCall(
         }
 
     var deviceListener: DeviceListener? = null
-        set(value) {
-            field = value
-            value?.let(::collectDevices)
-        }
-
-    val localScope = CoroutineScope(parentScope.coroutineContext + Job())
-
-    private val devices = MutableStateFlow<Pair<List<StreamAudioDevice>, StreamAudioDevice>?>(null)
 
     private var activeCallSettings: ActiveCallSettings? = null
 
@@ -139,17 +126,19 @@ internal class TelecomCall(
 
         when (event) {
             TelecomEvent.ANSWER -> {
-                withContext(Dispatchers.IO) {
+                withContext(DispatcherProvider.IO) {
                     streamCall.accept().map {
-                        DefaultStreamIntentResolver(context)
-                            .searchAcceptCallPendingIntent(streamCall.buildStreamCallId())?.send()
+                        DefaultStreamIntentResolver(context).searchAcceptCallPendingIntent(
+                            callId = streamCall.buildStreamCallId(),
+                            notificationId = notificationId,
+                        )?.send()
                         streamCall.join()
                     }
                 }
             }
             TelecomEvent.DISCONNECT -> {
                 if (state == TelecomCallState.INCOMING) {
-                    withContext(Dispatchers.IO) { streamCall.reject(RejectReason.Decline) }
+                    withContext(DispatcherProvider.IO) { streamCall.reject(RejectReason.Decline) }
                     streamCall.leave() // Will trigger TelecomHandler#unregisterCall
                 } else {
                     streamCall.leave()
@@ -177,7 +166,7 @@ internal class TelecomCall(
     }
 
     fun cleanUp() {
-        localScope.cancel()
+        notificationUpdateJob?.cancel()
         callControlScope?.let {
             it.launch {
                 it.disconnect(DisconnectCause(DisconnectCause.LOCAL)).let { result ->
@@ -196,7 +185,7 @@ internal class TelecomCall(
         }
             .distinctUntilChanged()
             .onEach { devicePair ->
-                devices.value = devicePair
+                deviceListener?.invoke(devicePair.first, devicePair.second)
 
                 logger.d {
                     with(devicePair) {
@@ -205,21 +194,5 @@ internal class TelecomCall(
                 }
             }
             .launchIn(callControlScope)
-    }
-
-    private fun collectDevices(listener: DeviceListener) {
-        devices
-            .onEach { devicePair ->
-                devicePair?.let { pair ->
-                    with(pair) {
-                        listener(first, second)
-
-                        logger.d {
-                            "[collectDevices] #telecom; Collected devices. Available: ${first.map { it.name }}, selected: ${second.name}"
-                        }
-                    }
-                }
-            }
-            .launchIn(localScope)
     }
 }
