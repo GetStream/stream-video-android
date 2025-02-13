@@ -133,6 +133,7 @@ internal constructor(
                 context = applicationContext,
                 streamCall = call,
                 config = callConfig,
+                telecomHandler = this,
             )
 
             logger.d { "[registerCall] #telecom; New call registered" }

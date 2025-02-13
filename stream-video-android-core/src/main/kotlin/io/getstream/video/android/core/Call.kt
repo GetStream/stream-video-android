@@ -796,9 +796,7 @@ public class Call(
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
-        if (state.ringingState.value is RingingState.Outgoing) {
-            client.state.removeRingingCall(willTransitionToOngoing = false)
-        }
+        client.state.removeRingingCall(willTransitionToOngoing = false)
         cleanup()
     }
 

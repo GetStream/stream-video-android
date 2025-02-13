@@ -47,6 +47,7 @@ internal class TelecomCall(
     val context: Context,
     val streamCall: StreamCall,
     val config: CallServiceConfig,
+    private val telecomHandler: TelecomHandler,
 ) {
     private val logger by taggedLogger("StreamVideo:TelecomCall")
 
@@ -102,6 +103,7 @@ internal class TelecomCall(
         val joined = TelecomCallState.IDLE to TelecomCallState.ONGOING
         val answered = TelecomCallState.INCOMING to TelecomCallState.ONGOING
         val accepted = TelecomCallState.OUTGOING to TelecomCallState.ONGOING
+        val outgoing = TelecomCallState.IDLE to TelecomCallState.OUTGOING
         val transition = previousState to state
 
         logger.d { "[updateInternalTelecomState] #telecom; Transition: $transition" }
@@ -109,7 +111,7 @@ internal class TelecomCall(
         callControlScope?.let {
             it.launch {
                 when (transition) {
-                    joined, accepted -> it.setActive().let { result ->
+                    joined, outgoing, accepted -> it.setActive().let { result ->
                         logger.d { "[updateInternalTelecomState] #telecom; Set active: $result" }
                     }
 
@@ -122,7 +124,7 @@ internal class TelecomCall(
     }
 
     suspend fun handleTelecomEvent(event: TelecomEvent) {
-        logger.d { "[handleTelecomEvent] #telecom; event: $event" }
+        logger.d { "[handleTelecomEvent] #telecom; event: $event, call state: $state" }
 
         when (event) {
             TelecomEvent.ANSWER -> {
@@ -137,11 +139,16 @@ internal class TelecomCall(
                 }
             }
             TelecomEvent.DISCONNECT -> {
-                if (state == TelecomCallState.INCOMING) {
-                    withContext(DispatcherProvider.IO) { streamCall.reject(RejectReason.Decline) }
-                    streamCall.leave() // Will trigger TelecomHandler#unregisterCall
-                } else {
+                if (state == TelecomCallState.ONGOING) {
                     streamCall.leave()
+                } else {
+                    val rejectReason = when (state) {
+                        TelecomCallState.INCOMING -> RejectReason.Decline
+                        TelecomCallState.OUTGOING -> RejectReason.Cancel
+                        else -> null
+                    }
+                    withContext(DispatcherProvider.IO) { streamCall.reject(rejectReason) }
+                    telecomHandler.unregisterCall(streamCall)
                 }
             }
             TelecomEvent.SET_ACTIVE -> {
