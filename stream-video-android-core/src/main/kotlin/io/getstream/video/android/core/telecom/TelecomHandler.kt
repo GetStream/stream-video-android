@@ -169,7 +169,7 @@ internal constructor(
 
             if (wasPreviouslyAdded) {
                 logger.i { "[changeCallState] #telecom; Call was already added to Telecom, skipping addCall()" }
-                telecomCall.updateTelecomState()
+                telecomCall.updateInternalTelecomState()
             } else {
                 telecomHandlerScope.launch {
                     safeCall(exceptionLogTag = TAG) {
@@ -189,7 +189,7 @@ internal constructor(
                             },
                             block = {
                                 telecomCall.callControlScope = this
-                                telecomCall.updateTelecomState()
+                                telecomCall.updateInternalTelecomState()
                                 logger.i { "[changeCallState] #telecom; Added call to Telecom, call ID: ${call.id}" }
                             },
                         )

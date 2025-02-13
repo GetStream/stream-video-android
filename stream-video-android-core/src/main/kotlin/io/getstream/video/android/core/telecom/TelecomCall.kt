@@ -98,23 +98,23 @@ internal class TelecomCall(
         val speakerVolume: Int,
     )
 
-    fun updateTelecomState() {
+    fun updateInternalTelecomState() {
         val joined = TelecomCallState.IDLE to TelecomCallState.ONGOING
         val answered = TelecomCallState.INCOMING to TelecomCallState.ONGOING
         val accepted = TelecomCallState.OUTGOING to TelecomCallState.ONGOING
         val transition = previousState to state
 
-        logger.d { "[updateTelecomState] #telecom; Transition: $transition" }
+        logger.d { "[updateInternalTelecomState] #telecom; Transition: $transition" }
 
         callControlScope?.let {
             it.launch {
                 when (transition) {
                     joined, accepted -> it.setActive().let { result ->
-                        logger.d { "[updateTelecomState] #telecom; Set active: $result" }
+                        logger.d { "[updateInternalTelecomState] #telecom; Set active: $result" }
                     }
 
                     answered -> it.answer(mediaType).let { result ->
-                        logger.d { "[updateTelecomState] #telecom; Answered: $result" }
+                        logger.d { "[updateInternalTelecomState] #telecom; Answered: $result" }
                     }
                 }
             }
