@@ -33,6 +33,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCall
@@ -130,9 +131,9 @@ internal constructor(
             logger.i { "[registerCall] #telecom; Call already registered, ignoring" }
         } else {
             calls[call.cid] = TelecomCall(
-                context = applicationContext,
                 streamCall = call,
                 config = callConfig,
+                intentResolver = DefaultStreamIntentResolver(applicationContext),
                 telecomHandler = this,
             )
 

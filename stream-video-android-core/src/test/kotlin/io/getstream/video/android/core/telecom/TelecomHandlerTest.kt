@@ -25,6 +25,7 @@ import androidx.core.telecom.CallsManager
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.mockk.coEvery
@@ -37,7 +38,6 @@ import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
-import kotlinx.coroutines.CoroutineScope
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -50,7 +50,7 @@ class TelecomHandlerTest {
     private val callSoundPlayer: CallSoundPlayer = mockk(relaxed = true)
     private val streamCall: StreamCall = mockk(relaxed = true)
     private val callConfig: CallServiceConfig = mockk(relaxed = true)
-    private val coroutineScope: CoroutineScope = mockk(relaxed = true)
+    private val intentResolver: DefaultStreamIntentResolver = mockk(relaxed = true)
     private lateinit var telecomCall: TelecomCall
     private val streamVideo: StreamVideoClient = mockk(relaxed = true)
     private val notificationManager = mockk<NotificationManager>(relaxed = true)
@@ -70,7 +70,12 @@ class TelecomHandlerTest {
         every { streamCall.cid } returns "default:123"
 
         telecomCall = spyk(
-            TelecomCall(context = context, streamCall = streamCall, config = callConfig),
+            TelecomCall(
+                streamCall = streamCall,
+                config = callConfig,
+                intentResolver = intentResolver,
+                telecomHandler = telecomHandler,
+            ),
         )
 
         mockkObject(StreamVideo)

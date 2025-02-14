@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.telecom
 
-import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
@@ -44,9 +43,9 @@ import kotlin.getValue
 
 @RequiresApi(Build.VERSION_CODES.O)
 internal class TelecomCall(
-    val context: Context,
     val streamCall: StreamCall,
     val config: CallServiceConfig,
+    private val intentResolver: DefaultStreamIntentResolver,
     private val telecomHandler: TelecomHandler,
 ) {
     private val logger by taggedLogger("StreamVideo:TelecomCall")
@@ -128,15 +127,10 @@ internal class TelecomCall(
 
         when (event) {
             TelecomEvent.ANSWER -> {
-                withContext(DispatcherProvider.IO) {
-                    streamCall.accept().map {
-                        DefaultStreamIntentResolver(context).searchAcceptCallPendingIntent(
-                            callId = streamCall.buildStreamCallId(),
-                            notificationId = notificationId,
-                        )?.send()
-                        streamCall.join()
-                    }
-                }
+                intentResolver.searchAcceptCallPendingIntent(
+                    callId = streamCall.buildStreamCallId(),
+                    notificationId = notificationId,
+                )?.send()
             }
             TelecomEvent.DISCONNECT -> {
                 if (state == TelecomCallState.ONGOING) {
