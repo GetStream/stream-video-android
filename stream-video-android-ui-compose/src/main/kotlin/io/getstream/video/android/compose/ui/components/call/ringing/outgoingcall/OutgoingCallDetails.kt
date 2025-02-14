@@ -46,11 +46,9 @@ public fun OutgoingCallDetails(
     participants: List<MemberState>,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        if (!isVideoType) {
-            ParticipantAvatars(participants = participants)
+        ParticipantAvatars(participants = participants)
 
-            Spacer(modifier = Modifier.height(32.dp))
-        }
+        Spacer(modifier = Modifier.height(32.dp))
 
         ParticipantInformation(
             isVideoType = isVideoType,

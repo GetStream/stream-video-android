@@ -34,6 +34,7 @@ import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.model.User.Companion.isLocalUser
 
 /**
  * Component that renders user avatars for call participants.
@@ -58,6 +59,14 @@ public fun ParticipantAvatars(
                     modifier = Modifier.size(VideoTheme.dimens.genericMax),
                     userName = participant.user.userNameOrId,
                     userImage = participant.user.image,
+                )
+            } else if (participants.size == 2) {
+                val remoteParticipant = participants.firstOrNull { it.user.isLocalUser() != true }
+
+                UserAvatar(
+                    modifier = Modifier.size(VideoTheme.dimens.genericMax),
+                    userName = remoteParticipant?.user?.userNameOrId,
+                    userImage = remoteParticipant?.user?.image,
                 )
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
