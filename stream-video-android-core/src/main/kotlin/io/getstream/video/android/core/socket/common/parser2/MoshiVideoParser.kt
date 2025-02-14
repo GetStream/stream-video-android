@@ -59,24 +59,6 @@ internal class MoshiVideoParser : VideoParser {
             )
             .add(
                 lenientAdapter(
-                    org.openapitools.client.models.BlockListOptions.Behavior.BehaviorAdapter(),
-                ),
-            )
-            .add(
-                lenientAdapter(
-                    org.openapitools.client.models.ChannelConfigWithInfo.Automod.AutomodAdapter(),
-                ),
-            )
-            .add(
-                lenientAdapter(
-                    org.openapitools.client.models.ChannelConfigWithInfo.AutomodBehavior.AutomodBehaviorAdapter(),
-                ),
-            ).add(
-                lenientAdapter(
-                    org.openapitools.client.models.ChannelConfigWithInfo.BlocklistBehavior.BlocklistBehaviorAdapter(),
-                ),
-            ).add(
-                lenientAdapter(
                     org.openapitools.client.models.CreateDeviceRequest.PushProvider.PushProviderAdapter(),
                 ),
             )

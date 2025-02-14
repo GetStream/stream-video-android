@@ -109,7 +109,7 @@ internal class StreamNotificationManager private constructor(
         logger.d { "[deleteDevice] device: $device" }
         val userId = StreamVideo.instanceOrNull()?.user?.id
         return try {
-            api.deleteDevice(device.id, userId)
+            api.deleteDevice(device.id)
             removeStoredDeivce(device)
             Result.Success(Unit)
         } catch (e: Exception) {

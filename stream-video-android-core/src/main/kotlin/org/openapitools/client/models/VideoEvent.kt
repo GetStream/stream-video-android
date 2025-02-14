@@ -23,65 +23,16 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.APIError
-import org.openapitools.client.models.BlockedUserEvent
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallCreatedEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallLiveStartedEvent
-import org.openapitools.client.models.CallMemberAddedEvent
-import org.openapitools.client.models.CallMemberRemovedEvent
-import org.openapitools.client.models.CallMemberUpdatedEvent
-import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
-import org.openapitools.client.models.CallNotificationEvent
-import org.openapitools.client.models.CallParticipantResponse
-import org.openapitools.client.models.CallReactionEvent
-import org.openapitools.client.models.CallRecording
-import org.openapitools.client.models.CallRecordingFailedEvent
-import org.openapitools.client.models.CallRecordingReadyEvent
-import org.openapitools.client.models.CallRecordingStartedEvent
-import org.openapitools.client.models.CallRecordingStoppedEvent
-import org.openapitools.client.models.CallRejectedEvent
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.CallRingEvent
-import org.openapitools.client.models.CallSessionEndedEvent
-import org.openapitools.client.models.CallSessionParticipantJoinedEvent
-import org.openapitools.client.models.CallSessionParticipantLeftEvent
-import org.openapitools.client.models.CallSessionStartedEvent
-import org.openapitools.client.models.CallUpdatedEvent
-import org.openapitools.client.models.CallUserMutedEvent
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.ConnectionErrorEvent
-import org.openapitools.client.models.CustomVideoEvent
-import org.openapitools.client.models.HealthCheckEvent
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.OwnUserResponse
-import org.openapitools.client.models.PermissionRequestEvent
-import org.openapitools.client.models.ReactionResponse
-import org.openapitools.client.models.UnblockedUserEvent
-import org.openapitools.client.models.UpdatedCallPermissionsEvent
-import org.openapitools.client.models.UserResponse
-
-
-
-
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
-
-/**
- * The discriminator object for all websocket events, you should use this to map event payloads to their own type
- *
- */
-
 
 public abstract class VideoEvent {
-    abstract fun getEventType(): String
+    abstract fun getEventType(): kotlin.String
+
 }
 
 
@@ -103,7 +54,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
         return eventType?.let {
             peek.use { peekedReader ->
-                Serializer.moshi.adapter(getSubclass(eventType)).fromJson(peekedReader)
+                org.openapitools.client.infrastructure.Serializer.moshi.adapter(getSubclass(eventType)).fromJson(peekedReader)
             }
         }
     }
@@ -115,57 +66,54 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
     private fun getSubclass(type: String): Class<out VideoEvent> {
         return when (type) {
-            "call.accepted" -> CallAcceptedEvent::class.java
-            "call.blocked_user" -> BlockedUserEvent::class.java
-            "call.closed_captions_started" -> ClosedCaptionStartedEvent::class.java
-            "call.closed_captions_stopped" -> ClosedCaptionEndedEvent::class.java
-            "call.closed_caption" -> ClosedCaptionEvent::class.java
-            "call.created" -> CallCreatedEvent::class.java
-            "call.deleted" -> CallDeletedEvent::class.java
-            "call.ended" -> CallEndedEvent::class.java
-            "call.hls_broadcasting_failed" -> CallHLSBroadcastingFailedEvent::class.java
-            "call.hls_broadcasting_started" -> CallHLSBroadcastingStartedEvent::class.java
-            "call.hls_broadcasting_stopped" -> CallHLSBroadcastingStoppedEvent::class.java
-            "call.live_started" -> CallLiveStartedEvent::class.java
-            "call.member_added" -> CallMemberAddedEvent::class.java
-            "call.member_removed" -> CallMemberRemovedEvent::class.java
-            "call.member_updated" -> CallMemberUpdatedEvent::class.java
-            "call.member_updated_permission" -> CallMemberUpdatedPermissionEvent::class.java
-            "call.missed" -> CallMissedEvent::class.java
-            "call.notification" -> CallNotificationEvent::class.java
-            "call.permission_request" -> PermissionRequestEvent::class.java
-            "call.permissions_updated" -> UpdatedCallPermissionsEvent::class.java
-            "call.reaction_new" -> CallReactionEvent::class.java
-            "call.recording_failed" -> CallRecordingFailedEvent::class.java
-            "call.recording_ready" -> CallRecordingReadyEvent::class.java
-            "call.recording_started" -> CallRecordingStartedEvent::class.java
-            "call.recording_stopped" -> CallRecordingStoppedEvent::class.java
-            "call.rejected" -> CallRejectedEvent::class.java
-            "call.ring" -> CallRingEvent::class.java
-            "call.session_ended" -> CallSessionEndedEvent::class.java
-            "call.session_participant_count_updated" -> CallSessionParticipantCountsUpdatedEvent::class.java
-            "call.session_participant_joined" -> CallSessionParticipantJoinedEvent::class.java
-            "call.session_participant_left" -> CallSessionParticipantLeftEvent::class.java
-            "call.session_started" -> CallSessionStartedEvent::class.java
-            "call.unblocked_user" -> UnblockedUserEvent::class.java
-            "call.updated" -> CallUpdatedEvent::class.java
-            "call.user_muted" -> CallUserMutedEvent::class.java
-            "call.transcription_started" -> CallTranscriptionStartedEvent::class.java
-            "call.transcription_stopped" -> CallTranscriptionStoppedEvent::class.java
-            "call.transcription_ready" -> CallTranscriptionReadyEvent::class.java
-            "call.transcription_failed" -> CallTranscriptionFailedEvent::class.java
-            "connection.error" -> ConnectionErrorEvent::class.java
-            "connection.ok" -> ConnectedEvent::class.java
-            "custom" -> CustomVideoEvent::class.java
-            "health.check" -> HealthCheckEvent::class.java
-            "user.banned" -> UserBannedEvent::class.java
-            "user.deactivated" -> UserDeactivatedEvent::class.java
-            "user.deleted" -> UserDeletedEvent::class.java
-            "user.muted" -> UserMutedEvent::class.java
-            "user.presence.changed" -> UserPresenceChangedEvent::class.java
-            "user.reactivated" -> UserReactivatedEvent::class.java
-            "user.unbanned" -> UserUnbannedEvent::class.java
-            "user.updated" -> UserUpdatedEvent::class.java
+            "call.accepted" -> org.openapitools.client.models.CallAcceptedEvent::class.java
+            "call.blocked_user" -> org.openapitools.client.models.BlockedUserEvent::class.java
+            "call.closed_caption" -> org.openapitools.client.models.ClosedCaptionEvent::class.java
+            "call.closed_captions_failed" -> org.openapitools.client.models.CallClosedCaptionsFailedEvent::class.java
+            "call.closed_captions_started" -> org.openapitools.client.models.CallClosedCaptionsStartedEvent::class.java
+            "call.closed_captions_stopped" -> org.openapitools.client.models.CallClosedCaptionsStoppedEvent::class.java
+            "call.created" -> org.openapitools.client.models.CallCreatedEvent::class.java
+            "call.deleted" -> org.openapitools.client.models.CallDeletedEvent::class.java
+            "call.ended" -> org.openapitools.client.models.CallEndedEvent::class.java
+            "call.hls_broadcasting_failed" -> org.openapitools.client.models.CallHLSBroadcastingFailedEvent::class.java
+            "call.hls_broadcasting_started" -> org.openapitools.client.models.CallHLSBroadcastingStartedEvent::class.java
+            "call.hls_broadcasting_stopped" -> org.openapitools.client.models.CallHLSBroadcastingStoppedEvent::class.java
+            "call.live_started" -> org.openapitools.client.models.CallLiveStartedEvent::class.java
+            "call.member_added" -> org.openapitools.client.models.CallMemberAddedEvent::class.java
+            "call.member_removed" -> org.openapitools.client.models.CallMemberRemovedEvent::class.java
+            "call.member_updated" -> org.openapitools.client.models.CallMemberUpdatedEvent::class.java
+            "call.member_updated_permission" -> org.openapitools.client.models.CallMemberUpdatedPermissionEvent::class.java
+            "call.missed" -> org.openapitools.client.models.CallMissedEvent::class.java
+            "call.notification" -> org.openapitools.client.models.CallNotificationEvent::class.java
+            "call.permission_request" -> org.openapitools.client.models.PermissionRequestEvent::class.java
+            "call.permissions_updated" -> org.openapitools.client.models.UpdatedCallPermissionsEvent::class.java
+            "call.reaction_new" -> org.openapitools.client.models.CallReactionEvent::class.java
+            "call.recording_failed" -> org.openapitools.client.models.CallRecordingFailedEvent::class.java
+            "call.recording_ready" -> org.openapitools.client.models.CallRecordingReadyEvent::class.java
+            "call.recording_started" -> org.openapitools.client.models.CallRecordingStartedEvent::class.java
+            "call.recording_stopped" -> org.openapitools.client.models.CallRecordingStoppedEvent::class.java
+            "call.rejected" -> org.openapitools.client.models.CallRejectedEvent::class.java
+            "call.ring" -> org.openapitools.client.models.CallRingEvent::class.java
+            "call.rtmp_broadcast_failed" -> org.openapitools.client.models.CallRtmpBroadcastFailedEvent::class.java
+            "call.rtmp_broadcast_started" -> org.openapitools.client.models.CallRtmpBroadcastStartedEvent::class.java
+            "call.rtmp_broadcast_stopped" -> org.openapitools.client.models.CallRtmpBroadcastStoppedEvent::class.java
+            "call.session_ended" -> org.openapitools.client.models.CallSessionEndedEvent::class.java
+            "call.session_participant_count_updated" -> org.openapitools.client.models.CallSessionParticipantCountsUpdatedEvent::class.java
+            "call.session_participant_joined" -> org.openapitools.client.models.CallSessionParticipantJoinedEvent::class.java
+            "call.session_participant_left" -> org.openapitools.client.models.CallSessionParticipantLeftEvent::class.java
+            "call.session_started" -> org.openapitools.client.models.CallSessionStartedEvent::class.java
+            "call.transcription_failed" -> org.openapitools.client.models.CallTranscriptionFailedEvent::class.java
+            "call.transcription_ready" -> org.openapitools.client.models.CallTranscriptionReadyEvent::class.java
+            "call.transcription_started" -> org.openapitools.client.models.CallTranscriptionStartedEvent::class.java
+            "call.transcription_stopped" -> org.openapitools.client.models.CallTranscriptionStoppedEvent::class.java
+            "call.unblocked_user" -> org.openapitools.client.models.UnblockedUserEvent::class.java
+            "call.updated" -> org.openapitools.client.models.CallUpdatedEvent::class.java
+            "call.user_muted" -> org.openapitools.client.models.CallUserMutedEvent::class.java
+            "connection.error" -> org.openapitools.client.models.ConnectionErrorEvent::class.java
+            "connection.ok" -> org.openapitools.client.models.ConnectedEvent::class.java
+            "custom" -> org.openapitools.client.models.CustomVideoEvent::class.java
+            "health.check" -> org.openapitools.client.models.HealthCheckEvent::class.java
+            "user.updated" -> org.openapitools.client.models.UserUpdatedEvent::class.java
             else -> UnsupportedVideoEvent::class.java
         }
     }

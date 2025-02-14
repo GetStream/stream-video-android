@@ -23,43 +23,34 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallRequest
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param `data`
- * @param membersLimit
- * @param notify if provided it sends a notification event to the members for this call
- * @param ring if provided it sends a ring event to the members for this call
  */
 
-
 data class GetOrCreateCallRequest (
-
-    @Json(name = "data")
-    val `data`: CallRequest? = null,
-
     @Json(name = "members_limit")
     val membersLimit: kotlin.Int? = null,
 
-    /* if provided it sends a notification event to the members for this call */
     @Json(name = "notify")
     val notify: kotlin.Boolean? = null,
 
-    /* if provided it sends a ring event to the members for this call */
     @Json(name = "ring")
-    val ring: kotlin.Boolean? = null
+    val ring: kotlin.Boolean? = null,
 
+    @Json(name = "video")
+    val video: kotlin.Boolean? = null,
+
+    @Json(name = "data")
+    val data: org.openapitools.client.models.CallRequest? = null
 )

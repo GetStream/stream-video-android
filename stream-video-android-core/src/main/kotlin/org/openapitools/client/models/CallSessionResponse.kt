@@ -23,53 +23,36 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallParticipantResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param acceptedBy
- * @param anonymousParticipantCount
- * @param id
- * @param missedBy
- * @param participants
- * @param participantsCountByRole
- * @param rejectedBy
- * @param endedAt
- * @param liveEndedAt
- * @param liveStartedAt
- * @param startedAt
- * @param timerEndsAt
  */
 
-
 data class CallSessionResponse (
-
-    @Json(name = "accepted_by")
-    val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
-
     @Json(name = "anonymous_participant_count")
     val anonymousParticipantCount: kotlin.Int,
 
     @Json(name = "id")
     val id: kotlin.String,
 
+    @Json(name = "participants")
+    val participants: kotlin.collections.List<org.openapitools.client.models.CallParticipantResponse>,
+
+    @Json(name = "accepted_by")
+    val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
+
     @Json(name = "missed_by")
     val missedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
-
-    @Json(name = "participants")
-    val participants: kotlin.collections.List<CallParticipantResponse>,
 
     @Json(name = "participants_count_by_role")
     val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int>,
@@ -91,5 +74,4 @@ data class CallSessionResponse (
 
     @Json(name = "timer_ends_at")
     val timerEndsAt: org.threeten.bp.OffsetDateTime? = null
-
 )

@@ -23,32 +23,22 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param audio
- * @param muteAllUsers
- * @param screenshare
- * @param screenshareAudio
- * @param userIds
- * @param video
  */
 
-
 data class MuteUsersRequest (
-
     @Json(name = "audio")
     val audio: kotlin.Boolean? = null,
 
@@ -61,10 +51,9 @@ data class MuteUsersRequest (
     @Json(name = "screenshare_audio")
     val screenshareAudio: kotlin.Boolean? = null,
 
-    @Json(name = "user_ids")
-    val userIds: kotlin.collections.List<kotlin.String>? = null,
-
     @Json(name = "video")
-    val video: kotlin.Boolean? = null
+    val video: kotlin.Boolean? = null,
 
+    @Json(name = "user_ids")
+    val userIds: kotlin.collections.List<kotlin.String>? = null
 )

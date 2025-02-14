@@ -23,32 +23,22 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when the participant counts in a call session are updated
- *
- * @param anonymousParticipantCount
- * @param callCid
- * @param createdAt
- * @param participantsCountByRole
- * @param sessionId Call session ID
- * @param type The type of event: \"call.session_participant_count_updated\" in this case
  */
 
-
 data class CallSessionParticipantCountsUpdatedEvent (
-
     @Json(name = "anonymous_participant_count")
     val anonymousParticipantCount: kotlin.Int,
 
@@ -58,24 +48,23 @@ data class CallSessionParticipantCountsUpdatedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "participants_count_by_role")
-    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int>,
-
-    /* Call session ID */
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
-    /* The type of event: \"call.session_participant_count_updated\" in this case */
+    @Json(name = "participants_count_by_role")
+    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int>,
+
     @Json(name = "type")
-    val type: kotlin.String = "call.session_participant_count_updated"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

@@ -23,47 +23,34 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- * Represents a call
- *
- * @param call
- * @param duration
- * @param members
- * @param ownCapabilities
- * @param membership
+ * Response for updating a call
  */
 
-
 data class UpdateCallResponse (
-
-    @Json(name = "call")
-    val call: CallResponse,
-
     @Json(name = "duration")
     val duration: kotlin.String,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
+    val members: kotlin.collections.List<org.openapitools.client.models.MemberResponse>,
 
     @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+    val ownCapabilities: kotlin.collections.List<org.openapitools.client.models.OwnCapability>,
+
+    @Json(name = "call")
+    val call: org.openapitools.client.models.CallResponse,
 
     @Json(name = "membership")
-    val membership: MemberResponse? = null
-
+    val membership: org.openapitools.client.models.MemberResponse? = null
 )

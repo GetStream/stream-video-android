@@ -23,28 +23,28 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param transcriptionExternalStorage
  */
 
-
 data class StartTranscriptionRequest (
+    @Json(name = "enable_closed_captions")
+    val enableClosedCaptions: kotlin.Boolean? = null,
+
+    @Json(name = "language")
+    val language: kotlin.String? = null,
 
     @Json(name = "transcription_external_storage")
     val transcriptionExternalStorage: kotlin.String? = null
-
 )

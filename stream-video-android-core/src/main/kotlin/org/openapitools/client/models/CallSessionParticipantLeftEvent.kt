@@ -23,56 +23,48 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallParticipantResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a participant leaves a call session
- *
- * @param callCid
- * @param createdAt
- * @param participant
- * @param sessionId Call session ID
- * @param type The type of event: \"call.session_participant_left\" in this case
  */
 
-
 data class CallSessionParticipantLeftEvent (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "participant")
-    val participant: CallParticipantResponse,
+    @Json(name = "duration_seconds")
+    val durationSeconds: kotlin.Int,
 
-    /* Call session ID */
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
-    /* The type of event: \"call.session_participant_left\" in this case */
+    @Json(name = "participant")
+    val participant: org.openapitools.client.models.CallParticipantResponse,
+
     @Json(name = "type")
-    val type: kotlin.String = "call.session_participant_left"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

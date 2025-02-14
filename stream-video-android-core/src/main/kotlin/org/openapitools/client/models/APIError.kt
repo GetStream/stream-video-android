@@ -23,59 +23,43 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param statusCode Response HTTP status code
- * @param code API error code
- * @param details Additional error-specific information
- * @param duration Request duration
- * @param message Message describing an error
- * @param moreInfo URL with additional information
- * @param exceptionFields Additional error info
  */
 
-
 data class APIError (
-
-    /* Response HTTP status code */
-    @Json(name = "StatusCode")
-    val statusCode: kotlin.Int,
-
-    /* API error code */
     @Json(name = "code")
     val code: kotlin.Int,
 
-    /* Additional error-specific information */
-    @Json(name = "details")
-    val details: kotlin.collections.List<kotlin.Int>,
-
-    /* Request duration */
     @Json(name = "duration")
     val duration: kotlin.String,
 
-    /* Message describing an error */
     @Json(name = "message")
     val message: kotlin.String,
 
-    /* URL with additional information */
     @Json(name = "more_info")
     val moreInfo: kotlin.String,
 
-    /* Additional error info */
+    @Json(name = "StatusCode")
+    val statusCode: kotlin.Int,
+
+    @Json(name = "details")
+    val details: kotlin.collections.List<kotlin.Int>,
+
+    @Json(name = "unrecoverable")
+    val unrecoverable: kotlin.Boolean? = null,
+
     @Json(name = "exception_fields")
     val exceptionFields: kotlin.collections.Map<kotlin.String, kotlin.String>? = null
-
 )

@@ -23,33 +23,28 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.HLSSettingsResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param enabled
- * @param hls
+ * BroadcastSettingsResponse is the payload for broadcasting settings
  */
 
-
 data class BroadcastSettingsResponse (
-
     @Json(name = "enabled")
     val enabled: kotlin.Boolean,
 
     @Json(name = "hls")
-    val hls: HLSSettingsResponse
+    val hls: org.openapitools.client.models.HLSSettingsResponse,
 
+    @Json(name = "rtmp")
+    val rtmp: org.openapitools.client.models.RTMPSettingsResponse
 )

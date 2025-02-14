@@ -23,32 +23,44 @@
 
 package org.openapitools.client.models
 
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  *
- *
- * @param connectionId
- * @param createdAt
- * @param type
  */
 
-
 data class HealthCheckEvent (
-
     @Json(name = "connection_id")
     val connectionId: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>,
+
     @Json(name = "type")
-    val type: kotlin.String = "health.check",
+    val type: kotlin.String,
 
-) : VideoEvent(), WSClientEvent {
+    @Json(name = "cid")
+    val cid: kotlin.String? = null,
 
-    override fun getEventType(): String {
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null
+)
+: org.openapitools.client.models.VideoEvent()
+{
+
+    override fun getEventType(): kotlin.String {
         return type
     }
 }

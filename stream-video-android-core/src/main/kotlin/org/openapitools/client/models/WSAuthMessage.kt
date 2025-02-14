@@ -23,37 +23,28 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.ConnectUserDetailsRequest
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param token
- * @param userDetails
- * @param products
+ * Websocket auth message
  */
 
-
 data class WSAuthMessage (
-
     @Json(name = "token")
     val token: kotlin.String,
 
     @Json(name = "user_details")
-    val userDetails: ConnectUserDetailsRequest,
+    val userDetails: org.openapitools.client.models.ConnectUserDetailsRequest,
 
     @Json(name = "products")
     val products: kotlin.collections.List<kotlin.String>? = null
-
 )

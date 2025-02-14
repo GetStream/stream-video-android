@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import org.openapitools.client.models.SortParam
+import org.openapitools.client.models.SortParamRequest
 
 /**
  * Represents the data required to apply a sorting method to queries.
@@ -42,9 +42,9 @@ public sealed class SortField(public val field: String, public val ascending: Bo
     public class Desc(field: String) : SortField(field, false)
 }
 
-public fun SortField.toRequest(): SortParam {
+public fun SortField.toRequest(): SortParamRequest {
     val direction = if (ascending) 1 else -1
-    return SortParam(
+    return SortParamRequest(
         direction = direction,
         field = field,
     )
@@ -53,8 +53,8 @@ public fun SortField.toRequest(): SortParam {
 /**
  * Maps the data to the request for the BE.
  */
-public fun SortData.toRequest(): SortParam {
-    return SortParam(
+public fun SortData.toRequest(): SortParamRequest {
+    return SortParamRequest(
         direction = direction,
         field = sortField,
     )

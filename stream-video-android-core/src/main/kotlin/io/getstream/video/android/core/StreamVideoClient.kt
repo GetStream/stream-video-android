@@ -112,12 +112,12 @@ import org.openapitools.client.models.SendCallEventRequest
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionRequest
 import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StartClosedCaptionResponse
+import org.openapitools.client.models.StartClosedCaptionsResponse
 import org.openapitools.client.models.StartHLSBroadcastingResponse
 import org.openapitools.client.models.StartRecordingRequest
 import org.openapitools.client.models.StartTranscriptionRequest
 import org.openapitools.client.models.StartTranscriptionResponse
-import org.openapitools.client.models.StopClosedCaptionResponse
+import org.openapitools.client.models.StopClosedCaptionsResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnblockUserRequest
@@ -538,8 +538,8 @@ internal class StreamVideoClient internal constructor(
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
             coordinatorConnectionModule.api.getCall(
-                type,
-                id,
+                type = type,
+                id = id,
                 connectionId = waitForConnectionId(),
             )
         }
@@ -684,10 +684,10 @@ internal class StreamVideoClient internal constructor(
 
         val result = apiCall {
             coordinatorConnectionModule.api.joinCall(
-                type,
-                id,
-                joinCallRequest,
-                waitForConnectionId(),
+                type = type,
+                id = id,
+                joinCallRequest = joinCallRequest,
+                connectionId = waitForConnectionId(),
             )
         }
         return result
@@ -873,7 +873,10 @@ internal class StreamVideoClient internal constructor(
             watch = watch,
         )
         val result = apiCall {
-            coordinatorConnectionModule.api.queryCalls(request, waitForConnectionId())
+            coordinatorConnectionModule.api.queryCalls(
+                queryCallsRequest = request,
+                connectionId = waitForConnectionId(),
+            )
         }
         if (result.isSuccess) {
             // update state for these calls
@@ -962,7 +965,7 @@ internal class StreamVideoClient internal constructor(
         emoji: String? = null,
         custom: Map<String, Any>? = null,
     ): Result<SendReactionResponse> {
-        val request = SendReactionRequest(type, custom, emoji)
+        val request = SendReactionRequest(type, custom = custom, emojiCode = emoji)
 
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 
@@ -1077,19 +1080,24 @@ internal class StreamVideoClient internal constructor(
 
     internal suspend fun notify(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.getCall(type, id, notify = true)
+            coordinatorConnectionModule.api.getCall(type = type, id = id, notify = true)
         }
     }
 
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.getCall(type, id, ring = true)
+            coordinatorConnectionModule.api.getCall(type = type, id = id, ring = true)
         }
     }
 
-    suspend fun startTranscription(type: String, id: String, externalStorage: String? = null): Result<StartTranscriptionResponse> {
+    suspend fun startTranscription(
+        type: String,
+        id: String,
+        externalStorage: String? = null,
+    ): Result<StartTranscriptionResponse> {
         return apiCall {
-            val startTranscriptionRequest = StartTranscriptionRequest(externalStorage)
+            val startTranscriptionRequest =
+                StartTranscriptionRequest(transcriptionExternalStorage = externalStorage)
             coordinatorConnectionModule.api.startTranscription(type, id, startTranscriptionRequest)
         }
     }
@@ -1106,13 +1114,13 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
-    suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionResponse> {
+    suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionsResponse> {
         return apiCall {
             coordinatorConnectionModule.api.startClosedCaptions(type, id)
         }
     }
 
-    suspend fun stopClosedCaptions(type: String, id: String): Result<StopClosedCaptionResponse> {
+    suspend fun stopClosedCaptions(type: String, id: String): Result<StopClosedCaptionsResponse> {
         return apiCall {
             coordinatorConnectionModule.api.stopClosedCaptions(type, id)
         }

@@ -23,56 +23,43 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallRequest
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param location
- * @param create if true the call will be created if it doesn't exist
- * @param `data`
- * @param membersLimit
- * @param migratingFrom If the participant is migrating from another SFU, then this is the ID of the previous SFU
- * @param notify
- * @param ring if true and the call is created, the notification will include ring=true
  */
 
-
 data class JoinCallRequest (
-
     @Json(name = "location")
     val location: kotlin.String,
 
-    /* if true the call will be created if it doesn't exist */
     @Json(name = "create")
     val create: kotlin.Boolean? = null,
-
-    @Json(name = "data")
-    val `data`: CallRequest? = null,
 
     @Json(name = "members_limit")
     val membersLimit: kotlin.Int? = null,
 
-    /* If the participant is migrating from another SFU, then this is the ID of the previous SFU */
     @Json(name = "migrating_from")
     val migratingFrom: kotlin.String? = null,
 
     @Json(name = "notify")
     val notify: kotlin.Boolean? = null,
 
-    /* if true and the call is created, the notification will include ring=true */
     @Json(name = "ring")
-    val ring: kotlin.Boolean? = null
+    val ring: kotlin.Boolean? = null,
 
+    @Json(name = "video")
+    val video: kotlin.Boolean? = null,
+
+    @Json(name = "data")
+    val data: org.openapitools.client.models.CallRequest? = null
 )

@@ -23,67 +23,54 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.UserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent to all call members to notify they are getting called
- *
- * @param call
- * @param callCid
- * @param createdAt
- * @param members Call members
- * @param sessionId Call session ID
- * @param type The type of event: \"call.notification\" in this case
- * @param user
  */
 
-
 data class CallRingEvent (
-
-    @Json(name = "call")
-    val call: CallResponse,
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* Call members */
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
-
-    /* Call session ID */
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
-    /* The type of event: \"call.notification\" in this case */
-    @Json(name = "type")
-    val type: kotlin.String = "call.ring",
+    @Json(name = "video")
+    val video: kotlin.Boolean,
+
+    @Json(name = "members")
+    val members: kotlin.collections.List<org.openapitools.client.models.MemberResponse>,
+
+    @Json(name = "call")
+    val call: org.openapitools.client.models.CallResponse,
 
     @Json(name = "user")
-    val user: UserResponse
+    val user: org.openapitools.client.models.UserResponse,
 
-) : VideoEvent(), WSCallEvent {
+    @Json(name = "type")
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

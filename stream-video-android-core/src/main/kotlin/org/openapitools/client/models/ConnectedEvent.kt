@@ -23,32 +23,22 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.OwnUserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
- *
- * @param connectionId The connection_id for this client
- * @param createdAt
- * @param me
- * @param type The type of event: \"connection.ok\" in this case
  */
 
-
 data class ConnectedEvent (
-
-    /* The connection_id for this client */
     @Json(name = "connection_id")
     val connectionId: kotlin.String,
 
@@ -56,15 +46,15 @@ data class ConnectedEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "me")
-    val me: OwnUserResponse,
+    val me: org.openapitools.client.models.OwnUserResponse,
 
-    /* The type of event: \"connection.ok\" in this case */
     @Json(name = "type")
-    val type: kotlin.String = "connection.ok"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent()
+{
 
-) : VideoEvent(), WSClientEvent {
-
-    override fun getEventType(): String {
+    override fun getEventType(): kotlin.String {
         return type
     }
 }

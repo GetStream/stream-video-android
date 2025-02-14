@@ -23,36 +23,33 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param description
- * @param endTimestamp
- * @param severity
- * @param timestamp
- * @param type
  */
 
-
 data class CallEvent (
-
     @Json(name = "description")
     val description: kotlin.String,
 
     @Json(name = "end_timestamp")
     val endTimestamp: kotlin.Int,
+
+    @Json(name = "internal")
+    val internal: kotlin.Boolean,
+
+    @Json(name = "kind")
+    val kind: kotlin.String,
 
     @Json(name = "severity")
     val severity: kotlin.Int,
@@ -61,6 +58,14 @@ data class CallEvent (
     val timestamp: kotlin.Int,
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String,
 
+    @Json(name = "category")
+    val category: kotlin.String? = null,
+
+    @Json(name = "component")
+    val component: kotlin.String? = null,
+
+    @Json(name = "issue_tags")
+    val issueTags: kotlin.collections.List<kotlin.String>? = null
 )

@@ -23,33 +23,27 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param recordingStorageName
- * @param startHls
- * @param startRecording
- * @param startTranscription
- * @param transcriptionStorageName
  */
 
-
 data class GoLiveRequest (
-
     @Json(name = "recording_storage_name")
     val recordingStorageName: kotlin.String? = null,
+
+    @Json(name = "start_closed_caption")
+    val startClosedCaption: kotlin.Boolean? = null,
 
     @Json(name = "start_hls")
     val startHls: kotlin.Boolean? = null,
@@ -57,10 +51,12 @@ data class GoLiveRequest (
     @Json(name = "start_recording")
     val startRecording: kotlin.Boolean? = null,
 
+    @Json(name = "start_rtmp_broadcasts")
+    val startRtmpBroadcasts: kotlin.Boolean? = null,
+
     @Json(name = "start_transcription")
     val startTranscription: kotlin.Boolean? = null,
 
     @Json(name = "transcription_storage_name")
     val transcriptionStorageName: kotlin.String? = null
-
 )

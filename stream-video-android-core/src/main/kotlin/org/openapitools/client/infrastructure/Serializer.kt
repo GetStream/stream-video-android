@@ -14,41 +14,46 @@
  * limitations under the License.
  */
 
+@file:Suppress(
+    "ArrayInDataClass",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "UnusedImport"
+)
+
 package org.openapitools.client.infrastructure
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import org.openapitools.client.models.VideoEventAdapter
 
 object Serializer {
     @JvmStatic
     val moshiBuilder: Moshi.Builder = Moshi.Builder()
-        .add(OffsetDateTimeAdapter())
-        .add(LocalDateTimeAdapter())
-        .add(LocalDateAdapter())
-        .add(UUIDAdapter())
-        .add(ByteArrayAdapter())
-        .add(URIAdapter())
-        .addLast(KotlinJsonAdapterFactory())
-        .add(VideoEventAdapter())
         .add(org.openapitools.client.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter())
         .add(org.openapitools.client.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter())
-        .add(org.openapitools.client.models.BlockListOptions.Behavior.BehaviorAdapter())
-        .add(org.openapitools.client.models.ChannelConfigWithInfo.Automod.AutomodAdapter())
-        .add(org.openapitools.client.models.ChannelConfigWithInfo.AutomodBehavior.AutomodBehaviorAdapter())
-        .add(org.openapitools.client.models.ChannelConfigWithInfo.BlocklistBehavior.BlocklistBehaviorAdapter())
         .add(org.openapitools.client.models.CreateDeviceRequest.PushProvider.PushProviderAdapter())
+        .add(org.openapitools.client.models.LayoutSettingsRequest.Name.NameAdapter())
         .add(org.openapitools.client.models.NoiseCancellationSettings.Mode.ModeAdapter())
         .add(org.openapitools.client.models.OwnCapability.OwnCapabilityAdapter())
+        .add(org.openapitools.client.models.RTMPBroadcastRequest.Quality.QualityAdapter())
+        .add(org.openapitools.client.models.RTMPSettingsRequest.Quality.QualityAdapter())
         .add(org.openapitools.client.models.RecordSettingsRequest.Mode.ModeAdapter())
         .add(org.openapitools.client.models.RecordSettingsRequest.Quality.QualityAdapter())
         .add(org.openapitools.client.models.TranscriptionSettingsRequest.Mode.ModeAdapter())
-        .add(org.openapitools.client.models.TranscriptionSettingsResponse.Mode.ModeAdapter())
+        .add(org.openapitools.client.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter())
+        .add(org.openapitools.client.models.TranscriptionSettingsRequest.Language.LanguageAdapter())
         .add(org.openapitools.client.models.TranscriptionSettingsResponse.ClosedCaptionMode.ClosedCaptionModeAdapter())
+        .add(org.openapitools.client.models.TranscriptionSettingsResponse.Language.LanguageAdapter())
+        .add(org.openapitools.client.models.TranscriptionSettingsResponse.Mode.ModeAdapter())
         .add(org.openapitools.client.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter())
         .add(org.openapitools.client.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter())
-        .add(BigDecimalAdapter())
-        .add(BigIntegerAdapter())
+        .add(org.openapitools.client.infrastructure.BigDecimalAdapter())
+        .add(org.openapitools.client.infrastructure.BigIntegerAdapter())
+        .add(org.openapitools.client.infrastructure.ByteArrayAdapter())
+        .add(org.openapitools.client.infrastructure.LocalDateAdapter())
+        .add(org.openapitools.client.infrastructure.LocalDateTimeAdapter())
+        .add(org.openapitools.client.infrastructure.OffsetDateTimeAdapter())
+        .add(org.openapitools.client.infrastructure.URIAdapter())
+        .add(org.openapitools.client.infrastructure.UUIDAdapter())
 
     @JvmStatic
     val moshi: Moshi by lazy {

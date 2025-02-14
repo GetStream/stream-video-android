@@ -23,51 +23,28 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallTimeline
-import org.openapitools.client.models.SFULocationResponse
-import org.openapitools.client.models.Stats
-import org.openapitools.client.models.UserStats
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param callDurationSeconds
- * @param callStatus
- * @param duration Duration of the request in human-readable format
- * @param maxFreezesDurationSeconds
- * @param maxParticipants
- * @param maxTotalQualityLimitationDurationSeconds
- * @param participantReport
- * @param publishingParticipants
- * @param qualityScore
- * @param sfuCount
- * @param sfus
- * @param callTimeline
- * @param jitter
- * @param latency
+ * Basic response information
  */
 
-
 data class GetCallStatsResponse (
-
     @Json(name = "call_duration_seconds")
     val callDurationSeconds: kotlin.Int,
 
     @Json(name = "call_status")
     val callStatus: kotlin.String,
 
-    /* Duration of the request in human-readable format */
     @Json(name = "duration")
     val duration: kotlin.String,
 
@@ -80,9 +57,6 @@ data class GetCallStatsResponse (
     @Json(name = "max_total_quality_limitation_duration_seconds")
     val maxTotalQualityLimitationDurationSeconds: kotlin.Int,
 
-    @Json(name = "participant_report")
-    val participantReport: kotlin.collections.List<UserStats>,
-
     @Json(name = "publishing_participants")
     val publishingParticipants: kotlin.Int,
 
@@ -92,16 +66,24 @@ data class GetCallStatsResponse (
     @Json(name = "sfu_count")
     val sfuCount: kotlin.Int,
 
+    @Json(name = "participant_report")
+    val participantReport: kotlin.collections.List<org.openapitools.client.models.UserStats>,
+
     @Json(name = "sfus")
-    val sfus: kotlin.collections.List<SFULocationResponse>,
+    val sfus: kotlin.collections.List<org.openapitools.client.models.SFULocationResponse>,
+
+    @Json(name = "average_connection_time")
+    val averageConnectionTime: kotlin.Float? = null,
+
+    @Json(name = "aggregated")
+    val aggregated: org.openapitools.client.models.AggregatedStats? = null,
 
     @Json(name = "call_timeline")
-    val callTimeline: CallTimeline? = null,
+    val callTimeline: org.openapitools.client.models.CallTimeline? = null,
 
     @Json(name = "jitter")
-    val jitter: Stats? = null,
+    val jitter: org.openapitools.client.models.TimeStats? = null,
 
     @Json(name = "latency")
-    val latency: Stats? = null
-
+    val latency: org.openapitools.client.models.TimeStats? = null
 )

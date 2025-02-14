@@ -23,46 +23,37 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallSettingsRequest
-import org.openapitools.client.models.MemberRequest
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param custom
- * @param members
- * @param settingsOverride
- * @param startsAt
- * @param team
+ * CallRequest is the payload for creating a call.
  */
 
-
 data class CallRequest (
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<MemberRequest>? = null,
-
-    @Json(name = "settings_override")
-    val settingsOverride: CallSettingsRequest? = null,
-
     @Json(name = "starts_at")
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
-    val team: kotlin.String? = null
+    val team: kotlin.String? = null,
 
+    @Json(name = "video")
+    val video: kotlin.Boolean? = null,
+
+    @Json(name = "members")
+    val members: kotlin.collections.List<org.openapitools.client.models.MemberRequest>? = null,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = null,
+
+    @Json(name = "settings_override")
+    val settingsOverride: org.openapitools.client.models.CallSettingsRequest? = null
 )

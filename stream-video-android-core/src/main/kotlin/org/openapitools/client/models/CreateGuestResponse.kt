@@ -23,31 +23,22 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param accessToken the access token to authenticate the user
- * @param duration
- * @param user
  */
 
-
 data class CreateGuestResponse (
-
-    /* the access token to authenticate the user */
     @Json(name = "access_token")
     val accessToken: kotlin.String,
 
@@ -55,6 +46,5 @@ data class CreateGuestResponse (
     val duration: kotlin.String,
 
     @Json(name = "user")
-    val user: UserResponse
-
+    val user: org.openapitools.client.models.UserResponse
 )

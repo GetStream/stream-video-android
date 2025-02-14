@@ -23,42 +23,31 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.Coordinates
-import org.openapitools.client.models.Location
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param coordinates
- * @param datacenter
- * @param id
- * @param location
  */
 
-
 data class SFULocationResponse (
-
-    @Json(name = "coordinates")
-    val coordinates: Coordinates,
-
     @Json(name = "datacenter")
     val datacenter: kotlin.String,
 
     @Json(name = "id")
     val id: kotlin.String,
 
-    @Json(name = "location")
-    val location: Location
+    @Json(name = "coordinates")
+    val coordinates: org.openapitools.client.models.Coordinates,
 
+    @Json(name = "location")
+    val location: org.openapitools.client.models.Location
 )

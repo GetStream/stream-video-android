@@ -23,50 +23,24 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param banned
- * @param createdAt Date/time of creation
- * @param custom
- * @param id
- * @param language
- * @param online
- * @param role
- * @param teams
- * @param updatedAt Date/time of the last update
- * @param deactivatedAt
- * @param deletedAt Date/time of deletion
- * @param image
- * @param lastActive
- * @param name
- * @param revokeTokensIssuedBefore
+ * User response object
  */
 
-
 data class UserResponse (
-
-    @Json(name = "banned")
-    val banned: kotlin.Boolean = false,
-
-    /* Date/time of creation */
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?> = emptyMap(),
 
     @Json(name = "id")
     val id: kotlin.String,
@@ -74,23 +48,24 @@ data class UserResponse (
     @Json(name = "language")
     val language: kotlin.String,
 
-    @Json(name = "online")
-    val online: kotlin.Boolean,
-
     @Json(name = "role")
     val role: kotlin.String,
+
+    @Json(name = "updated_at")
+    val updatedAt: org.threeten.bp.OffsetDateTime,
+
+    @Json(name = "blocked_user_ids")
+    val blockedUserIds: kotlin.collections.List<kotlin.String>,
 
     @Json(name = "teams")
     val teams: kotlin.collections.List<kotlin.String>,
 
-    /* Date/time of the last update */
-    @Json(name = "updated_at")
-    val updatedAt: org.threeten.bp.OffsetDateTime,
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>,
 
     @Json(name = "deactivated_at")
     val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
 
-    /* Date/time of deletion */
     @Json(name = "deleted_at")
     val deletedAt: org.threeten.bp.OffsetDateTime? = null,
 
@@ -105,5 +80,4 @@ data class UserResponse (
 
     @Json(name = "revoke_tokens_issued_before")
     val revokeTokensIssuedBefore: org.threeten.bp.OffsetDateTime? = null
-
 )

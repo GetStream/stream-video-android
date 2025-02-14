@@ -23,32 +23,24 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param custom
- * @param image
- * @param name
- * @param roles
  */
 
-
 data class UserInfoResponse (
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
+    @Json(name = "id")
+    val id: kotlin.String,
 
     @Json(name = "image")
     val image: kotlin.String,
@@ -57,6 +49,8 @@ data class UserInfoResponse (
     val name: kotlin.String,
 
     @Json(name = "roles")
-    val roles: kotlin.collections.List<kotlin.String>
+    val roles: kotlin.collections.List<kotlin.String>,
 
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>
 )

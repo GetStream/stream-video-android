@@ -23,56 +23,45 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.UserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
- *
- * @param call
- * @param callCid
- * @param createdAt
- * @param type The type of event: \"call.ended\" in this case
- * @param user
  */
 
-
 data class CallEndedEvent (
-
-    @Json(name = "call")
-    val call: CallResponse,
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* The type of event: \"call.ended\" in this case */
+    @Json(name = "call")
+    val call: org.openapitools.client.models.CallResponse,
+
     @Json(name = "type")
-    val type: kotlin.String = "call.ended",
+    val type: kotlin.String,
 
     @Json(name = "user")
-    val user: UserResponse? = null
+    val user: org.openapitools.client.models.UserResponse? = null
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

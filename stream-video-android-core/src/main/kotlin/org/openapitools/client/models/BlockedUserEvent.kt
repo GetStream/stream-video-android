@@ -23,55 +23,45 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- * This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification.  If the user is the current user, the client should leave the call screen as well
- *
- * @param callCid
- * @param createdAt
- * @param type The type of event: \"call.blocked_user\" in this case
- * @param user
- * @param blockedByUser
+ * This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification.
  */
 
-
 data class BlockedUserEvent (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* The type of event: \"call.blocked_user\" in this case */
-    @Json(name = "type")
-    val type: kotlin.String = "call.blocked_user",
-
     @Json(name = "user")
-    val user: UserResponse,
+    val user: org.openapitools.client.models.UserResponse,
+
+    @Json(name = "type")
+    val type: kotlin.String,
 
     @Json(name = "blocked_by_user")
-    val blockedByUser: UserResponse? = null
+    val blockedByUser: org.openapitools.client.models.UserResponse? = null
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

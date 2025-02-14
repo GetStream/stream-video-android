@@ -23,31 +23,22 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a call member is muted
- *
- * @param callCid
- * @param createdAt
- * @param fromUserId
- * @param mutedUserIds
- * @param type The type of event: \"call.user_muted\" in this case
  */
 
-
 data class CallUserMutedEvent (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -60,17 +51,17 @@ data class CallUserMutedEvent (
     @Json(name = "muted_user_ids")
     val mutedUserIds: kotlin.collections.List<kotlin.String>,
 
-    /* The type of event: \"call.user_muted\" in this case */
     @Json(name = "type")
-    val type: kotlin.String = "call.user_muted"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

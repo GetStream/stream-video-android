@@ -29,9 +29,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.openapitools.client.models.CallClosedCaption
 import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.ClosedCaptionEndedEvent
 import org.openapitools.client.models.ClosedCaptionEvent
-import org.openapitools.client.models.ClosedCaptionStartedEvent
 import org.openapitools.client.models.TranscriptionSettingsResponse.ClosedCaptionMode
 import org.openapitools.client.models.VideoEvent
 
@@ -142,11 +140,11 @@ class ClosedCaptionManager(
                 _closedCaptioning.value = true
             }
 
-            is ClosedCaptionStartedEvent -> {
+            is org.openapitools.client.models.CallClosedCaptionsStartedEvent -> {
                 _closedCaptioning.value = true
             }
 
-            is ClosedCaptionEndedEvent -> {
+            is org.openapitools.client.models.CallClosedCaptionsStoppedEvent -> {
                 _closedCaptioning.value = false
             }
         }
