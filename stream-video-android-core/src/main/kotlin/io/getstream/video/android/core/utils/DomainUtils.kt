@@ -29,6 +29,7 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.User.Companion.isLocalUser
 import org.openapitools.client.models.CallRecording
 import org.openapitools.client.models.CallStateResponseFields
 import org.openapitools.client.models.EdgeResponse
@@ -61,9 +62,10 @@ public fun MemberState.toCallUser(): CallUser {
     return CallUser(
         id = user.id,
         name = user.name,
-        imageUrl = user.image,
-        teams = user.teams,
         role = user.role,
+        imageUrl = user.image,
+        isLocalUser = user.isLocalUser(),
+        teams = user.teams,
         state = null,
         createdAt = null,
         updatedAt = null,

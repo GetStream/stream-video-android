@@ -30,6 +30,7 @@ public data class CallUser(
     val name: String? = null,
     val role: String? = null,
     val imageUrl: String? = null,
+    val isLocalUser: Boolean? = null,
     val teams: List<String>? = null,
     val state: CallUserState?,
     val createdAt: Date?,

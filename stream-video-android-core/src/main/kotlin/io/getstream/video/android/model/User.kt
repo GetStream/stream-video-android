@@ -19,6 +19,7 @@
 package io.getstream.video.android.model
 
 import androidx.compose.runtime.Immutable
+import io.getstream.video.android.core.StreamVideo
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -91,6 +92,9 @@ public data class User(
         inline get() = name.takeUnless { it.isNullOrBlank() } ?: id
 
     companion object {
+        /** Check if user is the local SDK user */
+        fun User.isLocalUser(): Boolean = StreamVideo.instanceOrNull()?.userId == id
+
         /** Check if user is anonymous. */
         fun User.isAnonymous(): Boolean = id == "!anon"
 
