@@ -26,6 +26,7 @@ import androidx.core.telecom.CallAttributesCompat.Companion.DIRECTION_OUTGOING
 import androidx.core.telecom.CallAttributesCompat.Companion.SUPPORTS_SET_INACTIVE
 import androidx.core.telecom.CallAttributesCompat.Companion.SUPPORTS_STREAM
 import androidx.core.telecom.CallControlScope
+import androidx.core.telecom.CallEndpointCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.RejectReason
@@ -98,7 +99,7 @@ internal class TelecomCall(
         val speakerVolume: Int,
     )
 
-    fun updateInternalTelecomState() {
+    fun informTelecomAboutStateChange() {
         val joined = TelecomCallState.IDLE to TelecomCallState.ONGOING
         val answered = TelecomCallState.INCOMING to TelecomCallState.ONGOING
         val accepted = TelecomCallState.OUTGOING to TelecomCallState.ONGOING
@@ -122,7 +123,7 @@ internal class TelecomCall(
         }
     }
 
-    suspend fun handleTelecomEvent(event: TelecomEvent) {
+    suspend fun onTelecomEvent(event: TelecomEvent) {
         logger.d { "[handleTelecomEvent] #telecom; event: $event, call state: $state" }
 
         when (event) {
@@ -162,6 +163,16 @@ internal class TelecomCall(
                 streamCall.camera.disable()
                 streamCall.microphone.disable()
                 streamCall.speaker.setVolume(0)
+            }
+        }
+    }
+
+    fun selectDevice(device: CallEndpointCompat) {
+        callControlScope?.let {
+            it.launch {
+                it.requestEndpointChange(device).let { result ->
+                    logger.d { "[selectDevice] #telecom; New device: ${device.name}, change result: $result" }
+                }
             }
         }
     }

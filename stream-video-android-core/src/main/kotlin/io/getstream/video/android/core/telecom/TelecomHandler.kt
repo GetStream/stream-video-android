@@ -101,8 +101,6 @@ internal constructor(
         } else {
             false
         }
-
-//        fun isSupported(context: Context) = false // TODO-Telecom: remove
     }
 
     init {
@@ -171,27 +169,27 @@ internal constructor(
 
             if (wasPreviouslyAdded) {
                 logger.i { "[changeCallState] #telecom; Call was already added to Telecom, skipping addCall()" }
-                telecomCall.updateInternalTelecomState()
+                telecomCall.informTelecomAboutStateChange()
             } else {
                 telecomHandlerScope.launch {
                     safeCall(exceptionLogTag = TAG) {
                         callManager.addCall(
                             callAttributes = telecomCall.attributes,
                             onAnswer = {
-                                telecomCall.handleTelecomEvent(TelecomEvent.ANSWER)
+                                telecomCall.onTelecomEvent(TelecomEvent.ANSWER)
                             },
                             onDisconnect = {
-                                telecomCall.handleTelecomEvent(TelecomEvent.DISCONNECT)
+                                telecomCall.onTelecomEvent(TelecomEvent.DISCONNECT)
                             },
                             onSetActive = {
-                                telecomCall.handleTelecomEvent(TelecomEvent.SET_ACTIVE)
+                                telecomCall.onTelecomEvent(TelecomEvent.SET_ACTIVE)
                             },
                             onSetInactive = {
-                                telecomCall.handleTelecomEvent(TelecomEvent.SET_INACTIVE)
+                                telecomCall.onTelecomEvent(TelecomEvent.SET_INACTIVE)
                             },
                             block = {
                                 telecomCall.callControlScope = this
-                                telecomCall.updateInternalTelecomState()
+                                telecomCall.informTelecomAboutStateChange()
                                 logger.i { "[changeCallState] #telecom; Added call to Telecom, call ID: ${call.id}" }
                             },
                         )
@@ -335,15 +333,7 @@ internal constructor(
     }
 
     fun selectDevice(call: StreamCall, device: CallEndpointCompat) {
-        calls[call.cid]?.callControlScope?.let {
-            with(it) {
-                launch {
-                    requestEndpointChange(device).let { result ->
-                        logger.d { "[selectDevice] #telecom; New device: ${device.name}, change result: $result" }
-                    }
-                }
-            }
-        }
+        calls[call.cid]?.selectDevice(device)
     }
 
     fun cleanUp() {
