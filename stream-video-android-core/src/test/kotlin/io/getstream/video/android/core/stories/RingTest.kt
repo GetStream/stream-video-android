@@ -55,6 +55,8 @@ class RingTest : IntegrationTestBase() {
             sessionId = "",
             user = userResponse,
             members = emptyList(),
+            video = true,
+            type = "",
         )
 
         clientImpl.fireEvent(ringEvent)
@@ -102,6 +104,7 @@ class RingTest : IntegrationTestBase() {
             callCid = call.cid,
             createdAt = nowUtc,
             user = userResponse,
+            type = "",
         )
         clientImpl.fireEvent(callAcceptedEvent)
 
@@ -121,6 +124,7 @@ class RingTest : IntegrationTestBase() {
             callCid = call.cid,
             createdAt = nowUtc,
             user = userResponse,
+            type = "",
         )
         clientImpl.fireEvent(rejectEvent)
 
