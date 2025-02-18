@@ -226,9 +226,3 @@ dependencies {
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.turbine)
 }
-
-spotless {
-    java {
-        targetExclude("**/stream-video-android-core/src/main/kotlin/org/openapitools/client/**")
-    }
-}
