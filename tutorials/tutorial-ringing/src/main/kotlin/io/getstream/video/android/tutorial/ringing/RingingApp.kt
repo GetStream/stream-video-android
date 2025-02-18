@@ -67,6 +67,7 @@ class RingingApp : Application() {
                         // Make sure that the provider name is equal to the "Name" of the configuration in Stream Dashboard.
                         pushDeviceGenerators = listOf(
                             FirebasePushDeviceGenerator(
+                                context = context,
                                 providerName = "firebase",
                             ),
                         ),

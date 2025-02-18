@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
@@ -69,7 +69,7 @@ public fun BoxScope.LivestreamPlayerOverlay(call: Call) {
 
 @Composable
 private fun BoxScope.LiveBadge(call: Call) {
-    val totalParticipants by call.state.totalParticipants.collectAsState()
+    val totalParticipants by call.state.totalParticipants.collectAsStateWithLifecycle()
 
     Row(
         modifier = Modifier
@@ -114,7 +114,7 @@ private fun BoxScope.LiveBadge(call: Call) {
 
 @Composable
 private fun BoxScope.LiveDuration(call: Call) {
-    val duration by call.state.duration.collectAsState()
+    val duration by call.state.duration.collectAsStateWithLifecycle()
 
     Row(
         modifier = Modifier.align(Alignment.Center),
@@ -142,7 +142,7 @@ private fun BoxScope.LiveControls(call: Call) {
     val speakerphoneEnabled by if (LocalInspectionMode.current) {
         remember { mutableStateOf(true) }
     } else {
-        call.speaker.isEnabled.collectAsState()
+        call.speaker.isEnabled.collectAsStateWithLifecycle()
     }
 
     ToggleSpeakerphoneAction(

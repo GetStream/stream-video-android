@@ -28,4 +28,10 @@ sealed class CallType(val name: String) {
     override fun toString(): String {
         return name
     }
+
+    companion object {
+        fun fromName(name: String): CallType? {
+            return listOf(Livestream, AudioCall, Default, AnyMarker).find { it.name == name }
+        }
+    }
 }

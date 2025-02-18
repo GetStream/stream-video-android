@@ -46,7 +46,7 @@ import org.openapitools.client.models.CreateDeviceRequest
 
 internal class StreamNotificationManager private constructor(
     private val context: Context,
-    private val scope: CoroutineScope,
+    private var scope: CoroutineScope,
     private val notificationConfig: NotificationConfig,
     private var api: ProductvideoApi,
     internal val deviceTokenStorage: DeviceTokenStorage,
@@ -57,7 +57,7 @@ internal class StreamNotificationManager private constructor(
         logger.d { "[registerPushDevice] no args" }
         // first get a push device generator that works for this device
         notificationConfig.pushDeviceGenerators
-            .firstOrNull { it.isValidForThisDevice(context) }
+            .firstOrNull { it.isValidForThisDevice() }
             ?.let { generator ->
                 generator.onPushDeviceGeneratorSelected()
                 generator.asyncGeneratePushDevice { generatedDevice ->
@@ -93,13 +93,11 @@ internal class StreamNotificationManager private constructor(
             ?: Result.Success(newDevice)
     }
 
-    private fun removeStoredDeivce(device: Device) {
-        logger.d { "[storeDevice] device: device" }
-        scope.launch {
-            deviceTokenStorage.userDevice.firstOrNull()
-                .takeIf { it == device }
-                ?.let { deviceTokenStorage.updateUserDevice(null) }
-        }
+    private suspend fun removeStoredDevice(device: Device) {
+        logger.d { "[removeStoredDevice] device: device" }
+        deviceTokenStorage.userDevice.firstOrNull()
+            .takeIf { it == device }
+            ?.let { deviceTokenStorage.updateUserDevice(null) }
     }
 
     /**
@@ -110,7 +108,7 @@ internal class StreamNotificationManager private constructor(
         val userId = StreamVideo.instanceOrNull()?.user?.id
         return try {
             api.deleteDevice(device.id)
-            removeStoredDeivce(device)
+            removeStoredDevice(device)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Failure(Error.ThrowableError("Device couldn't be deleted", e))
@@ -154,6 +152,7 @@ internal class StreamNotificationManager private constructor(
         ): StreamNotificationManager {
             synchronized(this) {
                 if (Companion::internalStreamNotificationManager.isInitialized) {
+                    internalStreamNotificationManager.scope = scope
                     internalStreamNotificationManager.api = api
                 } else {
                     val application = context.applicationContext as? Application

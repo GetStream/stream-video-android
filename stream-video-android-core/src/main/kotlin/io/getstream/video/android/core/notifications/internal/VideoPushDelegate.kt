@@ -16,10 +16,9 @@
 
 package io.getstream.video.android.core.notifications.internal
 
-import android.content.Context
 import io.getstream.android.push.PushDevice
+import io.getstream.android.push.delegate.AndroidPushDelegateProvider
 import io.getstream.android.push.delegate.PushDelegate
-import io.getstream.android.push.delegate.PushDelegateProvider
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -31,11 +30,9 @@ import kotlinx.coroutines.launch
 /**
  * Class used to handle Push Notifications.
  *
- * It is used by reflection by [PushDelegateProvider] class.
+ * It is used by reflection by [AndroidPushDelegateProvider] class.
  */
-internal class VideoPushDelegate(
-    context: Context,
-) : PushDelegate(context) {
+internal class VideoPushDelegate : PushDelegate() {
     private val logger by taggedLogger("Call:PushDelegate")
     private val DEFAULT_CALL_TEXT = "Unknown caller"
 
