@@ -662,11 +662,6 @@ public class CallState(
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
 
-                Log.d(
-                    "RingingStateDebug",
-                    "CallRejectedEvent. Rejected by: ${event.user.id}. Reason: ${event.reason}. Will call updateRingingState().",
-                )
-
                 updateRingingState(
                     rejectReason = event.reason?.let {
                         when (it) {
@@ -1090,10 +1085,6 @@ public class CallState(
         }
         Log.d("RingingState", "Update: $state")
 
-        Log.d("RingingStateDebug", "updateRingingState 1. Called by: ${getCallingMethod()}")
-        Log.d("RingingStateDebug", "updateRingingState 2. New state: $state")
-        Log.d("RingingStateDebug", "-------------------")
-
         _ringingState.value = state
     }
 
@@ -1154,8 +1145,6 @@ public class CallState(
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-
-                    Log.d("RingingStateDebug", "startRingingTimer. Timeout.")
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
