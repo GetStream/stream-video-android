@@ -128,6 +128,7 @@ internal class TelecomCall(
 
         when (event) {
             TelecomEvent.ANSWER -> {
+                streamCall.camera.setEnabled(false)
                 intentResolver.searchAcceptCallPendingIntent(
                     callId = streamCall.buildStreamCallId(),
                     notificationId = notificationId,
