@@ -24,31 +24,32 @@ import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 internal object NoOpNotificationHandler : NotificationHandler {
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
+    override fun onIncomingCall(callId: StreamCallId, callerName: String) { /* NoOp */ }
+    override fun onMissedCall(callId: StreamCallId, callerName: String) { /* NoOp */ }
+    override fun onNotification(callId: StreamCallId, callCreatorName: String) { /* NoOp */ }
+    override fun onLiveCall(callId: StreamCallId, callCreatorName: String) { /* NoOp */ }
 
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callerName: String?,
+        callInfo: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? = null
 
     override fun getOngoingCallNotification(
         callId: StreamCallId,
-        callDisplayName: String?,
+        callInfo: String?,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? = null
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String?,
+        callInfo: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? = null
     override fun getSettingUpCallNotification(): Notification? = null
@@ -57,7 +58,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
-    ) { /* NoOp */ }
+    ): Job = Job()
 
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }

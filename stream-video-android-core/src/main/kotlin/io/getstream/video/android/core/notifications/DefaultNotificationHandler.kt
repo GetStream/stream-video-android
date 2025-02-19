@@ -39,14 +39,14 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -92,23 +92,18 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onIncomingCall(callId: StreamCallId, callerName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(
+
+        TelecomCompat.registerCall(
             application,
-            callId,
-            callDisplayName,
-            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
-                callId,
-                callDisplayName,
-                shouldHaveContentIntent = true,
-            ),
+            callId = callId,
+            callInfo = callerName,
+            isIncomingCall = true,
         )
     }
 
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onMissedCall(callId: StreamCallId, callerName: String) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
         val notificationId = callId.hashCode()
         val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
@@ -118,7 +113,7 @@ public open class DefaultNotificationHandler(
             }
         showMissedCallNotification(
             intent,
-            callDisplayName,
+            callerName,
             notificationId,
         )
     }
@@ -126,7 +121,7 @@ public open class DefaultNotificationHandler(
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
-        callDisplayName: String?,
+        callInfo: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? {
         return if (ringingState is RingingState.Incoming) {
@@ -139,7 +134,7 @@ public open class DefaultNotificationHandler(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
-                    callDisplayName,
+                    callInfo,
                     shouldHaveContentIntent,
                 )
             } else {
@@ -153,7 +148,7 @@ public open class DefaultNotificationHandler(
             if (outgoingCallPendingIntent != null && endCallPendingIntent != null) {
                 getOngoingCallNotification(
                     callId,
-                    callDisplayName,
+                    callInfo,
                     isOutgoingCall = true,
                 )
             } else {
@@ -202,7 +197,7 @@ public open class DefaultNotificationHandler(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
-        callerName: String?,
+        callInfo: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification {
         // if the app is in foreground then don't interrupt the user with a high priority
@@ -222,7 +217,7 @@ public open class DefaultNotificationHandler(
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle(callerName)
+            setContentTitle(callInfo)
             setContentText(
                 application.getString(R.string.stream_video_incoming_call_notification_description),
             )
@@ -242,7 +237,7 @@ public open class DefaultNotificationHandler(
                 setContentIntent(emptyIntent)
                 setAutoCancel(false)
             }
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
+            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callInfo)
         }
     }
 
@@ -277,25 +272,25 @@ public open class DefaultNotificationHandler(
         )
     }
 
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+    override fun onNotification(callId: StreamCallId, callCreatorName: String) {
         val notificationId = callId.hashCode()
         intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
             ?.let { notificationPendingIntent ->
                 showNotificationCallNotification(
                     notificationPendingIntent,
-                    callDisplayName,
+                    callCreatorName,
                     notificationId,
                 )
             } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
     }
 
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onLiveCall(callId: StreamCallId, callCreatorName: String) {
         val notificationId = callId.hashCode()
         intentResolver.searchLiveCallPendingIntent(callId, notificationId)
             ?.let { liveCallPendingIntent ->
                 showLiveCallNotification(
                     liveCallPendingIntent,
-                    callDisplayName,
+                    callCreatorName,
                     notificationId,
                 )
             } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
@@ -303,7 +298,7 @@ public open class DefaultNotificationHandler(
 
     override fun getOngoingCallNotification(
         callId: StreamCallId,
-        callDisplayName: String?,
+        callInfo: String?,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? {
@@ -346,8 +341,9 @@ public open class DefaultNotificationHandler(
                 // If the intent is configured, clicking the notification will return to the call
                 if (onClickIntent != null) {
                     it.setContentIntent(onClickIntent)
+                    it.setFullScreenIntent(onClickIntent, false)
                 } else {
-                    logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
+                    logger.w { "Ongoing intent is null. Clicking on the ongoing call notification will not work." }
                 }
             }
             .setContentTitle(
@@ -364,7 +360,7 @@ public open class DefaultNotificationHandler(
             .setOngoing(true)
             .addHangUpAction(
                 hangUpIntent,
-                callDisplayName ?: application.getString(
+                callInfo ?: application.getString(
                     R.string.stream_video_ongoing_call_notification_title,
                 ),
                 remoteParticipantCount,
@@ -393,80 +389,78 @@ public open class DefaultNotificationHandler(
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
-    ) {
-        coroutineScope.launch {
-            var latestRemoteParticipantCount = -1
+    ): Job = coroutineScope.launch {
+        var latestRemoteParticipantCount = -1
 
-            // Monitor call state and remote participants
-            combine(
-                call.state.ringingState,
-                call.state.members,
-                call.state.remoteParticipants,
-            ) { ringingState, members, remoteParticipants ->
-                Triple(ringingState, members, remoteParticipants)
-            }
-                .distinctUntilChanged()
-                .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
-                .collectLatest { state ->
-                    val ringingState = state.first
-                    val members = state.second
-                    val remoteParticipants = state.third
+        // Monitor call state and remote participants
+        combine(
+            call.state.ringingState,
+            call.state.members,
+            call.state.remoteParticipants,
+        ) { ringingState, members, remoteParticipants ->
+            Triple(ringingState, members, remoteParticipants)
+        }
+            .distinctUntilChanged()
+            .filter { it.first is RingingState.Active || it.first is RingingState.Outgoing }
+            .collectLatest { state ->
+                val ringingState = state.first
+                val members = state.second
+                val remoteParticipants = state.third
 
-                    if (ringingState is RingingState.Outgoing) {
-                        val remoteMembersCount = members.size - 1
+                if (ringingState is RingingState.Outgoing) {
+                    val remoteMembersCount = members.size - 1
 
-                        val callDisplayName = if (remoteMembersCount != 1) {
+                    val callDisplayName = if (remoteMembersCount != 1) {
+                        application.getString(
+                            R.string.stream_video_outgoing_call_notification_title,
+                        )
+                    } else {
+                        members.firstOrNull { member ->
+                            member.user.id != localUser.id
+                        }?.user?.name ?: "Unknown"
+                    }
+
+                    getOngoingCallNotification(
+                        callId = StreamCallId.fromCallCid(call.cid),
+                        callInfo = callDisplayName,
+                        isOutgoingCall = true,
+                        remoteParticipantCount = remoteMembersCount,
+                    )?.let {
+                        onUpdate(it)
+                    }
+                } else if (ringingState is RingingState.Active) {
+                    // If number of remote participants increased or decreased
+                    if (remoteParticipants.size != latestRemoteParticipantCount) {
+                        latestRemoteParticipantCount = remoteParticipants.size
+
+                        val callDisplayName = if (remoteParticipants.isEmpty()) {
+                            // If no remote participants, get simple call notification title
                             application.getString(
-                                R.string.stream_video_outgoing_call_notification_title,
+                                R.string.stream_video_ongoing_call_notification_title,
                             )
                         } else {
-                            members.firstOrNull { member ->
-                                member.user.id != localUser.id
-                            }?.user?.name ?: "Unknown"
+                            if (remoteParticipants.size > 1) {
+                                // If more than 1 remote participant, get group call notification title
+                                application.getString(
+                                    R.string.stream_video_ongoing_group_call_notification_title,
+                                )
+                            } else {
+                                // If 1 remote participant, get the name of the remote participant
+                                remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+                            }
                         }
 
+                        // Use latest call display name in notification
                         getOngoingCallNotification(
                             callId = StreamCallId.fromCallCid(call.cid),
-                            callDisplayName = callDisplayName,
-                            isOutgoingCall = true,
-                            remoteParticipantCount = remoteMembersCount,
+                            callInfo = callDisplayName,
+                            remoteParticipantCount = remoteParticipants.size,
                         )?.let {
                             onUpdate(it)
                         }
-                    } else if (ringingState is RingingState.Active) {
-                        // If number of remote participants increased or decreased
-                        if (remoteParticipants.size != latestRemoteParticipantCount) {
-                            latestRemoteParticipantCount = remoteParticipants.size
-
-                            val callDisplayName = if (remoteParticipants.isEmpty()) {
-                                // If no remote participants, get simple call notification title
-                                application.getString(
-                                    R.string.stream_video_ongoing_call_notification_title,
-                                )
-                            } else {
-                                if (remoteParticipants.size > 1) {
-                                    // If more than 1 remote participant, get group call notification title
-                                    application.getString(
-                                        R.string.stream_video_ongoing_group_call_notification_title,
-                                    )
-                                } else {
-                                    // If 1 remote participant, get the name of the remote participant
-                                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
-                                }
-                            }
-
-                            // Use latest call display name in notification
-                            getOngoingCallNotification(
-                                callId = StreamCallId.fromCallCid(call.cid),
-                                callDisplayName = callDisplayName,
-                                remoteParticipantCount = remoteParticipants.size,
-                            )?.let {
-                                onUpdate(it)
-                            }
-                        }
                     }
                 }
-        }
+            }
     }
 
     open fun maybeCreateChannel(

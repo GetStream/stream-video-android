@@ -337,9 +337,7 @@ public class Call(
 
         response.onSuccess {
             state.updateFromResponse(it)
-            if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
-            }
+            if (ring) client.state.addRingingCall(this, RingingState.Outgoing())
         }
         return response
     }
@@ -375,9 +373,9 @@ public class Call(
             clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
         if (!permissionPass) {
-            logger.w {
+            logger.d {
                 "\n[Call.join()] called without having the required permissions.\n" +
-                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                    "This will work only if you set [runCallServiceInForeground = false] in StreamVideoBuilder.build().\n" +
                     "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
                     "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
                     "otherwise the service will fail to start, resulting in a crash.\n" +
@@ -508,6 +506,7 @@ public class Call(
     private fun Call.monitorSession(result: JoinCallResponse) {
         sfuEvents?.cancel()
         sfuListener?.cancel()
+
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
         // listen to Signal WS
         sfuEvents = scope.launch {
@@ -772,7 +771,7 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        logger.d { "[leave] #ringing; no args" }
+        logger.d { "[leave] #ringing; #telecom; no args" }
         leave(disconnectionReason = null)
     }
 
@@ -797,7 +796,7 @@ public class Call(
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+        client.state.removeRingingCall(willTransitionToOngoing = false)
         cleanup()
     }
 
@@ -1217,11 +1216,10 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "[accept] #ringing; no args" }
+        logger.d { "[accept] #ringing; #telecom; no args" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
         return clientImpl.accept(type, id)
     }
 

@@ -296,7 +296,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun handleEvent (Lorg/openapitools/client/models/VideoEvent;)V
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
-	public final fun removeRingingCall ()V
+	public final fun removeRingingCall (Z)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
 }
 
@@ -894,6 +894,7 @@ public abstract interface class io/getstream/video/android/core/api/SignalServer
 }
 
 public abstract interface class io/getstream/video/android/core/audio/AudioHandler {
+	public abstract fun selectDevice (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
 	public abstract fun start ()V
 	public abstract fun stop ()V
 }
@@ -901,7 +902,7 @@ public abstract interface class io/getstream/video/android/core/audio/AudioHandl
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
 	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function2;)V
-	public final fun selectDevice (Lcom/twilio/audioswitch/AudioDevice;)V
+	public fun selectDevice (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
 	public fun start ()V
 	public fun stop ()V
 }
@@ -912,21 +913,25 @@ public final class io/getstream/video/android/core/audio/AudioSwitchHandler$Comp
 public abstract class io/getstream/video/android/core/audio/StreamAudioDevice {
 	public static final field Companion Lio/getstream/video/android/core/audio/StreamAudioDevice$Companion;
 	public static final fun fromAudio (Lcom/twilio/audioswitch/AudioDevice;)Lio/getstream/video/android/core/audio/StreamAudioDevice;
-	public abstract fun getAudio ()Lcom/twilio/audioswitch/AudioDevice;
+	public abstract fun getAudioSwitchDevice ()Lcom/twilio/audioswitch/AudioDevice;
 	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getTelecomDevice ()Landroidx/core/telecom/CallEndpointCompat;
 	public static final fun toAudioDevice (Lio/getstream/video/android/core/audio/StreamAudioDevice;)Lcom/twilio/audioswitch/AudioDevice;
 }
 
 public final class io/getstream/video/android/core/audio/StreamAudioDevice$BluetoothHeadset : io/getstream/video/android/core/audio/StreamAudioDevice {
-	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lcom/twilio/audioswitch/AudioDevice;
-	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)Lio/getstream/video/android/core/audio/StreamAudioDevice$BluetoothHeadset;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$BluetoothHeadset;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$BluetoothHeadset;
+	public final fun component3 ()Landroidx/core/telecom/CallEndpointCompat;
+	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)Lio/getstream/video/android/core/audio/StreamAudioDevice$BluetoothHeadset;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$BluetoothHeadset;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$BluetoothHeadset;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getAudio ()Lcom/twilio/audioswitch/AudioDevice;
+	public fun getAudioSwitchDevice ()Lcom/twilio/audioswitch/AudioDevice;
 	public fun getName ()Ljava/lang/String;
+	public fun getTelecomDevice ()Landroidx/core/telecom/CallEndpointCompat;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -937,43 +942,52 @@ public final class io/getstream/video/android/core/audio/StreamAudioDevice$Compa
 }
 
 public final class io/getstream/video/android/core/audio/StreamAudioDevice$Earpiece : io/getstream/video/android/core/audio/StreamAudioDevice {
-	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lcom/twilio/audioswitch/AudioDevice;
-	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Earpiece;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$Earpiece;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Earpiece;
+	public final fun component3 ()Landroidx/core/telecom/CallEndpointCompat;
+	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Earpiece;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$Earpiece;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Earpiece;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getAudio ()Lcom/twilio/audioswitch/AudioDevice;
+	public fun getAudioSwitchDevice ()Lcom/twilio/audioswitch/AudioDevice;
 	public fun getName ()Ljava/lang/String;
+	public fun getTelecomDevice ()Landroidx/core/telecom/CallEndpointCompat;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/audio/StreamAudioDevice$Speakerphone : io/getstream/video/android/core/audio/StreamAudioDevice {
-	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lcom/twilio/audioswitch/AudioDevice;
-	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Speakerphone;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$Speakerphone;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Speakerphone;
+	public final fun component3 ()Landroidx/core/telecom/CallEndpointCompat;
+	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Speakerphone;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$Speakerphone;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$Speakerphone;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getAudio ()Lcom/twilio/audioswitch/AudioDevice;
+	public fun getAudioSwitchDevice ()Lcom/twilio/audioswitch/AudioDevice;
 	public fun getName ()Ljava/lang/String;
+	public fun getTelecomDevice ()Landroidx/core/telecom/CallEndpointCompat;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/audio/StreamAudioDevice$WiredHeadset : io/getstream/video/android/core/audio/StreamAudioDevice {
-	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lcom/twilio/audioswitch/AudioDevice;
-	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;)Lio/getstream/video/android/core/audio/StreamAudioDevice$WiredHeadset;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$WiredHeadset;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$WiredHeadset;
+	public final fun component3 ()Landroidx/core/telecom/CallEndpointCompat;
+	public final fun copy (Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;)Lio/getstream/video/android/core/audio/StreamAudioDevice$WiredHeadset;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/StreamAudioDevice$WiredHeadset;Ljava/lang/String;Lcom/twilio/audioswitch/AudioDevice;Landroidx/core/telecom/CallEndpointCompat;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/StreamAudioDevice$WiredHeadset;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getAudio ()Lcom/twilio/audioswitch/AudioDevice;
+	public fun getAudioSwitchDevice ()Lcom/twilio/audioswitch/AudioDevice;
 	public fun getName ()Ljava/lang/String;
+	public fun getTelecomDevice ()Landroidx/core/telecom/CallEndpointCompat;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4409,7 +4423,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun getNotification (Lkotlin/jvm/functions/Function1;)Landroid/app/Notification;
 	public final fun getNotificationIconRes ()I
 	protected final fun getNotificationManager ()Landroidx/core/app/NotificationManagerCompat;
-	public fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)V
+	public fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
 	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZI)Landroid/app/Notification;
 	public fun getRejectAction (Landroid/app/PendingIntent;)Landroidx/core/app/NotificationCompat$Action;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
@@ -4417,6 +4431,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun isInForeground ()Z
 	public fun maybeCreateChannel (Ljava/lang/String;Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun maybeCreateChannel$default (Lio/getstream/video/android/core/notifications/DefaultNotificationHandler;Ljava/lang/String;Landroid/content/Context;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public fun onIncomingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onMissedCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
@@ -4424,7 +4439,6 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun onPermissionGranted ()V
 	public fun onPermissionRationale ()V
 	public fun onPermissionRequested ()V
-	public fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public fun showLiveCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;I)V
 	public fun showMissedCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;I)V
 	public fun showNotificationCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;I)V
@@ -4453,18 +4467,20 @@ public final class io/getstream/video/android/core/notifications/DefaultStreamIn
 
 public final class io/getstream/video/android/core/notifications/NotificationConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;Z)V
-	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZ)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lio/getstream/video/android/core/notifications/NotificationHandler;
 	public final fun component4 ()Z
 	public final fun component5 ()Lkotlin/jvm/functions/Function0;
 	public final fun component6 ()Z
-	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;Z)Lio/getstream/video/android/core/notifications/NotificationConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public final fun component7 ()Z
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZ)Lio/getstream/video/android/core/notifications/NotificationConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationConfig;Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAutoRegisterPushDevice ()Z
+	public final fun getEnableCallNotificationUpdates ()Z
 	public final fun getHideRingingNotificationInForeground ()Z
 	public final fun getNotificationHandler ()Lio/getstream/video/android/core/notifications/NotificationHandler;
 	public final fun getPushDeviceGenerators ()Ljava/util/List;
@@ -4490,16 +4506,16 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public static final field INTENT_EXTRA_CALL_DISPLAY_NAME Ljava/lang/String;
 	public static final field INTENT_EXTRA_NOTIFICATION_ID Ljava/lang/String;
 	public abstract fun getIncomingCallNotification (Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;Z)Landroid/app/Notification;
-	public abstract fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun getNotificationUpdates (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
 	public abstract fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZI)Landroid/app/Notification;
 	public static synthetic fun getOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZIILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/NotificationHandler;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/lang/Object;)Landroid/app/Notification;
 	public abstract fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public abstract fun onIncomingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onMissedCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 	public abstract fun onNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
-	public abstract fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)V
 }
 
 public final class io/getstream/video/android/core/notifications/NotificationHandler$Companion {
@@ -5324,6 +5340,13 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/sounds/CallSoundPlayer {
+	public fun <init> (Landroid/content/Context;)V
+	public final fun cleanUpAudioResources ()V
+	public final fun playCallSound (Landroid/net/Uri;)V
+	public final fun stopCallSound ()V
+}
+
 public abstract interface class io/getstream/video/android/core/sounds/RingingConfig {
 	public abstract fun getIncomingCallSoundUri ()Landroid/net/Uri;
 	public abstract fun getOutgoingCallSoundUri ()Landroid/net/Uri;
@@ -5347,6 +5370,16 @@ public final class io/getstream/video/android/core/sounds/Sounds {
 	public final fun getRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/telecom/TelecomEvent : java/lang/Enum {
+	public static final field ANSWER Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static final field DISCONNECT Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static final field SET_ACTIVE Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static final field SET_INACTIVE Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/telecom/TelecomEvent;
+	public static fun values ()[Lio/getstream/video/android/core/telecom/TelecomEvent;
 }
 
 public final class io/getstream/video/android/core/utils/AndroidUtilsKt {

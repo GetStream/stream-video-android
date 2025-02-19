@@ -22,6 +22,8 @@ androidxLifecycle = "2.8.6"
 androidxStartup = "1.2.0"
 androidxActivity = "1.9.2"
 androidxDataStore = "1.1.1"
+androidxCoreTelecom = "1.0.0-beta01"
+
 googleService = "4.4.2"
 
 androidxComposeBom = "2024.11.00"
@@ -86,6 +88,7 @@ androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.r
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
+androidx-core-telecom = { group = "androidx.core", name = "core-telecom", version.ref = "androidxCoreTelecom" }
 androidx-activity = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidxActivity" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "androidxAnnotation" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "androidxContraintLayout" }

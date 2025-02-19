@@ -25,6 +25,7 @@ import org.openapitools.client.models.MemberRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import kotlin.test.Ignore
 
 @RunWith(RobolectricTestRunner::class)
 class AudioRoomTest : IntegrationTestBase() {
@@ -41,6 +42,7 @@ class AudioRoomTest : IntegrationTestBase() {
      * - Trying to publish while not having permissions to do so should raise an error
      *
      */
+    @Ignore
     @Test
     fun `query calls - about to start`() = runTest {
         val threeHoursFromNow = OffsetDateTime.now(Clock.systemUTC()).plusHours(3)

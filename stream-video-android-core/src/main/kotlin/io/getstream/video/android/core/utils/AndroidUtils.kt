@@ -123,7 +123,8 @@ internal suspend fun safeSuspendingCall(block: suspend () -> Unit) {
  *
  * @param block the function to call.
  */
-internal inline fun safeCall(block: () -> Unit) {
+@OptIn(ExperimentalContracts::class)
+internal inline fun safeCall(exceptionLogTag: String = "SafeCall", block: () -> Unit) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
@@ -131,7 +132,7 @@ internal inline fun safeCall(block: () -> Unit) {
         block()
     } catch (e: Exception) {
         // Handle or log the exception here
-        StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
+        StreamLog.e(exceptionLogTag, e) { "Exception occurred: ${e.message}" }
     }
 }
 

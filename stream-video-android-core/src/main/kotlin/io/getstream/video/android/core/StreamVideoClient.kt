@@ -41,8 +41,6 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
-import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -52,9 +50,9 @@ import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.telecom.TelecomCompat
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import io.getstream.video.android.core.utils.toEdge
@@ -152,6 +150,7 @@ internal class StreamVideoClient internal constructor(
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
+    internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
@@ -190,25 +189,14 @@ internal class StreamVideoClient internal constructor(
     }
 
     override fun cleanup() {
-        // remove all cached calls
+        // Remove all cached calls
         calls.clear()
-        // stop all running coroutines
+        // Stop all running coroutines
         scope.cancel()
-        // call cleanup on the active call
         val activeCall = state.activeCall.value
-        // Stop the call service if it was running
-
-        val callConfig = callServiceConfigRegistry.get(activeCall?.type ?: ANY_MARKER)
-        val runCallServiceInForeground = callConfig.runCallServiceInForeground
-        if (runCallServiceInForeground) {
-            safeCall {
-                val serviceIntent = CallService.buildStopIntent(
-                    context = context,
-                    callServiceConfiguration = callConfig,
-                )
-                context.stopService(serviceIntent)
-            }
-        }
+        // Clean up Telecom or the call service
+        TelecomCompat.cleanUp(context, activeCall)
+        // Leave the active call
         activeCall?.leave()
     }
 
@@ -1025,6 +1013,8 @@ internal class StreamVideoClient internal constructor(
         } else {
             val call = Call(this, type, idOrRandom, user)
             calls[cid] = call
+            TelecomCompat.registerCall(context, call)
+
             call
         }
     }
