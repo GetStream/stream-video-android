@@ -32,8 +32,8 @@ internal fun User.toResponse(): UserResponse {
         updatedAt = updatedAt ?: OffsetDateTime.now(),
         deletedAt = deletedAt,
         // TODO: Implement these fields
-        banned = false,
+        blockedUserIds = emptyList(),
         language = "",
-        online = false,
+
     )
 }

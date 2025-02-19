@@ -23,56 +23,45 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- * This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user
- *
- * @param callCid
- * @param createdAt
- * @param permissions The list of permissions requested by the user
- * @param type The type of event: \"call.permission_request\" in this case
- * @param user
+ * This event is sent when a user requests access to a feature on a call,
  */
 
-
 data class PermissionRequestEvent (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* The list of permissions requested by the user */
     @Json(name = "permissions")
     val permissions: kotlin.collections.List<kotlin.String>,
 
-    /* The type of event: \"call.permission_request\" in this case */
-    @Json(name = "type")
-    val type: kotlin.String = "call.permission_request",
-
     @Json(name = "user")
-    val user: UserResponse
+    val user: org.openapitools.client.models.UserResponse,
 
-) : VideoEvent(), WSCallEvent {
+    @Json(name = "type")
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

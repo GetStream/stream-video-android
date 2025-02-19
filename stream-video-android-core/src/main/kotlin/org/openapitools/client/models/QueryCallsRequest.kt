@@ -23,36 +23,22 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.SortParam
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param filterConditions
- * @param limit
- * @param next
- * @param prev
- * @param sort
- * @param watch
  */
 
-
 data class QueryCallsRequest (
-
-    @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
-
     @Json(name = "limit")
     val limit: kotlin.Int? = null,
 
@@ -62,10 +48,12 @@ data class QueryCallsRequest (
     @Json(name = "prev")
     val prev: kotlin.String? = null,
 
-    @Json(name = "sort")
-    val sort: kotlin.collections.List<SortParam>? = null,
-
     @Json(name = "watch")
-    val watch: kotlin.Boolean? = null
+    val watch: kotlin.Boolean? = null,
 
+    @Json(name = "sort")
+    val sort: kotlin.collections.List<org.openapitools.client.models.SortParamRequest>? = null,
+
+    @Json(name = "filter_conditions")
+    val filterConditions: kotlin.collections.Map<kotlin.String, Any?>? = null
 )

@@ -23,29 +23,22 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param reason Reason for rejecting the call
  */
 
-
 data class RejectCallRequest (
-
-    /* Reason for rejecting the call */
     @Json(name = "reason")
     val reason: kotlin.String? = null
-
 )

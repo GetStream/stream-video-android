@@ -1,6 +1,7 @@
 apply(plugin = "io.github.gradle-nexus.publish-plugin")
 apply(plugin = "org.jetbrains.dokka")
 apply(from = "${rootDir}/scripts/sonar.gradle")
+apply(from = "${rootDir}/scripts/open-api-code-gen.gradle.kts")
 
 buildscript {
   repositories {

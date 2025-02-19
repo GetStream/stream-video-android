@@ -23,70 +23,58 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param mode
- * @param audioOnly
- * @param quality
  */
 
-
 data class RecordSettingsRequest (
-
     @Json(name = "mode")
-    val mode: RecordSettingsRequest.Mode,
+    val mode: Mode,
 
     @Json(name = "audio_only")
     val audioOnly: kotlin.Boolean? = null,
 
     @Json(name = "quality")
-    val quality: RecordSettingsRequest.Quality? = null
-
+    val quality: Quality? = null
 )
-
 {
 
     /**
-     *
-     *
-     * Values: available,disabled,autoOn
-     */
-
+    * Mode Enum
+    */
     sealed class Mode(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): Mode = when (s) {
-                "available" -> Available
-                "disabled" -> Disabled
-                "auto-on" -> AutoOn
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): Mode = when (s) {
+                    "auto-on" -> AutoOn
+                    "available" -> Available
+                    "disabled" -> Disabled
+                    else -> Unknown(s)
+                }
             }
-        }
+            object AutoOn : Mode("auto-on")
+            object Available : Mode("available")
+            object Disabled : Mode("disabled")
+            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
 
-        object Available : Mode("available")
-        object Disabled : Mode("disabled")
-        object AutoOn : Mode("auto-on")
-        data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
 
         class ModeAdapter : JsonAdapter<Mode>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Mode? {
                 val s = reader.nextString() ?: return null
-                return fromString(s)
+                return Mode.fromString(s)
             }
 
             @ToJson
@@ -95,40 +83,45 @@ data class RecordSettingsRequest (
             }
         }
     }
-
-
     /**
-     *
-     *
-     * Values: _360p,_480p,_720p,_1080p,_1440p
-     */
-
+    * Quality Enum
+    */
     sealed class Quality(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): Quality = when (s) {
-                "360p" -> `360p`
-                "480p" -> `480p`
-                "720p" -> `720p`
-                "1080p" -> `1080p`
-                "1440p" -> `1440p`
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): Quality = when (s) {
+                    "portrait-1080x1920" -> Portrait1080x1920
+                    "portrait-1440x2560" -> Portrait1440x2560
+                    "portrait-360x640" -> Portrait360x640
+                    "portrait-480x854" -> Portrait480x854
+                    "portrait-720x1280" -> Portrait720x1280
+                    "1080p" -> `1080p`
+                    "1440p" -> `1440p`
+                    "360p" -> `360p`
+                    "480p" -> `480p`
+                    "720p" -> `720p`
+                    else -> Unknown(s)
+                }
             }
-        }
+            object Portrait1080x1920 : Quality("portrait-1080x1920")
+            object Portrait1440x2560 : Quality("portrait-1440x2560")
+            object Portrait360x640 : Quality("portrait-360x640")
+            object Portrait480x854 : Quality("portrait-480x854")
+            object Portrait720x1280 : Quality("portrait-720x1280")
+            object `1080p` : Quality("1080p")
+            object `1440p` : Quality("1440p")
+            object `360p` : Quality("360p")
+            object `480p` : Quality("480p")
+            object `720p` : Quality("720p")
+            data class Unknown(val unknownValue: kotlin.String) : Quality(unknownValue)
 
-        object `360p` : Quality("360p")
-        object `480p` : Quality("480p")
-        object `720p` : Quality("720p")
-        object `1080p` : Quality("1080p")
-        object `1440p` : Quality("1440p")
-        data class Unknown(val unknownValue: kotlin.String) : Quality(unknownValue)
 
         class QualityAdapter : JsonAdapter<Quality>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Quality? {
                 val s = reader.nextString() ?: return null
-                return fromString(s)
+                return Quality.fromString(s)
             }
 
             @ToJson
@@ -137,7 +130,4 @@ data class RecordSettingsRequest (
             }
         }
     }
-
-
-
 }

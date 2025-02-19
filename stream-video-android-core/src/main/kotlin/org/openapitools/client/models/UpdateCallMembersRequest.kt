@@ -23,35 +23,25 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.MemberRequest
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param removeMembers List of userID to remove
- * @param updateMembers List of members to update or insert
+ * Update call members
  */
 
-
 data class UpdateCallMembersRequest (
-
-    /* List of userID to remove */
     @Json(name = "remove_members")
     val removeMembers: kotlin.collections.List<kotlin.String>? = null,
 
-    /* List of members to update or insert */
     @Json(name = "update_members")
-    val updateMembers: kotlin.collections.List<MemberRequest>? = null
-
+    val updateMembers: kotlin.collections.List<org.openapitools.client.models.MemberRequest>? = null
 )

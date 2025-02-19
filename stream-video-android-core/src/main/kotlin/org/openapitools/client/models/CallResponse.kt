@@ -23,121 +23,85 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallIngressResponse
-import org.openapitools.client.models.CallSessionResponse
-import org.openapitools.client.models.CallSettingsResponse
-import org.openapitools.client.models.EgressResponse
-import org.openapitools.client.models.ThumbnailResponse
-import org.openapitools.client.models.UserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * Represents a call
- *
- * @param backstage
- * @param blockedUserIds
- * @param cid The unique identifier for a call (<type>:<id>)
- * @param createdAt Date/time of creation
- * @param createdBy
- * @param currentSessionId
- * @param custom Custom data for this object
- * @param egress
- * @param id Call ID
- * @param ingress
- * @param recording
- * @param settings
- * @param transcribing
- * @param type The type of call
- * @param updatedAt Date/time of the last update
- * @param endedAt Date/time when the call ended
- * @param session
- * @param startsAt Date/time when the call will start
- * @param team
- * @param thumbnails
  */
 
-
 data class CallResponse (
-
     @Json(name = "backstage")
     val backstage: kotlin.Boolean,
-
-    @Json(name = "blocked_user_ids")
-    val blockedUserIds: kotlin.collections.List<kotlin.String>,
-
-    /* The unique identifier for a call (<type>:<id>) */
-    @Json(name = "cid")
-    val cid: kotlin.String,
-
-    /* Date/time of creation */
-    @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
-
-    @Json(name = "created_by")
-    val createdBy: UserResponse,
-
-    @Json(name = "current_session_id")
-    val currentSessionId: kotlin.String,
-
-    /* Custom data for this object */
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?> = emptyMap(),
-
-    @Json(name = "egress")
-    val egress: EgressResponse,
-
-    /* Call ID */
-    @Json(name = "id")
-    val id: kotlin.String,
-
-    @Json(name = "ingress")
-    val ingress: CallIngressResponse,
-
-    @Json(name = "recording")
-    val recording: kotlin.Boolean,
-
-    @Json(name = "settings")
-    val settings: CallSettingsResponse,
 
     @Json(name = "captioning")
     val captioning: kotlin.Boolean,
 
+    @Json(name = "cid")
+    val cid: kotlin.String,
+
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
+
+    @Json(name = "current_session_id")
+    val currentSessionId: kotlin.String,
+
+    @Json(name = "id")
+    val id: kotlin.String,
+
+    @Json(name = "recording")
+    val recording: kotlin.Boolean,
+
     @Json(name = "transcribing")
     val transcribing: kotlin.Boolean,
 
-    /* The type of call */
     @Json(name = "type")
     val type: kotlin.String,
 
-    /* Date/time of the last update */
     @Json(name = "updated_at")
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
-    /* Date/time when the call ended */
+    @Json(name = "blocked_user_ids")
+    val blockedUserIds: kotlin.collections.List<kotlin.String>,
+
+    @Json(name = "created_by")
+    val createdBy: org.openapitools.client.models.UserResponse,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>,
+
+    @Json(name = "egress")
+    val egress: org.openapitools.client.models.EgressResponse,
+
+    @Json(name = "ingress")
+    val ingress: org.openapitools.client.models.CallIngressResponse,
+
+    @Json(name = "settings")
+    val settings: org.openapitools.client.models.CallSettingsResponse,
+
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
-    @Json(name = "session")
-    val session: CallSessionResponse? = null,
+    @Json(name = "join_ahead_time_seconds")
+    val joinAheadTimeSeconds: kotlin.Int? = null,
 
-    /* Date/time when the call will start */
     @Json(name = "starts_at")
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
     val team: kotlin.String? = null,
 
-    @Json(name = "thumbnails")
-    val thumbnails: ThumbnailResponse? = null
+    @Json(name = "session")
+    val session: org.openapitools.client.models.CallSessionResponse? = null,
 
+    @Json(name = "thumbnails")
+    val thumbnails: org.openapitools.client.models.ThumbnailResponse? = null
 )

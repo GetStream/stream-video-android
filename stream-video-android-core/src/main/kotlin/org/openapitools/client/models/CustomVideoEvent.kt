@@ -23,56 +23,45 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * A custom event, this event is used to send custom events to other participants in the call.
- *
- * @param callCid
- * @param createdAt
- * @param custom Custom data for this object
- * @param type The type of event, \"custom\" in this case
- * @param user
  */
 
-
 data class CustomVideoEvent (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* Custom data for this object */
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>,
-
-    /* The type of event, \"custom\" in this case */
-    @Json(name = "type")
-    val type: kotlin.String = "custom",
+    val custom: kotlin.collections.Map<kotlin.String, Any?>,
 
     @Json(name = "user")
-    val user: UserResponse
+    val user: org.openapitools.client.models.UserResponse,
 
-) : VideoEvent(), WSCallEvent {
+    @Json(name = "type")
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

@@ -23,38 +23,28 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.ICEServer
-import org.openapitools.client.models.SFUResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param iceServers
- * @param server
- * @param token
  */
 
-
 data class Credentials (
+    @Json(name = "token")
+    val token: kotlin.String,
 
     @Json(name = "ice_servers")
-    val iceServers: kotlin.collections.List<ICEServer>,
+    val iceServers: kotlin.collections.List<org.openapitools.client.models.ICEServer>,
 
     @Json(name = "server")
-    val server: SFUResponse,
-
-    @Json(name = "token")
-    val token: kotlin.String
-
+    val server: org.openapitools.client.models.SFUResponse
 )

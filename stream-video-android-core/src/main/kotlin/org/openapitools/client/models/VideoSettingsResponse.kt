@@ -23,32 +23,22 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.TargetResolution
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param accessRequestEnabled
- * @param cameraDefaultOn
- * @param cameraFacing
- * @param enabled
- * @param targetResolution
  */
 
-
 data class VideoSettingsResponse (
-
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean,
 
@@ -56,46 +46,41 @@ data class VideoSettingsResponse (
     val cameraDefaultOn: kotlin.Boolean,
 
     @Json(name = "camera_facing")
-    val cameraFacing: VideoSettingsResponse.CameraFacing,
+    val cameraFacing: CameraFacing,
 
     @Json(name = "enabled")
     val enabled: kotlin.Boolean,
 
     @Json(name = "target_resolution")
-    val targetResolution: TargetResolution
-
+    val targetResolution: org.openapitools.client.models.TargetResolution
 )
-
 {
 
     /**
-     *
-     *
-     * Values: front,back,`external`
-     */
-
+    * CameraFacing Enum
+    */
     sealed class CameraFacing(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): CameraFacing = when (s) {
-                "front" -> Front
-                "back" -> Back
-                "external" -> External
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): CameraFacing = when (s) {
+                    "back" -> Back
+                    "external" -> External
+                    "front" -> Front
+                    else -> Unknown(s)
+                }
             }
-        }
+            object Back : CameraFacing("back")
+            object External : CameraFacing("external")
+            object Front : CameraFacing("front")
+            data class Unknown(val unknownValue: kotlin.String) : CameraFacing(unknownValue)
 
-        object Front : CameraFacing("front")
-        object Back : CameraFacing("back")
-        object External : CameraFacing("external")
-        data class Unknown(val unknownValue: kotlin.String) : CameraFacing(unknownValue)
 
         class CameraFacingAdapter : JsonAdapter<CameraFacing>() {
             @FromJson
             override fun fromJson(reader: JsonReader): CameraFacing? {
                 val s = reader.nextString() ?: return null
-                return fromString(s)
+                return CameraFacing.fromString(s)
             }
 
             @ToJson
@@ -104,7 +89,4 @@ data class VideoSettingsResponse (
             }
         }
     }
-
-
-
 }

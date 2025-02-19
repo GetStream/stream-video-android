@@ -23,56 +23,45 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- * This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current.
- *
- * @param call
- * @param callCid
- * @param capabilitiesByRole The capabilities by role for this call
- * @param createdAt
- * @param type The type of event: \"call.ended\" in this case
+ * This event is sent when a call is updated, clients should use this update the local state of the call.
  */
 
-
 data class CallUpdatedEvent (
-
-    @Json(name = "call")
-    val call: CallResponse,
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
-
-    /* The capabilities by role for this call */
-    @Json(name = "capabilities_by_role")
-    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* The type of event: \"call.ended\" in this case */
+    @Json(name = "call")
+    val call: org.openapitools.client.models.CallResponse,
+
+    @Json(name = "capabilities_by_role")
+    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>>,
+
     @Json(name = "type")
-    val type: kotlin.String = "call.updated"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

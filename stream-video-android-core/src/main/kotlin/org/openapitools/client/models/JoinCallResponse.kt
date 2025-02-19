@@ -23,61 +23,43 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.Credentials
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.StatsOptions
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param call
- * @param created
- * @param credentials
- * @param duration
- * @param members
- * @param ownCapabilities
- * @param statsOptions
- * @param membership
  */
 
-
 data class JoinCallResponse (
-
-    @Json(name = "call")
-    val call: CallResponse,
-
     @Json(name = "created")
     val created: kotlin.Boolean,
-
-    @Json(name = "credentials")
-    val credentials: Credentials,
 
     @Json(name = "duration")
     val duration: kotlin.String,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<MemberResponse>,
+    val members: kotlin.collections.List<org.openapitools.client.models.MemberResponse>,
 
     @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<OwnCapability>,
+    val ownCapabilities: kotlin.collections.List<org.openapitools.client.models.OwnCapability>,
+
+    @Json(name = "call")
+    val call: org.openapitools.client.models.CallResponse,
+
+    @Json(name = "credentials")
+    val credentials: org.openapitools.client.models.Credentials,
 
     @Json(name = "stats_options")
-    val statsOptions: StatsOptions,
+    val statsOptions: org.openapitools.client.models.StatsOptions,
 
     @Json(name = "membership")
-    val membership: MemberResponse? = null
-
+    val membership: org.openapitools.client.models.MemberResponse? = null
 )

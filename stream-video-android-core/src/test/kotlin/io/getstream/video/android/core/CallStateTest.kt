@@ -62,7 +62,7 @@ class CallStateTest : IntegrationTestBase() {
         val custom = mapOf("foo" to "bar")
         val response = call.create(
             custom = custom,
-            members = listOf(MemberRequest("tommaso", mutableMapOf("color" to "green"))),
+            members = listOf(MemberRequest("tommaso", custom = mutableMapOf("color" to "green"))),
             // block screensharing completely for this call
             settings = CallSettingsRequest(
                 screensharing = ScreensharingSettingsRequest(

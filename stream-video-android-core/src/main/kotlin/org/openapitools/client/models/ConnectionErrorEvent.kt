@@ -23,31 +23,22 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.APIError
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when the WS connection fails
- *
- * @param connectionId
- * @param createdAt
- * @param error
- * @param type The type of event: \"connection.ok\" in this case
  */
 
-
 data class ConnectionErrorEvent (
-
     @Json(name = "connection_id")
     val connectionId: kotlin.String,
 
@@ -55,15 +46,15 @@ data class ConnectionErrorEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "error")
-    val error: APIError?,
+    val error: org.openapitools.client.models.APIError,
 
-    /* The type of event: \"connection.ok\" in this case */
     @Json(name = "type")
-    val type: kotlin.String = "connection.error"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent()
+{
 
-) : VideoEvent(), WSClientEvent {
-
-    override fun getEventType(): String {
+    override fun getEventType(): kotlin.String {
         return type
     }
 }

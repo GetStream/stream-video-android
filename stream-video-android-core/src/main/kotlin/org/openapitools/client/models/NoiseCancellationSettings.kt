@@ -23,62 +23,52 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param mode
  */
 
-
 data class NoiseCancellationSettings (
-
     @Json(name = "mode")
-    val mode: NoiseCancellationSettings.Mode
-
+    val mode: Mode
 )
-
 {
 
     /**
-     *
-     *
-     * Values: available,disabled,autoOn
-     */
-
+    * Mode Enum
+    */
     sealed class Mode(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): Mode = when (s) {
-                "available" -> Available
-                "disabled" -> Disabled
-                "auto-on" -> AutoOn
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): Mode = when (s) {
+                    "auto-on" -> AutoOn
+                    "available" -> Available
+                    "disabled" -> Disabled
+                    else -> Unknown(s)
+                }
             }
-        }
+            object AutoOn : Mode("auto-on")
+            object Available : Mode("available")
+            object Disabled : Mode("disabled")
+            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
 
-        object Available : Mode("available")
-        object Disabled : Mode("disabled")
-        object AutoOn : Mode("auto-on")
-        data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
 
         class ModeAdapter : JsonAdapter<Mode>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Mode? {
                 val s = reader.nextString() ?: return null
-                return fromString(s)
+                return Mode.fromString(s)
             }
 
             @ToJson
@@ -87,7 +77,4 @@ data class NoiseCancellationSettings (
             }
         }
     }
-
-
-
 }

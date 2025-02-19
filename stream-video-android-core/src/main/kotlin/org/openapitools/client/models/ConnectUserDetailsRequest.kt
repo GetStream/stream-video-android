@@ -23,41 +23,24 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.PrivacySettings
-import org.openapitools.client.models.PushNotificationSettingsInput
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param id
- * @param custom
- * @param image
- * @param invisible
- * @param language
- * @param name
- * @param privacySettings
- * @param pushNotifications
  */
 
-
 data class ConnectUserDetailsRequest (
-
     @Json(name = "id")
     val id: kotlin.String,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
 
     @Json(name = "image")
     val image: kotlin.String? = null,
@@ -71,10 +54,6 @@ data class ConnectUserDetailsRequest (
     @Json(name = "name")
     val name: kotlin.String? = null,
 
-    @Json(name = "privacy_settings")
-    val privacySettings: PrivacySettings? = null,
-
-    @Json(name = "push_notifications")
-    val pushNotifications: PushNotificationSettingsInput? = null
-
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = null
 )

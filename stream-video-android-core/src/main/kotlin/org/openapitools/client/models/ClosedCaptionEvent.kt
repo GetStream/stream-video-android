@@ -23,51 +23,42 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallClosedCaption
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when closed captions are being sent in a call, clients should use this to show the closed captions in the call screen
- *
- * @param callCid
- * @param closedCaption
- * @param createdAt
- * @param type The type of event: \"call.closed_caption\" in this case
  */
 
-
 data class ClosedCaptionEvent (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
-
-    @Json(name = "closed_caption")
-    val closedCaption: CallClosedCaption,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* The type of event: \"call.closed_caption\" in this case */
+    @Json(name = "closed_caption")
+    val closedCaption: org.openapitools.client.models.CallClosedCaption,
+
     @Json(name = "type")
-    val type: kotlin.String = "call.closed_caption"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

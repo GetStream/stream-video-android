@@ -23,33 +23,22 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param callCid
- * @param callDurationSeconds
- * @param callSessionId
- * @param callStatus
- * @param firstStatsTime
- * @param createdAt
- * @param qualityScore
  */
 
-
 data class CallStatsReportSummaryResponse (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -68,7 +57,9 @@ data class CallStatsReportSummaryResponse (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime? = null,
 
+    @Json(name = "min_user_rating")
+    val minUserRating: kotlin.Int? = null,
+
     @Json(name = "quality_score")
     val qualityScore: kotlin.Int? = null
-
 )

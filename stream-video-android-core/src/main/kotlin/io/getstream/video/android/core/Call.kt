@@ -80,9 +80,7 @@ import org.openapitools.client.models.PinResponse
 import org.openapitools.client.models.RejectCallResponse
 import org.openapitools.client.models.SendCallEventResponse
 import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StartClosedCaptionResponse
 import org.openapitools.client.models.StartTranscriptionResponse
-import org.openapitools.client.models.StopClosedCaptionResponse
 import org.openapitools.client.models.StopLiveResponse
 import org.openapitools.client.models.StopTranscriptionResponse
 import org.openapitools.client.models.UnpinResponse
@@ -1318,11 +1316,11 @@ public class Call(
         return clientImpl.listTranscription(type, id)
     }
 
-    suspend fun startClosedCaptions(): Result<StartClosedCaptionResponse> {
+    suspend fun startClosedCaptions(): Result<org.openapitools.client.models.StartClosedCaptionsResponse> {
         return clientImpl.startClosedCaptions(type, id)
     }
 
-    suspend fun stopClosedCaptions(): Result<StopClosedCaptionResponse> {
+    suspend fun stopClosedCaptions(): Result<org.openapitools.client.models.StopClosedCaptionsResponse> {
         return clientImpl.stopClosedCaptions(type, id)
     }
 

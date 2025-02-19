@@ -23,79 +23,55 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.AudioSettingsResponse
-import org.openapitools.client.models.BackstageSettingsResponse
-import org.openapitools.client.models.BroadcastSettingsResponse
-import org.openapitools.client.models.GeofenceSettingsResponse
-import org.openapitools.client.models.LimitsSettingsResponse
-import org.openapitools.client.models.RecordSettingsResponse
-import org.openapitools.client.models.RingSettingsResponse
-import org.openapitools.client.models.ScreensharingSettingsResponse
-import org.openapitools.client.models.ThumbnailsSettingsResponse
-import org.openapitools.client.models.TranscriptionSettingsResponse
-import org.openapitools.client.models.VideoSettingsResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param audio
- * @param backstage
- * @param broadcasting
- * @param geofencing
- * @param limits
- * @param recording
- * @param ring
- * @param screensharing
- * @param thumbnails
- * @param transcription
- * @param video
  */
 
-
 data class CallSettingsResponse (
-
     @Json(name = "audio")
-    val audio: AudioSettingsResponse,
+    val audio: org.openapitools.client.models.AudioSettingsResponse,
 
     @Json(name = "backstage")
-    val backstage: BackstageSettingsResponse,
+    val backstage: org.openapitools.client.models.BackstageSettingsResponse,
 
     @Json(name = "broadcasting")
-    val broadcasting: BroadcastSettingsResponse,
+    val broadcasting: org.openapitools.client.models.BroadcastSettingsResponse,
 
     @Json(name = "geofencing")
-    val geofencing: GeofenceSettingsResponse,
+    val geofencing: org.openapitools.client.models.GeofenceSettingsResponse,
 
     @Json(name = "limits")
-    val limits: LimitsSettingsResponse,
+    val limits: org.openapitools.client.models.LimitsSettingsResponse,
 
     @Json(name = "recording")
-    val recording: RecordSettingsResponse,
+    val recording: org.openapitools.client.models.RecordSettingsResponse,
 
     @Json(name = "ring")
-    val ring: RingSettingsResponse,
+    val ring: org.openapitools.client.models.RingSettingsResponse,
 
     @Json(name = "screensharing")
-    val screensharing: ScreensharingSettingsResponse,
+    val screensharing: org.openapitools.client.models.ScreensharingSettingsResponse,
+
+    @Json(name = "session")
+    val session: org.openapitools.client.models.SessionSettingsResponse,
 
     @Json(name = "thumbnails")
-    val thumbnails: ThumbnailsSettingsResponse,
+    val thumbnails: org.openapitools.client.models.ThumbnailsSettingsResponse,
 
     @Json(name = "transcription")
-    val transcription: TranscriptionSettingsResponse,
+    val transcription: org.openapitools.client.models.TranscriptionSettingsResponse,
 
     @Json(name = "video")
-    val video: VideoSettingsResponse
-
+    val video: org.openapitools.client.models.VideoSettingsResponse
 )

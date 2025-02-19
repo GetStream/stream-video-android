@@ -23,92 +23,36 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallTimeline
-import org.openapitools.client.models.GeolocationResult
-import org.openapitools.client.models.MOSStats
-import org.openapitools.client.models.MediaPubSubHint
-import org.openapitools.client.models.PublishedTrackInfo
-import org.openapitools.client.models.Stats
-import org.openapitools.client.models.Subsession
-import org.openapitools.client.models.VideoQuality
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param freezeDurationSeconds
- * @param maxFreezeFraction
- * @param maxFreezesDurationSeconds
- * @param packetLossFraction
- * @param publisherPacketLossFraction
- * @param publishingDurationSeconds
- * @param qualityScore
- * @param receivingDurationSeconds
- * @param sessionId
- * @param totalPixelsIn
- * @param totalPixelsOut
- * @param browser
- * @param browserVersion
- * @param currentIp
- * @param currentSfu
- * @param deviceModel
- * @param deviceVersion
- * @param distanceToSfuKilometers
- * @param geolocation
- * @param jitter
- * @param latency
- * @param maxFirPerSecond
- * @param maxFreezesPerSecond
- * @param maxNackPerSecond
- * @param maxPliPerSecond
- * @param maxPublishingVideoQuality
- * @param maxReceivingVideoQuality
- * @param os
- * @param osVersion
- * @param pubSubHints
- * @param publishedTracks
- * @param publisherAudioMos
- * @param publisherJitter
- * @param publisherLatency
- * @param publisherNoiseCancellationSeconds
- * @param publisherQualityLimitationFraction
- * @param publisherVideoQualityLimitationDurationSeconds
- * @param publishingAudioCodec
- * @param publishingVideoCodec
- * @param receivingAudioCodec
- * @param receivingVideoCodec
- * @param sdk
- * @param sdkVersion
- * @param subscriberAudioMos
- * @param subscriberJitter
- * @param subscriberLatency
- * @param subscriberVideoQualityThrottledDurationSeconds
- * @param subsessions
- * @param timeline
- * @param webrtcVersion
  */
 
-
 data class UserSessionStats (
-
     @Json(name = "freeze_duration_seconds")
     val freezeDurationSeconds: kotlin.Int,
+
+    @Json(name = "group")
+    val group: kotlin.String,
 
     @Json(name = "max_freeze_fraction")
     val maxFreezeFraction: kotlin.Float,
 
     @Json(name = "max_freezes_duration_seconds")
     val maxFreezesDurationSeconds: kotlin.Int,
+
+    @Json(name = "min_event_ts")
+    val minEventTs: kotlin.Int,
 
     @Json(name = "packet_loss_fraction")
     val packetLossFraction: kotlin.Float,
@@ -134,6 +78,9 @@ data class UserSessionStats (
     @Json(name = "total_pixels_out")
     val totalPixelsOut: kotlin.Int,
 
+    @Json(name = "average_connection_time")
+    val averageConnectionTime: kotlin.Float? = null,
+
     @Json(name = "browser")
     val browser: kotlin.String? = null,
 
@@ -155,15 +102,6 @@ data class UserSessionStats (
     @Json(name = "distance_to_sfu_kilometers")
     val distanceToSfuKilometers: kotlin.Float? = null,
 
-    @Json(name = "geolocation")
-    val geolocation: GeolocationResult? = null,
-
-    @Json(name = "jitter")
-    val jitter: Stats? = null,
-
-    @Json(name = "latency")
-    val latency: Stats? = null,
-
     @Json(name = "max_fir_per_second")
     val maxFirPerSecond: kotlin.Float? = null,
 
@@ -176,41 +114,17 @@ data class UserSessionStats (
     @Json(name = "max_pli_per_second")
     val maxPliPerSecond: kotlin.Float? = null,
 
-    @Json(name = "max_publishing_video_quality")
-    val maxPublishingVideoQuality: VideoQuality? = null,
-
-    @Json(name = "max_receiving_video_quality")
-    val maxReceivingVideoQuality: VideoQuality? = null,
-
     @Json(name = "os")
     val os: kotlin.String? = null,
 
     @Json(name = "os_version")
     val osVersion: kotlin.String? = null,
 
-    @Json(name = "pub_sub_hints")
-    val pubSubHints: MediaPubSubHint? = null,
-
-    @Json(name = "published_tracks")
-    val publishedTracks: kotlin.collections.List<PublishedTrackInfo>? = null,
-
-    @Json(name = "publisher_audio_mos")
-    val publisherAudioMos: MOSStats? = null,
-
-    @Json(name = "publisher_jitter")
-    val publisherJitter: Stats? = null,
-
-    @Json(name = "publisher_latency")
-    val publisherLatency: Stats? = null,
-
     @Json(name = "publisher_noise_cancellation_seconds")
     val publisherNoiseCancellationSeconds: kotlin.Float? = null,
 
     @Json(name = "publisher_quality_limitation_fraction")
     val publisherQualityLimitationFraction: kotlin.Float? = null,
-
-    @Json(name = "publisher_video_quality_limitation_duration_seconds")
-    val publisherVideoQualityLimitationDurationSeconds: kotlin.collections.Map<kotlin.String, kotlin.Float>? = null,
 
     @Json(name = "publishing_audio_codec")
     val publishingAudioCodec: kotlin.String? = null,
@@ -230,25 +144,54 @@ data class UserSessionStats (
     @Json(name = "sdk_version")
     val sdkVersion: kotlin.String? = null,
 
-    @Json(name = "subscriber_audio_mos")
-    val subscriberAudioMos: MOSStats? = null,
-
-    @Json(name = "subscriber_jitter")
-    val subscriberJitter: Stats? = null,
-
-    @Json(name = "subscriber_latency")
-    val subscriberLatency: Stats? = null,
-
     @Json(name = "subscriber_video_quality_throttled_duration_seconds")
     val subscriberVideoQualityThrottledDurationSeconds: kotlin.Float? = null,
 
-    @Json(name = "subsessions")
-    val subsessions: kotlin.collections.List<Subsession>? = null,
-
-    @Json(name = "timeline")
-    val timeline: CallTimeline? = null,
+    @Json(name = "truncated")
+    val truncated: kotlin.Boolean? = null,
 
     @Json(name = "webrtc_version")
-    val webrtcVersion: kotlin.String? = null
+    val webrtcVersion: kotlin.String? = null,
 
+    @Json(name = "published_tracks")
+    val publishedTracks: kotlin.collections.List<org.openapitools.client.models.PublishedTrackInfo>? = null,
+
+    @Json(name = "subsessions")
+    val subsessions: kotlin.collections.List<org.openapitools.client.models.Subsession>? = null,
+
+    @Json(name = "geolocation")
+    val geolocation: org.openapitools.client.models.GeolocationResult? = null,
+
+    @Json(name = "jitter")
+    val jitter: org.openapitools.client.models.TimeStats? = null,
+
+    @Json(name = "latency")
+    val latency: org.openapitools.client.models.TimeStats? = null,
+
+    @Json(name = "max_publishing_video_quality")
+    val maxPublishingVideoQuality: org.openapitools.client.models.VideoQuality? = null,
+
+    @Json(name = "max_receiving_video_quality")
+    val maxReceivingVideoQuality: org.openapitools.client.models.VideoQuality? = null,
+
+    @Json(name = "pub_sub_hints")
+    val pubSubHints: org.openapitools.client.models.MediaPubSubHint? = null,
+
+    @Json(name = "publisher_jitter")
+    val publisherJitter: org.openapitools.client.models.TimeStats? = null,
+
+    @Json(name = "publisher_latency")
+    val publisherLatency: org.openapitools.client.models.TimeStats? = null,
+
+    @Json(name = "publisher_video_quality_limitation_duration_seconds")
+    val publisherVideoQualityLimitationDurationSeconds: kotlin.collections.Map<kotlin.String, kotlin.Float>? = null,
+
+    @Json(name = "subscriber_jitter")
+    val subscriberJitter: org.openapitools.client.models.TimeStats? = null,
+
+    @Json(name = "subscriber_latency")
+    val subscriberLatency: org.openapitools.client.models.TimeStats? = null,
+
+    @Json(name = "timeline")
+    val timeline: org.openapitools.client.models.CallTimeline? = null
 )

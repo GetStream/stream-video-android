@@ -23,32 +23,22 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param rating
- * @param sdk
- * @param sdkVersion
- * @param userSessionId
- * @param custom
- * @param reason
  */
 
-
 data class CollectUserFeedbackRequest (
-
     @Json(name = "rating")
     val rating: kotlin.Int,
 
@@ -61,10 +51,9 @@ data class CollectUserFeedbackRequest (
     @Json(name = "user_session_id")
     val userSessionId: kotlin.String,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, kotlin.Any?>? = null,
-
     @Json(name = "reason")
-    val reason: kotlin.String? = null
+    val reason: kotlin.String? = null,
 
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = null
 )

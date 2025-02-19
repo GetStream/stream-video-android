@@ -23,10 +23,10 @@
 
 package org.openapitools.client.models
 
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -35,11 +35,11 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * All possibility of string to use
- *
- * Values: blockUsers,changeMaxDuration,createCall,createReaction,enableNoiseCancellation,endCall,joinBackstage,joinCall,joinEndedCall,muteUsers,pinForEveryone,readCall,removeCallMember,screenshare,sendAudio,sendVideo,startBroadcastCall,startRecordCall,startTranscriptionCall,stopBroadcastCall,stopRecordCall,stopTranscriptionCall,updateCall,updateCallMember,updateCallPermissions,updateCallSettings
+ * [All possibility of string to use]
  */
-
+/**
+ * OwnCapability Enum
+ */
 sealed class OwnCapability(val value: kotlin.String) {
     override fun toString(): String = value
 
@@ -62,9 +62,11 @@ sealed class OwnCapability(val value: kotlin.String) {
             "send-audio" -> SendAudio
             "send-video" -> SendVideo
             "start-broadcast-call" -> StartBroadcastCall
+            "start-closed-captions-call" -> StartClosedCaptionsCall
             "start-record-call" -> StartRecordCall
             "start-transcription-call" -> StartTranscriptionCall
             "stop-broadcast-call" -> StopBroadcastCall
+            "stop-closed-captions-call" -> StopClosedCaptionsCall
             "stop-record-call" -> StopRecordCall
             "stop-transcription-call" -> StopTranscriptionCall
             "update-call" -> UpdateCall
@@ -74,7 +76,6 @@ sealed class OwnCapability(val value: kotlin.String) {
             else -> Unknown(s)
         }
     }
-
     object BlockUsers : OwnCapability("block-users")
     object ChangeMaxDuration : OwnCapability("change-max-duration")
     object CreateCall : OwnCapability("create-call")
@@ -92,9 +93,11 @@ sealed class OwnCapability(val value: kotlin.String) {
     object SendAudio : OwnCapability("send-audio")
     object SendVideo : OwnCapability("send-video")
     object StartBroadcastCall : OwnCapability("start-broadcast-call")
+    object StartClosedCaptionsCall : OwnCapability("start-closed-captions-call")
     object StartRecordCall : OwnCapability("start-record-call")
     object StartTranscriptionCall : OwnCapability("start-transcription-call")
     object StopBroadcastCall : OwnCapability("stop-broadcast-call")
+    object StopClosedCaptionsCall : OwnCapability("stop-closed-captions-call")
     object StopRecordCall : OwnCapability("stop-record-call")
     object StopTranscriptionCall : OwnCapability("stop-transcription-call")
     object UpdateCall : OwnCapability("update-call")
@@ -103,11 +106,12 @@ sealed class OwnCapability(val value: kotlin.String) {
     object UpdateCallSettings : OwnCapability("update-call-settings")
     data class Unknown(val unknownValue: kotlin.String) : OwnCapability(unknownValue)
 
+
     class OwnCapabilityAdapter : JsonAdapter<OwnCapability>() {
         @FromJson
         override fun fromJson(reader: JsonReader): OwnCapability? {
             val s = reader.nextString() ?: return null
-            return fromString(s)
+            return OwnCapability.fromString(s)
         }
 
         @ToJson
@@ -115,4 +119,5 @@ sealed class OwnCapability(val value: kotlin.String) {
             writer.value(value?.value)
         }
     }
+
 }

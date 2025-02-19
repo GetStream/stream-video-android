@@ -23,51 +23,42 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.CallResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a call is deleted. Clients receiving this event should leave the call screen
- *
- * @param call
- * @param callCid
- * @param createdAt
- * @param type The type of event: \"call.deleted\" in this case
  */
 
-
 data class CallDeletedEvent (
-
-    @Json(name = "call")
-    val call: CallResponse,
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    /* The type of event: \"call.deleted\" in this case */
+    @Json(name = "call")
+    val call: org.openapitools.client.models.CallResponse,
+
     @Json(name = "type")
-    val type: kotlin.String = "call.deleted"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

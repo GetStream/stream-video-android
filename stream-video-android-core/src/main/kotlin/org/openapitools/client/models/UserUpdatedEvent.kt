@@ -23,42 +23,41 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserObject
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param createdAt
- * @param type
- * @param user
+ * This event is sent when a user gets updated. The event contains information about the updated user.
  */
 
-
 data class UserUpdatedEvent (
-
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "type")
-    val type: kotlin.String = "user.updated",
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>,
 
     @Json(name = "user")
-    val user: UserObject? = null
+    val user: org.openapitools.client.models.UserResponsePrivacyFields,
 
-) : VideoEvent(), WSClientEvent {
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    override fun getEventType(): String {
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null
+)
+: org.openapitools.client.models.VideoEvent()
+{
+
+    override fun getEventType(): kotlin.String {
         return type
     }
 }

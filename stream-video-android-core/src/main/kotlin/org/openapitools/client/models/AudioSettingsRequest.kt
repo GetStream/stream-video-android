@@ -23,45 +23,30 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.NoiseCancellationSettings
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  *
- *
- * @param defaultDevice
- * @param accessRequestEnabled
- * @param micDefaultOn
- * @param noiseCancellation
- * @param opusDtxEnabled
- * @param redundantCodingEnabled
- * @param speakerDefaultOn
  */
 
-
 data class AudioSettingsRequest (
-
     @Json(name = "default_device")
-    val defaultDevice: AudioSettingsRequest.DefaultDevice,
+    val defaultDevice: DefaultDevice,
 
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean? = null,
 
     @Json(name = "mic_default_on")
     val micDefaultOn: kotlin.Boolean? = null,
-
-    @Json(name = "noise_cancellation")
-    val noiseCancellation: NoiseCancellationSettings? = null,
 
     @Json(name = "opus_dtx_enabled")
     val opusDtxEnabled: kotlin.Boolean? = null,
@@ -70,38 +55,36 @@ data class AudioSettingsRequest (
     val redundantCodingEnabled: kotlin.Boolean? = null,
 
     @Json(name = "speaker_default_on")
-    val speakerDefaultOn: kotlin.Boolean? = null
+    val speakerDefaultOn: kotlin.Boolean? = null,
 
+    @Json(name = "noise_cancellation")
+    val noiseCancellation: org.openapitools.client.models.NoiseCancellationSettings? = null
 )
-
 {
 
     /**
-     *
-     *
-     * Values: speaker,earpiece
-     */
-
+    * DefaultDevice Enum
+    */
     sealed class DefaultDevice(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): DefaultDevice = when (s) {
-                "speaker" -> Speaker
-                "earpiece" -> Earpiece
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): DefaultDevice = when (s) {
+                    "earpiece" -> Earpiece
+                    "speaker" -> Speaker
+                    else -> Unknown(s)
+                }
             }
-        }
+            object Earpiece : DefaultDevice("earpiece")
+            object Speaker : DefaultDevice("speaker")
+            data class Unknown(val unknownValue: kotlin.String) : DefaultDevice(unknownValue)
 
-        object Speaker : DefaultDevice("speaker")
-        object Earpiece : DefaultDevice("earpiece")
-        data class Unknown(val unknownValue: kotlin.String) : DefaultDevice(unknownValue)
 
         class DefaultDeviceAdapter : JsonAdapter<DefaultDevice>() {
             @FromJson
             override fun fromJson(reader: JsonReader): DefaultDevice? {
                 val s = reader.nextString() ?: return null
-                return fromString(s)
+                return DefaultDevice.fromString(s)
             }
 
             @ToJson
@@ -110,7 +93,4 @@ data class AudioSettingsRequest (
             }
         }
     }
-
-
-
 }

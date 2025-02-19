@@ -59,24 +59,6 @@ internal class MoshiVideoParser : VideoParser {
             )
             .add(
                 lenientAdapter(
-                    org.openapitools.client.models.BlockListOptions.Behavior.BehaviorAdapter(),
-                ),
-            )
-            .add(
-                lenientAdapter(
-                    org.openapitools.client.models.ChannelConfigWithInfo.Automod.AutomodAdapter(),
-                ),
-            )
-            .add(
-                lenientAdapter(
-                    org.openapitools.client.models.ChannelConfigWithInfo.AutomodBehavior.AutomodBehaviorAdapter(),
-                ),
-            ).add(
-                lenientAdapter(
-                    org.openapitools.client.models.ChannelConfigWithInfo.BlocklistBehavior.BlocklistBehaviorAdapter(),
-                ),
-            ).add(
-                lenientAdapter(
                     org.openapitools.client.models.CreateDeviceRequest.PushProvider.PushProviderAdapter(),
                 ),
             )
@@ -120,6 +102,30 @@ internal class MoshiVideoParser : VideoParser {
             ).add(
                 lenientAdapter(
                     org.openapitools.client.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.LayoutSettingsRequest.Name.NameAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.RTMPBroadcastRequest.Quality.QualityAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.RTMPSettingsRequest.Quality.QualityAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.TranscriptionSettingsRequest.Language.LanguageAdapter(),
+                ),
+            ).add(
+                lenientAdapter(
+                    org.openapitools.client.models.TranscriptionSettingsResponse.Language.LanguageAdapter(),
                 ),
             )
             // Factories

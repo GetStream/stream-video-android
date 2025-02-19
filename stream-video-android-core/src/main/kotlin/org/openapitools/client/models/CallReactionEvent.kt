@@ -23,31 +23,22 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.ReactionResponse
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
  * This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
- *
- * @param callCid
- * @param createdAt
- * @param reaction
- * @param type The type of event: \"call.reaction_new\" in this case
  */
 
-
 data class CallReactionEvent (
-
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -55,19 +46,19 @@ data class CallReactionEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "reaction")
-    val reaction: ReactionResponse,
+    val reaction: org.openapitools.client.models.ReactionResponse,
 
-    /* The type of event: \"call.reaction_new\" in this case */
     @Json(name = "type")
-    val type: kotlin.String = "call.reaction_new"
+    val type: kotlin.String
+)
+: org.openapitools.client.models.VideoEvent(), org.openapitools.client.models.WSCallEvent
+{
 
-) : VideoEvent(), WSCallEvent {
-
-    override fun getCallCID(): String {
-        return callCid
+    override fun getEventType(): kotlin.String {
+        return type
     }
 
-    override fun getEventType(): String {
-        return type
+    override fun getCallCID(): kotlin.String {
+        return callCid
     }
 }

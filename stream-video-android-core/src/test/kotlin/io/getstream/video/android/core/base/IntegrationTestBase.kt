@@ -45,10 +45,12 @@ import org.openapitools.client.models.GeofenceSettingsResponse
 import org.openapitools.client.models.HLSSettingsResponse
 import org.openapitools.client.models.LimitsSettingsResponse
 import org.openapitools.client.models.RTMPIngress
+import org.openapitools.client.models.RTMPSettingsResponse
 import org.openapitools.client.models.RecordSettingsRequest
 import org.openapitools.client.models.RecordSettingsResponse
 import org.openapitools.client.models.RingSettingsResponse
 import org.openapitools.client.models.ScreensharingSettingsResponse
+import org.openapitools.client.models.SessionSettingsResponse
 import org.openapitools.client.models.TargetResolution
 import org.openapitools.client.models.ThumbnailsSettingsResponse
 import org.openapitools.client.models.TranscriptionSettingsResponse
@@ -220,6 +222,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         broadcasting = BroadcastSettingsResponse(
             enabled = false,
             hls = HLSSettingsResponse(autoOn = false, enabled = false, qualityTracks = listOf("f")),
+            rtmp = RTMPSettingsResponse(enabled = false, quality = ""),
         ),
         geofencing = GeofenceSettingsResponse(names = emptyList()),
         recording = RecordSettingsResponse(
@@ -234,9 +237,9 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         ),
         screensharing = ScreensharingSettingsResponse(false, false),
         transcription = TranscriptionSettingsResponse(
-            TranscriptionSettingsResponse.ClosedCaptionMode.Available,
-            emptyList(),
-            TranscriptionSettingsResponse.Mode.Available,
+            closedCaptionMode = TranscriptionSettingsResponse.ClosedCaptionMode.Available,
+            language = TranscriptionSettingsResponse.Language.fromString("english"),
+            mode = TranscriptionSettingsResponse.Mode.Available,
         ),
         video = VideoSettingsResponse(
             false,
@@ -252,6 +255,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         thumbnails = ThumbnailsSettingsResponse(
             enabled = false,
         ),
+        session = SessionSettingsResponse(0),
     )
     val response = CallResponse(
         id = id,

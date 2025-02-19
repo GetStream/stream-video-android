@@ -23,85 +23,63 @@
 
 package org.openapitools.client.models
 
-import org.openapitools.client.models.UserRequest
-
-
-
-
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
- * @param id
- * @param pushProvider
- * @param pushProviderName
- * @param user
- * @param userId
- * @param voipToken
+ * Create device request
  */
 
-
 data class CreateDeviceRequest (
-
     @Json(name = "id")
-    val id: kotlin.String? = null,
+    val id: kotlin.String,
 
     @Json(name = "push_provider")
-    val pushProvider: CreateDeviceRequest.PushProvider? = null,
+    val pushProvider: PushProvider,
 
     @Json(name = "push_provider_name")
     val pushProviderName: kotlin.String? = null,
 
-    @Json(name = "user")
-    val user: UserRequest? = null,
-
-    @Json(name = "user_id")
-    val userId: kotlin.String? = null,
-
     @Json(name = "voip_token")
     val voipToken: kotlin.Boolean? = null
-
 )
-
 {
 
     /**
-     *
-     *
-     * Values: firebase,apn,huawei,xiaomi
-     */
-
+    * PushProvider Enum
+    */
     sealed class PushProvider(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): PushProvider = when (s) {
-                "firebase" -> Firebase
-                "apn" -> Apn
-                "huawei" -> Huawei
-                "xiaomi" -> Xiaomi
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): PushProvider = when (s) {
+                    "apn" -> Apn
+                    "firebase" -> Firebase
+                    "huawei" -> Huawei
+                    "xiaomi" -> Xiaomi
+                    else -> Unknown(s)
+                }
             }
-        }
+            object Apn : PushProvider("apn")
+            object Firebase : PushProvider("firebase")
+            object Huawei : PushProvider("huawei")
+            object Xiaomi : PushProvider("xiaomi")
+            data class Unknown(val unknownValue: kotlin.String) : PushProvider(unknownValue)
 
-        object Firebase : PushProvider("firebase")
-        object Apn : PushProvider("apn")
-        object Huawei : PushProvider("huawei")
-        object Xiaomi : PushProvider("xiaomi")
-        data class Unknown(val unknownValue: kotlin.String) : PushProvider(unknownValue)
 
         class PushProviderAdapter : JsonAdapter<PushProvider>() {
             @FromJson
             override fun fromJson(reader: JsonReader): PushProvider? {
                 val s = reader.nextString() ?: return null
-                return fromString(s)
+                return PushProvider.fromString(s)
             }
 
             @ToJson
@@ -110,7 +88,4 @@ data class CreateDeviceRequest (
             }
         }
     }
-
-
-
 }
