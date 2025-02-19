@@ -35,6 +35,11 @@ public fun buildSmallCallText(
         )
     }
 
+    if (participants.size == 2) {
+        // TODO: the same for avatars
+        participants.firstOrNull { it.isLocalUser != true }?.let { return it.getNameOrId() }
+    }
+
     val names = participants.map { it.getNameOrId() }
     val stringBuilder = StringBuilder(names.first())
 
