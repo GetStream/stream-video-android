@@ -36,8 +36,6 @@ import com.squareup.moshi.ToJson
 import org.openapitools.client.infrastructure.Serializer
 
 /**
- *
- *
  * @param duration
  */
 
