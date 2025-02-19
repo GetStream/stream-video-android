@@ -57,13 +57,13 @@ interface ProductvideoApi {
      */
     @GET("/video/call/{type}/{id}")
     suspend fun getCall(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
         @Query("connection_id") connectionId: kotlin.String? = null,
         @Query("members_limit") membersLimit: kotlin.Int? = null,
         @Query("ring") ring: kotlin.Boolean? = null,
         @Query("notify") notify: kotlin.Boolean? = null,
-        @Query("video") video: kotlin.Boolean? = null,
-        @Path("type") type: kotlin.String,
-        @Path("id") id: kotlin.String
+        @Query("video") video: kotlin.Boolean? = null
     ): org.openapitools.client.models.GetCallResponse
 
     /**
@@ -83,9 +83,9 @@ interface ProductvideoApi {
      */
     @POST("/video/call/{type}/{id}")
     suspend fun getOrCreateCall(
-        @Query("connection_id") connectionId: kotlin.String? = null,
         @Path("type") type: kotlin.String,
-        @Path("id") id: kotlin.String ,
+        @Path("id") id: kotlin.String,
+        @Query("connection_id") connectionId: kotlin.String? = null ,
         @Body getOrCreateCallRequest : org.openapitools.client.models.GetOrCreateCallRequest? = null
     ): org.openapitools.client.models.GetOrCreateCallResponse
 
@@ -161,9 +161,9 @@ interface ProductvideoApi {
      */
     @POST("/video/call/{type}/{id}/join")
     suspend fun joinCall(
-        @Query("connection_id") connectionId: kotlin.String? = null,
         @Path("type") type: kotlin.String,
-        @Path("id") id: kotlin.String ,
+        @Path("id") id: kotlin.String,
+        @Query("connection_id") connectionId: kotlin.String? = null ,
         @Body joinCallRequest : org.openapitools.client.models.JoinCallRequest
     ): org.openapitools.client.models.JoinCallResponse
 

@@ -46,6 +46,7 @@ object Serializer {
         .add(org.openapitools.client.models.TranscriptionSettingsResponse.Mode.ModeAdapter())
         .add(org.openapitools.client.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter())
         .add(org.openapitools.client.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter())
+        .add(org.openapitools.client.models.VideoEventAdapter())
         .add(org.openapitools.client.infrastructure.BigDecimalAdapter())
         .add(org.openapitools.client.infrastructure.BigIntegerAdapter())
         .add(org.openapitools.client.infrastructure.ByteArrayAdapter())
@@ -54,6 +55,7 @@ object Serializer {
         .add(org.openapitools.client.infrastructure.OffsetDateTimeAdapter())
         .add(org.openapitools.client.infrastructure.URIAdapter())
         .add(org.openapitools.client.infrastructure.UUIDAdapter())
+        .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
 
     @JvmStatic
     val moshi: Moshi by lazy {
