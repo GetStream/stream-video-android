@@ -17,14 +17,21 @@
 package io.getstream.video.android.core.notifications.internal.service.telecom
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.OutcomeReceiver
 import android.telecom.CallAudioState
 import android.telecom.CallEndpoint
+import android.telecom.CallEndpointException
 import android.telecom.Connection
 import android.telecom.DisconnectCause
+import androidx.annotation.RequiresApi
+import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.audio.AudioHandler
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +48,13 @@ class VoipConnection(
 
     private val logger by taggedLogger("VoipConnection")
     private val serviceScope = CoroutineScope(Dispatchers.IO)
+
+    private var availableEndpoints: List<CallEndpoint> = emptyList()
+    private var deviceListener: DeviceListener? = null
+        set(value) {
+            field = value
+            value?.invoke(availableEndpoints.map { it.toStreamAudioDevice() }, null)
+        }
 
     init {
         logger.i { "[init] callId: ${callId.id}, isIncoming: $isIncoming" }
@@ -124,9 +138,30 @@ class VoipConnection(
         logger.i { "[onCallEndpointChanged] callEndpoint: $callEndpoint" }
     }
 
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onAvailableCallEndpointsChanged(availableEndpoints: MutableList<CallEndpoint>) {
         super.onAvailableCallEndpointsChanged(availableEndpoints)
         logger.i { "[onAvailableCallEndpointsChanged] availableEndpoints: $availableEndpoints" }
+
+        this.availableEndpoints = availableEndpoints
+        deviceListener?.invoke(availableEndpoints.map { it.toStreamAudioDevice() }, null)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    fun selectEndpoint(endpoint: CallEndpoint) {
+        requestCallEndpointChange(
+            endpoint,
+            context.mainExecutor,
+            object : OutcomeReceiver<Void, CallEndpointException> {
+                override fun onResult(p0: Void?) {
+                    logger.i { "[selectEndpoint] success" }
+                }
+
+                override fun onError(error: CallEndpointException) {
+                    logger.e { "[selectEndpoint] error: $error" }
+                }
+            },
+        )
     }
 
     override fun onCallEvent(event: String?, extras: Bundle?) {
@@ -170,4 +205,33 @@ class VoipConnection(
             }
         }
     }
+
+    companion object {
+        var currentConnection: VoipConnection? = null // temporary solution
+
+        fun setDeviceListener(listener: DeviceListener): AudioHandler {
+            return object : AudioHandler {
+                override fun start() {
+                    currentConnection?.deviceListener = listener
+                }
+
+                override fun stop() {}
+
+                @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                override fun selectDevice(audioDevice: StreamAudioDevice?) {
+                    if (currentConnection != null && audioDevice?.telecomDevice != null) {
+                        currentConnection?.let {
+                            StreamLog.d(
+                                "VoipConnection",
+                            ) { "[selectDevice] audioDevice: $audioDevice" }
+
+                            it.selectEndpoint(audioDevice.telecomDevice!!)
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+
+internal typealias DeviceListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit

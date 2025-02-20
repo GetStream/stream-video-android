@@ -20,6 +20,7 @@ import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.PowerManager
+import android.telecom.DisconnectCause
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.log.taggedLogger
@@ -47,6 +48,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.notifications.internal.service.telecom.VoipConnection
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -798,6 +800,9 @@ public class Call(
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
+
+        VoipConnection.currentConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+
         cleanup()
     }
 
@@ -1222,6 +1227,9 @@ public class Call(
 
         clientImpl.state.removeRingingCall()
         clientImpl.state.maybeStopForegroundService(call = this)
+
+        VoipConnection.currentConnection?.setActive()
+
         return clientImpl.accept(type, id)
     }
 

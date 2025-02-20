@@ -22,10 +22,13 @@ import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.provider.Settings
+import android.telecom.CallEndpoint
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import androidx.annotation.RequiresApi
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.audio.StreamAudioDevice
 
 fun isTelecomIntegrationAvailable(context: Context): Boolean {
     // 2. Check if we have a registered and enabled PhoneAccount.
@@ -87,4 +90,13 @@ fun registerMyPhoneAccount(context: Context) {
 
     // Register the PhoneAccount with Telecom
     telecomManager.registerPhoneAccount(phoneAccount)
+}
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+fun CallEndpoint.toStreamAudioDevice(): StreamAudioDevice = when (this.endpointType) {
+    CallEndpoint.TYPE_BLUETOOTH -> StreamAudioDevice.BluetoothHeadset(telecomDevice = this)
+    CallEndpoint.TYPE_EARPIECE -> StreamAudioDevice.Earpiece(telecomDevice = this)
+    CallEndpoint.TYPE_SPEAKER -> StreamAudioDevice.Speakerphone(telecomDevice = this)
+    CallEndpoint.TYPE_WIRED_HEADSET -> StreamAudioDevice.WiredHeadset(telecomDevice = this)
+    else -> StreamAudioDevice.Earpiece()
 }

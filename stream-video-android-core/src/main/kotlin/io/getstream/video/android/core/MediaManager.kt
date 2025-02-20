@@ -33,9 +33,8 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
+import io.getstream.video.android.core.notifications.internal.service.telecom.VoipConnection
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -422,7 +421,7 @@ class MicrophoneManager(
     fun select(device: StreamAudioDevice?) {
         enforceSetup {
             logger.i { "selecting device $device" }
-            ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+            ifAudioHandlerInitialized { it.selectDevice(device) }
             _selectedDevice.value = device
         }
     }
@@ -459,18 +458,20 @@ class MicrophoneManager(
         }
 
         if (canHandleDeviceSwitch()) {
-            audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
-                logger.i { "audio devices. selected $selected, available devices are $devices" }
+            audioHandler = VoipConnection.setDeviceListener { devices, selected ->
+                logger.i {
+                    "[setup] #telecom; listenForDevices. Selected: ${selected?.name}, available: ${devices.map { it.name }}"
+                }
 
-                _devices.value = devices.map { it.fromAudio() }
-                _selectedDevice.value = selected?.fromAudio()
+                _devices.value = devices
+                _selectedDevice.value = selected
 
                 capturedOnAudioDevicesUpdate?.invoke()
                 capturedOnAudioDevicesUpdate = null
                 setupCompleted = true
+            }.also {
+                it.start()
             }
-
-            audioHandler.start()
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
@@ -478,9 +479,9 @@ class MicrophoneManager(
 
     internal fun enforceSetup(actual: () -> Unit) = setup(onAudioDevicesUpdate = actual)
 
-    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
+    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
-            then(this.audioHandler as AudioSwitchHandler)
+            then(this.audioHandler)
         } else {
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
         }

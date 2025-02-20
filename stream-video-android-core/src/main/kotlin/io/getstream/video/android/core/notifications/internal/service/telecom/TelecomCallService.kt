@@ -143,6 +143,8 @@ internal class TelecomCallService : ConnectionService() {
             registerToggleCameraBroadcastReceiver()
         }
 
+        VoipConnection.currentConnection = connection
+
         return connection
     }
 

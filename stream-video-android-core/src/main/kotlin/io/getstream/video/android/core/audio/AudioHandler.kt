@@ -25,6 +25,7 @@ import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 
 public interface AudioHandler {
     /**
@@ -36,6 +37,8 @@ public interface AudioHandler {
      * Called when a room is disconnected.
      */
     public fun stop()
+
+    public fun selectDevice(audioDevice: StreamAudioDevice?)
 }
 
 /**
@@ -90,9 +93,9 @@ public class AudioSwitchHandler(
         }
     }
 
-    public fun selectDevice(audioDevice: AudioDevice?) {
+    override fun selectDevice(audioDevice: StreamAudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
-        audioSwitch?.selectDevice(audioDevice)
+        audioSwitch?.selectDevice(audioDevice?.toAudioDevice())
         audioSwitch?.activate()
     }
 
