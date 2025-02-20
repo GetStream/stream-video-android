@@ -176,6 +176,7 @@ internal open class CallService : Service() {
         ) {
             val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
             safeCallWithResult {
+
                 val result = if (!hasActiveCall) {
                     ContextCompat.startForegroundService(
                         context,

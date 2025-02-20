@@ -30,6 +30,7 @@ import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.telecom.registerMyPhoneAccount
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -40,6 +41,7 @@ import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.toSounds
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -170,6 +172,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // Android JSR-310 backport backport
         AndroidThreeTen.init(context)
+
+        // Register with Telecom
+        safeCall { registerMyPhoneAccount(context) }
 
         // This connection module class exposes the connections to the various retrofit APIs.
         val coordinatorConnectionModule = CoordinatorConnectionModule(

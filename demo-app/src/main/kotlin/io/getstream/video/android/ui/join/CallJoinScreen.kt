@@ -98,6 +98,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.core.notifications.internal.service.telecom.promptEnablePhoneAccount
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -212,6 +213,7 @@ private fun CallJoinHeader(
         horizontalArrangement = Arrangement.SpaceAround,
     ) {
         user?.let {
+            val context = LocalContext.current
             Box(
                 modifier = if (isProduction) {
                     Modifier.combinedClickable(
@@ -390,6 +392,7 @@ private fun CallActualContent(
             onClick = { onNewCall() },
         )
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+        val context = LocalContext.current
         StreamButton(
             style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
             modifier = Modifier
@@ -397,7 +400,8 @@ private fun CallActualContent(
                 .testTag("scan_qr_code"),
             text = stringResource(id = R.string.scan_qr_code),
             icon = Icons.Default.QrCodeScanner,
-            onClick = { gotoQR() },
+            onClick = {
+                promptEnablePhoneAccount(context) },
         )
     }
 }

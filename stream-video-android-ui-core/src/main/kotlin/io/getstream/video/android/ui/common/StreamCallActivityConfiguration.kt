@@ -24,6 +24,7 @@ internal object StreamCallActivityConfigStrings {
     const val EXTRA_CLOSE_ON_ENDED = "close-on-ended"
     const val EXTRA_KEEP_SCREEN_ON = "keep-screen-on"
     const val EXTRA_CAN_SKIP_RATIONALE = "skip-rationale-allowed"
+    const val EXTRA_SAME_UI_FOR_ALL_CALLS = "same-ui-for-all-calls"
     const val EXTRA_CUSTOM = "custom-fields"
 }
 
@@ -39,6 +40,8 @@ public data class StreamCallActivityConfiguration(
     val canSkipPermissionRationale: Boolean = true,
     /** When set to true, the activity will keep the screen on. */
     val canKeepScreenOn: Boolean = true,
+    /** When set to true, the same UI will be used for all calls. */
+    val sameUiForAllCalls: Boolean = false,
     /**
      * Custom configuration extension for any extending classes.
      * Can be used same as normal extras.
@@ -57,6 +60,7 @@ public fun Bundle.extractStreamActivityConfig(): StreamCallActivityConfiguration
     val canSkipPermissionRationale =
         getBoolean(StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE, true)
     val canKeepScreenOn = getBoolean(StreamCallActivityConfigStrings.EXTRA_KEEP_SCREEN_ON, true)
+    val sameUiForAllCalls = getBoolean(StreamCallActivityConfigStrings.EXTRA_SAME_UI_FOR_ALL_CALLS, false)
     val custom = getBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM)
     return StreamCallActivityConfiguration(
         closeScreenOnError = closeScreenOnError,
@@ -78,6 +82,7 @@ public fun StreamCallActivityConfiguration.toBundle(): Bundle {
         StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE,
         canSkipPermissionRationale,
     )
+    bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_SAME_UI_FOR_ALL_CALLS, sameUiForAllCalls)
     bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_KEEP_SCREEN_ON, canKeepScreenOn)
     bundle.putBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM, custom)
     return bundle
