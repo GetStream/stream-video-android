@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.service.telecom
 
 import android.Manifest
@@ -74,16 +90,18 @@ internal class TelecomCallService : ConnectionService() {
     // ---------------------------------------------------------------------------------------
     override fun onCreateIncomingConnection(
         connectionManagerPhoneAccount: PhoneAccountHandle?,
-        request: ConnectionRequest
+        request: ConnectionRequest,
     ): Connection {
         logger.i { "[onCreateIncomingConnection]" }
 
         // 1) Parse call info from request.extras
         val extras: Bundle = request.extras
         val intentCallId = extras.getString(NotificationHandler.INTENT_EXTRA_CALL_CID)
-        val intentCallDisplayName = extras.getString(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME)
+        val intentCallDisplayName = extras.getString(
+            NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME,
+        )
 
-        logger.i { "[onCreateIncomingConnection] callId: ${intentCallId}, name: $intentCallDisplayName" }
+        logger.i { "[onCreateIncomingConnection] callId: $intentCallId, name: $intentCallDisplayName" }
 
         // 2) If no callId or StreamVideo client, we can reject or return a failed Connection
         val streamVideoClient = StreamVideo.instanceOrNull() as? StreamVideoClient
@@ -96,19 +114,18 @@ internal class TelecomCallService : ConnectionService() {
             return Connection.createFailedConnection(DisconnectCause(DisconnectCause.ERROR))
         }
 
-
         // 3) Create a custom Connection
         val callId = StreamCallId.fromCallCid(intentCallId)
         val connection = VoipConnection(
             context = applicationContext,
             callId = callId,
             isIncoming = true,
-            //displayName = intentCallDisplayName ?: "Incoming call"
+            // displayName = intentCallDisplayName ?: "Incoming call"
         )
-        connection.setAddress(Uri.parse("sip:${callId}"), TelecomManager.PRESENTATION_ALLOWED)
+        connection.setAddress(Uri.parse("sip:$callId"), TelecomManager.PRESENTATION_ALLOWED)
         connection.setCallerDisplayName(
             intentCallDisplayName,
-            TelecomManager.PRESENTATION_ALLOWED
+            TelecomManager.PRESENTATION_ALLOWED,
         )
 
         // 4) Mark as RINGING so the system recognizes an incoming call (if not self-managed).
@@ -134,15 +151,17 @@ internal class TelecomCallService : ConnectionService() {
     // ---------------------------------------------------------------------------------------
     override fun onCreateOutgoingConnection(
         connectionManagerPhoneAccount: PhoneAccountHandle?,
-        request: ConnectionRequest
+        request: ConnectionRequest,
     ): Connection {
         logger.i { "[onCreateOutgoingConnection]" }
 
         val extras: Bundle = request.extras
         val intentCallId = extras.getString(NotificationHandler.INTENT_EXTRA_CALL_CID)
-        val intentCallDisplayName = extras.getString(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME)
+        val intentCallDisplayName = extras.getString(
+            NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME,
+        )
 
-        logger.i { "[onCreateOutgoingConnection] callId: ${intentCallId}, name: $intentCallDisplayName" }
+        logger.i { "[onCreateOutgoingConnection] callId: $intentCallId, name: $intentCallDisplayName" }
 
         // If no callId or no client
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
@@ -157,12 +176,12 @@ internal class TelecomCallService : ConnectionService() {
             context = applicationContext,
             callId = callId,
             isIncoming = false,
-            //displayName = intentCallDisplayName ?: "Outgoing call"
+            // displayName = intentCallDisplayName ?: "Outgoing call"
         )
-        connection.setAddress(Uri.parse("sip:${callId}"), TelecomManager.PRESENTATION_ALLOWED)
+        connection.setAddress(Uri.parse("sip:$callId"), TelecomManager.PRESENTATION_ALLOWED)
         connection.setCallerDisplayName(
             intentCallDisplayName ?: getString(R.string.stream_video_outgoing_call_notification_title),
-            TelecomManager.PRESENTATION_ALLOWED
+            TelecomManager.PRESENTATION_ALLOWED,
         )
 
         // Mark it as DIALING
@@ -208,7 +227,10 @@ internal class TelecomCallService : ConnectionService() {
      * Called from our serviceScope (see onCreateIncomingConnection or onCreateOutgoingConnection).
      * Mimics your old code's "initializeCallAndSocket" logic.
      */
-    private suspend fun initializeCallAndSocket(streamVideo: StreamVideoClient, callId: StreamCallId) {
+    private suspend fun initializeCallAndSocket(
+        streamVideo: StreamVideoClient,
+        callId: StreamCallId,
+    ) {
         val call = streamVideo.call(callId.type, callId.id)
         val result = call.get()
         if (result.isFailure) {
@@ -318,7 +340,7 @@ internal class TelecomCallService : ConnectionService() {
                         AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build()
+                            .build(),
                     )
                     .setAcceptsDelayedFocusGain(false)
                     .build()
@@ -394,7 +416,7 @@ internal class TelecomCallService : ConnectionService() {
                         handleIncomingCallAcceptedByMeOnAnotherDevice(
                             event.user.id,
                             streamVideo.userId,
-                            call.state.ringingState.value
+                            call.state.ringingState.value,
                         )
                     }
                     is CallRejectedEvent -> {
@@ -403,7 +425,7 @@ internal class TelecomCallService : ConnectionService() {
                             streamVideo.userId,
                             call.state.createdBy.value?.id,
                             streamVideo.state.activeCall.value != null,
-                            callId
+                            callId,
                         )
                     }
                     is CallEndedEvent -> {
@@ -418,7 +440,7 @@ internal class TelecomCallService : ConnectionService() {
     private fun handleIncomingCallAcceptedByMeOnAnotherDevice(
         acceptedByUserId: String,
         myUserId: String,
-        callRingingState: RingingState
+        callRingingState: RingingState,
     ) {
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
             // Stop ringing on this device
@@ -431,7 +453,7 @@ internal class TelecomCallService : ConnectionService() {
         myUserId: String,
         createdByUserId: String?,
         activeCallExists: Boolean,
-        callId: StreamCallId
+        callId: StreamCallId,
     ) {
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
             // This device no longer needs to ring or handle the call
@@ -463,7 +485,7 @@ internal class TelecomCallService : ConnectionService() {
                             addAction(Intent.ACTION_SCREEN_ON)
                             addAction(Intent.ACTION_SCREEN_OFF)
                             addAction(Intent.ACTION_USER_PRESENT)
-                        }
+                        },
                     )
                     isToggleCameraBroadcastReceiverRegistered = true
                 } catch (e: Exception) {
@@ -510,13 +532,13 @@ internal class TelecomCallService : ConnectionService() {
             ringingState = RingingState.Incoming(),
             callId = callId,
             callDisplayName = displayName,
-            shouldHaveContentIntent = true // up to you
+            shouldHaveContentIntent = true, // up to you
         )
         if (notification != null) {
             // Just post it; no foreground logic needed
             val hasPermission = ActivityCompat.checkSelfPermission(
                 this,
-                Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
             if (hasPermission) {
                 NotificationManagerCompat.from(this).notify(callId.hashCode(), notification)
@@ -535,7 +557,7 @@ internal class TelecomCallService : ConnectionService() {
         if (notification != null) {
             val hasPermission = ActivityCompat.checkSelfPermission(
                 this,
-                Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
             if (hasPermission) {
                 NotificationManagerCompat.from(this).notify(callId.hashCode(), notification)

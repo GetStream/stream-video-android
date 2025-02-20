@@ -1,16 +1,31 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.service.telecom
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.telecom.CallAudioState
 import android.telecom.CallEndpoint
 import android.telecom.Connection
 import android.telecom.DisconnectCause
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,7 +36,7 @@ import org.openapitools.client.models.CallRejectedEvent
 class VoipConnection(
     private val context: Context,
     private val callId: StreamCallId,
-    private val isIncoming: Boolean
+    private val isIncoming: Boolean,
 ) : Connection() {
 
     private val logger by taggedLogger("VoipConnection")
@@ -87,6 +102,13 @@ class VoipConnection(
         super.onHold()
         logger.i { "[onHold]" }
         setOnHold()
+
+        serviceScope.launch {
+            val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return@launch
+            val call = streamVideo.call(callId.type, callId.id)
+            call.reject()
+            call.leave()
+        }
         // Mute / pause your video or audio if needed
     }
 
@@ -94,7 +116,7 @@ class VoipConnection(
         super.onUnhold()
         logger.i { "[onUnhold]" }
         setActive()
-        // Resume your media logic
+        // There is no unhold logic.
     }
 
     override fun onCallEndpointChanged(callEndpoint: CallEndpoint) {
@@ -109,7 +131,7 @@ class VoipConnection(
 
     override fun onCallEvent(event: String?, extras: Bundle?) {
         super.onCallEvent(event, extras)
-        logger.i { "Telecom event: $event"}
+        logger.i { "Telecom event: $event" }
     }
     override fun onCallAudioStateChanged(state: CallAudioState) {
         super.onCallAudioStateChanged(state)

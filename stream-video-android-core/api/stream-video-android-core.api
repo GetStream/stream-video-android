@@ -4579,6 +4579,27 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun getLivestreamGuestCallServiceConfig ()Ljava/util/Map;
 }
 
+public final class io/getstream/video/android/core/notifications/internal/service/telecom/TelecomUtilsKt {
+	public static final fun getMyPhoneAccountHandle (Landroid/content/Context;)Landroid/telecom/PhoneAccountHandle;
+	public static final fun isTelecomIntegrationAvailable (Landroid/content/Context;)Z
+	public static final fun promptEnablePhoneAccount (Landroid/content/Context;)V
+	public static final fun registerMyPhoneAccount (Landroid/content/Context;)V
+}
+
+public final class io/getstream/video/android/core/notifications/internal/service/telecom/VoipConnection : android/telecom/Connection {
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Z)V
+	public fun onAbort ()V
+	public fun onAnswer ()V
+	public fun onAvailableCallEndpointsChanged (Ljava/util/List;)V
+	public fun onCallAudioStateChanged (Landroid/telecom/CallAudioState;)V
+	public fun onCallEndpointChanged (Landroid/telecom/CallEndpoint;)V
+	public fun onCallEvent (Ljava/lang/String;Landroid/os/Bundle;)V
+	public fun onDisconnect ()V
+	public fun onHold ()V
+	public fun onReject ()V
+	public fun onUnhold ()V
+}
+
 public final class io/getstream/video/android/core/permission/PermissionRequest {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
 	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

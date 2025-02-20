@@ -60,7 +60,8 @@ public fun Bundle.extractStreamActivityConfig(): StreamCallActivityConfiguration
     val canSkipPermissionRationale =
         getBoolean(StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE, true)
     val canKeepScreenOn = getBoolean(StreamCallActivityConfigStrings.EXTRA_KEEP_SCREEN_ON, true)
-    val sameUiForAllCalls = getBoolean(StreamCallActivityConfigStrings.EXTRA_SAME_UI_FOR_ALL_CALLS, false)
+    val sameUiForAllCalls =
+        getBoolean(StreamCallActivityConfigStrings.EXTRA_SAME_UI_FOR_ALL_CALLS, false)
     val custom = getBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM)
     return StreamCallActivityConfiguration(
         closeScreenOnError = closeScreenOnError,
@@ -82,7 +83,10 @@ public fun StreamCallActivityConfiguration.toBundle(): Bundle {
         StreamCallActivityConfigStrings.EXTRA_CAN_SKIP_RATIONALE,
         canSkipPermissionRationale,
     )
-    bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_SAME_UI_FOR_ALL_CALLS, sameUiForAllCalls)
+    bundle.putBoolean(
+        StreamCallActivityConfigStrings.EXTRA_SAME_UI_FOR_ALL_CALLS,
+        sameUiForAllCalls,
+    )
     bundle.putBoolean(StreamCallActivityConfigStrings.EXTRA_KEEP_SCREEN_ON, canKeepScreenOn)
     bundle.putBundle(StreamCallActivityConfigStrings.EXTRA_CUSTOM, custom)
     return bundle

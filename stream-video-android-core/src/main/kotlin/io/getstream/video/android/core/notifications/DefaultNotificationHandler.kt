@@ -105,7 +105,9 @@ public open class DefaultNotificationHandler(
         if (isTelecomIntegrationAvailable(application)) {
             try {
                 // 2) Invoke Telecom
-                val telecomManager = application.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                val telecomManager = application.getSystemService(
+                    Context.TELECOM_SERVICE,
+                ) as TelecomManager
                 val phoneAccountHandle = getMyPhoneAccountHandle(application)
 
                 // Build extras that your ConnectionService will read
@@ -137,16 +139,17 @@ public open class DefaultNotificationHandler(
             context = application,
             callId = callId,
             callDisplayName = callDisplayName,
-            callServiceConfiguration = StreamVideo.instance().state.callConfigRegistry.get(callId.type),
+            callServiceConfiguration = StreamVideo.instance().state.callConfigRegistry.get(
+                callId.type,
+            ),
             notification = getRingingCallNotification(
                 RingingState.Incoming(),
                 callId,
                 callDisplayName,
-                shouldHaveContentIntent = true
+                shouldHaveContentIntent = true,
             ),
         )
     }
-
 
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
