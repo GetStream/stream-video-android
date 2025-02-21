@@ -17,16 +17,16 @@
 package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.BlockedUserEvent
+import io.getstream.android.video.generated.models.CallMemberRemovedEvent
+import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.PermissionRequestEvent
 import io.getstream.video.android.core.base.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.BlockedUserEvent
-import org.openapitools.client.models.CallMemberRemovedEvent
-import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.PermissionRequestEvent
 import org.robolectric.RobolectricTestRunner
 
 /**

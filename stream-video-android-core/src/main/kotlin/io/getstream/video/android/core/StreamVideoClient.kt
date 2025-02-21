@@ -20,6 +20,56 @@ import android.content.Context
 import android.media.AudioAttributes
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
+import io.getstream.android.video.generated.models.AcceptCallResponse
+import io.getstream.android.video.generated.models.BlockUserRequest
+import io.getstream.android.video.generated.models.BlockUserResponse
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallRequest
+import io.getstream.android.video.generated.models.CallSettingsRequest
+import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
+import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.generated.models.CreateGuestRequest
+import io.getstream.android.video.generated.models.CreateGuestResponse
+import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetOrCreateCallRequest
+import io.getstream.android.video.generated.models.GetOrCreateCallResponse
+import io.getstream.android.video.generated.models.GoLiveRequest
+import io.getstream.android.video.generated.models.GoLiveResponse
+import io.getstream.android.video.generated.models.JoinCallRequest
+import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.ListRecordingsResponse
+import io.getstream.android.video.generated.models.ListTranscriptionsResponse
+import io.getstream.android.video.generated.models.MemberRequest
+import io.getstream.android.video.generated.models.MuteUsersResponse
+import io.getstream.android.video.generated.models.PinRequest
+import io.getstream.android.video.generated.models.QueryCallMembersRequest
+import io.getstream.android.video.generated.models.QueryCallMembersResponse
+import io.getstream.android.video.generated.models.QueryCallsRequest
+import io.getstream.android.video.generated.models.RejectCallRequest
+import io.getstream.android.video.generated.models.RejectCallResponse
+import io.getstream.android.video.generated.models.RequestPermissionRequest
+import io.getstream.android.video.generated.models.SendCallEventRequest
+import io.getstream.android.video.generated.models.SendCallEventResponse
+import io.getstream.android.video.generated.models.SendReactionRequest
+import io.getstream.android.video.generated.models.SendReactionResponse
+import io.getstream.android.video.generated.models.StartClosedCaptionsResponse
+import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
+import io.getstream.android.video.generated.models.StartRecordingRequest
+import io.getstream.android.video.generated.models.StartTranscriptionRequest
+import io.getstream.android.video.generated.models.StartTranscriptionResponse
+import io.getstream.android.video.generated.models.StopClosedCaptionsResponse
+import io.getstream.android.video.generated.models.StopLiveResponse
+import io.getstream.android.video.generated.models.StopTranscriptionResponse
+import io.getstream.android.video.generated.models.UnblockUserRequest
+import io.getstream.android.video.generated.models.UnpinRequest
+import io.getstream.android.video.generated.models.UpdateCallMembersRequest
+import io.getstream.android.video.generated.models.UpdateCallMembersResponse
+import io.getstream.android.video.generated.models.UpdateCallRequest
+import io.getstream.android.video.generated.models.UpdateCallResponse
+import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
+import io.getstream.android.video.generated.models.UserRequest
+import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.generated.models.WSCallEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
@@ -80,56 +130,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
-import org.openapitools.client.models.AcceptCallResponse
-import org.openapitools.client.models.BlockUserRequest
-import org.openapitools.client.models.BlockUserResponse
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallRequest
-import org.openapitools.client.models.CallSettingsRequest
-import org.openapitools.client.models.CollectUserFeedbackRequest
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.CreateGuestRequest
-import org.openapitools.client.models.CreateGuestResponse
-import org.openapitools.client.models.GetCallResponse
-import org.openapitools.client.models.GetOrCreateCallRequest
-import org.openapitools.client.models.GetOrCreateCallResponse
-import org.openapitools.client.models.GoLiveRequest
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.JoinCallRequest
-import org.openapitools.client.models.JoinCallResponse
-import org.openapitools.client.models.ListRecordingsResponse
-import org.openapitools.client.models.ListTranscriptionsResponse
-import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.MuteUsersResponse
-import org.openapitools.client.models.PinRequest
-import org.openapitools.client.models.QueryCallMembersRequest
-import org.openapitools.client.models.QueryCallMembersResponse
-import org.openapitools.client.models.QueryCallsRequest
-import org.openapitools.client.models.RejectCallRequest
-import org.openapitools.client.models.RejectCallResponse
-import org.openapitools.client.models.RequestPermissionRequest
-import org.openapitools.client.models.SendCallEventRequest
-import org.openapitools.client.models.SendCallEventResponse
-import org.openapitools.client.models.SendReactionRequest
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StartClosedCaptionResponse
-import org.openapitools.client.models.StartHLSBroadcastingResponse
-import org.openapitools.client.models.StartRecordingRequest
-import org.openapitools.client.models.StartTranscriptionRequest
-import org.openapitools.client.models.StartTranscriptionResponse
-import org.openapitools.client.models.StopClosedCaptionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.StopTranscriptionResponse
-import org.openapitools.client.models.UnblockUserRequest
-import org.openapitools.client.models.UnpinRequest
-import org.openapitools.client.models.UpdateCallMembersRequest
-import org.openapitools.client.models.UpdateCallMembersResponse
-import org.openapitools.client.models.UpdateCallRequest
-import org.openapitools.client.models.UpdateCallResponse
-import org.openapitools.client.models.UpdateUserPermissionsResponse
-import org.openapitools.client.models.UserRequest
-import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.WSCallEvent
 import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
 import java.util.*
@@ -538,8 +538,8 @@ internal class StreamVideoClient internal constructor(
     internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
             coordinatorConnectionModule.api.getCall(
-                type,
-                id,
+                type = type,
+                id = id,
                 connectionId = waitForConnectionId(),
             )
         }
@@ -684,10 +684,10 @@ internal class StreamVideoClient internal constructor(
 
         val result = apiCall {
             coordinatorConnectionModule.api.joinCall(
-                type,
-                id,
-                joinCallRequest,
-                waitForConnectionId(),
+                type = type,
+                id = id,
+                joinCallRequest = joinCallRequest,
+                connectionId = waitForConnectionId(),
             )
         }
         return result
@@ -873,7 +873,10 @@ internal class StreamVideoClient internal constructor(
             watch = watch,
         )
         val result = apiCall {
-            coordinatorConnectionModule.api.queryCalls(request, waitForConnectionId())
+            coordinatorConnectionModule.api.queryCalls(
+                queryCallsRequest = request,
+                connectionId = waitForConnectionId(),
+            )
         }
         if (result.isSuccess) {
             // update state for these calls
@@ -962,7 +965,7 @@ internal class StreamVideoClient internal constructor(
         emoji: String? = null,
         custom: Map<String, Any>? = null,
     ): Result<SendReactionResponse> {
-        val request = SendReactionRequest(type, custom, emoji)
+        val request = SendReactionRequest(type, custom = custom, emojiCode = emoji)
 
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 
@@ -1077,19 +1080,24 @@ internal class StreamVideoClient internal constructor(
 
     internal suspend fun notify(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.getCall(type, id, notify = true)
+            coordinatorConnectionModule.api.getCall(type = type, id = id, notify = true)
         }
     }
 
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.getCall(type, id, ring = true)
+            coordinatorConnectionModule.api.getCall(type = type, id = id, ring = true)
         }
     }
 
-    suspend fun startTranscription(type: String, id: String, externalStorage: String? = null): Result<StartTranscriptionResponse> {
+    suspend fun startTranscription(
+        type: String,
+        id: String,
+        externalStorage: String? = null,
+    ): Result<StartTranscriptionResponse> {
         return apiCall {
-            val startTranscriptionRequest = StartTranscriptionRequest(externalStorage)
+            val startTranscriptionRequest =
+                StartTranscriptionRequest(transcriptionExternalStorage = externalStorage)
             coordinatorConnectionModule.api.startTranscription(type, id, startTranscriptionRequest)
         }
     }
@@ -1106,13 +1114,13 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
-    suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionResponse> {
+    suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionsResponse> {
         return apiCall {
             coordinatorConnectionModule.api.startClosedCaptions(type, id)
         }
     }
 
-    suspend fun stopClosedCaptions(type: String, id: String): Result<StopClosedCaptionResponse> {
+    suspend fun stopClosedCaptions(type: String, id: String): Result<StopClosedCaptionsResponse> {
         return apiCall {
             coordinatorConnectionModule.api.stopClosedCaptions(type, id)
         }

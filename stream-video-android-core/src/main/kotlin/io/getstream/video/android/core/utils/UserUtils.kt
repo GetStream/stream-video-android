@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.video.android.model.User
-import org.openapitools.client.models.UserResponse
 import org.threeten.bp.OffsetDateTime
 
 internal fun User.toResponse(): UserResponse {
@@ -32,8 +32,8 @@ internal fun User.toResponse(): UserResponse {
         updatedAt = updatedAt ?: OffsetDateTime.now(),
         deletedAt = deletedAt,
         // TODO: Implement these fields
-        banned = false,
+        blockedUserIds = emptyList(),
         language = "",
-        online = false,
+
     )
 }

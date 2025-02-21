@@ -22,6 +22,35 @@ import android.graphics.Bitmap
 import android.os.PowerManager
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
+import io.getstream.android.video.generated.models.AcceptCallResponse
+import io.getstream.android.video.generated.models.AudioSettingsResponse
+import io.getstream.android.video.generated.models.BlockUserResponse
+import io.getstream.android.video.generated.models.CallSettingsRequest
+import io.getstream.android.video.generated.models.CallSettingsResponse
+import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetOrCreateCallResponse
+import io.getstream.android.video.generated.models.GoLiveResponse
+import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.ListRecordingsResponse
+import io.getstream.android.video.generated.models.ListTranscriptionsResponse
+import io.getstream.android.video.generated.models.MemberRequest
+import io.getstream.android.video.generated.models.MuteUsersResponse
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.PinResponse
+import io.getstream.android.video.generated.models.RejectCallResponse
+import io.getstream.android.video.generated.models.SendCallEventResponse
+import io.getstream.android.video.generated.models.SendReactionResponse
+import io.getstream.android.video.generated.models.StartTranscriptionResponse
+import io.getstream.android.video.generated.models.StopLiveResponse
+import io.getstream.android.video.generated.models.StopTranscriptionResponse
+import io.getstream.android.video.generated.models.UnpinResponse
+import io.getstream.android.video.generated.models.UpdateCallMembersRequest
+import io.getstream.android.video.generated.models.UpdateCallMembersResponse
+import io.getstream.android.video.generated.models.UpdateCallRequest
+import io.getstream.android.video.generated.models.UpdateCallResponse
+import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
+import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
@@ -62,37 +91,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.openapitools.client.models.AcceptCallResponse
-import org.openapitools.client.models.AudioSettingsResponse
-import org.openapitools.client.models.BlockUserResponse
-import org.openapitools.client.models.CallSettingsRequest
-import org.openapitools.client.models.CallSettingsResponse
-import org.openapitools.client.models.GetCallResponse
-import org.openapitools.client.models.GetOrCreateCallResponse
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.JoinCallResponse
-import org.openapitools.client.models.ListRecordingsResponse
-import org.openapitools.client.models.ListTranscriptionsResponse
-import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.MuteUsersResponse
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.PinResponse
-import org.openapitools.client.models.RejectCallResponse
-import org.openapitools.client.models.SendCallEventResponse
-import org.openapitools.client.models.SendReactionResponse
-import org.openapitools.client.models.StartClosedCaptionResponse
-import org.openapitools.client.models.StartTranscriptionResponse
-import org.openapitools.client.models.StopClosedCaptionResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.StopTranscriptionResponse
-import org.openapitools.client.models.UnpinResponse
-import org.openapitools.client.models.UpdateCallMembersRequest
-import org.openapitools.client.models.UpdateCallMembersResponse
-import org.openapitools.client.models.UpdateCallRequest
-import org.openapitools.client.models.UpdateCallResponse
-import org.openapitools.client.models.UpdateUserPermissionsResponse
-import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
@@ -1318,11 +1316,11 @@ public class Call(
         return clientImpl.listTranscription(type, id)
     }
 
-    suspend fun startClosedCaptions(): Result<StartClosedCaptionResponse> {
+    suspend fun startClosedCaptions(): Result<io.getstream.android.video.generated.models.StartClosedCaptionsResponse> {
         return clientImpl.startClosedCaptions(type, id)
     }
 
-    suspend fun stopClosedCaptions(): Result<StopClosedCaptionResponse> {
+    suspend fun stopClosedCaptions(): Result<io.getstream.android.video.generated.models.StopClosedCaptionsResponse> {
         return clientImpl.stopClosedCaptions(type, id)
     }
 

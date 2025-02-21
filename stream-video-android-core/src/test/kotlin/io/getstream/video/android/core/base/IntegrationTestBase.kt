@@ -18,6 +18,29 @@ package io.getstream.video.android.core.base
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
+import io.getstream.android.video.generated.models.AudioSettingsResponse
+import io.getstream.android.video.generated.models.BackstageSettingsResponse
+import io.getstream.android.video.generated.models.BroadcastSettingsResponse
+import io.getstream.android.video.generated.models.CallIngressResponse
+import io.getstream.android.video.generated.models.CallResponse
+import io.getstream.android.video.generated.models.CallSettingsResponse
+import io.getstream.android.video.generated.models.EgressResponse
+import io.getstream.android.video.generated.models.GeofenceSettingsResponse
+import io.getstream.android.video.generated.models.HLSSettingsResponse
+import io.getstream.android.video.generated.models.LimitsSettingsResponse
+import io.getstream.android.video.generated.models.RTMPIngress
+import io.getstream.android.video.generated.models.RTMPSettingsResponse
+import io.getstream.android.video.generated.models.RecordSettingsRequest
+import io.getstream.android.video.generated.models.RecordSettingsResponse
+import io.getstream.android.video.generated.models.RingSettingsResponse
+import io.getstream.android.video.generated.models.ScreensharingSettingsResponse
+import io.getstream.android.video.generated.models.SessionSettingsResponse
+import io.getstream.android.video.generated.models.TargetResolution
+import io.getstream.android.video.generated.models.ThumbnailsSettingsResponse
+import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
+import io.getstream.android.video.generated.models.UserResponse
+import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.Priority
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
@@ -34,27 +57,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
-import org.openapitools.client.models.AudioSettingsResponse
-import org.openapitools.client.models.BackstageSettingsResponse
-import org.openapitools.client.models.BroadcastSettingsResponse
-import org.openapitools.client.models.CallIngressResponse
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.CallSettingsResponse
-import org.openapitools.client.models.EgressResponse
-import org.openapitools.client.models.GeofenceSettingsResponse
-import org.openapitools.client.models.HLSSettingsResponse
-import org.openapitools.client.models.LimitsSettingsResponse
-import org.openapitools.client.models.RTMPIngress
-import org.openapitools.client.models.RecordSettingsRequest
-import org.openapitools.client.models.RecordSettingsResponse
-import org.openapitools.client.models.RingSettingsResponse
-import org.openapitools.client.models.ScreensharingSettingsResponse
-import org.openapitools.client.models.TargetResolution
-import org.openapitools.client.models.ThumbnailsSettingsResponse
-import org.openapitools.client.models.TranscriptionSettingsResponse
-import org.openapitools.client.models.UserResponse
-import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.VideoSettingsResponse
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import java.util.UUID
@@ -220,12 +222,13 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         broadcasting = BroadcastSettingsResponse(
             enabled = false,
             hls = HLSSettingsResponse(autoOn = false, enabled = false, qualityTracks = listOf("f")),
+            rtmp = RTMPSettingsResponse(enabled = false, quality = ""),
         ),
         geofencing = GeofenceSettingsResponse(names = emptyList()),
         recording = RecordSettingsResponse(
             audioOnly = false,
             mode = RecordSettingsRequest.Mode.Available.value,
-            quality = RecordSettingsRequest.Quality.`720p`.value,
+            quality = RecordSettingsRequest.Quality.Quality720p.value,
         ),
         ring = RingSettingsResponse(
             autoCancelTimeoutMs = 10000,
@@ -234,9 +237,9 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         ),
         screensharing = ScreensharingSettingsResponse(false, false),
         transcription = TranscriptionSettingsResponse(
-            TranscriptionSettingsResponse.ClosedCaptionMode.Available,
-            emptyList(),
-            TranscriptionSettingsResponse.Mode.Available,
+            closedCaptionMode = TranscriptionSettingsResponse.ClosedCaptionMode.Available,
+            language = TranscriptionSettingsResponse.Language.fromString("english"),
+            mode = TranscriptionSettingsResponse.Mode.Available,
         ),
         video = VideoSettingsResponse(
             false,
@@ -252,6 +255,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         thumbnails = ThumbnailsSettingsResponse(
             enabled = false,
         ),
+        session = SessionSettingsResponse(0),
     )
     val response = CallResponse(
         id = id,

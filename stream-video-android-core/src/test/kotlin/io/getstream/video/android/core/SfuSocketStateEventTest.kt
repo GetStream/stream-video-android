@@ -17,6 +17,17 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.BlockedUserEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallReactionEvent
+import io.getstream.android.video.generated.models.CallRecordingStartedEvent
+import io.getstream.android.video.generated.models.CallRecordingStoppedEvent
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.PermissionRequestEvent
+import io.getstream.android.video.generated.models.ReactionResponse
+import io.getstream.android.video.generated.models.UnblockedUserEvent
+import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
+import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -30,17 +41,6 @@ import io.getstream.video.android.core.permission.PermissionRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.BlockedUserEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallReactionEvent
-import org.openapitools.client.models.CallRecordingStartedEvent
-import org.openapitools.client.models.CallRecordingStoppedEvent
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.PermissionRequestEvent
-import org.openapitools.client.models.ReactionResponse
-import org.openapitools.client.models.UnblockedUserEvent
-import org.openapitools.client.models.UpdatedCallPermissionsEvent
-import org.openapitools.client.models.UserResponse
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.event.ConnectionQualityInfo
@@ -53,12 +53,13 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
     @Test
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event
-        val event = CallRecordingStartedEvent(callCid = call.cid, nowUtc, "call.recording_started")
+        val event =
+            CallRecordingStartedEvent(callCid = call.cid, nowUtc, "", "call.recording_started")
         clientImpl.fireEvent(event)
         assertThat(call.state.recording.value).isTrue()
         // now stop recording
         val stopRecordingEvent =
-            CallRecordingStoppedEvent(callCid = call.cid, nowUtc, "call.recording_stopped")
+            CallRecordingStoppedEvent(callCid = call.cid, nowUtc, "", "call.recording_stopped")
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
     }
@@ -154,11 +155,11 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
     fun `Call permissions updated`() {
         val permissions = mutableListOf<String>("screenshare")
         val requestEvent = PermissionRequestEvent(
-            call.cid,
-            nowUtc,
-            permissions,
-            "call.permission_request",
-            testData.users["thierry"]!!.toUserResponse(),
+            callCid = call.cid,
+            createdAt = nowUtc,
+            permissions = permissions,
+            type = "call.permission_request",
+            user = testData.users["thierry"]!!.toUserResponse(),
         )
         clientImpl.fireEvent(requestEvent)
         val capability = OwnCapability.Screenshare
@@ -167,8 +168,8 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
             call.cid,
             nowUtc,
             ownCapabilities,
-            "call.permissions_updated",
-            testData.users["thierry"]!!.toUserResponse(),
+            type = "call.permissions_updated",
+            user = testData.users["thierry"]!!.toUserResponse(),
         )
         clientImpl.fireEvent(permissionsUpdated, call.cid)
 
@@ -326,8 +327,7 @@ private fun io.getstream.video.android.model.User.toUserResponse(): UserResponse
         updatedAt = OffsetDateTime.now(),
         deletedAt = OffsetDateTime.now(),
         // TODO: implement these
-        banned = false,
+        blockedUserIds = emptyList(),
         language = "",
-        online = false,
     )
 }

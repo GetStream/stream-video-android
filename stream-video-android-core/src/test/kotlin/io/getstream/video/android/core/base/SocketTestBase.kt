@@ -19,6 +19,7 @@ package io.getstream.video.android.core.base
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
@@ -32,7 +33,6 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import okhttp3.logging.HttpLoggingInterceptor
-import org.openapitools.client.models.VideoEvent
 import java.util.concurrent.TimeUnit
 
 open class SocketTestBase : TestBase() {

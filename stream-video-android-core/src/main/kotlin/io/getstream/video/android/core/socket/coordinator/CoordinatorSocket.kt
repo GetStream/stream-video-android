@@ -16,6 +16,10 @@
 
 package io.getstream.video.android.core.socket.coordinator
 
+import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.generated.models.ConnectionErrorEvent
+import io.getstream.android.video.generated.models.HealthCheckEvent
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -44,10 +48,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.ConnectionErrorEvent
-import org.openapitools.client.models.HealthCheckEvent
-import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import kotlin.coroutines.EmptyCoroutineContext
 
