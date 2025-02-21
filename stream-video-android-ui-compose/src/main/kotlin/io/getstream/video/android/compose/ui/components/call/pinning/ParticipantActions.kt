@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.lifecycleScope
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
@@ -59,7 +60,6 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import io.getstream.android.video.generated.models.OwnCapability
 
 /**
  * Defines a participant action.
