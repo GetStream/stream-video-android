@@ -26,6 +26,9 @@ import android.telecom.CallEndpointException
 import android.telecom.Connection
 import android.telecom.DisconnectCause
 import androidx.annotation.RequiresApi
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallRejectedEvent
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
@@ -37,9 +40,6 @@ import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallRejectedEvent
 
 class VoipConnection(
     private val context: Context,
