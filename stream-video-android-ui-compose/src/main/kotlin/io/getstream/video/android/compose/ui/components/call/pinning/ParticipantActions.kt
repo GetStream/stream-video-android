@@ -59,7 +59,7 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.OwnCapability
+import io.getstream.android.video.generated.models.OwnCapability
 
 /**
  * Defines a participant action.

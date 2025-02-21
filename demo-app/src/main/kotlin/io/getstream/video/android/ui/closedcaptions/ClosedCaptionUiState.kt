@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.ui.closedcaptions
 
-import org.openapitools.client.models.TranscriptionSettingsResponse
+import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 
 sealed class ClosedCaptionUiState {
     /**

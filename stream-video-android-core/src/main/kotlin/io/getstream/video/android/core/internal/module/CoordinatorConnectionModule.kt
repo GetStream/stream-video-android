@@ -29,8 +29,8 @@ import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.openapitools.client.apis.ProductvideoApi
-import org.openapitools.client.infrastructure.Serializer
+import io.getstream.android.video.generated.apis.ProductvideoApi
+import io.getstream.android.video.generated.infrastructure.Serializer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory

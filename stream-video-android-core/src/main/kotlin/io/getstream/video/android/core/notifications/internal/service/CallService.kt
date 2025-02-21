@@ -61,9 +61,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallRejectedEvent
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallRejectedEvent
 
 /**
  * A foreground service that is running when there is an active call.

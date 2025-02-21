@@ -59,10 +59,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallSessionParticipantLeftEvent
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.VideoEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.VideoEvent
 
 @OptIn(StreamCallActivityDelicateApi::class)
 public abstract class StreamCallActivity : ComponentActivity() {

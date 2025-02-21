@@ -41,8 +41,8 @@ import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import org.openapitools.client.apis.ProductvideoApi
-import org.openapitools.client.models.CreateDeviceRequest
+import io.getstream.android.video.generated.apis.ProductvideoApi
+import io.getstream.android.video.generated.models.CreateDeviceRequest
 
 internal class StreamNotificationManager private constructor(
     private val context: Context,

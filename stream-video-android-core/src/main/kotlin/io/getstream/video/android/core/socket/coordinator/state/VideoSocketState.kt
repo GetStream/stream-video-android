@@ -18,7 +18,7 @@ package io.getstream.video.android.core.socket.coordinator.state
 
 import io.getstream.result.Error
 import io.getstream.video.android.core.socket.common.ConnectionConf
-import org.openapitools.client.models.ConnectedEvent
+import io.getstream.android.video.generated.models.ConnectedEvent
 
 public sealed class VideoSocketState {
 

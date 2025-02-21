@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import org.openapitools.client.models.ReactionResponse
+import io.getstream.android.video.generated.models.ReactionResponse
 
 @Stable
 public data class Reaction(

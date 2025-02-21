@@ -22,7 +22,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.MemberRequest
+import io.getstream.android.video.generated.models.MemberRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime

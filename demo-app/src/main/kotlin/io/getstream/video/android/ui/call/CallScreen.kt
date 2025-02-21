@@ -115,8 +115,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.TranscriptionSettingsResponse
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 
 @Composable
 fun CallScreen(

@@ -26,9 +26,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallRejectedEvent
-import org.openapitools.client.models.CallRingEvent
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallRejectedEvent
+import io.getstream.android.video.generated.models.CallRingEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)

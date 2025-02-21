@@ -19,7 +19,7 @@ package io.getstream.video.android.core.permission.android
 import android.content.pm.PackageManager
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
-import org.openapitools.client.models.OwnCapability
+import io.getstream.android.video.generated.models.OwnCapability
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

@@ -34,7 +34,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.openapitools.client.models.VideoEvent
+import io.getstream.android.video.generated.models.VideoEvent
 
 /**
  * The main interface to control the Video calls. [StreamVideoClient] implements this interface.

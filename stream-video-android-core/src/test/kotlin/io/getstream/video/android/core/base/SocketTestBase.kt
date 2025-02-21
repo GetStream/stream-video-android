@@ -32,7 +32,7 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.WebSocket
 import okhttp3.logging.HttpLoggingInterceptor
-import org.openapitools.client.models.VideoEvent
+import io.getstream.android.video.generated.models.VideoEvent
 import java.util.concurrent.TimeUnit
 
 open class SocketTestBase : TestBase() {

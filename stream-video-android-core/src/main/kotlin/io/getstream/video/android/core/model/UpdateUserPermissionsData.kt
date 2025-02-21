@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import org.openapitools.client.models.UpdateUserPermissionsRequest
+import io.getstream.android.video.generated.models.UpdateUserPermissionsRequest
 
 /**
  * Represents the data used to request user permission updates.

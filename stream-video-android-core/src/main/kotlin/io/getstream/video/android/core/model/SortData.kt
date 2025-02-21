@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import org.openapitools.client.models.SortParamRequest
+import io.getstream.android.video.generated.models.SortParamRequest
 
 /**
  * Represents the data required to apply a sorting method to queries.

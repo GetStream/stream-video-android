@@ -30,7 +30,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.Test
-import org.openapitools.client.models.MemberRequest
+import io.getstream.android.video.generated.models.MemberRequest
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.MediaStreamTrack

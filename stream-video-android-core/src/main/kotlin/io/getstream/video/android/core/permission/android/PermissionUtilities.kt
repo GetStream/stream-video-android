@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
-import org.openapitools.client.models.OwnCapability
+import io.getstream.android.video.generated.models.OwnCapability
 
 /**
  * Default mapper for stream calls.

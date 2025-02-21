@@ -48,11 +48,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import org.openapitools.client.infrastructure.Serializer
-import org.openapitools.client.models.ConnectUserDetailsRequest
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.VideoEvent
-import org.openapitools.client.models.WSAuthMessageRequest
+import io.getstream.android.video.generated.infrastructure.Serializer
+import io.getstream.android.video.generated.models.ConnectUserDetailsRequest
+import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.generated.models.WSAuthMessageRequest
 
 /**
  * PersistentSocket architecture

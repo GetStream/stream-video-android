@@ -27,10 +27,10 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.openapitools.client.models.CallCreatedEvent
-import org.openapitools.client.models.CallRingEvent
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.VideoEvent
+import io.getstream.android.video.generated.models.CallCreatedEvent
+import io.getstream.android.video.generated.models.CallRingEvent
+import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.generated.models.VideoEvent
 
 // These are UI states, need to move out.
 @Stable

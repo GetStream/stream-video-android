@@ -44,7 +44,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.VideoSettingsResponse
+import io.getstream.android.video.generated.models.VideoSettingsResponse
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid

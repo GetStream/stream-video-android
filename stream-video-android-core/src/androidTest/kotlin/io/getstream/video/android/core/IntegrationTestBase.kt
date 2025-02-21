@@ -30,7 +30,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
-import org.openapitools.client.models.VideoEvent
+import io.getstream.android.video.generated.models.VideoEvent
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume

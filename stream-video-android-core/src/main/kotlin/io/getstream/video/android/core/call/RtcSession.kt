@@ -104,7 +104,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
-import org.openapitools.client.models.VideoEvent
+import io.getstream.android.video.generated.models.VideoEvent
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
