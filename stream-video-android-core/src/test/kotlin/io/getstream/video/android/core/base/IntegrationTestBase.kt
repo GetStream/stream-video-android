@@ -228,7 +228,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         recording = RecordSettingsResponse(
             audioOnly = false,
             mode = RecordSettingsRequest.Mode.Available.value,
-            quality = RecordSettingsRequest.Quality.`720p`.value,
+            quality = RecordSettingsRequest.Quality.Quality720p.value,
         ),
         ring = RingSettingsResponse(
             autoCancelTimeoutMs = 10000,
