@@ -39,6 +39,9 @@ import android.telecom.TelecomManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallRejectedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
@@ -53,9 +56,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallRejectedEvent
 
 /**
  * A ConnectionService replacement for your old CallService.
