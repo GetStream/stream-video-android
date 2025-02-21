@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.socket.sfu
 
+import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -25,7 +26,6 @@ import io.getstream.video.android.core.socket.sfu.state.RestartReason
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketStateEvent
 import kotlinx.coroutines.flow.StateFlow
-import org.openapitools.client.models.ConnectedEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketState.Disconnected.Stopped) {

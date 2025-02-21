@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.events
 
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.model.UserAudioLevel
-import org.openapitools.client.models.VideoEvent
 import stream.video.sfu.event.ChangePublishOptions
 import stream.video.sfu.event.ChangePublishQuality
 import stream.video.sfu.event.ConnectionQualityInfo
