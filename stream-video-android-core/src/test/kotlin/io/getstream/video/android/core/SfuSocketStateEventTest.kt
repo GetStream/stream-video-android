@@ -17,6 +17,17 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.BlockedUserEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallReactionEvent
+import io.getstream.android.video.generated.models.CallRecordingStartedEvent
+import io.getstream.android.video.generated.models.CallRecordingStoppedEvent
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.PermissionRequestEvent
+import io.getstream.android.video.generated.models.ReactionResponse
+import io.getstream.android.video.generated.models.UnblockedUserEvent
+import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
+import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -30,17 +41,6 @@ import io.getstream.video.android.core.permission.PermissionRequest
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import io.getstream.android.video.generated.models.BlockedUserEvent
-import io.getstream.android.video.generated.models.CallEndedEvent
-import io.getstream.android.video.generated.models.CallReactionEvent
-import io.getstream.android.video.generated.models.CallRecordingStartedEvent
-import io.getstream.android.video.generated.models.CallRecordingStoppedEvent
-import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.android.video.generated.models.PermissionRequestEvent
-import io.getstream.android.video.generated.models.ReactionResponse
-import io.getstream.android.video.generated.models.UnblockedUserEvent
-import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
-import io.getstream.android.video.generated.models.UserResponse
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.event.ConnectionQualityInfo

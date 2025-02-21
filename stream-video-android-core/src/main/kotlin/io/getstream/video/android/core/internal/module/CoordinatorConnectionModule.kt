@@ -19,6 +19,8 @@ package io.getstream.video.android.core.internal.module
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.video.generated.apis.ProductvideoApi
+import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.token.TokenProvider
@@ -29,8 +31,6 @@ import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.infrastructure.Serializer
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory

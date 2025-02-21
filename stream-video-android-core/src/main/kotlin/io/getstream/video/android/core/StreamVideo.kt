@@ -20,6 +20,7 @@ import android.content.Context
 import android.os.Build
 import androidx.compose.runtime.Stable
 import io.getstream.android.push.PushDevice
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener
@@ -34,7 +35,6 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import io.getstream.android.video.generated.models.VideoEvent
 
 /**
  * The main interface to control the Video calls. [StreamVideoClient] implements this interface.

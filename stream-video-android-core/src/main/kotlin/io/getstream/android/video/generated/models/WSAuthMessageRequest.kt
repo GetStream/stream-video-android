@@ -18,23 +18,12 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import io.getstream.android.video.generated.models.ConnectUserDetailsRequest
-
-
-
-
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
-import io.getstream.android.video.generated.infrastructure.Serializer
 
 /**
  *
@@ -43,14 +32,13 @@ import io.getstream.android.video.generated.infrastructure.Serializer
  * @param userDetails
  */
 
-
-data class WSAuthMessageRequest (
+data class WSAuthMessageRequest(
 
     @Json(name = "token")
     val token: kotlin.String,
 
     @Json(name = "user_details")
-    val userDetails: ConnectUserDetailsRequest
+    val userDetails: ConnectUserDetailsRequest,
 
 ) : VideoEvent() {
     override fun getEventType(): String = "authenticate"

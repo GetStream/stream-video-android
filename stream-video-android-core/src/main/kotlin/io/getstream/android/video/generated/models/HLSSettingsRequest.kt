@@ -18,27 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.List
 
 /**
  *
  */
 
-data class HLSSettingsRequest (
+data class HLSSettingsRequest(
     @Json(name = "quality_tracks")
     val qualityTracks: kotlin.collections.List<kotlin.String>,
 
@@ -46,5 +38,5 @@ data class HLSSettingsRequest (
     val autoOn: kotlin.Boolean? = null,
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null
+    val enabled: kotlin.Boolean? = null,
 )

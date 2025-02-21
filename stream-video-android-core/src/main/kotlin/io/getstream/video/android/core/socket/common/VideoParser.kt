@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.socket.common
 
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.StreamLog
 import io.getstream.result.Error
 import io.getstream.result.Result
@@ -28,7 +29,6 @@ import io.getstream.video.android.core.events.SfuDataRequest
 import okhttp3.Response
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import io.getstream.android.video.generated.models.VideoEvent
 import retrofit2.Retrofit
 import stream.video.sfu.event.SfuEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy

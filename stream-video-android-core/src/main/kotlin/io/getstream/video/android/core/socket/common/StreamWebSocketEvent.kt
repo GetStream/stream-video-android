@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.socket.common
 
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.result.Error
 import io.getstream.video.android.core.events.SfuDataEvent
-import io.getstream.android.video.generated.models.VideoEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 public sealed class StreamWebSocketEvent {

@@ -19,8 +19,8 @@ package io.getstream.video.android.core.permission.android
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import io.getstream.video.android.core.Call
 import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.video.android.core.Call
 
 /**
  * Default mapper for stream calls.

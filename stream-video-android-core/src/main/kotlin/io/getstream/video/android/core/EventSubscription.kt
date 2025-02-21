@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.video.android.core.events.VideoEventListener
 
 class EventSubscription(
     public val listener: VideoEventListener<VideoEvent>,

@@ -18,27 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.Map
 
 /**
  *
  */
 
-data class ConnectUserDetailsRequest (
+data class ConnectUserDetailsRequest(
     @Json(name = "id")
     val id: kotlin.String,
 
@@ -55,5 +47,5 @@ data class ConnectUserDetailsRequest (
     val name: kotlin.String? = null,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>? = null
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = null,
 )

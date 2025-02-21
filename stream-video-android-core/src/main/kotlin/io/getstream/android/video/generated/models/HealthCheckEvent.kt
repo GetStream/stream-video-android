@@ -18,27 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.Map
 
 /**
  *
  */
 
-data class HealthCheckEvent (
+data class HealthCheckEvent(
     @Json(name = "connection_id")
     val connectionId: kotlin.String,
 
@@ -55,10 +47,9 @@ data class HealthCheckEvent (
     val cid: kotlin.String? = null,
 
     @Json(name = "received_at")
-    val receivedAt: org.threeten.bp.OffsetDateTime? = null
-)
-: io.getstream.android.video.generated.models.VideoEvent()
-{
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null,
+) :
+    io.getstream.android.video.generated.models.VideoEvent() {
 
     override fun getEventType(): kotlin.String {
         return type

@@ -18,6 +18,10 @@ package io.getstream.video.android.core
 
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
+import io.getstream.android.video.generated.models.CallCreatedEvent
+import io.getstream.android.video.generated.models.CallRingEvent
+import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
@@ -27,10 +31,6 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import io.getstream.android.video.generated.models.CallCreatedEvent
-import io.getstream.android.video.generated.models.CallRingEvent
-import io.getstream.android.video.generated.models.ConnectedEvent
-import io.getstream.android.video.generated.models.VideoEvent
 
 // These are UI states, need to move out.
 @Stable

@@ -18,6 +18,11 @@ package io.getstream.video.android.core.socket.coordinator
 
 import androidx.lifecycle.Lifecycle
 import com.squareup.moshi.JsonAdapter
+import io.getstream.android.video.generated.infrastructure.Serializer
+import io.getstream.android.video.generated.models.ConnectUserDetailsRequest
+import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.generated.models.WSAuthMessageRequest
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -48,11 +53,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
-import io.getstream.android.video.generated.infrastructure.Serializer
-import io.getstream.android.video.generated.models.ConnectUserDetailsRequest
-import io.getstream.android.video.generated.models.ConnectedEvent
-import io.getstream.android.video.generated.models.VideoEvent
-import io.getstream.android.video.generated.models.WSAuthMessageRequest
 
 /**
  * PersistentSocket architecture

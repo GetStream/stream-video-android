@@ -18,15 +18,11 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -38,7 +34,7 @@ import com.squareup.moshi.ToJson
  * RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
  */
 
-data class RTMPBroadcastRequest (
+data class RTMPBroadcastRequest(
     @Json(name = "name")
     val name: kotlin.String,
 
@@ -52,43 +48,41 @@ data class RTMPBroadcastRequest (
     val streamKey: kotlin.String? = null,
 
     @Json(name = "layout")
-    val layout: io.getstream.android.video.generated.models.LayoutSettingsRequest? = null
-)
-{
+    val layout: io.getstream.android.video.generated.models.LayoutSettingsRequest? = null,
+) {
 
     /**
-    * Quality Enum
-    */
+     * Quality Enum
+     */
     sealed class Quality(val value: kotlin.String) {
-            override fun toString(): String = value
+        override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: kotlin.String): Quality = when (s) {
-                    "portrait-1080x1920" -> Portrait1080x1920
-                    "portrait-1440x2560" -> Portrait1440x2560
-                    "portrait-360x640" -> Portrait360x640
-                    "portrait-480x854" -> Portrait480x854
-                    "portrait-720x1280" -> Portrait720x1280
-                    "1080p" -> `1080p`
-                    "1440p" -> `1440p`
-                    "360p" -> `360p`
-                    "480p" -> `480p`
-                    "720p" -> `720p`
-                    else -> Unknown(s)
-                }
+        companion object {
+            fun fromString(s: kotlin.String): Quality = when (s) {
+                "portrait-1080x1920" -> Portrait1080x1920
+                "portrait-1440x2560" -> Portrait1440x2560
+                "portrait-360x640" -> Portrait360x640
+                "portrait-480x854" -> Portrait480x854
+                "portrait-720x1280" -> Portrait720x1280
+                "1080p" -> Quality1080p
+                "1440p" -> Quality1440p
+                "360p" -> Quality360p
+                "480p" -> Quality480p
+                "720p" -> Quality720p
+                else -> Unknown(s)
             }
-            object Portrait1080x1920 : Quality("portrait-1080x1920")
-            object Portrait1440x2560 : Quality("portrait-1440x2560")
-            object Portrait360x640 : Quality("portrait-360x640")
-            object Portrait480x854 : Quality("portrait-480x854")
-            object Portrait720x1280 : Quality("portrait-720x1280")
-            object `1080p` : Quality("1080p")
-            object `1440p` : Quality("1440p")
-            object `360p` : Quality("360p")
-            object `480p` : Quality("480p")
-            object `720p` : Quality("720p")
-            data class Unknown(val unknownValue: kotlin.String) : Quality(unknownValue)
-
+        }
+        object Portrait1080x1920 : Quality("portrait-1080x1920")
+        object Portrait1440x2560 : Quality("portrait-1440x2560")
+        object Portrait360x640 : Quality("portrait-360x640")
+        object Portrait480x854 : Quality("portrait-480x854")
+        object Portrait720x1280 : Quality("portrait-720x1280")
+        object Quality1080p : Quality("1080p")
+        object Quality1440p : Quality("1440p")
+        object Quality360p : Quality("360p")
+        object Quality480p : Quality("480p")
+        object Quality720p : Quality("720p")
+        data class Unknown(val unknownValue: kotlin.String) : Quality(unknownValue)
 
         class QualityAdapter : JsonAdapter<Quality>() {
             @FromJson

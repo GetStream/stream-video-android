@@ -18,27 +18,18 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 
 /**
  *
  */
 
-data class RingSettingsResponse (
+data class RingSettingsResponse(
     @Json(name = "auto_cancel_timeout_ms")
     val autoCancelTimeoutMs: kotlin.Int,
 
@@ -46,5 +37,5 @@ data class RingSettingsResponse (
     val incomingCallTimeoutMs: kotlin.Int,
 
     @Json(name = "missed_call_timeout_ms")
-    val missedCallTimeoutMs: kotlin.Int
+    val missedCallTimeoutMs: kotlin.Int,
 )

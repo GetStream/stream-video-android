@@ -18,36 +18,29 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.List
 
 /**
  *
  */
 
-data class UserStats (
+data class UserStats(
     @Json(name = "min_event_ts")
     val minEventTs: kotlin.Int,
 
     @Json(name = "session_stats")
-    val sessionStats: kotlin.collections.List<io.getstream.android.video.generated.models.UserSessionStats>,
+    val sessionStats:
+    kotlin.collections.List<io.getstream.android.video.generated.models.UserSessionStats>,
 
     @Json(name = "info")
     val info: io.getstream.android.video.generated.models.UserInfoResponse,
 
     @Json(name = "rating")
-    val rating: kotlin.Int? = null
+    val rating: kotlin.Int? = null,
 )

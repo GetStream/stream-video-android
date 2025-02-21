@@ -24,8 +24,6 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.getstream.video.android.core.socket.common.VideoParser
-import io.getstream.video.android.core.socket.common.parser2.adapters.DateAdapter
 import io.getstream.android.video.generated.infrastructure.BigDecimalAdapter
 import io.getstream.android.video.generated.infrastructure.BigIntegerAdapter
 import io.getstream.android.video.generated.infrastructure.ByteArrayAdapter
@@ -35,6 +33,8 @@ import io.getstream.android.video.generated.infrastructure.OffsetDateTimeAdapter
 import io.getstream.android.video.generated.infrastructure.URIAdapter
 import io.getstream.android.video.generated.infrastructure.UUIDAdapter
 import io.getstream.android.video.generated.models.VideoEventAdapter
+import io.getstream.video.android.core.socket.common.VideoParser
+import io.getstream.video.android.core.socket.common.parser2.adapters.DateAdapter
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -68,7 +68,9 @@ internal class MoshiVideoParser : VideoParser {
                 ),
             )
             .add(
-                lenientAdapter(io.getstream.android.video.generated.models.OwnCapability.OwnCapabilityAdapter()),
+                lenientAdapter(
+                    io.getstream.android.video.generated.models.OwnCapability.OwnCapabilityAdapter(),
+                ),
             )
             .add(
                 lenientAdapter(

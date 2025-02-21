@@ -18,27 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.List
 
 /**
  * Basic response information
  */
 
-data class GetCallStatsResponse (
+data class GetCallStatsResponse(
     @Json(name = "call_duration_seconds")
     val callDurationSeconds: kotlin.Int,
 
@@ -67,10 +59,12 @@ data class GetCallStatsResponse (
     val sfuCount: kotlin.Int,
 
     @Json(name = "participant_report")
-    val participantReport: kotlin.collections.List<io.getstream.android.video.generated.models.UserStats>,
+    val participantReport:
+    kotlin.collections.List<io.getstream.android.video.generated.models.UserStats>,
 
     @Json(name = "sfus")
-    val sfus: kotlin.collections.List<io.getstream.android.video.generated.models.SFULocationResponse>,
+    val sfus:
+    kotlin.collections.List<io.getstream.android.video.generated.models.SFULocationResponse>,
 
     @Json(name = "average_connection_time")
     val averageConnectionTime: kotlin.Float? = null,
@@ -85,5 +79,5 @@ data class GetCallStatsResponse (
     val jitter: io.getstream.android.video.generated.models.TimeStats? = null,
 
     @Json(name = "latency")
-    val latency: io.getstream.android.video.generated.models.TimeStats? = null
+    val latency: io.getstream.android.video.generated.models.TimeStats? = null,
 )

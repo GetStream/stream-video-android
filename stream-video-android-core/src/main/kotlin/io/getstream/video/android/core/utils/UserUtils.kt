@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.utils
 
-import io.getstream.video.android.model.User
 import io.getstream.android.video.generated.models.UserResponse
+import io.getstream.video.android.model.User
 import org.threeten.bp.OffsetDateTime
 
 internal fun User.toResponse(): UserResponse {

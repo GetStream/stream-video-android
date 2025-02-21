@@ -18,27 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.List
 
 /**
  * This event is sent when a call is created. Clients receiving this event should check if the ringing
  */
 
-data class CallCreatedEvent (
+data class CallCreatedEvent(
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -46,16 +38,16 @@ data class CallCreatedEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse>,
+    val members:
+    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse>,
 
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: kotlin.String
-)
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
+    val type: kotlin.String,
+) :
+    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 
     override fun getEventType(): kotlin.String {
         return type

@@ -40,6 +40,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallRejectedEvent
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.R
@@ -61,9 +64,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import io.getstream.android.video.generated.models.CallAcceptedEvent
-import io.getstream.android.video.generated.models.CallEndedEvent
-import io.getstream.android.video.generated.models.CallRejectedEvent
 
 /**
  * A foreground service that is running when there is an active call.

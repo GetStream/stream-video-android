@@ -27,6 +27,8 @@ import io.getstream.android.push.permissions.NotificationPermissionStatus.DENIED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.GRANTED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.RATIONALE_NEEDED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.REQUESTED
+import io.getstream.android.video.generated.apis.ProductvideoApi
+import io.getstream.android.video.generated.models.CreateDeviceRequest
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -41,8 +43,6 @@ import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.CreateDeviceRequest
 
 internal class StreamNotificationManager private constructor(
     private val context: Context,

@@ -18,27 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.List
 
 /**
  * This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
  */
 
-data class UpdatedCallPermissionsEvent (
+data class UpdatedCallPermissionsEvent(
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -46,16 +38,16 @@ data class UpdatedCallPermissionsEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability>,
+    val ownCapabilities:
+    kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability>,
 
     @Json(name = "user")
     val user: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String
-)
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
+    val type: kotlin.String,
+) :
+    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 
     override fun getEventType(): kotlin.String {
         return type

@@ -17,6 +17,9 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallSettingsRequest
+import io.getstream.android.video.generated.models.MemberRequest
+import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -32,9 +35,6 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import io.getstream.android.video.generated.models.CallSettingsRequest
-import io.getstream.android.video.generated.models.MemberRequest
-import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime

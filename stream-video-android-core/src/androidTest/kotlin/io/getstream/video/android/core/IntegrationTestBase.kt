@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog
@@ -30,7 +31,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
-import io.getstream.android.video.generated.models.VideoEvent
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume

@@ -18,17 +18,12 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -106,7 +101,6 @@ sealed class OwnCapability(val value: kotlin.String) {
     object UpdateCallSettings : OwnCapability("update-call-settings")
     data class Unknown(val unknownValue: kotlin.String) : OwnCapability(unknownValue)
 
-
     class OwnCapabilityAdapter : JsonAdapter<OwnCapability>() {
         @FromJson
         override fun fromJson(reader: JsonReader): OwnCapability? {
@@ -119,5 +113,4 @@ sealed class OwnCapability(val value: kotlin.String) {
             writer.value(value?.value)
         }
     }
-
 }

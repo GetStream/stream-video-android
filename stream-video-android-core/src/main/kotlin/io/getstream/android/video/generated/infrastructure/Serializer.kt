@@ -18,7 +18,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.infrastructure
@@ -28,24 +28,54 @@ import com.squareup.moshi.Moshi
 object Serializer {
     @JvmStatic
     val moshiBuilder: Moshi.Builder = Moshi.Builder()
-        .add(io.getstream.android.video.generated.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter())
-        .add(io.getstream.android.video.generated.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter())
-        .add(io.getstream.android.video.generated.models.CreateDeviceRequest.PushProvider.PushProviderAdapter())
+        .add(
+            io.getstream.android.video.generated.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.CreateDeviceRequest.PushProvider.PushProviderAdapter(),
+        )
         .add(io.getstream.android.video.generated.models.LayoutSettingsRequest.Name.NameAdapter())
-        .add(io.getstream.android.video.generated.models.NoiseCancellationSettings.Mode.ModeAdapter())
+        .add(
+            io.getstream.android.video.generated.models.NoiseCancellationSettings.Mode.ModeAdapter(),
+        )
         .add(io.getstream.android.video.generated.models.OwnCapability.OwnCapabilityAdapter())
-        .add(io.getstream.android.video.generated.models.RTMPBroadcastRequest.Quality.QualityAdapter())
-        .add(io.getstream.android.video.generated.models.RTMPSettingsRequest.Quality.QualityAdapter())
+        .add(
+            io.getstream.android.video.generated.models.RTMPBroadcastRequest.Quality.QualityAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.RTMPSettingsRequest.Quality.QualityAdapter(),
+        )
         .add(io.getstream.android.video.generated.models.RecordSettingsRequest.Mode.ModeAdapter())
-        .add(io.getstream.android.video.generated.models.RecordSettingsRequest.Quality.QualityAdapter())
-        .add(io.getstream.android.video.generated.models.TranscriptionSettingsRequest.Mode.ModeAdapter())
-        .add(io.getstream.android.video.generated.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter())
-        .add(io.getstream.android.video.generated.models.TranscriptionSettingsRequest.Language.LanguageAdapter())
-        .add(io.getstream.android.video.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode.ClosedCaptionModeAdapter())
-        .add(io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Language.LanguageAdapter())
-        .add(io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Mode.ModeAdapter())
-        .add(io.getstream.android.video.generated.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter())
-        .add(io.getstream.android.video.generated.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter())
+        .add(
+            io.getstream.android.video.generated.models.RecordSettingsRequest.Quality.QualityAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.TranscriptionSettingsRequest.Mode.ModeAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.TranscriptionSettingsRequest.Language.LanguageAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode.ClosedCaptionModeAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Language.LanguageAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Mode.ModeAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter(),
+        )
+        .add(
+            io.getstream.android.video.generated.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter(),
+        )
         .add(io.getstream.android.video.generated.models.VideoEventAdapter())
         .add(io.getstream.android.video.generated.infrastructure.BigDecimalAdapter())
         .add(io.getstream.android.video.generated.infrastructure.BigIntegerAdapter())

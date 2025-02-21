@@ -18,13 +18,12 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
 import com.squareup.moshi.FromJson
-import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -32,9 +31,7 @@ import com.squareup.moshi.ToJson
 
 public abstract class VideoEvent {
     abstract fun getEventType(): kotlin.String
-
 }
-
 
 class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
@@ -54,7 +51,9 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
         return eventType?.let {
             peek.use { peekedReader ->
-                io.getstream.android.video.generated.infrastructure.Serializer.moshi.adapter(getSubclass(eventType)).fromJson(peekedReader)
+                io.getstream.android.video.generated.infrastructure.Serializer.moshi.adapter(
+                    getSubclass(eventType),
+                ).fromJson(peekedReader)
             }
         }
     }

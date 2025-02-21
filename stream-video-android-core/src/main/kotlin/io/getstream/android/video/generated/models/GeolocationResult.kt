@@ -18,27 +18,18 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 
 /**
  *
  */
 
-data class GeolocationResult (
+data class GeolocationResult(
     @Json(name = "accuracy_radius")
     val accuracyRadius: kotlin.Int,
 
@@ -67,5 +58,5 @@ data class GeolocationResult (
     val subdivision: kotlin.String,
 
     @Json(name = "subdivision_iso_code")
-    val subdivisionIsoCode: kotlin.String
+    val subdivisionIsoCode: kotlin.String,
 )

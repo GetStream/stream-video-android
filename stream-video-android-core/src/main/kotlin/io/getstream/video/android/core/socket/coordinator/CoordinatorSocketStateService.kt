@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.socket.coordinator
 
+import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.socket.common.ConnectionConf
@@ -25,7 +26,6 @@ import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConne
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketStateEvent
 import kotlinx.coroutines.flow.StateFlow
-import io.getstream.android.video.generated.models.ConnectedEvent
 
 internal class CoordinatorSocketStateService(initialState: VideoSocketState = VideoSocketState.Disconnected.Stopped) {
     private val logger by taggedLogger("Video:SocketState")

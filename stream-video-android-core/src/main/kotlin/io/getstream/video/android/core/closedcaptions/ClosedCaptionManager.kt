@@ -16,6 +16,13 @@
 
 package io.getstream.video.android.core.closedcaptions
 
+import io.getstream.android.video.generated.models.CallClosedCaption
+import io.getstream.android.video.generated.models.CallClosedCaptionsStartedEvent
+import io.getstream.android.video.generated.models.CallClosedCaptionsStoppedEvent
+import io.getstream.android.video.generated.models.CallResponse
+import io.getstream.android.video.generated.models.ClosedCaptionEvent
+import io.getstream.android.video.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode
+import io.getstream.android.video.generated.models.VideoEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,13 +34,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import io.getstream.android.video.generated.models.CallClosedCaption
-import io.getstream.android.video.generated.models.CallClosedCaptionsStartedEvent
-import io.getstream.android.video.generated.models.CallClosedCaptionsStoppedEvent
-import io.getstream.android.video.generated.models.CallResponse
-import io.getstream.android.video.generated.models.ClosedCaptionEvent
-import io.getstream.android.video.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode
-import io.getstream.android.video.generated.models.VideoEvent
 
 private fun ClosedCaptionEvent.key(): String {
     return "${closedCaption.speakerId}/${closedCaption.startTime.toEpochSecond()}"

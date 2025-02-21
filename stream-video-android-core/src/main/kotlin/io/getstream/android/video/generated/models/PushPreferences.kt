@@ -18,27 +18,18 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 
 /**
  *
  */
 
-data class PushPreferences (
+data class PushPreferences(
     @Json(name = "call_level")
     val callLevel: kotlin.String? = null,
 
@@ -46,5 +37,5 @@ data class PushPreferences (
     val chatLevel: kotlin.String? = null,
 
     @Json(name = "disabled_until")
-    val disabledUntil: org.threeten.bp.OffsetDateTime? = null
+    val disabledUntil: org.threeten.bp.OffsetDateTime? = null,
 )

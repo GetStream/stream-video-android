@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
@@ -30,7 +31,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.Test
-import io.getstream.android.video.generated.models.MemberRequest
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.MediaStreamTrack

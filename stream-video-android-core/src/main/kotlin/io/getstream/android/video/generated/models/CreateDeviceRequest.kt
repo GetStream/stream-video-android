@@ -18,15 +18,11 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -38,7 +34,7 @@ import com.squareup.moshi.ToJson
  * Create device request
  */
 
-data class CreateDeviceRequest (
+data class CreateDeviceRequest(
     @Json(name = "id")
     val id: kotlin.String,
 
@@ -49,31 +45,29 @@ data class CreateDeviceRequest (
     val pushProviderName: kotlin.String? = null,
 
     @Json(name = "voip_token")
-    val voipToken: kotlin.Boolean? = null
-)
-{
+    val voipToken: kotlin.Boolean? = null,
+) {
 
     /**
-    * PushProvider Enum
-    */
+     * PushProvider Enum
+     */
     sealed class PushProvider(val value: kotlin.String) {
-            override fun toString(): String = value
+        override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: kotlin.String): PushProvider = when (s) {
-                    "apn" -> Apn
-                    "firebase" -> Firebase
-                    "huawei" -> Huawei
-                    "xiaomi" -> Xiaomi
-                    else -> Unknown(s)
-                }
+        companion object {
+            fun fromString(s: kotlin.String): PushProvider = when (s) {
+                "apn" -> Apn
+                "firebase" -> Firebase
+                "huawei" -> Huawei
+                "xiaomi" -> Xiaomi
+                else -> Unknown(s)
             }
-            object Apn : PushProvider("apn")
-            object Firebase : PushProvider("firebase")
-            object Huawei : PushProvider("huawei")
-            object Xiaomi : PushProvider("xiaomi")
-            data class Unknown(val unknownValue: kotlin.String) : PushProvider(unknownValue)
-
+        }
+        object Apn : PushProvider("apn")
+        object Firebase : PushProvider("firebase")
+        object Huawei : PushProvider("huawei")
+        object Xiaomi : PushProvider("xiaomi")
+        data class Unknown(val unknownValue: kotlin.String) : PushProvider(unknownValue)
 
         class PushProviderAdapter : JsonAdapter<PushProvider>() {
             @FromJson

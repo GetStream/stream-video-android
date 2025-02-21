@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.core.permission
 
+import io.getstream.android.video.generated.models.PermissionRequestEvent
+import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
-import io.getstream.android.video.generated.models.PermissionRequestEvent
-import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 

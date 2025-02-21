@@ -18,27 +18,20 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
+import com.squareup.moshi.Json
 import kotlin.collections.List
 import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 
 /**
  *
  */
 
-data class CallSessionResponse (
+data class CallSessionResponse(
     @Json(name = "anonymous_participant_count")
     val anonymousParticipantCount: kotlin.Int,
 
@@ -46,7 +39,8 @@ data class CallSessionResponse (
     val id: kotlin.String,
 
     @Json(name = "participants")
-    val participants: kotlin.collections.List<io.getstream.android.video.generated.models.CallParticipantResponse>,
+    val participants:
+    kotlin.collections.List<io.getstream.android.video.generated.models.CallParticipantResponse>,
 
     @Json(name = "accepted_by")
     val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
@@ -73,5 +67,5 @@ data class CallSessionResponse (
     val startedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "timer_ends_at")
-    val timerEndsAt: org.threeten.bp.OffsetDateTime? = null
+    val timerEndsAt: org.threeten.bp.OffsetDateTime? = null,
 )

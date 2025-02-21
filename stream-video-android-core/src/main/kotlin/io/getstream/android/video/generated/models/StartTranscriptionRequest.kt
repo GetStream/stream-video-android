@@ -18,27 +18,18 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 
 /**
  *
  */
 
-data class StartTranscriptionRequest (
+data class StartTranscriptionRequest(
     @Json(name = "enable_closed_captions")
     val enableClosedCaptions: kotlin.Boolean? = null,
 
@@ -46,5 +37,5 @@ data class StartTranscriptionRequest (
     val language: kotlin.String? = null,
 
     @Json(name = "transcription_external_storage")
-    val transcriptionExternalStorage: kotlin.String? = null
+    val transcriptionExternalStorage: kotlin.String? = null,
 )

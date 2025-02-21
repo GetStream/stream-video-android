@@ -18,27 +18,20 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
+import kotlin.collections.List
 
 /**
  * StartRTMPBroadcastsRequest is the payload for starting RTMP broadcasts.
  */
 
-data class StartRTMPBroadcastsRequest (
+data class StartRTMPBroadcastsRequest(
     @Json(name = "broadcasts")
-    val broadcasts: kotlin.collections.List<io.getstream.android.video.generated.models.RTMPBroadcastRequest>
+    val broadcasts:
+    kotlin.collections.List<io.getstream.android.video.generated.models.RTMPBroadcastRequest>,
 )
