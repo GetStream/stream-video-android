@@ -28,14 +28,6 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
                 )
             }
         }
-
-//        filters {
-//            excludes {
-//                classes(
-//                        "", // Exclude all classes in this package
-//                )
-//            }
-//        }
     }
 
     sonarqube {
