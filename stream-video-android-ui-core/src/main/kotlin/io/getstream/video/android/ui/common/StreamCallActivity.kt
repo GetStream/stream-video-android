@@ -29,6 +29,10 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.flatMap
@@ -59,10 +63,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import io.getstream.android.video.generated.models.CallEndedEvent
-import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
-import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.android.video.generated.models.VideoEvent
 
 @OptIn(StreamCallActivityDelicateApi::class)
 public abstract class StreamCallActivity : ComponentActivity() {
