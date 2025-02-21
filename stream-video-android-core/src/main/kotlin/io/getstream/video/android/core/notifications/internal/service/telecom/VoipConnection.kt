@@ -32,6 +32,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,9 +72,12 @@ class VoipConnection(
         serviceScope.launch {
             // If you are using StreamVideo:
             val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return@launch
-            val call = streamVideo.call(callId.type, callId.id)
-            call.accept()
-            call.join()
+            val streamCall = streamVideo.call(callId.type, callId.id)
+
+            DefaultStreamIntentResolver(context).searchAcceptCallPendingIntent(
+                callId = StreamCallId.fromCallCid(streamCall.cid),
+                notificationId = streamCall.cid.hashCode(),
+            )?.send()
         }
     }
 
