@@ -39,8 +39,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.core.Call
 import io.getstream.android.video.generated.models.CallClosedCaption
+import io.getstream.video.android.core.Call
 
 /**
  * A set of composables and supporting classes for displaying and customizing closed captions in a call.
