@@ -20,13 +20,21 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
                 warningInsteadOfFailure = true
             }
         }
-        filters {
-            excludes {
-                classes(
-                        "io.getstream.android.video.generated.*", // Exclude all classes in this package
-                )
-            }
+        instrumentation {
+            excludeClasses = [
+                    "io.getstream.android.video.generated.*", // Exclude all classes in this package
+//                    "io.getstream.video.android.core.utils.*",    // Exclude utility classes
+//                    "io.getstream.video.android.core.BuildConfig", // Exclude BuildConfig
+//                    "io.getstream.video.android.core.di.*"        // Exclude Dependency Injection classes
+            ]
         }
+//        filters {
+//            excludes {
+//                classes(
+//                        "", // Exclude all classes in this package
+//                )
+//            }
+//        }
     }
 
     sonarqube {
@@ -34,6 +42,7 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
             property "sonar.junit.reportPaths", "${buildDir}/test-results/testDebugUnitTest"
             property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/kover/reportDebug.xml"
             property "sonar.sources", "src/main/kotlin"
+            property "sonar.coverage.exclusions", "**/generated/**"
         }
     }
 }
