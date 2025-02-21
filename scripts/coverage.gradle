@@ -22,13 +22,7 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
         }
         currentProject {
             instrumentation {
-                excludedClasses.add("io.getstream.android.video.generated.*")
-//                excludeClasses = [
-//                        "io.getstream.android.video.generated.*", // Exclude all classes in this package
-////                    "io.getstream.video.android.core.utils.*",    // Exclude utility classes
-////                    "io.getstream.video.android.core.BuildConfig", // Exclude BuildConfig
-////                    "io.getstream.video.android.core.di.*"        // Exclude Dependency Injection classes
-//                ]
+                excludedClasses.add("io.getstream.android.video.generated.*", "io.getstream.video.android.core.model.*")
             }
         }
 
