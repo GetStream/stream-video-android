@@ -20,6 +20,13 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
                 warningInsteadOfFailure = true
             }
         }
+        filters {
+            excludes {
+                classes(
+                        "io.getstream.android.video.generated.*", // Exclude all classes in this package
+                )
+            }
+        }
     }
 
     sonarqube {
