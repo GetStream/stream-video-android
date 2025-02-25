@@ -160,6 +160,7 @@ internal class StreamVideoClient internal constructor(
     internal val appName: String? = null,
     internal val audioProcessing: ManagedAudioProcessingFactory? = null,
     internal val leaveAfterDisconnectSeconds: Long = 30,
+    internal val appVersion: String? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null

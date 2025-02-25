@@ -16,15 +16,15 @@
 
 package io.getstream.video.android.core.internal.module
 
-import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.header.SdkTrackingHeaders
 import okhttp3.Interceptor
 import okhttp3.Response
 
-internal class HeadersInterceptor : Interceptor {
+internal class HeadersInterceptor(private val sdkTrackingHeaders: SdkTrackingHeaders) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
             .newBuilder()
-            .addHeader("X-Stream-Client", StreamVideo.buildSdkTrackingHeaders())
+            .addHeader("X-Stream-Client", sdkTrackingHeaders.buildSdkTrackingHeaders())
             .build()
         return chain.proceed(request)
     }
