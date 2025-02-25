@@ -21,6 +21,7 @@ import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.infrastructure.Serializer
+import io.getstream.video.android.core.header.SdkTrackingHeaders
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.token.TokenProvider
@@ -64,7 +65,11 @@ internal class CoordinatorConnectionModule(
     }
 
     // API
-    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(HeadersInterceptor())
+    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
+        HeadersInterceptor(
+            SdkTrackingHeaders(),
+        ),
+    )
         .addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = loggingLevel.httpLoggingLevel.level

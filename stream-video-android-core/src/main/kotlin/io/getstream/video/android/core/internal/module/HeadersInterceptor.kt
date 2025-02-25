@@ -20,8 +20,7 @@ import io.getstream.video.android.core.header.SdkTrackingHeaders
 import okhttp3.Interceptor
 import okhttp3.Response
 
-internal class HeadersInterceptor : Interceptor {
-    private val sdkTrackingHeaders = SdkTrackingHeaders()
+internal class HeadersInterceptor(private val sdkTrackingHeaders: SdkTrackingHeaders) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
             .newBuilder()

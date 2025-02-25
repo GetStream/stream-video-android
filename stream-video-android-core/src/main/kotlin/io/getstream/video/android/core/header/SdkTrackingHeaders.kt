@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.header
 
+import android.content.Context
 import android.os.Build
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.StreamVideo
@@ -31,6 +32,39 @@ class SdkTrackingHeaders {
         @InternalStreamVideoApi
         @JvmStatic
         public var VERSION_PREFIX_HEADER: VersionPrefixHeader = VersionPrefixHeader.Default
+    }
+
+    /**
+     * Retrieves the version name of the application.
+     *
+     * @return The version name (e.g., "1.2.3") or `"nameNotFound"` if retrieval fails.
+     */
+    private fun getAppVersionName(): String {
+        return runCatching {
+            getContext().packageManager.getPackageInfo(getContext().packageName, 0).versionName
+        }.getOrNull() ?: "nameNotFound"
+    }
+
+    /**
+     * Retrieves the application's name as displayed in the launcher.
+     *
+     * - If the application label is not available, it falls back to `nonLocalizedLabel`.
+     * - If both are unavailable, it returns `"UnknownApp"`.
+     *
+     * @return The application name or `"UnknownApp"` if retrieval fails.
+     */
+    private fun getAppName(): String {
+        val applicationInfo = getContext().applicationInfo
+        return if (applicationInfo != null) {
+            val stringId = applicationInfo.labelRes
+            if (stringId == 0) {
+                applicationInfo.nonLocalizedLabel?.toString() ?: "UnknownApp"
+            } else {
+                getContext().getString(stringId) ?: "UnknownApp"
+            }
+        } else {
+            "UnknownApp"
+        }
     }
 
     /**
@@ -51,11 +85,15 @@ class SdkTrackingHeaders {
     }
 
     private fun buildAppVersionForHeader() = (StreamVideo.instance() as? StreamVideoClient)?.let { streamVideoImpl ->
-        "|app_version=" + (streamVideoImpl.appVersion ?: streamVideoImpl.context.packageManager.getPackageInfo(streamVideoImpl.context.packageName, 0).versionName)
+        "|app_version=" + (streamVideoImpl.appVersion ?: getAppVersionName())
     } ?: ""
 
     private fun buildAppName(): String =
         (StreamVideo.instance() as? StreamVideoClient)?.let { streamVideoImpl ->
-            "|app_name=" + (streamVideoImpl.appName ?: streamVideoImpl.context.packageName)
+            "|app_name=" + (streamVideoImpl.appName ?: getAppName())
         } ?: ""
+
+    private fun getContext(): Context {
+        return StreamVideo.instance().context
+    }
 }
