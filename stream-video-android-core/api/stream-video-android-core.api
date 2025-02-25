@@ -9086,6 +9086,33 @@ public final class io/getstream/video/android/core/filter/OrFilterObject : io/ge
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/header/SdkTrackingHeaders$Companion {
+}
+
+public final class io/getstream/video/android/core/header/VersionPrefixHeader$Compose : io/getstream/video/android/core/header/VersionPrefixHeader {
+	public static final field INSTANCE Lio/getstream/video/android/core/header/VersionPrefixHeader$Compose;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPrefix ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/header/VersionPrefixHeader$Default : io/getstream/video/android/core/header/VersionPrefixHeader {
+	public static final field INSTANCE Lio/getstream/video/android/core/header/VersionPrefixHeader$Default;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPrefix ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/header/VersionPrefixHeader$UiComponents : io/getstream/video/android/core/header/VersionPrefixHeader {
+	public static final field INSTANCE Lio/getstream/video/android/core/header/VersionPrefixHeader$UiComponents;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getPrefix ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface annotation class io/getstream/video/android/core/internal/InternalStreamVideoApi : java/lang/annotation/Annotation {
 }
 
