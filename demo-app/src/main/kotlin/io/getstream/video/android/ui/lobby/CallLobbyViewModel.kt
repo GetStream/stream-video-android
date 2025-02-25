@@ -180,6 +180,10 @@ class CallLobbyViewModel @Inject constructor(
             StreamVideo.removeClient()
         }
     }
+
+    fun leaveCall() {
+        call.leave()
+    }
 }
 
 sealed interface CallLobbyUiState {
