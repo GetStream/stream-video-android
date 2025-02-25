@@ -47,11 +47,11 @@ import io.getstream.video.android.model.User.Companion.isLocalUser
 public fun ParticipantAvatars(
     participants: List<MemberState>,
 ) {
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (participants.isNotEmpty()) {
+    if (participants.isNotEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
             if (participants.size == 1) {
                 val participant = participants.first()
 
@@ -71,21 +71,13 @@ public fun ParticipantAvatars(
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        items(participants.take(2)) { participant ->
+                        items(participants.take(3)) { participant ->
                             UserAvatar(
-                                modifier = Modifier.size(VideoTheme.dimens.genericL),
+                                modifier = Modifier.size(VideoTheme.dimens.genericXl),
                                 userName = participant.user.userNameOrId,
                                 userImage = participant.user.image,
                             )
                         }
-                    }
-
-                    if (participants.size >= 3) {
-                        UserAvatar(
-                            modifier = Modifier.size(VideoTheme.dimens.genericM),
-                            userName = participants[2].user.userNameOrId,
-                            userImage = participants[2].user.image,
-                        )
                     }
                 }
             }
