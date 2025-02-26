@@ -459,18 +459,21 @@ class MicrophoneManager(
         }
 
         if (canHandleDeviceSwitch()) {
-            audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
-                logger.i { "audio devices. selected $selected, available devices are $devices" }
+            if (!::audioHandler.isInitialized) { // This check is atomic
+                audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
+                    logger.i { "audio devices. selected $selected, available devices are $devices" }
 
-                _devices.value = devices.map { it.fromAudio() }
-                _selectedDevice.value = selected?.fromAudio()
+                    _devices.value = devices.map { it.fromAudio() }
+                    _selectedDevice.value = selected?.fromAudio()
 
-                capturedOnAudioDevicesUpdate?.invoke()
-                capturedOnAudioDevicesUpdate = null
-                setupCompleted = true
+                    capturedOnAudioDevicesUpdate?.invoke()
+                    capturedOnAudioDevicesUpdate = null
+                    setupCompleted = true
+                }
+
+                logger.d { "[setup] Calling start on instance $audioHandler" }
+                audioHandler.start()
             }
-
-            audioHandler.start()
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
