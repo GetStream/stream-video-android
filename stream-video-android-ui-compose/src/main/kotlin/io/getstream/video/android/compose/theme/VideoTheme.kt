@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import io.getstream.video.android.compose.ui.components.base.styling.CompositeStyleProvider
-import io.getstream.video.android.core.header.SdkTrackingHeaders
+import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.header.VersionPrefixHeader
 import io.getstream.video.android.core.mapper.ReactionMapper
 
@@ -95,7 +95,7 @@ public fun VideoTheme(
     content: @Composable () -> Unit,
 ) {
     LaunchedEffect(Unit) {
-        SdkTrackingHeaders.VERSION_PREFIX_HEADER = VersionPrefixHeader.Compose
+        HeadersUtil.VERSION_PREFIX_HEADER = VersionPrefixHeader.Compose
     }
     CompositionLocalProvider(
         LocalColors provides colors,

@@ -24,7 +24,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @InternalStreamVideoApi
-class SdkTrackingHeaders {
+class HeadersUtil {
     /**
      * Header used to track which SDK is being used.
      */

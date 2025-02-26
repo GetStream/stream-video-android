@@ -26,20 +26,20 @@ public sealed class VersionPrefixHeader {
      * Low-level client.
      */
     public data object Default : VersionPrefixHeader() {
-        override val prefix: String = "stream-video-android-"
+        override val prefix: String = "stream-video-android"
     }
 
     /**
      * XML based UI components.
      */
     public data object UiComponents : VersionPrefixHeader() {
-        override val prefix: String = "stream-video-android-ui-components-"
+        override val prefix: String = "stream-video-android-ui-components"
     }
 
     /**
      * Compose UI components.
      */
     public data object Compose : VersionPrefixHeader() {
-        override val prefix: String = "stream-video-android-compose-"
+        override val prefix: String = "stream-video-android-compose"
     }
 }

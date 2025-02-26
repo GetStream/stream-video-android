@@ -9086,7 +9086,7 @@ public final class io/getstream/video/android/core/filter/OrFilterObject : io/ge
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/header/SdkTrackingHeaders$Companion {
+public final class io/getstream/video/android/core/header/HeadersUtil$Companion {
 }
 
 public final class io/getstream/video/android/core/header/VersionPrefixHeader$Compose : io/getstream/video/android/core/header/VersionPrefixHeader {
