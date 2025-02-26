@@ -22,6 +22,7 @@ import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
+import io.getstream.video.android.core.header.SdkTrackingHeaders
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.SfuParser
@@ -62,6 +63,8 @@ class SfuSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
+    /** Sdk Tracking headers */
+    private val sdkTrackingHeaders: SdkTrackingHeaders,
 ) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
     SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken, JoinRequest> {
 
@@ -78,6 +81,7 @@ class SfuSocketConnection(
         socketFactory = SocketFactory(
             parser = object : SfuParser {},
             httpClient = httpClient,
+            sdkTrackingHeaders = sdkTrackingHeaders,
         ),
         lifecycleObserver = StreamLifecycleObserver(scope, lifecycle),
         networkStateProvider = networkStateProvider,

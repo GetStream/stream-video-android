@@ -25,6 +25,7 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.android.video.generated.models.WSAuthMessageRequest
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
+import io.getstream.video.android.core.header.SdkTrackingHeaders
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.SocketActions
@@ -81,6 +82,8 @@ public open class CoordinatorSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
+    /** SdkTrackingHeaders to */
+    private val sdkTrackingHeaders: SdkTrackingHeaders,
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
     SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
 
@@ -108,6 +111,7 @@ public open class CoordinatorSocketConnection(
         SocketFactory(
             parser,
             httpClient,
+            sdkTrackingHeaders,
         ),
         scope as? UserScope ?: UserScope(ClientScope()),
         StreamLifecycleObserver(scope, lifecycle),

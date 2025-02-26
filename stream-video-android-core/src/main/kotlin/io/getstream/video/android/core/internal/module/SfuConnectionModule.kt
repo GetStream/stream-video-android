@@ -20,6 +20,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.header.SdkTrackingHeaders
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
@@ -83,6 +84,7 @@ internal class SfuConnectionModule(
         tokenProvider = ConstantTokenProvider(userToken),
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
+        sdkTrackingHeaders = SdkTrackingHeaders(context),
     )
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 

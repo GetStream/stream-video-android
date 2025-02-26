@@ -24,7 +24,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @InternalStreamVideoApi
-class SdkTrackingHeaders {
+class SdkTrackingHeaders(private val context: Context) {
     /**
      * Header used to track which SDK is being used.
      */
@@ -41,7 +41,7 @@ class SdkTrackingHeaders {
      */
     private fun getAppVersionName(): String {
         return runCatching {
-            getContext().packageManager.getPackageInfo(getContext().packageName, 0).versionName
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
         }.getOrNull() ?: "nameNotFound"
     }
 
@@ -54,13 +54,13 @@ class SdkTrackingHeaders {
      * @return The application name or `"UnknownApp"` if retrieval fails.
      */
     private fun getAppName(): String {
-        val applicationInfo = getContext().applicationInfo
+        val applicationInfo = context.applicationInfo
         return if (applicationInfo != null) {
             val stringId = applicationInfo.labelRes
             if (stringId == 0) {
                 applicationInfo.nonLocalizedLabel?.toString() ?: "UnknownApp"
             } else {
-                getContext().getString(stringId) ?: "UnknownApp"
+                context.getString(stringId) ?: "UnknownApp"
             }
         } else {
             "UnknownApp"
@@ -84,16 +84,12 @@ class SdkTrackingHeaders {
         }
     }
 
-    private fun buildAppVersionForHeader() = (StreamVideo.instance() as? StreamVideoClient)?.let { streamVideoImpl ->
+    private fun buildAppVersionForHeader() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoImpl ->
         "|app_version=" + (streamVideoImpl.appVersion ?: getAppVersionName())
     } ?: ""
 
     private fun buildAppName(): String =
-        (StreamVideo.instance() as? StreamVideoClient)?.let { streamVideoImpl ->
+        (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoImpl ->
             "|app_name=" + (streamVideoImpl.appName ?: getAppName())
         } ?: ""
-
-    private fun getContext(): Context {
-        return StreamVideo.instance().context
-    }
 }
