@@ -24,6 +24,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,50 +35,62 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.userNameOrId
+import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 
 /**
  * Component that renders user avatars for call participants.
  *
- * @param participants The list of participants to render avatars for.
+ * @param members The list of participants to render avatars for.
  *
  * @see [UserAvatar]
  */
 @Composable
 public fun ParticipantAvatars(
-    participants: List<MemberState>,
+    members: List<MemberState>? = null,
+    participants: List<ParticipantState>? = null,
 ) {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
-        if (participants.isNotEmpty()) {
-            if (participants.size == 1) {
-                val participant = participants.first()
+        val callUsers by remember(members, participants) {
+            derivedStateOf {
+                members?.map { it.toCallUser() }
+                    ?: participants?.map { it.toCallUser() }
+                    ?: emptyList()
+            }
+        }
+
+        if (callUsers.isNotEmpty()) {
+            if (callUsers.size == 1) {
+                val user = callUsers.first()
 
                 UserAvatar(
                     modifier = Modifier.size(VideoTheme.dimens.genericMax),
-                    userName = participant.user.userNameOrId,
-                    userImage = participant.user.image,
+                    userName = user.name ?: user.id,
+                    userImage = user.imageUrl,
                 )
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        items(participants.take(2)) { participant ->
+                        items(callUsers.take(2)) { user ->
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.genericL),
-                                userName = participant.user.userNameOrId,
-                                userImage = participant.user.image,
+                                userName = user.userNameOrId,
+                                userImage = user.imageUrl,
                             )
                         }
                     }
 
-                    if (participants.size >= 3) {
+                    if (callUsers.size >= 3) {
                         UserAvatar(
                             modifier = Modifier.size(VideoTheme.dimens.genericM),
-                            userName = participants[2].user.userNameOrId,
-                            userImage = participants[2].user.image,
+                            userName = callUsers[2].userNameOrId,
+                            userImage = callUsers[2].imageUrl,
                         )
                     }
                 }
@@ -90,7 +105,7 @@ private fun ParticipantAvatarsPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(
-            participants = previewMemberListState,
+            members = previewMemberListState,
         )
     }
 }

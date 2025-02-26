@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -48,7 +49,8 @@ import io.getstream.video.android.ui.common.util.buildSmallCallText
 @Composable
 public fun ParticipantInformation(
     callStatus: CallStatus,
-    participants: List<MemberState>,
+    members: List<MemberState>? = null,
+    participants: List<ParticipantState>? = null,
     isVideoType: Boolean = true,
 ) {
     Column(
@@ -56,14 +58,21 @@ public fun ParticipantInformation(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val context = LocalContext.current
-        val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
-        val text = if (participants.size <= 3) {
+        val callUsers by remember(members, participants) {
+            derivedStateOf {
+                members?.map { it.toCallUser() }
+                    ?: participants?.map { it.toCallUser() }
+                    ?: emptyList()
+            }
+        }
+
+        val text = if (callUsers.size <= 3) {
             buildSmallCallText(context, callUsers)
         } else {
             buildLargeCallText(context, callUsers)
         }
 
-        val fontSize = if (participants.size == 1) {
+        val fontSize = if (callUsers.size == 1) {
             VideoTheme.dimens.textSizeL
         } else {
             VideoTheme.dimens.textSizeM
@@ -96,7 +105,7 @@ public fun ParticipantInformation(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_outgoing,
                 )
 
-                is CallStatus.Calling -> callStatus.duration
+                is CallStatus.Ongoing -> callStatus.duration
             },
             style = VideoTheme.typography.bodyM,
             textAlign = TextAlign.Center,
@@ -112,7 +121,7 @@ private fun ParticipantInformationTwoUsersPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = previewTwoMembers,
+            members = previewTwoMembers,
         )
     }
 }
@@ -125,7 +134,7 @@ private fun ParticipantInformationThreeUsersPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = previewThreeMembers,
+            members = previewThreeMembers,
         )
     }
 }
@@ -138,7 +147,7 @@ private fun ParticipantInformationPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = previewMemberListState,
+            members = previewMemberListState,
         )
     }
 }

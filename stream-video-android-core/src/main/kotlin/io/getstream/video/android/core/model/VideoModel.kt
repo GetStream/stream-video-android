@@ -80,6 +80,9 @@ public data class CallEgress(
     val recordEgress: String,
 )
 
+val CallUser.userNameOrId: String
+    get() = name.takeUnless { it.isNullOrBlank() } ?: id
+
 internal fun List<MemberResponse>.toCallUsers(): Map<String, CallUser> =
     associate { it.userId to it.toCallUser() }
 

@@ -47,7 +47,7 @@ public fun OutgoingCallDetails(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (!isVideoType) {
-            ParticipantAvatars(participants = participants)
+            ParticipantAvatars(members = participants)
 
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -55,7 +55,7 @@ public fun OutgoingCallDetails(
         ParticipantInformation(
             isVideoType = isVideoType,
             callStatus = CallStatus.Outgoing,
-            participants = participants,
+            members = participants,
         )
     }
 }

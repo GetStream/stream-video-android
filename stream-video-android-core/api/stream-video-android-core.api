@@ -9270,20 +9270,20 @@ public final class io/getstream/video/android/core/model/CallRecordingData {
 public abstract interface class io/getstream/video/android/core/model/CallStatus {
 }
 
-public final class io/getstream/video/android/core/model/CallStatus$Calling : io/getstream/video/android/core/model/CallStatus {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/model/CallStatus$Calling;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallStatus$Calling;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallStatus$Calling;
+public final class io/getstream/video/android/core/model/CallStatus$Incoming : io/getstream/video/android/core/model/CallStatus {
+	public static final field INSTANCE Lio/getstream/video/android/core/model/CallStatus$Incoming;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDuration ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/model/CallStatus$Incoming : io/getstream/video/android/core/model/CallStatus {
-	public static final field INSTANCE Lio/getstream/video/android/core/model/CallStatus$Incoming;
+public final class io/getstream/video/android/core/model/CallStatus$Ongoing : io/getstream/video/android/core/model/CallStatus {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/model/CallStatus$Ongoing;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallStatus$Ongoing;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallStatus$Ongoing;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -9802,6 +9802,7 @@ public final class io/getstream/video/android/core/model/VideoCodec : java/lang/
 }
 
 public final class io/getstream/video/android/core/model/VideoModelKt {
+	public static final fun getUserNameOrId (Lio/getstream/video/android/core/model/CallUser;)Ljava/lang/String;
 	public static final fun merge (Lio/getstream/video/android/core/model/CallUser;Lio/getstream/video/android/core/model/CallUser;)Lio/getstream/video/android/core/model/CallUser;
 	public static final fun merge (Lio/getstream/video/android/core/model/CallUserState;Lio/getstream/video/android/core/model/CallUserState;)Lio/getstream/video/android/core/model/CallUserState;
 	public static final fun merge (Ljava/util/Map;Lio/getstream/video/android/core/model/CallUser;)Ljava/util/Map;

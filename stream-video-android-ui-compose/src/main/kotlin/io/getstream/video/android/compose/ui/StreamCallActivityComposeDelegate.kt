@@ -22,15 +22,11 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Text
@@ -39,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -58,8 +53,6 @@ import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
@@ -288,48 +281,13 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.AudioCallContent(call: Call) {
         val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
-        val duration by call.state.durationInDateFormat.collectAsStateWithLifecycle()
 
         io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent(
             call = call,
             isMicrophoneEnabled = micEnabled,
             onCallAction = { onCallAction(call, it) },
-            durationPlaceholder = duration ?: "...",
-            controlsContent = {
-                AudioCallControls(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(VideoTheme.dimens.spacingM),
-                    isMicrophoneEnabled = micEnabled,
-                    onCallAction = { onCallAction(call, it) },
-                )
-            },
             onBackPressed = { onBackPressed(call) },
         )
-    }
-
-    @Composable
-    private fun AudioCallControls(
-        modifier: Modifier,
-        isMicrophoneEnabled: Boolean,
-        onCallAction: (CallAction) -> Unit,
-    ) {
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
-        ) {
-            ToggleMicrophoneAction(
-                isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = onCallAction,
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
-            )
-
-            LeaveCallAction(
-                onCallAction = onCallAction,
-            )
-        }
     }
 
     @Composable

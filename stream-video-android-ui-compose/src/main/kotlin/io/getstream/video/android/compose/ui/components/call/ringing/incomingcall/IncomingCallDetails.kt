@@ -46,14 +46,14 @@ public fun IncomingCallDetails(
     participants: List<MemberState>,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        ParticipantAvatars(participants = participants)
+        ParticipantAvatars(members = participants)
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
 
         ParticipantInformation(
             isVideoType = isVideoType,
             callStatus = CallStatus.Incoming,
-            participants = participants,
+            members = participants,
         )
     }
 }

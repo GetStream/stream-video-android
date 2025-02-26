@@ -58,7 +58,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
     @Test
     fun `snapshot ParticipantAvatars composable`() {
         snapshotWithDarkMode {
-            ParticipantAvatars(participants = previewMemberListState)
+            ParticipantAvatars(members = previewMemberListState)
         }
     }
 
@@ -67,7 +67,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         snapshotWithDarkMode {
             ParticipantInformation(
                 callStatus = CallStatus.Incoming,
-                participants = previewMemberListState,
+                members = previewMemberListState,
             )
         }
     }
