@@ -17,6 +17,9 @@
 package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallRejectedEvent
+import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.base.toResponse
@@ -26,9 +29,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallRejectedEvent
-import org.openapitools.client.models.CallRingEvent
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -55,6 +55,8 @@ class RingTest : IntegrationTestBase() {
             sessionId = "",
             user = userResponse,
             members = emptyList(),
+            video = true,
+            type = "",
         )
 
         clientImpl.fireEvent(ringEvent)
@@ -102,6 +104,7 @@ class RingTest : IntegrationTestBase() {
             callCid = call.cid,
             createdAt = nowUtc,
             user = userResponse,
+            type = "",
         )
         clientImpl.fireEvent(callAcceptedEvent)
 
@@ -121,6 +124,7 @@ class RingTest : IntegrationTestBase() {
             callCid = call.cid,
             createdAt = nowUtc,
             user = userResponse,
+            type = "",
         )
         clientImpl.fireEvent(rejectEvent)
 

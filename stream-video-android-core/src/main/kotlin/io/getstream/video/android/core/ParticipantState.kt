@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import androidx.compose.runtime.Stable
+import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
@@ -30,7 +31,6 @@ import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.openapitools.client.models.MuteUsersResponse
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset

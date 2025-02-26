@@ -17,6 +17,9 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallSettingsRequest
+import io.getstream.android.video.generated.models.MemberRequest
+import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -32,9 +35,6 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.CallSettingsRequest
-import org.openapitools.client.models.MemberRequest
-import org.openapitools.client.models.ScreensharingSettingsRequest
 import org.robolectric.RobolectricTestRunner
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
@@ -62,7 +62,7 @@ class CallStateTest : IntegrationTestBase() {
         val custom = mapOf("foo" to "bar")
         val response = call.create(
             custom = custom,
-            members = listOf(MemberRequest("tommaso", mutableMapOf("color" to "green"))),
+            members = listOf(MemberRequest("tommaso", custom = mutableMapOf("color" to "green"))),
             // block screensharing completely for this call
             settings = CallSettingsRequest(
                 screensharing = ScreensharingSettingsRequest(

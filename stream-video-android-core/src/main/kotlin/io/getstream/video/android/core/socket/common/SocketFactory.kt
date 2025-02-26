@@ -16,11 +16,11 @@
 
 package io.getstream.video.android.core.socket.common
 
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo.Companion.buildSdkTrackingHeaders
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.openapitools.client.models.VideoEvent
 import java.io.UnsupportedEncodingException
 
 internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(

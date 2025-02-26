@@ -16,6 +16,14 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.android.video.generated.models.CallRecording
+import io.getstream.android.video.generated.models.CallStateResponseFields
+import io.getstream.android.video.generated.models.EdgeResponse
+import io.getstream.android.video.generated.models.MemberResponse
+import io.getstream.android.video.generated.models.QueryCallMembersResponse
+import io.getstream.android.video.generated.models.QueryCallsResponse
+import io.getstream.android.video.generated.models.ReactionResponse
+import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallData
@@ -29,15 +37,6 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.User.Companion.isLocalUser
-import org.openapitools.client.models.CallRecording
-import org.openapitools.client.models.CallStateResponseFields
-import org.openapitools.client.models.EdgeResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.QueryCallMembersResponse
-import org.openapitools.client.models.QueryCallsResponse
-import org.openapitools.client.models.ReactionResponse
-import org.openapitools.client.models.UserResponse
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.Date

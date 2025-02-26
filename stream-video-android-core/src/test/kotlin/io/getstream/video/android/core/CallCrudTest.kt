@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.base.IntegrationTestBase
@@ -26,7 +27,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openapitools.client.models.MemberRequest
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertTrue
 

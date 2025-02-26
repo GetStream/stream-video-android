@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import org.openapitools.client.models.MuteUsersRequest
+import io.getstream.android.video.generated.models.MuteUsersRequest
 
 /**
  * Represents the data used to request user's tracks to be muted.
