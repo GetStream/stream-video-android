@@ -44,47 +44,48 @@ public interface AudioHandler {
 public class AudioSwitchHandler(
     private val context: Context,
     private var audioDeviceChangeListener: AudioDeviceChangeListener,
-) :
-    AudioHandler {
+) : AudioHandler {
 
     private val logger by taggedLogger(TAG)
-
     private var audioSwitch: AudioSwitch? = null
-
-    private val handler = Handler(Looper.getMainLooper())
+    private val mainThreadHandler = Handler(Looper.getMainLooper())
+    private var isAudioSwitchInitScheduled = false
 
     override fun start() {
-        logger.d { "[start] audioSwitch: $audioSwitch" }
-        if (audioSwitch == null) {
-            handler.removeCallbacksAndMessages(null)
+        synchronized(this) {
+            if (!isAudioSwitchInitScheduled) {
+                isAudioSwitchInitScheduled = true
+                mainThreadHandler.removeCallbacksAndMessages(null)
 
-            val devices = mutableListOf(
-                AudioDevice.WiredHeadset::class.java,
-                AudioDevice.BluetoothHeadset::class.java,
-                AudioDevice.Earpiece::class.java,
-                AudioDevice.Speakerphone::class.java,
-            )
+                logger.d { "[start] Posting on main" }
 
-            handler.post {
-                val switch = AudioSwitch(
-                    context = context,
-                    audioFocusChangeListener = onAudioFocusChangeListener,
-                    preferredDeviceList = devices,
-                )
-                // TODO: AudioSwitch logging is disabled by default and it doesn't allow
-                // to specify a custom logger. At some point we may need to fork the library
-                // and add custom logger support.
-                audioSwitch = switch
-                switch.start(audioDeviceChangeListener)
-                switch.activate()
+                mainThreadHandler.post {
+                    logger.d { "[start] Running on main" }
+
+                    val devices = mutableListOf(
+                        AudioDevice.WiredHeadset::class.java,
+                        AudioDevice.BluetoothHeadset::class.java,
+                        AudioDevice.Earpiece::class.java,
+                        AudioDevice.Speakerphone::class.java,
+                    )
+
+                    val switch = AudioSwitch(
+                        context = context,
+                        audioFocusChangeListener = onAudioFocusChangeListener,
+                        preferredDeviceList = devices,
+                    )
+                    audioSwitch = switch
+                    switch.start(audioDeviceChangeListener)
+                    switch.activate()
+                }
             }
         }
     }
 
     override fun stop() {
         logger.d { "[stop] no args" }
-        handler.removeCallbacksAndMessages(null)
-        handler.post {
+        mainThreadHandler.removeCallbacksAndMessages(null)
+        mainThreadHandler.post {
             audioSwitch?.stop()
             audioSwitch = null
         }
