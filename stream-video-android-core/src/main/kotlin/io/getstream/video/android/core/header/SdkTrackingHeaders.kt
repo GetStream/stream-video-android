@@ -75,7 +75,7 @@ class SdkTrackingHeaders {
 
     internal fun buildSdkTrackingHeaders(): String {
         return buildString {
-            append("$VERSION_PREFIX_HEADER-${BuildConfig.STREAM_VIDEO_VERSION}")
+            append("${VERSION_PREFIX_HEADER.prefix}-${BuildConfig.STREAM_VIDEO_VERSION}")
             append("|os=Android ${Build.VERSION.RELEASE}")
             append("|api_version=${Build.VERSION.SDK_INT}")
             append("|device_model=${Build.MANUFACTURER} ${Build.MODEL}")
