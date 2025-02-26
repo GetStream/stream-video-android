@@ -26,7 +26,7 @@ import java.io.UnsupportedEncodingException
 internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(
     private val parser: P,
     private val httpClient: OkHttpClient = OkHttpClient(),
-    ) {
+) {
     private val logger by taggedLogger("Video:SocketFactory")
     private val sdkTrackingHeaders = SdkTrackingHeaders()
 

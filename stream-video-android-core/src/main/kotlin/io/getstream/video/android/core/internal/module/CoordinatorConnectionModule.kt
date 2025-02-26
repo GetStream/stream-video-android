@@ -95,7 +95,7 @@ internal class CoordinatorConnectionModule(
         networkStateProvider = networkStateProvider,
         scope = scope,
         lifecycle = lifecycle,
-        tokenProvider = tokenProvider
+        tokenProvider = tokenProvider,
     )
 
     override fun updateToken(token: UserToken) {
