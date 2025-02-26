@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import android.content.Context
-import android.os.Build
 import androidx.compose.runtime.Stable
 import io.getstream.android.push.PushDevice
 import io.getstream.android.video.generated.models.VideoEvent
@@ -202,27 +201,6 @@ public interface StreamVideo : NotificationHandler {
                 internalStreamVideo = streamVideo
             }
         }
-
-        /**
-         * Builds the client information header (X-Stream-Client) that will be added to requests.
-         *
-         * @return Header value as a string.
-         */
-        internal fun buildSdkTrackingHeaders(): String {
-            val streamVideoVersion = "stream-video-android-${BuildConfig.STREAM_VIDEO_VERSION}"
-            val os = "|os=Android ${Build.VERSION.RELEASE}"
-            val apiVersion = "|api_version=${Build.VERSION.SDK_INT}"
-            val deviceVendor = "|device_vendor=${Build.MANUFACTURER}"
-            val deviceModel = "|device_model=${Build.MODEL}"
-            val appName = buildAppName()
-
-            return streamVideoVersion + os + apiVersion + deviceVendor + deviceModel + appName
-        }
-
-        private fun buildAppName(): String =
-            (internalStreamVideo as? StreamVideoClient)?.let { streamVideoImpl ->
-                "|app_name=" + (streamVideoImpl.appName ?: streamVideoImpl.context.packageName)
-            } ?: ""
 
         /**
          * Uninstall a previous [StreamVideo] instance.
