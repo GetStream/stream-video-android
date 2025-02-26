@@ -37,6 +37,7 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.User.Companion.isLocalUser
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.Date
