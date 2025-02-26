@@ -26,9 +26,9 @@ import java.io.UnsupportedEncodingException
 internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(
     private val parser: P,
     private val httpClient: OkHttpClient = OkHttpClient(),
-    private val sdkTrackingHeaders: SdkTrackingHeaders,
-) {
+    ) {
     private val logger by taggedLogger("Video:SocketFactory")
+    private val sdkTrackingHeaders = SdkTrackingHeaders()
 
     @Throws(UnsupportedEncodingException::class)
     fun <T : VideoEvent> createSocket(connectionConf: C, tag: String): StreamWebSocket<V, P> {

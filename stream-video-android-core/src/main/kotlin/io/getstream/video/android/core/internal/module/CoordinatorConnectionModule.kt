@@ -63,11 +63,10 @@ internal class CoordinatorConnectionModule(
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             .client(http).build()
     }
-    private val sdkTrackingHeaders = SdkTrackingHeaders(context)
 
     // API
     override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
-        HeadersInterceptor(sdkTrackingHeaders),
+        HeadersInterceptor(SdkTrackingHeaders()),
     )
         .addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
@@ -96,8 +95,7 @@ internal class CoordinatorConnectionModule(
         networkStateProvider = networkStateProvider,
         scope = scope,
         lifecycle = lifecycle,
-        tokenProvider = tokenProvider,
-        sdkTrackingHeaders = sdkTrackingHeaders,
+        tokenProvider = tokenProvider
     )
 
     override fun updateToken(token: UserToken) {

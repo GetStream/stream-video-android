@@ -24,7 +24,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @InternalStreamVideoApi
-class SdkTrackingHeaders(private val context: Context) {
+class SdkTrackingHeaders {
     /**
      * Header used to track which SDK is being used.
      */
@@ -41,7 +41,9 @@ class SdkTrackingHeaders(private val context: Context) {
      */
     private fun getAppVersionName(): String {
         return runCatching {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            getContext()?.packageManager
+                ?.getPackageInfo(getContext()?.packageName ?: return@runCatching null, 0)
+                ?.versionName
         }.getOrNull() ?: "nameNotFound"
     }
 
@@ -54,16 +56,14 @@ class SdkTrackingHeaders(private val context: Context) {
      * @return The application name or `"UnknownApp"` if retrieval fails.
      */
     private fun getAppName(): String {
+        val context = getContext() ?: return "UnknownApp"
         val applicationInfo = context.applicationInfo
-        return if (applicationInfo != null) {
-            val stringId = applicationInfo.labelRes
-            if (stringId == 0) {
-                applicationInfo.nonLocalizedLabel?.toString() ?: "UnknownApp"
-            } else {
-                context.getString(stringId) ?: "UnknownApp"
-            }
+        val stringId = applicationInfo.labelRes
+
+        return if (stringId != 0) {
+            context.getString(stringId)
         } else {
-            "UnknownApp"
+            applicationInfo.nonLocalizedLabel?.toString() ?: "UnknownApp"
         }
     }
 
@@ -92,4 +92,8 @@ class SdkTrackingHeaders(private val context: Context) {
         (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoImpl ->
             "|app_name=" + (streamVideoImpl.appName ?: getAppName())
         } ?: ""
+
+    private fun getContext(): Context? {
+        return StreamVideo.instanceOrNull()?.context
+    }
 }
