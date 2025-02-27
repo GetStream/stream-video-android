@@ -44,8 +44,8 @@ import io.getstream.video.android.mock.previewMemberListState
 /**
  * Component that renders user avatars for a call.
  *
- * @param members The list of call members to render avatars for. If `null`, `participants` will be used instead. Takes precedence over `participants` if both are not `null`.
- * @param participants The list of call participants to render avatars for. If `null`, `members` will be used instead.
+ * @param members The list of call members to render avatars for. If `null`, [participants] will be used instead. Takes precedence over `participants` if both are not `null`.
+ * @param participants The list of call participants to render avatars for. If `null`, [members] will be used instead.
  *
  * @see [UserAvatar]
  */

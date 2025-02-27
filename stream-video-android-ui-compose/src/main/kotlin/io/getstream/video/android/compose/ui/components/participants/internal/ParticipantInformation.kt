@@ -44,6 +44,12 @@ import io.getstream.video.android.mock.previewTwoMembers
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 
+/**
+ * Component that renders user names for a call.
+ *
+ * @param members The list of call members to render names for. If `null`, [participants] will be used instead. Takes precedence over `participants` if both are not `null`.
+ * @param participants The list of call participants to render names for. If `null`, [members] will be used instead.
+ */
 @Composable
 public fun ParticipantInformation(
     callStatus: CallStatus,

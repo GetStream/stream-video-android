@@ -106,7 +106,7 @@ public fun IncomingCallContent(
  *
  * @param call The call contains states and will be rendered with participants.
  * @param isVideoType The type of call, Audio or Video.
- * @param members List of call members. Only remote members will be shown on screen.
+ * @param members List of call members.
  * @param isCameraEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param isShowingHeader If the app bar header is shown or not.

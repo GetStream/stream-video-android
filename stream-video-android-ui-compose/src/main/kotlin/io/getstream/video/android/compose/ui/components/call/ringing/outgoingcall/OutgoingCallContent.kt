@@ -97,7 +97,7 @@ public fun OutgoingCallContent(
  * @param call The call contains states and will be rendered with participants.
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
- * @param members A list of participants.
+ * @param members List of call members.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param headerContent Content shown for the call header.
  * @param detailsContent Content shown for call details, such as call participant information.
