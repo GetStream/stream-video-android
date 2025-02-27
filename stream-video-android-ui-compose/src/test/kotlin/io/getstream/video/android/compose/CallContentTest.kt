@@ -44,14 +44,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot IncomingCallContentDetails Video composable`() {
         snapshot {
-            IncomingCallDetails(participants = previewMemberListState)
+            IncomingCallDetails(members = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot IncomingCallContentDetails Audio composable`() {
         snapshot {
-            IncomingCallDetails(participants = previewMemberListState)
+            IncomingCallDetails(members = previewMemberListState)
         }
     }
 
