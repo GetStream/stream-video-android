@@ -172,7 +172,7 @@ public fun AudioCallControls(
 
 @Preview
 @Composable
-private fun AudioCallPreview() {
+private fun AudioCallContentPreview() {
     val context = LocalContext.current
     StreamPreviewDataUtils.initializeStreamVideo(context)
     VideoTheme {
