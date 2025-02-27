@@ -40,12 +40,12 @@ import io.getstream.video.android.core.model.userNameOrId
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
-import io.getstream.video.android.model.User.Companion.isLocalUser
 
 /**
- * Component that renders user avatars for call participants.
+ * Component that renders user avatars for a call.
  *
- * @param members The list of participants to render avatars for.
+ * @param members The list of call members to render avatars for. If `null`, `participants` will be used instead. Takes precedence over `participants` if both are not `null`.
+ * @param participants The list of call participants to render avatars for. If `null`, `members` will be used instead.
  *
  * @see [UserAvatar]
  */
@@ -78,7 +78,7 @@ public fun ParticipantAvatars(
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        items(callUsers.take(3)) { user ->
+                        items(callUsers.take(if (callUsers.size >= 3) 3 else 2)) { user ->
                             UserAvatar(
                                 modifier = Modifier.size(VideoTheme.dimens.genericXl),
                                 userName = user.userNameOrId,

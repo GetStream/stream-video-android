@@ -41,7 +41,6 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.mock.previewThreeMembers
 import io.getstream.video.android.mock.previewTwoMembers
-import io.getstream.video.android.model.User.Companion.isLocalUser
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 

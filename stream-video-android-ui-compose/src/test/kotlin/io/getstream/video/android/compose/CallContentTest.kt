@@ -71,7 +71,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 call = previewCall,
-                participants = previewMemberListState.takeLast(1),
+                members = previewMemberListState.takeLast(1),
                 isCameraEnabled = false,
                 onBackPressed = {},
             ) {}
@@ -83,7 +83,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 call = previewCall,
-                participants = previewMemberListState,
+                members = previewMemberListState,
                 isCameraEnabled = false,
                 onBackPressed = {},
             ) {}
@@ -93,14 +93,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot OutgoingCallDetails Video composable`() {
         snapshot {
-            OutgoingCallDetails(participants = previewMemberListState)
+            OutgoingCallDetails(members = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot OutgoingCallDetails Audio composable`() {
         snapshot {
-            OutgoingCallDetails(participants = previewMemberListState)
+            OutgoingCallDetails(members = previewMemberListState)
         }
     }
 
@@ -127,7 +127,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 call = previewCall,
-                participants = previewMemberListState.take(1),
+                members = previewMemberListState.take(1),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
                 onCallAction = {},
@@ -140,7 +140,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 call = previewCall,
-                participants = previewMemberListState,
+                members = previewMemberListState,
                 onBackPressed = {},
             ) {}
         }

@@ -1137,7 +1137,7 @@ public class CallState(
     private fun startRingingTimer() {
         ringingTimerJob?.cancel()
         ringingTimerJob = scope.launch {
-            val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
+            val autoCancelTimeout = 0
 
             if (autoCancelTimeout != null && autoCancelTimeout > 0) {
                 delay(autoCancelTimeout.toLong())
