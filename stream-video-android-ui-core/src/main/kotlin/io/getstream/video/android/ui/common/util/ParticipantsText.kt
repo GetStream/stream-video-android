@@ -31,23 +31,21 @@ public fun buildSmallCallText(
 ): String {
     if (participants.isEmpty()) {
         return context.getString(
-            R.string.stream_video_call_participants_empty,
+            R.string.stream_video_call_remote_participants_empty,
         )
     }
 
     val names = participants.map { it.userNameOrId }
     val stringBuilder = StringBuilder(names.first())
+    val max = participants.size.coerceAtMost(maxDisplayedNameCount)
 
-    if (participants.size > 1) {
-        val max = participants.size.coerceAtMost(maxDisplayedNameCount)
-        for (i in 1 until max) {
-            val conjunction = if (i < max - 1 || onlyUseComma) {
-                ","
-            } else {
-                " ${context.getString(R.string.stream_video_call_participants_conjunction)}"
-            }
-            stringBuilder.append("$conjunction ${names[i]}")
+    for (i in 1 until max) {
+        val conjunction = if (i < max - 1 || onlyUseComma) {
+            ","
+        } else {
+            " ${context.getString(R.string.stream_video_call_participants_conjunction)}"
         }
+        stringBuilder.append("$conjunction ${names[i]}")
     }
 
     return stringBuilder.toString()
@@ -59,7 +57,7 @@ public fun buildLargeCallText(
 ): String {
     if (participants.isEmpty()) {
         return context.getString(
-            R.string.stream_video_call_participants_empty,
+            R.string.stream_video_call_remote_participants_empty,
         )
     }
 
@@ -69,5 +67,5 @@ public fun buildLargeCallText(
     val initial = buildSmallCallText(context, participants, onlyUseComma = true)
     if (participants.size == 1) return initial
 
-    return "$initial $conjunction +${participants.size - 3} $trailing"
+    return "$initial $conjunction ${participants.size - 3} $trailing"
 }

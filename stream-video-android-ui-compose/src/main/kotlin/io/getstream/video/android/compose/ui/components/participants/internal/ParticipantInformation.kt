@@ -30,8 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -43,6 +41,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.mock.previewThreeMembers
 import io.getstream.video.android.mock.previewTwoMembers
+import io.getstream.video.android.model.User.Companion.isLocalUser
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 
@@ -98,7 +97,7 @@ public fun ParticipantInformation(
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
-                    callType.capitalize(Locale.current),
+                    callType,
                 )
 
                 CallStatus.Outgoing -> stringResource(

@@ -9296,18 +9296,19 @@ public final class io/getstream/video/android/core/model/CallStatus$Outgoing : i
 }
 
 public final class io/getstream/video/android/core/model/CallUser : java/io/Serializable {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/util/List;
-	public final fun component6 ()Lio/getstream/video/android/core/model/CallUserState;
-	public final fun component7 ()Ljava/util/Date;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Lio/getstream/video/android/core/model/CallUserState;
 	public final fun component8 ()Ljava/util/Date;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;)Lio/getstream/video/android/core/model/CallUser;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallUser;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallUser;
+	public final fun component9 ()Ljava/util/Date;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;)Lio/getstream/video/android/core/model/CallUser;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallUser;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/video/android/core/model/CallUserState;Ljava/util/Date;Ljava/util/Date;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallUser;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreatedAt ()Ljava/util/Date;
 	public final fun getId ()Ljava/lang/String;
@@ -9318,6 +9319,7 @@ public final class io/getstream/video/android/core/model/CallUser : java/io/Seri
 	public final fun getTeams ()Ljava/util/List;
 	public final fun getUpdatedAt ()Ljava/util/Date;
 	public fun hashCode ()I
+	public final fun isLocalUser ()Ljava/lang/Boolean;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -12305,6 +12307,7 @@ public final class io/getstream/video/android/model/User$$serializer : kotlinx/s
 public final class io/getstream/video/android/model/User$Companion {
 	public final fun anonymous ()Lio/getstream/video/android/model/User;
 	public final fun isAnonymous (Lio/getstream/video/android/model/User;)Z
+	public final fun isLocalUser (Lio/getstream/video/android/model/User;)Z
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
