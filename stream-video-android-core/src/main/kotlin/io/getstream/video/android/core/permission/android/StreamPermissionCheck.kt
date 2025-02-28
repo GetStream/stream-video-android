@@ -27,11 +27,11 @@ import io.getstream.video.android.core.Call
  *
  * The default implementation checks for two permissions:
  *
- * [android.Manifest.permission.RECORD_AUDIO] if the call has [org.openapitools.client.models.OwnCapability.SendAudio] capability
+ * [android.Manifest.permission.RECORD_AUDIO] if the call has [io.getstream.android.video.generated.models.OwnCapability.SendAudio] capability
  *
  * and
  *
- * [android.Manifest.permission.CAMERA] if the call has [org.openapitools.client.models.OwnCapability.SendVideo] capability.
+ * [android.Manifest.permission.CAMERA] if the call has [io.getstream.android.video.generated.models.OwnCapability.SendVideo] capability.
  *
  * This means that editing the configuration of the call has effect on which permissions are checked.
  * It is possible to provide a separate implementation to this interface to override this behavior.

@@ -25,6 +25,7 @@ import androidx.compose.material.LocalRippleConfiguration
 import androidx.compose.material.RippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -32,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import io.getstream.video.android.compose.ui.components.base.styling.CompositeStyleProvider
+import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.header.VersionPrefixHeader
 import io.getstream.video.android.core.mapper.ReactionMapper
 
 /**
@@ -91,6 +94,9 @@ public fun VideoTheme(
     styles: CompositeStyleProvider = CompositeStyleProvider(),
     content: @Composable () -> Unit,
 ) {
+    LaunchedEffect(Unit) {
+        HeadersUtil.VERSION_PREFIX_HEADER = VersionPrefixHeader.Compose
+    }
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalDimens provides dimens,

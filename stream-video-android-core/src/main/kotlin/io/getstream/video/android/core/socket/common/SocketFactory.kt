@@ -16,11 +16,11 @@
 
 package io.getstream.video.android.core.socket.common
 
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.StreamVideo.Companion.buildSdkTrackingHeaders
+import io.getstream.video.android.core.header.HeadersUtil
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.openapitools.client.models.VideoEvent
 import java.io.UnsupportedEncodingException
 
 internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(
@@ -28,6 +28,7 @@ internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(
     private val httpClient: OkHttpClient = OkHttpClient(),
 ) {
     private val logger by taggedLogger("Video:SocketFactory")
+    private val headersUtil = HeadersUtil()
 
     @Throws(UnsupportedEncodingException::class)
     fun <T : VideoEvent> createSocket(connectionConf: C, tag: String): StreamWebSocket<V, P> {
@@ -42,6 +43,6 @@ internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(
             .url(connectionConf.endpoint)
             .addHeader("Connection", "Upgrade")
             .addHeader("Upgrade", "websocket")
-            .addHeader("X-Stream-Client", buildSdkTrackingHeaders())
+            .addHeader("X-Stream-Client", headersUtil.buildSdkTrackingHeaders())
             .build()
 }

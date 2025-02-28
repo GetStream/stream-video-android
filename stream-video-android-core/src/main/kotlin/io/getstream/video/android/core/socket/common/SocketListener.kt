@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.socket.common
 
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
-import org.openapitools.client.models.VideoEvent
 
 /**
  * Listener which is invoked for WebSocket events.

@@ -104,7 +104,10 @@ fun CallLobbyScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             CallLobbyHeader(
-                onBack = onBack,
+                onBack = {
+                    callLobbyViewModel.leaveCall()
+                    onBack()
+                },
                 callLobbyViewModel = callLobbyViewModel,
             )
 

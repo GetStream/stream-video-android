@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.ui.menu.transcriptions
 
+import io.getstream.android.video.generated.models.CallSettingsResponse
+import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.TranscriptionDisabledUiState
 import io.getstream.video.android.ui.menu.TranscriptionStoppedUiState
 import io.getstream.video.android.ui.menu.TranscriptionUiState
-import org.openapitools.client.models.CallSettingsResponse
-import org.openapitools.client.models.TranscriptionSettingsResponse
 
 class TranscriptionUiStateManager(
     private val isTranscribing: Boolean,

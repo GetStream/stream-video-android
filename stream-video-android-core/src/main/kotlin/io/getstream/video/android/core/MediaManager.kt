@@ -29,6 +29,8 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
@@ -44,7 +46,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.VideoSettingsResponse
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
@@ -459,18 +460,21 @@ class MicrophoneManager(
         }
 
         if (canHandleDeviceSwitch()) {
-            audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
-                logger.i { "audio devices. selected $selected, available devices are $devices" }
+            if (!::audioHandler.isInitialized) { // This check is atomic
+                audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
+                    logger.i { "audio devices. selected $selected, available devices are $devices" }
 
-                _devices.value = devices.map { it.fromAudio() }
-                _selectedDevice.value = selected?.fromAudio()
+                    _devices.value = devices.map { it.fromAudio() }
+                    _selectedDevice.value = selected?.fromAudio()
 
-                capturedOnAudioDevicesUpdate?.invoke()
-                capturedOnAudioDevicesUpdate = null
-                setupCompleted = true
+                    capturedOnAudioDevicesUpdate?.invoke()
+                    capturedOnAudioDevicesUpdate = null
+                    setupCompleted = true
+                }
+
+                logger.d { "[setup] Calling start on instance $audioHandler" }
+                audioHandler.start()
             }
-
-            audioHandler.start()
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
@@ -552,15 +556,21 @@ public class CameraManager(
     }
 
     internal fun enable(fromUser: Boolean = true) {
-        setup()
-        // 1. update our local state
-        // 2. update the track enabled status
-        // 3. Rtc listens and sends the update mute state request
-        if (fromUser) {
-            _status.value = DeviceStatus.Enabled
+        val (isCallVideoEnabled, canUserSendVideo) = with(mediaManager.call.state) {
+            (settings.value?.video?.enabled == true) to ownCapabilities.value.contains(OwnCapability.SendVideo)
         }
-        mediaManager.videoTrack.trySetEnabled(true)
-        startCapture()
+
+        if (isCallVideoEnabled && canUserSendVideo) {
+            setup()
+            // 1. update our local state
+            // 2. update the track enabled status
+            // 3. Rtc listens and sends the update mute state request
+            if (fromUser) {
+                _status.value = DeviceStatus.Enabled
+            }
+            mediaManager.videoTrack.trySetEnabled(true)
+            startCapture()
+        }
     }
 
     fun pause(fromUser: Boolean = true) {

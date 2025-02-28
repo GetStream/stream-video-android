@@ -18,6 +18,60 @@ package io.getstream.video.android.core
 
 import android.util.Log
 import androidx.compose.runtime.Stable
+import io.getstream.android.video.generated.models.BlockedUserEvent
+import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallClosedCaption
+import io.getstream.android.video.generated.models.CallClosedCaptionsStartedEvent
+import io.getstream.android.video.generated.models.CallClosedCaptionsStoppedEvent
+import io.getstream.android.video.generated.models.CallCreatedEvent
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallIngressResponse
+import io.getstream.android.video.generated.models.CallLiveStartedEvent
+import io.getstream.android.video.generated.models.CallMemberAddedEvent
+import io.getstream.android.video.generated.models.CallMemberRemovedEvent
+import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
+import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.CallParticipantResponse
+import io.getstream.android.video.generated.models.CallReactionEvent
+import io.getstream.android.video.generated.models.CallRecordingStartedEvent
+import io.getstream.android.video.generated.models.CallRecordingStoppedEvent
+import io.getstream.android.video.generated.models.CallRejectedEvent
+import io.getstream.android.video.generated.models.CallResponse
+import io.getstream.android.video.generated.models.CallRingEvent
+import io.getstream.android.video.generated.models.CallSessionEndedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantCountsUpdatedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantJoinedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
+import io.getstream.android.video.generated.models.CallSessionResponse
+import io.getstream.android.video.generated.models.CallSessionStartedEvent
+import io.getstream.android.video.generated.models.CallSettingsResponse
+import io.getstream.android.video.generated.models.CallStateResponseFields
+import io.getstream.android.video.generated.models.CallTranscriptionFailedEvent
+import io.getstream.android.video.generated.models.CallTranscriptionStartedEvent
+import io.getstream.android.video.generated.models.CallTranscriptionStoppedEvent
+import io.getstream.android.video.generated.models.CallUpdatedEvent
+import io.getstream.android.video.generated.models.ClosedCaptionEvent
+import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.generated.models.CustomVideoEvent
+import io.getstream.android.video.generated.models.EgressHLSResponse
+import io.getstream.android.video.generated.models.EgressResponse
+import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetOrCreateCallResponse
+import io.getstream.android.video.generated.models.GoLiveResponse
+import io.getstream.android.video.generated.models.HealthCheckEvent
+import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.MemberResponse
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.generated.models.PermissionRequestEvent
+import io.getstream.android.video.generated.models.QueryCallMembersResponse
+import io.getstream.android.video.generated.models.ReactionResponse
+import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
+import io.getstream.android.video.generated.models.StopLiveResponse
+import io.getstream.android.video.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode
+import io.getstream.android.video.generated.models.UnblockedUserEvent
+import io.getstream.android.video.generated.models.UpdateCallResponse
+import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
@@ -72,60 +126,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.openapitools.client.models.BlockedUserEvent
-import org.openapitools.client.models.CallAcceptedEvent
-import org.openapitools.client.models.CallClosedCaption
-import org.openapitools.client.models.CallCreatedEvent
-import org.openapitools.client.models.CallEndedEvent
-import org.openapitools.client.models.CallIngressResponse
-import org.openapitools.client.models.CallLiveStartedEvent
-import org.openapitools.client.models.CallMemberAddedEvent
-import org.openapitools.client.models.CallMemberRemovedEvent
-import org.openapitools.client.models.CallMemberUpdatedEvent
-import org.openapitools.client.models.CallMemberUpdatedPermissionEvent
-import org.openapitools.client.models.CallParticipantResponse
-import org.openapitools.client.models.CallReactionEvent
-import org.openapitools.client.models.CallRecordingStartedEvent
-import org.openapitools.client.models.CallRecordingStoppedEvent
-import org.openapitools.client.models.CallRejectedEvent
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.CallRingEvent
-import org.openapitools.client.models.CallSessionEndedEvent
-import org.openapitools.client.models.CallSessionParticipantCountsUpdatedEvent
-import org.openapitools.client.models.CallSessionParticipantJoinedEvent
-import org.openapitools.client.models.CallSessionParticipantLeftEvent
-import org.openapitools.client.models.CallSessionResponse
-import org.openapitools.client.models.CallSessionStartedEvent
-import org.openapitools.client.models.CallSettingsResponse
-import org.openapitools.client.models.CallStateResponseFields
-import org.openapitools.client.models.CallTranscriptionFailedEvent
-import org.openapitools.client.models.CallTranscriptionStartedEvent
-import org.openapitools.client.models.CallTranscriptionStoppedEvent
-import org.openapitools.client.models.CallUpdatedEvent
-import org.openapitools.client.models.ClosedCaptionEndedEvent
-import org.openapitools.client.models.ClosedCaptionEvent
-import org.openapitools.client.models.ClosedCaptionStartedEvent
-import org.openapitools.client.models.ConnectedEvent
-import org.openapitools.client.models.CustomVideoEvent
-import org.openapitools.client.models.EgressHLSResponse
-import org.openapitools.client.models.EgressResponse
-import org.openapitools.client.models.GetCallResponse
-import org.openapitools.client.models.GetOrCreateCallResponse
-import org.openapitools.client.models.GoLiveResponse
-import org.openapitools.client.models.HealthCheckEvent
-import org.openapitools.client.models.JoinCallResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
-import org.openapitools.client.models.PermissionRequestEvent
-import org.openapitools.client.models.QueryCallMembersResponse
-import org.openapitools.client.models.ReactionResponse
-import org.openapitools.client.models.StartHLSBroadcastingResponse
-import org.openapitools.client.models.StopLiveResponse
-import org.openapitools.client.models.TranscriptionSettingsResponse.ClosedCaptionMode
-import org.openapitools.client.models.UnblockedUserEvent
-import org.openapitools.client.models.UpdateCallResponse
-import org.openapitools.client.models.UpdatedCallPermissionsEvent
-import org.openapitools.client.models.VideoEvent
 import org.threeten.bp.Clock
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
@@ -601,7 +601,7 @@ public class CallState(
     /**
      *  Holds the current closed caption mode for the video call. This object contains information about closed
      *  captioning feature availability. This state is updated dynamically based on the server's transcription
-     *  setting which is [org.openapitools.client.models.TranscriptionSettingsResponse.closedCaptionMode]
+     *  setting which is [io.getstream.android.video.generated.models.TranscriptionSettingsResponse.closedCaptionMode]
      *
      *  Possible values:
      *  - [ClosedCaptionMode.Available]: Closed captions are available and can be enabled.
@@ -661,11 +661,6 @@ public class CallState(
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
-
-                Log.d(
-                    "RingingStateDebug",
-                    "CallRejectedEvent. Rejected by: ${event.user.id}. Reason: ${event.reason}. Will call updateRingingState().",
-                )
 
                 updateRingingState(
                     rejectReason = event.reason?.let {
@@ -988,9 +983,9 @@ public class CallState(
                 _transcribing.value = false
             }
 
-            is ClosedCaptionStartedEvent,
+            is CallClosedCaptionsStartedEvent,
             is ClosedCaptionEvent,
-            is ClosedCaptionEndedEvent,
+            is CallClosedCaptionsStoppedEvent,
             ->
                 closedCaptionManager.handleEvent(event)
         }
@@ -1090,10 +1085,6 @@ public class CallState(
         }
         Log.d("RingingState", "Update: $state")
 
-        Log.d("RingingStateDebug", "updateRingingState 1. Called by: ${getCallingMethod()}")
-        Log.d("RingingStateDebug", "updateRingingState 2. New state: $state")
-        Log.d("RingingStateDebug", "-------------------")
-
         _ringingState.value = state
     }
 
@@ -1154,8 +1145,6 @@ public class CallState(
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-
-                    Log.d("RingingStateDebug", "startRingingTimer. Timeout.")
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
@@ -1327,6 +1316,7 @@ public class CallState(
 
     fun updateFromResponse(callData: CallStateResponseFields) {
         updateFromResponse(callData.call)
+        _ownCapabilities.value = callData.ownCapabilities
         updateFromResponse(callData.members)
     }
 
@@ -1365,11 +1355,11 @@ public class CallState(
             broadcasting = true,
             hls = curEgress.hls?.copy(
                 playlistUrl = response.playlistUrl,
-            ) ?: EgressHLSResponse(playlistUrl = response.playlistUrl),
+            ) ?: EgressHLSResponse(playlistUrl = response.playlistUrl, ""),
         ) ?: EgressResponse(
             broadcasting = true,
             rtmps = emptyList(),
-            hls = EgressHLSResponse(playlistUrl = response.playlistUrl),
+            hls = EgressHLSResponse(playlistUrl = response.playlistUrl, ""),
         )
         logger.v { "[updateFromResponse] newEgress: $newEgress" }
         _egress.value = newEgress

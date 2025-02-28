@@ -18,6 +18,8 @@ package io.getstream.video.android.xml.initializer
 
 import android.content.Context
 import androidx.startup.Initializer
+import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.header.VersionPrefixHeader
 import io.getstream.video.android.xml.VideoUI
 
 /**
@@ -27,6 +29,7 @@ public class VideoUIInitializer : Initializer<Unit> {
 
     override fun create(context: Context) {
         VideoUI.appContext = context
+        HeadersUtil.VERSION_PREFIX_HEADER = VersionPrefixHeader.UiComponents
     }
 
     override fun dependencies(): MutableList<Class<out Initializer<*>>> = mutableListOf()

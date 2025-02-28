@@ -39,6 +39,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.model.User.Companion.isLocalUser
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -72,12 +73,13 @@ public fun OutgoingCallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val participants: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
+    val members: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
+    val remoteMembers = members.filterNot { it.user.isLocalUser() }
 
     OutgoingCallContent(
         call = call,
         isVideoType = isVideoType,
-        participants = participants,
+        members = remoteMembers,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
         backgroundContent = backgroundContent,
@@ -95,7 +97,7 @@ public fun OutgoingCallContent(
  * @param call The call contains states and will be rendered with participants.
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
- * @param participants A list of participants.
+ * @param members List of call members.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param headerContent Content shown for the call header.
  * @param detailsContent Content shown for call details, such as call participant information.
@@ -108,7 +110,7 @@ public fun OutgoingCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean = true,
-    participants: List<MemberState>,
+    members: List<MemberState>,
     isShowingHeader: Boolean = true,
     backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
@@ -142,17 +144,17 @@ public fun OutgoingCallContent(
                 headerContent?.invoke(this)
             }
 
-            val topPadding = if (participants.size == 1 || isVideoType) {
+            val topPadding = if (members.size == 1 || isVideoType) {
                 VideoTheme.dimens.spacingL
             } else {
                 VideoTheme.dimens.spacingM
             }
 
-            detailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
+            detailsContent?.invoke(this, members, topPadding) ?: OutgoingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                participants = participants,
+                members = members,
                 isVideoType = isVideoType,
             )
         }
@@ -177,7 +179,7 @@ private fun OutgoingCallVideoPreview() {
         OutgoingCallContent(
             call = previewCall,
             isVideoType = true,
-            participants = previewMemberListState,
+            members = previewMemberListState,
             onBackPressed = {},
         ) {}
     }
@@ -191,7 +193,7 @@ private fun OutgoingCallAudioPreview() {
         OutgoingCallContent(
             call = previewCall,
             isVideoType = false,
-            participants = previewMemberListState,
+            members = previewMemberListState,
             onBackPressed = {},
         ) {}
     }

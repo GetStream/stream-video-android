@@ -17,10 +17,10 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
+import io.getstream.android.video.generated.models.CallResponse
+import io.getstream.android.video.generated.models.MemberResponse
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.utils.toCallUser
-import org.openapitools.client.models.CallResponse
-import org.openapitools.client.models.MemberResponse
-import org.openapitools.client.models.OwnCapability
 import java.io.Serializable
 import java.util.Date
 
@@ -30,6 +30,7 @@ public data class CallUser(
     val name: String? = null,
     val role: String? = null,
     val imageUrl: String? = null,
+    val isLocalUser: Boolean? = null,
     val teams: List<String>? = null,
     val state: CallUserState?,
     val createdAt: Date?,
@@ -79,6 +80,9 @@ public data class CallEgress(
     val broadcastEgress: String,
     val recordEgress: String,
 )
+
+val CallUser.userNameOrId: String
+    get() = name.takeUnless { it.isNullOrBlank() } ?: id
 
 internal fun List<MemberResponse>.toCallUsers(): Map<String, CallUser> =
     associate { it.userId to it.toCallUser() }
