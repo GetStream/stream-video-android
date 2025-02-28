@@ -180,7 +180,7 @@ class CallStateTest : IntegrationTestBase() {
         )
         call.state.updateParticipantSortingOrder(
             compareByDescending {
-                it.sessionId
+                it.name.value
             },
         )
 

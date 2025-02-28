@@ -9979,17 +9979,19 @@ public final class io/getstream/video/android/core/notifications/internal/receiv
 
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfig {
 	public fun <init> ()V
-	public fun <init> (ZILjava/util/Map;Ljava/lang/Class;)V
-	public synthetic fun <init> (ZILjava/util/Map;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZILjava/util/Map;Ljava/lang/Class;)V
+	public synthetic fun <init> (ZZILjava/util/Map;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
-	public final fun component2 ()I
-	public final fun component3 ()Ljava/util/Map;
-	public final fun component4 ()Ljava/lang/Class;
-	public final fun copy (ZILjava/util/Map;Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/lang/Class;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun component4 ()Ljava/util/Map;
+	public final fun component5 ()Ljava/lang/Class;
+	public final fun copy (ZZILjava/util/Map;Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZZILjava/util/Map;Ljava/lang/Class;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioUsage ()I
 	public final fun getCallServicePerType ()Ljava/util/Map;
+	public final fun getEnableTelecomIntegration ()Z
 	public final fun getRunCallServiceInForeground ()Z
 	public final fun getServiceClass ()Ljava/lang/Class;
 	public fun hashCode ()I

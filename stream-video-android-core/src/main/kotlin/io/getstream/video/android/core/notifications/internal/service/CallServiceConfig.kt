@@ -37,6 +37,7 @@ internal const val ANY_MARKER = "ALL_CALL_TYPES"
  */
 public data class CallServiceConfig(
     val runCallServiceInForeground: Boolean = true,
+    val enableTelecomIntegration: Boolean = false,
     val audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION,
     @Deprecated(
         "This property will be removed soon. Please use CallServiceConfigRegistry",

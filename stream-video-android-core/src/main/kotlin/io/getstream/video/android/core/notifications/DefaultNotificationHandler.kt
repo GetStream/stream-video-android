@@ -42,6 +42,8 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -100,32 +102,44 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
         // 1) Check if Telecom-based calls are supported/enabled
         if (isTelecomIntegrationAvailable(application)) {
             try {
-                // 2) Invoke Telecom
+                // Invoke Telecom
                 val telecomManager = application.getSystemService(
                     Context.TELECOM_SERVICE,
                 ) as TelecomManager
                 val phoneAccountHandle = getMyPhoneAccountHandle(application)
 
-                // Build extras that your ConnectionService will read
+                // Build extras that ConnectionService will read
                 val extras = Bundle().apply {
                     putString(INTENT_EXTRA_CALL_CID, callId.cid)
                     putString(INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
                 }
 
-                // 3) Add as an incoming call in the system
-                telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
+                // Add as an incoming call in the system
+                val canAddIncomingCall = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    telecomManager.isIncomingCallPermitted(phoneAccountHandle)
+                } else {
+                    true
+                }
+                if (canAddIncomingCall) {
+                    telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
+                } else {
+                    val call = streamVideo?.call(callId.type, callId.id)
+                    streamVideo?.scope?.launch {
+                        call?.reject(reason = RejectReason.Busy)
+                    }
+                }
             } catch (e: Exception) {
-                // 4) Fallback to your existing CallService approach if Telecom fails
+                // Fallback to existing CallService approach if Telecom fails
                 logger.e { "[onRingingCall] Telecom call failed, falling back. Reason: $e" }
                 fallbackShowIncomingCall(callId, callDisplayName)
             }
         } else {
             logger.e { "[onRingingCall] Telecom is not supported/enabled, falling back." }
-            // 5) If Telecom is not supported/enabled, fallback to your old approach
+            // If Telecom is not supported/enabled, fallback to old approach
             fallbackShowIncomingCall(callId, callDisplayName)
         }
     }
