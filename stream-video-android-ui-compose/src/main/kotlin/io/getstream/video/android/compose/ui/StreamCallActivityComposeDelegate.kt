@@ -281,18 +281,12 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.AudioCallContent(call: Call) {
         val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
-        val duration by call.state.durationInDateFormat.collectAsStateWithLifecycle()
+
         io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent(
-            onBackPressed = {
-                onBackPressed(call)
-            },
             call = call,
             isMicrophoneEnabled = micEnabled,
-            onCallAction = {
-                onCallAction(call, it)
-            },
-            durationPlaceholder = duration
-                ?: "...",
+            onCallAction = { onCallAction(call, it) },
+            onBackPressed = { onBackPressed(call) },
         )
     }
 

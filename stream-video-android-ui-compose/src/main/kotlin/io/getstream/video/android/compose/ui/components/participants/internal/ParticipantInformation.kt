@@ -30,12 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -45,10 +44,17 @@ import io.getstream.video.android.mock.previewTwoMembers
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 
+/**
+ * Component that renders user names for a call.
+ *
+ * @param members The list of call members to render names for. If `null`, [participants] will be used instead. Takes precedence over `participants` if both are not `null`.
+ * @param participants The list of call participants to render names for. If `null`, [members] will be used instead.
+ */
 @Composable
 public fun ParticipantInformation(
     callStatus: CallStatus,
-    participants: List<MemberState>,
+    members: List<MemberState>? = null,
+    participants: List<ParticipantState>? = null,
     isVideoType: Boolean = true,
 ) {
     Column(
@@ -56,14 +62,21 @@ public fun ParticipantInformation(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val context = LocalContext.current
-        val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
-        val text = if (participants.size <= 3) {
+        val callUsers by remember(members, participants) {
+            derivedStateOf {
+                members?.map { it.toCallUser() }
+                    ?: participants?.map { it.toCallUser() }
+                    ?: emptyList()
+            }
+        }
+
+        val text = if (callUsers.size <= 3) {
             buildSmallCallText(context, callUsers)
         } else {
             buildLargeCallText(context, callUsers)
         }
 
-        val fontSize = if (participants.size == 1) {
+        val fontSize = if (callUsers.size == 1) {
             VideoTheme.dimens.textSizeL
         } else {
             VideoTheme.dimens.textSizeM
@@ -89,14 +102,14 @@ public fun ParticipantInformation(
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
-                    callType.capitalize(Locale.current),
+                    callType,
                 )
 
                 CallStatus.Outgoing -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_outgoing,
                 )
 
-                is CallStatus.Calling -> callStatus.duration
+                is CallStatus.Ongoing -> callStatus.duration
             },
             style = VideoTheme.typography.bodyM,
             textAlign = TextAlign.Center,
@@ -112,7 +125,7 @@ private fun ParticipantInformationTwoUsersPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = previewTwoMembers,
+            members = previewTwoMembers,
         )
     }
 }
@@ -125,7 +138,7 @@ private fun ParticipantInformationThreeUsersPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = previewThreeMembers,
+            members = previewThreeMembers,
         )
     }
 }
@@ -138,7 +151,7 @@ private fun ParticipantInformationPreview() {
         ParticipantInformation(
             isVideoType = true,
             callStatus = CallStatus.Incoming,
-            participants = previewMemberListState,
+            members = previewMemberListState,
         )
     }
 }
