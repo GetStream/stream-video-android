@@ -5,12 +5,12 @@ object Configuration {
     const val targetSdk = 35
     const val minSdk = 24
     const val majorVersion = 1
-    const val minorVersion = 3
-    const val patchVersion = 1
+    const val minorVersion = 4
+    const val patchVersion = 0
     const val versionName = "$majorVersion.$minorVersion.$patchVersion"
-    const val versionCode = 47
+    const val versionCode = 48
     const val snapshotVersionName = "$majorVersion.$minorVersion.${patchVersion + 1}-SNAPSHOT"
     const val artifactGroup = "io.getstream"
-    const val streamVideoCallGooglePlayVersion = "1.3.1"
+    const val streamVideoCallGooglePlayVersion = "1.4.0"
     const val streamWebRtcVersionName = "1.3.6"
 }
