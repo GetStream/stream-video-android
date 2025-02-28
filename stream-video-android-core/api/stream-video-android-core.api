@@ -2847,6 +2847,10 @@ public final class io/getstream/android/video/generated/models/OwnCapability$Sta
 	public static final field INSTANCE Lio/getstream/android/video/generated/models/OwnCapability$StartClosedCaptionsCall;
 }
 
+public final class io/getstream/android/video/generated/models/OwnCapability$StartFrameRecordCall : io/getstream/android/video/generated/models/OwnCapability {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/OwnCapability$StartFrameRecordCall;
+}
+
 public final class io/getstream/android/video/generated/models/OwnCapability$StartRecordCall : io/getstream/android/video/generated/models/OwnCapability {
 	public static final field INSTANCE Lio/getstream/android/video/generated/models/OwnCapability$StartRecordCall;
 }
@@ -2861,6 +2865,10 @@ public final class io/getstream/android/video/generated/models/OwnCapability$Sto
 
 public final class io/getstream/android/video/generated/models/OwnCapability$StopClosedCaptionsCall : io/getstream/android/video/generated/models/OwnCapability {
 	public static final field INSTANCE Lio/getstream/android/video/generated/models/OwnCapability$StopClosedCaptionsCall;
+}
+
+public final class io/getstream/android/video/generated/models/OwnCapability$StopFrameRecordCall : io/getstream/android/video/generated/models/OwnCapability {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/OwnCapability$StopFrameRecordCall;
 }
 
 public final class io/getstream/android/video/generated/models/OwnCapability$StopRecordCall : io/getstream/android/video/generated/models/OwnCapability {
