@@ -28,5 +28,5 @@ public sealed interface CallStatus {
     public data object Outgoing : CallStatus
 
     @Stable
-    public data class Calling(public val duration: String) : CallStatus
+    public data class Ongoing(public val duration: String) : CallStatus
 }

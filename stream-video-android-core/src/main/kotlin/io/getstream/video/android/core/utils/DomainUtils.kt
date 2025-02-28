@@ -25,6 +25,7 @@ import io.getstream.android.video.generated.models.QueryCallsResponse
 import io.getstream.android.video.generated.models.ReactionResponse
 import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallData
 import io.getstream.video.android.core.model.CallRecordingData
@@ -37,6 +38,7 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.ReactionData
 import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.User.Companion.isLocalUser
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.Date
@@ -61,9 +63,23 @@ public fun MemberState.toCallUser(): CallUser {
     return CallUser(
         id = user.id,
         name = user.name,
-        imageUrl = user.image,
-        teams = user.teams,
         role = user.role,
+        imageUrl = user.image,
+        isLocalUser = user.isLocalUser(),
+        teams = user.teams,
+        state = null,
+        createdAt = null,
+        updatedAt = null,
+    )
+}
+
+@JvmSynthetic
+@InternalStreamVideoApi
+public fun ParticipantState.toCallUser(): CallUser {
+    return CallUser(
+        id = userId.value,
+        name = userNameOrId.value,
+        imageUrl = image.value,
         state = null,
         createdAt = null,
         updatedAt = null,
@@ -179,7 +195,3 @@ internal fun EdgeResponse.toEdge(): EdgeData {
         red = red,
     )
 }
-
-@JvmSynthetic
-@InternalStreamVideoApi
-fun CallUser.getNameOrId(): String = name.takeUnless { it.isNullOrBlank() } ?: id
