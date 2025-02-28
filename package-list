@@ -2,6 +2,9 @@ $dokka.format:html-v1
 $dokka.linkExtension:html
 
 module:stream-video-android-core
+io.getstream.android.video.generated.apis
+io.getstream.android.video.generated.infrastructure
+io.getstream.android.video.generated.models
 io.getstream.video.android.core
 io.getstream.video.android.core.audio
 io.getstream.video.android.core.call
@@ -19,6 +22,7 @@ io.getstream.video.android.core.dispatchers
 io.getstream.video.android.core.errors
 io.getstream.video.android.core.events
 io.getstream.video.android.core.filter
+io.getstream.video.android.core.header
 io.getstream.video.android.core.internal
 io.getstream.video.android.core.internal.network
 io.getstream.video.android.core.logging
@@ -48,9 +52,6 @@ io.getstream.video.android.datastore.delegate
 io.getstream.video.android.datastore.model
 io.getstream.video.android.model
 io.getstream.video.android.model.mapper
-org.openapitools.client.apis
-org.openapitools.client.infrastructure
-org.openapitools.client.models
 module:stream-video-android-filters-video
 io.getstream.video.android.filters.video
 module:stream-video-android-previewdata
