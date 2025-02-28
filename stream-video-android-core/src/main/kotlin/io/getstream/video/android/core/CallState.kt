@@ -1327,6 +1327,7 @@ public class CallState(
 
     fun updateFromResponse(callData: CallStateResponseFields) {
         updateFromResponse(callData.call)
+        _ownCapabilities.value = callData.ownCapabilities
         updateFromResponse(callData.members)
     }
 
