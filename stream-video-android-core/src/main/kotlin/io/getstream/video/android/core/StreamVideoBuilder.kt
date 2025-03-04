@@ -24,6 +24,7 @@ import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.call.CallType
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -121,6 +122,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
+    @InternalStreamVideoApi private val apiUrl: String? = null,
+    @InternalStreamVideoApi private val wssUrl: String? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -175,8 +178,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
-            apiUrl = "https:///$videoDomain",
-            wssUrl = "wss://$videoDomain/video/connect",
+            apiUrl = apiUrl ?: "https:///$videoDomain",
+            wssUrl = wssUrl ?: "wss://$videoDomain/video/connect",
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
             user = user,
