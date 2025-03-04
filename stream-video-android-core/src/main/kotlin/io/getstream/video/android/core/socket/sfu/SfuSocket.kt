@@ -87,13 +87,9 @@ internal open class SfuSocket(
         reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
     )
     private val lifecycleHandler = object : LifecycleHandler {
-        override suspend fun resume() {
-            sfuSocketStateService.onResume()
-        }
+        override suspend fun resume() { /* No-op */ }
 
-        override suspend fun stopped() {
-            healthMonitor.stop()
-        }
+        override suspend fun stopped() { /* No-op */ }
     }
 
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
