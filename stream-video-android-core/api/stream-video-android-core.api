@@ -10160,6 +10160,12 @@ public final class io/getstream/video/android/core/socket/SocketError$Companion 
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class io/getstream/video/android/core/socket/common/CallAwareConnectionPolicy : io/getstream/video/android/core/socket/common/SocketConnectionPolicy {
+	public fun <init> (Lkotlinx/coroutines/flow/StateFlow;)V
+	public fun shouldConnect ()Z
+	public fun shouldDisconnect ()Z
+}
+
 public abstract class io/getstream/video/android/core/socket/common/ConnectionConf {
 	public abstract fun getApiKey ()Ljava/lang/String;
 	public abstract fun getEndpoint ()Ljava/lang/String;
@@ -10250,6 +10256,11 @@ public abstract interface class io/getstream/video/android/core/socket/common/So
 public final class io/getstream/video/android/core/socket/common/SocketActions$Companion {
 }
 
+public abstract interface class io/getstream/video/android/core/socket/common/SocketConnectionPolicy {
+	public abstract fun shouldConnect ()Z
+	public abstract fun shouldDisconnect ()Z
+}
+
 public class io/getstream/video/android/core/socket/common/SocketListener {
 	public fun <init> ()V
 	public fun getDeliverOnMainThread ()Z
@@ -10259,6 +10270,12 @@ public class io/getstream/video/android/core/socket/common/SocketListener {
 	public fun onDisconnected (Lio/getstream/video/android/core/errors/DisconnectCause;)V
 	public fun onError (Lio/getstream/video/android/core/socket/common/StreamWebSocketEvent$Error;)V
 	public fun onEvent (Ljava/lang/Object;)V
+}
+
+public final class io/getstream/video/android/core/socket/common/SocketStateConnectionPolicy : io/getstream/video/android/core/socket/common/SocketConnectionPolicy {
+	public fun <init> (Lkotlinx/coroutines/flow/StateFlow;)V
+	public fun shouldConnect ()Z
+	public fun shouldDisconnect ()Z
 }
 
 public abstract class io/getstream/video/android/core/socket/common/StreamWebSocketEvent {
