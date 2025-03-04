@@ -95,13 +95,7 @@ object DefaultCallConfigurations {
         return mapOf(
             Pair(CallType.AnyMarker, default),
             Pair(CallType.AudioCall, audioCall),
-            Pair(
-                CallType.Livestream,
-                livestream.copy(
-                    runCallServiceInForeground = true,
-                    audioUsage = AudioAttributes.USAGE_MEDIA,
-                ),
-            ),
+            Pair(CallType.Livestream, livestreamGuestCall),
         )
     }
 }
