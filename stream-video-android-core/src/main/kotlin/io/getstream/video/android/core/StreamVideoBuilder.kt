@@ -175,7 +175,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
 
         if (token.isBlank()) {
-            throw IllegalStateException("The token cannot be blank")
+            throw IllegalArgumentException("The token cannot be blank")
         }
 
         if (user.type == UserType.Authenticated && user.id.isBlank()) {

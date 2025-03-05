@@ -20,6 +20,7 @@ import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
+import io.getstream.video.android.model.User
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -90,12 +91,15 @@ class StreamVideoBuilderTest : TestBase() {
         val customApiUrl = "http://some-api-url.com:3030"
         val customWssUrl = "ws://some-wss-url.com:8800/video/connect"
 
-        val client = StreamVideoBuilder(context = context, apiKey = authData!!.apiKey)
-            .apply {
-                forceApiUrl(customApiUrl)
-                forceWssUrl(customWssUrl)
-            }
-            .build() as StreamVideoClient
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = authData!!.apiKey,
+            user = User.anonymous(),
+            token = "anonymous-token",
+        ).apply {
+            forceApiUrl(customApiUrl)
+            forceWssUrl(customWssUrl)
+        }.build() as StreamVideoClient
 
         assertEquals(client.coordinatorConnectionModule.apiUrl, customApiUrl)
         assertEquals(client.coordinatorConnectionModule.wssUrl, customWssUrl)
