@@ -28,7 +28,7 @@ import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.lifecycle.LifecycleHandler
+import io.getstream.video.android.core.lifecycle.NoOpLifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.HealthMonitor
@@ -86,11 +86,7 @@ internal open class SfuSocket(
         },
         reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
     )
-    private val lifecycleHandler = object : LifecycleHandler {
-        override suspend fun resume() { /* No-op */ }
-
-        override suspend fun stopped() { /* No-op */ }
-    }
+    private val lifecycleHandler = NoOpLifecycleHandler()
 
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {

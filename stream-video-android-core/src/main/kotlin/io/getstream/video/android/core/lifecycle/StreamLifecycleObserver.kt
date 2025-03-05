@@ -76,8 +76,3 @@ internal class StreamLifecycleObserver(
         }
     }
 }
-
-internal interface LifecycleHandler {
-    suspend fun resume()
-    suspend fun stopped()
-}

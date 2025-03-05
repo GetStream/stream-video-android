@@ -27,7 +27,7 @@ import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.lifecycle.LifecycleHandler
+import io.getstream.video.android.core.lifecycle.ConnectionPolicyLifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.CallAwareConnectionPolicy
 import io.getstream.video.android.core.socket.common.ConnectionConf
@@ -84,21 +84,8 @@ internal open class CoordinatorSocket(
         CallAwareConnectionPolicy(StreamVideo.instanceState),
         SocketStateConnectionPolicy(state()),
     )
-    private val lifecycleHandler = object : LifecycleHandler {
-        override suspend fun resume() {
-            val shouldConnect = connectionPolicies.all { it.shouldConnect() }
-            if (shouldConnect) coordinatorSocketStateService.onResume()
-
-            logger.d { "[lifecycleHandler#resume] shouldConnect: $shouldConnect" }
-        }
-
-        override suspend fun stopped() {
-            val shouldDisconnect = connectionPolicies.all { it.shouldDisconnect() }
-            if (shouldDisconnect) coordinatorSocketStateService.onStop()
-
-            logger.d { "[lifecycleHandler#stopped] shouldDisconnect: $shouldDisconnect" }
-        }
-    }
+    private val lifecycleHandler =
+        ConnectionPolicyLifecycleHandler(connectionPolicies, coordinatorSocketStateService)
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             coordinatorSocketStateService.onNetworkAvailable()
