@@ -82,4 +82,22 @@ class StreamVideoBuilderTest : TestBase() {
         assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
         assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
     }
+
+    @Test
+    fun customApiWssUrls() {
+        StreamVideo.removeClient()
+
+        val customApiUrl = "http://some-api-url.com:3030"
+        val customWssUrl = "ws://some-wss-url.com:8800/video/connect"
+
+        val client = StreamVideoBuilder(context = context, apiKey = authData!!.apiKey)
+            .apply {
+                forceApiUrl(customApiUrl)
+                forceWssUrl(customWssUrl)
+            }
+            .build() as StreamVideoClient
+
+        assertEquals(client.coordinatorConnectionModule.apiUrl, customApiUrl)
+        assertEquals(client.coordinatorConnectionModule.wssUrl, customWssUrl)
+    }
 }
