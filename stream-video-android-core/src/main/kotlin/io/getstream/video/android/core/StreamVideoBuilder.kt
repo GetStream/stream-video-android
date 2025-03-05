@@ -122,11 +122,32 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
-    @InternalStreamVideoApi private val apiUrl: String? = null,
-    @InternalStreamVideoApi private val wssUrl: String? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
+
+    private var apiUrl: String? = null
+    private var wssUrl: String? = null
+
+    /**
+     * Set the API URL to be used for the video client.
+     *
+     * For testing purposes only.
+     */
+    @InternalStreamVideoApi
+    public fun forceApiUrl(value: String): StreamVideoBuilder = apply {
+        apiUrl = value
+    }
+
+    /**
+     * Set the WSS URL to be used for the video client.
+     *
+     * For testing purposes only.
+     */
+    @InternalStreamVideoApi
+    public fun forceWssUrl(value: String): StreamVideoBuilder = apply {
+        wssUrl = value
+    }
 
     /**
      * Builds the [StreamVideo] client.
