@@ -128,6 +128,8 @@ fun ParticipantsListContent(
                 context,
             )
             Spacer(modifier = Modifier.size(16.dp))
+            QRCodeInfo()
+            Spacer(modifier = Modifier.size(16.dp))
         }
 
         items(count = participants.size, key = { index -> participants[index].sessionId }) {
@@ -193,6 +195,18 @@ fun ParticipantsListContent(
             }
             Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
         }
+    }
+}
+
+@Composable
+fun QRCodeInfo(modifier: Modifier = Modifier) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        QRCode(content = "http://pronto.io/123")
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = "Scan the QR code to join from another device.",
+            style = VideoTheme.typography.bodyM.copy(color = Color.White),
+        )
     }
 }
 
