@@ -296,6 +296,14 @@ private fun DynamicMenuDebugPreview() {
                 onToggleAudioFilterClick = { },
                 onSelectScaleType = { },
                 onSwitchSfuClick = { },
+                loadRecordings = { emptyList() },
+                onShowFeedback = { },
+                isScreenShareEnabled = true,
+                onToggleScreenShare = { },
+                selectedIncomingVideoResolution = null,
+                onSelectIncomingVideoResolution = { },
+                isIncomingVideoEnabled = true,
+                onToggleIncomingVideoEnabled = { },
             ),
         )
     }
