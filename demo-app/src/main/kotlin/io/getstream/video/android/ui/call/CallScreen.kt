@@ -79,7 +79,6 @@ import io.getstream.video.android.compose.ui.components.base.StreamIconToggleBut
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
-import io.getstream.video.android.compose.ui.components.call.controls.actions.ClosedCaptionsToggleAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
@@ -334,16 +333,8 @@ fun CallScreen(
                                         },
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                                    ClosedCaptionsToggleAction(
-                                        active = closedCaptionUiState == ClosedCaptionUiState.Running,
-                                        onCallAction = {
-                                            onLocalClosedCaptionsClick.invoke()
-                                        },
-                                    )
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                                    if (call.hasCapability(OwnCapability.StartRecordCall) || call.hasCapability(
-                                            OwnCapability.StopRecordCall,
-                                        )
+                                    if (call.hasCapability(OwnCapability.StartRecordCall) ||
+                                        call.hasCapability(OwnCapability.StopRecordCall)
                                     ) {
                                         ToggleAction(
                                             progress = showEndRecordingDialog,
