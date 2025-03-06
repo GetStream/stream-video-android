@@ -20,6 +20,7 @@ import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.PowerManager
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
@@ -858,8 +859,14 @@ public class Call(
 
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
         logger.i {
-            "[setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible"
+            "[call#setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
+
+        Log.d(
+            "LivestreamDebug",
+            "[setVisibility] sessionId: $sessionId, trackType: $trackType, visible: $visible",
+        )
+
         session?.updateTrackDimensions(sessionId, trackType, visible)
     }
 

@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.compose.ui.components.video
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -91,21 +92,39 @@ public fun VideoRenderer(
         // Show avatar always behind the video.
         videoRendererConfig.fallbackContent.invoke(call)
 
+        Log.d("LivestreamDebug", "[VideoRenderer] video.enabled: ${video?.enabled}")
+
         if (video?.enabled == true) {
             val sessionId = video.sessionId
             val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
             if (isIncomingVideoEnabled(call, sessionId, videoEnabledOverrides)) {
+                Log.d("LivestreamDebug", "[VideoRenderer] incoming video enabled")
+
                 val mediaTrack = video.track
                 val trackType = video.type
 
                 var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
+                Log.d(
+                    "LivestreamDebug",
+                    "[VideoRenderer] mediaTrack: $mediaTrack, trackType: $trackType, view: $view, sessionId: $sessionId",
+                )
+
                 DisposableEffect(call, video) {
                     // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+                    Log.d(
+                        "LivestreamDebug",
+                        "[VideoRenderer#DisposableEffect] will setVisibility, view: $view",
+                    )
                     call.setVisibility(sessionId, trackType, true)
 
                     onDispose {
+                        Log.d(
+                            "LivestreamDebug",
+                            "[VideoRenderer#DisposableEffect#onDispose] will cleanTrack, view: $view",
+                        )
+
                         cleanTrack(view, mediaTrack)
                         // inform the call that we no longer want to render this video track
                         call.setVisibility(sessionId, trackType, false)
