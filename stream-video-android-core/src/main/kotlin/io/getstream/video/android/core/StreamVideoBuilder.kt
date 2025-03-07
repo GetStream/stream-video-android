@@ -24,6 +24,7 @@ import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.call.CallType
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -125,6 +126,29 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
 
+    private var apiUrl: String? = null
+    private var wssUrl: String? = null
+
+    /**
+     * Set the API URL to be used for the video client.
+     *
+     * For testing purposes only.
+     */
+    @InternalStreamVideoApi
+    public fun forceApiUrl(value: String): StreamVideoBuilder = apply {
+        apiUrl = value
+    }
+
+    /**
+     * Set the WSS URL to be used for the video client.
+     *
+     * For testing purposes only.
+     */
+    @InternalStreamVideoApi
+    public fun forceWssUrl(value: String): StreamVideoBuilder = apply {
+        wssUrl = value
+    }
+
     /**
      * Builds the [StreamVideo] client.
      *
@@ -151,7 +175,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
 
         if (token.isBlank()) {
-            throw IllegalStateException("The token cannot be blank")
+            throw IllegalArgumentException("The token cannot be blank")
         }
 
         if (user.type == UserType.Authenticated && user.id.isBlank()) {
@@ -175,8 +199,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
-            apiUrl = "https:///$videoDomain",
-            wssUrl = "wss://$videoDomain/video/connect",
+            apiUrl = apiUrl ?: "https:///$videoDomain",
+            wssUrl = wssUrl ?: "wss://$videoDomain/video/connect",
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
             user = user,
