@@ -48,7 +48,7 @@ class MicrophoneManagerTest {
         every { microphoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
         every {
             microphoneManager["ifAudioHandlerInitialized"](
-                any<(AudioSwitchHandler, ) -> Unit>(),
+                any<(AudioSwitchHandler) -> Unit>(),
             )
         } answers { true }
 
