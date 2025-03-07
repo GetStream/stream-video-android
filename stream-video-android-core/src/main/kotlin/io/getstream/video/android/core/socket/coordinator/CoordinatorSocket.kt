@@ -22,16 +22,19 @@ import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.lifecycle.LifecycleHandler
+import io.getstream.video.android.core.lifecycle.ConnectionPolicyLifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
+import io.getstream.video.android.core.socket.common.CallAwareConnectionPolicy
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.HealthMonitor
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
+import io.getstream.video.android.core.socket.common.SocketStateConnectionPolicy
 import io.getstream.video.android.core.socket.common.StreamWebSocket
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.VideoErrorDetail
@@ -77,16 +80,12 @@ internal open class CoordinatorSocket(
             coordinatorSocketStateService.onWebSocketEventLost()
         },
     )
-    private val lifecycleHandler = object : LifecycleHandler {
-        override suspend fun resume() {
-            coordinatorSocketStateService.onResume()
-        }
-
-        override suspend fun stopped() {
-            coordinatorSocketStateService.onStop()
-        }
-    }
-
+    private val connectionPolicies = listOf(
+        CallAwareConnectionPolicy(StreamVideo.instanceState),
+        SocketStateConnectionPolicy(state()),
+    )
+    private val lifecycleHandler =
+        ConnectionPolicyLifecycleHandler(connectionPolicies, coordinatorSocketStateService)
     private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             coordinatorSocketStateService.onNetworkAvailable()
