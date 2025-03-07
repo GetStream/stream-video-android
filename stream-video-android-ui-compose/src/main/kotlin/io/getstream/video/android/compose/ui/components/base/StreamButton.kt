@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.R
@@ -121,8 +122,10 @@ public fun StreamButton(
     }
     val textStyle = style.textStyle.of(state = state)
     Text(
-        style = textStyle.value.platform,
         text = text,
+        style = textStyle.value.platform,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
     )
     if (showProgress) {
         CircularProgressIndicator(

@@ -21,49 +21,34 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.PersonAddAlt1
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
@@ -74,11 +59,12 @@ public fun ShareCallWithOthers(
     env: State<StreamEnvironment?>,
     context: Context,
 ) {
-    ShareSettingsBox(modifier, call, clipboardManager) {
-        val link = "${env.value?.sharelink}${call.id}"
+    val shareUrl = "${env.value?.sharelink}${call.id}"
+
+    ShareSettingsBox(modifier, call, clipboardManager, shareUrl) {
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, link)
+            putExtra(Intent.EXTRA_TEXT, shareUrl)
             type = "text/plain"
         }
         val shareIntent = Intent.createChooser(sendIntent, null)
@@ -91,6 +77,7 @@ public fun ShareSettingsBox(
     modifier: Modifier = Modifier,
     call: Call,
     clipboardManager: ClipboardManager?,
+    shareUrl: String,
     onShare: (String) -> Unit,
 ) {
     Box(
@@ -134,7 +121,7 @@ public fun ShareSettingsBox(
                         backgroundColor = VideoTheme.colors.baseSheetTertiary,
                         contentColor = VideoTheme.colors.basePrimary,
                         disabledBackgroundColor = VideoTheme.colors.baseSheetTertiary,
-                    )
+                    ),
                 ),
                 onClick = {
                     val clipData = ClipData.newPlainText("Call ID", call.id)
@@ -142,25 +129,25 @@ public fun ShareSettingsBox(
                 },
             )
             Spacer(modifier = Modifier.size(16.dp))
-            JoinCallQRCode()
+            JoinCallQRCode(shareUrl = shareUrl)
         }
     }
 }
 
 @Composable
-private fun JoinCallQRCode() {
+private fun JoinCallQRCode(shareUrl: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = Color.Black, shape = VideoTheme.shapes.sheet)
             .padding(VideoTheme.dimens.spacingM),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        QRCode(content = "Join Call QR Code")
+        QRCode(content = shareUrl, size = 150.dp)
         Spacer(modifier = Modifier.size(16.dp))
         Text(
-            text = "Scan the QR code to join from another device.",
-            style = VideoTheme.typography.subtitleS.copy(color = VideoTheme.colors.basePrimary),
+            text = "Scan the QR code to join from another device",
+            style = VideoTheme.typography.labelXS.copy(fontWeight = FontWeight.W400),
         )
     }
 }
@@ -174,6 +161,7 @@ private fun ShareSettingsBoxPreview() {
         ShareSettingsBox(
             call = previewCall,
             clipboardManager = null,
+            shareUrl = "http://test/join/123",
             onShare = {},
         )
     }
