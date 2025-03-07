@@ -19,7 +19,6 @@ package io.getstream.video.android.ui.menu
 import android.media.MediaCodecInfo
 import android.os.Build
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MobileScreenShare
 import androidx.compose.material.icons.automirrored.filled.ReadMore
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AspectRatio
@@ -35,6 +34,7 @@ import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
+import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
@@ -67,8 +67,6 @@ fun defaultStreamMenu(
     noiseCancellationEnabled: Boolean = false,
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
-    isScreenShareEnabled: Boolean,
-    onToggleScreenShare: () -> Unit = {},
     onShowCallStats: () -> Unit,
     onToggleAudioFilterClick: () -> Unit,
     onRestartSubscriberIceClick: () -> Unit,
@@ -92,20 +90,35 @@ fun defaultStreamMenu(
     onToggleClosedCaptions: () -> Unit = {},
     closedCaptionUiState: ClosedCaptionUiState,
 ) = buildList<MenuItem> {
-    add(
-        DynamicSubMenuItem(
-            title = "Recordings",
-            icon = Icons.Default.VideoLibrary,
-            itemsLoader = loadRecordings,
-        ),
-    )
-    add(
-        ActionMenuItem(
-            title = "Call stats",
-            icon = Icons.Default.AutoGraph,
-            action = onShowCallStats,
-        ),
-    )
+    if (noiseCancellationFeatureEnabled) {
+        add(
+            ActionMenuItem(
+                title = "Noise cancellation",
+                icon = Icons.Default.SpatialAudioOff,
+                highlight = noiseCancellationEnabled,
+                action = onNoiseCancellation,
+            ),
+        )
+    }
+    when (transcriptionUiState) {
+        is TranscriptionAvailableUiState, TranscriptionStoppedUiState -> {
+            add(
+                ActionMenuItem(
+                    title = transcriptionUiState.text,
+                    icon = transcriptionUiState.icon,
+                    highlight = transcriptionUiState.highlight,
+                    action = {
+                        GlobalScope.launch {
+                            onToggleTranscription.invoke()
+                        }
+                    },
+                ),
+            )
+        }
+
+        else -> {}
+    }
+    add(getCCActionMenu(closedCaptionUiState, onToggleClosedCaptions))
     add(
         SubMenuItem(
             title = "Choose audio device",
@@ -127,116 +140,12 @@ fun defaultStreamMenu(
     )
     add(
         ActionMenuItem(
-            title = "Feedback",
-            icon = Icons.Default.Feedback,
-            action = onShowFeedback,
-        ),
-    )
-    add(
-        ActionMenuItem(
-            title = if (isScreenShareEnabled) "Stop screen-share" else "Start screen-share",
-            icon = Icons.AutoMirrored.Default.MobileScreenShare,
-            action = onToggleScreenShare,
-        ),
-    )
-    if (noiseCancellationFeatureEnabled) {
-        add(
-            ActionMenuItem(
-                title = "Noise cancellation",
-                icon = Icons.Default.SpatialAudioOff,
-                highlight = noiseCancellationEnabled,
-                action = onNoiseCancellation,
-            ),
-        )
-    }
-    add(
-        SubMenuItem(
-            title = "Incoming video settings",
-            icon = Icons.Default.VideoSettings,
-            items = listOf(
-                ActionMenuItem(
-                    title = "Auto Quality",
-                    icon = Icons.Default.AspectRatio,
-                    highlight = selectedIncomingVideoResolution == null,
-                    action = { onSelectIncomingVideoResolution(null) },
-                ),
-                ActionMenuItem(
-                    title = "4K 2160p",
-                    icon = Icons.Default.AspectRatio,
-                    highlight = selectedIncomingVideoResolution == PreferredVideoResolution(3840, 2160),
-                    action = {
-                        onSelectIncomingVideoResolution(PreferredVideoResolution(3840, 2160))
-                    },
-                ),
-                ActionMenuItem(
-                    title = "Full HD 1080p",
-                    icon = Icons.Default.AspectRatio,
-                    highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1920, 1080),
-                    action = {
-                        onSelectIncomingVideoResolution(PreferredVideoResolution(1920, 1080))
-                    },
-                ),
-                ActionMenuItem(
-                    title = "HD 720p",
-                    icon = Icons.Default.AspectRatio,
-                    highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1280, 720),
-                    action = {
-                        onSelectIncomingVideoResolution(PreferredVideoResolution(1280, 720))
-                    },
-                ),
-                ActionMenuItem(
-                    title = "SD 480p",
-                    icon = Icons.Default.AspectRatio,
-                    highlight = selectedIncomingVideoResolution == PreferredVideoResolution(640, 480),
-                    action = {
-                        onSelectIncomingVideoResolution(PreferredVideoResolution(640, 480))
-                    },
-                ),
-                ActionMenuItem(
-                    title = "Data Saver 144p",
-                    icon = Icons.Default.AspectRatio,
-                    highlight = selectedIncomingVideoResolution == PreferredVideoResolution(256, 144),
-                    action = {
-                        onSelectIncomingVideoResolution(PreferredVideoResolution(256, 144))
-                    },
-                ),
-                ActionMenuItem(
-                    title = if (isIncomingVideoEnabled) "Disable incoming video" else "Enable incoming video",
-                    icon = if (isIncomingVideoEnabled) Icons.Default.VideocamOff else Icons.Default.Videocam,
-                    action = { onToggleIncomingVideoEnabled(!isIncomingVideoEnabled) },
-                ),
-            ),
+            title = "Call stats",
+            icon = Icons.Default.AutoGraph,
+            action = onShowCallStats,
         ),
     )
 
-    when (transcriptionUiState) {
-        is TranscriptionAvailableUiState, TranscriptionStoppedUiState -> {
-            add(
-                ActionMenuItem(
-                    title = transcriptionUiState.text,
-                    icon = transcriptionUiState.icon,
-                    highlight = transcriptionUiState.highlight,
-                    action = {
-                        GlobalScope.launch {
-                            onToggleTranscription.invoke()
-                        }
-                    },
-                ),
-            )
-
-            add(
-                DynamicSubMenuItem(
-                    title = "List Transcriptions",
-                    icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                    itemsLoader = loadTranscriptions,
-                ),
-            )
-        }
-
-        else -> {}
-    }
-
-    add(getCCActionMenu(closedCaptionUiState, onToggleClosedCaptions))
     if (showDebugOptions) {
         add(
             SubMenuItem(
@@ -252,6 +161,13 @@ fun defaultStreamMenu(
                     onSfuRejoinClick,
                     onSfuFastReconnectClick,
                     onSelectScaleType,
+                    loadRecordings,
+                    onShowFeedback,
+                    selectedIncomingVideoResolution,
+                    onSelectIncomingVideoResolution,
+                    isIncomingVideoEnabled,
+                    onToggleIncomingVideoEnabled,
+                    loadTranscriptions,
                 ),
             ),
         )
@@ -372,7 +288,83 @@ fun debugSubmenu(
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
+    loadRecordings: suspend () -> List<MenuItem>,
+    onShowFeedback: () -> Unit,
+    selectedIncomingVideoResolution: PreferredVideoResolution?,
+    onSelectIncomingVideoResolution: (PreferredVideoResolution?) -> Unit,
+    isIncomingVideoEnabled: Boolean,
+    onToggleIncomingVideoEnabled: (Boolean) -> Unit,
+    loadTranscriptions: suspend () -> List<MenuItem>,
 ) = listOf(
+    DynamicSubMenuItem(
+        title = "List Transcriptions",
+        icon = Icons.AutoMirrored.Filled.ReceiptLong,
+        itemsLoader = loadTranscriptions,
+    ),
+    SubMenuItem(
+        title = "Incoming video settings",
+        icon = Icons.Default.VideoSettings,
+        items = listOf(
+            ActionMenuItem(
+                title = "Auto Quality",
+                icon = Icons.Default.AspectRatio,
+                highlight = selectedIncomingVideoResolution == null,
+                action = { onSelectIncomingVideoResolution(null) },
+            ),
+            ActionMenuItem(
+                title = "4K 2160p",
+                icon = Icons.Default.AspectRatio,
+                highlight = selectedIncomingVideoResolution == PreferredVideoResolution(3840, 2160),
+                action = {
+                    onSelectIncomingVideoResolution(PreferredVideoResolution(3840, 2160))
+                },
+            ),
+            ActionMenuItem(
+                title = "Full HD 1080p",
+                icon = Icons.Default.AspectRatio,
+                highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1920, 1080),
+                action = {
+                    onSelectIncomingVideoResolution(PreferredVideoResolution(1920, 1080))
+                },
+            ),
+            ActionMenuItem(
+                title = "HD 720p",
+                icon = Icons.Default.AspectRatio,
+                highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1280, 720),
+                action = {
+                    onSelectIncomingVideoResolution(PreferredVideoResolution(1280, 720))
+                },
+            ),
+            ActionMenuItem(
+                title = "SD 480p",
+                icon = Icons.Default.AspectRatio,
+                highlight = selectedIncomingVideoResolution == PreferredVideoResolution(640, 480),
+                action = {
+                    onSelectIncomingVideoResolution(PreferredVideoResolution(640, 480))
+                },
+            ),
+            ActionMenuItem(
+                title = "Data Saver 144p",
+                icon = Icons.Default.AspectRatio,
+                highlight = selectedIncomingVideoResolution == PreferredVideoResolution(256, 144),
+                action = {
+                    onSelectIncomingVideoResolution(PreferredVideoResolution(256, 144))
+                },
+            ),
+            ActionMenuItem(
+                title = if (isIncomingVideoEnabled) "Disable incoming video" else "Enable incoming video",
+                icon = if (isIncomingVideoEnabled) Icons.Default.VideocamOff else Icons.Default.Videocam,
+                action = { onToggleIncomingVideoEnabled(!isIncomingVideoEnabled) },
+            ),
+        ),
+    ),
+    SubMenuItem(
+        title = "Scale type",
+        icon = Icons.Default.AspectRatio,
+        items = scaleTypeMenu(
+            onSelectScaleType,
+        ),
+    ),
     SubMenuItem(
         title = "Available video codecs",
         icon = Icons.Default.VideoSettings,
@@ -383,12 +375,28 @@ fun debugSubmenu(
         icon = Icons.Default.Audiotrack,
         action = onToggleAudioFilterClick,
     ),
-    SubMenuItem(
-        title = "Scale type",
-        icon = Icons.Default.AspectRatio,
-        items = scaleTypeMenu(
-            onSelectScaleType,
-        ),
+    ActionMenuItem(
+        title = "Start/stop recording",
+        icon = Icons.Default.RadioButtonChecked,
+        action = {
+//                scope.launch {
+//                    if (isRecording) {
+//                        showEndRecordingDialog = true
+//                    } else {
+//                        call.startRecording()
+//                    }
+//                }
+        },
+    ),
+    DynamicSubMenuItem(
+        title = "Recordings",
+        icon = Icons.Default.VideoLibrary,
+        itemsLoader = loadRecordings,
+    ),
+    ActionMenuItem(
+        title = "Feedback",
+        icon = Icons.Default.Feedback,
+        action = onShowFeedback,
     ),
     SubMenuItem(
         title = "Reconnect V2",
