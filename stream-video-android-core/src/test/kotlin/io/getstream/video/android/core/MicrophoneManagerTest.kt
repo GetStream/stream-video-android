@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.mockk.every
 import io.mockk.mockk
@@ -47,13 +48,13 @@ class MicrophoneManagerTest {
         every { microphoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
         every {
             microphoneManager["ifAudioHandlerInitialized"](
-                any<
-                    (
-                        AudioSwitchHandler,
-                    ) -> Unit,
-                    >(),
+                any<(AudioSwitchHandler, ) -> Unit>(),
             )
         } answers { true }
+
+        val mockCallState = mockk<CallState>(relaxed = true)
+        every { mediaManager.call.state } returns mockCallState
+        every { mockCallState.ownCapabilities.value } returns listOf(OwnCapability.SendAudio)
 
         // When
         microphoneManager.enable() // 1
@@ -135,8 +136,12 @@ class MicrophoneManagerTest {
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage)
         val spyMicrophoneManager = spyk(microphoneManager)
         val mockContext = mockk<Context>(relaxed = true)
+        val mockCallState = mockk<CallState>(relaxed = true)
+
         every { mediaManager.context } returns mockContext
         every { mockContext.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
+        every { mediaManager.call.state } returns mockCallState
+        every { mockCallState.ownCapabilities.value } returns listOf(OwnCapability.SendAudio)
 
         val slot = slot<() -> Unit>()
         every { spyMicrophoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
