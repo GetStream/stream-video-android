@@ -17,18 +17,14 @@
 package io.getstream.video.android.ui.menu
 
 import android.Manifest
-import android.app.Activity
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Context.DOWNLOAD_SERVICE
 import android.media.MediaCodecList
-import android.media.projection.MediaProjectionManager
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
@@ -37,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -63,7 +58,6 @@ import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
-import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -88,33 +82,7 @@ internal fun SettingsMenu(
     onClosedCaptionsToggle: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
-
-    val screenSharePermissionResult = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = {
-            if (it.resultCode == Activity.RESULT_OK && it.data != null) {
-                call.startScreenSharing(it.data!!)
-            }
-            onDismissed.invoke()
-        },
-    )
-
-    val isScreenSharing by call.screenShare.isEnabled.collectAsStateWithLifecycle()
-    val onScreenShareClick: () -> Unit = {
-        if (!isScreenSharing) {
-            scope.launch {
-                val mediaProjectionManager =
-                    context.getSystemService(MediaProjectionManager::class.java)
-                screenSharePermissionResult.launch(
-                    mediaProjectionManager.createScreenCaptureIntent(),
-                )
-            }
-        } else {
-            call.stopScreenSharing()
-        }
-    }
 
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
@@ -280,7 +248,6 @@ internal fun SettingsMenu(
                     onDismissed()
                 },
                 onShowFeedback = onShowFeedback,
-                onToggleScreenShare = onScreenShareClick,
                 onRestartPublisherIceClick = onRestartPublisherIceClick,
                 onRestartSubscriberIceClick = onRestartSubscriberIceClick,
                 onToggleAudioFilterClick = onToggleAudioFilterClick,
@@ -293,7 +260,6 @@ internal fun SettingsMenu(
                 onToggleIncomingVideoEnabled = { onToggleIncomingVideoVisibility(it) },
                 onSfuRejoinClick = onSfuRejoinClick,
                 onSfuFastReconnectClick = onSfuFastReconnectClick,
-                isScreenShareEnabled = isScreenSharing,
                 onSelectScaleType = onSelectScaleType,
                 loadRecordings = onLoadRecordings,
                 onToggleClosedCaptions = onClosedCaptionsToggle,
@@ -349,8 +315,6 @@ private fun SettingsMenuPreview() {
                 codecList = emptyList(),
                 onCodecSelected = {
                 },
-                isScreenShareEnabled = false,
-                onToggleScreenShare = { },
                 onShowCallStats = { },
                 onToggleAudioFilterClick = { },
                 onRestartSubscriberIceClick = { },

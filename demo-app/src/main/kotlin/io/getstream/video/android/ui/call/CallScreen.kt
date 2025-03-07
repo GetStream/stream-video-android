@@ -18,10 +18,14 @@
 
 package io.getstream.video.android.ui.call
 
+import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
+import android.media.projection.MediaProjectionManager
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +44,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,7 +69,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
@@ -83,6 +85,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.De
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ScreenShareToggleAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -241,6 +244,17 @@ fun CallScreen(
      */
     val isCurrentlyTranscribing by call.state.transcribing.collectAsStateWithLifecycle()
 
+    val isScreenSharing by call.screenShare.isEnabled.collectAsStateWithLifecycle()
+
+    val screenSharePermissionResult = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = {
+            if (it.resultCode == Activity.RESULT_OK && it.data != null) {
+                call.startScreenSharing(it.data!!)
+            }
+        },
+    )
+
     LaunchedEffect(Unit) {
         call.state.settings.map { it?.transcription }
             .collectLatest { transcription ->
@@ -333,31 +347,26 @@ fun CallScreen(
                                         },
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                                    if (call.hasCapability(OwnCapability.StartRecordCall) ||
-                                        call.hasCapability(OwnCapability.StopRecordCall)
-                                    ) {
-                                        ToggleAction(
-                                            progress = showEndRecordingDialog,
-                                            isActionActive = !isRecording,
-                                            iconOnOff = Pair(
-                                                Icons.Default.RadioButtonChecked,
-                                                Icons.Default.RadioButtonChecked,
-                                            ),
-                                            onAction = {
-                                                scope.launch {
-                                                    if (isRecording) {
-                                                        showEndRecordingDialog = true
-                                                    } else {
-                                                        call.startRecording()
+                                    if (isTablet()) {
+                                        ScreenShareToggleAction(
+                                            active = isScreenSharing,
+                                            onCallAction = {
+                                                if (!isScreenSharing) {
+                                                    scope.launch {
+                                                        val mediaProjectionManager =
+                                                            context.getSystemService(
+                                                                MediaProjectionManager::class.java,
+                                                            )
+                                                        screenSharePermissionResult.launch(
+                                                            mediaProjectionManager.createScreenCaptureIntent(),
+                                                        )
                                                     }
+                                                } else {
+                                                    call.stopScreenSharing()
                                                 }
                                             },
                                         )
-                                        Spacer(
-                                            modifier = Modifier.size(
-                                                VideoTheme.dimens.spacingM,
-                                            ),
-                                        )
+                                        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     }
                                     ToggleMicrophoneAction(
                                         isMicrophoneEnabled = isMicrophoneEnabled,
@@ -730,6 +739,16 @@ private suspend fun executeTranscriptionApis(
 private fun SpeakingWhileMuted() {
     Snackbar {
         Text(text = "You're talking while muting the microphone!")
+    }
+}
+
+@Composable
+fun isTablet(): Boolean {
+    val configuration = LocalConfiguration.current
+    return if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        configuration.screenWidthDp > 840
+    } else {
+        configuration.screenWidthDp > 600
     }
 }
 

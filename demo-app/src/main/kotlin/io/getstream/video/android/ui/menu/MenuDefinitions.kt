@@ -19,7 +19,6 @@ package io.getstream.video.android.ui.menu
 import android.media.MediaCodecInfo
 import android.os.Build
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MobileScreenShare
 import androidx.compose.material.icons.automirrored.filled.ReadMore
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AspectRatio
@@ -35,6 +34,7 @@ import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
+import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
@@ -67,8 +67,6 @@ fun defaultStreamMenu(
     noiseCancellationEnabled: Boolean = false,
     codecList: List<MediaCodecInfo>,
     onCodecSelected: (MediaCodecInfo) -> Unit,
-    isScreenShareEnabled: Boolean,
-    onToggleScreenShare: () -> Unit = {},
     onShowCallStats: () -> Unit,
     onToggleAudioFilterClick: () -> Unit,
     onRestartSubscriberIceClick: () -> Unit,
@@ -173,8 +171,6 @@ fun defaultStreamMenu(
                     onSelectScaleType,
                     loadRecordings,
                     onShowFeedback,
-                    isScreenShareEnabled,
-                    onToggleScreenShare,
                     selectedIncomingVideoResolution,
                     onSelectIncomingVideoResolution,
                     isIncomingVideoEnabled,
@@ -301,8 +297,6 @@ fun debugSubmenu(
     onSelectScaleType: (VideoScalingType) -> Unit,
     loadRecordings: suspend () -> List<MenuItem>,
     onShowFeedback: () -> Unit,
-    isScreenShareEnabled: Boolean,
-    onToggleScreenShare: () -> Unit = {},
     selectedIncomingVideoResolution: PreferredVideoResolution?,
     onSelectIncomingVideoResolution: (PreferredVideoResolution?) -> Unit,
     isIncomingVideoEnabled: Boolean,
@@ -366,11 +360,6 @@ fun debugSubmenu(
             ),
         ),
     ),
-    ActionMenuItem(
-        title = if (isScreenShareEnabled) "Stop screen-share" else "Start screen-share",
-        icon = Icons.AutoMirrored.Default.MobileScreenShare,
-        action = onToggleScreenShare,
-    ),
     SubMenuItem(
         title = "Scale type",
         icon = Icons.Default.AspectRatio,
@@ -387,6 +376,19 @@ fun debugSubmenu(
         title = "Toggle audio filter",
         icon = Icons.Default.Audiotrack,
         action = onToggleAudioFilterClick,
+    ),
+    ActionMenuItem(
+        title = "Start/stop recording",
+        icon = Icons.Default.RadioButtonChecked,
+        action = {
+//                scope.launch {
+//                    if (isRecording) {
+//                        showEndRecordingDialog = true
+//                    } else {
+//                        call.startRecording()
+//                    }
+//                }
+        },
     ),
     DynamicSubMenuItem(
         title = "Recordings",
