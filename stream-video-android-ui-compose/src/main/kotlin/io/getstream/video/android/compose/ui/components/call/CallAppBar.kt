@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -163,7 +164,8 @@ private fun CalLCenterContent(
                     .padding(
                         start = VideoTheme.dimens.componentPaddingStart,
                         end = VideoTheme.dimens.componentPaddingEnd,
-                    ),
+                    )
+                    .testTag("Stream_CallInfoView"),
                 text = if (isReconnecting) {
                     stringResource(id = R.string.stream_video_call_reconnecting)
                 } else if (isRecording) {

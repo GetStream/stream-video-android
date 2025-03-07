@@ -1,0 +1,101 @@
+name: E2E Tests Nightly
+
+on:
+  schedule:
+    # Runs "At 01:00 every night except weekends"
+    - cron: '0 1 * * 1-5'
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
+  BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
+  BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
+  BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build-compose-apks:
+    name: Build
+    uses: ./.github/workflows/e2e-build.yml
+
+  run-compose-tests-nightly:
+    name: Test compose
+    runs-on: ubuntu-24.04
+    needs: build-compose-apks
+    strategy:
+      matrix:
+        include:
+          - android_api_level: 35
+          - android_api_level: 34
+          - android_api_level: 33
+          - android_api_level: 32
+          - android_api_level: 31
+          - android_api_level: 28
+      fail-fast: false
+    env:
+      ANDROID_API_LEVEL: ${{ matrix.android_api_level }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/download-artifact@v4.1.8
+        continue-on-error: true
+        with:
+          name: apks
+      - uses: ./.github/actions/setup-java
+      - uses: ./.github/actions/enable-kvm
+      - uses: ./.github/actions/setup-ruby
+      - uses: ./.github/actions/allure-launch
+        with:
+          allure-token: ${{ secrets.ALLURE_TOKEN }}
+          cron: true
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 120
+        with:
+          api-level: ${{ env.ANDROID_API_LEVEL }}
+          disable-animations: true
+          profile: pixel
+          arch : x86_64
+          emulator-options: ${{ vars.EMULATOR_OPTIONS }}
+          script: bundle exec fastlane run_e2e_test
+      - name: Allure TestOps Upload
+        run: bundle exec fastlane allure_upload
+        if: success() || failure()
+        timeout-minutes: 10
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+          LAUNCH_ID: ${{ env.LAUNCH_ID }}
+      - name: Allure TestOps Launch Removal
+        run: bundle exec fastlane allure_launch_removal
+        if: cancelled()
+        env:
+          ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+          LAUNCH_ID: ${{ env.LAUNCH_ID }}
+      - name: Upload test results
+        uses: actions/upload-artifact@v4.4.3
+        if: failure()
+        with:
+          name: logs_${{ env.ANDROID_API_LEVEL }}
+          path: |
+            fastlane/recordings/*
+            fastlane/video-buddy-server.log
+            fastlane/video-buddy-console.log
+
+  slack:
+    name: Slack Report
+    runs-on: ubuntu-latest
+    needs: [build-compose-apks, run-compose-tests-nightly]
+    if: failure() && github.event_name == 'schedule'
+    steps:
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: cancelled
+          text: "You shall not pass!"
+          job_name: "${{ github.workflow }}: ${{ github.job }}"
+          fields: repo,commit,author,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY_CHECKS }}

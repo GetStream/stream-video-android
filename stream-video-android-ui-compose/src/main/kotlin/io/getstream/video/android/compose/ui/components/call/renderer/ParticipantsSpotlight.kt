@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.SpotlightVideoRenderer
 import io.getstream.video.android.core.Call
@@ -81,7 +82,7 @@ public fun ParticipantsSpotlight(
             speaker = speaker,
             participants = participants,
             orientation = configuration.orientation,
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize().testTag("Stream_SpotlightView"),
             isZoomable = isZoomable,
             style = style,
             videoRenderer = videoRenderer,

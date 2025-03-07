@@ -1,0 +1,33 @@
+name: E2E Build
+
+on:
+  workflow_call:
+
+env:
+  BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
+  BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
+  BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
+  BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
+
+jobs:
+  build:
+    name: compose apks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: ./.github/actions/setup-java
+      - uses: ./.github/actions/enable-kvm
+      - uses: ./.github/actions/setup-ruby
+      - uses: ./.github/actions/gradle-cache
+        with:
+          key-prefix: gradle-test
+      - name: Build apks
+        run: bundle exec fastlane build_e2e_test
+        timeout-minutes: 30
+      - name: Upload apks
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: apks
+          path: |
+            demo-app/build/outputs/apk/e2e/development/*.apk
+            demo-app/build/outputs/apk/androidTest/e2e/development/*.apk
