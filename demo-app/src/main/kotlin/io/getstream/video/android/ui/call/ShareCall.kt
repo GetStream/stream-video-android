@@ -21,34 +21,49 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.PersonAddAlt1
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
@@ -91,66 +106,75 @@ public fun ShareSettingsBox(
                 .padding(VideoTheme.dimens.spacingL),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            StreamButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Share link with others",
-                icon = Icons.Default.PersonAddAlt1,
-                style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
-            ) {
-                onShare(call.id)
-            }
-            Spacer(modifier = Modifier.size(16.dp))
             Text(
-                text = "Or share this call ID with the \u2028others you want in the meeting",
-                style = VideoTheme.typography.bodyM,
+                text = "Your meeting is live!",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Left,
+                style = VideoTheme.typography.titleS.copy(fontSize = 20.sp),
             )
             Spacer(modifier = Modifier.size(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row {
-                    Text(
-                        text = "Call ID: ",
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            lineHeight = 20.sp,
-                            fontWeight = FontWeight(500),
-                            color = Color.White,
-                        ),
-                    )
-                    Text(
-                        modifier = Modifier.width(200.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        text = call.id,
-                        softWrap = false,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight.W400,
-                            color = VideoTheme.colors.brandCyan,
-                        ),
-                    )
-                }
-
-                Spacer(modifier = Modifier.size(8.dp))
-                IconButton(
-                    modifier = Modifier.size(32.dp),
-                    onClick = {
-                        val clipData = ClipData.newPlainText("Call ID", call.id)
-                        clipboardManager?.setPrimaryClip(clipData)
-                    },
-                ) {
-                    Icon(
-                        tint = Color.White,
-                        imageVector = Icons.Default.CopyAll,
-                        contentDescription = "Copy",
-                    )
-                }
-            }
+            StreamButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp),
+                text = "Add others",
+                icon = Icons.Default.PersonAddAlt1,
+                style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                onClick = { onShare(call.id) },
+            )
             Spacer(modifier = Modifier.size(16.dp))
+            StreamButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp),
+                text = "Call ID: ${call.id}",
+                icon = Icons.Default.CopyAll,
+                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle().copy(
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = VideoTheme.colors.baseSheetTertiary,
+                        contentColor = VideoTheme.colors.basePrimary,
+                        disabledBackgroundColor = VideoTheme.colors.baseSheetTertiary,
+                    )
+                ),
+                onClick = {
+                    val clipData = ClipData.newPlainText("Call ID", call.id)
+                    clipboardManager?.setPrimaryClip(clipData)
+                },
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            JoinCallQRCode()
         }
+    }
+}
+
+@Composable
+private fun JoinCallQRCode() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.Black, shape = VideoTheme.shapes.sheet)
+            .padding(VideoTheme.dimens.spacingM),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        QRCode(content = "Join Call QR Code")
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(
+            text = "Scan the QR code to join from another device.",
+            style = VideoTheme.typography.subtitleS.copy(color = VideoTheme.colors.basePrimary),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ShareSettingsBoxPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+
+    VideoTheme {
+        ShareSettingsBox(
+            call = previewCall,
+            clipboardManager = null,
+            onShare = {},
+        )
     }
 }
