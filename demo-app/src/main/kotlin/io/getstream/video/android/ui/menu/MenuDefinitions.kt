@@ -90,25 +90,6 @@ fun defaultStreamMenu(
     onToggleClosedCaptions: () -> Unit = {},
     closedCaptionUiState: ClosedCaptionUiState,
 ) = buildList<MenuItem> {
-    add(
-        SubMenuItem(
-            title = "Choose audio device",
-            icon = Icons.Default.SettingsVoice,
-            items = availableDevices.map {
-                val icon = when (it) {
-                    is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
-                    is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
-                    is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
-                    is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
-                }
-                ActionMenuItem(
-                    title = it.name,
-                    icon = icon,
-                    action = { onDeviceSelected(it) },
-                )
-            },
-        ),
-    )
     if (noiseCancellationFeatureEnabled) {
         add(
             ActionMenuItem(
@@ -133,19 +114,30 @@ fun defaultStreamMenu(
                     },
                 ),
             )
-
-            add(
-                DynamicSubMenuItem(
-                    title = "List Transcriptions",
-                    icon = Icons.AutoMirrored.Filled.ReceiptLong,
-                    itemsLoader = loadTranscriptions,
-                ),
-            )
         }
 
         else -> {}
     }
     add(getCCActionMenu(closedCaptionUiState, onToggleClosedCaptions))
+    add(
+        SubMenuItem(
+            title = "Choose audio device",
+            icon = Icons.Default.SettingsVoice,
+            items = availableDevices.map {
+                val icon = when (it) {
+                    is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+                    is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+                    is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+                    is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+                }
+                ActionMenuItem(
+                    title = it.name,
+                    icon = icon,
+                    action = { onDeviceSelected(it) },
+                )
+            },
+        ),
+    )
     add(
         ActionMenuItem(
             title = "Call stats",
@@ -175,6 +167,7 @@ fun defaultStreamMenu(
                     onSelectIncomingVideoResolution,
                     isIncomingVideoEnabled,
                     onToggleIncomingVideoEnabled,
+                    loadTranscriptions,
                 ),
             ),
         )
@@ -301,8 +294,13 @@ fun debugSubmenu(
     onSelectIncomingVideoResolution: (PreferredVideoResolution?) -> Unit,
     isIncomingVideoEnabled: Boolean,
     onToggleIncomingVideoEnabled: (Boolean) -> Unit,
-
+    loadTranscriptions: suspend () -> List<MenuItem>,
 ) = listOf(
+    DynamicSubMenuItem(
+        title = "List Transcriptions",
+        icon = Icons.AutoMirrored.Filled.ReceiptLong,
+        itemsLoader = loadTranscriptions,
+    ),
     SubMenuItem(
         title = "Incoming video settings",
         icon = Icons.Default.VideoSettings,

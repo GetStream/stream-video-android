@@ -298,6 +298,7 @@ private fun DynamicMenuDebugPreview() {
                 onSelectIncomingVideoResolution = { },
                 isIncomingVideoEnabled = true,
                 onToggleIncomingVideoEnabled = { },
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
