@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,6 +116,7 @@ public fun ShareSettingsBox(
                     .fillMaxWidth()
                     .height(36.dp),
                 text = "Call ID: ${call.id}",
+                textOverflow = TextOverflow.Ellipsis,
                 icon = Icons.Default.CopyAll,
                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle().copy(
                     colors = ButtonDefaults.buttonColors(

@@ -98,6 +98,8 @@ public fun StreamButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     text: String,
+    textOverflow: TextOverflow = TextOverflow.Clip,
+    textMaxLines: Int = 1,
     enabled: Boolean = true,
     showProgress: Boolean = false,
     style: StreamButtonStyle = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
@@ -124,8 +126,8 @@ public fun StreamButton(
     Text(
         text = text,
         style = textStyle.value.platform,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
+        maxLines = textMaxLines,
+        overflow = textOverflow,
     )
     if (showProgress) {
         CircularProgressIndicator(
