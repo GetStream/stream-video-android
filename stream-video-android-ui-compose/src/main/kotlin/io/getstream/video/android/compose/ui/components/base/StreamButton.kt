@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.base
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -59,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.R
@@ -96,6 +98,8 @@ public fun StreamButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     text: String,
+    textOverflow: TextOverflow = TextOverflow.Clip,
+    textMaxLines: Int = 1,
     enabled: Boolean = true,
     showProgress: Boolean = false,
     style: StreamButtonStyle = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
@@ -120,8 +124,10 @@ public fun StreamButton(
     }
     val textStyle = style.textStyle.of(state = state)
     Text(
-        style = textStyle.value.platform,
         text = text,
+        style = textStyle.value.platform,
+        maxLines = textMaxLines,
+        overflow = textOverflow,
     )
     if (showProgress) {
         CircularProgressIndicator(
