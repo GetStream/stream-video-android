@@ -92,15 +92,13 @@ public fun VideoRenderer(
         // Show avatar always behind the video.
         videoRendererConfig.fallbackContent.invoke(call)
 
-        Log.d("LivestreamDebug", "[VideoRenderer] video.enabled: ${video?.enabled}")
+//        Log.d("LivestreamDebug", "[VideoRenderer] video.enabled: ${video?.enabled}")
 
         if (video?.enabled == true) {
             val sessionId = video.sessionId
             val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
             if (isIncomingVideoEnabled(call, sessionId, videoEnabledOverrides)) {
-                Log.d("LivestreamDebug", "[VideoRenderer] incoming video enabled")
-
                 val mediaTrack = video.track
                 val trackType = video.type
 
@@ -108,23 +106,23 @@ public fun VideoRenderer(
 
                 Log.d(
                     "LivestreamDebug",
-                    "[VideoRenderer] mediaTrack: $mediaTrack, trackType: $trackType, view: $view, sessionId: $sessionId",
+                    "[VideoRenderer] incoming video enabled, mediaTrack: $mediaTrack, trackType: $trackType, view: $view, sessionId: $sessionId",
                 )
 
                 DisposableEffect(call, video) {
                     // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-                    Log.d(
-                        "LivestreamDebug",
-                        "[VideoRenderer#DisposableEffect] will setVisibility, view: $view",
-                    )
+//                    Log.d(
+//                        "LivestreamDebug",
+//                        "[VideoRenderer#DisposableEffect] will setVisibility, view: $view",
+//                    )
                     call.setVisibility(sessionId, trackType, true)
 
                     onDispose {
-                        Log.d(
-                            "LivestreamDebug",
-                            "[VideoRenderer#DisposableEffect#onDispose] will cleanTrack, view: $view",
-                        )
-
+//                        Log.d(
+//                            "LivestreamDebug",
+//                            "[VideoRenderer#DisposableEffect#onDispose] will cleanTrack, view: $view",
+//                        )
+//
                         cleanTrack(view, mediaTrack)
                         // inform the call that we no longer want to render this video track
                         call.setVisibility(sessionId, trackType, false)
@@ -241,6 +239,11 @@ private fun setupVideo(
     try {
         if (mediaTrack is VideoTrack) {
             mediaTrack.video.addSink(renderer)
+
+            Log.d(
+                "LivestreamDebug",
+                "[setupVideo] added sink, mediaTrack: $mediaTrack, renderer: $renderer",
+            )
         }
     } catch (e: Exception) {
         StreamLog.w("VideoRenderer") { e.message.toString() }

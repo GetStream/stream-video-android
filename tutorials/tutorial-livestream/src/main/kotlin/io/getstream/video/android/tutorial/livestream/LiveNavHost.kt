@@ -45,13 +45,15 @@ fun LiveNavHost(
     startDestination: String = LiveScreens.Main.destination,
 ) {
     val context = LocalContext.current
-    val userId = "Darth_Krayt"
+//    val userId = "Darth_Krayt"
+//    val userId = "liviu-guest-1"
+    val userId = "liviu-guest-2"
     val userToken = StreamVideo.devToken(userId)
 
     // step1 - create a user.
     val user = User(
         id = userId, // any string
-        name = "Tutorial", // name and image are used in the UI
+        name = userId, // name and image are used in the UI
         role = "admin",
     )
 
