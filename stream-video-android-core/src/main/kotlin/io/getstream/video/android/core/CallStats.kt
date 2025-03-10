@@ -169,6 +169,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                 val width = it.members["frameWidth"] as? Long
                 val height = it.members["frameHeight"] as? Long
                 val fps = it.members["framesPerSecond"] as? Double
+
                 subscriber._jitterInMs.value = (jitter * 1000).toInt()
                 if (width != null && height != null && fps != null) {
                     subscriber._resolution.value = "$width x $height @ $fps fps"

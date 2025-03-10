@@ -170,10 +170,10 @@ fun CallStats(call: Call) {
                     Log.d("SKALI", "Resolution: ${it?.stateStats?.publisher?.resolution?.value}")
                 }
             }
-            val publishResolution by call.state.stats.publisher.resolution.collectAsStateWithLifecycle()
-            val dropReason by call.state.stats.publisher.qualityDropReason.collectAsStateWithLifecycle()
+            val publisherResolution by call.state.stats.publisher.resolution.collectAsStateWithLifecycle()
+            val publisherDropReason by call.state.stats.publisher.qualityDropReason.collectAsStateWithLifecycle()
             val subscriberResolution by call.state.stats.subscriber.resolution.collectAsStateWithLifecycle()
-            val publishJitter by call.state.stats.publisher.jitterInMs.collectAsStateWithLifecycle()
+            val publisherJitter by call.state.stats.publisher.jitterInMs.collectAsStateWithLifecycle()
             val subscriberJitter by call.state.stats.subscriber.jitterInMs.collectAsStateWithLifecycle()
             val publisherBitrate by call.state.stats.publisher.bitrateKbps.collectAsStateWithLifecycle()
             val subscriberBitrate by call.state.stats.subscriber.bitrateKbps.collectAsStateWithLifecycle()
@@ -186,19 +186,19 @@ fun CallStats(call: Call) {
             Spacer(modifier = Modifier.size(16.dp))
             LatencyOrJitter(title = "Receive jitter", value = subscriberJitter)
             Spacer(modifier = Modifier.size(16.dp))
-            LatencyOrJitter(title = "Publish jitter", value = publishJitter)
+            LatencyOrJitter(title = "Publish jitter", value = publisherJitter)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Region", value = statsReport?.local?.sfu)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish resolution $publishCodecLabel", value = publishResolution)
             Spacer(modifier = Modifier.size(16.dp))
-            StatItem(title = "Publish quality drop reason", value = dropReason)
+            StatItem(title = "Publish quality drop reason", value = publisherDropReason)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Receive resolution $receiveCodecLabel", value = subscriberResolution)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish bitrate", value = "$publisherBitrate Kbps")
             Spacer(modifier = Modifier.size(16.dp))
-            StatItem(title = "Receive bitrate", value = "$subscriberBitrate Kbps")
+            StatItem(title = "Receiving bitrate", value = "$subscriberBitrate Kbps")
         }
     }
 }
