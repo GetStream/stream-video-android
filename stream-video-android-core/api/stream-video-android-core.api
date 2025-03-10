@@ -6090,6 +6090,7 @@ public final class io/getstream/video/android/core/PeerConnectionStats {
 	public final fun getLatency ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getQualityDropReason ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getResolution ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getVideoCodec ()Lkotlinx/coroutines/flow/StateFlow;
 }
 
 public abstract interface class io/getstream/video/android/core/RealtimeConnection {
