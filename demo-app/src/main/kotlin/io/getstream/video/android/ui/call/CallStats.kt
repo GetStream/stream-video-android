@@ -178,9 +178,9 @@ fun CallStats(call: Call) {
             val publisherBitrate by call.state.stats.publisher.bitrateKbps.collectAsStateWithLifecycle()
             val subscriberBitrate by call.state.stats.subscriber.bitrateKbps.collectAsStateWithLifecycle()
             val publisherVideoCodec by call.state.stats.publisher.videoCodec.collectAsStateWithLifecycle()
-            val publishCodecLabel = if (publisherVideoCodec.isNotEmpty()) "($publisherVideoCodec)" else ""
+            val publisherCodecLabel = if (publisherVideoCodec.isNotEmpty()) "($publisherVideoCodec)" else ""
             val subscriberVideoCodec by call.state.stats.subscriber.videoCodec.collectAsStateWithLifecycle()
-            val receiveCodecLabel = if (subscriberVideoCodec.isNotEmpty()) "($subscriberVideoCodec)" else ""
+            val subscriberCodecLabel = if (subscriberVideoCodec.isNotEmpty()) "($subscriberVideoCodec)" else ""
 
             LatencyOrJitter(title = "Latency", value = latency)
             Spacer(modifier = Modifier.size(16.dp))
@@ -190,11 +190,14 @@ fun CallStats(call: Call) {
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Region", value = statsReport?.local?.sfu)
             Spacer(modifier = Modifier.size(16.dp))
-            StatItem(title = "Publish resolution $publishCodecLabel", value = publishResolution)
+            StatItem(title = "Publish resolution $publisherCodecLabel", value = publisherResolution)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish quality drop reason", value = publisherDropReason)
             Spacer(modifier = Modifier.size(16.dp))
-            StatItem(title = "Receive resolution $receiveCodecLabel", value = subscriberResolution)
+            StatItem(
+                title = "Receiving resolution $subscriberCodecLabel",
+                value = subscriberResolution,
+            )
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish bitrate", value = "$publisherBitrate Kbps")
             Spacer(modifier = Modifier.size(16.dp))

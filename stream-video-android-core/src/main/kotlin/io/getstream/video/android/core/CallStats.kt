@@ -115,8 +115,10 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
             } else if (type == "track") {
                 "$type:${stat.members["kind"]}"
             } else if (type == "outbound-rtp") {
-                val rid = stat.members["rid"] ?: "missing"
-                "$type:${stat.members["kind"]}:$rid"
+                // If we have a rid value, create rid-related stats. If not, create generic outbound stats.
+                // Both types of stats are read below, if available.
+                val rid = stat.members["rid"]
+                "$type:${stat.members["kind"]}" + if (rid != null) ":$rid" else ""
             } else if (type == "codec") {
                 (stat.members["mimeType"] as? String)
                     ?.split("/")
@@ -161,6 +163,22 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                 }
                 if (resolutionUpdate != null) {
                     publisher._resolution.value = resolutionUpdate
+                }
+            }
+
+            statGroups["outbound-rtp:video"]?.firstOrNull()?.let {
+                val jitter = it.members["jitter"] as? Double
+                val width = it.members["frameWidth"] as? Long
+                val height = it.members["frameHeight"] as? Long
+                val fps = it.members["framesPerSecond"] as? Double
+                val qualityDropReason = it.members["qualityLimitationReason"] as? String
+
+                publisher._qualityDropReason.value = qualityDropReason ?: ""
+                if (jitter != null) {
+                    publisher._jitterInMs.value = (jitter * 1000).toInt()
+                }
+                if (width != null && height != null && fps != null) {
+                    publisher._resolution.value = "$width x $height @ $fps fps"
                 }
             }
 
