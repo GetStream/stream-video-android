@@ -177,6 +177,10 @@ fun CallStats(call: Call) {
             val subscriberJitter by call.state.stats.subscriber.jitterInMs.collectAsStateWithLifecycle()
             val publisherBitrate by call.state.stats.publisher.bitrateKbps.collectAsStateWithLifecycle()
             val subscriberBitrate by call.state.stats.subscriber.bitrateKbps.collectAsStateWithLifecycle()
+            val publisherVideoCodec by call.state.stats.publisher.videoCodec.collectAsStateWithLifecycle()
+            val publishCodecLabel = if (publisherVideoCodec.isNotEmpty()) "($publisherVideoCodec)" else ""
+            val subscriberVideoCodec by call.state.stats.subscriber.videoCodec.collectAsStateWithLifecycle()
+            val receiveCodecLabel = if (subscriberVideoCodec.isNotEmpty()) "($subscriberVideoCodec)" else ""
 
             LatencyOrJitter(title = "Latency", value = latency)
             Spacer(modifier = Modifier.size(16.dp))
@@ -186,11 +190,11 @@ fun CallStats(call: Call) {
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Region", value = statsReport?.local?.sfu)
             Spacer(modifier = Modifier.size(16.dp))
-            StatItem(title = "Publish resolution", value = publishResolution)
+            StatItem(title = "Publish resolution $publishCodecLabel", value = publishResolution)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish quality drop reason", value = dropReason)
             Spacer(modifier = Modifier.size(16.dp))
-            StatItem(title = "Receive resolution", value = subscriberResolution)
+            StatItem(title = "Receive resolution $receiveCodecLabel", value = subscriberResolution)
             Spacer(modifier = Modifier.size(16.dp))
             StatItem(title = "Publish bitrate", value = "$publisherBitrate Kbps")
             Spacer(modifier = Modifier.size(16.dp))
