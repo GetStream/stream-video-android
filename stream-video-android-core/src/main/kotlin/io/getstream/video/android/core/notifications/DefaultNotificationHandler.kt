@@ -40,6 +40,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -394,6 +395,10 @@ public open class DefaultNotificationHandler(
         localUser: User,
         onUpdate: (Notification) -> Unit,
     ) {
+        val streamVideoClient = StreamVideo.instanceOrNull() as? StreamVideoClient
+
+        if (streamVideoClient?.enableCallNotificationUpdates != true) return
+
         coroutineScope.launch {
             var latestRemoteParticipantCount = -1
 
