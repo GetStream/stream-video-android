@@ -83,6 +83,9 @@ fun defaultStreamMenu(
     onSfuFastReconnectClick: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
     availableDevices: List<StreamAudioDevice>,
+    isRecordingEnabled: Boolean,
+    isRecordingInProgress: Boolean,
+    onToggleRecordingClick: () -> Unit,
     loadRecordings: suspend () -> List<MenuItem>,
     transcriptionUiState: TranscriptionUiState,
     onToggleTranscription: suspend () -> Unit,
@@ -161,6 +164,9 @@ fun defaultStreamMenu(
                     onSfuRejoinClick,
                     onSfuFastReconnectClick,
                     onSelectScaleType,
+                    isRecordingEnabled,
+                    isRecordingInProgress,
+                    onToggleRecordingClick,
                     loadRecordings,
                     onShowFeedback,
                     selectedIncomingVideoResolution,
@@ -288,6 +294,9 @@ fun debugSubmenu(
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
+    isRecordingEnabled: Boolean,
+    isRecordingInProgress: Boolean,
+    onToggleRecordingClick: () -> Unit,
     loadRecordings: suspend () -> List<MenuItem>,
     onShowFeedback: () -> Unit,
     selectedIncomingVideoResolution: PreferredVideoResolution?,
@@ -376,17 +385,9 @@ fun debugSubmenu(
         action = onToggleAudioFilterClick,
     ),
     ActionMenuItem(
-        title = "Start/stop recording",
+        title = (if (isRecordingInProgress) "Stop" else "Start") + " recording",
         icon = Icons.Default.RadioButtonChecked,
-        action = {
-//                scope.launch {
-//                    if (isRecording) {
-//                        showEndRecordingDialog = true
-//                    } else {
-//                        call.startRecording()
-//                    }
-//                }
-        },
+        action = onToggleRecordingClick,
     ),
     DynamicSubMenuItem(
         title = "Recordings",

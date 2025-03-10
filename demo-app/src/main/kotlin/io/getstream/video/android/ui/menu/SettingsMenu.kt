@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
@@ -79,7 +81,8 @@ internal fun SettingsMenu(
     onShowCallStats: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
     closedCaptionUiState: ClosedCaptionUiState,
-    onClosedCaptionsToggle: () -> Unit,
+    onToggleClosedCaptions: () -> Unit,
+    onToggleRecording: () -> Unit,
 ) {
     val context = LocalContext.current
     val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
@@ -141,6 +144,10 @@ internal fun SettingsMenu(
         }
     }
 
+    val isRecordingEnabled = remember {
+        call.hasCapability(OwnCapability.StartRecordCall) || call.hasCapability(OwnCapability.StopRecordCall)
+    }
+    val isRecordingInProgress by call.state.recording.collectAsStateWithLifecycle()
     val onLoadRecordings: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
         when (it) {
             is PermissionStatus.Granted -> {
@@ -261,8 +268,11 @@ internal fun SettingsMenu(
                 onSfuRejoinClick = onSfuRejoinClick,
                 onSfuFastReconnectClick = onSfuFastReconnectClick,
                 onSelectScaleType = onSelectScaleType,
+                isRecordingEnabled = isRecordingEnabled,
+                isRecordingInProgress = isRecordingInProgress,
+                onToggleRecordingClick = onToggleRecording,
                 loadRecordings = onLoadRecordings,
-                onToggleClosedCaptions = onClosedCaptionsToggle,
+                onToggleClosedCaptions = onToggleClosedCaptions,
                 closedCaptionUiState = closedCaptionUiState,
                 transcriptionUiState = transcriptionUiState,
                 onToggleTranscription = onToggleTranscription,
@@ -331,6 +341,9 @@ private fun SettingsMenuPreview() {
                 onSelectIncomingVideoResolution = {},
                 isIncomingVideoEnabled = true,
                 onToggleIncomingVideoEnabled = {},
+                isRecordingEnabled = true,
+                isRecordingInProgress = false,
+                onToggleRecordingClick = {},
                 loadRecordings = { emptyList() },
                 onToggleClosedCaptions = { },
                 closedCaptionUiState = ClosedCaptionUiState.Available,

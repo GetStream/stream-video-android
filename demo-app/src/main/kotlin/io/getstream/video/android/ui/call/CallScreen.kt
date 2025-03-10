@@ -144,13 +144,7 @@ fun CallScreen(
         initialValue = ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true,
     )
-    var showRecordingWarning by remember {
-        mutableStateOf(false)
-    }
     val orientation = LocalConfiguration.current.orientation
-    var showEndRecordingDialog by remember { mutableStateOf(false) }
-    var acceptedCallRecording by remember { mutableStateOf(false) }
-    val isRecording by call.state.recording.collectAsStateWithLifecycle()
     val participantsSize by call.state.participants.collectAsStateWithLifecycle()
     val messages: MutableList<MessageItemState> = remember { mutableStateListOf() }
     var messagesVisibility by remember { mutableStateOf(false) }
@@ -254,6 +248,18 @@ fun CallScreen(
             }
         },
     )
+
+    val isRecordingInProgress by call.state.recording.collectAsStateWithLifecycle()
+    var showEndRecordingDialog by remember { mutableStateOf(false) }
+    var showRecordingWarning by remember { mutableStateOf(false) }
+    var acceptedCallRecording by remember { mutableStateOf(false) }
+    val onToggleRecording: suspend () -> Unit = {
+        if (isRecordingInProgress) {
+            showEndRecordingDialog = true
+        } else {
+            call.startRecording()
+        }
+    }
 
     LaunchedEffect(Unit) {
         call.state.settings.map { it?.transcription }
@@ -629,7 +635,10 @@ fun CallScreen(
                     isShowingSettingMenu = false
                 },
                 closedCaptionUiState = closedCaptionUiState,
-                onClosedCaptionsToggle = onLocalClosedCaptionsClick,
+                onToggleClosedCaptions = onLocalClosedCaptionsClick,
+                onToggleRecording = {
+                    scope.launch { onToggleRecording() }
+                },
             )
         }
 
@@ -668,7 +677,7 @@ fun CallScreen(
         }
 
         // TODO: AAP, move recording and actions in separate composables.
-        if (isRecording && !showRecordingWarning) {
+        if (isRecordingInProgress && !showRecordingWarning) {
             StreamDialogPositiveNegative(
                 title = "This call is being recorded",
                 contentText = "By staying in the call you’re consenting to being recorded.",
@@ -689,6 +698,7 @@ fun CallScreen(
                 },
             )
         }
+
         if (showEndRecordingDialog) {
             StreamDialogPositiveNegative(
                 title = "End recording",
