@@ -214,8 +214,6 @@ private fun DynamicMenuPreview() {
             items = defaultStreamMenu(
                 codecList = emptyList(),
                 onCodecSelected = {},
-                isScreenShareEnabled = false,
-                onToggleScreenShare = { },
                 onShowCallStats = { },
                 onToggleAudioFilterClick = { },
                 onRestartSubscriberIceClick = { },
@@ -252,8 +250,6 @@ private fun DynamicMenuDebugOptionPreview() {
                 showDebugOptions = true,
                 codecList = emptyList(),
                 onCodecSelected = {},
-                isScreenShareEnabled = true,
-                onToggleScreenShare = { },
                 onShowCallStats = { },
                 onToggleAudioFilterClick = { },
                 onRestartSubscriberIceClick = { },
@@ -296,6 +292,13 @@ private fun DynamicMenuDebugPreview() {
                 onToggleAudioFilterClick = { },
                 onSelectScaleType = { },
                 onSwitchSfuClick = { },
+                loadRecordings = { emptyList() },
+                onShowFeedback = { },
+                selectedIncomingVideoResolution = null,
+                onSelectIncomingVideoResolution = { },
+                isIncomingVideoEnabled = true,
+                onToggleIncomingVideoEnabled = { },
+                loadTranscriptions = { emptyList() },
             ),
         )
     }
