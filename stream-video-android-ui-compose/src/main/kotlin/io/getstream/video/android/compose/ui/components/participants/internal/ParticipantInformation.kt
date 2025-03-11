@@ -30,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -43,6 +45,71 @@ import io.getstream.video.android.mock.previewThreeMembers
 import io.getstream.video.android.mock.previewTwoMembers
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
+
+@Deprecated(
+    message = "This version of ParticipantInformation is deprecated. Use the newer overload.",
+    replaceWith = ReplaceWith("ParticipantInformation"),
+)
+@Composable
+public fun ParticipantInformation(
+    callStatus: CallStatus,
+    participants: List<MemberState>,
+    isVideoType: Boolean = true,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        val context = LocalContext.current
+        val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
+        val text = if (participants.size <= 3) {
+            buildSmallCallText(context, callUsers)
+        } else {
+            buildLargeCallText(context, callUsers)
+        }
+
+        val fontSize = if (participants.size == 1) {
+            VideoTheme.dimens.textSizeL
+        } else {
+            VideoTheme.dimens.textSizeM
+        }
+
+        Text(
+            modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
+            text = text,
+            fontSize = fontSize,
+            color = VideoTheme.colors.basePrimary,
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+
+        val callType = if (isVideoType) {
+            "video"
+        } else {
+            "audio"
+        }
+
+        Text(
+            text = when (callStatus) {
+                CallStatus.Incoming -> stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,
+                    callType.capitalize(Locale.current),
+                )
+
+                CallStatus.Outgoing -> stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_outgoing,
+                )
+
+                is CallStatus.Calling -> callStatus.duration
+
+                is CallStatus.Ongoing -> callStatus.duration
+            },
+            style = VideoTheme.typography.bodyM,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
 
 /**
  * Component that renders user names for a call.
@@ -110,6 +177,8 @@ public fun ParticipantInformation(
                 )
 
                 is CallStatus.Ongoing -> callStatus.duration
+
+                is CallStatus.Calling -> callStatus.duration
             },
             style = VideoTheme.typography.bodyM,
             textAlign = TextAlign.Center,
