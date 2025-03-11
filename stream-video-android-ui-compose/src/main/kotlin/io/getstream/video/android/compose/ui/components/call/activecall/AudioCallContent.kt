@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,14 +45,105 @@ import io.getstream.video.android.compose.ui.components.call.activecall.internal
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
+import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+
+/**
+ * Audio call content represents the UI of an active audio only call.
+ *
+ * @param call The call includes states and will be rendered with participants.
+ * @param modifier Modifier for styling.
+ * @param isMicrophoneEnabled weather or not the microphone icon will be enabled or not
+ * @param permissions the permissions required for the call to work (e.g. manifest.RECORD_AUDIO)
+ * @param onBackPressed Handler when the user taps on the back button.
+ * @param permissions Android permissions that should be required to render a video call properly.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
+ * @param durationPlaceholder Content (text) shown while the duration is not available yet
+ * @param isShowingHeader if true, header content is shown
+ * @param headerContent override the header content
+ * @param detailsContent override the details content (middle part of the screen)
+ */
+@Deprecated(
+    message = "This version of AudioCallContent is deprecated. Use the newer overload.",
+    replaceWith = ReplaceWith("AudioCallContent"),
+)
+@Composable
+public fun AudioCallContent(
+    modifier: Modifier = Modifier,
+    call: Call,
+    isMicrophoneEnabled: Boolean,
+    permissions: VideoPermissionsState = rememberCallPermissionsState(
+        call = call,
+        permissions = listOf(
+            android.Manifest.permission.RECORD_AUDIO,
+        ),
+    ),
+    onCallAction: (CallAction) -> Unit = { action: CallAction ->
+        DefaultOnCallActionHandler.onCallAction(call, action)
+    },
+    durationPlaceholder: String = "",
+    isShowingHeader: Boolean = true,
+    headerContent: (@Composable ColumnScope.() -> Unit)? = null,
+    detailsContent: (
+        @Composable ColumnScope.(
+            participants: List<MemberState>,
+            topPadding: Dp,
+        ) -> Unit
+    )? = null,
+    controlsContent: (@Composable BoxScope.() -> Unit)? = null,
+    onBackPressed: () -> Unit = {},
+    deprecatedMarker: Boolean = true,
+) {
+    val duration by call.state.duration.collectAsStateWithLifecycle()
+    val durationText = duration?.toString() ?: durationPlaceholder
+
+    DefaultPermissionHandler(videoPermission = permissions)
+
+    OutgoingCallContent(
+        modifier = modifier,
+        isShowingHeader = isShowingHeader,
+        headerContent = headerContent,
+        call = call,
+        isVideoType = false,
+        detailsContent = detailsContent ?: { members, topPadding ->
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = topPadding),
+            ) {
+                ParticipantInformation(
+                    isVideoType = false,
+                    callStatus = CallStatus.Calling(durationText),
+                    participants = members,
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                ParticipantAvatars(participants = members)
+            }
+        },
+        onBackPressed = onBackPressed,
+        controlsContent = controlsContent ?: {
+            OutgoingCallControls(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(VideoTheme.dimens.spacingM),
+                isVideoCall = false,
+                isCameraEnabled = false,
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                onCallAction = onCallAction,
+            )
+        },
+    )
+}
 
 /**
  * Represents the UI of an active audio only call.
@@ -131,16 +223,18 @@ public fun AudioCallContent(
 public fun AudioCallDetails(
     modifier: Modifier = Modifier,
     duration: String,
-    participants: List<ParticipantState>,
+    members: List<MemberState>? = null,
+    participants: List<ParticipantState>? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        ParticipantAvatars(participants = participants)
+        ParticipantAvatars(members = members, participants = participants)
 
         Spacer(modifier = Modifier.height(32.dp))
 
         ParticipantInformation(
             isVideoType = false,
             callStatus = CallStatus.Ongoing(duration),
+            members = members,
             participants = participants,
         )
     }

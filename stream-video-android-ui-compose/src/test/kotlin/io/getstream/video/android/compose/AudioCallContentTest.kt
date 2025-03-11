@@ -16,10 +16,14 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
@@ -34,10 +38,18 @@ internal class AudioCallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot AudioCallContent in default state`() {
         snapshot {
+            val detailsContent: (
+                @Composable ColumnScope.(
+                    List<ParticipantState>,
+                    Dp,
+                ) -> Unit
+            )? = null
+
             AudioCallContent(
                 call = previewCall,
                 isMicrophoneEnabled = false,
                 durationPlaceholder = "11:45",
+                detailsContent = detailsContent,
             )
         }
     }
@@ -45,10 +57,18 @@ internal class AudioCallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot AudioCallContent without header`() {
         snapshot {
+            val detailsContent: (
+                @Composable ColumnScope.(
+                    List<ParticipantState>,
+                    Dp,
+                ) -> Unit
+            )? = null
+
             AudioCallContent(
                 call = previewCall,
                 isMicrophoneEnabled = false,
                 isShowingHeader = false,
+                detailsContent = detailsContent,
             )
         }
     }
