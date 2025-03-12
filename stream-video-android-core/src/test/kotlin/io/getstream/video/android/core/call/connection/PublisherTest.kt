@@ -23,7 +23,6 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverId
 import io.getstream.video.android.core.model.StreamPeerType
-import io.getstream.video.android.core.trySetEnabled
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify

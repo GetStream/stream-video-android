@@ -38,10 +38,8 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.webrtc.AudioSource
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.MediaConstraints
-import org.webrtc.MediaSource
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
@@ -50,7 +48,6 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
-import org.webrtc.VideoSource
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.PublishOption
@@ -197,7 +194,9 @@ internal class Publisher(
                     return fallbackTrack
                 }
             } else {
-                logger.d { "[trackPublishing] No transceiver found for $trackType, creating new track and transceiver." }
+                logger.d {
+                    "[trackPublishing] No transceiver found for $trackType, creating new track and transceiver."
+                }
                 // This is the first time we are adding the transceiver.
                 val newTrack = newTrackFromSource(publishOption.track_type)
                 addTransceiver(captureFormat, newTrack, publishOption)
@@ -208,7 +207,9 @@ internal class Publisher(
     }
 
     private fun logTrack(senderTrack: MediaStreamTrack?) {
-        logger.d { "[trackPublishing] Track: ${senderTrack?.enabled()}:${senderTrack?.state()}:${senderTrack?.id()}" }
+        logger.d {
+            "[trackPublishing] Track: ${senderTrack?.enabled()}:${senderTrack?.state()}:${senderTrack?.id()}"
+        }
     }
 
     private fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
@@ -470,7 +471,7 @@ internal class Publisher(
             publishOption.video_dimension ?: defaultScreenShareFormat.toVideoDimension()
         } else {
             format?.toVideoDimension() ?: publishOption.video_dimension
-            ?: defaultFormat.toVideoDimension()
+                ?: defaultFormat.toVideoDimension()
         }
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
