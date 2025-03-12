@@ -82,8 +82,8 @@ internal class Publisher(
     onIceCandidate,
     maxBitRate,
 ) {
-    private val defaultScreenShareFormat = CaptureFormat(1080, 720, 24, 30)
-    private val defaultFormat = CaptureFormat(1080, 720, 24, 30)
+    private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
+    private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
     private var isIceRestarting = false
 
     override fun onRenegotiationNeeded() {
