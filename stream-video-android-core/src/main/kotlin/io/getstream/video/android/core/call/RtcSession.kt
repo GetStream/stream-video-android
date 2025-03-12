@@ -943,7 +943,6 @@ public class RtcSession internal constructor(
             publishOptions = publishOptions,
             coroutineScope = coroutineScope,
             mediaConstraints = mediaConstraints,
-            onStreamAdded = { addStream(it) },
             onNegotiationNeeded = { _, _ -> },
             onIceCandidate = ::sendIceCandidate,
         ) {

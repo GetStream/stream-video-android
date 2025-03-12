@@ -42,6 +42,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
@@ -186,6 +187,26 @@ class PublisherTest {
     }
 
     //region Tests
+    @Test
+    fun `publishStream adds a new track if there is none`() = runTest {
+        // Mock a transceiver for the video option
+        val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
+        val mockSender = mockk<RtpSender>(relaxed = true)
+        every { mockTransceiver.sender } returns mockSender
+        every { mockTransceiverCache.get(videoPublishOption) } returns mockTransceiver
+        every { mockSender.track() } returns null
+
+        val resultTrack = publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+
+        coVerify {
+            // Verify new track is set to the sender
+            mockSender.setTrack(any(), true)
+        }
+
+        // Verify track is returned by the publishStream
+        assertNotNull(resultTrack)
+    }
+
 
     @Test
     fun `publishStream with no matching option logs an error and does nothing`() = runTest {

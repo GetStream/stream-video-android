@@ -212,7 +212,8 @@ internal class Publisher(
         }
     }
 
-    private fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
+    @VisibleForTesting
+    public fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
         return when (trackType) {
             TrackType.TRACK_TYPE_AUDIO -> {
                 val id = UUID.randomUUID().toString()
