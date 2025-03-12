@@ -461,7 +461,7 @@ private fun JoinCallForm(
         mutableStateOf(
             TextFieldValue(
                 if (BuildConfig.FLAVOR == StreamFlavors.development) {
-                    "default:79cYh3J5JgGk"
+                    "default:123lex"
                 } else {
                     ""
                 },

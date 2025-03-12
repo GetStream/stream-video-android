@@ -67,6 +67,7 @@ import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.MediaTrack
+import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
@@ -571,12 +572,7 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
 
                 if (it == DeviceStatus.Enabled) {
-                    val newTrack = call.peerConnectionFactory.makeVideoTrack(
-                        call.mediaManager.videoSource,
-                        UUID.randomUUID().toString(),
-                    )
-                    publisher?.publishStream(
-                        newTrack,
+                    val track = publisher?.publishStream(
                         TrackType.TRACK_TYPE_VIDEO,
                         call.mediaManager.camera.resolution.value,
                     )
@@ -584,11 +580,11 @@ public class RtcSession internal constructor(
                         TrackType.TRACK_TYPE_VIDEO,
                         VideoTrack(
                             streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
-                            video = newTrack,
+                            video = track as org.webrtc.VideoTrack,
                         ),
                     )
                 } else {
-                    publisher?.unpublishStream(TrackType.TRACK_TYPE_VIDEO, false)
+                    publisher?.unpublishStream(TrackType.TRACK_TYPE_VIDEO)
                 }
             }
         }
@@ -599,23 +595,18 @@ public class RtcSession internal constructor(
                 setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
 
                 if (it == DeviceStatus.Enabled) {
-                    val newTrack = call.peerConnectionFactory.makeAudioTrack(
-                        call.mediaManager.audioSource,
-                        UUID.randomUUID().toString(),
-                    )
-                    publisher?.publishStream(
-                        newTrack,
+                    val track = publisher?.publishStream(
                         TrackType.TRACK_TYPE_AUDIO,
                     )
                     setLocalTrack(
                         TrackType.TRACK_TYPE_AUDIO,
                         AudioTrack(
                             streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
-                            audio = newTrack,
+                            audio = track as org.webrtc.AudioTrack,
                         ),
                     )
                 } else {
-                    publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO, false)
+                    publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
                 }
             }
         }
@@ -628,23 +619,18 @@ public class RtcSession internal constructor(
                     TrackType.TRACK_TYPE_SCREEN_SHARE,
                 )
                 if (it == DeviceStatus.Enabled) {
-                    val newTrack = call.peerConnectionFactory.makeVideoTrack(
-                        call.mediaManager.screenShareVideoSource,
-                        UUID.randomUUID().toString(),
-                    )
-                    publisher?.publishStream(
-                        newTrack,
+                    val track = publisher?.publishStream(
                         TrackType.TRACK_TYPE_SCREEN_SHARE,
                     )
                     setLocalTrack(
                         TrackType.TRACK_TYPE_SCREEN_SHARE,
                         VideoTrack(
                             streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
-                            video = newTrack,
+                            video = track as org.webrtc.VideoTrack,
                         ),
                     )
                 } else {
-                    publisher?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE, false)
+                    publisher?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE)
                 }
             }
         }

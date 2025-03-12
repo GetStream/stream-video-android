@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.connection.transceivers
 import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
 import org.webrtc.RtpTransceiver
 import stream.video.sfu.models.PublishOption
+import stream.video.sfu.models.TrackType
 import java.util.Collections
 
 internal class TransceiverCache {
@@ -73,6 +74,10 @@ internal class TransceiverCache {
 
     private fun findLayer(publishOption: PublishOption): TrackLayersCache? {
         return layers[publishOption.key()]
+    }
+
+    fun getByTrackType(trackType: TrackType): List<RtpTransceiver> {
+        return items().filter { it.publishOption.track_type == trackType }.map { it.transceiver }
     }
 }
 
