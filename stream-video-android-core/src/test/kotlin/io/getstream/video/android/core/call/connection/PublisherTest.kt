@@ -207,7 +207,6 @@ class PublisherTest {
         assertNotNull(resultTrack)
     }
 
-
     @Test
     fun `publishStream with no matching option logs an error and does nothing`() = runTest {
         // There's no matching PublishOption for SCREEN_SHARE in the list
