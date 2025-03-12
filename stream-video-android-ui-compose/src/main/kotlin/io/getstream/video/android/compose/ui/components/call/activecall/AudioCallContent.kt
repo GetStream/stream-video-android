@@ -233,7 +233,7 @@ public fun AudioCallDetails(
 
         ParticipantInformation(
             isVideoType = false,
-            callStatus = CallStatus.Ongoing(duration),
+            callStatus = CallStatus.Calling(duration),
             members = members,
             participants = participants,
         )

@@ -29,7 +29,4 @@ public sealed interface CallStatus {
 
     @Stable
     public data class Calling(public val duration: String) : CallStatus
-
-    @Stable
-    public data class Ongoing(public val duration: String) : CallStatus
 }

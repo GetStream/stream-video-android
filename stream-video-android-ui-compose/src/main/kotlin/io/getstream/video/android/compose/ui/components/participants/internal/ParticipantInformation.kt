@@ -102,8 +102,6 @@ public fun ParticipantInformation(
                 )
 
                 is CallStatus.Calling -> callStatus.duration
-
-                is CallStatus.Ongoing -> callStatus.duration
             },
             style = VideoTheme.typography.bodyM,
             textAlign = TextAlign.Center,
@@ -175,8 +173,6 @@ public fun ParticipantInformation(
                 CallStatus.Outgoing -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_outgoing,
                 )
-
-                is CallStatus.Ongoing -> callStatus.duration
 
                 is CallStatus.Calling -> callStatus.duration
             },

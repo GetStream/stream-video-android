@@ -9326,17 +9326,6 @@ public final class io/getstream/video/android/core/model/CallStatus$Incoming : i
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/model/CallStatus$Ongoing : io/getstream/video/android/core/model/CallStatus {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/model/CallStatus$Ongoing;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallStatus$Ongoing;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallStatus$Ongoing;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDuration ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/core/model/CallStatus$Outgoing : io/getstream/video/android/core/model/CallStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/CallStatus$Outgoing;
 	public fun equals (Ljava/lang/Object;)Z
