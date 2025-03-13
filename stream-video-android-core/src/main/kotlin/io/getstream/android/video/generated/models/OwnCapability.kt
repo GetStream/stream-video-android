@@ -58,10 +58,12 @@ sealed class OwnCapability(val value: kotlin.String) {
             "send-video" -> SendVideo
             "start-broadcast-call" -> StartBroadcastCall
             "start-closed-captions-call" -> StartClosedCaptionsCall
+            "start-frame-record-call" -> StartFrameRecordCall
             "start-record-call" -> StartRecordCall
             "start-transcription-call" -> StartTranscriptionCall
             "stop-broadcast-call" -> StopBroadcastCall
             "stop-closed-captions-call" -> StopClosedCaptionsCall
+            "stop-frame-record-call" -> StopFrameRecordCall
             "stop-record-call" -> StopRecordCall
             "stop-transcription-call" -> StopTranscriptionCall
             "update-call" -> UpdateCall
@@ -89,10 +91,12 @@ sealed class OwnCapability(val value: kotlin.String) {
     object SendVideo : OwnCapability("send-video")
     object StartBroadcastCall : OwnCapability("start-broadcast-call")
     object StartClosedCaptionsCall : OwnCapability("start-closed-captions-call")
+    object StartFrameRecordCall : OwnCapability("start-frame-record-call")
     object StartRecordCall : OwnCapability("start-record-call")
     object StartTranscriptionCall : OwnCapability("start-transcription-call")
     object StopBroadcastCall : OwnCapability("stop-broadcast-call")
     object StopClosedCaptionsCall : OwnCapability("stop-closed-captions-call")
+    object StopFrameRecordCall : OwnCapability("stop-frame-record-call")
     object StopRecordCall : OwnCapability("stop-record-call")
     object StopTranscriptionCall : OwnCapability("stop-transcription-call")
     object UpdateCall : OwnCapability("update-call")

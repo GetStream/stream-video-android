@@ -41,6 +41,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.model.User.Companion.isLocalUser
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -75,7 +76,8 @@ public fun IncomingCallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val participants: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
+    val members: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
+    val remoteMembers = members.filterNot { it.user.isLocalUser() }
     val isCameraEnabled by if (LocalInspectionMode.current) {
         remember { mutableStateOf(true) }
     } else {
@@ -85,7 +87,7 @@ public fun IncomingCallContent(
     IncomingCallContent(
         call = call,
         isVideoType = isVideoType,
-        participants = participants,
+        participants = remoteMembers,
         isCameraEnabled = isCameraEnabled,
         isShowingHeader = isShowingHeader,
         modifier = modifier,
@@ -104,7 +106,7 @@ public fun IncomingCallContent(
  *
  * @param call The call contains states and will be rendered with participants.
  * @param isVideoType The type of call, Audio or Video.
- * @param participants People participating in the call.
+ * @param participants List of call members.
  * @param isCameraEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param isShowingHeader If the app bar header is shown or not.

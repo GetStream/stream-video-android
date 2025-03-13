@@ -33,11 +33,11 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 
 /**
- * A details of an incoming call that displays a list of participant information.
+ * Component that displays details for an incoming call.
  *
  * @param modifier Modifier for styling.
- * @param isVideoType The type of call, Audio or Video.
- * @param participants A list of participants to be displayed.
+ * @param isVideoType The type of call, audio or video.
+ * @param participants A list of call members to be displayed.
  */
 @Composable
 public fun IncomingCallDetails(
@@ -46,14 +46,14 @@ public fun IncomingCallDetails(
     participants: List<MemberState>,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        ParticipantAvatars(participants = participants)
+        ParticipantAvatars(members = participants)
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
 
         ParticipantInformation(
             isVideoType = isVideoType,
             callStatus = CallStatus.Incoming,
-            participants = participants,
+            members = participants,
         )
     }
 }

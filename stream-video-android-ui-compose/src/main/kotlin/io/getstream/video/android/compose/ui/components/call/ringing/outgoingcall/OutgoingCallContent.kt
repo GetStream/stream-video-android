@@ -39,6 +39,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.model.User.Companion.isLocalUser
 
 /**
  * Represents the Outgoing Call state and UI, when the user is calling other people.
@@ -72,12 +73,13 @@ public fun OutgoingCallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = {},
 ) {
-    val participants: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
+    val members: List<MemberState> by call.state.members.collectAsStateWithLifecycle()
+    val remoteMembers = members.filterNot { it.user.isLocalUser() }
 
     OutgoingCallContent(
         call = call,
         isVideoType = isVideoType,
-        participants = participants,
+        participants = remoteMembers,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
         backgroundContent = backgroundContent,
@@ -95,7 +97,7 @@ public fun OutgoingCallContent(
  * @param call The call contains states and will be rendered with participants.
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
- * @param participants A list of participants.
+ * @param participants List of call members.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param headerContent Content shown for the call header.
  * @param detailsContent Content shown for call details, such as call participant information.

@@ -91,6 +91,15 @@ internal class CallContentTest : BaseComposeTest() {
     }
 
     @Test
+    fun `snapshot IncomingCallContent with minimum parameters`() {
+        snapshot {
+            IncomingCallContent(
+                call = previewCall,
+            )
+        }
+    }
+
+    @Test
     fun `snapshot OutgoingCallDetails Video composable`() {
         snapshot {
             OutgoingCallDetails(participants = previewMemberListState)
@@ -150,6 +159,26 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot CallContent with multiple participants composable`() {
         snapshot {
             CallContent(call = previewCall)
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallContent with minimum parameters and video type`() {
+        snapshot {
+            OutgoingCallContent(
+                call = previewCall,
+                isVideoType = true,
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallContent with minimum parameters and audio type`() {
+        snapshot {
+            OutgoingCallContent(
+                call = previewCall,
+                isVideoType = false,
+            )
         }
     }
 }

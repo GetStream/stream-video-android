@@ -24,6 +24,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +35,9 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.userNameOrId
+import io.getstream.video.android.core.utils.toCallUser
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 
@@ -42,6 +48,10 @@ import io.getstream.video.android.mock.previewMemberListState
  *
  * @see [UserAvatar]
  */
+@Deprecated(
+    message = "This version of ParticipantAvatars is deprecated. Use the newer overload.",
+    replaceWith = ReplaceWith("ParticipantAvatars"),
+)
 @Composable
 public fun ParticipantAvatars(
     participants: List<MemberState>,
@@ -84,13 +94,64 @@ public fun ParticipantAvatars(
     }
 }
 
+/**
+ * Component that renders user avatars for a call.
+ *
+ * @param members The list of call members to render avatars for. If `null`, [participants] will be used instead. Takes precedence over `participants` if both are not `null`.
+ * @param participants The list of call participants to render avatars for. If `null`, [members] will be used instead.
+ *
+ * @see [UserAvatar]
+ */
+@Composable
+public fun ParticipantAvatars(
+    members: List<MemberState>? = null,
+    participants: List<ParticipantState>? = null,
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        val callUsers by remember(members, participants) {
+            derivedStateOf {
+                members?.map { it.toCallUser() }
+                    ?: participants?.map { it.toCallUser() }
+                    ?: emptyList()
+            }
+        }
+
+        if (callUsers.isNotEmpty()) {
+            if (callUsers.size == 1) {
+                val user = callUsers.first()
+
+                UserAvatar(
+                    modifier = Modifier.size(VideoTheme.dimens.genericMax),
+                    userName = user.name ?: user.id,
+                    userImage = user.imageUrl,
+                )
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        items(callUsers.take(if (callUsers.size >= 3) 3 else 2)) { user ->
+                            UserAvatar(
+                                modifier = Modifier.size(VideoTheme.dimens.genericXl),
+                                userName = user.userNameOrId,
+                                userImage = user.imageUrl,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun ParticipantAvatarsPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         ParticipantAvatars(
-            participants = previewMemberListState,
+            members = previewMemberListState,
         )
     }
 }

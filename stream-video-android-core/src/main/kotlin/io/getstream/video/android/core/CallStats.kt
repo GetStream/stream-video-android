@@ -66,6 +66,9 @@ public class PeerConnectionStats(scope: CoroutineScope) {
 
     internal val _bitrateKbps: MutableStateFlow<Float> = MutableStateFlow(0F)
     val bitrateKbps: StateFlow<Float> = _bitrateKbps
+
+    internal val _videoCodec: MutableStateFlow<String> = MutableStateFlow("")
+    val videoCodec: StateFlow<String> = _videoCodec
 }
 
 public data class LocalStats(
@@ -95,7 +98,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
         if (stats == null) return
         // also see https://github.com/GetStream/stream-video-js/blob/main/packages/client/src/stats/state-store-stats-reporter.ts
 
-        val skipTypes = listOf("codec", "certificate", "data-channel")
+        val skipTypes = listOf("certificate", "data-channel")
         val trackToParticipant = call.session?.trackIdToParticipant?.value ?: emptyMap()
         val displayingAt = call.session?.trackDimensions?.value ?: emptyMap()
 
@@ -112,8 +115,14 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
             } else if (type == "track") {
                 "$type:${stat.members["kind"]}"
             } else if (type == "outbound-rtp") {
-                val rid = stat.members["rid"] ?: "missing"
-                "$type:${stat.members["kind"]}:$rid"
+                // If we have a rid value, create rid-related stats. If not, create generic outbound stats.
+                // Both types of stats are read below, if available.
+                val rid = stat.members["rid"]
+                "$type:${stat.members["kind"]}" + if (rid != null) ":$rid" else ""
+            } else if (type == "codec") {
+                (stat.members["mimeType"] as? String)
+                    ?.split("/")
+                    ?.firstOrNull()?.let { audioOrVideo -> "codec:$audioOrVideo" }
             } else {
                 type
             }
@@ -157,11 +166,28 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                 }
             }
 
+            statGroups["outbound-rtp:video"]?.firstOrNull()?.let {
+                val jitter = it.members["jitter"] as? Double
+                val width = it.members["frameWidth"] as? Long
+                val height = it.members["frameHeight"] as? Long
+                val fps = it.members["framesPerSecond"] as? Double
+                val qualityDropReason = it.members["qualityLimitationReason"] as? String
+
+                publisher._qualityDropReason.value = qualityDropReason ?: ""
+                if (jitter != null) {
+                    publisher._jitterInMs.value = (jitter * 1000).toInt()
+                }
+                if (width != null && height != null && fps != null) {
+                    publisher._resolution.value = "$width x $height @ $fps fps"
+                }
+            }
+
             statGroups["inbound-rtp:video"]?.firstOrNull()?.let {
                 val jitter = it.members["jitter"] as Double
                 val width = it.members["frameWidth"] as? Long
                 val height = it.members["frameHeight"] as? Long
                 val fps = it.members["framesPerSecond"] as? Double
+
                 subscriber._jitterInMs.value = (jitter * 1000).toInt()
                 if (width != null && height != null && fps != null) {
                     subscriber._resolution.value = "$width x $height @ $fps fps"
@@ -197,6 +223,15 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                 if (participantId != null) {
                     logger.v {
                         "[stats] #manual-quality-selection; receiving video for $participantId at $frameWidth: ${it.members["frameWidth"]} and rendering it at ${visibleAt?.dimensions?.width} visible: ${visibleAt?.visible}"
+                    }
+                }
+            }
+            statGroups["codec:video"]?.firstOrNull()?.let {
+                (it.members["mimeType"] as? String)?.split("/")?.get(1)?.let { codec ->
+                    if (isPublisher) {
+                        publisher._videoCodec.value = codec
+                    } else {
+                        subscriber._videoCodec.value = codec
                     }
                 }
             }
