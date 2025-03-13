@@ -20,6 +20,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +47,28 @@ internal class AudioCallContentTest : BaseComposeTest() {
     fun `snapshot AudioCallContent without header`() {
         snapshot {
             AudioCallContent(
+                call = previewCall,
+                isMicrophoneEnabled = false,
+                isShowingHeader = false,
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot AudioOnlyCallContent in default state`() {
+        snapshot {
+            AudioOnlyCallContent(
+                call = previewCall,
+                isMicrophoneEnabled = false,
+                durationPlaceholder = "11:45",
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot AudioOnlyCallContent without header`() {
+        snapshot {
+            AudioOnlyCallContent(
                 call = previewCall,
                 isMicrophoneEnabled = false,
                 isShowingHeader = false,

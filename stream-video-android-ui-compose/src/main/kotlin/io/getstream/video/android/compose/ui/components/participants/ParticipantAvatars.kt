@@ -42,6 +42,59 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
 
 /**
+ * Component that renders user avatars for call participants.
+ *
+ * @param participants The list of participants to render avatars for.
+ *
+ * @see [UserAvatar]
+ */
+@Deprecated(
+    message = "This version of ParticipantAvatars is deprecated. Use the newer overload.",
+    replaceWith = ReplaceWith("ParticipantAvatars"),
+)
+@Composable
+public fun ParticipantAvatars(
+    participants: List<MemberState>,
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (participants.isNotEmpty()) {
+            if (participants.size == 1) {
+                val participant = participants.first()
+
+                UserAvatar(
+                    modifier = Modifier.size(VideoTheme.dimens.genericMax),
+                    userName = participant.user.userNameOrId,
+                    userImage = participant.user.image,
+                )
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        items(participants.take(2)) { participant ->
+                            UserAvatar(
+                                modifier = Modifier.size(VideoTheme.dimens.genericL),
+                                userName = participant.user.userNameOrId,
+                                userImage = participant.user.image,
+                            )
+                        }
+                    }
+
+                    if (participants.size >= 3) {
+                        UserAvatar(
+                            modifier = Modifier.size(VideoTheme.dimens.genericM),
+                            userName = participants[2].user.userNameOrId,
+                            userImage = participants[2].user.image,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
  * Component that renders user avatars for a call.
  *
  * @param members The list of call members to render avatars for. If `null`, [participants] will be used instead. Takes precedence over `participants` if both are not `null`.
