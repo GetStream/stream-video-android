@@ -31,15 +31,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.audio.StreamAudioDevice
 
 fun isTelecomIntegrationAvailable(context: Context): Boolean {
-    val telecomManager =
-        context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return false
-
-    val phoneAccountHandle = getMyPhoneAccountHandle(context)
-    val phoneAccount = telecomManager.getPhoneAccount(phoneAccountHandle)
-    if (phoneAccount == null || !phoneAccount.isEnabled) {
-        return false
-    }
-
+    context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return false
     return true
 }
 
