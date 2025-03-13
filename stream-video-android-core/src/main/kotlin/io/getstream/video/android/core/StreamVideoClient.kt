@@ -152,6 +152,7 @@ internal class StreamVideoClient internal constructor(
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
+    internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,

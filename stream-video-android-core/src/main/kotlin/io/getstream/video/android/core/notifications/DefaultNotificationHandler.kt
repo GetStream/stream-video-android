@@ -40,6 +40,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -394,6 +395,10 @@ public open class DefaultNotificationHandler(
         localUser: User,
         onUpdate: (Notification) -> Unit,
     ) {
+        val streamVideoClient = StreamVideo.instanceOrNull() as? StreamVideoClient
+
+        if (streamVideoClient?.enableCallNotificationUpdates != true) return
+
         coroutineScope.launch {
             var latestRemoteParticipantCount = -1
 
@@ -434,34 +439,38 @@ public open class DefaultNotificationHandler(
                             onUpdate(it)
                         }
                     } else if (ringingState is RingingState.Active) {
+                        val currentRemoteParticipantCount = remoteParticipants.size
                         // If number of remote participants increased or decreased
-                        if (remoteParticipants.size != latestRemoteParticipantCount) {
-                            latestRemoteParticipantCount = remoteParticipants.size
+                        if (currentRemoteParticipantCount != latestRemoteParticipantCount) {
+                            val isSameCase = currentRemoteParticipantCount > 1 && latestRemoteParticipantCount > 1
+                            latestRemoteParticipantCount = currentRemoteParticipantCount
 
-                            val callDisplayName = if (remoteParticipants.isEmpty()) {
-                                // If no remote participants, get simple call notification title
-                                application.getString(
-                                    R.string.stream_video_ongoing_call_notification_title,
-                                )
-                            } else {
-                                if (remoteParticipants.size > 1) {
-                                    // If more than 1 remote participant, get group call notification title
+                            if (!isSameCase) {
+                                val callDisplayName = if (remoteParticipants.isEmpty()) {
+                                    // If no remote participants, get simple call notification title
                                     application.getString(
-                                        R.string.stream_video_ongoing_group_call_notification_title,
+                                        R.string.stream_video_ongoing_call_notification_title,
                                     )
                                 } else {
-                                    // If 1 remote participant, get the name of the remote participant
-                                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+                                    if (currentRemoteParticipantCount > 1) {
+                                        // If more than 1 remote participant, get group call notification title
+                                        application.getString(
+                                            R.string.stream_video_ongoing_group_call_notification_title,
+                                        )
+                                    } else {
+                                        // If 1 remote participant, get the name of the remote participant
+                                        remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+                                    }
                                 }
-                            }
 
-                            // Use latest call display name in notification
-                            getOngoingCallNotification(
-                                callId = StreamCallId.fromCallCid(call.cid),
-                                callDisplayName = callDisplayName,
-                                remoteParticipantCount = remoteParticipants.size,
-                            )?.let {
-                                onUpdate(it)
+                                // Use latest call display name in notification
+                                getOngoingCallNotification(
+                                    callId = StreamCallId.fromCallCid(call.cid),
+                                    callDisplayName = callDisplayName,
+                                    remoteParticipantCount = currentRemoteParticipantCount,
+                                )?.let {
+                                    onUpdate(it)
+                                }
                             }
                         }
                     }

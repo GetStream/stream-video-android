@@ -239,6 +239,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
+            enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
             testSfuAddress = localSfuAddress,
             sounds = sounds,
