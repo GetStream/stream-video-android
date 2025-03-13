@@ -44,14 +44,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot IncomingCallContentDetails Video composable`() {
         snapshot {
-            IncomingCallDetails(members = previewMemberListState)
+            IncomingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot IncomingCallContentDetails Audio composable`() {
         snapshot {
-            IncomingCallDetails(members = previewMemberListState)
+            IncomingCallDetails(participants = previewMemberListState)
         }
     }
 
@@ -71,7 +71,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 call = previewCall,
-                members = previewMemberListState.takeLast(1),
+                participants = previewMemberListState.takeLast(1),
                 isCameraEnabled = false,
                 onBackPressed = {},
             ) {}
@@ -83,7 +83,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             IncomingCallContent(
                 call = previewCall,
-                members = previewMemberListState,
+                participants = previewMemberListState,
                 isCameraEnabled = false,
                 onBackPressed = {},
             ) {}
@@ -102,14 +102,14 @@ internal class CallContentTest : BaseComposeTest() {
     @Test
     fun `snapshot OutgoingCallDetails Video composable`() {
         snapshot {
-            OutgoingCallDetails(members = previewMemberListState)
+            OutgoingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot OutgoingCallDetails Audio composable`() {
         snapshot {
-            OutgoingCallDetails(members = previewMemberListState)
+            OutgoingCallDetails(participants = previewMemberListState)
         }
     }
 
@@ -136,7 +136,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 call = previewCall,
-                members = previewMemberListState.take(1),
+                participants = previewMemberListState.take(1),
                 modifier = Modifier.fillMaxSize(),
                 onBackPressed = {},
                 onCallAction = {},
@@ -149,7 +149,7 @@ internal class CallContentTest : BaseComposeTest() {
         snapshot {
             OutgoingCallContent(
                 call = previewCall,
-                members = previewMemberListState,
+                participants = previewMemberListState,
                 onBackPressed = {},
             ) {}
         }

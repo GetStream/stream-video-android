@@ -79,7 +79,7 @@ public fun OutgoingCallContent(
     OutgoingCallContent(
         call = call,
         isVideoType = isVideoType,
-        members = remoteMembers,
+        participants = remoteMembers,
         modifier = modifier,
         isShowingHeader = isShowingHeader,
         backgroundContent = backgroundContent,
@@ -97,7 +97,7 @@ public fun OutgoingCallContent(
  * @param call The call contains states and will be rendered with participants.
  * @param isVideoType Represent the call type is a video or an audio.
  * @param modifier Modifier for styling.
- * @param members List of call members.
+ * @param participants List of call members.
  * @param isShowingHeader Weather or not the app bar will be shown.
  * @param headerContent Content shown for the call header.
  * @param detailsContent Content shown for call details, such as call participant information.
@@ -110,7 +110,7 @@ public fun OutgoingCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean = true,
-    members: List<MemberState>,
+    participants: List<MemberState>,
     isShowingHeader: Boolean = true,
     backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
@@ -144,17 +144,17 @@ public fun OutgoingCallContent(
                 headerContent?.invoke(this)
             }
 
-            val topPadding = if (members.size == 1 || isVideoType) {
+            val topPadding = if (participants.size == 1 || isVideoType) {
                 VideoTheme.dimens.spacingL
             } else {
                 VideoTheme.dimens.spacingM
             }
 
-            detailsContent?.invoke(this, members, topPadding) ?: OutgoingCallDetails(
+            detailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
-                members = members,
+                participants = participants,
                 isVideoType = isVideoType,
             )
         }
@@ -179,7 +179,7 @@ private fun OutgoingCallVideoPreview() {
         OutgoingCallContent(
             call = previewCall,
             isVideoType = true,
-            members = previewMemberListState,
+            participants = previewMemberListState,
             onBackPressed = {},
         ) {}
     }
@@ -193,7 +193,7 @@ private fun OutgoingCallAudioPreview() {
         OutgoingCallContent(
             call = previewCall,
             isVideoType = false,
-            members = previewMemberListState,
+            participants = previewMemberListState,
             onBackPressed = {},
         ) {}
     }

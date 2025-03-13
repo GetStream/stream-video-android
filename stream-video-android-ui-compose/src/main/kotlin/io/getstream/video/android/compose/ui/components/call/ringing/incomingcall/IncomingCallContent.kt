@@ -87,7 +87,7 @@ public fun IncomingCallContent(
     IncomingCallContent(
         call = call,
         isVideoType = isVideoType,
-        members = remoteMembers,
+        participants = remoteMembers,
         isCameraEnabled = isCameraEnabled,
         isShowingHeader = isShowingHeader,
         modifier = modifier,
@@ -106,7 +106,7 @@ public fun IncomingCallContent(
  *
  * @param call The call contains states and will be rendered with participants.
  * @param isVideoType The type of call, Audio or Video.
- * @param members List of call members.
+ * @param participants List of call members.
  * @param isCameraEnabled Whether the video should be enabled when entering the call or not.
  * @param modifier Modifier for styling.
  * @param isShowingHeader If the app bar header is shown or not.
@@ -119,7 +119,7 @@ public fun IncomingCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isVideoType: Boolean = true,
-    members: List<MemberState>,
+    participants: List<MemberState>,
     isCameraEnabled: Boolean,
     isShowingHeader: Boolean = true,
     backgroundContent: (@Composable BoxScope.() -> Unit)? = null,
@@ -143,17 +143,17 @@ public fun IncomingCallContent(
                 headerContent?.invoke(this)
             }
 
-            val topPadding = if (members.size == 1) {
+            val topPadding = if (participants.size == 1) {
                 VideoTheme.dimens.spacingL
             } else {
                 VideoTheme.dimens.spacingM
             }
-            detailsContent?.invoke(this, members, topPadding) ?: IncomingCallDetails(
+            detailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
                 isVideoType = isVideoType,
-                members = members,
+                participants = participants,
             )
         }
 
@@ -179,7 +179,7 @@ private fun IncomingCallPreview1() {
         ) {
             IncomingCallContent(
                 call = previewCall,
-                members = previewMemberListState.takeLast(1),
+                participants = previewMemberListState.takeLast(1),
                 isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {},
@@ -199,7 +199,7 @@ private fun IncomingCallPreview2() {
         ) {
             IncomingCallContent(
                 call = previewCall,
-                members = previewMemberListState,
+                participants = previewMemberListState,
                 isVideoType = true,
                 isCameraEnabled = false,
                 onBackPressed = {},
