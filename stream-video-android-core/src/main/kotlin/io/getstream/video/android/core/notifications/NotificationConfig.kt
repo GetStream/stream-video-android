@@ -33,4 +33,8 @@ public data class NotificationConfig(
      * NOTE: This setting has only an effect if you don't set a custom [NotificationHandler]!
      */
     val hideRingingNotificationInForeground: Boolean = false,
+    /**
+     * If `true`, call notifications will receive subsequent updates, based on the number of participants and other data.
+     */
+    val enableCallNotificationUpdates: Boolean = true,
 )

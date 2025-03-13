@@ -8,7 +8,7 @@
 -keep class kotlin.reflect.jvm.internal.* { *; }
 
 ## Moshi model classes
--keep class org.openapitools.client.** { *; }
+-keep class io.getstream.android.video.generated.** { *; }
 
 ## Kotlin serialized classes
 -keep @kotlinx.serialization.Serializable class * {*;}

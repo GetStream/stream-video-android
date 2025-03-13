@@ -109,7 +109,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     @Deprecated(
-        "Use 'callServiceConfigRegistry' instead",
+        "This property is ignored. Set runCallServiceInForeground in the callServiceConfigRegistry parameter instead.",
+        replaceWith = ReplaceWith("callServiceConfigRegistry"),
+        level = DeprecationLevel.WARNING,
+    )
+    private val runForegroundServiceForCalls: Boolean = true,
+    @Deprecated(
+        "Use callServiceConfigRegistry instead",
         replaceWith = ReplaceWith("callServiceConfigRegistry"),
         level = DeprecationLevel.WARNING,
     )
@@ -119,6 +125,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
+    @Deprecated(
+        message = "This property is ignored. Set audioUsage in the callServiceConfigRegistry parameter instead.",
+        level = DeprecationLevel.WARNING,
+    )
+    private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
@@ -239,6 +250,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
+            enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
             testSfuAddress = localSfuAddress,
             sounds = sounds,
