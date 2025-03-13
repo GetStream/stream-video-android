@@ -74,8 +74,8 @@ import io.getstream.video.android.mock.previewCall
  * @param detailsContent override the details content (middle part of the screen)
  */
 @Deprecated(
-    message = "This version of AudioCallContent is deprecated. Use the newer overload.",
-    replaceWith = ReplaceWith("AudioCallContent"),
+    message = "AudioCallContent is deprecated. Use the new AudioOnlyCallContent instead.",
+    replaceWith = ReplaceWith("AudioOnlyCallContent"),
 )
 @Composable
 public fun AudioCallContent(
@@ -102,7 +102,6 @@ public fun AudioCallContent(
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
-    deprecatedMarker: Boolean = true,
 ) {
     val duration by call.state.duration.collectAsStateWithLifecycle()
     val durationText = duration?.toString() ?: durationPlaceholder
@@ -146,7 +145,7 @@ public fun AudioCallContent(
 }
 
 /**
- * Represents the UI of an active audio only call.
+ * Represents the UI of an active audio-only call. By default, it shows the current participants that are in the call.
  *
  * @param modifier Modifier for styling.
  * @param call The call to be rendered.
@@ -161,7 +160,7 @@ public fun AudioCallContent(
  * @param onBackPressed Handler used when the user taps on the back button.
  */
 @Composable
-public fun AudioCallContent(
+public fun AudioOnlyCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isMicrophoneEnabled: Boolean,
@@ -200,7 +199,7 @@ public fun AudioCallContent(
         Column {
             if (isShowingHeader) headerContent?.invoke(this)
 
-            detailsContent?.invoke(this, remoteParticipants, VideoTheme.dimens.spacingM) ?: AudioCallDetails(
+            detailsContent?.invoke(this, remoteParticipants, VideoTheme.dimens.spacingM) ?: AudioOnlyCallDetails(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = VideoTheme.dimens.spacingM),
@@ -209,7 +208,7 @@ public fun AudioCallContent(
             )
         }
 
-        controlsContent?.invoke(this) ?: AudioCallControls(
+        controlsContent?.invoke(this) ?: AudioOnlyCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.componentHeightM),
@@ -220,7 +219,7 @@ public fun AudioCallContent(
 }
 
 @Composable
-public fun AudioCallDetails(
+public fun AudioOnlyCallDetails(
     modifier: Modifier = Modifier,
     duration: String,
     members: List<MemberState>? = null,
@@ -241,7 +240,7 @@ public fun AudioCallDetails(
 }
 
 @Composable
-public fun AudioCallControls(
+public fun AudioOnlyCallControls(
     modifier: Modifier,
     isMicrophoneEnabled: Boolean,
     onCallAction: (CallAction) -> Unit,
