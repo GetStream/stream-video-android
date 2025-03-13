@@ -145,7 +145,7 @@ public fun AudioCallContent(
 }
 
 /**
- * Represents the UI of an active audio-only call. By default, it shows the current participants that are in the call.
+ * Represents the UI for an active audio-only call. By default, it shows the current participants that are in the call.
  *
  * @param modifier Modifier for styling.
  * @param call The call to be rendered.
@@ -218,27 +218,39 @@ public fun AudioOnlyCallContent(
     }
 }
 
+/**
+ * Component that displays details for an active audio-only call.
+ *
+ * @param modifier Modifier for styling.
+ * @param duration The current duration of the call.
+ * @param participants A list of current call participants to be displayed.
+ */
 @Composable
 public fun AudioOnlyCallDetails(
     modifier: Modifier = Modifier,
     duration: String,
-    members: List<MemberState>? = null,
-    participants: List<ParticipantState>? = null,
+    participants: List<ParticipantState>,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        ParticipantAvatars(members = members, participants = participants)
+        ParticipantAvatars(participants = participants)
 
         Spacer(modifier = Modifier.height(32.dp))
 
         ParticipantInformation(
             isVideoType = false,
             callStatus = CallStatus.Calling(duration),
-            members = members,
             participants = participants,
         )
     }
 }
 
+/**
+ * Component that displays the call controls for an active audio-only call.
+ *
+ * @param modifier Modifier for styling.
+ * @param isMicrophoneEnabled Weather or not the microphone icon will show the mic as enabled or not.
+ * @param onCallAction Handler used when the user triggers a [CallAction].
+ */
 @Composable
 public fun AudioOnlyCallControls(
     modifier: Modifier,
@@ -273,6 +285,19 @@ private fun AudioCallContentPreview() {
             call = previewCall,
             isMicrophoneEnabled = false,
             durationPlaceholder = "11:45",
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun AudioOnlyCallContentPreview() {
+    val context = LocalContext.current
+    StreamPreviewDataUtils.initializeStreamVideo(context)
+    VideoTheme {
+        AudioOnlyCallContent(
+            call = previewCall,
+            isMicrophoneEnabled = false,
         )
     }
 }
