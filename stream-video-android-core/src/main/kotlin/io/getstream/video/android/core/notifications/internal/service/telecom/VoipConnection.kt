@@ -41,7 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class VoipConnection(
+internal class VoipConnection(
     private val context: Context,
     private val callId: StreamCallId,
     private val isIncoming: Boolean,
