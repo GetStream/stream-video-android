@@ -22,6 +22,7 @@ import android.content.Intent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.merge
@@ -38,7 +39,9 @@ class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastR
         logger.d { "Init ringing call value: " + streamVideo?.state?.ringingCall?.value?.cid }
 
         streamVideo?.let { streamVideo ->
-            call = streamVideo.state.activeCall.value ?: streamVideo.state.ringingCall.value
+            call = safeCallWithDefault( null) {
+                streamVideo.state.activeCall.value ?: streamVideo.state.ringingCall.value
+            }
 
             if (call == null) {
                 coroutineScope.launch {
