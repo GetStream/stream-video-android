@@ -10086,28 +10086,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public static final fun toStreamAudioDevice (Landroid/telecom/CallEndpoint;)Lio/getstream/video/android/core/audio/StreamAudioDevice;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/service/telecom/VoipConnection : android/telecom/Connection {
-	public static final field Companion Lio/getstream/video/android/core/notifications/internal/service/telecom/VoipConnection$Companion;
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Z)V
-	public fun onAbort ()V
-	public fun onAnswer ()V
-	public fun onAvailableCallEndpointsChanged (Ljava/util/List;)V
-	public fun onCallAudioStateChanged (Landroid/telecom/CallAudioState;)V
-	public fun onCallEndpointChanged (Landroid/telecom/CallEndpoint;)V
-	public fun onCallEvent (Ljava/lang/String;Landroid/os/Bundle;)V
-	public fun onDisconnect ()V
-	public fun onHold ()V
-	public fun onReject ()V
-	public fun onUnhold ()V
-	public final fun selectEndpoint (Landroid/telecom/CallEndpoint;)V
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/telecom/VoipConnection$Companion {
-	public final fun getCurrentConnection ()Lio/getstream/video/android/core/notifications/internal/service/telecom/VoipConnection;
-	public final fun setCurrentConnection (Lio/getstream/video/android/core/notifications/internal/service/telecom/VoipConnection;)V
-	public final fun setDeviceListener (Lkotlin/jvm/functions/Function2;)Lio/getstream/video/android/core/audio/AudioHandler;
-}
-
 public final class io/getstream/video/android/core/permission/PermissionRequest {
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/android/video/generated/models/PermissionRequestEvent;)V
 	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
