@@ -103,8 +103,12 @@ public open class DefaultNotificationHandler(
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        val configRegistry = streamVideo?.callServiceConfigRegistry
+        val type = callId.type
+        val callConfig = configRegistry?.get(type)
+
         // 1) Check if Telecom-based calls are supported/enabled
-        if (isTelecomIntegrationAvailable(application)) {
+        if (callConfig?.enableTelecomIntegration == true && isTelecomIntegrationAvailable(application)) {
             try {
                 // Invoke Telecom
                 val telecomManager = application.getSystemService(

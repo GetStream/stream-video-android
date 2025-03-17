@@ -157,6 +157,7 @@ class CallServiceConfigRegistry {
         val existingConfig = configs[callType] ?: CallServiceConfig()
         register(callType) {
             setServiceClass(existingConfig.serviceClass)
+            enableTelecomIntegration(existingConfig.enableTelecomIntegration)
             setRunCallServiceInForeground(existingConfig.runCallServiceInForeground)
             setAudioUsage(existingConfig.audioUsage)
             updater()

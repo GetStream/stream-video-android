@@ -10044,6 +10044,7 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder {
 	public fun <init> ()V
 	public final fun build ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public final fun enableTelecomIntegration (Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setAudioUsage (I)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setRunCallServiceInForeground (Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setServiceClass (Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
