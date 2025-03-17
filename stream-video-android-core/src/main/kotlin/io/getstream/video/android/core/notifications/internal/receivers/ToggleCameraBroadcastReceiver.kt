@@ -39,7 +39,7 @@ class ToggleCameraBroadcastReceiver(coroutineScope: CoroutineScope) : BroadcastR
         logger.d { "Init ringing call value: " + streamVideo?.state?.ringingCall?.value?.cid }
 
         streamVideo?.let { streamVideo ->
-            call = safeCallWithDefault( null) {
+            call = safeCallWithDefault(null) {
                 streamVideo.state.activeCall.value ?: streamVideo.state.ringingCall.value
             }
 
