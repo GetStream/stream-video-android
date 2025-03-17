@@ -401,7 +401,7 @@ private fun CallActualContent(
             text = stringResource(id = R.string.scan_qr_code),
             icon = Icons.Default.QrCodeScanner,
             onClick = {
-                promptEnablePhoneAccount(context)
+                gotoQR()
             },
         )
     }
