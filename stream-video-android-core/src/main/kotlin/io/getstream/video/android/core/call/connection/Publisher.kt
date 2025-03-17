@@ -31,6 +31,7 @@ import io.getstream.video.android.core.call.connection.utils.toVideoDimension
 import io.getstream.video.android.core.call.connection.utils.toVideoLayers
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -81,8 +82,8 @@ internal class Publisher(
     onIceCandidate,
     maxBitRate,
 ) {
-    private val defaultScreenShareFormat = CaptureFormat(1080, 720, 24, 30)
-    private val defaultFormat = CaptureFormat(1080, 720, 24, 30)
+    private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
+    private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
     private var isIceRestarting = false
 
     override fun onRenegotiationNeeded() {
@@ -155,45 +156,64 @@ internal class Publisher(
      * Starts publishing the given track.
      */
     suspend fun publishStream(
-        track: MediaStreamTrack,
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
-    ) {
-        logger.i { "Publishing track: $trackType" }
-        if (track.state() == MediaStreamTrack.State.ENDED) {
-            logger.e { "Can't publish a track that has ended already." }
-            return
-        }
+    ): MediaStreamTrack? {
+        logger.i { "[trackPublishing] Publishing track: $trackType" }
 
         if (publishOptions.none { it.track_type == trackType }) {
-            logger.e { "No publish options found for $trackType" }
-            return
+            logger.e { "[trackPublishing] No publish options found for $trackType" }
+            return null
         }
-
-        // enable the track if disabled
-        if (!track.enabled()) track.setEnabled(true)
 
         for (publishOption in publishOptions) {
             if (publishOption.track_type != trackType) continue
 
-            val trackToPublish = newTrackFromSource(publishOption.track_type)
             val transceiver = transceiverCache.get(publishOption)
             if (transceiver != null) {
                 try {
-                    transceiver.sender?.setTrack(trackToPublish, true)
+                    val sender = transceiver.sender
+                    val senderTrack = sender.track()
+                    if (senderTrack != null && !senderTrack.isDisposed) {
+                        logger.d { "[trackPublishing] Track already exists." }
+                        senderTrack.trySetEnabled(true)
+                        logTrack(senderTrack)
+                        return senderTrack
+                    } else {
+                        logger.d { "[trackPublishing] Track is disposed, creating new one." }
+                        val newTrack = newTrackFromSource(publishOption.track_type)
+                        sender.setTrack(newTrack, true)
+                        return newTrack
+                    }
                 } catch (e: Exception) {
                     // Fallback if anything happens with the sender
                     logger.w { "Failed to set track for ${publishOption.track_type}, creating new transceiver" }
                     transceiverCache.remove(publishOption)
-                    addTransceiver(captureFormat, trackToPublish, publishOption)
+                    val fallbackTrack = newTrackFromSource(publishOption.track_type)
+                    addTransceiver(captureFormat, fallbackTrack, publishOption)
+                    return fallbackTrack
                 }
             } else {
-                addTransceiver(captureFormat, trackToPublish, publishOption)
+                logger.d {
+                    "[trackPublishing] No transceiver found for $trackType, creating new track and transceiver."
+                }
+                // This is the first time we are adding the transceiver.
+                val newTrack = newTrackFromSource(publishOption.track_type)
+                addTransceiver(captureFormat, newTrack, publishOption)
+                return newTrack
             }
+        }
+        return null
+    }
+
+    private fun logTrack(senderTrack: MediaStreamTrack?) {
+        logger.d {
+            "[trackPublishing] Track: ${senderTrack?.enabled()}:${senderTrack?.state()}:${senderTrack?.id()}"
         }
     }
 
-    private fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
+    @VisibleForTesting
+    public fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
         return when (trackType) {
             TrackType.TRACK_TYPE_AUDIO -> {
                 val id = UUID.randomUUID().toString()
@@ -265,17 +285,14 @@ internal class Publisher(
         }
     }
 
-    suspend fun unpublishStream(trackType: TrackType, stopTrack: Boolean) {
-        for (option in publishOptions) {
-            if (option.track_type != trackType) continue
-            val transceiver = transceiverCache.get(option)
-            if (transceiver?.sender?.track()?.isDisposed == false) continue
-            try {
-                transceiver?.stop()
-                transceiver?.dispose()
-                transceiverCache.remove(option)
-            } catch (e: Exception) {
-                logger.w { "Transceiver for option ${option.id}-${option.track_type}" }
+    suspend fun unpublishStream(trackType: TrackType) {
+        transceiverCache.getByTrackType(trackType).forEach { transceiver ->
+            logger.d { "[trackPublishing] Unpublishing track: $trackType" }
+            val sender = transceiver.sender
+            val senderTrack = sender.track()
+            senderTrack?.let { track ->
+                track.trySetEnabled(false)
+                logTrack(track)
             }
         }
     }
@@ -332,10 +349,9 @@ internal class Publisher(
             "Update publish quality ($publishOptionId-$trackType-${videoSender.codec?.name}), requested layers by SFU: $enabledLayers"
         }
 
-        val sender =
-            transceiverCache.get(videoSender.toPublishOption())?.sender?.takeUnless {
-                it.track()?.isDisposed == true
-            }
+        val sender = transceiverCache.get(videoSender.toPublishOption())?.sender?.takeUnless {
+            it.track()?.isDisposed == true
+        }
 
         if (sender == null) {
             logger.w { "Update publish quality, no video sender found." }
@@ -360,6 +376,9 @@ internal class Publisher(
 
         sender.parameters = params
         logger.i { "Update publish quality, enabled rids: $activeLayers" }
+        activeLayers.forEach { layer ->
+            logger.i { "Update publish quality, enabled rid: ${layer.rid}" }
+        }
     }
 
     internal fun updateEncodings(

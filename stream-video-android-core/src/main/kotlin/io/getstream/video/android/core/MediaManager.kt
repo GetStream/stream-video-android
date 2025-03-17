@@ -367,11 +367,17 @@ class MicrophoneManager(
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
-        enforceSetup {
-            if (fromUser) {
-                _status.value = DeviceStatus.Enabled
+        val canUserSendAudio = with(mediaManager.call.state) {
+            ownCapabilities.value.contains(OwnCapability.SendAudio)
+        }
+
+        if (canUserSendAudio) {
+            enforceSetup {
+                if (fromUser) {
+                    _status.value = DeviceStatus.Enabled
+                }
+                mediaManager.audioTrack.trySetEnabled(true)
             }
-            mediaManager.audioTrack.trySetEnabled(true)
         }
     }
 

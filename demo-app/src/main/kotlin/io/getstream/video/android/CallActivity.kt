@@ -23,12 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -123,6 +125,18 @@ class CallActivity : ComposeStreamCallActivity() {
                     }
                 }
             }
+        }
+
+        @Composable
+        override fun StreamCallActivity.AudioCallContent(call: Call) {
+            val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+
+            AudioOnlyCallContent(
+                call = call,
+                isMicrophoneEnabled = micEnabled,
+                onCallAction = { onCallAction(call, it) },
+                onBackPressed = { onBackPressed(call) },
+            )
         }
 
         private fun StreamCallActivity.goBackToMainScreen() {

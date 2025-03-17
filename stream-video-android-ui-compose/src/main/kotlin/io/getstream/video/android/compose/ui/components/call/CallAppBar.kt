@@ -31,8 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -158,12 +156,6 @@ private fun CalLCenterContent(
                             shape = VideoTheme.shapes.circle,
                         )
                         .border(2.dp, VideoTheme.colors.basePrimary, VideoTheme.shapes.circle),
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.VerifiedUser,
-                    tint = VideoTheme.colors.alertSuccess,
-                    contentDescription = "call duration",
                 )
             }
             Text(
