@@ -468,8 +468,8 @@ class MicrophoneManager(
             if (!::audioHandler.isInitialized) { // This check is atomic
                 audioHandler = VoipConnection.setDeviceListener { devices, selected ->
                     logger.i {
-                    "[setup] #telecom; listenForDevices. Selected: ${selected?.name}, available: ${devices.map { it.name }}"
-                }
+                        "[setup] #telecom; listenForDevices. Selected: ${selected?.name}, available: ${devices.map { it.name }}"
+                    }
 
                     _devices.value = devices
                     _selectedDevice.value = selected
