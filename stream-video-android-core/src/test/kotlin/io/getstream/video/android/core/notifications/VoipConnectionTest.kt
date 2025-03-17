@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications
 
 import android.content.Context
@@ -6,7 +22,6 @@ import android.telecom.CallAudioState
 import android.telecom.DisconnectCause
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.service.telecom.DeviceListener
@@ -20,7 +35,6 @@ import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.unmockkAll
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -62,7 +76,9 @@ class VoipConnectionTest {
 
         // Optional: if VoipConnection or onAnswer uses DefaultStreamIntentResolver internally, mock that
         mockkConstructor(DefaultStreamIntentResolver::class)
-        every { anyConstructed<DefaultStreamIntentResolver>().searchAcceptCallPendingIntent(any(), any()) } returns mockk {
+        every {
+            anyConstructed<DefaultStreamIntentResolver>().searchAcceptCallPendingIntent(any(), any())
+        } returns mockk {
             justRun { send() } // no-op
         }
 
@@ -87,7 +103,7 @@ class VoipConnectionTest {
         val connection = VoipConnection(
             context,
             StreamCallId("typeA", "id123"),
-            isIncoming = false
+            isIncoming = false,
         )
 
         connection.onDisconnect()
@@ -103,7 +119,7 @@ class VoipConnectionTest {
         val connection = VoipConnection(
             context,
             StreamCallId("typeB", "id999"),
-            isIncoming = false
+            isIncoming = false,
         )
 
         connection.onAbort()
@@ -121,7 +137,7 @@ class VoipConnectionTest {
         val connection = VoipConnection(
             context,
             StreamCallId("default", "123"),
-            isIncoming = true
+            isIncoming = true,
         )
 
         connection.onHold()
@@ -137,7 +153,7 @@ class VoipConnectionTest {
     fun `onCallAudioStateChanged - logs new mute state`() = runTest {
         val connection = VoipConnection(context, StreamCallId("t", "id"), isIncoming = false)
         // Just verify we can call onCallAudioStateChanged w/o exception
-        val audioState = CallAudioState( true, CallAudioState.ROUTE_SPEAKER, 0)
+        val audioState = CallAudioState(true, CallAudioState.ROUTE_SPEAKER, 0)
         connection.onCallAudioStateChanged(audioState)
 
         // Because it's just logging, no real effect on the Connection state
