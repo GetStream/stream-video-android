@@ -124,8 +124,9 @@ internal class VoipConnection(
         serviceScope.launch {
             val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return@launch
             val call = streamVideo.call(callId.type, callId.id)
-            call.reject()
             call.leave()
+            setDisconnected(DisconnectCause(DisconnectCause.OTHER))
+            destroy()
         }
         // Mute / pause your video or audio if needed
     }
@@ -133,7 +134,6 @@ internal class VoipConnection(
     override fun onUnhold() {
         super.onUnhold()
         logger.i { "[onUnhold]" }
-        setActive()
         // There is no unhold logic.
     }
 
