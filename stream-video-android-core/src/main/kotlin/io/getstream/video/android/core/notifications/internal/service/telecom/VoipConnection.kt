@@ -190,9 +190,8 @@ class VoipConnection(
             call.subscribe { event ->
                 when (event) {
                     is CallAcceptedEvent -> {
-                        // Possibly setActive() if the user accepted on another device
                         logger.i { "call accepted: $event" }
-                        setActive()
+                        // Not setting to `Active` this will happen in onAnswer
                     }
                     is CallRejectedEvent -> {
                         logger.i { "call rejected: $event" }
