@@ -107,7 +107,11 @@ public class StreamPeerConnectionFactory(
      * Default video decoder factory used to unpack video from the remote tracks.
      */
     private val videoDecoderFactory by lazy {
-        DefaultBlacklistedVideoDecoderFactory(eglBase.eglBaseContext)
+        DefaultBlacklistedVideoDecoderFactory(eglBase.eglBaseContext) { decoder ->
+            decoder?.implementationName?.lowercase()?.let {
+                it.contains("mediatek") || it.contains("mtk") && it.contains("vp9")
+            } ?: false
+        }
     }
 
     /**

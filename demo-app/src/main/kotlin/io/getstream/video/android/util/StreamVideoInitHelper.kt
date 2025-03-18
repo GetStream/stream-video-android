@@ -191,9 +191,11 @@ object StreamVideoInitHelper {
     ): StreamVideo {
         return StreamVideoBuilder(
             context = context,
-            apiKey = apiKey,
-            user = user,
-            token = token,
+            apiKey = "8d8j4ujbd3pj",
+            user = User(
+                id = "liviu",
+            ),
+            token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGl2aXUifQ.MOIrZ6DARGNwRXGD3e5r5B2R7_B9MQJrbnxfih6YPlA",
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             notificationConfig = NotificationConfig(

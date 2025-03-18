@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.tutorial.livestream
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,14 +33,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.model.QueriedCalls
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun LiveMain(
@@ -54,7 +63,10 @@ fun LiveMain(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var callId by remember { mutableStateOf(TextFieldValue("dE8AsD5Qxqrt")) }
+            var callId by remember { mutableStateOf(TextFieldValue("room188")) }
+            val scope = rememberCoroutineScope()
+            val context = LocalContext.current
+
             StreamTextField(
                 modifier = Modifier.width(300.dp),
                 value = callId,
@@ -97,6 +109,57 @@ fun LiveMain(
             ) {
                 Text(text = "guest", color = VideoTheme.colors.basePrimary)
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(64.dp),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = VideoTheme.colors.brandPrimary,
+                    backgroundColor = VideoTheme.colors.brandPrimary,
+                ),
+                onClick = {
+                    scope.launch {
+                        val cid = withContext(Dispatchers.IO) {
+                            getOngoingLives(StreamVideo.instance())
+                        }
+                        callId = callId.copy(text = cid)
+
+                        val toastMessage = if (cid.isEmpty()) {
+                            "No ongoing livestreams"
+                        } else {
+                            "Found $cid"
+                        }
+                        Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
+                    }
+                },
+            ) {
+                Text(text = "query ongoing live", color = VideoTheme.colors.basePrimary)
+            }
         }
     }
+}
+
+private suspend fun getOngoingLives(client: StreamVideo): String {
+    val filters = mutableMapOf(
+        "type" to "livestream",
+        "ongoing" to true,
+//        "ended_at" to mutableMapOf("\$gt" to "2025-03-20T07:34:57.022975Z"),
+    )
+    var returnedId = ""
+
+    client.queryCalls(filters).let { result ->
+        result
+            .onSuccess { calls: QueriedCalls ->
+                Log.d("LivestreamDebug", "Query success: $calls")
+
+//                returnedCid = calls.calls.fold("") { acc, callData -> acc + callData.call.id }
+                returnedId = calls.calls.firstOrNull()?.call?.id ?: ""
+            }
+            .onError { error -> Log.d("LivestreamDebug", "Query error: $error") }
+    }
+
+    return returnedId
 }

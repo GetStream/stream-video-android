@@ -31,7 +31,6 @@ import androidx.navigation.navArgument
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.GEO
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
@@ -47,14 +46,14 @@ fun LiveNavHost(
     val context = LocalContext.current
 //    val userId = "Darth_Krayt"
 //    val userId = "liviu-guest-1"
-    val userId = "liviu-guest-2"
-    val userToken = StreamVideo.devToken(userId)
+    val userId = "liviu"
+    val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGl2aXUifQ.MOIrZ6DARGNwRXGD3e5r5B2R7_B9MQJrbnxfih6YPlA"
 
     // step1 - create a user.
     val user = User(
         id = userId, // any string
-        name = userId, // name and image are used in the UI
-        role = "admin",
+        name = "Liviu", // name and image are used in the UI
+        role = "user",
     )
 
     val callServiceConfigRegistry = CallServiceConfigRegistry()
@@ -63,7 +62,7 @@ fun LiveNavHost(
     // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
     val client = StreamVideoBuilder(
         context = context,
-        apiKey = "k436tyde94hj", // demo API key
+        apiKey = "8d8j4ujbd3pj", // demo API key
         geo = GEO.GlobalEdgeNetwork,
         user = user,
         token = userToken,
