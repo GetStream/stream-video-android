@@ -27,6 +27,7 @@ import android.os.PowerManager.THERMAL_STATUS_SEVERE
 import android.os.PowerManager.THERMAL_STATUS_SHUTDOWN
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
@@ -562,26 +563,33 @@ public class RtcSession internal constructor(
         listenToSfuSocket()
     }
 
-    private suspend fun listenToMediaChanges() {
+    private fun listenToMediaChanges() {
         coroutineScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
-                // set the mute /unumute status
-                setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_VIDEO)
+                val canUserSendVideo = call.state.ownCapabilities.value.contains(
+                    OwnCapability.SendVideo,
+                )
 
                 if (it == DeviceStatus.Enabled) {
-                    val track = publisher?.publishStream(
-                        TrackType.TRACK_TYPE_VIDEO,
-                        call.mediaManager.camera.resolution.value,
-                    )
-                    setLocalTrack(
-                        TrackType.TRACK_TYPE_VIDEO,
-                        VideoTrack(
-                            streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
-                            video = track as org.webrtc.VideoTrack,
-                        ),
-                    )
+                    if (canUserSendVideo) {
+                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
+
+                        val track = publisher?.publishStream(
+                            TrackType.TRACK_TYPE_VIDEO,
+                            call.mediaManager.camera.resolution.value,
+                        )
+
+                        setLocalTrack(
+                            TrackType.TRACK_TYPE_VIDEO,
+                            VideoTrack(
+                                streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
+                                video = track as org.webrtc.VideoTrack,
+                            ),
+                        )
+                    }
                 } else {
+                    setMuteState(isEnabled = false, TrackType.TRACK_TYPE_VIDEO)
                     publisher?.unpublishStream(TrackType.TRACK_TYPE_VIDEO)
                 }
             }
@@ -589,21 +597,28 @@ public class RtcSession internal constructor(
 
         coroutineScope.launch {
             call.mediaManager.microphone.status.collectLatest {
-                // set the mute /unumute status
-                setMuteState(isEnabled = it == DeviceStatus.Enabled, TrackType.TRACK_TYPE_AUDIO)
+                val canUserSendAudio = call.state.ownCapabilities.value.contains(
+                    OwnCapability.SendAudio,
+                )
 
                 if (it == DeviceStatus.Enabled) {
-                    val track = publisher?.publishStream(
-                        TrackType.TRACK_TYPE_AUDIO,
-                    )
-                    setLocalTrack(
-                        TrackType.TRACK_TYPE_AUDIO,
-                        AudioTrack(
-                            streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
-                            audio = track as org.webrtc.AudioTrack,
-                        ),
-                    )
+                    if (canUserSendAudio) {
+                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
+
+                        val track = publisher?.publishStream(
+                            TrackType.TRACK_TYPE_AUDIO,
+                        )
+
+                        setLocalTrack(
+                            TrackType.TRACK_TYPE_AUDIO,
+                            AudioTrack(
+                                streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                                audio = track as org.webrtc.AudioTrack,
+                            ),
+                        )
+                    }
                 } else {
+                    setMuteState(isEnabled = false, TrackType.TRACK_TYPE_AUDIO)
                     publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
                 }
             }
