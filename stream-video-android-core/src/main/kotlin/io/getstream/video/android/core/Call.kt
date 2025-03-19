@@ -803,8 +803,15 @@ public class Call(
     suspend fun end(): Result<Unit> {
         // end the call for everyone
         val result = clientImpl.endCall(type, id)
-        // cleanup
+
+        result.onSuccess {
+            logger.d { "[end] Call ended successfully" }
+        }.onError {
+            logger.d { "[end] Call end failure: ${it.message}" }
+        }
+
         leave()
+
         return result
     }
 
