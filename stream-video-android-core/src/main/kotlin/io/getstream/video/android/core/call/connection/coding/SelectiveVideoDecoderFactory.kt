@@ -23,7 +23,7 @@ import org.webrtc.VideoDecoder
 import org.webrtc.VideoDecoderFactory
 import org.webrtc.WrappedVideoDecoderFactory
 
-open class SelectiveVideoDecoderFactory(
+internal class SelectiveVideoDecoderFactory(
     sharedContext: EglBase.Context?,
     private var forceSWCodec: Boolean = false,
     private var forceSWCodecs: List<String> = listOf("VP9", "AV1"),
