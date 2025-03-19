@@ -29,7 +29,6 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioHandler
@@ -367,17 +366,11 @@ class MicrophoneManager(
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
-        val canUserSendAudio = with(mediaManager.call.state) {
-            ownCapabilities.value.contains(OwnCapability.SendAudio)
-        }
-
-        if (canUserSendAudio) {
-            enforceSetup {
-                if (fromUser) {
-                    _status.value = DeviceStatus.Enabled
-                }
-                mediaManager.audioTrack.trySetEnabled(true)
+        enforceSetup {
+            if (fromUser) {
+                _status.value = DeviceStatus.Enabled
             }
+            mediaManager.audioTrack.trySetEnabled(true)
         }
     }
 
@@ -562,21 +555,15 @@ public class CameraManager(
     }
 
     internal fun enable(fromUser: Boolean = true) {
-        val (isCallVideoEnabled, canUserSendVideo) = with(mediaManager.call.state) {
-            (settings.value?.video?.enabled == true) to ownCapabilities.value.contains(OwnCapability.SendVideo)
+        setup()
+        // 1. update our local state
+        // 2. update the track enabled status
+        // 3. Rtc listens and sends the update mute state request
+        if (fromUser) {
+            _status.value = DeviceStatus.Enabled
         }
-
-        if (isCallVideoEnabled && canUserSendVideo) {
-            setup()
-            // 1. update our local state
-            // 2. update the track enabled status
-            // 3. Rtc listens and sends the update mute state request
-            if (fromUser) {
-                _status.value = DeviceStatus.Enabled
-            }
-            mediaManager.videoTrack.trySetEnabled(true)
-            startCapture()
-        }
+        mediaManager.videoTrack.trySetEnabled(true)
+        startCapture()
     }
 
     fun pause(fromUser: Boolean = true) {
