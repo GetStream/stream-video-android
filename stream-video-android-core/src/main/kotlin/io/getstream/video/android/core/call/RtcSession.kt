@@ -626,23 +626,28 @@ public class RtcSession internal constructor(
 
         coroutineScope.launch {
             call.mediaManager.screenShare.status.collectLatest {
-                // set the mute /unumute status
-                setMuteState(
-                    isEnabled = it == DeviceStatus.Enabled,
-                    TrackType.TRACK_TYPE_SCREEN_SHARE,
+                val canUserShareScreen = call.state.ownCapabilities.value.contains(
+                    OwnCapability.Screenshare,
                 )
+
                 if (it == DeviceStatus.Enabled) {
-                    val track = publisher?.publishStream(
-                        TrackType.TRACK_TYPE_SCREEN_SHARE,
-                    )
-                    setLocalTrack(
-                        TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        VideoTrack(
-                            streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
-                            video = track as org.webrtc.VideoTrack,
-                        ),
-                    )
+                    if (canUserShareScreen) {
+                        setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
+
+                        val track = publisher?.publishStream(
+                            TrackType.TRACK_TYPE_SCREEN_SHARE,
+                        )
+
+                        setLocalTrack(
+                            TrackType.TRACK_TYPE_SCREEN_SHARE,
+                            VideoTrack(
+                                streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
+                                video = track as org.webrtc.VideoTrack,
+                            ),
+                        )
+                    }
                 } else {
+                    setMuteState(false, TrackType.TRACK_TYPE_SCREEN_SHARE)
                     publisher?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE)
                 }
             }
