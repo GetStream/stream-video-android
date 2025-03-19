@@ -6562,6 +6562,24 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun toggleAudioProcessing ()Z
 }
 
+public class io/getstream/video/android/core/call/connection/coding/SelectiveVideoDecoderFactory : org/webrtc/VideoDecoderFactory {
+	public fun <init> (Lorg/webrtc/EglBase$Context;ZLjava/util/List;)V
+	public synthetic fun <init> (Lorg/webrtc/EglBase$Context;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun createDecoder (Lorg/webrtc/VideoCodecInfo;)Lorg/webrtc/VideoDecoder;
+	public fun getSupportedCodecs ()[Lorg/webrtc/VideoCodecInfo;
+	public final fun setForceSWCodec (Z)V
+	public final fun setForceSWCodecList (Ljava/util/List;)V
+}
+
+public class io/getstream/video/android/core/call/connection/coding/SelectiveVideoEncoderFactory : org/webrtc/VideoEncoderFactory {
+	public fun <init> (Lorg/webrtc/EglBase$Context;ZZZLjava/util/List;)V
+	public synthetic fun <init> (Lorg/webrtc/EglBase$Context;ZZZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun createEncoder (Lorg/webrtc/VideoCodecInfo;)Lorg/webrtc/VideoEncoder;
+	public fun getSupportedCodecs ()[Lorg/webrtc/VideoCodecInfo;
+	public final fun setForceSWCodec (Z)V
+	public final fun setForceSWCodecList (Ljava/util/List;)V
+}
+
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/signal/socket/RTCEventMapper;
 	public final fun mapEvent (Lstream/video/sfu/event/SfuEvent;)Lio/getstream/video/android/core/events/SfuDataEvent;
