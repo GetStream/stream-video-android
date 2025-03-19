@@ -50,7 +50,6 @@ import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
-import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ICERestartEvent
@@ -440,10 +439,6 @@ public class RtcSession internal constructor(
         // listen to socket events and errors
         eventJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.events().collect {
-                if (it is CallEndedSfuEvent) {
-                    logger.d { "#rtcsession #events #sfu, event: $it" }
-                    call.leave()
-                }
                 clientImpl.fireEvent(it, call.cid)
             }
         }
