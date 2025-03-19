@@ -23,6 +23,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDecoderFactory
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
@@ -30,7 +31,6 @@ import io.getstream.video.android.core.model.StreamPeerType
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
-import org.webrtc.DefaultBlacklistedVideoDecoderFactory
 import org.webrtc.EglBase
 import org.webrtc.Logging
 import org.webrtc.ManagedAudioProcessingFactory
@@ -107,7 +107,7 @@ public class StreamPeerConnectionFactory(
      * Default video decoder factory used to unpack video from the remote tracks.
      */
     private val videoDecoderFactory by lazy {
-        DefaultBlacklistedVideoDecoderFactory(eglBase.eglBaseContext)
+        SelectiveVideoDecoderFactory(eglBase.eglBaseContext)
     }
 
     /**
