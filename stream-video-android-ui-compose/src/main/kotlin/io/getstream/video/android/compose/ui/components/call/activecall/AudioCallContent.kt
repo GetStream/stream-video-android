@@ -117,6 +117,7 @@ public fun AudioCallContent(
         detailsContent = detailsContent ?: { members, topPadding ->
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
                     .align(Alignment.CenterHorizontally)
                     .padding(top = topPadding),
             ) {

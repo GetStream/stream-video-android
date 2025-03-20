@@ -26,6 +26,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
+import android.telecom.TelecomManager
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -41,10 +43,15 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.telecom.getMyPhoneAccountHandle
+import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomIntegrationAvailable
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -95,11 +102,65 @@ public open class DefaultNotificationHandler(
 
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        val configRegistry = streamVideo?.callServiceConfigRegistry
+        val type = callId.type
+        val callConfig = configRegistry?.get(type)
+
+        // 1) Check if Telecom-based calls are supported/enabled
+        if (callConfig?.enableTelecomIntegration == true && isTelecomIntegrationAvailable(application)) {
+            try {
+                // Invoke Telecom
+                val telecomManager = application.getSystemService(
+                    Context.TELECOM_SERVICE,
+                ) as TelecomManager
+                val phoneAccountHandle = getMyPhoneAccountHandle(application)
+
+                // Build extras that ConnectionService will read
+                val extras = Bundle().apply {
+                    putString(INTENT_EXTRA_CALL_CID, callId.cid)
+                    putString(INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
+                }
+
+                // Add as an incoming call in the system
+                val canAddIncomingCall = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    telecomManager.isIncomingCallPermitted(phoneAccountHandle)
+                } else {
+                    true
+                }
+                if (canAddIncomingCall) {
+                    logger.d { "[onRingingCall] Using Telecom for incoming call" }
+                    telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
+                } else {
+                    val call = streamVideo?.call(callId.type, callId.id)
+                    streamVideo?.scope?.launch {
+                        call?.reject(reason = RejectReason.Busy)
+                    }
+                }
+            } catch (e: Exception) {
+                // Fallback to existing CallService approach if Telecom fails
+                logger.e { "[onRingingCall] Telecom call failed, falling back. Reason: $e" }
+                fallbackShowIncomingCall(callId, callDisplayName)
+            }
+        } else {
+            logger.e { "[onRingingCall] Telecom is not supported/enabled, falling back." }
+            // If Telecom is not supported/enabled, fallback to old approach
+            fallbackShowIncomingCall(callId, callDisplayName)
+        }
+    }
+
+    /**
+     * Fallback method that invokes your existing CallService foreground approach.
+     */
+    private fun fallbackShowIncomingCall(callId: StreamCallId, callDisplayName: String) {
+        // Example of your existing code
         CallService.showIncomingCall(
-            application,
-            callId,
-            callDisplayName,
-            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
+            context = application,
+            callId = callId,
+            callDisplayName = callDisplayName,
+            callServiceConfiguration = StreamVideo.instance().state.callConfigRegistry.get(
+                callId.type,
+            ),
             notification = getRingingCallNotification(
                 RingingState.Incoming(),
                 callId,
