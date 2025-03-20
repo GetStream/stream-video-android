@@ -129,6 +129,7 @@ public open class DefaultNotificationHandler(
                     true
                 }
                 if (canAddIncomingCall) {
+                    logger.d { "[onRingingCall] Using Telecom for incoming call" }
                     telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
                 } else {
                     val call = streamVideo?.call(callId.type, callId.id)

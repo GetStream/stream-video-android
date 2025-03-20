@@ -31,8 +31,12 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.audio.StreamAudioDevice
 
 fun isTelecomIntegrationAvailable(context: Context): Boolean {
-    context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return false
-    return true
+    try {
+        context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return false
+        return true
+    } catch (e: Error) {
+        return false
+    }
 }
 
 fun getMyPhoneAccountHandle(context: Context): PhoneAccountHandle {

@@ -31,6 +31,7 @@ import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomIntegrationAvailable
 import io.getstream.video.android.core.notifications.internal.service.telecom.registerMyPhoneAccount
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
@@ -209,7 +210,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         AndroidThreeTen.init(context)
 
         // Register with Telecom
-        safeCall { registerMyPhoneAccount(context) }
+        safeCall {
+            if (isTelecomIntegrationAvailable(context)) {
+                registerMyPhoneAccount(context)
+            }
+        }
 
         // This connection module class exposes the connections to the various retrofit APIs.
         val coordinatorConnectionModule = CoordinatorConnectionModule(
