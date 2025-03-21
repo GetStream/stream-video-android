@@ -28,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.getstream.video.android.CallActivity
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.join.CallJoinScreen
 import io.getstream.video.android.ui.join.barcode.BarcodeScanner
@@ -58,6 +59,8 @@ fun AppNavHost(
             )
         }
         composable(AppScreens.CallJoin.route) {
+            val context = LocalContext.current
+
             CallJoinScreen(
                 navigateToCallLobby = { cid ->
                     navController.navigate(AppScreens.CallLobby.routeWithArg(cid))
@@ -72,6 +75,17 @@ fun AppNavHost(
                 },
                 navigateToBarcodeScanner = {
                     navController.navigate(AppScreens.BarcodeScanning.route)
+                },
+                navigateToIncomingCallScreen = { call ->
+                    val intent = StreamCallActivity.callIntent(
+                        context = context,
+                        cid = StreamCallId.fromCallCid(call.cid),
+                        members = emptyList(),
+                        leaveWhenLastInCall = true,
+                        action = NotificationHandler.ACTION_INCOMING_CALL,
+                        clazz = CallActivity::class.java,
+                    )
+                    context.startActivity(intent)
                 },
             )
         }

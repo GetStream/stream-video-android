@@ -23,6 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.android.push.PushProvider
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
@@ -32,11 +33,13 @@ import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.util.NetworkMonitor
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.fcmToken
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
@@ -69,6 +72,9 @@ class CallJoinViewModel @Inject constructor(
                 is CallJoinEvent.JoinCompleted -> flowOf(
                     CallJoinUiState.JoinCompleted(event.callId),
                 )
+                is CallJoinEvent.IncomingCallReceived -> flowOf(
+                    CallJoinUiState.IncomingCall(event.call),
+                )
                 else -> flowOf(CallJoinUiState.Nothing)
             }
         }
@@ -81,6 +87,28 @@ class CallJoinViewModel @Inject constructor(
                     StreamVideoInitHelper.loadSdk(
                         dataStore = dataStore,
                     )
+                }
+            }
+        }
+
+        observeIncomingCall()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeIncomingCall() {
+        viewModelScope.launch {
+            StreamVideo.instanceState.flatMapLatest { instance ->
+                instance?.state?.ringingCall ?: flowOf(null)
+            }.collectLatest { call ->
+                if (call != null) {
+                    viewModelScope.launch {
+                        // Monitor the ringingState on a non-null call
+                        call.state.ringingState.collectLatest {
+                            if (it is RingingState.Incoming) {
+                                event.emit(CallJoinEvent.IncomingCallReceived(call))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -132,6 +160,8 @@ sealed interface CallJoinUiState {
 
     data class JoinCompleted(val callId: String) : CallJoinUiState
 
+    data class IncomingCall(val call: Call) : CallJoinUiState
+
     object GoBackToLogin : CallJoinUiState
 }
 
@@ -141,6 +171,8 @@ sealed interface CallJoinEvent {
     data class JoinCall(val callId: String? = null) : CallJoinEvent
 
     data class JoinCompleted(val callId: String) : CallJoinEvent
+
+    data class IncomingCallReceived(val call: Call) : CallJoinEvent
 
     object GoBackToLogin : CallJoinEvent
 }
