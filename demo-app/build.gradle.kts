@@ -157,6 +157,7 @@ android {
 
 play {
     enabled.set(false)
+    resolutionStrategy.set(ResolutionStrategy.AUTO)
 }
 
 androidComponents {
