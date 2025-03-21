@@ -66,29 +66,32 @@ public fun LaunchPermissionRequest(
         val anyPermissionWasGranted = permissionsState.permissions.any {
             it.status == PermissionStatus.Granted
         }
-        if (anyPermissionWasGranted) {
-            val granted = permissionsState.permissions.mapNotNull {
-                if (it.status == PermissionStatus.Granted) {
-                    it.permission
-                } else {
-                    null
-                }
+        val granted = permissionsState.permissions.mapNotNull {
+            if (it.status == PermissionStatus.Granted) {
+                it.permission
+            } else {
+                null
             }
-            val notGranted = permissionsState.permissions.mapNotNull {
-                if (it.status is PermissionStatus.Denied) {
-                    it.permission
-                } else {
-                    null
-                }
+        }
+        val notGranted = permissionsState.permissions.mapNotNull {
+            if (it.status is PermissionStatus.Denied) {
+                it.permission
+            } else {
+                null
             }
+        }
 
+        if (anyPermissionWasGranted) {
             ensurePermissionScope.someGrantedContent(
                 granted,
                 notGranted,
                 permissionsState.shouldShowRationale,
             )
         } else {
-            ensurePermissionScope.notGrantedContent(permissionsState.shouldShowRationale)
+            ensurePermissionScope.notGrantedContent(
+                notGranted,
+                permissionsState.shouldShowRationale,
+            )
         }
     }
     LaunchedEffect(key1 = true) {
@@ -124,7 +127,12 @@ public interface LaunchPermissionRequestScope {
      * None of the permissions were granted.
      */
     @Composable
-    public fun NoneGranted(content: @Composable (showRationale: Boolean) -> Unit)
+    public fun NoneGranted(
+        content: @Composable (
+            notGranted: List<String>,
+            showRationale: Boolean,
+        ) -> Unit,
+    )
 }
 
 private class LaunchPermissionRequestScopeImpl : LaunchPermissionRequestScope {
@@ -136,7 +144,10 @@ private class LaunchPermissionRequestScopeImpl : LaunchPermissionRequestScope {
         showRationale: Boolean,
     ) -> Unit =
         { _, _, _ -> }
-    var notGrantedContent: @Composable (showRationale: Boolean) -> Unit = { }
+    var notGrantedContent: @Composable (
+        notGranted: List<String>,
+        showRationale: Boolean,
+    ) -> Unit = { _, _ -> }
 
     @Composable
     override fun AllPermissionsGranted(content: @Composable () -> Unit) {
@@ -155,7 +166,12 @@ private class LaunchPermissionRequestScopeImpl : LaunchPermissionRequestScope {
     }
 
     @Composable
-    override fun NoneGranted(content: @Composable (showRationale: Boolean) -> Unit) {
+    override fun NoneGranted(
+        content: @Composable (
+            notGranted: List<String>,
+            showRationale: Boolean,
+        ) -> Unit,
+    ) {
         notGrantedContent = content
     }
 }
