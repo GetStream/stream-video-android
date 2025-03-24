@@ -77,7 +77,6 @@ object AppConfig {
     )
     val currentEnvironment = MutableStateFlow(availableEnvironments.default(BuildConfig.FLAVOR))
 
-
     // Utilities
     private val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
@@ -138,7 +137,7 @@ object AppConfig {
 
     private fun List<StreamEnvironment>.default(currentFlavor: String): StreamEnvironment {
         return if (currentFlavor == StreamFlavors.development) {
-           first { it.env == "pronto" }
+            first { it.env == "pronto" }
         } else {
             first { it.env == "demo" }
         }
