@@ -26,6 +26,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.config.types.StreamEnvironment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -47,7 +49,6 @@ object AppConfig {
     private lateinit var prefs: SharedPreferences
 
     // State of config values
-    val currentEnvironment = MutableStateFlow<StreamEnvironment?>(null)
     val availableEnvironments = listOf(
         StreamEnvironment(
             env = "pronto",
@@ -74,6 +75,8 @@ object AppConfig {
             sharelink = "https://pronto-staging.getstream.io/join/",
         ),
     )
+    val currentEnvironment = MutableStateFlow(availableEnvironments.default(BuildConfig.FLAVOR))
+
 
     // Utilities
     private val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
@@ -100,7 +103,7 @@ object AppConfig {
             val selectedEnvironment = selectedEnvData?.let {
                 jsonAdapter.fromJson(it)
             }
-            val which = selectedEnvironment ?: availableEnvironments[0]
+            val which = selectedEnvironment ?: availableEnvironments.default(BuildConfig.FLAVOR)
             selectEnv(which)
             onLoaded()
         } catch (e: Exception) {
@@ -130,6 +133,14 @@ object AppConfig {
             firstOrNull { streamEnv ->
                 streamEnv.env == name || streamEnv.aliases.contains(name)
             }
+        }
+    }
+
+    private fun List<StreamEnvironment>.default(currentFlavor: String): StreamEnvironment {
+        return if (currentFlavor == StreamFlavors.development) {
+           first { it.env == "pronto" }
+        } else {
+            first { it.env == "demo" }
         }
     }
 
