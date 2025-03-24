@@ -476,7 +476,7 @@ fun CallScreen(
                                 ClosedCaptionsContainer(
                                     call,
                                     ClosedCaptionsDefaults.streamThemeConfig().copy(
-                                        yOffset = (-80).dp,
+                                        yOffset = (-100).dp,
                                     ),
                                     closedCaptionUiState,
                                 )

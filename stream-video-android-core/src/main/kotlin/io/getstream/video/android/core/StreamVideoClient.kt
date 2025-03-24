@@ -52,6 +52,7 @@ import io.getstream.android.video.generated.models.SendCallEventRequest
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionRequest
 import io.getstream.android.video.generated.models.SendReactionResponse
+import io.getstream.android.video.generated.models.StartClosedCaptionsRequest
 import io.getstream.android.video.generated.models.StartClosedCaptionsResponse
 import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
 import io.getstream.android.video.generated.models.StartRecordingRequest
@@ -1118,7 +1119,11 @@ internal class StreamVideoClient internal constructor(
 
     suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionsResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.startClosedCaptions(type, id)
+            coordinatorConnectionModule.api.startClosedCaptions(
+                type,
+                id,
+                StartClosedCaptionsRequest(),
+            )
         }
     }
 
