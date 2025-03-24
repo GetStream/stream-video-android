@@ -29,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,10 +39,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.rememberModalBottomSheetState
@@ -58,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -139,6 +144,7 @@ fun CallScreen(
     var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
+    var showShareDialog by remember { mutableStateOf(true) }
     var showParticipants by remember { mutableStateOf(false) }
     val chatState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -521,7 +527,8 @@ fun CallScreen(
 
         val isPictureInPictureMode = rememberIsInPipMode()
         if (!isPictureInPictureMode) {
-            if (participantsSize.size == 1 &&
+            if (showShareDialog &&
+                participantsSize.size == 1 &&
                 !chatState.isVisible &&
                 orientation == Configuration.ORIENTATION_PORTRAIT
             ) {
@@ -533,17 +540,31 @@ fun CallScreen(
                     alignment = Alignment.BottomCenter,
                     offset = IntOffset(
                         0,
-                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
-                            .toInt(),
+                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
                     ),
                 ) {
-                    ShareCallWithOthers(
-                        modifier = Modifier.fillMaxWidth(),
-                        call = call,
-                        clipboardManager = clipboardManager,
-                        env = env,
-                        context = context,
-                    )
+                    Box {
+                        ShareCallWithOthers(
+                            modifier = Modifier.fillMaxWidth(),
+                            call = call,
+                            clipboardManager = clipboardManager,
+                            env = env,
+                            context = context,
+                        )
+
+                        IconButton(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(top = 10.dp, end = 10.dp),
+                            onClick = { showShareDialog = false },
+                        ) {
+                            Icon(
+                                tint = Color.White,
+                                imageVector = Icons.Default.Close,
+                                contentDescription = Icons.Default.Close.name,
+                            )
+                        }
+                    }
                 }
             }
         }
