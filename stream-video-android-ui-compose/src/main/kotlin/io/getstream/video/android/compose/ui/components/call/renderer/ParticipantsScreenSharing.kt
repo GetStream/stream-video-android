@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.core.Call
@@ -60,6 +61,11 @@ public fun ParticipantsScreenSharing(
             style = videoStyle,
         )
     },
+    screenSharingFallbackContent: @Composable (ScreenSharingSession) -> Unit = {
+        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by it.participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
+    },
 ) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
@@ -76,6 +82,7 @@ public fun ParticipantsScreenSharing(
             isZoomable = isZoomable,
             style = style,
             videoRenderer = videoRenderer,
+            screenSharingFallbackContent = screenSharingFallbackContent,
         )
     } else {
         LandscapeScreenSharingVideoRenderer(
@@ -87,6 +94,7 @@ public fun ParticipantsScreenSharing(
             isZoomable = isZoomable,
             style = style,
             videoRenderer = videoRenderer,
+            screenSharingFallbackContent = screenSharingFallbackContent,
         )
     }
 }
