@@ -77,6 +77,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
+import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
@@ -675,10 +676,14 @@ public class CallState(
             }
 
             is CallEndedEvent -> {
+                updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
+                call.leave()
+            }
 
-                // leave the call
+            is CallEndedSfuEvent -> {
+                _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 call.leave()
             }
 
@@ -907,6 +912,7 @@ public class CallState(
             }
 
             is CallSessionEndedEvent -> {
+                updateFromResponse(event.call)
                 _session.value = event.call.session
             }
 
