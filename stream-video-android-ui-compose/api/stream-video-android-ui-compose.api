@@ -11,11 +11,11 @@ public final class io/getstream/video/android/compose/permission/ComposableSingl
 	public static final field INSTANCE Lio/getstream/video/android/compose/permission/ComposableSingletons$LaunchPermissionRequestKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public static field lambda-2 Lkotlin/jvm/functions/Function5;
-	public static field lambda-3 Lkotlin/jvm/functions/Function3;
+	public static field lambda-3 Lkotlin/jvm/functions/Function4;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function5;
-	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class io/getstream/video/android/compose/permission/LaunchPermissionRequestKt {
@@ -24,7 +24,7 @@ public final class io/getstream/video/android/compose/permission/LaunchPermissio
 
 public abstract interface class io/getstream/video/android/compose/permission/LaunchPermissionRequestScope {
 	public abstract fun AllPermissionsGranted (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
-	public abstract fun NoneGranted (Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
+	public abstract fun NoneGranted (Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun SomeGranted (Lkotlin/jvm/functions/Function5;Landroidx/compose/runtime/Composer;I)V
 }
 
@@ -362,13 +362,6 @@ public final class io/getstream/video/android/compose/theme/VideoTheme : io/gets
 
 public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Lio/getstream/video/android/compose/theme/StreamRippleConfiguration;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {
-	public static final field INSTANCE Lio/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public class io/getstream/video/android/compose/ui/ComposeStreamCallActivity : io/getstream/video/android/ui/common/StreamCallActivity {

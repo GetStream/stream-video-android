@@ -98,6 +98,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -113,6 +114,7 @@ fun CallJoinScreen(
     navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
     navigateToDirectCallJoin: () -> Unit,
     navigateToBarcodeScanner: () -> Unit = {},
+    navigateToIncomingCallScreen: (Call) -> Unit = {},
 ) {
     LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
@@ -125,6 +127,7 @@ fun CallJoinScreen(
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
+        navigateToIncomingCallScreen = navigateToIncomingCallScreen,
         navigateUpToLogin = { navigateUpToLogin(true) },
     )
 
@@ -181,6 +184,7 @@ fun CallJoinScreen(
 private fun HandleCallJoinUiState(
     callJoinUiState: CallJoinUiState,
     navigateToCallLobby: (callId: String) -> Unit,
+    navigateToIncomingCallScreen: (call: Call) -> Unit,
     navigateUpToLogin: () -> Unit,
 ) {
     LaunchedEffect(key1 = callJoinUiState) {
@@ -188,6 +192,10 @@ private fun HandleCallJoinUiState(
             is CallJoinUiState.JoinCompleted -> navigateToCallLobby.invoke(callJoinUiState.callId)
 
             is CallJoinUiState.GoBackToLogin -> navigateUpToLogin.invoke()
+
+            is CallJoinUiState.IncomingCall -> navigateToIncomingCallScreen.invoke(
+                callJoinUiState.call,
+            )
 
             else -> Unit
         }
