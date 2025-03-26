@@ -534,7 +534,7 @@ internal class TelecomCallService : ConnectionService() {
             ringingState = RingingState.Incoming(),
             callId = callId,
             callDisplayName = displayName,
-            shouldHaveContentIntent = true, // up to you
+            shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
         )
         if (notification != null) {
             // Just post it; no foreground logic needed
