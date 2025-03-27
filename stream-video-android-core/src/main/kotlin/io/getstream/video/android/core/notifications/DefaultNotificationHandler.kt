@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Application
@@ -29,6 +30,8 @@ import android.os.Build
 import android.os.Bundle
 import android.telecom.TelecomManager
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
@@ -100,6 +103,8 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
@@ -129,12 +134,15 @@ public open class DefaultNotificationHandler(
                     true
                 }
                 if (canAddIncomingCall) {
-                    logger.d { "[onRingingCall] Using Telecom for incoming call" }
+                    logger.d { "[onRingingCall] #telecom; Using Telecom for incoming call" }
                     telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
                 } else {
+                    logger.d { "[onRingingCall] #telecom; Incoming call was not permitted" }
+
                     val call = streamVideo?.call(callId.type, callId.id)
                     streamVideo?.scope?.launch {
                         call?.reject(reason = RejectReason.Busy)
+                        call?.leave()
                     }
                 }
             } catch (e: Exception) {

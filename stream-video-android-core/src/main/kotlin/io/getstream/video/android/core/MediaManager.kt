@@ -35,7 +35,7 @@ import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
-import io.getstream.video.android.core.notifications.internal.service.telecom.VoipConnection
+import io.getstream.video.android.core.notifications.internal.service.telecom.TelecomConnection
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -459,7 +459,7 @@ class MicrophoneManager(
 
         if (canHandleDeviceSwitch()) {
             if (!::audioHandler.isInitialized) { // This check is atomic
-                audioHandler = VoipConnection.setDeviceListener { devices, selected ->
+                audioHandler = TelecomConnection.setDeviceListener { devices, selected ->
                     logger.i {
                         "[setup] #telecom; listenForDevices. Selected: ${selected?.name}, available: ${devices.map { it.name }}"
                     }

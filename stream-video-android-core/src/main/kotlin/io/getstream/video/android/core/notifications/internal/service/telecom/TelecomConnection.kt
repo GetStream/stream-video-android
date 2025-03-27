@@ -41,7 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-internal class VoipConnection(
+internal class TelecomConnection(
     private val context: Context,
     private val callId: StreamCallId,
     private val isIncoming: Boolean,
@@ -63,6 +63,7 @@ internal class VoipConnection(
         subscribeToCallEvents()
     }
 
+    // Equivalent of callManager.addCall(onAnswer = onTelecomEvent) - used when accepting from watch.
     override fun onAnswer() {
         super.onAnswer()
         logger.i { "[onAnswer]" }
@@ -210,31 +211,31 @@ internal class VoipConnection(
     }
 
     companion object {
-        var currentConnection: VoipConnection? = null // temporary solution
-
         fun setDeviceListener(listener: DeviceListener): AudioHandler {
             return object : AudioHandler {
                 override fun start() {
-                    currentConnection?.deviceListener = listener
+//                    currentConnection?.deviceListener = listener
                 }
 
                 override fun stop() {}
 
                 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
                 override fun selectDevice(audioDevice: StreamAudioDevice?) {
-                    if (currentConnection != null && audioDevice?.telecomDevice != null) {
-                        currentConnection?.let {
-                            StreamLog.d(
-                                "VoipConnection",
-                            ) { "[selectDevice] audioDevice: $audioDevice" }
-
-                            it.selectEndpoint(audioDevice.telecomDevice!!)
-                        }
-                    }
+//                    if (currentConnection != null && audioDevice?.telecomDevice != null) {
+//                        currentConnection?.let {
+//                            StreamLog.d(
+//                                "VoipConnection",
+//                            ) { "[selectDevice] audioDevice: $audioDevice" }
+//
+//                            it.selectEndpoint(audioDevice.telecomDevice!!)
+//                        }
+//                    }
                 }
             }
         }
     }
 }
+
+internal val telecomConnections = mutableMapOf<String, TelecomConnection>()
 
 internal typealias DeviceListener = (available: List<StreamAudioDevice>, selected: StreamAudioDevice?) -> Unit

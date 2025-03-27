@@ -25,7 +25,7 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.service.telecom.DeviceListener
-import io.getstream.video.android.core.notifications.internal.service.telecom.VoipConnection
+import io.getstream.video.android.core.notifications.internal.service.telecom.TelecomConnection
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
 import io.mockk.coVerify
@@ -51,7 +51,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-class VoipConnectionTest {
+class TelecomConnectionTest {
 
     private lateinit var context: Context
 
@@ -100,7 +100,7 @@ class VoipConnectionTest {
         val mockCall = mockk<io.getstream.video.android.core.Call>(relaxed = true)
         every { mockStreamVideoClient.call("typeA", "id123") } returns mockCall
 
-        val connection = VoipConnection(
+        val connection = TelecomConnection(
             context,
             StreamCallId("typeA", "id123"),
             isIncoming = false,
@@ -116,7 +116,7 @@ class VoipConnectionTest {
 
     @Test
     fun `onAbort - sets disconnected with canceled`() = runTest {
-        val connection = VoipConnection(
+        val connection = TelecomConnection(
             context,
             StreamCallId("typeB", "id999"),
             isIncoming = false,
@@ -134,7 +134,7 @@ class VoipConnectionTest {
         val mockCall = mockk<io.getstream.video.android.core.Call>(relaxed = true)
         every { mockStreamVideoClient.call("default", "123") } returns mockCall
 
-        val connection = VoipConnection(
+        val connection = TelecomConnection(
             context,
             StreamCallId("default", "123"),
             isIncoming = true,
@@ -151,7 +151,7 @@ class VoipConnectionTest {
 
     @Test
     fun `onCallAudioStateChanged - logs new mute state`() = runTest {
-        val connection = VoipConnection(context, StreamCallId("t", "id"), isIncoming = false)
+        val connection = TelecomConnection(context, StreamCallId("t", "id"), isIncoming = false)
         // Just verify we can call onCallAudioStateChanged w/o exception
         val audioState = CallAudioState(true, CallAudioState.ROUTE_SPEAKER, 0)
         connection.onCallAudioStateChanged(audioState)
@@ -163,13 +163,13 @@ class VoipConnectionTest {
     @Test
     fun `setDeviceListener - sets the listener on currentConnection`() = runTest {
         // Prepare a connection
-        val connection = VoipConnection(context, StreamCallId("typ", "abc"), false)
-        VoipConnection.currentConnection = connection
+        val connection = TelecomConnection(context, StreamCallId("typ", "abc"), false)
+//        TelecomConnection.currentConnection = connection
 
         val mockListener: DeviceListener = mockk(relaxed = true)
 
         // 1) Create an AudioHandler via setDeviceListener
-        val audioHandler = VoipConnection.setDeviceListener(mockListener)
+        val audioHandler = TelecomConnection.setDeviceListener(mockListener)
         // 2) Start it
         audioHandler.start()
 

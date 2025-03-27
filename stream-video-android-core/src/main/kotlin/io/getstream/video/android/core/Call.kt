@@ -77,7 +77,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.notifications.internal.service.telecom.VoipConnection
+import io.getstream.video.android.core.notifications.internal.service.telecom.telecomConnections
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -799,7 +799,11 @@ public class Call(
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
 
-        VoipConnection.currentConnection?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+        telecomConnections.remove(cid).let {
+            logger.d { "[leave] #telecom; Will disconnect & destroy connection ${it?.hashCode()}" }
+            it?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+            it?.destroy()
+        }
 
         cleanup()
     }
@@ -1226,7 +1230,7 @@ public class Call(
         clientImpl.state.removeRingingCall()
         clientImpl.state.maybeStopForegroundService(call = this)
 
-        VoipConnection.currentConnection?.setActive()
+        telecomConnections[cid]?.setActive()
 
         return clientImpl.accept(type, id)
     }

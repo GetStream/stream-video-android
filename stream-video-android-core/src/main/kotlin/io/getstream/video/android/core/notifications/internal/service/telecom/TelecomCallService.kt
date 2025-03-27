@@ -92,8 +92,6 @@ internal class TelecomCallService : ConnectionService() {
         connectionManagerPhoneAccount: PhoneAccountHandle?,
         request: ConnectionRequest,
     ): Connection {
-        logger.i { "[onCreateIncomingConnection]" }
-
         // 1) Parse call info from request.extras
         val extras: Bundle = request.extras
         val intentCallId = extras.getString(NotificationHandler.INTENT_EXTRA_CALL_CID)
@@ -116,7 +114,7 @@ internal class TelecomCallService : ConnectionService() {
 
         // 3) Create a custom Connection
         val callId = StreamCallId.fromCallCid(intentCallId)
-        val connection = VoipConnection(
+        val connection = TelecomConnection(
             context = applicationContext,
             callId = callId,
             isIncoming = true,
@@ -143,7 +141,8 @@ internal class TelecomCallService : ConnectionService() {
             registerToggleCameraBroadcastReceiver()
         }
 
-        VoipConnection.currentConnection = connection
+        logger.d { "[onCreateIncomingConnection] #telecom; Created TelecomConnection ${connection.hashCode()}"}
+        telecomConnections[callId.cid] = connection
 
         return connection
     }
@@ -174,7 +173,7 @@ internal class TelecomCallService : ConnectionService() {
 
         // Create the Connection
         val callId = StreamCallId.fromCallCid(intentCallId)
-        val connection = VoipConnection(
+        val connection = TelecomConnection(
             context = applicationContext,
             callId = callId,
             isIncoming = false,

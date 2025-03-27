@@ -81,9 +81,6 @@ fun registerMyPhoneAccount(context: Context) {
         .build()
 
     telecomManager.registerPhoneAccount(phoneAccount)
-
-    // Register the PhoneAccount with Telecom
-    telecomManager.registerPhoneAccount(phoneAccount)
 }
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
