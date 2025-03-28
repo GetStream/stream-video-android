@@ -141,7 +141,9 @@ internal class TelecomCallService : ConnectionService() {
             registerToggleCameraBroadcastReceiver()
         }
 
-        logger.d { "[onCreateIncomingConnection] #telecom; Created TelecomConnection ${connection.hashCode()}"}
+        logger.d {
+            "[onCreateIncomingConnection] #telecom; Created TelecomConnection ${connection.hashCode()}"
+        }
         telecomConnections[callId.cid] = connection
 
         return connection
