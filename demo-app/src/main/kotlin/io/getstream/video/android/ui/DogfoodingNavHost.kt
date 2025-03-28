@@ -40,7 +40,7 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: String = AppScreens.Login.route,
-    initialCallId: String? = null,
+    prefilledCallId: String? = null,
 ) {
     NavHost(
         modifier = modifier.fillMaxSize(),
@@ -60,7 +60,7 @@ fun AppNavHost(
         }
         composable(AppScreens.CallJoin.route) {
             CallJoinScreen(
-                initialCallId = initialCallId,
+                prefilledCallId = prefilledCallId,
                 navigateToCallLobby = { cid ->
                     navController.navigate(AppScreens.CallLobby.routeWithArg(cid))
                 },

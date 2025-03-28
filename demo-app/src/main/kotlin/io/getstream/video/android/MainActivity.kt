@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
                         } else {
                             AppScreens.CallJoin.route
                         },
-                        initialCallId = launchIntentCallId,
+                        prefilledCallId = launchIntentCallId,
                     )
                 }
             }
@@ -92,4 +92,4 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private const val EXTRA_CALL_ID = "io.getstream.video.android.demoapp.CALL_ID"
+internal const val EXTRA_CALL_ID = "io.getstream.video.android.demoapp.CALL_ID"

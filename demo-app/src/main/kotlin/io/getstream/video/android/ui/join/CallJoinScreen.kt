@@ -96,6 +96,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.defaultCallId
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -106,7 +107,7 @@ import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
 fun CallJoinScreen(
-    initialCallId: String? = null,
+    prefilledCallId: String? = null,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
@@ -150,7 +151,7 @@ fun CallJoinScreen(
                 .align(Alignment.CenterHorizontally)
                 .verticalScroll(rememberScrollState())
                 .weight(1f),
-            initialCallId = initialCallId,
+            prefilledCallId = prefilledCallId,
             openCamera = { navigateToBarcodeScanner() },
             callJoinViewModel = callJoinViewModel,
             isNetworkAvailable = isNetworkAvailable,
@@ -319,7 +320,7 @@ private fun CallJoinHeader(
 @Composable
 private fun CallJoinBody(
     modifier: Modifier,
-    initialCallId: String? = null,
+    prefilledCallId: String? = null,
     openCamera: () -> Unit,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
@@ -356,7 +357,7 @@ private fun CallJoinBody(
                 gotoQR = {
                     openCamera()
                 },
-                initialCallId = initialCallId
+                prefilledCallId = prefilledCallId
             )
         }
     }
@@ -368,7 +369,7 @@ private fun CallActualContent(
     onJoinCall: (String) -> Unit,
     onNewCall: () -> Unit,
     gotoQR: () -> Unit,
-    initialCallId: String? = null,
+    prefilledCallId: String? = null,
 ) = Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
     Column(
         modifier = modifier
@@ -383,7 +384,7 @@ private fun CallActualContent(
         Spacer(modifier = Modifier.height(20.dp))
         Description(text = stringResource(id = R.string.join_description))
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingL))
-        JoinCallForm(initialCallId) {
+        JoinCallForm(prefilledCallId) {
             onJoinCall(it)
         }
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
@@ -461,18 +462,16 @@ private fun Label(text: String) {
 
 @Composable
 private fun JoinCallForm(
-    initialCallId: String? = null,
+    prefilledCallId: String? = null,
     joinCall: (String) -> Unit,
 ) {
     var callId by remember {
         mutableStateOf(
             TextFieldValue(
-                if (initialCallId?.isNotEmpty() == true) {
-                    initialCallId
-                } else if (BuildConfig.FLAVOR == StreamFlavors.development) {
-                    "default:79cYh3J5JgGk"
+                if (prefilledCallId?.isNotEmpty() == true) {
+                    prefilledCallId
                 } else {
-                    ""
+                    defaultCallId
                 },
             ),
         )
@@ -485,7 +484,8 @@ private fun JoinCallForm(
         StreamTextField(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .testTag("call_id_text_field"),
             onValueChange = { callId = it },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
