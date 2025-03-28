@@ -22,6 +22,7 @@ class CallServiceConfigBuilder {
     private var serviceClass: Class<*> = CallService::class.java
     private var runCallServiceInForeground: Boolean = true
     private var audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION
+    private var enableTelecomIntegration: Boolean = false
 
     fun setServiceClass(serviceClass: Class<*>): CallServiceConfigBuilder = apply {
         this.serviceClass = serviceClass
@@ -35,9 +36,14 @@ class CallServiceConfigBuilder {
         this.audioUsage = audioUsage
     }
 
+    fun enableTelecomIntegration(enabled: Boolean): CallServiceConfigBuilder = apply {
+        this.enableTelecomIntegration = enabled
+    }
+
     fun build(): CallServiceConfig {
         return CallServiceConfig(
             serviceClass = serviceClass,
+            enableTelecomIntegration = enableTelecomIntegration,
             runCallServiceInForeground = runCallServiceInForeground,
             audioUsage = audioUsage,
         )

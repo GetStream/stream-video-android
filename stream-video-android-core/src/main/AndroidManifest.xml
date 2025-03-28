@@ -31,6 +31,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
 
     <!-- Call foreground service permission -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -111,5 +112,16 @@
             android:name=".notifications.internal.service.AudioCallService"
             android:foregroundServiceType="microphone|shortService"
             android:exported="false" />
+
+        <service
+            android:exported="true"
+            android:name=".notifications.internal.service.telecom.TelecomCallService"
+            android:label="Your Telecom Connection Service"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService" />
+            </intent-filter>
+        </service>
+
     </application>
 </manifest>

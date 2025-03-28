@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.audio
 
+import android.telecom.CallEndpoint
 import com.twilio.audioswitch.AudioDevice
 
 sealed class StreamAudioDevice {
@@ -23,46 +24,52 @@ sealed class StreamAudioDevice {
     /** The friendly name of the device.*/
     abstract val name: String
 
-    abstract val audio: AudioDevice
+    abstract val audioSwitchDevice: AudioDevice?
+
+    abstract val telecomDevice: CallEndpoint?
 
     /** An [StreamAudioDevice] representing a Bluetooth Headset.*/
     data class BluetoothHeadset constructor(
         override val name: String = "Bluetooth",
-        override val audio: AudioDevice,
+        override val audioSwitchDevice: AudioDevice? = null,
+        override val telecomDevice: CallEndpoint? = null,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing a Wired Headset.*/
     data class WiredHeadset constructor(
         override val name: String = "Wired Headset",
-        override val audio: AudioDevice,
+        override val audioSwitchDevice: AudioDevice? = null,
+        override val telecomDevice: CallEndpoint? = null,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing the Earpiece.*/
     data class Earpiece constructor(
         override val name: String = "Earpiece",
-        override val audio: AudioDevice,
+        override val audioSwitchDevice: AudioDevice? = null,
+        override val telecomDevice: CallEndpoint? = null,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing the Speakerphone.*/
     data class Speakerphone constructor(
         override val name: String = "Speakerphone",
-        override val audio: AudioDevice,
+        override val audioSwitchDevice: AudioDevice? = null,
+        override val telecomDevice: CallEndpoint? = null,
     ) : StreamAudioDevice()
 
     companion object {
 
         @JvmStatic
-        fun StreamAudioDevice.toAudioDevice(): AudioDevice {
-            return this.audio
+        fun StreamAudioDevice.toAudioDevice(): AudioDevice? {
+            return this.audioSwitchDevice
         }
 
         @JvmStatic
         fun AudioDevice.fromAudio(): StreamAudioDevice {
             return when (this) {
-                is AudioDevice.BluetoothHeadset -> BluetoothHeadset(audio = this)
-                is AudioDevice.WiredHeadset -> WiredHeadset(audio = this)
-                is AudioDevice.Earpiece -> Earpiece(audio = this)
-                is AudioDevice.Speakerphone -> Speakerphone(audio = this)
+                is AudioDevice.BluetoothHeadset -> BluetoothHeadset(audioSwitchDevice = this)
+                is AudioDevice.WiredHeadset -> WiredHeadset(audioSwitchDevice = this)
+                is AudioDevice.Earpiece -> Earpiece(audioSwitchDevice = this)
+                is AudioDevice.Speakerphone -> Speakerphone(audioSwitchDevice = this)
             }
         }
     }
