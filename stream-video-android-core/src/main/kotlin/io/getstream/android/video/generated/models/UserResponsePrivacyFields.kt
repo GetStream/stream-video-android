@@ -54,7 +54,7 @@ data class UserResponsePrivacyFields(
     val teams: kotlin.collections.List<kotlin.String>,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
     @Json(name = "deactivated_at")
     val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
