@@ -718,7 +718,6 @@ public class CallState(
 
             is ConnectedEvent -> {
                 // this is handled by the client
-
             }
 
             is CustomVideoEvent -> {
@@ -910,8 +909,6 @@ public class CallState(
                 }
                 updateFromResponse(event.call)
             }
-
-
 
             is CallSessionEndedEvent -> {
                 _session.value = event.call.session
