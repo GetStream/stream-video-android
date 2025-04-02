@@ -559,7 +559,13 @@ public class RtcSession internal constructor(
     }
 
     private fun listenToMediaChanges() {
+        logger.d { "[trackPublishing] listenToMediaChanges" }
         coroutineScope.launch {
+            // We don't want to publish video track if there is no camera resolution
+            if (call.camera.resolution.value == null) {
+                return@launch
+            }
+
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
                 val canUserSendVideo = call.state.ownCapabilities.value.contains(
