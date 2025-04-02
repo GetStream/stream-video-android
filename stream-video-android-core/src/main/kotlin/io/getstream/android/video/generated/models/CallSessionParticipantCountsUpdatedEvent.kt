@@ -44,7 +44,7 @@ data class CallSessionParticipantCountsUpdatedEvent(
     val sessionId: kotlin.String,
 
     @Json(name = "participants_count_by_role")
-    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int>,
+    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap(),
 
     @Json(name = "type")
     val type: kotlin.String,

@@ -128,9 +128,7 @@ import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.threeten.bp.Clock
-import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.text.SimpleDateFormat
@@ -597,7 +595,8 @@ public class CallState(
      * Holds the current list of closed captions. This list is updated dynamically
      * and contains at most [ClosedCaptionsSettings.maxVisibleCaptions] captions.
      */
-    public val closedCaptions: StateFlow<List<CallClosedCaption>> = closedCaptionManager.closedCaptions
+    public val closedCaptions: StateFlow<List<CallClosedCaption>> =
+        closedCaptionManager.closedCaptions
 
     /**
      *  Holds the current closed caption mode for the video call. This object contains information about closed
@@ -662,7 +661,6 @@ public class CallState(
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
-
                 updateRingingState(
                     rejectReason = event.reason?.let {
                         when (it) {
@@ -909,11 +907,12 @@ public class CallState(
                 event.call.session?.let { session ->
                     _session.value = session
                 }
+                updateFromResponse(event.call)
             }
 
             is CallSessionEndedEvent -> {
-                updateFromResponse(event.call)
                 _session.value = event.call.session
+                updateFromResponse(event.call)
             }
 
             is CallSessionParticipantCountsUpdatedEvent -> {
@@ -982,9 +981,11 @@ public class CallState(
             is CallTranscriptionStartedEvent -> {
                 _transcribing.value = true
             }
+
             is CallTranscriptionStoppedEvent -> {
                 _transcribing.value = false
             }
+
             is CallTranscriptionFailedEvent -> {
                 _transcribing.value = false
             }
@@ -1102,15 +1103,6 @@ public class CallState(
     private fun updateFromJoinResponse(event: JoinCallResponseEvent) {
         // update the participant count
         _participantCounts.value = event.participantCount
-
-        val startedAt = event.callState.started_at
-        if (startedAt != null) {
-            val instant = Instant.ofEpochSecond(startedAt.epochSecond, 0)
-            _startedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
-        } else {
-            _startedAt.value = null
-        }
-
         // creates the participants
         val participantStates = event.callState.participants.map {
             getOrCreateParticipant(it)
@@ -1118,7 +1110,10 @@ public class CallState(
         upsertParticipants(participantStates)
     }
 
-    private fun updateParticipantCounts(session: CallSessionResponse? = null, sfuHealthCheckEvent: SFUHealthCheckEvent? = null) {
+    private fun updateParticipantCounts(
+        session: CallSessionResponse? = null,
+        sfuHealthCheckEvent: SFUHealthCheckEvent? = null,
+    ) {
         // When in JOINED state, we should use the participant from SFU health check event, as it's more accurate.
 
         if (sfuHealthCheckEvent != null) {
@@ -1281,9 +1276,29 @@ public class CallState(
         _settings.value = response.settings
         _transcribing.value = response.transcribing
         _team.value = response.team
+        didUpdateSession(response.session)
 
         updateRingingState()
         closedCaptionManager.handleCallUpdate(response)
+    }
+
+    /**
+     * Called after session changes
+     */
+    private fun didUpdateSession(newSession: CallSessionResponse?) {
+        _session.value = newSession
+
+        if (newSession?.startedAt != null) {
+            _startedAt.value = newSession.startedAt
+        } else if (newSession?.liveStartedAt != null) {
+            _startedAt.value = newSession.liveStartedAt
+        }
+
+        if (newSession?.liveEndedAt != null) {
+            _endedAt.value = newSession.liveEndedAt
+        }
+        // Also unify participant counts if needed:
+        updateParticipantCounts(session = newSession)
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {

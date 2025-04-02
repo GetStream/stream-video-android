@@ -41,7 +41,7 @@ data class MemberResponse(
     val userId: kotlin.String,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
     @Json(name = "user")
     val user: io.getstream.android.video.generated.models.UserResponse,
