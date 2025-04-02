@@ -16,47 +16,104 @@
 
 package io.getstream.video.android.tutorial.livestream
 
-import androidx.compose.foundation.layout.Box
+import android.content.Context
+import android.util.Log
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import io.getstream.android.video.generated.models.CallLiveStartedEvent
+import io.getstream.log.Priority
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
+import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
+import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+object GuestClient {
+    val userId = "Darth_Client"
+    val user = User(
+        id = userId, // any string
+        name = "Tutorial", // name and image are used in the UI
+        role = "admin",
+    )
+    val userToken = StreamVideo.devToken(userId)
+    var client: StreamVideo? = null
+    fun client(context: Context): StreamVideo {
+        if (client == null) {
+            client = StreamVideoBuilder(
+                context = context,
+                apiKey = "k436tyde94hj", // demo API key
+                geo = GEO.GlobalEdgeNetwork,
+                user = user,
+                token = userToken,
+                ensureSingleInstance = false,
+                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+            ).build()
+        }
+
+        return client!!
+    }
+}
 
 @Composable
 fun LiveAudience(
     navController: NavController,
     callId: String,
-    client: StreamVideo,
 ) {
-    val context = LocalContext.current
-
-    // Step 1 - Update call settings via callConfigRegistry
-    client.state.callConfigRegistry.register(
-        DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
-    )
-
+    // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
+    val client = GuestClient.client(LocalContext.current)
     // Step 2 - join a call, which type is `default` and id is `123`.
-    val call = client.call("livestream", callId)
+    val cid = StreamCallId.fromCallCid(callId)
+    val call = client.call(cid.type, cid.id)
 
     LaunchedEffect(call) {
-        call.microphone.setEnabled(false, fromUser = true)
-        call.camera.setEnabled(false, fromUser = true)
+        call.get()
+        delay(3000)
         call.join()
+
+        GlobalScope.launch {
+            call.subscribe {
+                if (it is CallLiveStartedEvent) {
+                    GlobalScope.launch {
+                        call.join()
+                    }
+                }
+            }
+        }
     }
 
-    Box {
-        LivestreamPlayer(call = call)
+    Column {
+        val live = call.state.live.collectAsStateWithLifecycle()
+        val startedAt = call.state.startedAt.collectAsStateWithLifecycle()
+        val startsAt = call.state.startsAt.collectAsStateWithLifecycle()
+        val backstage = call.state.backstage.collectAsStateWithLifecycle()
+        val session = call.state.session.collectAsStateWithLifecycle()
+        Log.d(
+            "LiveAudience",
+            "Session: ${session.value}",
+        )
+        Log.d(
+            "LiveAudience",
+            "Backstage: ${backstage.value}, Live: ${live.value}, Started at: ${startedAt.value}, Starts at: ${startsAt.value}",
+        )
+        Text(
+            text = "Backstage: ${backstage.value}, Live: ${live.value}, Started at: ${startedAt.value}, Starts at: ${startsAt.value}",
+        )
         CallAppBar(
             modifier = Modifier
-                .align(Alignment.TopCenter)
                 .padding(end = 16.dp, top = 16.dp),
             call = call,
             centerContent = { },
@@ -65,5 +122,6 @@ fun LiveAudience(
                 navController.popBackStack()
             },
         )
+        LivestreamPlayer(call = call)
     }
 }

@@ -20,7 +20,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -28,15 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import io.getstream.log.Priority
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.GEO
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
-import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
-import io.getstream.video.android.model.User
 
 @Composable
 fun LiveNavHost(
@@ -44,32 +35,6 @@ fun LiveNavHost(
     navController: NavHostController = rememberNavController(),
     startDestination: String = LiveScreens.Main.destination,
 ) {
-    val context = LocalContext.current
-    val userId = "Darth_Krayt"
-    val userToken = StreamVideo.devToken(userId)
-
-    // step1 - create a user.
-    val user = User(
-        id = userId, // any string
-        name = "Tutorial", // name and image are used in the UI
-        role = "admin",
-    )
-
-    val callServiceConfigRegistry = CallServiceConfigRegistry()
-    callServiceConfigRegistry.register(DefaultCallConfigurations.getLivestreamCallServiceConfig())
-
-    // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
-    val client = StreamVideoBuilder(
-        context = context,
-        apiKey = "k436tyde94hj", // demo API key
-        geo = GEO.GlobalEdgeNetwork,
-        user = user,
-        token = userToken,
-        ensureSingleInstance = false,
-        callServiceConfigRegistry = callServiceConfigRegistry,
-        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-    ).build()
-
     NavHost(
         modifier = modifier
             .fillMaxSize()
@@ -82,14 +47,13 @@ fun LiveNavHost(
         }
 
         composable(LiveScreens.Host.destination, LiveScreens.Host.args) {
-            LiveHost(navController = navController, callId = LiveScreens.Host.getCallId(it), client)
+            LiveHost(navController = navController, callId = LiveScreens.Host.getCallId(it))
         }
 
         composable(LiveScreens.Guest.destination, LiveScreens.Guest.args) {
             LiveAudience(
                 navController = navController,
                 callId = LiveScreens.Guest.getCallId(it),
-                client,
             )
         }
     }

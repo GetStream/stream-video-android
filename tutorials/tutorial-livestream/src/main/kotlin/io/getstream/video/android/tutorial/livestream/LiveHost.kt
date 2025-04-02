@@ -16,9 +16,10 @@
 
 package io.getstream.video.android.tutorial.livestream
 
-import android.widget.Toast
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,8 +32,11 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,41 +45,107 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import io.getstream.log.Priority
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
+import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.User
+import io.getstream.video.android.tutorial.livestream.ui.CidInput
+import io.getstream.video.android.tutorial.livestream.ui.rememberCidInputState
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.threeten.bp.OffsetDateTime
+
+object HostClient {
+    val userId = "Darth_Krayt"
+    val user = User(
+        id = userId, // any string
+        name = "Tutorial", // name and image are used in the UI
+        role = "admin",
+    )
+    val userToken = StreamVideo.devToken(userId)
+    var client: StreamVideo? = null
+
+    fun client(context: Context): StreamVideo {
+        if (client == null) {
+            client = StreamVideoBuilder(
+                context = context,
+                apiKey = "k436tyde94hj", // demo API key
+                geo = GEO.GlobalEdgeNetwork,
+                user = user,
+                token = userToken,
+                ensureSingleInstance = false,
+                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+            ).build()
+        }
+
+        return client!!
+    }
+}
 
 @Composable
 fun LiveHost(
     navController: NavController,
     callId: String,
-    client: StreamVideo,
 ) {
-    val context = LocalContext.current
+    val callServiceConfigRegistry = CallServiceConfigRegistry()
+    callServiceConfigRegistry.register(DefaultCallConfigurations.getLivestreamCallServiceConfig())
 
-    // Step 1 - Update call settings via callConfigRegistry
-    client.state.callConfigRegistry.register(
-        DefaultCallConfigurations.getLivestreamCallServiceConfig(),
-    )
+    // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
+    val client = HostClient.client(LocalContext.current)
+    val cidState = rememberCidInputState(callId)
+    val call: MutableState<Call?> = remember { mutableStateOf<Call?>(null) }
 
-    // Step 2 - join a call, which type is `default` and id is `123`.
-    val call = client.call("livestream", callId)
+    Column {
+        Spacer(Modifier.padding(16.dp))
+        CidInput(cidState)
+        Spacer(Modifier.padding(16.dp))
+        StreamButton(
+            text = "Schedule",
+            onClick = {
+                val cid = StreamCallId.fromCallCid(cidState.value.cid)
+                call.value = client.call(cid.type, cid.id)
+                GlobalScope.launch {
+                    call.value?.create(
+                        startsAt = OffsetDateTime.now().plusMinutes(1),
+                    )
+                }
+            },
+        )
+        // Step 2 - join a call, which type is `default` and id is `123`.
+        if (call.value != null) {
+            val started = remember { mutableStateOf(false) }
+            if (started.value.not()) {
+                StreamButton(
+                    text = "Join and start",
+                    onClick = {
+                        started.value = true
+                        GlobalScope.launch {
+                            call.value?.join()
+                        }
+                    },
+                )
+            }
 
-    LaunchCallPermissions(call = call) {
-        val result = call.join(create = true)
-        result.onError {
-            Toast.makeText(context, "uh oh $it", Toast.LENGTH_SHORT).show()
+            val nonNullCall = call.value!!
+            if (started.value) {
+                LiveHostContent(navController, nonNullCall)
+            }
         }
     }
-    LiveHostContent(navController, call)
 }
 
 @Composable

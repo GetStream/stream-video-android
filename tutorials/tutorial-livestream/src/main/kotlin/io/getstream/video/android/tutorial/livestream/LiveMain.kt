@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import java.util.Date
 
 @Composable
 fun LiveMain(
@@ -54,7 +55,14 @@ fun LiveMain(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var callId by remember { mutableStateOf(TextFieldValue("dE8AsD5Qxqrt")) }
+            val date = Date()
+            val callIdDerived = remember { mutableStateOf("${date.hours}${date.minutes}") }
+
+            var callId by remember {
+                mutableStateOf(
+                    TextFieldValue("livestream:lex_${callIdDerived.value}"),
+                )
+            }
             StreamTextField(
                 modifier = Modifier.width(300.dp),
                 value = callId,
