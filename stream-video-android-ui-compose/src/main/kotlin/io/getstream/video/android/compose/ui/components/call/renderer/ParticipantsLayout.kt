@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -104,7 +105,7 @@ public fun ParticipantsLayout(
         } else {
             ParticipantsRegularGrid(
                 call = call,
-                modifier = modifier,
+                modifier = modifier.testTag("Stream_GridView"),
                 style = style,
                 videoRenderer = videoRenderer,
                 floatingVideoRenderer = floatingVideoRenderer,
@@ -113,7 +114,7 @@ public fun ParticipantsLayout(
     } else {
         ParticipantsScreenSharing(
             call = call,
-            modifier = modifier,
+            modifier = modifier.testTag("Stream_ParticipantsScreenSharingView"),
             session = screenSharing,
             style = ScreenSharingVideoRendererStyle().copy(
                 isFocused = style.isFocused,

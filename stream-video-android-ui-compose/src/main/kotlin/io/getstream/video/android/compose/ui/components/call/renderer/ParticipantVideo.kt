@@ -126,7 +126,8 @@ public fun ParticipantVideo(
             networkQuality = it,
             modifier = Modifier
                 .align(BottomEnd)
-                .height(VideoTheme.dimens.componentHeightM),
+                .height(VideoTheme.dimens.componentHeightM)
+                .testTag("Stream_ParticipantNetworkQualityIndicator"),
         )
     },
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
@@ -149,7 +150,8 @@ public fun ParticipantVideo(
         ParticipantActions(
             Modifier
                 .align(TopStart)
-                .padding(8.dp),
+                .padding(8.dp)
+                .testTag("Stream_ParticipantActionsIcon"),
             actions,
             call,
             participant,
@@ -300,7 +302,8 @@ public fun BoxScope.ParticipantLabel(
                 .padding(
                     vertical = VideoTheme.dimens.spacingXs,
                     horizontal = VideoTheme.dimens.spacingS,
-                ),
+                )
+                .testTag("Stream_ParticipantMicrophone_Enabled_$audioEnabled"),
         )
     },
 ) {
@@ -374,7 +377,8 @@ public fun BoxScope.ParticipantLabel(
                 modifier = Modifier
                     .widthIn(max = componentWidth)
                     .padding(start = VideoTheme.dimens.spacingM)
-                    .align(CenterVertically),
+                    .align(CenterVertically)
+                    .testTag("Stream_ParticipantName"),
                 text = nameLabel,
                 style = VideoTheme.typography.bodyS,
                 color = VideoTheme.colors.basePrimary,

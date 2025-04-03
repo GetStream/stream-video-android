@@ -68,11 +68,16 @@ freeline/
 freeline_project_description.json
 
 # fastlane
+!fastlane/.env
+fastlane/fastlane.log
 fastlane/report.xml
-fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
-fastlane/readme.md
+fastlane/allurectl
+fastlane/recordings
+fastlane/test-parser.jar
+fastlane/AllTests.txt
+allure-results
 
 # Version control
 vcs.xml
@@ -114,3 +119,8 @@ demo-app/src/production/play/
 
 # Environment Variables
 .env.properties
+
+# Stream Video Buddy
+video-buddy-server.log
+video-buddy-console.log
+video-buddy-session.json

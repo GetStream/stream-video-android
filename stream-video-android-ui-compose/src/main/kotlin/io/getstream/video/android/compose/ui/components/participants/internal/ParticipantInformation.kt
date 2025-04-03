@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
@@ -164,6 +165,7 @@ public fun ParticipantInformation(
         }
 
         Text(
+            modifier = Modifier.testTag("Stream_CallActionLabel"),
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,

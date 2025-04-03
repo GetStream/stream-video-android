@@ -153,7 +153,9 @@ public fun CallLobby(
                 hasAudio = isMicrophoneEnabled,
                 soundIndicatorContent = {
                     MicrophoneIndicator(
-                        modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
+                        modifier = Modifier
+                            .padding(horizontal = VideoTheme.dimens.spacingM)
+                            .testTag("Stream_UserMicrophone_Enabled_$isMicrophoneEnabled"),
                         isMicrophoneEnabled = isMicrophoneEnabled,
                     )
                 },

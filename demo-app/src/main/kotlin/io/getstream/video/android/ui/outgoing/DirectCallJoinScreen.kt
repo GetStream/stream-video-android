@@ -43,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -159,15 +160,16 @@ private fun Body(
                         // Floating button
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(bottom = 10.dp),
+                            .padding(bottom = 10.dp)
+                            .testTag("Stream_AudioCallButton"),
                         enabled = users.any { it.isSelected },
                         icon = Icons.Default.Call,
                         text = "Audio call",
                         style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
                         onClick = {
                             onStartCallClick(
-                                // StreamCallId("audio_call", UUID.randomUUID().toString()),
-                                StreamCallId("default", UUID.randomUUID().toString()),
+                                StreamCallId("audio_call", UUID.randomUUID().toString()),
+//                                StreamCallId("default", UUID.randomUUID().toString()),
                                 users
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
@@ -179,7 +181,8 @@ private fun Body(
                         // Floating button
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(bottom = 10.dp),
+                            .padding(bottom = 10.dp)
+                            .testTag("Stream_VideoCallButton"),
                         enabled = users.any { it.isSelected },
                         icon = Icons.Default.VideoCall,
                         text = "Video call",

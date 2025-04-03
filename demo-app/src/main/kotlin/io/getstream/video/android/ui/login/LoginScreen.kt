@@ -271,7 +271,9 @@ private fun LoginContent(
                     when (it) {
                         "built-in" -> {
                             StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_BuiltInUserSignIn"),
                                 icon = Icons.Outlined.Adb,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.builtin_user_sign_in),
@@ -283,7 +285,9 @@ private fun LoginContent(
                         "google" -> {
                             StreamButton(
                                 icon = ImageVector.vectorResource(R.drawable.google_button_logo),
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_GoogleSignIn"),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_google),
                                 style = ButtonStyles.primaryButtonStyle()
@@ -300,7 +304,9 @@ private fun LoginContent(
 
                         "email" -> {
                             StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_EmailSignIn"),
                                 icon = Icons.Default.Email,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_email),
@@ -313,7 +319,9 @@ private fun LoginContent(
 
                         "guest" -> {
                             StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_RandomUserSignIn"),
                                 icon = Icons.Outlined.GroupAdd,
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.random_user_sign_in),

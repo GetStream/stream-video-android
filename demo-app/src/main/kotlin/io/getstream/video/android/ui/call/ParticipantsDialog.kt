@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,9 +76,14 @@ public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
                 ),
         ) {
             ParticipantsList(call = call)
-            IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = {
-                onDismiss()
-            }) {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .testTag("Stream_CloseButton"),
+                onClick = {
+                    onDismiss()
+                },
+            ) {
                 Icon(
                     tint = Color.White,
                     imageVector = Icons.Default.Close,
@@ -143,7 +149,9 @@ fun ParticipantsListContent(
                     val userName by participant.userNameOrId.collectAsStateWithLifecycle()
                     val userImage by participant.image.collectAsStateWithLifecycle()
                     UserAvatar(
-                        modifier = Modifier.size(VideoTheme.dimens.genericXxl),
+                        modifier = Modifier
+                            .size(VideoTheme.dimens.genericXxl)
+                            .testTag("Stream_ParticipantsListUserAvatar"),
                         userImage = userImage,
                         userName = userName,
                         isShowingOnlineIndicator = false,
@@ -151,7 +159,8 @@ fun ParticipantsListContent(
                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                     Text(
                         modifier = Modifier
-                            .padding(start = 8.dp),
+                            .padding(start = 8.dp)
+                            .testTag("Stream_ParticipantsListUserName"),
                         text = userName,
                         style = VideoTheme.typography.bodyM,
                         color = VideoTheme.colors.basePrimary,
@@ -172,6 +181,8 @@ fun ParticipantsListContent(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
+                        modifier = Modifier
+                            .testTag("Stream_ParticipantsListUserMicrophone_Enabled_$audioEnabled"),
                         tint = VideoTheme.colors.basePrimary,
                         imageVector = iconAudio,
                         contentDescription = null,
@@ -185,6 +196,8 @@ fun ParticipantsListContent(
                         Icons.Default.VideocamOff
                     }
                     Icon(
+                        modifier = Modifier
+                            .testTag("Stream_ParticipantsListUserCamera_Enabled_$videoEnabled"),
                         tint = VideoTheme.colors.basePrimary,
                         imageVector = iconVideo,
                         contentDescription = null,

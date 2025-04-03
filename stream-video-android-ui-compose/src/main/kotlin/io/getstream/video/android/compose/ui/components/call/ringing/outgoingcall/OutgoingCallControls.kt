@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
@@ -52,6 +53,8 @@ public fun OutgoingCallControls(
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         ToggleMicrophoneAction(
+            modifier = Modifier
+                .testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
@@ -60,6 +63,8 @@ public fun OutgoingCallControls(
 
         if (isVideoCall) {
             ToggleCameraAction(
+                modifier = Modifier
+                    .testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
                 offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
                 onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
                 isCameraEnabled = isCameraEnabled,
@@ -68,6 +73,7 @@ public fun OutgoingCallControls(
         }
 
         CancelCallAction(
+            modifier = Modifier.testTag("Stream_HangUpButton"),
             onCallAction = onCallAction,
         )
     }

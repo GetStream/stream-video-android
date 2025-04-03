@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
@@ -298,6 +299,7 @@ fun CallScreen(
                                     )
                                     Row {
                                         ToggleAction(
+                                            modifier = Modifier.testTag("Stream_CallViewButton"),
                                             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
                                             isActionActive = !isShowingLayoutChooseMenu,
                                             iconOnOff = Pair(iconOnOff, iconOnOff),
@@ -313,12 +315,17 @@ fun CallScreen(
                                         )
 
                                         FlipCameraAction(
+                                            modifier = Modifier.testTag(
+                                                "Stream_FlipCameraIcon_${call.camera.direction}",
+                                            ),
                                             onCallAction = { call.camera.flip() },
                                         )
                                     }
                                 },
                                 trailingContent = {
-                                    LeaveCallAction {
+                                    LeaveCallAction(
+                                        modifier = Modifier.testTag("Stream_HangUpButton"),
+                                    ) {
                                         call.leave()
                                     }
                                 },
@@ -341,6 +348,10 @@ fun CallScreen(
                             ) {
                                 Row {
                                     ToggleSettingsAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_CallSettingsToggle_Open_$isShowingSettingMenu",
+                                            ),
                                         isShowingSettings = !isShowingSettingMenu,
                                         onCallAction = {
                                             isShowingSettingMenu = !isShowingSettingMenu
@@ -366,9 +377,17 @@ fun CallScreen(
                                                 }
                                             },
                                         )
-                                        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                        Spacer(
+                                            modifier = Modifier.size(
+                                                VideoTheme.dimens.spacingM,
+                                            ),
+                                        )
                                     }
                                     ToggleMicrophoneAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled",
+                                            ),
                                         isMicrophoneEnabled = isMicrophoneEnabled,
                                         onCallAction = {
                                             call.microphone.setEnabled(
@@ -378,6 +397,10 @@ fun CallScreen(
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ToggleCameraAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_CameraToggle_Enabled_$isCameraEnabled",
+                                            ),
                                         isCameraEnabled = isCameraEnabled,
                                         onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
@@ -393,6 +416,7 @@ fun CallScreen(
                                     }
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ChatDialogAction(
+                                        modifier = Modifier.testTag("Stream_ChatButton"),
                                         messageCount = unreadCount,
                                         onCallAction = { scope.launch { chatState.show() } },
                                     )
@@ -401,7 +425,7 @@ fun CallScreen(
                         },
                         videoRenderer = { modifier, call, participant, style ->
                             ParticipantVideo(
-                                modifier = modifier,
+                                modifier = modifier.testTag("Stream_ParticipantVideoView"),
                                 call = call,
                                 participant = participant,
                                 style = style,
@@ -430,7 +454,8 @@ fun CallScreen(
                                         ParticipantVideo(
                                             modifier = Modifier
                                                 .fillMaxSize()
-                                                .clip(VideoTheme.shapes.dialog),
+                                                .clip(VideoTheme.shapes.dialog)
+                                                .testTag("Stream_FloatingVideoView"),
                                             call = call,
                                             participant = participant,
                                             reactionContent = {

@@ -235,7 +235,7 @@ private fun CallJoinHeader(
         }
 
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("Stream_UserName"),
             color = Color.White,
             text = user?.userNameOrId.orEmpty(),
             maxLines = 1,
@@ -257,7 +257,7 @@ private fun CallJoinHeader(
                         y = buttonBounds.bottom.toInt(),
                     )
                     buttonSize = coordinates.size
-                },
+                }.testTag("Stream_SettingsIcon"),
                 toggleState = rememberUpdatedState(newValue = ToggleableState(showMenu)),
                 onIcon = Icons.Default.Settings,
                 onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
@@ -288,7 +288,9 @@ private fun CallJoinHeader(
                     ) {
                         if (showDirectCall) {
                             StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_DirectCallButton"),
                                 text = stringResource(id = R.string.direct_call),
                                 icon = Icons.Default.Call,
                                 style = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
@@ -301,7 +303,9 @@ private fun CallJoinHeader(
                         Spacer(modifier = Modifier.width(5.dp))
                         if (!isProduction) {
                             StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_SignOutButton"),
                                 icon = Icons.AutoMirrored.Filled.Logout,
                                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                                 text = stringResource(id = R.string.sign_out),
@@ -384,7 +388,7 @@ private fun CallActualContent(
         StreamButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("start_new_call"),
+                .testTag("Stream_StartNewCallButton"),
             text = stringResource(id = R.string.start_a_new_call),
             icon = Icons.Default.VideoCall,
             onClick = { onNewCall() },
@@ -394,7 +398,7 @@ private fun CallActualContent(
             style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("scan_qr_code"),
+                .testTag("Stream_ScanQrCodeButton"),
             text = stringResource(id = R.string.scan_qr_code),
             icon = Icons.Default.QrCodeScanner,
             onClick = { gotoQR() },
@@ -476,7 +480,8 @@ private fun JoinCallForm(
         StreamTextField(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .testTag("Stream_CallIdInputField"),
             onValueChange = { callId = it },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
@@ -497,7 +502,7 @@ private fun JoinCallForm(
             modifier = Modifier
                 .padding(start = 16.dp)
                 .fillMaxHeight()
-                .testTag("join_call"),
+                .testTag("Stream_JoinCallButton"),
             onClick = {
                 joinCall(callId.text)
             },
