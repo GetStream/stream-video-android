@@ -505,7 +505,7 @@ public class RtcSession internal constructor(
             publisher?.let {
                 if (!it.isHealthy() || forceRestart) {
                     logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
-                    it.connection.restartIce()
+                    it.restartIce()
                 }
             }
         }
@@ -1173,7 +1173,7 @@ public class RtcSession internal constructor(
                             }
 
                             PeerType.PEER_TYPE_SUBSCRIBER -> {
-                                subscriber?.connection?.restartIce()
+                                requestSubscriberIceRestart()
                             }
                         }
                     }
@@ -1657,9 +1657,7 @@ public class RtcSession internal constructor(
                     // We could not reuse the peer connections.
                     call.rejoin()
                 } else {
-                    subscriber?.connection?.restartIce()
                     publisher?.restartIce()
-
                     sendCallStats(
                         report = call.collectStats(),
                         reconnectionTimeSeconds = Pair(
