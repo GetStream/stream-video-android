@@ -69,7 +69,7 @@ data class CallResponse(
     val createdBy: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
     @Json(name = "egress")
     val egress: io.getstream.android.video.generated.models.EgressResponse,
