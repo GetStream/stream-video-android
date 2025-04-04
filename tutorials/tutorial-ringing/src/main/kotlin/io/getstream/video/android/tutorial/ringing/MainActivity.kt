@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
@@ -97,12 +98,17 @@ class MainActivity : ComponentActivity() {
                         selectedUser = user
                     })
 
-                    else -> HomeScreen(onLogoutClick = {
-                        RingingApp.logout()
-                        selectedUser = null
-                    }, onDialClick = { callees ->
-                        startOutgoingCallActivity(callees)
-                    })
+                    else -> HomeScreen(
+                        onLogoutClick = {
+                            lifecycleScope.launch {
+                                RingingApp.logout()
+                                selectedUser = null
+                            }
+                        },
+                        onDialClick = { callees ->
+                            startOutgoingCallActivity(callees)
+                        },
+                    )
                 }
             }
         }
@@ -134,10 +140,9 @@ class MainActivity : ComponentActivity() {
         val intent = StreamCallActivity.callIntent(
             context = this,
             cid = StreamCallId.fromCallCid(call.cid),
-            members = emptyList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_INCOMING_CALL,
-            clazz = VideoCallActivity::class.java,
+            clazz = ComposeStreamCallActivity::class.java,
         )
         startActivity(intent)
     }
@@ -149,10 +154,7 @@ class MainActivity : ComponentActivity() {
             members = callees.toList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_OUTGOING_CALL,
-            clazz = VideoCallActivity::class.java,
-            extraData = Bundle().apply {
-                putBoolean("is_video_call", true)
-            },
+            clazz = ComposeStreamCallActivity::class.java,
         )
         startActivity(intent)
     }
@@ -160,7 +162,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoginScreen(onUserSelected: (TutorialUser) -> Unit) {
-    // step1 - select a user.
     Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.baseTertiary) {
         Column(
             modifier = Modifier.fillMaxSize(),
