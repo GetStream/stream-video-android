@@ -450,7 +450,7 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.rejoin()
+                        call.fastReconnect()
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
@@ -934,7 +934,7 @@ public class RtcSession internal constructor(
             } else {
                 StreamPeerType.SUBSCRIBER
             },
-            mediaConstraints = MediaConstraints(),
+            mediaConstraints = buildAudioConstraints(),
         ).apply {
             addTempTransceivers(this)
         }
