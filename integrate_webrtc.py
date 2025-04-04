@@ -84,7 +84,7 @@ def update_compile_options(project_root):
             with open(file_path, 'r') as file:
                 file_content = file.read()
 
-                file_content = file_content.replace("JavaVersion.VERSION_11", "JavaVersion.VERSION_17")
+                file_content = file_content.replace("JavaVersion.VERSION_11", "JavaVersion.VERSION_21")
 
                 with open(file_path, 'w') as file:
                     file.write(file_content)

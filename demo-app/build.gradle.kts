@@ -38,11 +38,6 @@ plugins {
     id(libs.plugins.baseline.profile.get().pluginId)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 android {
     namespace = "io.getstream.video.android"
     compileSdk = Configuration.compileSdk
