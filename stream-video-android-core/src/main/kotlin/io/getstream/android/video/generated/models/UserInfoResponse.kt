@@ -45,5 +45,5 @@ data class UserInfoResponse(
     val roles: kotlin.collections.List<kotlin.String>,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>,
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 )
