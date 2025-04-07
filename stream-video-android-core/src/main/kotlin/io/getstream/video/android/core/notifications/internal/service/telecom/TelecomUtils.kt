@@ -20,6 +20,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.telecom.CallEndpoint
@@ -27,16 +28,30 @@ import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toUri
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.model.StreamCallId
+import kotlin.math.abs
+import kotlin.math.absoluteValue
 
-fun isTelecomIntegrationAvailable(context: Context): Boolean {
+private var cachedTelecomManager: TelecomManager? = null
+
+fun isTelecomSupported(context: Context): Boolean {
     try {
-        context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager ?: return false
+        getTelecomManager(context) ?: return false
         return true
     } catch (e: Error) {
         return false
     }
+}
+
+fun getTelecomManager(context: Context): TelecomManager? {
+    if (cachedTelecomManager == null) {
+        cachedTelecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
+    }
+    return cachedTelecomManager
 }
 
 fun getMyPhoneAccountHandle(context: Context): PhoneAccountHandle {
@@ -81,6 +96,17 @@ fun registerMyPhoneAccount(context: Context) {
         .build()
 
     telecomManager.registerPhoneAccount(phoneAccount)
+}
+
+internal fun getTelecomAddress(cid: String): Uri = "sip:${abs(cid.hashCode())}@getstream.io".toUri()
+
+internal fun notificationIdFromCallId(callId: StreamCallId) = callId.hashCode().absoluteValue
+
+internal val TelecomConnection.relatedNotificationId
+    get() = callId.hashCode().absoluteValue
+
+internal fun TelecomConnection.cancelRelatedNotification() {
+    NotificationManagerCompat.from(context).cancel(relatedNotificationId)
 }
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)

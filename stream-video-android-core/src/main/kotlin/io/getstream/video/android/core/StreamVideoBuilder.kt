@@ -31,7 +31,7 @@ import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
-import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomIntegrationAvailable
+import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomSupported
 import io.getstream.video.android.core.notifications.internal.service.telecom.registerMyPhoneAccount
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
@@ -214,7 +214,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // Register with Telecom
         safeCall {
-            if (isTelecomIntegrationAvailable(context)) {
+            if (isTelecomSupported(context)) {
                 registerMyPhoneAccount(context)
             }
         }

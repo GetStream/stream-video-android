@@ -20,7 +20,6 @@ import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.PowerManager
-import android.telecom.DisconnectCause
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
@@ -77,7 +76,6 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.notifications.internal.service.telecom.telecomConnections
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -798,13 +796,6 @@ public class Call(
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
-
-        telecomConnections.remove(cid).let {
-            logger.d { "[leave] #telecom; Will disconnect & destroy connection ${it?.hashCode()}" }
-            it?.setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
-            it?.destroy()
-        }
-
         cleanup()
     }
 
@@ -1227,10 +1218,8 @@ public class Call(
         logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
+        clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
         clientImpl.state.maybeStopForegroundService(call = this)
-
-        telecomConnections[cid]?.setActive()
 
         return clientImpl.accept(type, id)
     }

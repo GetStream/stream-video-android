@@ -5747,8 +5747,10 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun handleEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
-	public final fun removeRingingCall ()V
+	public final fun removeRingingCall (Z)V
+	public static synthetic fun removeRingingCall$default (Lio/getstream/video/android/core/ClientState;ZILjava/lang/Object;)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
+	public final fun setActiveCall2 (Lio/getstream/video/android/core/Call;)V
 }
 
 public abstract interface class io/getstream/video/android/core/ConnectionState {
@@ -10085,7 +10087,8 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 
 public final class io/getstream/video/android/core/notifications/internal/service/telecom/TelecomUtilsKt {
 	public static final fun getMyPhoneAccountHandle (Landroid/content/Context;)Landroid/telecom/PhoneAccountHandle;
-	public static final fun isTelecomIntegrationAvailable (Landroid/content/Context;)Z
+	public static final fun getTelecomManager (Landroid/content/Context;)Landroid/telecom/TelecomManager;
+	public static final fun isTelecomSupported (Landroid/content/Context;)Z
 	public static final fun promptEnablePhoneAccount (Landroid/content/Context;)V
 	public static final fun registerMyPhoneAccount (Landroid/content/Context;)V
 	public static final fun toStreamAudioDevice (Landroid/telecom/CallEndpoint;)Lio/getstream/video/android/core/audio/StreamAudioDevice;

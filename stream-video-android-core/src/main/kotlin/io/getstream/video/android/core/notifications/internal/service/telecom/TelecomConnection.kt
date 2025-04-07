@@ -25,7 +25,9 @@ import android.telecom.CallEndpoint
 import android.telecom.CallEndpointException
 import android.telecom.Connection
 import android.telecom.DisconnectCause
+import android.telecom.TelecomManager
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallRejectedEvent
@@ -35,18 +37,19 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 internal class TelecomConnection(
-    private val context: Context,
-    private val callId: StreamCallId,
-    private val isIncoming: Boolean,
+    val context: Context,
+    val callId: StreamCallId,
+    val callConfig: CallServiceConfig,
 ) : Connection() {
 
-    private val logger by taggedLogger("VoipConnection")
+    private val logger by taggedLogger("TelecomConnection")
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     private var availableEndpoints: List<CallEndpoint> = emptyList()
@@ -57,7 +60,6 @@ internal class TelecomConnection(
         }
 
     init {
-        logger.i { "[init] callId: ${callId.id}, isIncoming: $isIncoming" }
         // For example: connect to your StreamVideo call if needed
         subscribeToCallEvents()
     }
@@ -172,6 +174,7 @@ internal class TelecomConnection(
         super.onCallEvent(event, extras)
         logger.i { "Telecom event: $event" }
     }
+
     override fun onCallAudioStateChanged(state: CallAudioState) {
         super.onCallAudioStateChanged(state)
         logger.i {
@@ -209,7 +212,45 @@ internal class TelecomConnection(
         }
     }
 
+    fun cleanUp() {
+        logger.d { "[cleanUp] #telecom; Hash: ${hashCode()}, cid: ${callId.cid}" }
+
+        setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+        destroy()
+        NotificationManagerCompat.from(context).cancel(notificationIdFromCallId(callId))
+    }
+
     companion object {
+
+        fun createAndStore(
+            context: Context,
+            callId: StreamCallId,
+            callConfig: CallServiceConfig,
+            displayName: String = "",
+            isRinging: Boolean = false,
+            isDialing: Boolean = false,
+        ): TelecomConnection {
+            return TelecomConnection(
+                context = context,
+                callId = callId,
+                callConfig = callConfig,
+            ).apply {
+                setAddress(getTelecomAddress(callId.cid), TelecomManager.PRESENTATION_ALLOWED)
+                setCallerDisplayName(
+                    displayName,
+                    TelecomManager.PRESENTATION_ALLOWED,
+                )
+
+                if (isRinging) {
+                    setRinging()
+                } else if (isDialing) {
+                    setDialing()
+                }
+            }.also {
+                telecomConnections[callId.cid] = it
+            }
+        }
+
         fun setDeviceListener(listener: DeviceListener): AudioHandler {
             return object : AudioHandler {
                 override fun start() {

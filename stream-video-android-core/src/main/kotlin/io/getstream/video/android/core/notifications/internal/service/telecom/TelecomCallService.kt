@@ -17,6 +17,8 @@
 package io.getstream.video.android.core.notifications.internal.service.telecom
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -31,14 +33,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.telecom.Connection
+import android.telecom.Connection.STATE_RINGING
 import android.telecom.ConnectionRequest
 import android.telecom.ConnectionService
 import android.telecom.DisconnectCause
 import android.telecom.PhoneAccountHandle
-import android.telecom.TelecomManager
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallRejectedEvent
@@ -99,7 +101,9 @@ internal class TelecomCallService : ConnectionService() {
             NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME,
         )
 
-        logger.i { "[onCreateIncomingConnection] callId: $intentCallId, name: $intentCallDisplayName" }
+        logger.i {
+            "#telecom; [onCreateIncomingConnection] callId: $intentCallId, cid hash: ${intentCallId.hashCode()}, name: $intentCallDisplayName"
+        }
 
         // 2) If no callId or StreamVideo client, we can reject or return a failed Connection
         val streamVideoClient = StreamVideo.instanceOrNull() as? StreamVideoClient
@@ -114,25 +118,16 @@ internal class TelecomCallService : ConnectionService() {
 
         // 3) Create a custom Connection
         val callId = StreamCallId.fromCallCid(intentCallId)
-        val connection = TelecomConnection(
+        val connection = TelecomConnection.createAndStore(
             context = applicationContext,
             callId = callId,
-            isIncoming = true,
-            // displayName = intentCallDisplayName ?: "Incoming call"
-        )
-        connection.setAddress(Uri.parse("sip:$callId"), TelecomManager.PRESENTATION_ALLOWED)
-        connection.setCallerDisplayName(
-            intentCallDisplayName,
-            TelecomManager.PRESENTATION_ALLOWED,
+            callConfig = streamVideo.callServiceConfigRegistry.get(callId.type),
+            displayName = intentCallDisplayName ?: "Unknown caller",
+            isRinging = true,
         )
 
-        // 4) Mark as RINGING so the system recognizes an incoming call (if not self-managed).
-        connection.setRinging()
+        showIncomingNotification(connection, streamVideo)
 
-        // 5) Optionally show a custom notification if you still want a heads-up
-        showIncomingNotification(callId, intentCallDisplayName)
-
-        // 6) Copy your old init logic (e.g. connect to call, ring sound)
         serviceScope.launch {
             initializeCallAndSocket(streamVideo, callId)
             updateRingingCall(streamVideo, callId, RingingState.Incoming())
@@ -144,7 +139,6 @@ internal class TelecomCallService : ConnectionService() {
         logger.d {
             "[onCreateIncomingConnection] #telecom; Created TelecomConnection ${connection.hashCode()}"
         }
-        telecomConnections[callId.cid] = connection
 
         return connection
     }
@@ -156,15 +150,15 @@ internal class TelecomCallService : ConnectionService() {
         connectionManagerPhoneAccount: PhoneAccountHandle?,
         request: ConnectionRequest,
     ): Connection {
-        logger.i { "[onCreateOutgoingConnection]" }
-
         val extras: Bundle = request.extras
         val intentCallId = extras.getString(NotificationHandler.INTENT_EXTRA_CALL_CID)
         val intentCallDisplayName = extras.getString(
             NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME,
         )
 
-        logger.i { "[onCreateOutgoingConnection] callId: $intentCallId, name: $intentCallDisplayName" }
+        logger.i {
+            "[onCreateOutgoingConnection] #telecom; callId: $intentCallId, name: $intentCallDisplayName"
+        }
 
         // If no callId or no client
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
@@ -173,25 +167,17 @@ internal class TelecomCallService : ConnectionService() {
             return Connection.createFailedConnection(DisconnectCause(DisconnectCause.ERROR))
         }
 
-        // Create the Connection
         val callId = StreamCallId.fromCallCid(intentCallId)
-        val connection = TelecomConnection(
+        val connection = TelecomConnection.createAndStore(
             context = applicationContext,
             callId = callId,
-            isIncoming = false,
-            // displayName = intentCallDisplayName ?: "Outgoing call"
+            callConfig = streamVideo.callServiceConfigRegistry.get(callId.type),
+            displayName = intentCallDisplayName ?: getString(R.string.stream_video_outgoing_call_notification_title),
+            isDialing = true,
         )
-        connection.setAddress(Uri.parse("sip:$callId"), TelecomManager.PRESENTATION_ALLOWED)
-        connection.setCallerDisplayName(
-            intentCallDisplayName ?: getString(R.string.stream_video_outgoing_call_notification_title),
-            TelecomManager.PRESENTATION_ALLOWED,
-        )
-
-        // Mark it as DIALING
-        connection.setDialing()
 
         // Optionally show a custom notification if you want
-        showOutgoingNotification(callId, intentCallDisplayName)
+        showOutgoingNotification(connection, streamVideo)
 
         // Copy your old "outgoing" logic
         serviceScope.launch {
@@ -200,6 +186,11 @@ internal class TelecomCallService : ConnectionService() {
             observeCall(callId, streamVideo)
             registerToggleCameraBroadcastReceiver()
         }
+
+        logger.d {
+            "[onCreateOutgoingConnection] #telecom; Created TelecomConnection ${connection.hashCode()}"
+        }
+
         return connection
     }
 
@@ -421,6 +412,10 @@ internal class TelecomCallService : ConnectionService() {
                             streamVideo.userId,
                             call.state.ringingState.value,
                         )
+
+                        telecomConnections[callId.cid]?.let {
+                            showOngoingNotification(it, streamVideo)
+                        }
                     }
                     is CallRejectedEvent -> {
                         handleIncomingCallRejectedByMeOrCaller(
@@ -430,10 +425,12 @@ internal class TelecomCallService : ConnectionService() {
                             streamVideo.state.activeCall.value != null,
                             callId,
                         )
+
+                        cancelNotification(notificationIdFromCallId(callId))
                     }
                     is CallEndedEvent -> {
                         stopCallSound()
-                        endCall(callId)
+                        cancelNotification(notificationIdFromCallId(callId))
                     }
                 }
             }
@@ -523,48 +520,84 @@ internal class TelecomCallService : ConnectionService() {
     // NOTIFICATION LOGIC (OPTIONAL)
     // ---------------------------------------------------------------------------------------
 
-    /**
-     * If you still want to show a custom notification for incoming calls, place that code here.
-     * This is your old logic from CallService that calls `streamVideo.getRingingCallNotification(...)`
-     */
-    private fun showIncomingNotification(callId: StreamCallId?, displayName: String?) {
-        // e.g.
-        if (callId == null) return
-        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return
+    private fun showIncomingNotification(connection: TelecomConnection, streamVideo: StreamVideo) {
         val notification = streamVideo.getRingingCallNotification(
             ringingState = RingingState.Incoming(),
-            callId = callId,
-            callDisplayName = displayName,
+            callId = connection.callId,
+            callDisplayName = connection.callerDisplayName,
             shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
         )
+
         if (notification != null) {
-            // Just post it; no foreground logic needed
-            val hasPermission = ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS,
-            ) == PackageManager.PERMISSION_GRANTED
-            if (hasPermission) {
-                NotificationManagerCompat.from(this).notify(callId.hashCode(), notification)
+            postNotification(notification, connection, streamVideo)
+        }
+    }
+
+    private fun showOutgoingNotification(connection: TelecomConnection, streamVideo: StreamVideo) {
+        val notification = streamVideo.getRingingCallNotification(
+            ringingState = RingingState.Outgoing(),
+            callId = connection.callId,
+            callDisplayName = connection.callerDisplayName ?: getString(R.string.stream_video_outgoing_call_notification_title),
+        )
+
+        if (notification != null) {
+            postNotification(notification, connection, streamVideo)
+        }
+    }
+
+    private fun showOngoingNotification(connection: TelecomConnection, streamVideo: StreamVideo) {
+        val notification = streamVideo.getOngoingCallNotification(
+            callId = connection.callId,
+            isOutgoingCall = false,
+        )
+
+        if (notification != null) {
+            postNotification(notification, connection, streamVideo)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun postNotification(
+        notification: Notification,
+        connection: TelecomConnection,
+        streamVideo: StreamVideo,
+    ) {
+        if (!hasNotificationsPermission()) {
+            logger.e { "[postNotification] #telecom; POST_NOTIFICATIONS permission not granted" }
+            return
+        } else {
+            val notify: (Notification) -> Unit = {
+                logger.i {
+                    "[postNotification] #telecom; Posting notification for connection ${connection.hashCode()}"
+                }
+                NotificationManagerCompat
+                    .from(applicationContext)
+                    .notify(notificationIdFromCallId(connection.callId), it)
+            }
+
+            cancelNotification(notificationIdFromCallId(connection.callId))
+
+            if (connection.state == STATE_RINGING) {
+                notify(notification)
+            } else {
+                if (connection.callConfig.runCallServiceInForeground) {
+                    notify(notification)
+                }
             }
         }
     }
 
-    private fun showOutgoingNotification(callId: StreamCallId?, displayName: String?) {
-        if (callId == null) return
-        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return
-        val notification = streamVideo.getRingingCallNotification(
-            ringingState = RingingState.Outgoing(),
-            callId = callId,
-            callDisplayName = displayName ?: getString(R.string.stream_video_outgoing_call_notification_title),
-        )
-        if (notification != null) {
-            val hasPermission = ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS,
-            ) == PackageManager.PERMISSION_GRANTED
-            if (hasPermission) {
-                NotificationManagerCompat.from(this).notify(callId.hashCode(), notification)
-            }
-        }
+    private fun cancelNotification(notificationId: Int) {
+        logger.d { "[cancelNotification] #telecom;" }
+        NotificationManagerCompat.from(applicationContext).cancel(notificationId)
     }
+
+    private fun hasNotificationsPermission(): Boolean =
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            true
+        } else {
+            ContextCompat.checkSelfPermission(
+                applicationContext, Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        }
 }

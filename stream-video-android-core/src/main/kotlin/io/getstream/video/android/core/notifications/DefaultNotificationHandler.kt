@@ -54,7 +54,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.telecom.getMyPhoneAccountHandle
-import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomIntegrationAvailable
+import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomSupported
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -113,7 +113,7 @@ public open class DefaultNotificationHandler(
         val callConfig = configRegistry?.get(type)
 
         // 1) Check if Telecom-based calls are supported/enabled
-        if (callConfig?.enableTelecomIntegration == true && isTelecomIntegrationAvailable(application)) {
+        if (callConfig?.enableTelecomIntegration == true && isTelecomSupported(application)) {
             try {
                 // Invoke Telecom
                 val telecomManager = application.getSystemService(
@@ -139,10 +139,10 @@ public open class DefaultNotificationHandler(
                 } else {
                     logger.d { "[onRingingCall] #telecom; Incoming call was not permitted" }
 
-                    val call = streamVideo?.call(callId.type, callId.id)
-                    streamVideo?.scope?.launch {
-                        call?.reject(reason = RejectReason.Busy)
-                        call?.leave()
+                    val call = streamVideo.call(callId.type, callId.id)
+                    streamVideo.scope.launch {
+                        call.reject(reason = RejectReason.Busy)
+                        call.leave()
                     }
                 }
             } catch (e: Exception) {
@@ -416,6 +416,7 @@ public open class DefaultNotificationHandler(
                 // If the intent is configured, clicking the notification will return to the call
                 if (onClickIntent != null) {
                     it.setContentIntent(onClickIntent)
+                    it.setFullScreenIntent(onClickIntent, false)
                 } else {
                     logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
                 }

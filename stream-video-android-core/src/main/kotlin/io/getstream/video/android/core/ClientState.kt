@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core
 
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.telecom.TelecomManager
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.CallCreatedEvent
@@ -24,7 +27,14 @@ import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.telecom.TelecomConnection
+import io.getstream.video.android.core.notifications.internal.service.telecom.getMyPhoneAccountHandle
+import io.getstream.video.android.core.notifications.internal.service.telecom.getTelecomAddress
+import io.getstream.video.android.core.notifications.internal.service.telecom.getTelecomManager
+import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomSupported
+import io.getstream.video.android.core.notifications.internal.service.telecom.telecomConnections
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -148,31 +158,104 @@ class ClientState(private val client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
+
+        if (isTelecomSupported(client.context)) {
+            val connection = telecomConnections[call.cid] ?: TelecomConnection.createAndStore(
+                context = client.context.applicationContext,
+                callId = StreamCallId.fromCallCid(call.cid),
+                callConfig = callConfigRegistry.get(call.type),
+            )
+            connection.setActive()
+        } else {
+            removeRingingCall()
+            maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+        }
+
+        logger.d {
+            "[setActiveCall] #telecom; cid: ${call.cid}, setActive was called"
+        }
+    }
+
+    fun setActiveCall2(call: Call) {
+        this._activeCall.value = call
         removeRingingCall()
-        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+//        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+
+        val connection = (
+            telecomConnections[call.cid] ?: TelecomConnection.createAndStore(
+                context = client.context.applicationContext,
+                callId = StreamCallId.fromCallCid(call.cid),
+                callConfig = callConfigRegistry.get(call.type),
+            )
+            )
+        connection.setActive()
+
+        logger.d {
+            "[setActiveCall] #telecom; connection: ${connection.hashCode()}, cid: ${call.cid}, setActive was called"
+        }
     }
 
     fun removeActiveCall() {
-        _activeCall.value?.let {
-            maybeStopForegroundService(it)
+        _activeCall.value?.let { call ->
+            if (isTelecomSupported(client.context)) {
+                telecomConnections.remove(call.cid)?.cleanUp()
+            } else {
+                maybeStopForegroundService(call)
+            }
+
+            this._activeCall.value = null
         }
-        this._activeCall.value = null
+
         removeRingingCall()
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
-        if (ringingState is RingingState.Outgoing) {
-            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
-        }
 
-        // TODO: behaviour if you are already in a call
+        if (ringingState is RingingState.Outgoing) {
+            if (isTelecomSupported(client.context)) {
+                placeTelecomCall(call)
+            } else {
+                maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
+            }
+        }
     }
 
-    fun removeRingingCall() {
-        ringingCall.value?.let {
-            maybeStopForegroundService(it)
+    @SuppressLint("MissingPermission")
+    private fun placeTelecomCall(call: Call) {
+        val context = client.context
+        val phoneAccountHandle = getMyPhoneAccountHandle(context)
+        val telecomManager = getTelecomManager(context)
+
+        val extras = Bundle().apply {
+            putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle)
+            putBundle(
+                TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS,
+                Bundle().apply {
+                    putString(NotificationHandler.INTENT_EXTRA_CALL_CID, call.cid)
+                    putString(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME, "Calling...")
+                },
+            )
         }
+
+        logger.d {
+            "[placeTelecomCall] #telecom; telecomManager not null: ${telecomManager != null}, cid: ${call.cid}, cid hash: ${call.cid.hashCode()}, will placeCall"
+        }
+
+        telecomManager?.placeCall(getTelecomAddress(call.cid), extras)
+    }
+
+    fun removeRingingCall(willTransitionToOngoing: Boolean = false) {
+        ringingCall.value?.let {
+            if (isTelecomSupported(client.context)) {
+                if (!willTransitionToOngoing) {
+                    telecomConnections.remove(it.cid)?.cleanUp()
+                }
+            } else {
+                maybeStopForegroundService(it)
+            }
+        }
+
         _ringingCall.value = null
     }
 
