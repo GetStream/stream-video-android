@@ -193,18 +193,6 @@ internal val iceRestartConstraints = MediaConstraints().apply {
 }
 
 @JvmSynthetic
-internal fun buildMediaConstraints(): MediaConstraints {
-    return MediaConstraints().apply {
-        mandatory.addAll(
-            listOf(
-                MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"),
-                MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"),
-            ),
-        )
-    }
-}
-
-@JvmSynthetic
 internal fun buildAudioConstraints(): MediaConstraints {
     val mediaConstraints = MediaConstraints()
     val items = listOf(

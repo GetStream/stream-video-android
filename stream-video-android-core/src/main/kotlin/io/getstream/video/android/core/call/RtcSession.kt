@@ -72,9 +72,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
-import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
-import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -106,7 +104,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
-import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
@@ -330,14 +327,6 @@ public class RtcSession internal constructor(
 
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
     // internal var publisher: StreamPeerConnection? = null
-
-    private val mediaConstraints: MediaConstraints by lazy {
-        buildMediaConstraints()
-    }
-
-    private val audioConstraints: MediaConstraints by lazy {
-        buildAudioConstraints()
-    }
 
     internal lateinit var sfuConnectionModule: SfuConnectionModule
 
@@ -958,7 +947,7 @@ public class RtcSession internal constructor(
             configuration = connectionConfiguration,
             publishOptions = publishOptions,
             coroutineScope = coroutineScope,
-            mediaConstraints = mediaConstraints,
+            mediaConstraints = defaultConstraints,
             onNegotiationNeeded = { _, _ -> },
             onIceCandidate = ::sendIceCandidate,
         ) {
