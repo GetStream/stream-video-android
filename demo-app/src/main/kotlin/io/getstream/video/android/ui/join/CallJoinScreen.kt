@@ -357,7 +357,7 @@ private fun CallJoinBody(
                 gotoQR = {
                     openCamera()
                 },
-                prefilledCallId = prefilledCallId,
+                prefilledCallId = prefilledCallId
             )
         }
     }

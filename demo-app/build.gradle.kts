@@ -52,7 +52,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        testInstrumentationRunner = "io.getstream.video.android.utils.TestAppRunner"
     }
 
     val signFile: File = rootProject.file(".sign/keystore.properties")
@@ -284,11 +283,6 @@ dependencies {
 
     // Memory detection
     debugImplementation(libs.leakCanary)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.compose.ui.test)
-    androidTestImplementation(libs.hilt.android.testing)
 
     baselineProfile(project(":benchmark"))
 }
