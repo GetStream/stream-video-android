@@ -16,7 +16,8 @@ enum class FlavorDimension {
 @Suppress("EnumEntryName")
 enum class VideoDemoFlavor(val dimension: FlavorDimension, val applicationIdSuffix: String? = null) {
     development(FlavorDimension.contentType, applicationIdSuffix = ".dogfooding"),
-    production(FlavorDimension.contentType)
+    e2etesting(FlavorDimension.contentType, applicationIdSuffix = ".e2etesting"),
+    production(FlavorDimension.contentType),
 }
 
 fun configureFlavors(
