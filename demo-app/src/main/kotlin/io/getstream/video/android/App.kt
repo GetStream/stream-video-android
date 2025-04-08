@@ -20,6 +20,7 @@ import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.runBlocking
 
@@ -55,3 +56,9 @@ class App : Application() {
 }
 
 val Context.app get() = applicationContext as App
+
+val defaultCallId get() = if (BuildConfig.FLAVOR == StreamFlavors.development) {
+    "default:79cYh3J5JgGk"
+} else {
+    ""
+}
