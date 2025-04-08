@@ -50,7 +50,6 @@ class RtcSessionTest : IntegrationTestBase() {
 
     @Test
     fun `Constraints`() = runTest {
-
         val audioConstraints = buildAudioConstraints()
     }
 
