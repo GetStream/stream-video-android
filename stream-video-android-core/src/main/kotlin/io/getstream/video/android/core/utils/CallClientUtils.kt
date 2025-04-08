@@ -178,6 +178,7 @@ internal fun buildConnectionConfiguration(
     return PeerConnection.RTCConfiguration(emptyList()).apply {
         this.sdpSemantics = sdpSemantics
         this.iceServers = iceServers
+        this.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
     }
 }
 
