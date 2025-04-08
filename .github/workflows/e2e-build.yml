@@ -19,8 +19,6 @@ jobs:
       - uses: ./.github/actions/enable-kvm
       - uses: ./.github/actions/setup-ruby
       - uses: ./.github/actions/gradle-cache
-        with:
-          key-prefix: gradle-test
       - name: Build apks
         run: bundle exec fastlane build_e2e_test
         timeout-minutes: 30
@@ -29,5 +27,5 @@ jobs:
         with:
           name: apks
           path: |
-            demo-app/build/outputs/apk/e2e/development/*.apk
-            demo-app/build/outputs/apk/androidTest/e2e/development/*.apk
+            demo-app/build/outputs/apk/e2etesting/debug/*.apk
+            demo-app/build/outputs/apk/androidTest/e2etesting/debug/*.apk

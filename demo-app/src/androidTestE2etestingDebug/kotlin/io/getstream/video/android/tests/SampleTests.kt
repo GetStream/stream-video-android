@@ -17,8 +17,6 @@
 package io.getstream.video.android.tests
 
 import io.getstream.video.android.robots.ParticipantRobot.Options.WITH_CAMERA
-import io.getstream.video.android.uiautomator.seconds
-import io.getstream.video.android.uiautomator.sleep
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
 import org.junit.Test
@@ -33,9 +31,6 @@ class SampleTests : StreamTestCase() {
         }
         step("AND participant joins the call") {
             participantRobot.joinCall(callId, options = arrayOf(WITH_CAMERA))
-        }
-        step("THEN sleep") {
-            userRobot.sleep(10.seconds)
         }
     }
 }

@@ -3,6 +3,7 @@ skip_docs
 
 require 'json'
 require 'net/http'
+import 'Allurefile'
 
 test_flavor = 'demo-app'
 video_buddy_port = 5678
@@ -17,6 +18,7 @@ before_all do |lane|
 end
 
 lane :start_video_buddy do
+  install_video_buddy
   stop_video_buddy if is_localhost
   sh("stream-video-buddy server --port #{video_buddy_port} > video-buddy-server.log 2>&1 &")
 end
@@ -45,7 +47,7 @@ lane :build_e2e_test do
   next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
   gradle(
-    tasks: [":#{test_flavor}:assembleE2eDevelopmentAndroidTest", ":#{test_flavor}:assembleE2eDevelopment"],
+    tasks: [":#{test_flavor}:assembleE2etestingDebugAndroidTest", ":#{test_flavor}:assembleE2etestingDebug"],
     flags: "--scan"
   )
 end
@@ -62,12 +64,12 @@ lane :run_e2e_test do |options|
   install_test_services
 
   stream_apk_folder_path = is_ci ? '..' : "../#{test_flavor}/build/outputs/apk"
-  stream_app_path = "#{stream_apk_folder_path}/e2e/development/demo-app-development-debug.apk"
-  stream_test_path = "#{stream_apk_folder_path}/androidTest/e2e/development/demo-app-development-debug-androidTest.apk"
+  stream_app_path = "#{stream_apk_folder_path}/e2etesting/debug/demo-app-e2etesting-debug.apk"
+  stream_test_path = "#{stream_apk_folder_path}/androidTest/e2etesting/debug/demo-app-e2etesting-debug-androidTest.apk"
   sh("adb install -r #{stream_app_path}")
   sh("adb install -r #{stream_test_path}")
 
-  app_package_name = 'io.getstream.video.android.e2etest.debug'
+  app_package_name = 'io.getstream.video.android.e2etesting.debug'
   test_package_name = "#{app_package_name}.test"
   runner_package_name = 'io.qameta.allure.android.runners.AllureAndroidJUnitRunner'
   orchestrator_package_name = 'androidx.test.orchestrator/.AndroidTestOrchestrator'
@@ -119,7 +121,8 @@ end
 
 lane :install_video_buddy do
   playwright_version = '1.51.1'
-  sh("npm install -g playwright@#{playwright_version}")
+  sh("npm list -g playwright | grep -q '#{playwright_version}' || " \
+     "npm install -g playwright@#{playwright_version}")
   sh('npx playwright install chromium')
 
   stream_video_buddy_version = '1.6.24'
@@ -133,4 +136,31 @@ private_lane :sources_matrix do
     sonar: ['stream-video-android-'],
     ruby: ['fastlane', 'Gemfile', 'Gemfile.lock']
   }
+end
+
+private_lane :install do |options|
+  case options[:tool]
+  when :test_orchestrator
+    v = '1.5.1'
+    output = 'apks/orchestrator.apk'
+    url = "https://dl.google.com/dl/android/maven2/androidx/test/orchestrator/#{v}/orchestrator-#{v}.apk"
+  when :test_services
+    v = '1.5.0'
+    output = 'apks/test-services.apk'
+    url = "https://dl.google.com/dl/android/maven2/androidx/test/services/test-services/#{v}/test-services-#{v}.apk"
+  when :test_parser
+    v = '2.2.1'
+    output = 'test-parser.jar'
+    url = "https://linkedin.jfrog.io/artifactory/open-source/com/linkedin/dextestparser/parser/#{v}/parser-#{v}-all.jar"
+  when :allurectl
+    v = '2.16.0'
+    output = 'allurectl'
+    arch = RbConfig::CONFIG['host_os'].include?('darwin') ? 'darwin_amd64' : 'linux_amd64'
+    url = "https://github.com/allure-framework/allurectl/releases/download/#{v}/allurectl_#{arch}"
+  else
+    UI.user_error!('Provide a correct tool name.')
+  end
+  sh("wget -O #{output} '#{url}' 2>/dev/null") unless File.exist?(output)
+  sh("adb install #{options[:api_level] >= 30 ? '--force-queryable' : ''} -r #{output}") if options[:api_level]
+  sh("chmod +x #{output}") if options[:chmod]
 end

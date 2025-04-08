@@ -45,7 +45,7 @@ import java.util.UUID
 abstract class StreamTestCase {
 
     val userRobot = UserRobot()
-    var participantRobot = ParticipantRobot(debug = true, record = false)
+    var participantRobot = ParticipantRobot(debug = false, record = false)
     val callId: String by lazy {
         val uuid = UUID.randomUUID().toString().split("-")
         if (uuid.isNotEmpty()) uuid.first() else "Test"
