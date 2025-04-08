@@ -76,6 +76,7 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
+import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
@@ -867,7 +868,7 @@ public class RtcSession internal constructor(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
-            mediaConstraints = mediaConstraints,
+            mediaConstraints = defaultConstraints,
             onStreamAdded = { addStream(it) }, // addTrack
             onIceCandidateRequest = ::sendIceCandidate,
         )
@@ -934,7 +935,7 @@ public class RtcSession internal constructor(
             } else {
                 StreamPeerType.SUBSCRIBER
             },
-            mediaConstraints = buildAudioConstraints(),
+            mediaConstraints = defaultConstraints,
         ).apply {
             addTempTransceivers(this)
         }
