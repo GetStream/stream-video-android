@@ -192,7 +192,6 @@ internal val iceRestartConstraints = MediaConstraints().apply {
     optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
 }
 
-
 @JvmSynthetic
 internal fun buildMediaConstraints(): MediaConstraints {
     return MediaConstraints().apply {

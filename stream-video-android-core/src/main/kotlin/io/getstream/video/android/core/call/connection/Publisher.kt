@@ -123,7 +123,7 @@ internal class Publisher(
                 iceRestartConstraints
             } else {
                 defaultConstraints
-            }
+            },
         ).getOrThrow()
         val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
 

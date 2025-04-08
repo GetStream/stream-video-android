@@ -147,7 +147,9 @@ open class StreamPeerConnection(
      *
      * @return [Result] wrapper of the [SessionDescription] for the publisher.
      */
-    public suspend fun createOffer(mediaConstraints: MediaConstraints = defaultConstraints): Result<SessionDescription> {
+    public suspend fun createOffer(
+        mediaConstraints: MediaConstraints = defaultConstraints,
+    ): Result<SessionDescription> {
         logger.d { "[createOffer] #sfu; #$typeTag; no args" }
         return createValue {
             connection.createOffer(
@@ -162,7 +164,9 @@ open class StreamPeerConnection(
      *
      * @return [Result] wrapper of the [SessionDescription] for the subscriber.
      */
-    public suspend fun createAnswer(mediaConstraints: MediaConstraints = defaultConstraints): Result<SessionDescription> {
+    public suspend fun createAnswer(
+        mediaConstraints: MediaConstraints = defaultConstraints,
+    ): Result<SessionDescription> {
         logger.d { "[createAnswer] #sfu; #$typeTag; no args" }
         return createValue { connection.createAnswer(it, mediaConstraints) }
     }
