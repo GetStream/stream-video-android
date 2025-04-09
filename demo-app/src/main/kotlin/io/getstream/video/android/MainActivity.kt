@@ -16,6 +16,7 @@
 
 package io.getstream.video.android
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -30,13 +31,23 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
 import io.getstream.video.android.analytics.FirebaseEvents
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.AppNavHost
 import io.getstream.video.android.ui.AppScreens
+import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.util.InAppUpdateHelper
 import io.getstream.video.android.util.InstallReferrer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -85,5 +96,42 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        observeIncomingCall()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeIncomingCall() {
+        lifecycleScope.launch {
+            StreamVideo.instanceState.flatMapLatest { instance ->
+                instance?.state?.ringingCall ?: flowOf(null)
+            }.collectLatest { call ->
+                if (call != null) {
+                    lifecycleScope.launch {
+                        // Monitor the ringingState on a non-null call
+                        call.state.ringingState.collectLatest {
+                            if (it is RingingState.Incoming) {
+                                startIncomingCallActivity(call)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun startIncomingCallActivity(call: Call) {
+        val intent = StreamCallActivity.callIntent(
+            context = this,
+            cid = StreamCallId.fromCallCid(call.cid),
+            members = emptyList(),
+            leaveWhenLastInCall = true,
+            action = NotificationHandler.ACTION_INCOMING_CALL,
+            clazz = CallActivity::class.java,
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+
+        startActivity(intent)
     }
 }
