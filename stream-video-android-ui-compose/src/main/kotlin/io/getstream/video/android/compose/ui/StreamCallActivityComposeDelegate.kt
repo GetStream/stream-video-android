@@ -230,7 +230,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     }
 
     private fun getRequiredPermissions(call: Call): List<String> {
-        return mutableListOf(Manifest.permission.RECORD_AUDIO).apply {
+        return mutableListOf<String>().apply {
+            if (call.state.ownCapabilities.value.contains(OwnCapability.SendAudio)) {
+                add(Manifest.permission.RECORD_AUDIO)
+            }
             if (call.state.ownCapabilities.value.contains(OwnCapability.SendVideo)) {
                 add(Manifest.permission.CAMERA)
             }
