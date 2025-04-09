@@ -31,13 +31,14 @@ class CallPage {
         val hangUpButton = RingPage.hangUpButton
         val participantsCountBadge = By.res("Stream_ParticipantsCountBadge")
         val participantMenu = By.res("Stream_ParticipantsMenuIcon")
-//        val participantEvent = By.res("") // not implemented in the demo app yet
-//        val minimizedCallView = By.res("") // not implemented in the demo app yet
         val cornerDraggableView = By.res("Stream_FloatingVideoView")
         val callViewButton = By.res("Stream_CallViewButton")
         val chatButton = By.res("Stream_ChatButton")
         val connectionQualityIndicator = By.res("Stream_ParticipantNetworkQualityIndicator")
         val callInfoView = By.res("Stream_CallInfoView") // duration, recording, reconnecting
+
+//        val participantEvent = By.res("") // not implemented in the demo app yet
+//        val minimizedCallView = By.res("") // not implemented in the demo app yet
     }
 
     class ViewMenu {
