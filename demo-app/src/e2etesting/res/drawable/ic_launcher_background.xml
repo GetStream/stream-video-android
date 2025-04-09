@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2024 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="107dp"
+    android:height="107dp"
+    android:viewportWidth="107"
+    android:viewportHeight="107">
+  <path
+      android:pathData="M0,0h107v107h-107z"
+      android:fillColor="#008E30"/>
+  <path
+      android:pathData="M0,0h107v107h-107z">
+    <aapt:attr name="android:fillColor">
+      <gradient 
+          android:startX="107"
+          android:startY="-0"
+          android:endX="0"
+          android:endY="107"
+          android:type="linear">
+        <item android:offset="0" android:color="#FF49DDED"/>
+        <item android:offset="1" android:color="#0049DDED"/>
+      </gradient>
+    </aapt:attr>
+  </path>
+</vector>
