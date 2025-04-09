@@ -38,5 +38,5 @@ data class ICEServer(
     val username: kotlin.String,
 
     @Json(name = "urls")
-    val urls: kotlin.collections.List<kotlin.String>,
+    val urls: kotlin.collections.List<kotlin.String> = emptyList()
 )

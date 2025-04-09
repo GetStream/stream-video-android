@@ -32,6 +32,5 @@ import kotlin.collections.List
 
 data class UserFeedbackReportResponse(
     @Json(name = "daily")
-    val daily:
-    kotlin.collections.List<io.getstream.android.video.generated.models.DailyAggregateUserFeedbackReportResponse>,
+    val daily: kotlin.collections.List<io.getstream.android.video.generated.models.DailyAggregateUserFeedbackReportResponse> = emptyList()
 )

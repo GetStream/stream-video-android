@@ -37,17 +37,18 @@ data class CallMemberRemovedEvent(
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "members")
-    val members: kotlin.collections.List<kotlin.String>,
-
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
+    val type: kotlin.String = "call.member_removed",
 
+    @Json(name = "members")
+    val members: kotlin.collections.List<kotlin.String> = emptyList()
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

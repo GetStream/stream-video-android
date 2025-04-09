@@ -35,8 +35,7 @@ data class QueryCallsResponse(
     val duration: kotlin.String,
 
     @Json(name = "calls")
-    val calls:
-    kotlin.collections.List<io.getstream.android.video.generated.models.CallStateResponseFields>,
+    val calls: kotlin.collections.List<io.getstream.android.video.generated.models.CallStateResponseFields> = emptyList(),
 
     @Json(name = "next")
     val next: kotlin.String? = null,

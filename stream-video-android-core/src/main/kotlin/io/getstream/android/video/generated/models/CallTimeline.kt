@@ -32,5 +32,5 @@ import kotlin.collections.List
 
 data class CallTimeline(
     @Json(name = "events")
-    val events: kotlin.collections.List<io.getstream.android.video.generated.models.CallEvent>,
+    val events: kotlin.collections.List<io.getstream.android.video.generated.models.CallEvent> = emptyList()
 )

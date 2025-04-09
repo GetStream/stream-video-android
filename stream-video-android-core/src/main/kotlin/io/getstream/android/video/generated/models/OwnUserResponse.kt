@@ -48,11 +48,10 @@ data class OwnUserResponse(
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "devices")
-    val devices:
-    kotlin.collections.List<io.getstream.android.video.generated.models.DeviceResponse>,
+    val devices: kotlin.collections.List<io.getstream.android.video.generated.models.DeviceResponse> = emptyList(),
 
     @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>,
+    val teams: kotlin.collections.List<kotlin.String> = emptyList(),
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),

@@ -32,5 +32,5 @@ import kotlin.collections.List
 
 data class RequestPermissionRequest(
     @Json(name = "permissions")
-    val permissions: kotlin.collections.List<kotlin.String>,
+    val permissions: kotlin.collections.List<kotlin.String> = emptyList()
 )

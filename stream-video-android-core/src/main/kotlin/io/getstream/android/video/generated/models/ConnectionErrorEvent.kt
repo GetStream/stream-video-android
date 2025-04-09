@@ -40,10 +40,11 @@ data class ConnectionErrorEvent(
     val error: io.getstream.android.video.generated.models.APIError,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent() {
-
+    val type: kotlin.String = "connection.error"
+)
+: io.getstream.android.video.generated.models.VideoEvent()
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

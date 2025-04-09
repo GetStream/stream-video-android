@@ -32,6 +32,5 @@ import kotlin.collections.Map
 
 data class SDKUsageReport(
     @Json(name = "per_sdk_usage")
-    val perSdkUsage:
-    kotlin.collections.Map<kotlin.String, io.getstream.android.video.generated.models.PerSDKUsageReport>,
+    val perSdkUsage: kotlin.collections.Map<kotlin.String, io.getstream.android.video.generated.models.PerSDKUsageReport> = emptyMap()
 )

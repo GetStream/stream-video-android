@@ -37,17 +37,18 @@ data class PermissionRequestEvent(
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "permissions")
-    val permissions: kotlin.collections.List<kotlin.String>,
-
     @Json(name = "user")
     val user: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
+    val type: kotlin.String = "call.permission_request",
 
+    @Json(name = "permissions")
+    val permissions: kotlin.collections.List<kotlin.String> = emptyList()
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

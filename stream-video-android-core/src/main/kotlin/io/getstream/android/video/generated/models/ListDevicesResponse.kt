@@ -35,6 +35,5 @@ data class ListDevicesResponse(
     val duration: kotlin.String,
 
     @Json(name = "devices")
-    val devices:
-    kotlin.collections.List<io.getstream.android.video.generated.models.DeviceResponse>,
+    val devices: kotlin.collections.List<io.getstream.android.video.generated.models.DeviceResponse> = emptyList()
 )

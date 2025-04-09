@@ -34,16 +34,14 @@ data class UpdateCallResponse(
     @Json(name = "duration")
     val duration: kotlin.String,
 
-    @Json(name = "members")
-    val members:
-    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse>,
-
-    @Json(name = "own_capabilities")
-    val ownCapabilities:
-    kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability>,
-
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
+
+    @Json(name = "members")
+    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList(),
+
+    @Json(name = "own_capabilities")
+    val ownCapabilities: kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "membership")
     val membership: io.getstream.android.video.generated.models.MemberResponse? = null,

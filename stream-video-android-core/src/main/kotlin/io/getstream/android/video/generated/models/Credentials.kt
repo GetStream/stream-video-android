@@ -34,9 +34,9 @@ data class Credentials(
     @Json(name = "token")
     val token: kotlin.String,
 
-    @Json(name = "ice_servers")
-    val iceServers: kotlin.collections.List<io.getstream.android.video.generated.models.ICEServer>,
-
     @Json(name = "server")
     val server: io.getstream.android.video.generated.models.SFUResponse,
+
+    @Json(name = "ice_servers")
+    val iceServers: kotlin.collections.List<io.getstream.android.video.generated.models.ICEServer> = emptyList()
 )

@@ -40,14 +40,15 @@ data class CallUserMutedEvent(
     @Json(name = "from_user_id")
     val fromUserId: kotlin.String,
 
-    @Json(name = "muted_user_ids")
-    val mutedUserIds: kotlin.collections.List<kotlin.String>,
-
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
+    val type: kotlin.String = "call.user_muted",
 
+    @Json(name = "muted_user_ids")
+    val mutedUserIds: kotlin.collections.List<kotlin.String> = emptyList()
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

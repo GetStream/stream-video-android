@@ -35,5 +35,5 @@ data class UserFeedbackReport(
     val unreportedCount: kotlin.Int,
 
     @Json(name = "count_by_rating")
-    val countByRating: kotlin.collections.Map<kotlin.String, kotlin.Int>,
+    val countByRating: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap()
 )

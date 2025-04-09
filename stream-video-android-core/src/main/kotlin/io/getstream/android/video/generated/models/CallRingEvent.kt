@@ -43,10 +43,6 @@ data class CallRingEvent(
     @Json(name = "video")
     val video: kotlin.Boolean,
 
-    @Json(name = "members")
-    val members:
-    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse>,
-
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
 
@@ -54,10 +50,14 @@ data class CallRingEvent(
     val user: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
+    val type: kotlin.String = "call.ring",
 
+    @Json(name = "members")
+    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList()
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

@@ -43,13 +43,14 @@ data class CallRejectedEvent(
     val user: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.rejected",
 
     @Json(name = "reason")
-    val reason: kotlin.String? = null,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
-
+    val reason: kotlin.String? = null
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

@@ -59,12 +59,10 @@ data class GetCallStatsResponse(
     val sfuCount: kotlin.Int,
 
     @Json(name = "participant_report")
-    val participantReport:
-    kotlin.collections.List<io.getstream.android.video.generated.models.UserStats>,
+    val participantReport: kotlin.collections.List<io.getstream.android.video.generated.models.UserStats> = emptyList(),
 
     @Json(name = "sfus")
-    val sfus:
-    kotlin.collections.List<io.getstream.android.video.generated.models.SFULocationResponse>,
+    val sfus: kotlin.collections.List<io.getstream.android.video.generated.models.SFULocationResponse> = emptyList(),
 
     @Json(name = "average_connection_time")
     val averageConnectionTime: kotlin.Float? = null,

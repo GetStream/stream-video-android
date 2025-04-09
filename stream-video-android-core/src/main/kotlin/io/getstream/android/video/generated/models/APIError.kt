@@ -48,7 +48,7 @@ data class APIError(
     val statusCode: kotlin.Int,
 
     @Json(name = "details")
-    val details: kotlin.collections.List<kotlin.Int>,
+    val details: kotlin.collections.List<kotlin.Int> = emptyList(),
 
     @Json(name = "unrecoverable")
     val unrecoverable: kotlin.Boolean? = null,
