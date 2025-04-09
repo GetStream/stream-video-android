@@ -18,17 +18,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
 import kotlin.collections.Map
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
 data class UserSessionStats(
@@ -147,12 +152,10 @@ data class UserSessionStats(
     val webrtcVersion: kotlin.String? = null,
 
     @Json(name = "published_tracks")
-    val publishedTracks:
-    kotlin.collections.List<io.getstream.android.video.generated.models.PublishedTrackInfo>? = null,
+    val publishedTracks: kotlin.collections.List<io.getstream.android.video.generated.models.PublishedTrackInfo>? = null,
 
     @Json(name = "subsessions")
-    val subsessions:
-    kotlin.collections.List<io.getstream.android.video.generated.models.Subsession>? = null,
+    val subsessions: kotlin.collections.List<io.getstream.android.video.generated.models.Subsession>? = null,
 
     @Json(name = "geolocation")
     val geolocation: io.getstream.android.video.generated.models.GeolocationResult? = null,
@@ -179,8 +182,7 @@ data class UserSessionStats(
     val publisherLatency: io.getstream.android.video.generated.models.TimeStats? = null,
 
     @Json(name = "publisher_video_quality_limitation_duration_seconds")
-    val publisherVideoQualityLimitationDurationSeconds:
-    kotlin.collections.Map<kotlin.String, kotlin.Float>? = null,
+    val publisherVideoQualityLimitationDurationSeconds: kotlin.collections.Map<kotlin.String, kotlin.Float>? = null,
 
     @Json(name = "subscriber_jitter")
     val subscriberJitter: io.getstream.android.video.generated.models.TimeStats? = null,
@@ -189,5 +191,5 @@ data class UserSessionStats(
     val subscriberLatency: io.getstream.android.video.generated.models.TimeStats? = null,
 
     @Json(name = "timeline")
-    val timeline: io.getstream.android.video.generated.models.CallTimeline? = null,
+    val timeline: io.getstream.android.video.generated.models.CallTimeline? = null
 )

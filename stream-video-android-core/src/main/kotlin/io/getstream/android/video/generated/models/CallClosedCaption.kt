@@ -18,12 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * CallClosedCaption represents a closed caption of a call.
@@ -43,5 +50,5 @@ data class CallClosedCaption(
     val text: kotlin.String,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.generated.models.UserResponse,
+    val user: io.getstream.android.video.generated.models.UserResponse
 )

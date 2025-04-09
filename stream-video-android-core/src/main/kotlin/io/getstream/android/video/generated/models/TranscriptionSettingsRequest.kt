@@ -18,11 +18,13 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -31,7 +33,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
 data class TranscriptionSettingsRequest(
@@ -42,12 +44,13 @@ data class TranscriptionSettingsRequest(
     val closedCaptionMode: ClosedCaptionMode? = null,
 
     @Json(name = "language")
-    val language: Language? = null,
-) {
-
+    val language: Language? = null
+)
+{
+    
     /**
-     * Mode Enum
-     */
+    * Mode Enum
+    */
     sealed class Mode(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -77,10 +80,9 @@ data class TranscriptionSettingsRequest(
             }
         }
     }
-
     /**
-     * ClosedCaptionMode Enum
-     */
+    * ClosedCaptionMode Enum
+    */
     sealed class ClosedCaptionMode(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -110,10 +112,9 @@ data class TranscriptionSettingsRequest(
             }
         }
     }
-
     /**
-     * Language Enum
-     */
+    * Language Enum
+    */
     sealed class Language(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -202,5 +203,5 @@ data class TranscriptionSettingsRequest(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }

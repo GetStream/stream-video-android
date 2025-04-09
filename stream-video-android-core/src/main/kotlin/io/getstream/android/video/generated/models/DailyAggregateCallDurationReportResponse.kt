@@ -18,15 +18,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
 data class DailyAggregateCallDurationReportResponse(
@@ -34,5 +41,5 @@ data class DailyAggregateCallDurationReportResponse(
     val date: kotlin.String,
 
     @Json(name = "report")
-    val report: io.getstream.android.video.generated.models.CallDurationReport,
+    val report: io.getstream.android.video.generated.models.CallDurationReport
 )

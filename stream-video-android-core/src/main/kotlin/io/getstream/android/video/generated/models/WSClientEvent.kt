@@ -16,4 +16,4 @@
 
 package io.getstream.android.video.generated.models
 
-sealed interface WSClientEvent
+sealed interface WSClientEvent {}

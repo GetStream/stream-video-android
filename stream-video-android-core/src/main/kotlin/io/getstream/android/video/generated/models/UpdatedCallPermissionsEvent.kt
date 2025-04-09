@@ -18,13 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
+import kotlin.collections.Map
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
@@ -55,5 +61,5 @@ data class UpdatedCallPermissionsEvent(
 
     override fun getCallCID(): kotlin.String {
         return callCid
-    }
+    }    
 }

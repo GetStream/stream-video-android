@@ -18,11 +18,13 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -48,12 +50,13 @@ data class RTMPBroadcastRequest(
     val streamKey: kotlin.String? = null,
 
     @Json(name = "layout")
-    val layout: io.getstream.android.video.generated.models.LayoutSettingsRequest? = null,
-) {
-
+    val layout: io.getstream.android.video.generated.models.LayoutSettingsRequest? = null
+)
+{
+    
     /**
-     * Quality Enum
-     */
+    * Quality Enum
+    */
     sealed class Quality(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -96,5 +99,5 @@ data class RTMPBroadcastRequest(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }

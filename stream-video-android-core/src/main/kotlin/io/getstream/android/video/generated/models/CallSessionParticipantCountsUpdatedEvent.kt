@@ -18,13 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
+import kotlin.collections.List
 import kotlin.collections.Map
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * This event is sent when the participant counts in a call session are updated
@@ -51,12 +57,12 @@ data class CallSessionParticipantCountsUpdatedEvent(
 )
 : io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
 {
-
+    
     override fun getEventType(): kotlin.String {
         return type
     }
 
     override fun getCallCID(): kotlin.String {
         return callCid
-    }
+    }    
 }

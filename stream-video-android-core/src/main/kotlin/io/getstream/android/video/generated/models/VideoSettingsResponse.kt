@@ -18,11 +18,13 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -31,7 +33,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
 data class VideoSettingsResponse(
@@ -48,12 +50,13 @@ data class VideoSettingsResponse(
     val enabled: kotlin.Boolean,
 
     @Json(name = "target_resolution")
-    val targetResolution: io.getstream.android.video.generated.models.TargetResolution,
-) {
-
+    val targetResolution: io.getstream.android.video.generated.models.TargetResolution
+)
+{
+    
     /**
-     * CameraFacing Enum
-     */
+    * CameraFacing Enum
+    */
     sealed class CameraFacing(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -82,5 +85,5 @@ data class VideoSettingsResponse(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }

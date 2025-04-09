@@ -18,12 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * UnblockUserRequest is the payload for unblocking a user.
@@ -31,5 +38,5 @@ import com.squareup.moshi.Json
 
 data class UnblockUserRequest(
     @Json(name = "user_id")
-    val userId: kotlin.String,
+    val userId: kotlin.String
 )

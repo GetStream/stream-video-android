@@ -18,12 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * BroadcastSettingsResponse is the payload for broadcasting settings
@@ -37,5 +44,5 @@ data class BroadcastSettingsResponse(
     val hls: io.getstream.android.video.generated.models.HLSSettingsResponse,
 
     @Json(name = "rtmp")
-    val rtmp: io.getstream.android.video.generated.models.RTMPSettingsResponse,
+    val rtmp: io.getstream.android.video.generated.models.RTMPSettingsResponse
 )

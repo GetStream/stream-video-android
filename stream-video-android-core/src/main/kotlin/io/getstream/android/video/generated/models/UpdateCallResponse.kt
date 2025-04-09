@@ -18,13 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
+import kotlin.collections.Map
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * Response for updating a call
@@ -44,5 +50,5 @@ data class UpdateCallResponse(
     val ownCapabilities: kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "membership")
-    val membership: io.getstream.android.video.generated.models.MemberResponse? = null,
+    val membership: io.getstream.android.video.generated.models.MemberResponse? = null
 )

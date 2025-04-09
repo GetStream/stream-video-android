@@ -18,11 +18,13 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -31,7 +33,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
 data class RecordSettingsRequest(
@@ -42,12 +44,13 @@ data class RecordSettingsRequest(
     val audioOnly: kotlin.Boolean? = null,
 
     @Json(name = "quality")
-    val quality: Quality? = null,
-) {
-
+    val quality: Quality? = null
+)
+{
+    
     /**
-     * Mode Enum
-     */
+    * Mode Enum
+    */
     sealed class Mode(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -77,10 +80,9 @@ data class RecordSettingsRequest(
             }
         }
     }
-
     /**
-     * Quality Enum
-     */
+    * Quality Enum
+    */
     sealed class Quality(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -123,5 +125,5 @@ data class RecordSettingsRequest(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }

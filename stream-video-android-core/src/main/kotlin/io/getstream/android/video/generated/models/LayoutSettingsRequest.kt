@@ -18,21 +18,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import kotlin.collections.Map
 
 /**
- *
+ * 
  */
 
 data class LayoutSettingsRequest(
@@ -49,12 +50,13 @@ data class LayoutSettingsRequest(
     val externalCssUrl: kotlin.String? = null,
 
     @Json(name = "options")
-    val options: kotlin.collections.Map<kotlin.String, Any?>? = null,
-) {
-
+    val options: kotlin.collections.Map<kotlin.String, Any?>? = null
+)
+{
+    
     /**
-     * Name Enum
-     */
+    * Name Enum
+    */
     sealed class Name(val value: kotlin.String) {
         override fun toString(): String = value
 
@@ -87,5 +89,5 @@ data class LayoutSettingsRequest(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }

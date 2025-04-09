@@ -18,12 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * RTMPSettingsResponse is the payload for RTMP settings
@@ -34,5 +41,5 @@ data class RTMPSettingsResponse(
     val enabled: kotlin.Boolean,
 
     @Json(name = "quality")
-    val quality: kotlin.String,
+    val quality: kotlin.String
 )

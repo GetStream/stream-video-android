@@ -18,11 +18,13 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -31,7 +33,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
 data class AudioSettingsRequest(
@@ -54,12 +56,13 @@ data class AudioSettingsRequest(
     val speakerDefaultOn: kotlin.Boolean? = null,
 
     @Json(name = "noise_cancellation")
-    val noiseCancellation: io.getstream.android.video.generated.models.NoiseCancellationSettings? = null,
-) {
-
+    val noiseCancellation: io.getstream.android.video.generated.models.NoiseCancellationSettings? = null
+)
+{
+    
     /**
-     * DefaultDevice Enum
-     */
+    * DefaultDevice Enum
+    */
     sealed class DefaultDevice(val value: kotlin.String) {
         override fun toString(): String = value
 

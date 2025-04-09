@@ -18,13 +18,19 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
+import kotlin.collections.List
 import kotlin.collections.Map
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * This event is sent when a user gets updated. The event contains information about the updated user.
@@ -34,21 +40,22 @@ data class UserUpdatedEvent(
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
-
     @Json(name = "user")
     val user: io.getstream.android.video.generated.models.UserResponsePrivacyFields,
 
     @Json(name = "type")
     val type: kotlin.String = "user.updated",
 
-    @Json(name = "received_at")
-    val receivedAt: org.threeten.bp.OffsetDateTime? = null,
-) :
-    io.getstream.android.video.generated.models.VideoEvent() {
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null
+)
+: io.getstream.android.video.generated.models.VideoEvent()
+{
+    
     override fun getEventType(): kotlin.String {
         return type
-    }
+    }    
 }
