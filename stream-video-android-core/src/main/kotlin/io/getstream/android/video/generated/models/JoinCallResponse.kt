@@ -37,6 +37,14 @@ data class JoinCallResponse(
     @Json(name = "duration")
     val duration: kotlin.String,
 
+    @Json(name = "members")
+    val members:
+    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList(),
+
+    @Json(name = "own_capabilities")
+    val ownCapabilities:
+    kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability> = emptyList(),
+
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
 
@@ -45,12 +53,6 @@ data class JoinCallResponse(
 
     @Json(name = "stats_options")
     val statsOptions: io.getstream.android.video.generated.models.StatsOptions,
-
-    @Json(name = "members")
-    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList(),
-
-    @Json(name = "own_capabilities")
-    val ownCapabilities: kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "membership")
     val membership: io.getstream.android.video.generated.models.MemberResponse? = null,

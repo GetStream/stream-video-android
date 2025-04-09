@@ -62,8 +62,14 @@ data class CallResponse(
     @Json(name = "updated_at")
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "blocked_user_ids")
+    val blockedUserIds: kotlin.collections.List<kotlin.String> = emptyList(),
+
     @Json(name = "created_by")
     val createdBy: io.getstream.android.video.generated.models.UserResponse,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
     @Json(name = "egress")
     val egress: io.getstream.android.video.generated.models.EgressResponse,
@@ -73,12 +79,6 @@ data class CallResponse(
 
     @Json(name = "settings")
     val settings: io.getstream.android.video.generated.models.CallSettingsResponse,
-
-    @Json(name = "blocked_user_ids")
-    val blockedUserIds: kotlin.collections.List<kotlin.String> = emptyList(),
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,

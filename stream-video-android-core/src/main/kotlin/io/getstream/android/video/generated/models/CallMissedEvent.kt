@@ -43,6 +43,10 @@ data class CallMissedEvent(
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
+    @Json(name = "members")
+    val members:
+    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList(),
+
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
 
@@ -51,13 +55,9 @@ data class CallMissedEvent(
 
     @Json(name = "type")
     val type: kotlin.String = "call.missed",
+) :
+    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 
-    @Json(name = "members")
-    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList()
-)
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
-    
     override fun getEventType(): kotlin.String {
         return type
     }

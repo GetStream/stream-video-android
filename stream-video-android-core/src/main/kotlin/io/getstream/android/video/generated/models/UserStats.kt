@@ -34,11 +34,12 @@ data class UserStats(
     @Json(name = "min_event_ts")
     val minEventTs: kotlin.Int,
 
+    @Json(name = "session_stats")
+    val sessionStats:
+    kotlin.collections.List<io.getstream.android.video.generated.models.UserSessionStats> = emptyList(),
+
     @Json(name = "info")
     val info: io.getstream.android.video.generated.models.UserInfoResponse,
-
-    @Json(name = "session_stats")
-    val sessionStats: kotlin.collections.List<io.getstream.android.video.generated.models.UserSessionStats> = emptyList(),
 
     @Json(name = "rating")
     val rating: kotlin.Int? = null,

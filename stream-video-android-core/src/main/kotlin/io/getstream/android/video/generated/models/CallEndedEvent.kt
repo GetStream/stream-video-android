@@ -43,11 +43,10 @@ data class CallEndedEvent(
     val type: kotlin.String = "call.ended",
 
     @Json(name = "user")
-    val user: io.getstream.android.video.generated.models.UserResponse? = null
-)
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
-    
+    val user: io.getstream.android.video.generated.models.UserResponse? = null,
+) :
+    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
+
     override fun getEventType(): kotlin.String {
         return type
     }

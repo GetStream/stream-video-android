@@ -43,14 +43,13 @@ data class CallSessionParticipantCountsUpdatedEvent(
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
+    @Json(name = "participants_count_by_role")
+    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap(),
+
     @Json(name = "type")
     val type: kotlin.String = "call.session_participant_count_updated",
-
-    @Json(name = "participants_count_by_role")
-    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap()
-)
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
+) :
+    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 
     override fun getEventType(): kotlin.String {
         return type

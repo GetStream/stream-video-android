@@ -38,21 +38,22 @@ data class CallMemberUpdatedPermissionEvent(
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "members")
+    val members:
+    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList(),
+
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
 
+    @Json(name = "capabilities_by_role")
+    val capabilitiesByRole:
+    kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>> = emptyMap(),
+
     @Json(name = "type")
     val type: kotlin.String = "call.member_updated_permission",
+) :
+    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 
-    @Json(name = "members")
-    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList(),
-
-    @Json(name = "capabilities_by_role")
-    val capabilitiesByRole: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.String>> = emptyMap()
-)
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
-    
     override fun getEventType(): kotlin.String {
         return type
     }
