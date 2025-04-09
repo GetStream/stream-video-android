@@ -69,7 +69,7 @@ abstract class StreamTestCase {
 
     @Before
     fun setUp() {
-        device.startApp()
+        device.startApp(callId)
         grantAppPermissions()
     }
 

@@ -20,11 +20,13 @@ import android.content.Intent
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
+import io.getstream.video.android.EXTRA_CALL_ID
 import java.io.ByteArrayOutputStream
 
-public fun UiDevice.startApp() {
+public fun UiDevice.startApp(callId: String) {
     val intent = testContext.packageManager.getLaunchIntentForPackage(packageName)
     intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    intent?.putExtra(EXTRA_CALL_ID, callId)
     testContext.startActivity(intent)
 }
 

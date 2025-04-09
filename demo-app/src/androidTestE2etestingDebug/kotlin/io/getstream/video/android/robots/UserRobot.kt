@@ -55,14 +55,16 @@ class UserRobot {
         return this
     }
 
-    fun joinCall(callId: String, camera: Boolean = true, mic: Boolean = true): UserRobot {
+    fun joinCall(callId: String? = null, camera: Boolean = true, mic: Boolean = true): UserRobot {
         enterLobby(callId)
         joinCallFromLobby(camera = camera, mic = mic)
         return this
     }
 
-    fun enterLobby(callId: String): UserRobot {
-        CallDetailsPage.callIdInputField.waitToAppear().typeText(callId)
+    fun enterLobby(callId: String? = null): UserRobot {
+        if (callId != null) {
+            CallDetailsPage.callIdInputField.waitToAppear().typeText(callId)
+        }
         CallDetailsPage.joinCallButton.waitToAppear().click()
         return this
     }
