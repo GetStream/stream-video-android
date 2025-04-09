@@ -2,8 +2,8 @@ name: E2E Tests Nightly
 
 on:
   schedule:
-    # Runs "At 01:00 every night except weekends"
-    - cron: '0 1 * * 1-5'
+    # Runs "At 02:00 every night except weekends"
+    - cron: '0 2 * * 1-5'
 
   workflow_dispatch:
 
