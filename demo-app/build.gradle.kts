@@ -207,6 +207,10 @@ androidComponents {
                     }
                 )
             }
+
+            if (applicationVariant.name == "developmentDebug" || applicationVariant.name == "productionDebug") {
+                dependencies.add("${applicationVariant.name}Implementation", libs.leakCanary)
+            }
         }
     }
 }
@@ -287,8 +291,7 @@ dependencies {
     // Http
     implementation(libs.okhttp)
 
-    // Memory detection
-    debugImplementation(libs.leakCanary)
+    // Also Leak Canary added in the previous block
 
     // Instrumentation tests
     androidTestImplementation(libs.androidx.test.runner)
