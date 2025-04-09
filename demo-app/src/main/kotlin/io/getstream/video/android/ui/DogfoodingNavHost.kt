@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui
 
+import android.content.Intent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -84,7 +85,9 @@ fun AppNavHost(
                         leaveWhenLastInCall = true,
                         action = NotificationHandler.ACTION_INCOMING_CALL,
                         clazz = CallActivity::class.java,
-                    )
+                    ).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
                     context.startActivity(intent)
                 },
             )

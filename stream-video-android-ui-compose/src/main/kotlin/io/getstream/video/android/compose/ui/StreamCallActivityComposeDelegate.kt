@@ -425,7 +425,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     Text(
                         text = stringResource(
                             id = R.string.stream_default_call_ui_permission_rationale,
-                            getRequiredPermissions(notGranted),
+                            permissionsToString(notGranted),
                         ),
                         style = TextStyle(
                             fontSize = 16.sp,
@@ -457,7 +457,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         }
     }
 
-    private fun getRequiredPermissions(notGranted: List<String>): String {
+    private fun permissionsToString(notGranted: List<String>): String {
         return notGranted.mapNotNull {
             when (it) {
                 Manifest.permission.RECORD_AUDIO -> "microphone"
