@@ -31,8 +31,8 @@ class CallPage {
         val hangUpButton = RingPage.hangUpButton
         val participantsCountBadge = By.res("Stream_ParticipantsCountBadge")
         val participantMenu = By.res("Stream_ParticipantsMenuIcon")
-        val participantEvent = By.res("") // FIXME: not implemented in the demo app
-        val minimizedCallView = By.res("") // FIXME: not implemented in the demo app
+//        val participantEvent = By.res("") // not implemented in the demo app yet
+//        val minimizedCallView = By.res("") // not implemented in the demo app yet
         val cornerDraggableView = By.res("Stream_FloatingVideoView")
         val callViewButton = By.res("Stream_CallViewButton")
         val chatButton = By.res("Stream_ChatButton")
@@ -62,9 +62,9 @@ class CallPage {
             val avatar = By.res("Stream_ParticipantsListUserAvatar")
             val name = By.res("Stream_ParticipantsListUserName")
             val cameraEnabled = By.res("Stream_ParticipantsListUserCamera_Enabled_true")
-            val cameraDisabled = By.res("Stream_ParticipantsListUserCamera_Enabled_true")
+            val cameraDisabled = By.res("Stream_ParticipantsListUserCamera_Enabled_false")
             val microphoneEnabled = By.res("Stream_ParticipantsListUserMicrophone_Enabled_true")
-            val microphoneDisabled = By.res("Stream_ParticipantsListUserMicrophone_Enabled_true")
+            val microphoneDisabled = By.res("Stream_ParticipantsListUserMicrophone_Enabled_false")
             val closeButton = LobbyPage.closeButton
         }
     }
