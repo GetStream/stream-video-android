@@ -46,8 +46,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.VideoCall
@@ -98,6 +96,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.defaultCallId
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
@@ -108,6 +107,7 @@ import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
 fun CallJoinScreen(
+    prefilledCallId: String? = null,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
@@ -151,10 +151,9 @@ fun CallJoinScreen(
                 .align(Alignment.CenterHorizontally)
                 .verticalScroll(rememberScrollState())
                 .weight(1f),
+            prefilledCallId = prefilledCallId,
+            openCamera = { navigateToBarcodeScanner() },
             callJoinViewModel = callJoinViewModel,
-            openCamera = {
-                navigateToBarcodeScanner()
-            },
             isNetworkAvailable = isNetworkAvailable,
         )
     }
@@ -235,7 +234,7 @@ private fun CallJoinHeader(
         }
 
         Text(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).testTag("Stream_UserName"),
             color = Color.White,
             text = user?.userNameOrId.orEmpty(),
             maxLines = 1,
@@ -257,7 +256,7 @@ private fun CallJoinHeader(
                         y = buttonBounds.bottom.toInt(),
                     )
                     buttonSize = coordinates.size
-                },
+                }.testTag("Stream_SettingsIcon"),
                 toggleState = rememberUpdatedState(newValue = ToggleableState(showMenu)),
                 onIcon = Icons.Default.Settings,
                 onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
@@ -288,7 +287,9 @@ private fun CallJoinHeader(
                     ) {
                         if (showDirectCall) {
                             StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_DirectCallButton"),
                                 text = stringResource(id = R.string.direct_call),
                                 icon = Icons.Default.Call,
                                 style = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
@@ -301,7 +302,9 @@ private fun CallJoinHeader(
                         Spacer(modifier = Modifier.width(5.dp))
                         if (!isProduction) {
                             StreamButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_SignOutButton"),
                                 icon = Icons.AutoMirrored.Filled.Logout,
                                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                                 text = stringResource(id = R.string.sign_out),
@@ -321,6 +324,7 @@ private fun CallJoinHeader(
 @Composable
 private fun CallJoinBody(
     modifier: Modifier,
+    prefilledCallId: String? = null,
     openCamera: () -> Unit,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
@@ -346,13 +350,19 @@ private fun CallJoinBody(
         }
     } else {
         if (user != null) {
-            CallActualContent(modifier = modifier.fillMaxSize(), onJoinCall = {
-                callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = it))
-            }, onNewCall = {
-                callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall())
-            }, gotoQR = {
-                openCamera()
-            })
+            CallActualContent(
+                modifier = modifier.fillMaxSize(),
+                onJoinCall = {
+                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = it))
+                },
+                onNewCall = {
+                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall())
+                },
+                gotoQR = {
+                    openCamera()
+                },
+                prefilledCallId = prefilledCallId,
+            )
         }
     }
 }
@@ -363,6 +373,7 @@ private fun CallActualContent(
     onJoinCall: (String) -> Unit,
     onNewCall: () -> Unit,
     gotoQR: () -> Unit,
+    prefilledCallId: String? = null,
 ) = Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
     Column(
         modifier = modifier
@@ -377,14 +388,14 @@ private fun CallActualContent(
         Spacer(modifier = Modifier.height(20.dp))
         Description(text = stringResource(id = R.string.join_description))
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingL))
-        JoinCallForm {
+        JoinCallForm(prefilledCallId) {
             onJoinCall(it)
         }
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
         StreamButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("start_new_call"),
+                .testTag("Stream_StartNewCallButton"),
             text = stringResource(id = R.string.start_a_new_call),
             icon = Icons.Default.VideoCall,
             onClick = { onNewCall() },
@@ -394,7 +405,7 @@ private fun CallActualContent(
             style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("scan_qr_code"),
+                .testTag("Stream_ScanQrCodeButton"),
             text = stringResource(id = R.string.scan_qr_code),
             icon = Icons.Default.QrCodeScanner,
             onClick = { gotoQR() },
@@ -455,15 +466,16 @@ private fun Label(text: String) {
 
 @Composable
 private fun JoinCallForm(
+    prefilledCallId: String? = null,
     joinCall: (String) -> Unit,
 ) {
     var callId by remember {
         mutableStateOf(
             TextFieldValue(
-                if (BuildConfig.FLAVOR == StreamFlavors.development) {
-                    "default:79cYh3J5JgGk"
+                if (prefilledCallId?.isNotEmpty() == true) {
+                    prefilledCallId
                 } else {
-                    ""
+                    defaultCallId
                 },
             ),
         )
@@ -476,7 +488,8 @@ private fun JoinCallForm(
         StreamTextField(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .testTag("Stream_CallIdInputField"),
             onValueChange = { callId = it },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
@@ -497,7 +510,7 @@ private fun JoinCallForm(
             modifier = Modifier
                 .padding(start = 16.dp)
                 .fillMaxHeight()
-                .testTag("join_call"),
+                .testTag("Stream_JoinCallButton"),
             onClick = {
                 joinCall(callId.text)
             },
