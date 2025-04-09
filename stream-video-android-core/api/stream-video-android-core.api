@@ -2689,17 +2689,17 @@ public final class io/getstream/android/video/generated/models/MemberRequest {
 }
 
 public final class io/getstream/android/video/generated/models/MemberResponse {
-	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
-	public synthetic fun <init> (Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/util/Map;
-	public final fun component5 ()Lio/getstream/android/video/generated/models/UserResponse;
+	public final fun component4 ()Lio/getstream/android/video/generated/models/UserResponse;
+	public final fun component5 ()Ljava/util/Map;
 	public final fun component6 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component7 ()Ljava/lang/String;
-	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lio/getstream/android/video/generated/models/MemberResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/MemberResponse;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponse;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/MemberResponse;
+	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lio/getstream/android/video/generated/models/MemberResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/MemberResponse;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/MemberResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun getCustom ()Ljava/util/Map;
@@ -5307,15 +5307,15 @@ public final class io/getstream/android/video/generated/models/UserStats {
 }
 
 public final class io/getstream/android/video/generated/models/UserUpdatedEvent : io/getstream/android/video/generated/models/VideoEvent {
-	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;)V
-	public synthetic fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;)V
+	public synthetic fun <init> (Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component2 ()Ljava/util/Map;
-	public final fun component3 ()Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;
-	public final fun component4 ()Ljava/lang/String;
+	public final fun component2 ()Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/Map;
 	public final fun component5 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;)Lio/getstream/android/video/generated/models/UserUpdatedEvent;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/UserUpdatedEvent;Lorg/threeten/bp/OffsetDateTime;Ljava/util/Map;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/UserUpdatedEvent;
+	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;)Lio/getstream/android/video/generated/models/UserUpdatedEvent;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/UserUpdatedEvent;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/UserResponsePrivacyFields;Ljava/lang/String;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/UserUpdatedEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun getCustom ()Ljava/util/Map;
