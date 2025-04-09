@@ -47,6 +47,7 @@ import me.saket.telephoto.zoomable.zoomable
  * @param call The call state.
  * @param session The screen sharing session to show.
  * @param modifier Modifier for styling.
+ * @param fallbackContent Fallback content to show when the screen sharing session is loading or not available.
  */
 @Composable
 public fun ScreenShareVideoRenderer(

@@ -53,6 +53,7 @@ import io.getstream.video.android.mock.previewParticipantsList
  * @param modifier Modifier for styling.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param screenSharingFallbackContent Fallback content to show when the screen sharing session is loading or not available.
  */
 @Composable
 internal fun LandscapeScreenSharingVideoRenderer(

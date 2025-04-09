@@ -40,6 +40,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
  * @param isZoomable Decide to this screensharing video renderer is zoomable or not.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param screenSharingFallbackContent Fallback content to show when the screen sharing session is loading or not available.
  */
 @Composable
 public fun ParticipantsScreenSharing(
