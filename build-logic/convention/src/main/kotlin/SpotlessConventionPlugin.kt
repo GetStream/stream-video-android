@@ -28,7 +28,7 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 }
                 format("openapiGenerated") {
                     target("**/*.kt")
-                    targetExclude("**/build/**/*.kt")
+                    targetExclude("**/build/**/*.kt", "**/io/getstream/android/video/generated/**/*.kt")
                     trimTrailingWhitespace()
                     endWithNewline()
                     licenseHeaderFile(rootProject.file("$rootDir/spotless/copyright.kt"),
@@ -36,7 +36,7 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 }
                 format("kts") {
                     target("**/*.kts")
-                    targetExclude("**/build/**/*.kts")
+                    targetExclude("**/build/**/*.kts", "**/io/getstream/android/video/generated/**/*.kt")
                     // Look for the first line that doesn't have a block comment (assumed to be the license)
                     licenseHeaderFile(
                             rootProject.file("spotless/copyright.kts"),
