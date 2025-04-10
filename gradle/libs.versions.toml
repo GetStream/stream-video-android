@@ -1,4 +1,5 @@
 [versions]
+allureKotlin = "2.4.0"
 androidGradlePlugin = "8.4.2"
 cameraCamera2 = "1.3.4"
 kover = "0.9.1"
@@ -53,14 +54,16 @@ streamChat = "6.10.0"
 streamLog = "1.3.2"
 streamPush = "1.3.1"
 
-androidxTest = "1.5.2"
-androidxTestCore = "1.5.0"
+androidxTestRunner = "1.6.2"
+androidxTestCore = "1.6.1"
+androidxTestJunit = "1.2.1"
+androidxTestMonitor = "1.7.2"
+androidxTestOrchestrator = "1.5.1"
 androidxProfileinstaller = "1.3.1"
 androidxMacroBenchmark = "1.2.3"
-androidxUiAutomator = "2.3.0"
+androidxUiAutomator = "2.4.0-alpha01"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
-androidxJunit = "1.1.5"
 paparazzi = "1.3.1"
 robolectric = "4.11.1"
 junit = "4.13.2"
@@ -82,6 +85,10 @@ playPublisher = "3.8.4"
 googleMlKitSelfieSegmentation = "16.0.0-beta6"
 
 [libraries]
+allure-kotlin-model = { module = "io.qameta.allure:allure-kotlin-model", version.ref = "allureKotlin"}
+allure-kotlin-commons = { module = "io.qameta.allure:allure-kotlin-commons", version.ref = "allureKotlin"}
+allure-kotlin-junit4 = { module = "io.qameta.allure:allure-kotlin-junit4", version.ref = "allureKotlin"}
+allure-kotlin-android = { module = "io.qameta.allure:allure-kotlin-android", version.ref = "allureKotlin"}
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidxMaterial" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
@@ -174,11 +181,14 @@ kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "
 
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "androidxProfileinstaller" }
 androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "androidxMacroBenchmark" }
-androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTest" }
 androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestCore" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
-androidx-test-junit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxJunit" }
-androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "androidxUiAutomator" }
+androidx-test-monitor = { module = "androidx.test:monitor", version.ref = "androidxTestMonitor"}
+androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidxTestOrchestrator"}
+androidx-test-runner = { group = "androidx.test", name = "runner",  version.ref = "androidxTestRunner"}
+androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "androidxUiAutomator"}
+androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit"}
+androidx-test-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "androidxTestJunit"}
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
