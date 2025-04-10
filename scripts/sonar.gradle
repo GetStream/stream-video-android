@@ -21,7 +21,8 @@ ext.sonar = [
         '**/R$*.class',
         '**/BuildConfig.*',
         '**/Manifest*.*',
-        '**/*Test*.*'
+        '**/*Test*.*',
+        '**/generated/**'
     ]
 ]
 
