@@ -97,7 +97,6 @@ import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiv
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
 import io.getstream.video.android.defaultCallId
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
