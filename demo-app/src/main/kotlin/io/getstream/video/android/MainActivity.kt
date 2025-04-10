@@ -60,6 +60,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Extract callId from intent if available
+        val launchIntentCallId = intent.getStringExtra(EXTRA_CALL_ID)
+
         // Try to read the Google Play install referrer value. We use it to deliver
         // the Call ID from the QR code link.
         @Suppress("KotlinConstantConditions")
@@ -92,6 +95,7 @@ class MainActivity : ComponentActivity() {
                         } else {
                             AppScreens.CallJoin.route
                         },
+                        prefilledCallId = launchIntentCallId,
                     )
                 }
             }
@@ -135,3 +139,5 @@ class MainActivity : ComponentActivity() {
         startActivity(intent)
     }
 }
+
+internal const val EXTRA_CALL_ID = "io.getstream.video.android.demoapp.CALL_ID"

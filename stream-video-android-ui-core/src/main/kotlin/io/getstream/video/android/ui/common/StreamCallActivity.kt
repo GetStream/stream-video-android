@@ -30,6 +30,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CallSessionEndedEvent
 import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
@@ -52,6 +53,7 @@ import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
+import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -718,7 +720,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     @CallSuper
     public open fun onCallEvent(call: Call, event: VideoEvent) {
         when (event) {
-            is CallEndedEvent -> {
+            is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent -> {
                 // In any case finish the activity, the call is done for
                 leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
             }

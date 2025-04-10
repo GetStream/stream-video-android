@@ -1,0 +1,17 @@
+name: 'Setup Node'
+description: 'Setup Node'
+
+inputs:
+  node-version:
+    description: The version of Node.js to use
+    required: false
+    default: '16'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: https://registry.npmjs.org
