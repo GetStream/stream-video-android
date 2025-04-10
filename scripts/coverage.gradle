@@ -23,7 +23,6 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
         currentProject {
             instrumentation {
                 excludedClasses.addAll(
-                        "io.getstream.android.video.generated.models.*",
                         "io.getstream.android.video.generated.*",
                         "io.getstream.video.android.core.model.*"
                 )
