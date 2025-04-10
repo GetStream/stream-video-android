@@ -468,12 +468,13 @@ class MicrophoneManager(
 
                     capturedOnAudioDevicesUpdate?.invoke()
                     capturedOnAudioDevicesUpdate = null
-                    setupCompleted = true
                 }
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()
             }
+
+            setupCompleted = true
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }

@@ -31,6 +31,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.call.state.CallAction
 
 /**
@@ -45,6 +46,7 @@ import io.getstream.video.android.core.call.state.CallAction
 public fun IncomingCallControls(
     modifier: Modifier = Modifier,
     isVideoCall: Boolean,
+    isMicrophoneEnabled: Boolean? = null,
     isCameraEnabled: Boolean,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -56,6 +58,15 @@ public fun IncomingCallControls(
         DeclineCallAction(
             onCallAction = onCallAction,
         )
+
+        if (isMicrophoneEnabled != null) {
+            ToggleMicrophoneAction(
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                onCallAction = onCallAction,
+            )
+        }
 
         if (isVideoCall) {
             ToggleCameraAction(
