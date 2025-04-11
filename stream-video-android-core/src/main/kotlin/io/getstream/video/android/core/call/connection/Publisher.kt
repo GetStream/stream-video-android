@@ -33,6 +33,8 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
+import io.getstream.video.android.core.utils.defaultConstraints
+import io.getstream.video.android.core.utils.iceRestartConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
@@ -116,7 +118,13 @@ internal class Publisher(
 
     @VisibleForTesting
     public suspend fun negotiate(iceRestart: Boolean = false) {
-        val offer = super.createOffer().getOrThrow()
+        val offer = super.createOffer(
+            if (iceRestart) {
+                iceRestartConstraints
+            } else {
+                defaultConstraints
+            },
+        ).getOrThrow()
         val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
 
         if (isIceRestarting) {

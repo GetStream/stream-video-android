@@ -97,29 +97,3 @@ jobs:
         run: bundle exec fastlane run_sonar_analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  androidTest-GMD:
-    name: Android Test with GMD
-    if: ${{ false }}  # disable for now
-    runs-on: ubuntu-latest
-    timeout-minutes: 55
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: ./.github/actions/setup-java
-
-      - uses: ./.github/actions/enable-kvm
-
-      # Sets gradle up
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2.7
-
-      # Cleans managed device if previously settle and space currently is not available
-      - name: Clean Managed Devices
-        run: ./gradlew cleanManagedDevices --unused-only
-
-      - name: Run instrumented tests with GMD
-        run: ./gradlew pixel2api31DebugAndroidTest -Dorg.gradle.workers.max=1 -Pandroid.testoptions.manageddevices.emulator.gpu="swiftshader_indirect" -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=60
-

@@ -23,8 +23,6 @@ jobs:
         uses: actions/checkout@v3
       - uses: ./.github/actions/setup-java
       - uses: ./.github/actions/gradle-cache
-        with:
-          key-prefix: gradle-build
 
       - name: Assemble release for metrics
         run: ./gradlew :metrics:$METRICS_PROJECT:assembleRelease
@@ -74,7 +72,7 @@ jobs:
             | SDK | Before | After | Difference | Status |
             |-|-|-|-|-|
             `;
-            
+
             Object.keys(prSdkSizes).forEach(sdk => {
               const currentSize = currentSdkSizes[sdk] || 0;
               const prSize = prSdkSizes[sdk];
@@ -94,7 +92,7 @@ jobs:
 
               commentBody += `| ${sdk} | ${currentSizeInMb} MB | ${prSizeInMb} MB | ${diffInMb} MB | ${status} |\n`;
             });
-            
+
             // Post or update the PR comment
 
             // Find existing comment

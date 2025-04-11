@@ -202,9 +202,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user.copy(role = "user")
         }
 
-        // Initialize Stream internal loggers
-        StreamLog.install(AndroidStreamLogger())
-        StreamLog.setValidator { priority, _ -> priority.level >= loggingLevel.priority.level }
+        setupStreamLog()
 
         // Android JSR-310 backport backport
         AndroidThreeTen.init(context)
@@ -249,7 +247,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             apiKey = apiKey,
             token = token,
             tokenProvider = tokenProvider,
-            loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
@@ -302,6 +299,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         StreamVideo.install(client)
 
         return client
+    }
+
+    private fun setupStreamLog() {
+        if (!StreamLog.isInstalled) {
+            // Initialize Stream internal loggers
+            StreamLog.install(AndroidStreamLogger())
+            StreamLog.setValidator { priority, _ -> priority.level >= loggingLevel.priority.level }
+        }
     }
 
     internal fun createCallConfigurationRegistry(

@@ -48,10 +48,16 @@ android {
         targetSdk = Configuration.targetSdk
         versionCode = 1
         versionName = Configuration.streamVideoCallGooglePlayVersion
+        testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
         missingDimensionStrategy(FlavorDimension.contentType.name, VideoDemoFlavor.development.name)
         vectorDrawables {
             useSupportLibrary = true
         }
+    }
+
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
 
     val signFile: File = rootProject.file(".sign/keystore.properties")
@@ -201,6 +207,10 @@ androidComponents {
                     }
                 )
             }
+
+            if (applicationVariant.name == "developmentDebug" || applicationVariant.name == "productionDebug") {
+                dependencies.add("${applicationVariant.name}Implementation", libs.leakCanary)
+            }
         }
     }
 }
@@ -281,8 +291,18 @@ dependencies {
     // Http
     implementation(libs.okhttp)
 
-    // Memory detection
-    debugImplementation(libs.leakCanary)
+    // Also Leak Canary added in the previous block
+
+    // Instrumentation tests
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.uiautomator)
+    androidTestImplementation(libs.androidx.test.junit.ktx)
+    androidTestImplementation(libs.androidx.test.monitor)
+    androidTestUtil(libs.androidx.test.orchestrator)
+    androidTestImplementation(libs.allure.kotlin.model)
+    androidTestImplementation(libs.allure.kotlin.junit4)
+    androidTestImplementation(libs.allure.kotlin.commons)
+    androidTestImplementation(libs.allure.kotlin.android)
 
     baselineProfile(project(":benchmark"))
 }
