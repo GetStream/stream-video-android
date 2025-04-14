@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -61,6 +62,7 @@ import io.getstream.video.android.mock.previewParticipantsList
  * @param modifier Modifier for styling.
  * @param style Defined properties for styling a single video call track.
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param screenSharingFallbackContent Fallback content to show when the screen sharing session is loading or not available.
  */
 @Composable
 internal fun PortraitScreenSharingVideoRenderer(
@@ -84,6 +86,11 @@ internal fun PortraitScreenSharingVideoRenderer(
             style = videoStyle,
         )
     },
+    screenSharingFallbackContent: @Composable (ScreenSharingSession) -> Unit = {
+        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by it.participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
+    },
 ) {
     val sharingParticipant = session.participant
     val me by call.state.me.collectAsStateWithLifecycle()
@@ -102,6 +109,7 @@ internal fun PortraitScreenSharingVideoRenderer(
                         isZoomable = isZoomable,
                         me = me,
                         sharingParticipant = sharingParticipant,
+                        fallbackContent = screenSharingFallbackContent,
                     )
                 }
                 items(
@@ -134,6 +142,7 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
     isZoomable: Boolean,
     me: ParticipantState?,
     sharingParticipant: ParticipantState,
+    fallbackContent: @Composable (ScreenSharingSession) -> Unit,
 ) {
     val itemHeight = with(LocalDensity.current) {
         ((constraints.maxHeight * 0.45).toInt()).toDp()
@@ -154,6 +163,7 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
                 call = call,
                 session = session,
                 isZoomable = isZoomable,
+                fallbackContent = fallbackContent,
             )
 
             if (me?.sessionId != sharingParticipant.sessionId) {
