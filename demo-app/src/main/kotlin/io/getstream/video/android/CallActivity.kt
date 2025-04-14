@@ -49,7 +49,10 @@ class CallActivity : ComposeStreamCallActivity() {
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
     override val configuration: StreamCallActivityConfiguration =
-        StreamCallActivityConfiguration(closeScreenOnCallEnded = false)
+        StreamCallActivityConfiguration(
+            closeScreenOnCallEnded = false,
+            canSkipPermissionRationale = false,
+        )
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
