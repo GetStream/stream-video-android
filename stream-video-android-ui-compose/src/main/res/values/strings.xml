@@ -17,7 +17,7 @@
 <resources>
     <string name="stream_audio_call_ui_calling">Calling...</string>
     <string name="stream_default_call_ui_permissions_rationale_title">Some permissions are required</string>
-    <string name="stream_default_call_ui_permission_rationale">The app needs access to: %1$s.</string>
+    <string name="stream_default_call_ui_permission_rationale">Please grant the necessary permissions.</string>
     <string name="stream_default_call_ui_settings_button">Settings</string>
     <string name="stream_default_call_ui_not_now_button">Not now</string>
 </resources>

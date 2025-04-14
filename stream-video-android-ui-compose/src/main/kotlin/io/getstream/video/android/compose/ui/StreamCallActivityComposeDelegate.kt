@@ -221,8 +221,8 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                         InternalPermissionContent(showRationale, call, granted, notGranted)
                     }
 
-                    NoneGranted { notGranted, showRationale ->
-                        InternalPermissionContent(showRationale, call, emptyList(), notGranted)
+                    NoneGranted {
+                        InternalPermissionContent(it, call, emptyList(), emptyList())
                     }
                 }
             }
@@ -428,7 +428,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     Text(
                         text = stringResource(
                             id = R.string.stream_default_call_ui_permission_rationale,
-                            permissionsToString(notGranted),
                         ),
                         style = TextStyle(
                             fontSize = 16.sp,
@@ -458,15 +457,5 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 },
             )
         }
-    }
-
-    private fun permissionsToString(notGranted: List<String>): String {
-        return notGranted.mapNotNull {
-            when (it) {
-                Manifest.permission.RECORD_AUDIO -> "microphone"
-                Manifest.permission.CAMERA -> "camera"
-                else -> null
-            }
-        }.joinToString(", ")
     }
 }
