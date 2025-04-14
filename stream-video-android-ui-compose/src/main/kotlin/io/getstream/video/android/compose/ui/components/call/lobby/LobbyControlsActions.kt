@@ -17,7 +17,9 @@
 package io.getstream.video.android.compose.ui.components.call.lobby
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
@@ -47,12 +49,16 @@ public fun buildDefaultLobbyControlActions(
     return listOf(
         {
             ToggleMicrophoneAction(
+                modifier = Modifier
+                    .testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction,
             )
         },
         {
             ToggleCameraAction(
+                modifier = Modifier
+                    .testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )

@@ -198,7 +198,8 @@ private fun CallLobbyHeaderContent(
         )
         IconButton(
             modifier = Modifier
-                .padding(8.dp),
+                .padding(8.dp)
+                .testTag("Stream_CloseButton"),
             onClick = {
                 onBack()
             },
@@ -332,7 +333,9 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
-            modifier = Modifier.wrapContentWidth(),
+            modifier = Modifier
+                .wrapContentWidth()
+                .testTag("Stream_ParticipantsCount_$totalParticipants"),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -353,7 +356,7 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
             style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("start_call"),
+                .testTag("Stream_JoinCallButton"),
             text = text.second,
             onClick = onClick,
         )

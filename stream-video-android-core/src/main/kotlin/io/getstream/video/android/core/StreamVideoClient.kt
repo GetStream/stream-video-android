@@ -81,7 +81,6 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
-import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
@@ -149,7 +148,6 @@ internal class StreamVideoClient internal constructor(
     internal val apiKey: ApiKey,
     internal var token: String,
     private val lifecycle: Lifecycle,
-    private val loggingLevel: LoggingLevel,
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
