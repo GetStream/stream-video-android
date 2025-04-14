@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.4.5
+            <div class="library-version">1.5.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -147,12 +147,12 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-1811673124%2FFunctions%2F-1889015313" anchor-label="ParticipantsLayout" id="-1811673124%2FFunctions%2F-1889015313" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release"></a>
+        <div class="table"><a data-name="-1504845630%2FFunctions%2F-1889015313" anchor-label="ParticipantsLayout" id="-1504845630%2FFunctions%2F-1889015313" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-filterable-current=":stream-video-android-ui-compose:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-participants-layout.html"><span>Participants</span><wbr><span><span>Layout</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1811673124%2FFunctions%2F-1889015313"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1504845630%2FFunctions%2F-1889015313"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
@@ -164,7 +164,11 @@
             participant = videoParticipant,
             style = videoStyle,
         )
-    }<span class="token punctuation">, </span></span><span class="parameter ">floatingVideoRenderer<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span>call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">, </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/unit/IntSize.html">IntSize</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders all the participants, based on the number of people in a call and the call state. Also takes into account if there are any screen sharing sessions active and adjusts the UI accordingly.</p></div></div></div>
+    }<span class="token punctuation">, </span></span><span class="parameter ">floatingVideoRenderer<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span>call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">, </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/unit/IntSize.html">IntSize</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">screenSharingFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core.model/-screen-sharing-session/index.html">ScreenSharingSession</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
+        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by it.participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
+    }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders all the participants, based on the number of people in a call and the call state. Also takes into account if there are any screen sharing sessions active and adjusts the UI accordingly.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -191,12 +195,12 @@
               </div>
             </div>
           </div>
-<a data-name="2116472021%2FFunctions%2F-1889015313" anchor-label="ParticipantsScreenSharing" id="2116472021%2FFunctions%2F-1889015313" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release"></a>
+<a data-name="1620821481%2FFunctions%2F-1889015313" anchor-label="ParticipantsScreenSharing" id="1620821481%2FFunctions%2F-1889015313" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-filterable-current=":stream-video-android-ui-compose:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-participants-screen-sharing.html"><span>Participants</span><wbr><span>Screen</span><wbr><span><span>Sharing</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2116472021%2FFunctions%2F-1889015313"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1620821481%2FFunctions%2F-1889015313"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
@@ -208,6 +212,10 @@
             participant = videoParticipant,
             style = videoStyle,
         )
+    }<span class="token punctuation">, </span></span><span class="parameter ">screenSharingFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core.model/-screen-sharing-session/index.html">ScreenSharingSession</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
+        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by it.participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
     }</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Renders all the CallParticipants, based on the number of people in a call and the call state. Also takes into account if there are any screen sharing sessions active and adjusts the UI accordingly.</p></div></div></div>
                 </div>
               </div>
@@ -252,7 +260,8 @@
             networkQuality = it,
             modifier = Modifier
                 .align(BottomEnd)
-                .height(VideoTheme.dimens.componentHeightM),
+                .height(VideoTheme.dimens.componentHeightM)
+                .testTag("Stream_ParticipantNetworkQualityIndicator"),
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">scalingType<span class="token operator">: </span><a href="../io.getstream.video.android.compose.ui.components.video/-video-scaling-type/index.html">VideoScalingType</a><span class="token operator"> = </span>VideoScalingType.SCALE_ASPECT_FILL<span class="token punctuation">, </span></span><span class="parameter ">videoFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
@@ -267,7 +276,8 @@
         ParticipantActions(
             Modifier
                 .align(TopStart)
-                .padding(8.dp),
+                .padding(8.dp)
+                .testTag("Stream_ParticipantActionsIcon"),
             actions,
             call,
             participant,
@@ -383,7 +393,8 @@
                 .padding(
                     vertical = VideoTheme.dimens.spacingXs,
                     horizontal = VideoTheme.dimens.spacingS,
-                ),
+                )
+                .testTag("Stream_ParticipantMicrophone_Enabled_$audioEnabled"),
         )
     }</span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-label.html"><span class="token function">ParticipantLabel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">nameLabel<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">isPinned<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">labelPosition<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Alignment.html">Alignment</a><span class="token operator"> = </span>BottomStart<span class="token punctuation">, </span></span><span class="parameter ">hasAudio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">isSpeaking<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">audioLevel<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.0f</span><span class="token punctuation">, </span></span><span class="parameter ">soundIndicatorContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         SoundIndicator(

@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.4.5
+            <div class="library-version">1.5.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -70,7 +70,8 @@
             networkQuality = it,
             modifier = Modifier
                 .align(BottomEnd)
-                .height(VideoTheme.dimens.componentHeightM),
+                .height(VideoTheme.dimens.componentHeightM)
+                .testTag("Stream_ParticipantNetworkQualityIndicator"),
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">scalingType<span class="token operator">: </span><a href="../io.getstream.video.android.compose.ui.components.video/-video-scaling-type/index.html">VideoScalingType</a><span class="token operator"> = </span>VideoScalingType.SCALE_ASPECT_FILL<span class="token punctuation">, </span></span><span class="parameter ">videoFallbackContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
@@ -85,7 +86,8 @@
         ParticipantActions(
             Modifier
                 .align(TopStart)
-                .padding(8.dp),
+                .padding(8.dp)
+                .testTag("Stream_ParticipantActionsIcon"),
             actions,
             call,
             participant,
