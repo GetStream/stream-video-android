@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 object AppConfig {
     // Constants
     private val logger by taggedLogger("RemoteConfig")
-    private const val SHARED_PREF_NAME = "stream_demo_app"
+    private const val SHARED_PREF_NAME = "stream_demo_app_${BuildConfig.VERSION_CODE}"
     private const val SELECTED_ENV = "selected_env_v2"
 
     // Data

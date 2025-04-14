@@ -68,8 +68,11 @@ import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -195,7 +198,8 @@ private fun CallLobbyHeaderContent(
         )
         IconButton(
             modifier = Modifier
-                .padding(8.dp),
+                .padding(8.dp)
+                .testTag("Stream_CloseButton"),
             onClick = {
                 onBack()
             },
@@ -251,6 +255,26 @@ private fun CallLobbyBody(
                 .padding(VideoTheme.dimens.spacingM),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
+            onRenderedContent = {
+                val videoRendererConfig = remember {
+                    videoRenderConfig {
+                        this.fallbackContent = {
+                            val userName = it.user.userNameOrId
+                            val userImage = it.user.image
+                            UserAvatarBackground(userImage = userImage, userName = userName)
+                        }
+                    }
+                }
+                VideoRenderer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(VideoTheme.colors.baseSheetTertiary)
+                        .testTag("on_rendered_content"),
+                    call = call,
+                    video = it,
+                    videoRendererConfig = videoRendererConfig,
+                )
+            },
             onCallAction = { action ->
                 when (action) {
                     is ToggleCamera -> onToggleCamera(action.isEnabled)
@@ -309,7 +333,9 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
-            modifier = Modifier.wrapContentWidth(),
+            modifier = Modifier
+                .wrapContentWidth()
+                .testTag("Stream_ParticipantsCount_$totalParticipants"),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -330,7 +356,7 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
             style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier
                 .fillMaxWidth()
-                .testTag("start_call"),
+                .testTag("Stream_JoinCallButton"),
             text = text.second,
             onClick = onClick,
         )

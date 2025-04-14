@@ -55,9 +55,11 @@ object StreamVideoInitHelper {
     private lateinit var context: Context
     private val _initState = MutableStateFlow(InitializedState.NOT_STARTED)
     public val initializedState: StateFlow<InitializedState> = _initState
+    private var testNotificationConfig: NotificationConfig? = null
 
-    fun init(appContext: Context) {
+    fun init(appContext: Context, testNotificationConfig: NotificationConfig? = null) {
         context = appContext.applicationContext
+        this.testNotificationConfig = testNotificationConfig
     }
 
     suspend fun reloadSdk(
@@ -196,13 +198,14 @@ object StreamVideoInitHelper {
             token = token,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
-            notificationConfig = NotificationConfig(
+            notificationConfig = testNotificationConfig ?: NotificationConfig(
                 pushDeviceGenerators = listOf(
                     FirebasePushDeviceGenerator(
                         context = context,
                         providerName = "firebase",
                     ),
                 ),
+                hideRingingNotificationInForeground = true,
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {

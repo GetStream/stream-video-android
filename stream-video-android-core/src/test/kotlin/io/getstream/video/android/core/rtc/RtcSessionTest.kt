@@ -23,7 +23,6 @@ import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.utils.buildAudioConstraints
-import io.getstream.video.android.core.utils.buildMediaConstraints
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
@@ -51,8 +50,6 @@ class RtcSessionTest : IntegrationTestBase() {
 
     @Test
     fun `Constraints`() = runTest {
-        val mediaConstraints = buildMediaConstraints()
-
         val audioConstraints = buildAudioConstraints()
     }
 
