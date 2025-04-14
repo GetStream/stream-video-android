@@ -182,16 +182,15 @@ internal fun buildConnectionConfiguration(
     }
 }
 
-@JvmSynthetic
-internal fun buildMediaConstraints(): MediaConstraints {
-    return MediaConstraints().apply {
-        mandatory.addAll(
-            listOf(
-                MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"),
-                MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"),
-            ),
-        )
-    }
+internal val defaultConstraints = MediaConstraints().apply {
+    // No mandatory constraints
+    // Only optional ones
+    optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
+}
+
+internal val iceRestartConstraints = MediaConstraints().apply {
+    mandatory.add(MediaConstraints.KeyValuePair("IceRestart", "true"))
+    optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
 }
 
 @JvmSynthetic

@@ -6517,8 +6517,10 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;Z)V
-	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun createAnswer (Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createAnswer$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun createOffer (Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createOffer$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
 	public final fun getStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
