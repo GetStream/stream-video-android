@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest
@@ -124,7 +125,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             }
 
             else -> {
-                LaunchPermissionRequest(listOf(Manifest.permission.RECORD_AUDIO)) {
+                LaunchPermissionRequest(getRequiredPermissions(call)) {
                     AllPermissionsGranted {
                         // All permissions granted
                         RingingCallContent(
@@ -224,6 +225,17 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                         InternalPermissionContent(it, call, emptyList(), emptyList())
                     }
                 }
+            }
+        }
+    }
+
+    private fun getRequiredPermissions(call: Call): List<String> {
+        return mutableListOf<String>().apply {
+            if (call.state.ownCapabilities.value.contains(OwnCapability.SendAudio)) {
+                add(Manifest.permission.RECORD_AUDIO)
+            }
+            if (call.state.ownCapabilities.value.contains(OwnCapability.SendVideo)) {
+                add(Manifest.permission.CAMERA)
             }
         }
     }
@@ -415,7 +427,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         text = stringResource(
-                            id = R.string.stream_default_call_ui_microphone_rationale,
+                            id = R.string.stream_default_call_ui_permission_rationale,
                         ),
                         style = TextStyle(
                             fontSize = 16.sp,

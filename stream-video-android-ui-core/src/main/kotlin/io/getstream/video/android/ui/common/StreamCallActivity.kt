@@ -137,9 +137,10 @@ public abstract class StreamCallActivity : ComponentActivity() {
         }
     }
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
-        logger.e(error) { "Something went wrong, finishing the activity!" }
+        logger.e(error) { "Something went wrong" }
         onFailed(error)
         if (configuration.closeScreenOnError) {
+            logger.e(error) { "Finishing the activity" }
             finish()
         }
     }

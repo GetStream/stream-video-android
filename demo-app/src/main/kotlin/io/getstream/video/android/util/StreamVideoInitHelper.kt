@@ -205,6 +205,7 @@ object StreamVideoInitHelper {
                         providerName = "firebase",
                     ),
                 ),
+                hideRingingNotificationInForeground = true,
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {
