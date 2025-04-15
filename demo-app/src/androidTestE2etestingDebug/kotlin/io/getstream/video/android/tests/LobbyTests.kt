@@ -27,7 +27,7 @@ import org.junit.Test
 
 class LobbyTests : StreamTestCase() {
 
-    @AllureId("")
+    @AllureId("6992")
     @Test
     fun testLobbyWithTwoParticipants() {
         val participants = 2
@@ -63,7 +63,7 @@ class LobbyTests : StreamTestCase() {
         }
     }
 
-    @AllureId("")
+    @AllureId("6950")
     @Test
     fun testLobbyWithZeroParticipants() {
         step("WHEN user enters lobby") {
@@ -86,7 +86,7 @@ class LobbyTests : StreamTestCase() {
         }
     }
 
-    @AllureId("")
+    @AllureId("7254")
     @Test
     fun testCameraAndMicrophoneConfigurationInLobby() {
         step("WHEN user enters lobby w/o camera and mic") {
