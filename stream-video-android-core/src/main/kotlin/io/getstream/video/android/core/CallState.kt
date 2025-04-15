@@ -333,18 +333,17 @@ public class CallState(
         message = "The correct approach is to find the participant with video from the participants list or if the id of the user who is host is known query that one directly.",
         level = DeprecationLevel.WARNING,
         replaceWith = ReplaceWith(
-                """
+            """
                             call.state.participants.flatMapLatest { participants ->
                                 combine(participants.map { p -> p.videoEnabled.map { enabled -> p to enabled } }) { pairs ->
                                     pairs.filter { (_, e) -> e }.map { (p, _) -> p }
                                 }
                             }
-                         """
-        )
+                         """,
+        ),
     )
     val livestream: StateFlow<ParticipantState.Video?> =
         livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
-
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
@@ -651,7 +650,10 @@ public class CallState(
                 // auto-join the call if it's an outgoing call and someone has accepted
                 // do not auto-join if it's already accepted by us
                 val callRingState = _ringingState.value
-                if (callRingState is RingingState.Outgoing && callRingState.acceptedByCallee && _acceptedBy.value.findLast { it == client.userId } == null && client.state.activeCall.value == null && autoJoiningCall == null) {
+                if (callRingState is RingingState.Outgoing && callRingState.acceptedByCallee && _acceptedBy.value.findLast {
+                        it == client.userId
+                    } == null && client.state.activeCall.value == null && autoJoiningCall == null
+                ) {
                     autoJoiningCall = scope.launch {
                         // errors are handled inside the join function
                         call.join()
@@ -998,7 +1000,7 @@ public class CallState(
             is CallClosedCaptionsStartedEvent,
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
-                -> closedCaptionManager.handleEvent(event)
+            -> closedCaptionManager.handleEvent(event)
         }
     }
 
