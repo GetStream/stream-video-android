@@ -113,7 +113,7 @@ class UserRobot {
 
     fun camera(
         action: UserControls,
-        hard: Boolean = false, // When true, toggles twice to ensure server state syncs properly
+        hard: Boolean = false, // When true, hard-toggles to ensure server state syncs properly
     ): UserRobot {
         val isEnabled = CallPage.cameraEnabledToggle.findObjects().isNotEmpty()
 
@@ -149,7 +149,7 @@ class UserRobot {
 
     fun microphone(
         action: UserControls,
-        hard: Boolean = false, // When true, toggles twice to ensure server state syncs properly
+        hard: Boolean = false, // When true, hard-toggles to ensure server state syncs properly
     ): UserRobot {
         val isEnabled = CallPage.microphoneEnabledToggle.findObjects().isNotEmpty()
 
