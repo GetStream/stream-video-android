@@ -66,7 +66,7 @@ class CallPage {
             val cameraDisabled = By.res("Stream_ParticipantsListUserCamera_Enabled_false")
             val microphoneEnabled = By.res("Stream_ParticipantsListUserMicrophone_Enabled_true")
             val microphoneDisabled = By.res("Stream_ParticipantsListUserMicrophone_Enabled_false")
-            val closeButton = LobbyPage.closeButton
+            val closeButton = By.res("Stream_ParticipantsListCloseButton")
         }
     }
 
