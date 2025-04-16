@@ -44,15 +44,16 @@ fun LiveNavHost(
     startDestination: String = LiveScreens.Main.destination,
 ) {
     val context = LocalContext.current
-//    val userId = "Darth_Krayt"
+    val userId = "liviu-host"
 //    val userId = "liviu-guest-1"
-    val userId = "liviu"
-    val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGl2aXUifQ.MOIrZ6DARGNwRXGD3e5r5B2R7_B9MQJrbnxfih6YPlA"
+//    val userId = "liviu"
+//    val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGl2aXUtaG9zdCJ9.wkm7B7DAnXKfg_ojlh7FGSr4RsVj2HsurysHSdz2kbw" // host
+    val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGl2aXUtZ3Vlc3QtMSJ9.YqhYLm1z24uQSgPbvo_h7vC5dmW4QgXSTC-bF9S9hi4" // guest-1
+//    val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGl2aXUifQ.MOIrZ6DARGNwRXGD3e5r5B2R7_B9MQJrbnxfih6YPlA" alfagift
 
     // step1 - create a user.
     val user = User(
         id = userId, // any string
-        name = "Liviu", // name and image are used in the UI
         role = "user",
     )
 
@@ -62,7 +63,7 @@ fun LiveNavHost(
     // step2 - initialize StreamVideo. For a production app we recommend adding the client to your Application class or di module.
     val client = StreamVideoBuilder(
         context = context,
-        apiKey = "8d8j4ujbd3pj", // demo API key
+        apiKey = "par8f5s3gn2j",
         geo = GEO.GlobalEdgeNetwork,
         user = user,
         token = userToken,

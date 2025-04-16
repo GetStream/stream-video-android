@@ -26,15 +26,20 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
+import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
@@ -69,28 +74,47 @@ fun LiveAudience(
         it.video.value?.enabled == true
     }
     val livestream by call.state.livestream.collectAsStateWithLifecycle()
-    val filteredVideo = participantWithVideo?.video?.collectAsStateWithLifecycle()
+    val videoTrack = participantWithVideo?.video?.collectAsStateWithLifecycle()
 
 //    Log.d("LivestreamDebug", "participantWithVideo: $participantWithVideo")
 //    Log.d("LivestreamDebug", "livestream: ${livestream.value}")
-    Log.d("LivestreamDebugFlows", "filteredVideo: ${filteredVideo?.value}")
+    Log.d("LivestreamDebugFlows", "filteredVideo: ${videoTrack?.value}")
 
     val videoRendererConfig = videoRenderConfig {
         videoScalingType = VideoScalingType.SCALE_ASPECT_FIT
         fallbackContent = { FallbackContent() }
     }
 
-    Box {
+    var parentSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
+
+    Box(
+        modifier = Modifier.onSizeChanged { parentSize = it },
+    ) {
         Column {
-            LivestreamPlayer(
-                call = call,
+//            LivestreamPlayer(
+//                call = call,
+//                modifier = Modifier.weight(1f),
+//            )
+            VideoRenderer(
                 modifier = Modifier.weight(1f),
+                call = call,
+                video = videoTrack?.value,
+                videoRendererConfig = videoRendererConfig,
             )
             VideoRenderer(
                 modifier = Modifier.weight(1f),
                 call = call,
-                video = filteredVideo?.value,
+                video = videoTrack?.value,
                 videoRendererConfig = videoRendererConfig,
+            )
+        }
+
+        participantWithVideo?.let {
+            FloatingParticipantVideo(
+                modifier = Modifier.align(Alignment.TopEnd),
+                call = call,
+                participant = it,
+                parentBounds = parentSize,
             )
         }
 
