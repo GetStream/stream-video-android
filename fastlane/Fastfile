@@ -17,8 +17,8 @@ before_all do |lane|
   end
 end
 
-lane :start_video_buddy do
-  install_video_buddy
+lane :start_video_buddy do |options|
+  install_video_buddy unless options[:debug]
   stop_video_buddy if is_localhost
   sh("stream-video-buddy server --port #{video_buddy_port} > video-buddy-server.log 2>&1 &")
 end
