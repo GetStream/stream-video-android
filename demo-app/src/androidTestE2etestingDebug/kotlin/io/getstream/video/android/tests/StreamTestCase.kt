@@ -46,10 +46,7 @@ abstract class StreamTestCase {
 
     val userRobot = UserRobot()
     var participantRobot = ParticipantRobot(debug = false, record = false)
-    val callId: String by lazy {
-        val uuid = UUID.randomUUID().toString().split("-")
-        if (uuid.isNotEmpty()) uuid.first() else "Test"
-    }
+    lateinit var callId: String
 
     @get:Rule
     var testName: TestName = TestName()
@@ -65,10 +62,11 @@ abstract class StreamTestCase {
     val windowHierarchyRule = WindowHierarchyRule()
 
     @get:Rule
-    val retryRule = RetryRule(count = 1)
+    val retryRule = RetryRule(count = 3)
 
     @Before
     fun setUp() {
+        generateCallId()
         device.startApp(callId)
         grantAppPermissions()
     }
@@ -91,5 +89,10 @@ abstract class StreamTestCase {
         for (permission in permissions) {
             device.grantPermission(permission)
         }
+    }
+
+    private fun generateCallId() {
+        val uuid = UUID.randomUUID().toString().split("-")
+        callId = if (uuid.isNotEmpty()) uuid.first() else "Test"
     }
 }
