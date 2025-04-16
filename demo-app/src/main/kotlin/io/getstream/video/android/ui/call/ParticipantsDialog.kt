@@ -79,7 +79,7 @@ public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
             IconButton(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .testTag("Stream_CloseButton"),
+                    .testTag("Stream_ParticipantsListCloseButton"),
                 onClick = {
                     onDismiss()
                 },
