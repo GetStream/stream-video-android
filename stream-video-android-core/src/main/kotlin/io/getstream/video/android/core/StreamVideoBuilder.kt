@@ -85,6 +85,8 @@ import java.net.ConnectException
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
  * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
+ * @property leaveAfterDisconnectSeconds The number of seconds to wait before leaving the call after the connection is disconnected.
+ * @property callUpdatesAfterLeave Whether to update the call state after leaving the call.
  *
  * @see build
  * @see ClientState.connection
@@ -133,6 +135,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
+    private val callUpdatesAfterLeave: Boolean = false,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -199,9 +202,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user.copy(role = "user")
         }
 
-        // Initialize Stream internal loggers
-        StreamLog.install(AndroidStreamLogger())
-        StreamLog.setValidator { priority, _ -> priority.level >= loggingLevel.priority.level }
+        setupStreamLog()
 
         // Android JSR-310 backport backport
         AndroidThreeTen.init(context)
@@ -246,7 +247,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             apiKey = apiKey,
             token = token,
             tokenProvider = tokenProvider,
-            loggingLevel = loggingLevel,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamNotificationManager = streamNotificationManager,
@@ -259,6 +259,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             appName = appName,
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
+            enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
         )
 
         if (user.type == UserType.Guest) {
@@ -298,6 +299,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         StreamVideo.install(client)
 
         return client
+    }
+
+    private fun setupStreamLog() {
+        if (!StreamLog.isInstalled) {
+            // Initialize Stream internal loggers
+            StreamLog.install(AndroidStreamLogger())
+            StreamLog.setValidator { priority, _ -> priority.level >= loggingLevel.priority.level }
+        }
     }
 
     internal fun createCallConfigurationRegistry(

@@ -173,7 +173,7 @@ class PublisherTest {
         }
 
         // Mock the parent's createOffer so it returns a known Result<SessionDescription>.
-        every { publisher["createOffer"]() } returns mockSdpOfferResult
+        every { publisher["createOffer"](any<MediaConstraints>()) } returns mockSdpOfferResult
 
         // Also mock setLocalDescription & setRemoteDescription in the parent class
         justRun { publisher["setLocalDescription"](any<SessionDescription>()) }

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -51,7 +52,7 @@ public fun StreamBadgeBox(
     content: @Composable BoxScope.(Modifier) -> Unit,
 ) {
     Box(modifier = modifier) {
-        content(modifier)
+        content(modifier.testTag("Stream_ParticipantsMenuIcon"))
         // Badge content
         if (text != null || showWithoutValue) {
             BadgeContent(style = style, text = text)
@@ -72,7 +73,8 @@ private fun BoxScope.BadgeContent(style: BadgeStyle, text: String? = null) {
             modifier = Modifier
                 .align(Alignment.Center)
                 .wrapContentSize()
-                .padding(horizontal = 4.dp),
+                .padding(horizontal = 4.dp)
+                .testTag("Stream_ParticipantsCountBadge"),
             text = text ?: "",
             style = style.textStyle,
         )
