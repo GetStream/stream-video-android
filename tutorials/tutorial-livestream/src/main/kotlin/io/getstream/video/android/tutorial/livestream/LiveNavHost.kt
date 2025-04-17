@@ -19,8 +19,11 @@ package io.getstream.video.android.tutorial.livestream
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -36,6 +39,7 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.delay
 
 @Composable
 fun LiveNavHost(
@@ -43,6 +47,8 @@ fun LiveNavHost(
     navController: NavHostController = rememberNavController(),
     startDestination: String = LiveScreens.Main.destination,
 ) {
+    val viewModel = viewModel<LivestreamViewModel>()
+
     val context = LocalContext.current
     val userId = "liviu-host"
 //    val userId = "liviu-guest-1"
@@ -80,7 +86,7 @@ fun LiveNavHost(
         startDestination = startDestination,
     ) {
         composable(LiveScreens.Main.destination) {
-            LiveMain(navController = navController)
+            LiveMain(navController = navController, viewModel = viewModel)
         }
 
         composable(LiveScreens.Host.destination, LiveScreens.Host.args) {
@@ -88,10 +94,31 @@ fun LiveNavHost(
         }
 
         composable(LiveScreens.Guest.destination, LiveScreens.Guest.args) {
+            val callId = LiveScreens.Guest.getCallId(it)
+
+            LaunchedEffect(Unit) {
+                // Setting both just for testing
+                viewModel.setInViewerScreen(true)
+                viewModel.isInViewerScreenState.value = true
+
+                delay(200)
+            }
+            // Maybe merge these two effects
+            DisposableEffect(callId) {
+                viewModel.setCurrentCallId(callId)
+
+                onDispose {
+                    // Setting both just for testing
+                    viewModel.setInViewerScreen(false)
+                    viewModel.isInViewerScreenState.value = false
+                }
+            }
+
             LiveAudience(
                 navController = navController,
                 callId = LiveScreens.Guest.getCallId(it),
                 client,
+                viewModel,
             )
         }
     }

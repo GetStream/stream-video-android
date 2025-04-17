@@ -19,13 +19,17 @@ package io.getstream.video.android.tutorial.livestream
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
@@ -37,14 +41,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.VideoScalingType
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.QueriedCalls
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,7 +62,15 @@ import kotlinx.coroutines.withContext
 @Composable
 fun LiveMain(
     navController: NavHostController,
+    viewModel: LivestreamViewModel,
 ) {
+    val currentCallId by viewModel.currentCallId.collectAsStateWithLifecycle()
+    val client = StreamVideo.instance()
+
+    // Use one of these
+    val isInViewerScreenFromFlow by viewModel.isInViewerScreen.collectAsStateWithLifecycle()
+    val isInViewerScreenFromState by viewModel.isInViewerScreenState
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -104,6 +122,9 @@ fun LiveMain(
                     backgroundColor = VideoTheme.colors.brandPrimary,
                 ),
                 onClick = {
+//                    viewModel.setInViewerScreen(true)
+//                    viewModel.isInViewerScreenBool = true
+//                    viewModel.isInViewerScreenState.value = true
                     navController.navigate(LiveScreens.Guest.destination(callId.text))
                 },
             ) {
@@ -139,6 +160,56 @@ fun LiveMain(
                 Text(text = "query ongoing live", color = VideoTheme.colors.basePrimary)
             }
         }
+
+        if (currentCallId != null && !isInViewerScreenFromState) {
+            MiniPlayer(
+                navController = navController,
+                callId = currentCallId!!,
+                client = client,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+                    .size(200.dp),
+            )
+        }
+    }
+}
+
+@Composable
+fun MiniPlayer(
+    navController: NavHostController,
+    callId: String,
+    client: StreamVideo,
+    modifier: Modifier = Modifier,
+) {
+    val call = client.call("livestream", callId)
+    val participants by call.state.participants.collectAsStateWithLifecycle()
+    val participantWithVideo = participants.firstOrNull {
+        it.video.value?.enabled == true
+    }
+    val videoTrack = participantWithVideo?.video?.collectAsStateWithLifecycle()
+
+    var rendererView by remember { mutableStateOf<VideoTextureViewRenderer?>(null) }
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable {
+                navController.navigate(LiveScreens.Guest.destination(callId))
+            },
+    ) {
+        VideoRenderer(
+            call = call,
+            video = videoTrack?.value,
+            videoRendererConfig = videoRenderConfig {
+                videoScalingType = VideoScalingType.SCALE_ASPECT_FIT
+                fallbackContent = { FallbackContent() }
+            },
+            onRendered = {
+                rendererView = it
+                Log.d("LivestreamDebugMiniPlayer", "MiniPlayer rendererView created: $it")
+            },
+        )
     }
 }
 

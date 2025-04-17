@@ -17,14 +17,21 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,10 +46,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
+import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import kotlin.collections.firstOrNull
@@ -52,6 +62,7 @@ fun LiveAudience(
     navController: NavController,
     callId: String,
     client: StreamVideo,
+    viewModel: LivestreamViewModel,
 ) {
     val context = LocalContext.current
 
@@ -64,9 +75,11 @@ fun LiveAudience(
     val call = client.call("livestream", callId)
 
     LaunchedEffect(Unit) {
-        call.microphone.setEnabled(false, fromUser = true)
-        call.camera.setEnabled(false, fromUser = true)
-        call.join()
+        if (client.state.activeCall.value == null) {
+            call.microphone.setEnabled(false, fromUser = true)
+            call.camera.setEnabled(false, fromUser = true)
+            call.join()
+        }
     }
 
     val participants by call.state.participants.collectAsStateWithLifecycle()
@@ -91,9 +104,9 @@ fun LiveAudience(
         modifier = Modifier.onSizeChanged { parentSize = it },
     ) {
         Column {
-//            LivestreamPlayer(
-//                call = call,
-//                modifier = Modifier.weight(1f),
+//            ImprovedFallbackPlayer(
+//                call,
+//                navController,
 //            )
             VideoRenderer(
                 modifier = Modifier.weight(1f),
@@ -109,14 +122,14 @@ fun LiveAudience(
             )
         }
 
-        participantWithVideo?.let {
-            FloatingParticipantVideo(
-                modifier = Modifier.align(Alignment.TopEnd),
-                call = call,
-                participant = it,
-                parentBounds = parentSize,
-            )
-        }
+//        participantWithVideo?.let {
+//            FloatingParticipantVideo(
+//                modifier = Modifier.align(Alignment.TopEnd),
+//                call = call,
+//                participant = it,
+//                parentBounds = parentSize,
+//            )
+//        }
 
         CallAppBar(
             modifier = Modifier
@@ -125,11 +138,125 @@ fun LiveAudience(
             call = call,
             centerContent = { },
             onCallAction = {
+                viewModel.setCurrentCallId(null)
+
                 call.leave()
+                navController.popBackStack()
+            },
+            onBackPressed = {
                 navController.popBackStack()
             },
         )
     }
+}
+
+@Composable
+fun ImprovedFallbackPlayer(call: Call, navController: NavController) {
+    LivestreamPlayer(
+        call = call,
+        rendererContent = {
+            Column {
+                CallAppBar(
+                    modifier = Modifier.padding(end = 16.dp, top = 16.dp, bottom = 16.dp),
+                    call = call,
+                    centerContent = { },
+                    onCallAction = {
+                        call.leave()
+                        navController.popBackStack()
+                    },
+                    onBackPressed = {
+                        navController.popBackStack()
+                    },
+                )
+
+                val livestream by call.state.livestream.collectAsState()
+                val track by remember { derivedStateOf { livestream?.track } }
+                val participants by call.state.remoteParticipants.collectAsState()
+                var firstLoad by remember { mutableStateOf(true) }
+                val connection by call.state.connection.collectAsState()
+                val participantVideoEnabled = participants.firstOrNull()?.videoEnabled?.collectAsState()?.value
+                val isLoading = connection == RealtimeConnection.PreJoin || connection == RealtimeConnection.InProgress
+                val trackEnabled by remember { derivedStateOf { track?.video?.enabled() } }
+                val participantVideo = participants.firstOrNull()?.video?.collectAsState()
+                val participantVideoTrack = participants.firstOrNull()?.videoTrack?.collectAsState()
+
+                val fallbackContent: @Composable (Call) -> Unit = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.LightGray),
+                    )
+                }
+
+                val progressIndicator: @Composable BoxScope.() -> Unit = {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.White,
+                    )
+                }
+
+                Column {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, bottom = 16.dp, end = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        Text("connection: $connection", color = Color.White)
+                        Text(
+                            "track: " + if (track == null) "null" else "not null",
+                            color = Color.White,
+                        )
+                        Text(
+                            "participantVideoEnabled: $participantVideoEnabled",
+                            color = Color.White,
+                        )
+                        Text("firstLoad: $firstLoad", color = Color.White)
+                        // Text("video: ${video?.type}")
+                        // Text("video.enabled: ${video?.enabled}")
+                        // Text("trackEnabled: $trackEnabled")
+                        // Text("participantVideo: ${participantVideo?.value}")
+                        // Text("participantVideoTrack: ${participantVideoTrack?.value}")
+                    }
+
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (firstLoad) {
+                            when {
+                                isLoading -> progressIndicator()
+                                participantVideoEnabled == false -> firstLoad = false
+                                track == null -> progressIndicator()
+                                else -> firstLoad = false
+                            }
+                        } else {
+                            if (participantVideoEnabled != true) {
+                                fallbackContent(call)
+                            } else {
+                                Renderer(call, livestream, fallbackContent)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun Renderer(
+    call: Call,
+    video: ParticipantState.Media?,
+    fallbackContent: @Composable (Call) -> Unit,
+) {
+    val videoRendererConfig = remember {
+        videoRenderConfig {
+            this.fallbackContent = fallbackContent
+        }
+    }
+    VideoRenderer(
+        call = call,
+        video = video,
+        videoRendererConfig = videoRendererConfig,
+    )
 }
 
 @Composable
