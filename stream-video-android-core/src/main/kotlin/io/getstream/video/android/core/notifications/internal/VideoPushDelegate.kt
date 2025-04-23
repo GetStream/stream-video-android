@@ -51,33 +51,31 @@ internal class VideoPushDelegate : PushDelegate() {
         return payload.ifValid {
             val callId = (payload[KEY_CALL_CID] as String).toTypeAndId()
                 .let { StreamCallId(it.first, it.second) }
-            CoroutineScope(DispatcherProvider.IO).launch {
-                when (payload[KEY_TYPE]) {
-                    KEY_TYPE_RING -> handleRingType(callId, payload)
-                    KEY_TYPE_MISSED -> handleMissedType(callId, payload)
-                    KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
-                    KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
-                }
+            when (payload[KEY_TYPE]) {
+                KEY_TYPE_RING -> handleRingType(callId, payload)
+                KEY_TYPE_MISSED -> handleMissedType(callId, payload)
+                KEY_TYPE_NOTIFICATION -> handleNotificationType(callId, payload)
+                KEY_TYPE_LIVE_STARTED -> handleLiveStartedType(callId, payload)
             }
         }
     }
 
-    private suspend fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("ring-type-notification")?.onRingingCall(callId, callDisplayName)
     }
 
-    private suspend fun handleMissedType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleMissedType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("missed-type-notification")?.onMissedCall(callId, callDisplayName)
     }
 
-    private suspend fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("generic-notification")?.onNotification(callId, callDisplayName)
     }
 
-    private suspend fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
+    private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
         val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
         getStreamVideo("live-started-notification")?.onLiveCall(callId, callDisplayName)
     }
