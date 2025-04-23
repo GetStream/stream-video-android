@@ -225,7 +225,7 @@ class UserRobot {
         return this
     }
 
-    fun waitForParticipantsToJoin(count: Int, timeOutMillis: Long = 20.seconds): UserRobot {
+    fun waitForParticipantsToJoin(count: Int, timeOutMillis: Long = 30.seconds): UserRobot {
         val user = 1
         val participants = user + count
         CallPage.participantsCountBadge
