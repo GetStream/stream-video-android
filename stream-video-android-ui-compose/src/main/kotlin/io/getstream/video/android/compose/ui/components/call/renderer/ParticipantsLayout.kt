@@ -24,12 +24,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -54,6 +57,7 @@ public enum class LayoutType {
  * @param style Defined properties for styling a single video call track.
  * @param layoutType The type of layout. [LayoutType], default - [LayoutType.DYNAMIC]
  * @param videoRenderer A single video renderer renders each individual participant.
+ * @param screenSharingFallbackContent Fallback content to show when the screen sharing session is loading or not available.
  */
 @Composable
 public fun ParticipantsLayout(
@@ -75,6 +79,11 @@ public fun ParticipantsLayout(
         )
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
+    screenSharingFallbackContent: @Composable (ScreenSharingSession) -> Unit = {
+        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by it.participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
+    },
 ) {
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
     val screenSharing = screenSharingSession.value
@@ -104,7 +113,7 @@ public fun ParticipantsLayout(
         } else {
             ParticipantsRegularGrid(
                 call = call,
-                modifier = modifier,
+                modifier = modifier.testTag("Stream_GridView"),
                 style = style,
                 videoRenderer = videoRenderer,
                 floatingVideoRenderer = floatingVideoRenderer,
@@ -113,7 +122,7 @@ public fun ParticipantsLayout(
     } else {
         ParticipantsScreenSharing(
             call = call,
-            modifier = modifier,
+            modifier = modifier.testTag("Stream_ParticipantsScreenSharingView"),
             session = screenSharing,
             style = ScreenSharingVideoRendererStyle().copy(
                 isFocused = style.isFocused,
@@ -121,6 +130,7 @@ public fun ParticipantsLayout(
                 labelPosition = style.labelPosition,
             ),
             videoRenderer = videoRenderer,
+            screenSharingFallbackContent = screenSharingFallbackContent,
         )
     }
 }

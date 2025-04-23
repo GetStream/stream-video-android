@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -124,7 +125,9 @@ public fun ParticipantAvatars(
                 val user = callUsers.first()
 
                 UserAvatar(
-                    modifier = Modifier.size(VideoTheme.dimens.genericMax),
+                    modifier = Modifier
+                        .size(VideoTheme.dimens.genericMax)
+                        .testTag("Stream_ParticipantAvatar"),
                     userName = user.name ?: user.id,
                     userImage = user.imageUrl,
                 )
@@ -133,7 +136,9 @@ public fun ParticipantAvatars(
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                         items(callUsers.take(if (callUsers.size >= 3) 3 else 2)) { user ->
                             UserAvatar(
-                                modifier = Modifier.size(VideoTheme.dimens.genericXl),
+                                modifier = Modifier
+                                    .size(VideoTheme.dimens.genericXl)
+                                    .testTag("Stream_ParticipantAvatar"),
                                 userName = user.userNameOrId,
                                 userImage = user.imageUrl,
                             )

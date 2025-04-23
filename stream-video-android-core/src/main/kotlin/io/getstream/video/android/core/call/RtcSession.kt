@@ -72,10 +72,9 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
-import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
-import io.getstream.video.android.core.utils.buildMediaConstraints
 import io.getstream.video.android.core.utils.buildRemoteIceServers
+import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
@@ -105,7 +104,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
-import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
@@ -330,14 +328,6 @@ public class RtcSession internal constructor(
     /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
     // internal var publisher: StreamPeerConnection? = null
 
-    private val mediaConstraints: MediaConstraints by lazy {
-        buildMediaConstraints()
-    }
-
-    private val audioConstraints: MediaConstraints by lazy {
-        buildAudioConstraints()
-    }
-
     internal lateinit var sfuConnectionModule: SfuConnectionModule
 
     private val clientDetails = ClientDetails(
@@ -450,7 +440,7 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.rejoin()
+                        call.fastReconnect()
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
@@ -505,7 +495,7 @@ public class RtcSession internal constructor(
             publisher?.let {
                 if (!it.isHealthy() || forceRestart) {
                     logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
-                    it.connection.restartIce()
+                    it.restartIce()
                 }
             }
         }
@@ -559,7 +549,13 @@ public class RtcSession internal constructor(
     }
 
     private fun listenToMediaChanges() {
+        logger.d { "[trackPublishing] listenToMediaChanges" }
         coroutineScope.launch {
+            // We don't want to publish video track if there is no camera resolution
+            if (call.camera.resolution.value == null) {
+                return@launch
+            }
+
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
                 val canUserSendVideo = call.state.ownCapabilities.value.contains(
@@ -867,7 +863,7 @@ public class RtcSession internal constructor(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
             type = StreamPeerType.SUBSCRIBER,
-            mediaConstraints = mediaConstraints,
+            mediaConstraints = defaultConstraints,
             onStreamAdded = { addStream(it) }, // addTrack
             onIceCandidateRequest = ::sendIceCandidate,
         )
@@ -934,7 +930,7 @@ public class RtcSession internal constructor(
             } else {
                 StreamPeerType.SUBSCRIBER
             },
-            mediaConstraints = MediaConstraints(),
+            mediaConstraints = defaultConstraints,
         ).apply {
             addTempTransceivers(this)
         }
@@ -957,7 +953,7 @@ public class RtcSession internal constructor(
             configuration = connectionConfiguration,
             publishOptions = publishOptions,
             coroutineScope = coroutineScope,
-            mediaConstraints = mediaConstraints,
+            mediaConstraints = defaultConstraints,
             onNegotiationNeeded = { _, _ -> },
             onIceCandidate = ::sendIceCandidate,
         ) {
@@ -1173,7 +1169,7 @@ public class RtcSession internal constructor(
                             }
 
                             PeerType.PEER_TYPE_SUBSCRIBER -> {
-                                subscriber?.connection?.restartIce()
+                                requestSubscriberIceRestart()
                             }
                         }
                     }
@@ -1657,9 +1653,7 @@ public class RtcSession internal constructor(
                     // We could not reuse the peer connections.
                     call.rejoin()
                 } else {
-                    subscriber?.connection?.restartIce()
                     publisher?.restartIce()
-
                     sendCallStats(
                         report = call.collectStats(),
                         reconnectionTimeSeconds = Pair(

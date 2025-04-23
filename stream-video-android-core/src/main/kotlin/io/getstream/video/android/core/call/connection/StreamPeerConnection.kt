@@ -28,6 +28,7 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
+import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -146,12 +147,14 @@ open class StreamPeerConnection(
      *
      * @return [Result] wrapper of the [SessionDescription] for the publisher.
      */
-    public suspend fun createOffer(): Result<SessionDescription> {
+    public suspend fun createOffer(
+        mediaConstraints: MediaConstraints = defaultConstraints,
+    ): Result<SessionDescription> {
         logger.d { "[createOffer] #sfu; #$typeTag; no args" }
         return createValue {
             connection.createOffer(
                 it,
-                MediaConstraints(),
+                mediaConstraints,
             )
         }
     }
@@ -161,7 +164,9 @@ open class StreamPeerConnection(
      *
      * @return [Result] wrapper of the [SessionDescription] for the subscriber.
      */
-    public suspend fun createAnswer(): Result<SessionDescription> {
+    public suspend fun createAnswer(
+        mediaConstraints: MediaConstraints = defaultConstraints,
+    ): Result<SessionDescription> {
         logger.d { "[createAnswer] #sfu; #$typeTag; no args" }
         return createValue { connection.createAnswer(it, mediaConstraints) }
     }

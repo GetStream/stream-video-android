@@ -29,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,15 +39,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -58,9 +63,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
@@ -139,6 +146,7 @@ fun CallScreen(
     var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
+    var showShareDialog by remember { mutableStateOf(true) }
     var showParticipants by remember { mutableStateOf(false) }
     val chatState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -298,6 +306,7 @@ fun CallScreen(
                                     )
                                     Row {
                                         ToggleAction(
+                                            modifier = Modifier.testTag("Stream_CallViewButton"),
                                             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
                                             isActionActive = !isShowingLayoutChooseMenu,
                                             iconOnOff = Pair(iconOnOff, iconOnOff),
@@ -313,12 +322,17 @@ fun CallScreen(
                                         )
 
                                         FlipCameraAction(
+                                            modifier = Modifier.testTag(
+                                                "Stream_FlipCameraIcon_${call.camera.direction.collectAsState().value}",
+                                            ),
                                             onCallAction = { call.camera.flip() },
                                         )
                                     }
                                 },
                                 trailingContent = {
-                                    LeaveCallAction {
+                                    LeaveCallAction(
+                                        modifier = Modifier.testTag("Stream_HangUpButton"),
+                                    ) {
                                         call.leave()
                                     }
                                 },
@@ -341,6 +355,10 @@ fun CallScreen(
                             ) {
                                 Row {
                                     ToggleSettingsAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_CallSettingsToggle_Open_$isShowingSettingMenu",
+                                            ),
                                         isShowingSettings = !isShowingSettingMenu,
                                         onCallAction = {
                                             isShowingSettingMenu = !isShowingSettingMenu
@@ -366,9 +384,17 @@ fun CallScreen(
                                                 }
                                             },
                                         )
-                                        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                        Spacer(
+                                            modifier = Modifier.size(
+                                                VideoTheme.dimens.spacingM,
+                                            ),
+                                        )
                                     }
                                     ToggleMicrophoneAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled",
+                                            ),
                                         isMicrophoneEnabled = isMicrophoneEnabled,
                                         onCallAction = {
                                             call.microphone.setEnabled(
@@ -378,6 +404,10 @@ fun CallScreen(
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ToggleCameraAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_CameraToggle_Enabled_$isCameraEnabled",
+                                            ),
                                         isCameraEnabled = isCameraEnabled,
                                         onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
@@ -393,6 +423,7 @@ fun CallScreen(
                                     }
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ChatDialogAction(
+                                        modifier = Modifier.testTag("Stream_ChatButton"),
                                         messageCount = unreadCount,
                                         onCallAction = { scope.launch { chatState.show() } },
                                     )
@@ -401,7 +432,7 @@ fun CallScreen(
                         },
                         videoRenderer = { modifier, call, participant, style ->
                             ParticipantVideo(
-                                modifier = modifier,
+                                modifier = modifier.testTag("Stream_ParticipantVideoView"),
                                 call = call,
                                 participant = participant,
                                 style = style,
@@ -430,7 +461,8 @@ fun CallScreen(
                                         ParticipantVideo(
                                             modifier = Modifier
                                                 .fillMaxSize()
-                                                .clip(VideoTheme.shapes.dialog),
+                                                .clip(VideoTheme.shapes.dialog)
+                                                .testTag("Stream_FloatingVideoView"),
                                             call = call,
                                             participant = participant,
                                             reactionContent = {
@@ -470,7 +502,7 @@ fun CallScreen(
                                 ClosedCaptionsContainer(
                                     call,
                                     ClosedCaptionsDefaults.streamThemeConfig().copy(
-                                        yOffset = (-80).dp,
+                                        yOffset = (-100).dp,
                                     ),
                                     closedCaptionUiState,
                                 )
@@ -521,7 +553,8 @@ fun CallScreen(
 
         val isPictureInPictureMode = rememberIsInPipMode()
         if (!isPictureInPictureMode) {
-            if (participantsSize.size == 1 &&
+            if (showShareDialog &&
+                participantsSize.size == 1 &&
                 !chatState.isVisible &&
                 orientation == Configuration.ORIENTATION_PORTRAIT
             ) {
@@ -533,17 +566,31 @@ fun CallScreen(
                     alignment = Alignment.BottomCenter,
                     offset = IntOffset(
                         0,
-                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
-                            .toInt(),
+                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
                     ),
                 ) {
-                    ShareCallWithOthers(
-                        modifier = Modifier.fillMaxWidth(),
-                        call = call,
-                        clipboardManager = clipboardManager,
-                        env = env,
-                        context = context,
-                    )
+                    Box {
+                        ShareCallWithOthers(
+                            modifier = Modifier.fillMaxWidth(),
+                            call = call,
+                            clipboardManager = clipboardManager,
+                            env = env,
+                            context = context,
+                        )
+
+                        IconButton(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(top = 10.dp, end = 10.dp),
+                            onClick = { showShareDialog = false },
+                        ) {
+                            Icon(
+                                tint = Color.White,
+                                imageVector = Icons.Default.Close,
+                                contentDescription = Icons.Default.Close.name,
+                            )
+                        }
+                    }
                 }
             }
         }

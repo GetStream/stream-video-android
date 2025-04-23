@@ -523,7 +523,7 @@ public class Call(
             session?.publisher?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.publisher?.connection?.restartIce()
+                        session?.publisher?.restartIce()
                     }
 
                     else -> {
@@ -539,35 +539,6 @@ public class Call(
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session?.requestSubscriberIceRestart()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-        monitorPublisherStateJob?.cancel()
-        monitorPublisherStateJob = scope.launch {
-            session?.subscriber?.state?.collect {
-                when (it) {
-                    PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        rejoin()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-
-        monitorSubscriberStateJob?.cancel()
-        monitorSubscriberStateJob = scope.launch {
-            session?.subscriber?.state?.collect {
-                when (it) {
-                    PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        rejoin()
                     }
 
                     else -> {

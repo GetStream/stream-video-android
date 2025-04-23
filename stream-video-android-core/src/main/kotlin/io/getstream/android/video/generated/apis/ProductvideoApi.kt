@@ -43,7 +43,7 @@ interface ProductvideoApi {
     @POST("/video/call/stats")
     suspend fun queryCallStats(
         @Body queryCallStatsRequest:
-        io.getstream.android.video.generated.models.QueryCallStatsRequest? = null,
+        io.getstream.android.video.generated.models.QueryCallStatsRequest,
     ): io.getstream.android.video.generated.models.QueryCallStatsResponse
 
     /**
@@ -69,7 +69,7 @@ interface ProductvideoApi {
     suspend fun updateCall(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
-        @Body updateCallRequest: io.getstream.android.video.generated.models.UpdateCallRequest? = null,
+        @Body updateCallRequest: io.getstream.android.video.generated.models.UpdateCallRequest,
     ): io.getstream.android.video.generated.models.UpdateCallResponse
 
     /**
@@ -82,7 +82,7 @@ interface ProductvideoApi {
         @Path("id") id: kotlin.String,
         @Query("connection_id") connectionId: kotlin.String? = null,
         @Body getOrCreateCallRequest:
-        io.getstream.android.video.generated.models.GetOrCreateCallRequest? = null,
+        io.getstream.android.video.generated.models.GetOrCreateCallRequest,
     ): io.getstream.android.video.generated.models.GetOrCreateCallResponse
 
     /**
@@ -114,7 +114,7 @@ interface ProductvideoApi {
     suspend fun deleteCall(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
-        @Body deleteCallRequest: io.getstream.android.video.generated.models.DeleteCallRequest? = null,
+        @Body deleteCallRequest: io.getstream.android.video.generated.models.DeleteCallRequest,
     ): io.getstream.android.video.generated.models.DeleteCallResponse
 
     /**
@@ -126,7 +126,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Body sendCallEventRequest:
-        io.getstream.android.video.generated.models.SendCallEventRequest? = null,
+        io.getstream.android.video.generated.models.SendCallEventRequest,
     ): io.getstream.android.video.generated.models.SendCallEventResponse
 
     /**
@@ -150,7 +150,7 @@ interface ProductvideoApi {
     suspend fun goLive(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
-        @Body goLiveRequest: io.getstream.android.video.generated.models.GoLiveRequest? = null,
+        @Body goLiveRequest: io.getstream.android.video.generated.models.GoLiveRequest,
     ): io.getstream.android.video.generated.models.GoLiveResponse
 
     /**
@@ -184,7 +184,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Body updateCallMembersRequest:
-        io.getstream.android.video.generated.models.UpdateCallMembersRequest? = null,
+        io.getstream.android.video.generated.models.UpdateCallMembersRequest,
     ): io.getstream.android.video.generated.models.UpdateCallMembersResponse
 
     /**
@@ -195,7 +195,7 @@ interface ProductvideoApi {
     suspend fun muteUsers(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
-        @Body muteUsersRequest: io.getstream.android.video.generated.models.MuteUsersRequest? = null,
+        @Body muteUsersRequest: io.getstream.android.video.generated.models.MuteUsersRequest,
     ): io.getstream.android.video.generated.models.MuteUsersResponse
 
     /**
@@ -238,7 +238,7 @@ interface ProductvideoApi {
     suspend fun rejectCall(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
-        @Body rejectCallRequest: io.getstream.android.video.generated.models.RejectCallRequest? = null,
+        @Body rejectCallRequest: io.getstream.android.video.generated.models.RejectCallRequest,
     ): io.getstream.android.video.generated.models.RejectCallResponse
 
     /**
@@ -294,7 +294,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Body startClosedCaptionsRequest:
-        io.getstream.android.video.generated.models.StartClosedCaptionsRequest? = null,
+        io.getstream.android.video.generated.models.StartClosedCaptionsRequest,
     ): io.getstream.android.video.generated.models.StartClosedCaptionsResponse
 
     /**
@@ -306,7 +306,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Body startRecordingRequest:
-        io.getstream.android.video.generated.models.StartRecordingRequest? = null,
+        io.getstream.android.video.generated.models.StartRecordingRequest,
     ): io.getstream.android.video.generated.models.StartRecordingResponse
 
     /**
@@ -318,7 +318,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Body startTranscriptionRequest:
-        io.getstream.android.video.generated.models.StartTranscriptionRequest? = null,
+        io.getstream.android.video.generated.models.StartTranscriptionRequest,
     ): io.getstream.android.video.generated.models.StartTranscriptionResponse
 
     /**
@@ -351,7 +351,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Body stopClosedCaptionsRequest:
-        io.getstream.android.video.generated.models.StopClosedCaptionsRequest? = null,
+        io.getstream.android.video.generated.models.StopClosedCaptionsRequest,
     ): io.getstream.android.video.generated.models.StopClosedCaptionsResponse
 
     /**
@@ -362,7 +362,7 @@ interface ProductvideoApi {
     suspend fun stopLive(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
-        @Body stopLiveRequest: io.getstream.android.video.generated.models.StopLiveRequest? = null,
+        @Body stopLiveRequest: io.getstream.android.video.generated.models.StopLiveRequest,
     ): io.getstream.android.video.generated.models.StopLiveResponse
 
     /**
@@ -384,7 +384,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Body stopTranscriptionRequest:
-        io.getstream.android.video.generated.models.StopTranscriptionRequest? = null,
+        io.getstream.android.video.generated.models.StopTranscriptionRequest,
     ): io.getstream.android.video.generated.models.StopTranscriptionResponse
 
     /**
@@ -462,7 +462,7 @@ interface ProductvideoApi {
     @POST("/video/calls")
     suspend fun queryCalls(
         @Query("connection_id") connectionId: kotlin.String? = null,
-        @Body queryCallsRequest: io.getstream.android.video.generated.models.QueryCallsRequest? = null,
+        @Body queryCallsRequest: io.getstream.android.video.generated.models.QueryCallsRequest,
     ): io.getstream.android.video.generated.models.QueryCallsResponse
 
     /**
@@ -520,6 +520,6 @@ interface ProductvideoApi {
     @POST("/video/stats")
     suspend fun queryAggregateCallStats(
         @Body queryAggregateCallStatsRequest:
-        io.getstream.android.video.generated.models.QueryAggregateCallStatsRequest? = null,
+        io.getstream.android.video.generated.models.QueryAggregateCallStatsRequest,
     ): io.getstream.android.video.generated.models.QueryAggregateCallStatsResponse
 }

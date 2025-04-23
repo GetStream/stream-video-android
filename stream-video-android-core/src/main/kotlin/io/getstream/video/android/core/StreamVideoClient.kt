@@ -52,13 +52,17 @@ import io.getstream.android.video.generated.models.SendCallEventRequest
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionRequest
 import io.getstream.android.video.generated.models.SendReactionResponse
+import io.getstream.android.video.generated.models.StartClosedCaptionsRequest
 import io.getstream.android.video.generated.models.StartClosedCaptionsResponse
 import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
 import io.getstream.android.video.generated.models.StartRecordingRequest
 import io.getstream.android.video.generated.models.StartTranscriptionRequest
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
+import io.getstream.android.video.generated.models.StopClosedCaptionsRequest
 import io.getstream.android.video.generated.models.StopClosedCaptionsResponse
+import io.getstream.android.video.generated.models.StopLiveRequest
 import io.getstream.android.video.generated.models.StopLiveResponse
+import io.getstream.android.video.generated.models.StopTranscriptionRequest
 import io.getstream.android.video.generated.models.StopTranscriptionResponse
 import io.getstream.android.video.generated.models.UnblockUserRequest
 import io.getstream.android.video.generated.models.UnpinRequest
@@ -80,7 +84,6 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
-import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
@@ -148,7 +151,6 @@ internal class StreamVideoClient internal constructor(
     internal val apiKey: ApiKey,
     internal var token: String,
     private val lifecycle: Lifecycle,
-    private val loggingLevel: LoggingLevel,
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
@@ -844,7 +846,7 @@ internal class StreamVideoClient internal constructor(
     }
 
     suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
-        return apiCall { coordinatorConnectionModule.api.stopLive(type, id) }
+        return apiCall { coordinatorConnectionModule.api.stopLive(type, id, StopLiveRequest()) }
     }
 
     suspend fun muteUsers(
@@ -1110,7 +1112,7 @@ internal class StreamVideoClient internal constructor(
 
     suspend fun stopTranscription(type: String, id: String): Result<StopTranscriptionResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.stopTranscription(type, id)
+            coordinatorConnectionModule.api.stopTranscription(type, id, StopTranscriptionRequest())
         }
     }
 
@@ -1122,13 +1124,21 @@ internal class StreamVideoClient internal constructor(
 
     suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionsResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.startClosedCaptions(type, id)
+            coordinatorConnectionModule.api.startClosedCaptions(
+                type,
+                id,
+                StartClosedCaptionsRequest(),
+            )
         }
     }
 
     suspend fun stopClosedCaptions(type: String, id: String): Result<StopClosedCaptionsResponse> {
         return apiCall {
-            coordinatorConnectionModule.api.stopClosedCaptions(type, id)
+            coordinatorConnectionModule.api.stopClosedCaptions(
+                type,
+                id,
+                StopClosedCaptionsRequest(),
+            )
         }
     }
 }
