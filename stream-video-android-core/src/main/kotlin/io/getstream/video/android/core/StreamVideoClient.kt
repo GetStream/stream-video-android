@@ -365,7 +365,7 @@ internal class StreamVideoClient internal constructor(
                 if (it is VideoSocketState.Connected && calls.isNotEmpty()) {
                     rewatchCalls(calls.values.toList()).also {
                         if (it is Failure) {
-                            logger.e { "Failed to re-watch calls (${it.value}" }
+                            logger.e { "Failed to re-watch calls (${it.value})" }
                         }
                     }
                 }
