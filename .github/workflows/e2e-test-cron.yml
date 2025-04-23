@@ -39,6 +39,7 @@ jobs:
       fail-fast: false
     env:
       ANDROID_API_LEVEL: ${{ matrix.android_api_level }}
+      STREAM_SDK_TEST_APP: ${{ vars.STREAM_SDK_TEST_APP }}
     steps:
       - uses: actions/checkout@v4.2.2
       - uses: actions/download-artifact@v4.1.8

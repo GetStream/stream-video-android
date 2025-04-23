@@ -199,7 +199,7 @@ private fun CallLobbyHeaderContent(
         IconButton(
             modifier = Modifier
                 .padding(8.dp)
-                .testTag("Stream_CloseButton"),
+                .testTag("Stream_LobbyCloseButton"),
             onClick = {
                 onBack()
             },
