@@ -315,7 +315,7 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
     }
 }
 
-private fun io.getstream.video.android.model.User.toUserResponse(): UserResponse {
+internal fun io.getstream.video.android.model.User.toUserResponse(): UserResponse {
     return UserResponse(
         id = id,
         role = role ?: "user",

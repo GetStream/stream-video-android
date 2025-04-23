@@ -17,10 +17,12 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
+import io.getstream.video.android.core.Call
 
 @Stable
 public data class QueriedCalls(
     public val calls: List<CallData>,
+    public val watchedCalls: List<Call> = emptyList(),
     public val next: String?,
     public val prev: String?,
 )

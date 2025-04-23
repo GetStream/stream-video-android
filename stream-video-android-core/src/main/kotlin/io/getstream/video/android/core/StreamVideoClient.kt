@@ -187,6 +187,7 @@ internal class StreamVideoClient internal constructor(
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
+    private var queriedCalls = mutableMapOf<String, Call>()
 
     val socketImpl = coordinatorConnectionModule.socketConnection
 
@@ -199,6 +200,7 @@ internal class StreamVideoClient internal constructor(
 
     override fun cleanup() {
         // remove all cached calls
+        queriedCalls.clear()
         calls.clear()
         // stop all running coroutines
         scope.cancel()
@@ -360,9 +362,17 @@ internal class StreamVideoClient internal constructor(
                 // If the socket is reconnected then we have a new connection ID.
                 // We need to re-watch every watched call with the new connection ID
                 // (otherwise the WS events will stop)
-                val watchedCalls = calls
-                if (it is VideoSocketState.Connected && watchedCalls.isNotEmpty()) {
-                    val filter = Filters.`in`("cid", watchedCalls.values.map { it.cid }).toMap()
+                if (it is VideoSocketState.Connected && calls.isNotEmpty()) {
+                    rewatchCalls(calls.values.toList()).also {
+                        if (it is Failure) {
+                            logger.e { "Failed to re-watch calls (${it.value}" }
+                        }
+                    }
+                }
+
+                // If the integration has requested queried calls, re-watch them on Coordinator reconnect
+                if (it is VideoSocketState.Connected && queriedCalls.isNotEmpty()) {
+                    val filter = Filters.`in`("cid", queriedCalls.values.map { it.cid }).toMap()
                     queryCalls(filters = filter, watch = true).also {
                         if (it is Failure) {
                             logger.e { "Failed to re-watch calls (${it.value}" }
@@ -517,6 +527,7 @@ internal class StreamVideoClient internal constructor(
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.fireEvent(event)
+            queriedCalls[selectedCid]?.fireEvent(event)
         }
 
         if (selectedCid.isNotEmpty()) {
@@ -540,6 +551,7 @@ internal class StreamVideoClient internal constructor(
                 it.session?.handleEvent(event)
                 it.handleEvent(event)
             }
+            queriedCalls[selectedCid]?.state?.handleEvent(event)
         }
     }
 
@@ -860,6 +872,45 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
+    private suspend fun rewatchCalls(
+        calls: List<Call>,
+    ): Result<Unit> {
+        // These are internal SDK defaults
+        val filter = Filters.`in`("cid", calls.map { it.cid }).toMap()
+        val sort = listOf(SortField.Asc("cid"))
+        val limit = 25
+        val watch = true
+
+        logger.d { "[rewatchCalls] filters: $filter, sort: $sort, limit: $limit, watch: $watch" }
+        val request = QueryCallsRequest(
+            filterConditions = filter,
+            sort = sort.map { it.toRequest() },
+            limit = limit,
+            prev = null,
+            next = null,
+            watch = watch,
+        )
+        val result = apiCall {
+            coordinatorConnectionModule.api.queryCalls(
+                queryCallsRequest = request,
+                connectionId = waitForConnectionId(),
+            )
+        }
+        if (result.isSuccess) {
+            // update state for these calls
+            result.onSuccess {
+                it.calls.forEach { callData ->
+                    if (watch) {
+                        val call = this.call(callData.call.type, callData.call.id)
+                        call.state.updateFromResponse(callData)
+                    }
+                }
+            }
+        }
+
+        return result.map { Unit }
+    }
+
     /**
      * @see StreamVideo.queryCalls
      */
@@ -890,13 +941,15 @@ internal class StreamVideoClient internal constructor(
             // update state for these calls
             result.onSuccess {
                 it.calls.forEach { callData ->
-                    val call = this.call(callData.call.type, callData.call.id)
-                    call.state.updateFromResponse(callData)
+                    if (watch) {
+                        val call = this.queriedCall(callData.call.type, callData.call.id)
+                        call.state.updateFromResponse(callData)
+                    }
                 }
             }
         }
 
-        return result.map { it.toQueriedCalls() }
+        return result.map { it.toQueriedCalls(watchedCalls = queriedCalls.values.toList()) }
     }
 
     suspend fun requestPermissions(
@@ -1036,6 +1089,17 @@ internal class StreamVideoClient internal constructor(
         } else {
             val call = Call(this, type, idOrRandom, user)
             calls[cid] = call
+            call
+        }
+    }
+
+    internal fun queriedCall(type: String, id: String): Call {
+        val cid = "$type:$id"
+        return if (queriedCalls.contains(cid)) {
+            queriedCalls[cid]!!
+        } else {
+            val call = Call(this, type, id, user)
+            queriedCalls[cid] = call
             call
         }
     }

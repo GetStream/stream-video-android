@@ -24,6 +24,7 @@ import io.getstream.android.video.generated.models.QueryCallMembersResponse
 import io.getstream.android.video.generated.models.QueryCallsResponse
 import io.getstream.android.video.generated.models.ReactionResponse
 import io.getstream.android.video.generated.models.UserResponse
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
@@ -118,10 +119,13 @@ internal fun UserResponse.toUser(): User {
 }
 
 @JvmSynthetic
-internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
+internal fun QueryCallsResponse.toQueriedCalls(
+    watchedCalls: List<Call> = emptyList(),
+): QueriedCalls {
     return QueriedCalls(
         calls = calls.toCallData(),
         next = next,
+        watchedCalls = watchedCalls,
         prev = prev,
     )
 }

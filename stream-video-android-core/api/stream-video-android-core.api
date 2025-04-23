@@ -9608,16 +9608,19 @@ public final class io/getstream/video/android/core/model/PreferredVideoSubscribe
 }
 
 public final class io/getstream/video/android/core/model/QueriedCalls {
-	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
-	public final fun component2 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/model/QueriedCalls;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/QueriedCalls;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/QueriedCalls;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/model/QueriedCalls;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/QueriedCalls;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/QueriedCalls;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCalls ()Ljava/util/List;
 	public final fun getNext ()Ljava/lang/String;
 	public final fun getPrev ()Ljava/lang/String;
+	public final fun getWatchedCalls ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
