@@ -51,6 +51,7 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -322,7 +323,7 @@ fun CallScreen(
 
                                         FlipCameraAction(
                                             modifier = Modifier.testTag(
-                                                "Stream_FlipCameraIcon_${call.camera.direction}",
+                                                "Stream_FlipCameraIcon_${call.camera.direction.collectAsState().value}",
                                             ),
                                             onCallAction = { call.camera.flip() },
                                         )
