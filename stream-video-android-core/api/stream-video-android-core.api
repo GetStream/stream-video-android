@@ -10843,6 +10843,13 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/sounds/CallSoundPlayer {
+	public fun <init> (Landroid/content/Context;)V
+	public final fun cleanUpAudioResources ()V
+	public final fun playCallSound (Landroid/net/Uri;)V
+	public final fun stopCallSound ()V
+}
+
 public abstract interface class io/getstream/video/android/core/sounds/RingingConfig {
 	public abstract fun getIncomingCallSoundUri ()Landroid/net/Uri;
 	public abstract fun getOutgoingCallSoundUri ()Landroid/net/Uri;

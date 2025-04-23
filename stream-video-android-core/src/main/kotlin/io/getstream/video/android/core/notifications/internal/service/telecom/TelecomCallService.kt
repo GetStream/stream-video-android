@@ -19,17 +19,9 @@ package io.getstream.video.android.core.notifications.internal.service.telecom
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.media.Ringtone
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.telecom.Connection
@@ -38,7 +30,6 @@ import android.telecom.ConnectionRequest
 import android.telecom.ConnectionService
 import android.telecom.DisconnectCause
 import android.telecom.PhoneAccountHandle
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.CallAcceptedEvent
@@ -51,6 +42,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
+import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -69,23 +61,18 @@ import kotlinx.coroutines.launch
  * It reuses your old logic for camera toggles, call sound, call event subscription, etc.
  */
 internal class TelecomCallService : ConnectionService() {
+
     private val logger by taggedLogger("TelecomCallService")
 
-    // We'll keep a scope for any coroutines we launch
     private val handler = CoroutineExceptionHandler { _, exception ->
         logger.e(exception) { "[TelecomCallService] Uncaught exception: $exception" }
     }
     private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO + handler)
 
-    // For toggling the camera on screen on/off
     private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver(serviceScope)
     private var isToggleCameraBroadcastReceiverRegistered = false
 
-    // Audio-related
-    private var mediaPlayer: MediaPlayer? = null
-    private var audioManager: AudioManager? = null
-    private var audioFocusRequest: AudioFocusRequest? = null
-    private var ringtone: Ringtone? = null
+    private val callSoundPlayer by lazy { CallSoundPlayer(applicationContext) }
 
     // ---------------------------------------------------------------------------------------
     // INCOMING CALLS
@@ -131,7 +118,6 @@ internal class TelecomCallService : ConnectionService() {
         serviceScope.launch {
             initializeCallAndSocket(streamVideo, callId)
             updateRingingCall(streamVideo, callId, RingingState.Incoming())
-            instantiateMediaPlayer()
             observeCall(callId, streamVideo)
             registerToggleCameraBroadcastReceiver()
         }
@@ -182,7 +168,6 @@ internal class TelecomCallService : ConnectionService() {
         // Copy your old "outgoing" logic
         serviceScope.launch {
             initializeCallAndSocket(streamVideo, callId)
-            instantiateMediaPlayer()
             observeCall(callId, streamVideo)
             registerToggleCameraBroadcastReceiver()
         }
@@ -199,17 +184,18 @@ internal class TelecomCallService : ConnectionService() {
     // ---------------------------------------------------------------------------------------
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        logger.i { "[onTaskRemoved]" }
-        // You can define your logic to end or leave the call here if the user swipes the app away
-        // ...
+        cleanUp()
+    }
+
+    private fun cleanUp() {
+        logger.i { "[cleanUp]" }
+        callSoundPlayer.cleanUpAudioResources()
         serviceScope.cancel()
+        unregisterToggleCameraBroadcastReceiver()
     }
 
     override fun onDestroy() {
-        logger.i { "[onDestroy]" }
-        unregisterToggleCameraBroadcastReceiver()
-        cleanAudioResources()
-        serviceScope.cancel()
+        cleanUp()
         super.onDestroy()
     }
 
@@ -250,14 +236,8 @@ internal class TelecomCallService : ConnectionService() {
         }
     }
 
-    private fun instantiateMediaPlayer() {
-        synchronized(this) {
-            if (mediaPlayer == null) mediaPlayer = MediaPlayer()
-        }
-    }
-
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
-        observeRingingState(callId, streamVideo)
+//        observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
         // Optionally observe notification updates if you still want dynamic notifications
     }
@@ -270,133 +250,37 @@ internal class TelecomCallService : ConnectionService() {
                 when (state) {
                     is RingingState.Incoming -> {
                         if (!state.acceptedByMe) {
-                            playCallSound(streamVideo.sounds.ringingConfig.incomingCallSoundUri)
+//                            playCallSound(streamVideo.sounds.ringingConfig.incomingCallSoundUri)
                         } else {
-                            stopCallSound()
+//                            stopCallSound()
                         }
                     }
 
                     is RingingState.Outgoing -> {
                         if (!state.acceptedByCallee) {
-                            playCallSound(streamVideo.sounds.ringingConfig.outgoingCallSoundUri)
+//                            playCallSound(streamVideo.sounds.ringingConfig.outgoingCallSoundUri)
                         } else {
-                            stopCallSound()
+//                            stopCallSound()
                         }
                     }
 
                     is RingingState.Active -> {
-                        stopCallSound()
+//                        stopCallSound()
                     }
 
                     is RingingState.RejectedByAll -> {
-                        stopCallSound()
+//                        stopCallSound()
                         // Possibly disconnect
-                        endCall(callId)
+//                        endCall(callId)
                     }
 
                     is RingingState.TimeoutNoAnswer -> {
-                        stopCallSound()
+//                        stopCallSound()
                     }
 
                     else -> {}
                 }
             }
-        }
-    }
-
-    private fun playCallSound(soundUri: Uri?) {
-        try {
-            synchronized(this) {
-                requestAudioFocus(
-                    context = applicationContext,
-                    onGranted = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            playWithRingtone(soundUri)
-                        } else {
-                            playWithMediaPlayer(soundUri)
-                        }
-                    },
-                )
-            }
-        } catch (e: Exception) {
-            logger.d { "[Sounds] Error playing call sound: ${e.message}" }
-        }
-    }
-
-    private fun requestAudioFocus(context: Context, onGranted: () -> Unit) {
-        if (audioManager == null) {
-            audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        }
-        val isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (audioFocusRequest == null) {
-                audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                    .setAcceptsDelayedFocusGain(false)
-                    .build()
-            }
-            audioManager?.requestAudioFocus(audioFocusRequest!!) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        } else {
-            audioManager?.requestAudioFocus(
-                null,
-                AudioManager.STREAM_RING,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
-            ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        }
-        if (isGranted) onGranted()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.P)
-    private fun playWithRingtone(soundUri: Uri?) {
-        soundUri?.let {
-            if (ringtone?.isPlaying == true) ringtone?.stop()
-            ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
-            if (ringtone?.isPlaying == false) {
-                ringtone?.isLooping = true
-                ringtone?.play()
-            }
-        }
-    }
-
-    private fun playWithMediaPlayer(soundUri: Uri?) {
-        soundUri?.let {
-            mediaPlayer?.let { mp ->
-                if (!mp.isPlaying) {
-                    mp.reset()
-                    mp.setDataSource(applicationContext, it)
-                    mp.isLooping = true
-                    mp.prepare()
-                    mp.start()
-                }
-            }
-        }
-    }
-
-    private fun stopCallSound() {
-        synchronized(this) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    if (ringtone?.isPlaying == true) ringtone?.stop()
-                } else {
-                    if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
-                }
-            } catch (e: Exception) {
-                logger.d { "[Sounds] Error stopping call sound: ${e.message}" }
-            } finally {
-                abandonAudioFocus()
-            }
-        }
-    }
-
-    private fun abandonAudioFocus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
-        } else {
-            audioManager?.abandonAudioFocus(null)
         }
     }
 
@@ -429,7 +313,6 @@ internal class TelecomCallService : ConnectionService() {
                         cancelNotification(notificationIdFromCallId(callId))
                     }
                     is CallEndedEvent -> {
-                        stopCallSound()
                         cancelNotification(notificationIdFromCallId(callId))
                     }
                 }
@@ -443,8 +326,7 @@ internal class TelecomCallService : ConnectionService() {
         callRingingState: RingingState,
     ) {
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
-            // Stop ringing on this device
-            stopCallSound()
+            callSoundPlayer.stopCallSound()
         }
     }
 
@@ -456,8 +338,7 @@ internal class TelecomCallService : ConnectionService() {
         callId: StreamCallId,
     ) {
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
-            // This device no longer needs to ring or handle the call
-            stopCallSound()
+            callSoundPlayer.stopCallSound()
             endCall(callId)
         }
     }
@@ -506,21 +387,11 @@ internal class TelecomCallService : ConnectionService() {
         }
     }
 
-    private fun cleanAudioResources() {
-        logger.d { "[Sounds] Cleaning audio resources" }
-        if (ringtone?.isPlaying == true) ringtone?.stop()
-        ringtone = null
-        mediaPlayer?.release()
-        mediaPlayer = null
-        audioManager = null
-        audioFocusRequest = null
-    }
-
     // ---------------------------------------------------------------------------------------
     // NOTIFICATION LOGIC (OPTIONAL)
     // ---------------------------------------------------------------------------------------
 
-    private fun showIncomingNotification(connection: TelecomConnection, streamVideo: StreamVideo) {
+    private fun showIncomingNotification(connection: TelecomConnection, streamVideo: StreamVideoClient) {
         val notification = streamVideo.getRingingCallNotification(
             ringingState = RingingState.Incoming(),
             callId = connection.callId,
@@ -530,10 +401,11 @@ internal class TelecomCallService : ConnectionService() {
 
         if (notification != null) {
             postNotification(notification, connection, streamVideo)
+            callSoundPlayer.playCallSound(streamVideo.sounds.ringingConfig.incomingCallSoundUri)
         }
     }
 
-    private fun showOutgoingNotification(connection: TelecomConnection, streamVideo: StreamVideo) {
+    private fun showOutgoingNotification(connection: TelecomConnection, streamVideo: StreamVideoClient) {
         val notification = streamVideo.getRingingCallNotification(
             ringingState = RingingState.Outgoing(),
             callId = connection.callId,
@@ -542,6 +414,7 @@ internal class TelecomCallService : ConnectionService() {
 
         if (notification != null) {
             postNotification(notification, connection, streamVideo)
+            callSoundPlayer.playCallSound(streamVideo.sounds.ringingConfig.outgoingCallSoundUri)
         }
     }
 
@@ -553,6 +426,7 @@ internal class TelecomCallService : ConnectionService() {
 
         if (notification != null) {
             postNotification(notification, connection, streamVideo)
+            callSoundPlayer.stopCallSound()
         }
     }
 
@@ -590,6 +464,7 @@ internal class TelecomCallService : ConnectionService() {
     private fun cancelNotification(notificationId: Int) {
         logger.d { "[cancelNotification] #telecom;" }
         NotificationManagerCompat.from(applicationContext).cancel(notificationId)
+        callSoundPlayer.stopCallSound()
     }
 
     private fun hasNotificationsPermission(): Boolean =
