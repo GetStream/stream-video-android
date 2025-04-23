@@ -141,9 +141,10 @@ internal class TelecomCallService : ConnectionService() {
         val intentCallDisplayName = extras.getString(
             NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME,
         )
+        val isOngoingCall = extras.getBoolean(INTENT_EXTRA_IS_ONGOING_CALL, false)
 
         logger.i {
-            "[onCreateOutgoingConnection] #telecom; callId: $intentCallId, name: $intentCallDisplayName"
+            "[onCreateOutgoingConnection] #telecom; callId: $intentCallId, name: $intentCallDisplayName, isOngoingCall: $isOngoingCall"
         }
 
         // If no callId or no client
@@ -159,11 +160,15 @@ internal class TelecomCallService : ConnectionService() {
             callId = callId,
             callConfig = streamVideo.callServiceConfigRegistry.get(callId.type),
             displayName = intentCallDisplayName ?: getString(R.string.stream_video_outgoing_call_notification_title),
-            isDialing = true,
-        )
+            isDialing = false,
+        ).apply { if (isOngoingCall) setActive() }
 
-        // Optionally show a custom notification if you want
-        showOutgoingNotification(connection, streamVideo)
+        if (isOngoingCall) {
+            showOngoingNotification(connection, streamVideo)
+        } else {
+            showOutgoingNotification(connection, streamVideo)
+        }
+
 
         // Copy your old "outgoing" logic
         serviceScope.launch {

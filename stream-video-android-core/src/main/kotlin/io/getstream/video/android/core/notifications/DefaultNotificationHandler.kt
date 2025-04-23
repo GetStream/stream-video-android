@@ -55,6 +55,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.telecom.getMyPhoneAccountHandle
 import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomSupported
+import io.getstream.video.android.core.notifications.internal.service.telecom.useTelecom
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -113,7 +114,7 @@ public open class DefaultNotificationHandler(
         val callConfig = configRegistry?.get(type)
 
         // 1) Check if Telecom-based calls are supported/enabled
-        if (callConfig?.enableTelecomIntegration == true && isTelecomSupported(application)) {
+        if (useTelecom(application, callConfig)) {
             try {
                 // Invoke Telecom
                 val telecomManager = application.getSystemService(
@@ -139,10 +140,12 @@ public open class DefaultNotificationHandler(
                 } else {
                     logger.d { "[onRingingCall] #telecom; Incoming call was not permitted" }
 
-                    val call = streamVideo.call(callId.type, callId.id)
-                    streamVideo.scope.launch {
-                        call.reject(reason = RejectReason.Busy)
-                        call.leave()
+                    streamVideo?.let {
+                        val call = streamVideo.call(callId.type, callId.id)
+                        streamVideo.scope.launch {
+                            call.reject(reason = RejectReason.Busy)
+                            call.leave()
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -161,7 +164,6 @@ public open class DefaultNotificationHandler(
      * Fallback method that invokes your existing CallService foreground approach.
      */
     private fun fallbackShowIncomingCall(callId: StreamCallId, callDisplayName: String) {
-        // Example of your existing code
         CallService.showIncomingCall(
             context = application,
             callId = callId,

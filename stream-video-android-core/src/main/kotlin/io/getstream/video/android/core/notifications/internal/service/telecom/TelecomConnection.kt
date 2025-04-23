@@ -245,6 +245,8 @@ internal class TelecomConnection(
                     setRinging()
                 } else if (isDialing) {
                     setDialing()
+                } else {
+                    setActive()
                 }
             }.also {
                 telecomConnections[callId.cid] = it

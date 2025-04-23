@@ -32,11 +32,16 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.model.StreamCallId
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 
 private var cachedTelecomManager: TelecomManager? = null
+
+internal fun useTelecom(context: Context, callConfig: CallServiceConfig?): Boolean {
+    return callConfig?.enableTelecomIntegration == true && isTelecomSupported(context)
+}
 
 fun isTelecomSupported(context: Context): Boolean {
     try {
@@ -53,6 +58,8 @@ fun getTelecomManager(context: Context): TelecomManager? {
     }
     return cachedTelecomManager
 }
+
+
 
 fun getMyPhoneAccountHandle(context: Context): PhoneAccountHandle {
     val componentName = ComponentName(
@@ -117,3 +124,5 @@ fun CallEndpoint.toStreamAudioDevice(): StreamAudioDevice = when (this.endpointT
     CallEndpoint.TYPE_WIRED_HEADSET -> StreamAudioDevice.WiredHeadset(telecomDevice = this)
     else -> StreamAudioDevice.Earpiece()
 }
+
+internal const val INTENT_EXTRA_IS_ONGOING_CALL = "io.getstream.video.android.intent-extra.call_isongoing"

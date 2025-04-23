@@ -29,12 +29,14 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.telecom.INTENT_EXTRA_IS_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.telecom.TelecomConnection
 import io.getstream.video.android.core.notifications.internal.service.telecom.getMyPhoneAccountHandle
 import io.getstream.video.android.core.notifications.internal.service.telecom.getTelecomAddress
 import io.getstream.video.android.core.notifications.internal.service.telecom.getTelecomManager
 import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomSupported
 import io.getstream.video.android.core.notifications.internal.service.telecom.telecomConnections
+import io.getstream.video.android.core.notifications.internal.service.telecom.useTelecom
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -159,13 +161,14 @@ class ClientState(private val client: StreamVideo) {
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
 
-        if (isTelecomSupported(client.context)) {
-            val connection = telecomConnections[call.cid] ?: TelecomConnection.createAndStore(
-                context = client.context.applicationContext,
-                callId = StreamCallId.fromCallCid(call.cid),
-                callConfig = callConfigRegistry.get(call.type),
-            )
-            connection.setActive()
+        if (useTelecom(client.context, callConfigRegistry.get(call.type))) {
+//            val connection = telecomConnections[call.cid] ?: TelecomConnection.createAndStore(
+//                context = client.context.applicationContext,
+//                callId = StreamCallId.fromCallCid(call.cid),
+//                callConfig = callConfigRegistry.get(call.type),
+//            )
+//            connection.setActive()
+            placeTelecomCall(call, isOngoingCall = true)
         } else {
             removeRingingCall()
             maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
@@ -197,7 +200,7 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeActiveCall() {
         _activeCall.value?.let { call ->
-            if (isTelecomSupported(client.context)) {
+            if (useTelecom(client.context, callConfigRegistry.get(call.type))) {
                 telecomConnections.remove(call.cid)?.cleanUp()
             } else {
                 maybeStopForegroundService(call)
@@ -213,7 +216,7 @@ class ClientState(private val client: StreamVideo) {
         _ringingCall.value = call
 
         if (ringingState is RingingState.Outgoing) {
-            if (isTelecomSupported(client.context)) {
+            if (useTelecom(client.context, callConfigRegistry.get(call.type))) {
                 placeTelecomCall(call)
             } else {
                 maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
@@ -222,7 +225,7 @@ class ClientState(private val client: StreamVideo) {
     }
 
     @SuppressLint("MissingPermission")
-    private fun placeTelecomCall(call: Call) {
+    private fun placeTelecomCall(call: Call, isOngoingCall: Boolean = false) {
         val context = client.context
         val phoneAccountHandle = getMyPhoneAccountHandle(context)
         val telecomManager = getTelecomManager(context)
@@ -234,6 +237,9 @@ class ClientState(private val client: StreamVideo) {
                 Bundle().apply {
                     putString(NotificationHandler.INTENT_EXTRA_CALL_CID, call.cid)
                     putString(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME, "Calling...")
+                    if (isOngoingCall) {
+                        putBoolean(INTENT_EXTRA_IS_ONGOING_CALL, true)
+                    }
                 },
             )
         }
@@ -247,7 +253,7 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeRingingCall(willTransitionToOngoing: Boolean = false) {
         ringingCall.value?.let {
-            if (isTelecomSupported(client.context)) {
+            if (useTelecom(client.context, callConfigRegistry.get(it.type))) {
                 if (!willTransitionToOngoing) {
                     telecomConnections.remove(it.cid)?.cleanUp()
                 }
