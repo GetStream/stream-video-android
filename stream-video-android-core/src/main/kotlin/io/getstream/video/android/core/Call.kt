@@ -1070,7 +1070,8 @@ public class Call(
                     // be a new audio.defaultDevice setting returned from backend
                     true
                 } else {
-                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker
+                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
+                        callSettings.audio.speakerDefaultOn
                 }
 
             speaker.setEnabled(
