@@ -1082,9 +1082,9 @@ public class Call(
             } else {
                 logger.d { "[monitorHeadset] no headset found" }
 
-                if (microphone.selectedDeviceBeforeHeadset != null) {
+                microphone.selectedDeviceBeforeHeadset?.let { deviceBeforeHeadset ->
                     logger.d { "[monitorHeadset] before device selected" }
-                    microphone.select(microphone.selectedDeviceBeforeHeadset!!)
+                    microphone.select(deviceBeforeHeadset)
                 }
             }
         }.launchIn(scope)
