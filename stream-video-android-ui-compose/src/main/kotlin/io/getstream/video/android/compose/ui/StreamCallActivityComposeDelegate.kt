@@ -123,29 +123,36 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.RootContent(call: Call) {
         if (call.type == CallType.Livestream.name) {
-            Box {
-                LivestreamPlayer(
-                    call = call, videoRendererConfig =
-                        videoRenderConfig {
-                            this.fallbackContent = {
-                                val userName = it.user.userNameOrId
-                                val userImage = it.user.image
-                                Box {
-                                    UserAvatarBackground(userImage = userImage, userName = userName)
-                                }
-                            }
-                        })
-                CallAppBar(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(end = 16.dp, top = 16.dp),
-                    call = call,
-                    centerContent = { },
-                    onCallAction = {
-                        call.leave()
-                        finish()
-                    },
-                )
+            LaunchPermissionRequest(getRequiredPermissions(call)) {
+                AllPermissionsGranted {
+                    Box {
+                        LivestreamPlayer(
+                            call = call, videoRendererConfig =
+                                videoRenderConfig {
+                                    this.fallbackContent = {
+                                        val userName = it.user.userNameOrId
+                                        val userImage = it.user.image
+                                        Box {
+                                            UserAvatarBackground(
+                                                userImage = userImage,
+                                                userName = userName
+                                            )
+                                        }
+                                    }
+                                })
+                        CallAppBar(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(end = 16.dp, top = 16.dp),
+                            call = call,
+                            centerContent = { },
+                            onCallAction = {
+                                call.leave()
+                                finish()
+                            },
+                        )
+                    }
+                }
             }
         } else {
             var callAction: CallAction by remember {
