@@ -56,6 +56,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -88,6 +89,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -1061,6 +1064,32 @@ public class Call(
         }
     }
 
+    private fun monitorHeadset() {
+        microphone.devices.onEach { availableDevices ->
+            logger.d {
+                "[monitorHeadset] new available devices, prev selected: ${microphone.selectedDeviceBeforeHeadset}"
+            }
+
+            val bluetoothHeadset = availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
+            val wiredHeadset = availableDevices.find { it is StreamAudioDevice.WiredHeadset }
+
+            if (bluetoothHeadset != null) {
+                logger.d { "[monitorHeadset] BT headset selected" }
+                microphone.select(bluetoothHeadset)
+            } else if (wiredHeadset != null) {
+                logger.d { "[monitorHeadset] wired headset found" }
+                microphone.select(wiredHeadset)
+            } else {
+                logger.d { "[monitorHeadset] no headset found" }
+
+                if (microphone.selectedDeviceBeforeHeadset != null) {
+                    logger.d { "[monitorHeadset] before device selected" }
+                    microphone.select(microphone.selectedDeviceBeforeHeadset!!)
+                }
+            }
+        }.launchIn(scope)
+    }
+
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
         // Speaker
         if (speaker.status.value is DeviceStatus.NotSelected) {
@@ -1074,10 +1103,10 @@ public class Call(
                         callSettings.audio.speakerDefaultOn
                 }
 
-            speaker.setEnabled(
-                enabled = enableSpeaker,
-            )
+            speaker.setEnabled(enabled = enableSpeaker)
         }
+
+        monitorHeadset()
 
         // Camera
         if (camera.status.value is DeviceStatus.NotSelected) {
