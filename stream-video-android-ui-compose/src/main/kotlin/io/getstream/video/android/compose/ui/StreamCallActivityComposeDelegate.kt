@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Text
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -49,15 +51,20 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
+import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
+import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.CustomAction
@@ -115,114 +122,141 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @StreamCallActivityDelicateApi
     @Composable
     override fun StreamCallActivity.RootContent(call: Call) {
-        var callAction: CallAction by remember {
-            mutableStateOf(CustomAction(tag = "initial"))
-        }
-
-        when (callAction) {
-            is LeaveCall, is DeclineCall, is CancelCall -> {
-                CallDisconnectedContent(call)
+        if (call.type == CallType.Livestream.name) {
+            Box {
+                LivestreamPlayer(
+                    call = call, videoRendererConfig =
+                        videoRenderConfig {
+                            this.fallbackContent = {
+                                val userName = it.user.userNameOrId
+                                val userImage = it.user.image
+                                Box {
+                                    UserAvatarBackground(userImage = userImage, userName = userName)
+                                }
+                            }
+                        })
+                CallAppBar(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(end = 16.dp, top = 16.dp),
+                    call = call,
+                    centerContent = { },
+                    onCallAction = {
+                        call.leave()
+                        finish()
+                    },
+                )
+            }
+        } else {
+            var callAction: CallAction by remember {
+                mutableStateOf(CustomAction(tag = "initial"))
             }
 
-            else -> {
-                LaunchPermissionRequest(getRequiredPermissions(call)) {
-                    AllPermissionsGranted {
-                        // All permissions granted
-                        RingingCallContent(
-                            isVideoType = isVideoCall(call),
-                            call = call,
-                            modifier = Modifier.background(
-                                color = VideoTheme.colors.baseSheetPrimary,
-                            ),
-                            onBackPressed = {
-                                onBackPressed(call)
-                            },
-                            onOutgoingContent = {
-                                    modifier: Modifier,
-                                    call: Call,
-                                    isVideoType: Boolean,
-                                    isShowingHeader: Boolean,
-                                    headerContent: @Composable (ColumnScope.() -> Unit)?,
-                                    detailsContent: @Composable (
+            when (callAction) {
+                is LeaveCall, is DeclineCall, is CancelCall -> {
+                    CallDisconnectedContent(call)
+                }
+
+                else -> {
+                    LaunchPermissionRequest(getRequiredPermissions(call)) {
+                        AllPermissionsGranted {
+                            // All permissions granted
+                            RingingCallContent(
+                                isVideoType = isVideoCall(call),
+                                call = call,
+                                modifier = Modifier.background(
+                                    color = VideoTheme.colors.baseSheetPrimary,
+                                ),
+                                onBackPressed = {
+                                    onBackPressed(call)
+                                },
+                                onOutgoingContent = {
+                                        modifier: Modifier,
+                                        call: Call,
+                                        isVideoType: Boolean,
+                                        isShowingHeader: Boolean,
+                                        headerContent: @Composable (ColumnScope.() -> Unit)?,
+                                        detailsContent: @Composable (
                                         ColumnScope.(
                                             participants: List<MemberState>,
                                             topPadding: Dp,
                                         ) -> Unit
-                                    )?,
-                                    controlsContent: @Composable (BoxScope.() -> Unit)?,
-                                    onBackPressed: () -> Unit,
-                                    onCallAction: (CallAction) -> Unit,
-                                ->
-                                OutgoingCallContent(
-                                    call = call,
-                                    isVideoType = isVideoType,
-                                    modifier = modifier,
-                                    isShowingHeader = isShowingHeader,
-                                    headerContent = headerContent,
-                                    detailsContent = detailsContent,
-                                    controlsContent = controlsContent,
-                                    onBackPressed = onBackPressed,
-                                    onCallAction = onCallAction,
-                                )
-                            },
-                            onIncomingContent = {
-                                    modifier: Modifier,
-                                    call: Call,
-                                    isVideoType: Boolean, isShowingHeader: Boolean,
-                                    headerContent: @Composable (ColumnScope.() -> Unit)?,
-                                    detailsContent: @Composable (
+                                        )?,
+                                        controlsContent: @Composable (BoxScope.() -> Unit)?,
+                                        onBackPressed: () -> Unit,
+                                        onCallAction: (CallAction) -> Unit,
+                                    ->
+                                    OutgoingCallContent(
+                                        call = call,
+                                        isVideoType = isVideoType,
+                                        modifier = modifier,
+                                        isShowingHeader = isShowingHeader,
+                                        headerContent = headerContent,
+                                        detailsContent = detailsContent,
+                                        controlsContent = controlsContent,
+                                        onBackPressed = onBackPressed,
+                                        onCallAction = onCallAction,
+                                    )
+                                },
+                                onIncomingContent = {
+                                        modifier: Modifier,
+                                        call: Call,
+                                        isVideoType: Boolean, isShowingHeader: Boolean,
+                                        headerContent: @Composable (ColumnScope.() -> Unit)?,
+                                        detailsContent: @Composable (
                                         ColumnScope.(
                                             participants: List<MemberState>,
                                             topPadding: Dp,
                                         ) -> Unit
-                                    )?,
-                                    controlsContent: @Composable (BoxScope.() -> Unit)?,
-                                    onBackPressed: () -> Unit,
-                                    onCallAction: (CallAction) -> Unit,
-                                ->
-                                IncomingCallContent(
-                                    call = call,
-                                    isVideoType = isVideoType,
-                                    modifier = modifier,
-                                    isShowingHeader = isShowingHeader,
-                                    headerContent = headerContent,
-                                    detailsContent = detailsContent,
-                                    controlsContent = controlsContent,
-                                    onBackPressed = onBackPressed,
-                                    onCallAction = onCallAction,
-                                )
-                            },
-                            onAcceptedContent = {
-                                ConnectionAvailable(call = call) { theCall ->
-                                    if (isVideoCall(theCall)) {
-                                        VideoCallContent(call = theCall)
-                                    } else {
-                                        AudioCallContent(call = theCall)
+                                        )?,
+                                        controlsContent: @Composable (BoxScope.() -> Unit)?,
+                                        onBackPressed: () -> Unit,
+                                        onCallAction: (CallAction) -> Unit,
+                                    ->
+                                    IncomingCallContent(
+                                        call = call,
+                                        isVideoType = isVideoType,
+                                        modifier = modifier,
+                                        isShowingHeader = isShowingHeader,
+                                        headerContent = headerContent,
+                                        detailsContent = detailsContent,
+                                        controlsContent = controlsContent,
+                                        onBackPressed = onBackPressed,
+                                        onCallAction = onCallAction,
+                                    )
+                                },
+                                onAcceptedContent = {
+                                    ConnectionAvailable(call = call) { theCall ->
+                                        if (isVideoCall(theCall)) {
+                                            VideoCallContent(call = theCall)
+                                        } else {
+                                            AudioCallContent(call = theCall)
+                                        }
                                     }
-                                }
-                            },
-                            onNoAnswerContent = {
-                                NoAnswerContent(call)
-                            },
-                            onRejectedContent = {
-                                RejectedContent(call)
-                            },
-                            onCallAction = {
-                                onCallAction(call, it)
-                                callAction = it
-                            },
-                            onIdle = {
-                                LoadingContent(call)
-                            },
-                        )
-                    }
+                                },
+                                onNoAnswerContent = {
+                                    NoAnswerContent(call)
+                                },
+                                onRejectedContent = {
+                                    RejectedContent(call)
+                                },
+                                onCallAction = {
+                                    onCallAction(call, it)
+                                    callAction = it
+                                },
+                                onIdle = {
+                                    LoadingContent(call)
+                                },
+                            )
+                        }
 
-                    SomeGranted { granted, notGranted, showRationale ->
-                        InternalPermissionContent(showRationale, call, granted, notGranted)
-                    }
+                        SomeGranted { granted, notGranted, showRationale ->
+                            InternalPermissionContent(showRationale, call, granted, notGranted)
+                        }
 
-                    NoneGranted {
-                        InternalPermissionContent(it, call, emptyList(), emptyList())
+                        NoneGranted {
+                            InternalPermissionContent(it, call, emptyList(), emptyList())
+                        }
                     }
                 }
             }
@@ -275,6 +309,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     finish()
                 }
             }
+
             is RealtimeConnection.Failed -> {
                 if (!configuration.closeScreenOnError) {
                     val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
@@ -284,6 +319,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     finish()
                 }
             }
+
             else -> {
                 content.invoke(call)
             }
@@ -319,10 +355,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-            @Composable ColumnScope.(
-                participants: List<MemberState>,
-                topPadding: Dp,
-            ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<MemberState>,
+            topPadding: Dp,
+        ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,
@@ -349,10 +385,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-            @Composable ColumnScope.(
-                participants: List<MemberState>,
-                topPadding: Dp,
-            ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<MemberState>,
+            topPadding: Dp,
+        ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,

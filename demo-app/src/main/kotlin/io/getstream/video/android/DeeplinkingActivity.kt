@@ -80,6 +80,7 @@ class DeeplinkingActivity : ComponentActivity() {
         val data: Uri? = intent?.data
 
         val callId = callIdFromExtra ?: extractCallId(data)
+        val callType = extractCallType(data)
         if (callId == null) {
             logger.e { "Can't open the call from deeplink because call ID is null" }
             finish()
@@ -107,7 +108,7 @@ class DeeplinkingActivity : ComponentActivity() {
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         // ensure that audio & video permissions are granted
-                        joinCall(data, callId)
+                        joinCall(data, callType, callId)
                     } else {
                         // first ask for push notification permission
                         val manager =
@@ -117,7 +118,7 @@ class DeeplinkingActivity : ComponentActivity() {
                                 onPermissionStatus = {
                                     // we don't care about the result for demo purposes
                                     if (it != NotificationPermissionStatus.REQUESTED) {
-                                        joinCall(data, callId)
+                                        joinCall(data, callType, callId)
                                     }
                                 },
                             )
@@ -137,6 +138,10 @@ class DeeplinkingActivity : ComponentActivity() {
         )
 
         requestMultiplePermissionsLauncher.launch(permissions)
+    }
+
+    private fun extractCallType(data: Uri?) : String {
+        return data?.getQueryParameter("type") ?: "default"
     }
 
     private fun extractCallId(data: Uri?): String? {
@@ -160,7 +165,7 @@ class DeeplinkingActivity : ComponentActivity() {
         return callId ?: data.getQueryParameter("id")
     }
 
-    private fun joinCall(data: Uri?, cid: String) {
+    private fun joinCall(data: Uri?, callType: String, callID: String) {
         lifecycleScope.launch {
             data?.let {
                 val determinedEnv = AppConfig.availableEnvironments.fromUri(it)
@@ -179,7 +184,7 @@ class DeeplinkingActivity : ComponentActivity() {
             StreamVideoInitHelper.initializedState.collectLatest {
                 if (it == InitializedState.FINISHED || it == InitializedState.FAILED) {
                     if (StreamVideo.isInstalled) {
-                        val callId = StreamCallId(type = "default", id = cid)
+                        val callId = StreamCallId(type = callType, id = callID)
                         val intent = StreamCallActivity.callIntent(
                             context = this@DeeplinkingActivity,
                             cid = callId,
