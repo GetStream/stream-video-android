@@ -127,19 +127,21 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 AllPermissionsGranted {
                     Box {
                         LivestreamPlayer(
-                            call = call, videoRendererConfig =
-                                videoRenderConfig {
-                                    this.fallbackContent = {
-                                        val userName = it.user.userNameOrId
-                                        val userImage = it.user.image
-                                        Box {
-                                            UserAvatarBackground(
-                                                userImage = userImage,
-                                                userName = userName
-                                            )
-                                        }
+                            call = call,
+                            videoRendererConfig =
+                            videoRenderConfig {
+                                this.fallbackContent = {
+                                    val userName = it.user.userNameOrId
+                                    val userImage = it.user.image
+                                    Box {
+                                        UserAvatarBackground(
+                                            userImage = userImage,
+                                            userName = userName,
+                                        )
                                     }
-                                })
+                                }
+                            },
+                        )
                         CallAppBar(
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
@@ -184,10 +186,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                         isShowingHeader: Boolean,
                                         headerContent: @Composable (ColumnScope.() -> Unit)?,
                                         detailsContent: @Composable (
-                                        ColumnScope.(
-                                            participants: List<MemberState>,
-                                            topPadding: Dp,
-                                        ) -> Unit
+                                            ColumnScope.(
+                                                participants: List<MemberState>,
+                                                topPadding: Dp,
+                                            ) -> Unit
                                         )?,
                                         controlsContent: @Composable (BoxScope.() -> Unit)?,
                                         onBackPressed: () -> Unit,
@@ -211,10 +213,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                         isVideoType: Boolean, isShowingHeader: Boolean,
                                         headerContent: @Composable (ColumnScope.() -> Unit)?,
                                         detailsContent: @Composable (
-                                        ColumnScope.(
-                                            participants: List<MemberState>,
-                                            topPadding: Dp,
-                                        ) -> Unit
+                                            ColumnScope.(
+                                                participants: List<MemberState>,
+                                                topPadding: Dp,
+                                            ) -> Unit
                                         )?,
                                         controlsContent: @Composable (BoxScope.() -> Unit)?,
                                         onBackPressed: () -> Unit,
@@ -362,10 +364,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-        @Composable ColumnScope.(
-            participants: List<MemberState>,
-            topPadding: Dp,
-        ) -> Unit
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,
@@ -392,10 +394,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-        @Composable ColumnScope.(
-            participants: List<MemberState>,
-            topPadding: Dp,
-        ) -> Unit
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,

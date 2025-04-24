@@ -140,7 +140,7 @@ class DeeplinkingActivity : ComponentActivity() {
         requestMultiplePermissionsLauncher.launch(permissions)
     }
 
-    private fun extractCallType(data: Uri?) : String {
+    private fun extractCallType(data: Uri?): String {
         return data?.getQueryParameter("type") ?: "default"
     }
 
