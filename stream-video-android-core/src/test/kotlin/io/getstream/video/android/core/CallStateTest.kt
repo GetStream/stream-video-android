@@ -202,8 +202,6 @@ class CallStateTest : IntegrationTestBase() {
 
     @Test
     fun `Querying calls without watch should NOT populate the state`() = runTest {
-//        val createResult = client.call("default", randomUUID()).create(custom=mapOf("color" to "green"))
-//        assertSuccess(createResult)
         val filters = mutableMapOf("color" to "green")
         client.cleanup()
         val queryResult = client.queryCalls(filters, limit = 1)
@@ -220,8 +218,6 @@ class CallStateTest : IntegrationTestBase() {
 
     @Test
     fun `Querying calls with watch true should populate the state`() = runTest {
-//        val createResult = client.call("default", randomUUID()).create(custom=mapOf("color" to "green"))
-//        assertSuccess(createResult)
         val filters = mutableMapOf("color" to "green")
         val queryResult = client.queryCalls(filters, limit = 1, watch = true)
         assertSuccess(queryResult)
