@@ -58,6 +58,13 @@ public data class Sounds(
 )
 
 // Factories
+/**
+ * Creates a [Sounds] object using the provided [RingingConfig] and [MutedRingingConfig].
+ *
+ * @param ringingConfig The configuration for incoming and outgoing call sounds.
+ * @param mutedRingingConfig The configuration for handling incoming and outgoing call sounds if device is muted. Can be null.
+ * @return A [Sounds] object containing the specified configurations.
+ */
 public fun ringingConfig(
     ringingConfig: RingingConfig,
     mutedRingingConfig: MutedRingingConfig?,
@@ -69,8 +76,6 @@ public fun ringingConfig(
  * Returns a ringing config that uses the SDK default sounds for incoming and outgoing calls.
  *
  * @param context Context used for retrieving the sounds.
- * @param playIncomingSoundIfMuted Whether to play the incoming sound even if the device is muted.
- * @param playOutgoingSoundIfMuted Whether to play the outgoing sound even if the device is muted.
  */
 public fun defaultResourcesRingingConfig(
     context: Context,
@@ -91,8 +96,6 @@ public fun defaultMutedRingingConfig(
  * Returns a ringing config that uses the device ringtone for incoming calls and the SDK default ringing tone for outgoing calls.
  *
  * @param context Context used for retrieving the sounds.
- * @param playIncomingSoundIfMuted Whether to play the incoming sound even if the device is muted.
- * @param playOutgoingSoundIfMuted Whether to play the outgoing sound even if the device is muted.
  */
 public fun deviceRingtoneRingingConfig(
     context: Context,
@@ -114,8 +117,6 @@ public fun deviceRingtoneRingingConfig(
  * @param context Context used for retrieving the sounds.
  * @param incomingCallSoundResId The resource ID for the incoming call sound.
  * @param outgoingCallSoundResId The resource ID for the outgoing call sound.
- * @param playIncomingSoundIfMuted Whether to play the incoming sound even if the device is muted.
- * @param playOutgoingSoundIfMuted Whether to play the outgoing sound even if the device is muted.
  */
 public fun resRingingConfig(
     context: Context,
@@ -131,8 +132,6 @@ public fun resRingingConfig(
  *
  * @param incomingCallSoundUri The URI for the incoming call sound.
  * @param outgoingCallSoundUri The URI for the outgoing call sound.
- * @param playIncomingSoundIfMuted Whether to play the incoming sound even if the device is muted.
- * @param playOutgoingSoundIfMuted Whether to play the outgoing sound even if the device is muted.
  */
 public fun uriRingingConfig(
     incomingCallSoundUri: Uri,
