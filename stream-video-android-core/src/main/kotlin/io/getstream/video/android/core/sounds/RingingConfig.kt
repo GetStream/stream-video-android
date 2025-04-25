@@ -64,8 +64,8 @@ public fun defaultResourcesRingingConfig(
     playIncomingSoundIfMuted: Boolean = false,
     playOutgoingSoundIfMuted: Boolean = false,
 ): RingingConfig = object : RingingConfig {
-    override val incomingCallSoundUri: Uri? = R.raw.call_incoming_sound.toUriOrNUll(context)
-    override val outgoingCallSoundUri: Uri? = R.raw.call_outgoing_sound.toUriOrNUll(context)
+    override val incomingCallSoundUri: Uri? = R.raw.call_incoming_sound.toUriOrNull(context)
+    override val outgoingCallSoundUri: Uri? = R.raw.call_outgoing_sound.toUriOrNull(context)
 
     override val playIncomingSoundIfMuted: Boolean = playIncomingSoundIfMuted
     override val playOutgoingSoundIfMuted: Boolean = playOutgoingSoundIfMuted
@@ -117,8 +117,8 @@ public fun resRingingConfig(
     playIncomingSoundIfMuted: Boolean = false,
     playOutgoingSoundIfMuted: Boolean = false,
 ) = object : RingingConfig {
-    override val incomingCallSoundUri: Uri? = incomingCallSoundResId.toUriOrNUll(context)
-    override val outgoingCallSoundUri: Uri? = outgoingCallSoundResId.toUriOrNUll(context)
+    override val incomingCallSoundUri: Uri? = incomingCallSoundResId.toUriOrNull(context)
+    override val outgoingCallSoundUri: Uri? = outgoingCallSoundResId.toUriOrNull(context)
 
     override val playIncomingSoundIfMuted: Boolean = playIncomingSoundIfMuted
     override val playOutgoingSoundIfMuted: Boolean = playOutgoingSoundIfMuted
@@ -162,7 +162,7 @@ public fun emptyRingingConfig(): RingingConfig = object : RingingConfig {
 public fun RingingConfig.toSounds() = Sounds(this)
 
 // Internal utilities
-private fun Int?.toUriOrNUll(context: Context): Uri? =
+private fun Int?.toUriOrNull(context: Context): Uri? =
     safeCallWithDefault(default = null) {
         if (this != null) {
             Uri.parse("android.resource://${context.packageName}/$this")
