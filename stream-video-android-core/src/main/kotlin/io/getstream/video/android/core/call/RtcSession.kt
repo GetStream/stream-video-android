@@ -711,10 +711,6 @@ public class RtcSession internal constructor(
         logger.d { "[connectRtc] #sfu; #track; no args" }
         val settings = call.state.settings.value
 
-        // turn of the speaker if needed
-        if (settings?.audio?.speakerDefaultOn == false) {
-            call.speaker.setVolume(0)
-        }
         // update the peer state
         coroutineScope.launch {
             // call update participant subscriptions debounced
