@@ -45,8 +45,10 @@ import java.util.UUID
 abstract class StreamTestCase {
 
     val userRobot = UserRobot()
-    var participantRobot = ParticipantRobot(debug = false, record = false)
+    lateinit var participantRobot: ParticipantRobot
     lateinit var callId: String
+    private val headlessBrowser = true
+    private val recordBrowser = true
 
     @get:Rule
     var testName: TestName = TestName()
@@ -66,6 +68,11 @@ abstract class StreamTestCase {
 
     @Before
     fun setUp() {
+        participantRobot = ParticipantRobot(
+            testName = testName.methodName,
+            headless = headlessBrowser,
+            record = recordBrowser,
+        )
         generateCallId()
         device.startApp(callId)
         grantAppPermissions()
