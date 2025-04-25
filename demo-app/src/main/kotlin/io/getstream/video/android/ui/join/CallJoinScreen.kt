@@ -211,6 +211,7 @@ private fun CallJoinHeader(
         horizontalArrangement = Arrangement.SpaceAround,
     ) {
         user?.let {
+            val context = LocalContext.current
             Box(
                 modifier = if (isProduction) {
                     Modifier.combinedClickable(
@@ -401,6 +402,7 @@ private fun CallActualContent(
             onClick = { onNewCall() },
         )
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+        val context = LocalContext.current
         StreamButton(
             style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
             modifier = Modifier
@@ -408,7 +410,9 @@ private fun CallActualContent(
                 .testTag("Stream_ScanQrCodeButton"),
             text = stringResource(id = R.string.scan_qr_code),
             icon = Icons.Default.QrCodeScanner,
-            onClick = { gotoQR() },
+            onClick = {
+                gotoQR()
+            },
         )
     }
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Application
@@ -26,7 +27,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Bundle
+import android.telecom.TelecomManager
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
@@ -41,10 +46,16 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.telecom.getMyPhoneAccountHandle
+import io.getstream.video.android.core.notifications.internal.service.telecom.isTelecomSupported
+import io.getstream.video.android.core.notifications.internal.service.telecom.useTelecom
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -93,13 +104,73 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        val configRegistry = streamVideo?.callServiceConfigRegistry
+        val type = callId.type
+        val callConfig = configRegistry?.get(type)
+
+        // 1) Check if Telecom-based calls are supported/enabled
+        if (useTelecom(application, callConfig)) {
+            try {
+                // Invoke Telecom
+                val telecomManager = application.getSystemService(
+                    Context.TELECOM_SERVICE,
+                ) as TelecomManager
+                val phoneAccountHandle = getMyPhoneAccountHandle(application)
+
+                // Build extras that ConnectionService will read
+                val extras = Bundle().apply {
+                    putString(INTENT_EXTRA_CALL_CID, callId.cid)
+                    putString(INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
+                }
+
+                // Add as an incoming call in the system
+                val canAddIncomingCall = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    telecomManager.isIncomingCallPermitted(phoneAccountHandle)
+                } else {
+                    true
+                }
+                if (canAddIncomingCall) {
+                    logger.d { "[onRingingCall] #telecom; Using Telecom for incoming call" }
+                    telecomManager.addNewIncomingCall(phoneAccountHandle, extras)
+                } else {
+                    logger.d { "[onRingingCall] #telecom; Incoming call was not permitted" }
+
+                    streamVideo?.let {
+                        val call = streamVideo.call(callId.type, callId.id)
+                        streamVideo.scope.launch {
+                            call.reject(reason = RejectReason.Busy)
+                            call.leave()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Fallback to existing CallService approach if Telecom fails
+                logger.e { "[onRingingCall] Telecom call failed, falling back. Reason: $e" }
+                fallbackShowIncomingCall(callId, callDisplayName)
+            }
+        } else {
+            logger.e { "[onRingingCall] Telecom is not supported/enabled, falling back." }
+            // If Telecom is not supported/enabled, fallback to old approach
+            fallbackShowIncomingCall(callId, callDisplayName)
+        }
+    }
+
+    /**
+     * Fallback method that invokes your existing CallService foreground approach.
+     */
+    private fun fallbackShowIncomingCall(callId: StreamCallId, callDisplayName: String) {
         CallService.showIncomingCall(
-            application,
-            callId,
-            callDisplayName,
-            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
+            context = application,
+            callId = callId,
+            callDisplayName = callDisplayName,
+            callServiceConfiguration = StreamVideo.instance().state.callConfigRegistry.get(
+                callId.type,
+            ),
             notification = getRingingCallNotification(
                 RingingState.Incoming(),
                 callId,
@@ -347,6 +418,7 @@ public open class DefaultNotificationHandler(
                 // If the intent is configured, clicking the notification will return to the call
                 if (onClickIntent != null) {
                     it.setContentIntent(onClickIntent)
+                    it.setFullScreenIntent(onClickIntent, false)
                 } else {
                     logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
                 }

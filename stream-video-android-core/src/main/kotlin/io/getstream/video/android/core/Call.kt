@@ -1189,8 +1189,9 @@ public class Call(
         logger.d { "[accept] #ringing; no args" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
+        clientImpl.state.removeRingingCall(willTransitionToOngoing = true)
         clientImpl.state.maybeStopForegroundService(call = this)
+
         return clientImpl.accept(type, id)
     }
 
