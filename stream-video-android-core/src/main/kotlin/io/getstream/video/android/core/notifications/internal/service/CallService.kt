@@ -27,16 +27,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.media.Ringtone
-import android.media.RingtoneManager
-import android.net.Uri
-import android.os.Build
 import android.os.IBinder
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -53,6 +44,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
+import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
@@ -88,10 +80,7 @@ internal open class CallService : Service() {
     private var isToggleCameraBroadcastReceiverRegistered = false
 
     // Call sounds
-    private var mediaPlayer: MediaPlayer? = null
-    private var audioManager: AudioManager? = null
-    private var audioFocusRequest: AudioFocusRequest? = null
-    private var ringtone: Ringtone? = null
+    private var callSoundPlayer: CallSoundPlayer? = null
 
     internal companion object {
         private const val TAG = "CallServiceCompanion"
@@ -369,9 +358,9 @@ internal open class CallService : Service() {
 
             if (trigger == TRIGGER_INCOMING_CALL) {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
-                instantiateMediaPlayer()
+                callSoundPlayer = CallSoundPlayer(applicationContext)
             } else if (trigger == TRIGGER_OUTGOING_CALL) {
-                instantiateMediaPlayer()
+                callSoundPlayer = CallSoundPlayer(applicationContext)
             }
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
@@ -473,12 +462,6 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun instantiateMediaPlayer() {
-        synchronized(this) {
-            if (mediaPlayer == null) mediaPlayer = MediaPlayer()
-        }
-    }
-
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
@@ -494,35 +477,35 @@ internal open class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
-                            playCallSound(
+                            callSoundPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.incomingCallSoundUri,
                             )
                         } else {
-                            stopCallSound() // Stops sound sooner than Active. More responsive.
+                            callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
 
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
-                            playCallSound(
+                            callSoundPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
                             )
                         } else {
-                            stopCallSound() // Stops sound sooner than Active. More responsive.
+                            callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
 
                     is RingingState.Active -> { // Handle Active to make it more reliable
-                        stopCallSound()
+                        callSoundPlayer?.stopCallSound()
                     }
 
                     is RingingState.RejectedByAll -> {
-                        stopCallSound()
+                        callSoundPlayer?.stopCallSound()
                         stopService()
                     }
 
                     is RingingState.TimeoutNoAnswer -> {
-                        stopCallSound()
+                        callSoundPlayer?.stopCallSound()
                     }
 
                     else -> {
@@ -530,121 +513,6 @@ internal open class CallService : Service() {
                     }
                 }
             }
-        }
-    }
-
-    private fun playCallSound(soundUri: Uri?) {
-        try {
-            synchronized(this) {
-                requestAudioFocus(
-                    context = applicationContext,
-                    onGranted = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            playWithRingtone(soundUri)
-                        } else {
-                            playWithMediaPlayer(soundUri)
-                        }
-                    },
-                )
-            }
-        } catch (e: Exception) {
-            logger.d { "[Sounds] Error playing call sound: ${e.message}" }
-        }
-    }
-
-    private fun requestAudioFocus(context: Context, onGranted: () -> Unit) {
-        if (audioManager == null) {
-            audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        }
-
-        val isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (audioFocusRequest == null) {
-                audioFocusRequest = AudioFocusRequest
-                    .Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                    .setAcceptsDelayedFocusGain(false)
-                    .build()
-            }
-
-            audioFocusRequest?.let {
-                audioManager?.requestAudioFocus(it) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-            } ?: false
-        } else {
-            audioManager?.requestAudioFocus(
-                null,
-                AudioManager.STREAM_RING,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
-            ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        }
-
-        logger.d { "[Sounds] Audio focus " + if (isGranted) "granted" else "not granted" }
-        if (isGranted) onGranted()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.P)
-    private fun playWithRingtone(soundUri: Uri?) {
-        soundUri?.let {
-            if (ringtone?.isPlaying == true) ringtone?.stop()
-            ringtone = RingtoneManager.getRingtone(applicationContext, soundUri)
-            if (ringtone?.isPlaying == false) {
-                ringtone?.isLooping = true
-                ringtone?.play()
-
-                logger.d { "[Sounds] Sound playing with Ringtone" }
-            }
-        }
-    }
-
-    private fun playWithMediaPlayer(soundUri: Uri?) {
-        soundUri?.let {
-            mediaPlayer?.let { mediaPlayer ->
-                if (!mediaPlayer.isPlaying) {
-                    setMediaPlayerDataSource(mediaPlayer, soundUri)
-                    mediaPlayer.start()
-
-                    logger.d { "[Sounds] Sound playing with MediaPlayer" }
-                }
-            }
-        }
-    }
-
-    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, uri: Uri) {
-        mediaPlayer.reset()
-        mediaPlayer.setDataSource(applicationContext, uri)
-        mediaPlayer.isLooping = true
-        mediaPlayer.prepare()
-    }
-
-    private fun stopCallSound() {
-        synchronized(this) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    logger.d { "[Sounds] Stopping Ringtone sound" }
-                    if (ringtone?.isPlaying == true) ringtone?.stop()
-                } else {
-                    logger.d { "[Sounds] Stopping MediaPlayer sound" }
-                    if (mediaPlayer?.isPlaying == true) mediaPlayer?.stop()
-                }
-            } catch (e: Exception) {
-                logger.d { "[Sounds] Error stopping call sound: ${e.message}" }
-            } finally {
-                abandonAudioFocus()
-            }
-        }
-    }
-
-    private fun abandonAudioFocus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest?.let {
-                audioManager?.abandonAudioFocusRequest(it)
-            }
-        } else {
-            audioManager?.abandonAudioFocus(null)
         }
     }
 
@@ -823,7 +691,7 @@ internal open class CallService : Service() {
         unregisterToggleCameraBroadcastReceiver()
 
         // Call sounds
-        cleanAudioResources()
+        callSoundPlayer?.cleanUpAudioResources()
 
         // Stop any jobs
         serviceScope.cancel()
@@ -840,21 +708,6 @@ internal open class CallService : Service() {
             } catch (e: Exception) {
                 logger.d { "Unable to unregister ToggleCameraBroadcastReceiver." }
             }
-        }
-    }
-
-    private fun cleanAudioResources() {
-        synchronized(this) {
-            logger.d { "[Sounds] Cleaning audio resources" }
-
-            if (ringtone?.isPlaying == true) ringtone?.stop()
-            ringtone = null
-
-            mediaPlayer?.release()
-            mediaPlayer = null
-
-            audioManager = null
-            audioFocusRequest = null
         }
     }
 
