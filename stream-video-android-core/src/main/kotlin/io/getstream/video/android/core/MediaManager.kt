@@ -421,14 +421,12 @@ class MicrophoneManager(
      * Select a specific device
      */
     fun select(device: StreamAudioDevice?) {
-        enforceSetup {
-            logger.i { "selecting device $device" }
-            ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
-            _selectedDevice.value = device
+        logger.i { "selecting device $device" }
+        ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+        _selectedDevice.value = device
 
-            if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
-                selectedDeviceBeforeHeadset = device
-            }
+        if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
+            selectedDeviceBeforeHeadset = device
         }
     }
 
