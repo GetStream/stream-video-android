@@ -35,14 +35,14 @@ class CallSoundPlayer(private val context: Context) {
     private var audioFocusRequest: AudioFocusRequest? = null
     private var ringtone: Ringtone? = null
 
-    fun playCallSound(soundUri: Uri?) {
+    fun playCallSound(soundUri: Uri?, playIfMuted: Boolean = false) {
         try {
             synchronized(this) {
-                requestAudioFocus {
+                requestAudioFocus(playIfMuted) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        playWithRingtoneManager(soundUri)
+                        playWithRingtoneManager(soundUri, playIfMuted)
                     } else {
-                        playWithMediaPlayer(soundUri)
+                        playWithMediaPlayer(soundUri, playIfMuted)
                     }
                 }
             }
@@ -51,7 +51,7 @@ class CallSoundPlayer(private val context: Context) {
         }
     }
 
-    private fun requestAudioFocus(onGranted: () -> Unit) {
+    private fun requestAudioFocus(playIfMuted: Boolean = false, onGranted: () -> Unit) {
         if (audioManager == null) {
             (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
                 audioManager = it
@@ -62,18 +62,17 @@ class CallSoundPlayer(private val context: Context) {
         }
 
         val isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (audioFocusRequest == null) {
-                audioFocusRequest = AudioFocusRequest
-                    .Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                    .setAcceptsDelayedFocusGain(false)
-                    .build()
-            }
+            audioFocusRequest = AudioFocusRequest
+                .Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+                .setAudioAttributes(
+                    if (playIfMuted) {
+                        AudioAttributes.Builder().setVoiceCommunicationAttributes().build()
+                    } else {
+                        AudioAttributes.Builder().setNotificationRingtoneAttributes().build()
+                    },
+                )
+                .setAcceptsDelayedFocusGain(false)
+                .build()
 
             audioFocusRequest?.let {
                 audioManager?.requestAudioFocus(it) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
@@ -81,7 +80,7 @@ class CallSoundPlayer(private val context: Context) {
         } else {
             audioManager?.requestAudioFocus(
                 null,
-                AudioManager.STREAM_RING,
+                if (playIfMuted) AudioManager.STREAM_VOICE_CALL else AudioManager.STREAM_RING,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
             ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
         }
@@ -91,10 +90,22 @@ class CallSoundPlayer(private val context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
-    private fun playWithRingtoneManager(soundUri: Uri?) {
+    private fun playWithRingtoneManager(soundUri: Uri?, playIfMuted: Boolean = false) {
         soundUri?.let {
             if (ringtone?.isPlaying == true) ringtone?.stop()
+
             ringtone = RingtoneManager.getRingtone(context, soundUri)
+
+            if (playIfMuted) {
+                ringtone?.setAudioAttributes(
+                    AudioAttributes.Builder().setVoiceCommunicationAttributes().build(),
+                )
+            } else {
+                ringtone?.setAudioAttributes(
+                    AudioAttributes.Builder().setNotificationRingtoneAttributes().build(),
+                )
+            }
+
             if (ringtone?.isPlaying == false) {
                 ringtone?.isLooping = true
                 ringtone?.play()
@@ -104,11 +115,11 @@ class CallSoundPlayer(private val context: Context) {
         }
     }
 
-    private fun playWithMediaPlayer(soundUri: Uri?) {
+    private fun playWithMediaPlayer(soundUri: Uri?, playIfMuted: Boolean = false) {
         soundUri?.let {
             mediaPlayer.let { mediaPlayer ->
                 if (!mediaPlayer.isPlaying) {
-                    setMediaPlayerDataSource(mediaPlayer, soundUri)
+                    setMediaPlayerDataSource(mediaPlayer, soundUri, playIfMuted)
                     mediaPlayer.start()
 
                     logger.d { "[playWithMediaPlayer] Sound playing" }
@@ -117,10 +128,21 @@ class CallSoundPlayer(private val context: Context) {
         }
     }
 
-    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, uri: Uri) {
+    private fun setMediaPlayerDataSource(mediaPlayer: MediaPlayer, uri: Uri, playIfMuted: Boolean = false) {
         mediaPlayer.reset()
         mediaPlayer.setDataSource(context, uri)
         mediaPlayer.isLooping = true
+
+        if (playIfMuted) {
+            mediaPlayer.setAudioAttributes(
+                AudioAttributes.Builder().setVoiceCommunicationAttributes().build(),
+            )
+        } else {
+            mediaPlayer.setAudioAttributes(
+                AudioAttributes.Builder().setNotificationRingtoneAttributes().build(),
+            )
+        }
+
         mediaPlayer.prepare()
     }
 
@@ -163,4 +185,18 @@ class CallSoundPlayer(private val context: Context) {
             audioFocusRequest = null
         }
     }
+}
+
+private fun AudioAttributes.Builder.setVoiceCommunicationAttributes(): AudioAttributes.Builder {
+    setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+    setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+
+    return this
+}
+
+private fun AudioAttributes.Builder.setNotificationRingtoneAttributes(): AudioAttributes.Builder {
+    setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+    setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+
+    return this
 }

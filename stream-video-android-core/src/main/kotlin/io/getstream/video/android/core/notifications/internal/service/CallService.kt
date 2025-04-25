@@ -479,6 +479,7 @@ internal open class CallService : Service() {
                         if (!it.acceptedByMe) {
                             callSoundPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                                streamVideo.sounds.ringingConfig.playIncomingSoundIfMuted,
                             )
                         } else {
                             callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
@@ -489,6 +490,7 @@ internal open class CallService : Service() {
                         if (!it.acceptedByCallee) {
                             callSoundPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
+                                streamVideo.sounds.ringingConfig.playOutgoingSoundIfMuted,
                             )
                         } else {
                             callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.

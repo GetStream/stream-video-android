@@ -10815,18 +10815,32 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/sounds/CallSoundPlayer {
+	public fun <init> (Landroid/content/Context;)V
+	public final fun cleanUpAudioResources ()V
+	public final fun playCallSound (Landroid/net/Uri;Z)V
+	public static synthetic fun playCallSound$default (Lio/getstream/video/android/core/sounds/CallSoundPlayer;Landroid/net/Uri;ZILjava/lang/Object;)V
+	public final fun stopCallSound ()V
+}
+
 public abstract interface class io/getstream/video/android/core/sounds/RingingConfig {
 	public abstract fun getIncomingCallSoundUri ()Landroid/net/Uri;
 	public abstract fun getOutgoingCallSoundUri ()Landroid/net/Uri;
+	public abstract fun getPlayIncomingSoundIfMuted ()Z
+	public abstract fun getPlayOutgoingSoundIfMuted ()Z
 }
 
 public final class io/getstream/video/android/core/sounds/RingingConfigKt {
-	public static final fun defaultResourcesRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
-	public static final fun deviceRingtoneRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun defaultResourcesRingingConfig (Landroid/content/Context;ZZ)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static synthetic fun defaultResourcesRingingConfig$default (Landroid/content/Context;ZZILjava/lang/Object;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun deviceRingtoneRingingConfig (Landroid/content/Context;ZZ)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static synthetic fun deviceRingtoneRingingConfig$default (Landroid/content/Context;ZZILjava/lang/Object;)Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun emptyRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
-	public static final fun resRingingConfig (Landroid/content/Context;II)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun resRingingConfig (Landroid/content/Context;IIZZ)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static synthetic fun resRingingConfig$default (Landroid/content/Context;IIZZILjava/lang/Object;)Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun toSounds (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
-	public static final fun uriRingingConfig (Landroid/net/Uri;Landroid/net/Uri;)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun uriRingingConfig (Landroid/net/Uri;Landroid/net/Uri;ZZ)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static synthetic fun uriRingingConfig$default (Landroid/net/Uri;Landroid/net/Uri;ZZILjava/lang/Object;)Lio/getstream/video/android/core/sounds/RingingConfig;
 }
 
 public final class io/getstream/video/android/core/sounds/Sounds {
