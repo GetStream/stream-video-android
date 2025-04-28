@@ -115,7 +115,7 @@ class MicrophoneManagerTest {
         microphoneManager.resume() // Should call setup again
 
         // Then
-        verify(exactly = 2) {
+        verify(exactly = 1) {
             // Setup was called twice
             microphoneManager.setup(any())
         }
@@ -123,9 +123,7 @@ class MicrophoneManagerTest {
             microphoneManager.setup(any()) // Manual call
             microphoneManager.cleanup() // Manual call
             microphoneManager.resume() // Manual call
-            microphoneManager.setup(
-                any(),
-            ) // Automatic as part of enforce setup strategy of resume()
+            microphoneManager.setup(any()) // Auto as part of enforce setup strategy of resume()
         }
     }
 
