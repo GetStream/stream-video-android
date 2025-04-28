@@ -15,7 +15,7 @@ jobs:
   publish:
     uses: GetStream/android-ci-actions/.github/workflows/release-new-version.yml@main
     with:
-      ref: "develop"
+      ref: "jcdevelop"
       bump: ${{ inputs.bump }}
       file-path: ./buildSrc/src/main/kotlin/io/getstream/video/android/Configuration.kt
       excluded-modules: "demo-app,tutorials:tutorial-video,tutorials:tutorial-audio"
