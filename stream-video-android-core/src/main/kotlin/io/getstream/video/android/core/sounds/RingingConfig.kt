@@ -39,25 +39,57 @@ public interface RingingConfig {
     val outgoingCallSoundUri: Uri?
 }
 
+public interface MutedRingingConfig {
+    val playIncomingSoundIfMuted: Boolean
+    val playOutgoingSoundIfMuted: Boolean
+}
+
 /**
  * Contains all the sounds that the SDK uses.
  */
 @Deprecated(
     message = "Sounds will be deprecated in the future and replaced with RingingConfig. It is recommended to use one of the factory methods along with toSounds() to create the Sounds object.",
-    replaceWith = ReplaceWith("SoundConfig"),
+    replaceWith = ReplaceWith("RingingConfig"),
     level = DeprecationLevel.WARNING,
 )
-public data class Sounds(val ringingConfig: RingingConfig)
+public data class Sounds(
+    val ringingConfig: RingingConfig,
+    val mutedRingingConfig: MutedRingingConfig? = null,
+)
 
 // Factories
+/**
+ * Creates a [Sounds] object using the provided [RingingConfig] and [MutedRingingConfig].
+ *
+ * @param ringingConfig The configuration for incoming and outgoing call sounds.
+ * @param mutedRingingConfig The configuration for handling incoming and outgoing call sounds if device is muted. Can be null.
+ * @return A [Sounds] object containing the specified configurations.
+ */
+public fun ringingConfig(
+    ringingConfig: RingingConfig,
+    mutedRingingConfig: MutedRingingConfig?,
+): Sounds {
+    return Sounds(ringingConfig, mutedRingingConfig)
+}
+
 /**
  * Returns a ringing config that uses the SDK default sounds for incoming and outgoing calls.
  *
  * @param context Context used for retrieving the sounds.
  */
-public fun defaultResourcesRingingConfig(context: Context): RingingConfig = object : RingingConfig {
-    override val incomingCallSoundUri: Uri? = R.raw.call_incoming_sound.toUriOrNUll(context)
-    override val outgoingCallSoundUri: Uri? = R.raw.call_outgoing_sound.toUriOrNUll(context)
+public fun defaultResourcesRingingConfig(
+    context: Context,
+): RingingConfig = object : RingingConfig {
+    override val incomingCallSoundUri: Uri? = R.raw.call_incoming_sound.toUriOrNull(context)
+    override val outgoingCallSoundUri: Uri? = R.raw.call_outgoing_sound.toUriOrNull(context)
+}
+
+public fun defaultMutedRingingConfig(
+    playIncomingSoundIfMuted: Boolean = false,
+    playOutgoingSoundIfMuted: Boolean = false,
+): MutedRingingConfig = object : MutedRingingConfig {
+    override val playIncomingSoundIfMuted: Boolean = playIncomingSoundIfMuted
+    override val playOutgoingSoundIfMuted: Boolean = playOutgoingSoundIfMuted
 }
 
 /**
@@ -65,7 +97,9 @@ public fun defaultResourcesRingingConfig(context: Context): RingingConfig = obje
  *
  * @param context Context used for retrieving the sounds.
  */
-public fun deviceRingtoneRingingConfig(context: Context): RingingConfig = object : RingingConfig {
+public fun deviceRingtoneRingingConfig(
+    context: Context,
+): RingingConfig = object : RingingConfig {
     private val streamResSoundConfig = defaultResourcesRingingConfig(context)
     override val incomingCallSoundUri: Uri?
         get() = safeCallWithDefault(default = null) {
@@ -89,8 +123,8 @@ public fun resRingingConfig(
     @RawRes incomingCallSoundResId: Int,
     @RawRes outgoingCallSoundResId: Int,
 ) = object : RingingConfig {
-    override val incomingCallSoundUri: Uri? = incomingCallSoundResId.toUriOrNUll(context)
-    override val outgoingCallSoundUri: Uri? = outgoingCallSoundResId.toUriOrNUll(context)
+    override val incomingCallSoundUri: Uri? = incomingCallSoundResId.toUriOrNull(context)
+    override val outgoingCallSoundUri: Uri? = outgoingCallSoundResId.toUriOrNull(context)
 }
 
 /**
@@ -121,7 +155,7 @@ public fun emptyRingingConfig(): RingingConfig = object : RingingConfig {
 public fun RingingConfig.toSounds() = Sounds(this)
 
 // Internal utilities
-private fun Int?.toUriOrNUll(context: Context): Uri? =
+private fun Int?.toUriOrNull(context: Context): Uri? =
     safeCallWithDefault(default = null) {
         if (this != null) {
             Uri.parse("android.resource://${context.packageName}/$this")
