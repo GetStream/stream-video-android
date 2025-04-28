@@ -64,6 +64,7 @@ class CallServiceConfigRegistry {
 
     init {
         configs[ANY_MARKER] = DefaultCallConfigurations.default
+        configs[CallType.Livestream.name] = DefaultCallConfigurations.livestream
     }
 
     /**
