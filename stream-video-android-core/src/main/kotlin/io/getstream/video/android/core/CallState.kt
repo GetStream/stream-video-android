@@ -1040,7 +1040,9 @@ public class CallState(
         val state: RingingState = if (hasActiveCall) {
             cancelTimeout()
             RingingState.Active
-        } else if (rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) {
+        } else if (rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount ||
+            (rejectReason?.alias == RejectReason.Cancel.alias || rejectedBy.contains(createdBy?.id))
+        ) {
             call.leave()
             cancelTimeout()
 
