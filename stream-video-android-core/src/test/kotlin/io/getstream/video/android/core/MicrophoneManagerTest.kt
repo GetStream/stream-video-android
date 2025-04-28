@@ -58,15 +58,15 @@ class MicrophoneManagerTest {
 
         // When
         microphoneManager.enable() // 1
-        microphoneManager.select(null) // 2
-        microphoneManager.resume() // 3, 4, Resume calls enable internally, thus two invocations
-        microphoneManager.disable() // 5
-        microphoneManager.pause() // 6
-        microphoneManager.setEnabled(true) // 7, 8, calls enable internally
-        microphoneManager.setEnabled(false) // 9, 10, calls disable internally
+        microphoneManager.select(null) // 0
+        microphoneManager.resume() // 2, 3, Resume calls enable internally, thus two invocations
+        microphoneManager.disable() // 4
+        microphoneManager.pause() // 5
+        microphoneManager.setEnabled(true) // 6, 7, calls enable internally
+        microphoneManager.setEnabled(false) // 8, 9, calls disable internally
 
         // Then
-        verify(exactly = 8) {
+        verify(exactly = 9) {
             // Setup will be called exactly 10 times
             microphoneManager.setup(any())
         }
