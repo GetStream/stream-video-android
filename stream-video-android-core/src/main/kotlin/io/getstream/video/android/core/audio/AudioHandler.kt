@@ -43,6 +43,7 @@ public interface AudioHandler {
  */
 public class AudioSwitchHandler(
     private val context: Context,
+    private val preferredDeviceList: List<Class<out AudioDevice>>,
     private var audioDeviceChangeListener: AudioDeviceChangeListener,
 ) : AudioHandler {
 
@@ -62,17 +63,10 @@ public class AudioSwitchHandler(
                 mainThreadHandler.post {
                     logger.d { "[start] Running on main" }
 
-                    val devices = mutableListOf(
-                        AudioDevice.WiredHeadset::class.java,
-                        AudioDevice.BluetoothHeadset::class.java,
-                        AudioDevice.Earpiece::class.java,
-                        AudioDevice.Speakerphone::class.java,
-                    )
-
                     val switch = AudioSwitch(
                         context = context,
                         audioFocusChangeListener = onAudioFocusChangeListener,
-                        preferredDeviceList = devices,
+                        preferredDeviceList = preferredDeviceList,
                     )
                     audioSwitch = switch
                     switch.start(audioDeviceChangeListener)
