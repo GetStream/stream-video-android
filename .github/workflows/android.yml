@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3.1.0
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
       - name: spotless
         run: ./gradlew spotlessCheck --scan
 
@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3.1.0
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
       - name: API check
         run: ./gradlew apiCheck --scan
 
@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
 
       - uses: ./.github/actions/gradle-cache
 
@@ -70,7 +70,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
 
       - uses: ./.github/actions/gradle-cache
 

@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
       - uses: ./.github/actions/gradle-cache
 
       - name: Assemble release for metrics
