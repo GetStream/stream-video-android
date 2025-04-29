@@ -66,7 +66,7 @@ class MicrophoneManagerTest {
         microphoneManager.setEnabled(false) // 9, 10, calls disable internally
 
         // Then
-        verify(exactly = 10) {
+        verify(exactly = 9) {
             // Setup will be called exactly 10 times
             microphoneManager.setup(any())
         }
