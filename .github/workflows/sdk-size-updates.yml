@@ -28,7 +28,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: GetStream/android-ci-actions/actions/setup-java@main
-      - uses: ./.github/actions/gradle-cache
+      - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
       - name: Assemble release and debug for metrics
         run: ./gradlew :metrics:$METRICS_PROJECT:assemble

@@ -52,7 +52,7 @@ jobs:
 
       - uses: GetStream/android-ci-actions/actions/setup-java@main
 
-      - uses: ./.github/actions/gradle-cache
+      - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
@@ -72,7 +72,7 @@ jobs:
 
       - uses: GetStream/android-ci-actions/actions/setup-java@main
 
-      - uses: ./.github/actions/gradle-cache
+      - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
       - name: Run unit tests
         run: |

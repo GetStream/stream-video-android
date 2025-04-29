@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - uses: GetStream/android-ci-actions/actions/setup-java@main
-      - uses: ./.github/actions/gradle-cache
+      - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
       - name: Assemble release for metrics
         run: ./gradlew :metrics:$METRICS_PROJECT:assembleRelease
