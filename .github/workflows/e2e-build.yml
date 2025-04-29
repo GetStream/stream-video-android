@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
       - uses: GetStream/android-ci-actions/actions/setup-java@main
-      - uses: ./.github/actions/enable-kvm
+      - uses: GetStream/android-ci-actions/actions/enable-kvm@main
       - uses: ./.github/actions/setup-ruby
       - uses: GetStream/android-ci-actions/actions/gradle-cache@main
       - name: Build apks
