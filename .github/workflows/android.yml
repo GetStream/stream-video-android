@@ -91,7 +91,7 @@ jobs:
           name: unit-tests-compose-results
           path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html
 
-      - uses: ./.github/actions/setup-ruby
+      - uses: GetStream/android-ci-actions/actions/setup-ruby@main
 
       - name: Sonar
         run: bundle exec fastlane run_sonar_analysis
