@@ -34,6 +34,7 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
+import io.getstream.video.android.core.socket.common.SocketConnectionPolicy
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
@@ -136,6 +137,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
     private val callUpdatesAfterLeave: Boolean = false,
+    internal val socketConnectionPolicies: List<SocketConnectionPolicy> = emptyList(),
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -220,6 +222,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
+            socketConnectionPolicies = socketConnectionPolicies,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)

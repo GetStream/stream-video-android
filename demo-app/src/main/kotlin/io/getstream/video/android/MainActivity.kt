@@ -16,7 +16,13 @@
 
 package io.getstream.video.android
 
+import android.Manifest
+import android.app.ActivityManager
+import android.app.KeyguardManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -24,6 +30,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.Modifier
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -35,8 +43,11 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
+import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.ui.AppNavHost
 import io.getstream.video.android.ui.AppScreens
@@ -114,13 +125,70 @@ class MainActivity : ComponentActivity() {
                     lifecycleScope.launch {
                         // Monitor the ringingState on a non-null call
                         call.state.ringingState.collectLatest {
-                            if (it is RingingState.Incoming) {
-                                startIncomingCallActivity(call)
+                            when (it) {
+                                is RingingState.Incoming -> {
+                                    if (isInForeground()) {
+                                        startIncomingCallActivity(call)
+                                    } else if (isDeviceLocked(this@MainActivity)) {
+                                        showIncomingCallNotification(call)
+                                    } else {
+                                        // App is on background
+                                        showIncomingCallNotification(call)
+                                    }
+                                }
+                                is RingingState.RejectedByAll -> cancelNotification(call)
+                                else -> {
+                                    // Do nothing
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    fun isInForeground(): Boolean {
+        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+        ActivityManager.getMyMemoryState(appProcessInfo)
+        return (
+            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+            )
+    }
+
+    fun isDeviceLocked(context: Context): Boolean {
+        val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        return keyguardManager.isKeyguardLocked
+    }
+
+    fun cancelNotification(call: Call) {
+        NotificationManagerCompat.from(this)
+            .cancel(INCOMING_CALL_NOTIFICATION_ID)
+    }
+
+    fun showIncomingCallNotification(call: Call) {
+        val intentCallDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
+        val notification = StreamVideo.instance()
+            .getRingingCallNotification(
+                ringingState = RingingState.Incoming(),
+                callId = StreamCallId.fromCallCid(call.cid),
+                callDisplayName = intentCallDisplayName,
+                shouldHaveContentIntent = true,
+            )
+        val notificationId = INCOMING_CALL_NOTIFICATION_ID
+        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+
+        if (hasPermission && notification != null) {
+            NotificationManagerCompat.from(this)
+                .notify(notificationId, notification)
         }
     }
 

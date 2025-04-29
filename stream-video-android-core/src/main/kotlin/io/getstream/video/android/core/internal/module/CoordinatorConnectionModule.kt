@@ -25,6 +25,7 @@ import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.socket.common.SocketConnectionPolicy
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.model.ApiKey
@@ -46,6 +47,7 @@ internal class CoordinatorConnectionModule(
     context: Context,
     tokenProvider: TokenProvider,
     user: User,
+    internal val socketConnectionPolicies: List<SocketConnectionPolicy>,
     override val scope: CoroutineScope,
     // Common API
     override val apiUrl: String,
@@ -99,6 +101,7 @@ internal class CoordinatorConnectionModule(
         scope = scope,
         lifecycle = lifecycle,
         tokenProvider = tokenProvider,
+        socketConnectionPolicies = socketConnectionPolicies,
     )
 
     override fun updateToken(token: UserToken) {

@@ -28,6 +28,7 @@ import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.SocketActions
+import io.getstream.video.android.core.socket.common.SocketConnectionPolicy
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
@@ -81,6 +82,7 @@ public open class CoordinatorSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
+    private val socketConnectionPolicies: List<SocketConnectionPolicy> = emptyList(),
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
     SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
 
@@ -112,6 +114,7 @@ public open class CoordinatorSocketConnection(
         scope as? UserScope ?: UserScope(ClientScope()),
         StreamLifecycleObserver(scope, lifecycle),
         networkStateProvider,
+        socketConnectionPolicies = socketConnectionPolicies,
     ).also {
         it.addListener(this)
     }
