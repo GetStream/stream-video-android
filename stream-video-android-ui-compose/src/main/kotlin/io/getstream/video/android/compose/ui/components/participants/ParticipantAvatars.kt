@@ -19,8 +19,13 @@ package io.getstream.video.android.compose.ui.components.participants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -103,6 +108,7 @@ public fun ParticipantAvatars(
  *
  * @see [UserAvatar]
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 public fun ParticipantAvatars(
     members: List<MemberState>? = null,
@@ -123,26 +129,59 @@ public fun ParticipantAvatars(
         if (callUsers.isNotEmpty()) {
             if (callUsers.size == 1) {
                 val user = callUsers.first()
-
                 UserAvatar(
                     modifier = Modifier
-                        .size(VideoTheme.dimens.genericMax)
+                        .size(VideoTheme.dimens.genericMax * 2)
                         .testTag("Stream_ParticipantAvatar"),
                     userName = user.name ?: user.id,
                     userImage = user.imageUrl,
                 )
+            } else if (callUsers.size == 2) {
+                val firstThree = callUsers.take(2)
+                Row {
+                    UserAvatar(
+                        modifier = Modifier
+                            .size(VideoTheme.dimens.genericMax)
+                            .testTag("Stream_ParticipantAvatar"),
+                        userName = firstThree[0].userNameOrId,
+                        userImage = firstThree[0].imageUrl,
+                    )
+                    Spacer(modifier = Modifier.width(VideoTheme.dimens.spacingL))
+                    UserAvatar(
+                        modifier = Modifier
+                            .size(VideoTheme.dimens.genericMax)
+                            .testTag("Stream_ParticipantAvatar"),
+                        userName = firstThree[1].userNameOrId,
+                        userImage = firstThree[1].imageUrl,
+                    )
+                }
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        items(callUsers.take(if (callUsers.size >= 3) 3 else 2)) { user ->
-                            UserAvatar(
-                                modifier = Modifier
-                                    .size(VideoTheme.dimens.genericXl)
-                                    .testTag("Stream_ParticipantAvatar"),
-                                userName = user.userNameOrId,
-                                userImage = user.imageUrl,
-                            )
-                        }
+                    val firstThree = callUsers.take(if (callUsers.size >= 3) 3 else 2)
+                    UserAvatar(
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(16.dp)
+                            .testTag("Stream_ParticipantAvatar"),
+                        userName = firstThree[0].userNameOrId,
+                        userImage = firstThree[0].imageUrl,
+                    )
+                    Row {
+                        UserAvatar(
+                            modifier = Modifier
+                                .size(VideoTheme.dimens.genericMax)
+                                .testTag("Stream_ParticipantAvatar"),
+                            userName = firstThree[1].userNameOrId,
+                            userImage = firstThree[1].imageUrl,
+                        )
+                        Spacer(modifier = Modifier.width(VideoTheme.dimens.spacingL))
+                        UserAvatar(
+                            modifier = Modifier
+                                .size(VideoTheme.dimens.genericMax)
+                                .testTag("Stream_ParticipantAvatar"),
+                            userName = firstThree[2].userNameOrId,
+                            userImage = firstThree[2].imageUrl,
+                        )
                     }
                 }
             }
