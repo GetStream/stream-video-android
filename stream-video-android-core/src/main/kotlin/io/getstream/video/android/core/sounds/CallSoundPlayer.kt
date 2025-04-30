@@ -28,7 +28,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import io.getstream.log.taggedLogger
 
-class CallSoundPlayer(private val context: Context) {
+internal class CallSoundPlayer(private val context: Context) {
     private val logger by taggedLogger("CallSoundPlayer")
     private val mediaPlayer: MediaPlayer by lazy { MediaPlayer() }
     private var audioManager: AudioManager? = null
