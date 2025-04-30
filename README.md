@@ -3,7 +3,7 @@
 <img src=".readme-assets/Github-Graphic-Android.jpg" alt="Stream Video for Android Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
 
 <p align="center">
-  <a href="https://github.com/GetStream/stream-video-android/actions/workflows/app-distribute.yml"><img src="https://github.com/GetStream/stream-video-android/workflows/App%20Distribute%20CI/badge.svg" /></a>
+  <a href="https://github.com/GetStream/stream-video-android/actions/workflows/artifact-upload.yaml"><img src="https://github.com/GetStream/stream-video-android/actions/workflows/artifact-upload.yaml/badge.svg" /></a>
   <a href="https://android-arsenal.com/api?level=24"><img alt="API" src="https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat"/></a>
   <a href="https://search.maven.org/search?q=stream-video-android"><img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-core.svg?label=Maven%20Central" /></a>
 </p>
@@ -12,7 +12,7 @@
 
 ![stream-video-android-core](https://img.shields.io/badge/stream--video--android--core-11.21%20MB-lightgreen)
 ![stream-video-android-ui-xml](https://img.shields.io/badge/stream--video--android--ui--xml-5.66%20MB-lightgreen)
-![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-5.82%20MB-lightgreen)
+![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-5.84%20MB-lightgreen)
 
 </div>
 
