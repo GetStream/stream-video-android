@@ -10815,14 +10815,6 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/sounds/CallSoundPlayer {
-	public fun <init> (Landroid/content/Context;)V
-	public final fun cleanUpAudioResources ()V
-	public final fun playCallSound (Landroid/net/Uri;Z)V
-	public static synthetic fun playCallSound$default (Lio/getstream/video/android/core/sounds/CallSoundPlayer;Landroid/net/Uri;ZILjava/lang/Object;)V
-	public final fun stopCallSound ()V
-}
-
 public abstract interface class io/getstream/video/android/core/sounds/MutedRingingConfig {
 	public abstract fun getPlayIncomingSoundIfMuted ()Z
 	public abstract fun getPlayOutgoingSoundIfMuted ()Z
