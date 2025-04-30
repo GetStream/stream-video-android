@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.5.0
+            <div class="library-version">1.6.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -68,23 +68,39 @@
     <div class="tabs-section-body">
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="1940064207%2FFunctions%2F-1889015313" anchor-label="LivestreamPlayer" id="1940064207%2FFunctions%2F-1889015313" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release"></a>
+        <div class="table"><a data-name="1080898803%2FFunctions%2F-1889015313" anchor-label="LivestreamPlayer" id="1080898803%2FFunctions%2F-1889015313" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-filterable-current=":stream-video-android-ui-compose:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-ui-compose:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-livestream-player.html"><span>Livestream</span><wbr><span><span>Player</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1940064207%2FFunctions%2F-1889015313"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1080898803%2FFunctions%2F-1889015313"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-livestream-player.html"><span class="token function">LivestreamPlayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">call<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">, </span></span><span class="parameter ">enablePausing<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">true</span><span class="token punctuation">, </span></span><span class="parameter ">onPausedPlayer<span class="token operator">: </span><span class="token punctuation">(</span>isPaused<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">backstageContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         LivestreamBackStage()
-    }<span class="token punctuation">, </span></span><span class="parameter ">rendererContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
+    }<span class="token punctuation">, </span></span><span class="parameter ">videoRendererConfig<span class="token operator">: </span><a href="../io.getstream.video.android.compose.ui.components.video.config/-video-renderer-config/index.html">VideoRendererConfig</a><span class="token operator"> = </span>videoRenderConfig()<span class="token punctuation">, </span></span><span class="parameter ">livestreamFlow<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/-video/index.html">ParticipantState.Video</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token operator"> = </span>call.state.participants.flatMapLatest { participants: List&lt;ParticipantState&gt; -&gt;
+            // For each participant, create a small Flow that watches videoEnabled.
+            val participantVideoFlows = participants.map { participant -&gt;
+                participant.videoEnabled.map { enabled -&gt; participant to enabled }
+            }
+            // Combine these Flows: whenever a participant’s videoEnabled changes,
+            // we re-calculate which participants have video.
+            combine(participantVideoFlows) { participantEnabledPairs -&gt;
+                participantEnabledPairs
+                    .filter { (_, isEnabled) -&gt; isEnabled }
+                    .map { (participant, _) -&gt; participant }
+            }
+        }.flatMapLatest { participantWithVideo -&gt;
+            participantWithVideo.firstOrNull()?.video ?: flow { emit(null) }
+        }<span class="token punctuation">, </span></span><span class="parameter ">rendererContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         LivestreamRenderer(
             call = call,
             enablePausing = enablePausing,
             onPausedPlayer = onPausedPlayer,
+            configuration = videoRendererConfig,
+            livestreamFlow = livestreamFlow,
         )
     }<span class="token punctuation">, </span></span><span class="parameter ">overlayContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><a href="../../stream-video-android-core/io.getstream.video.android.core/-call/index.html">Call</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         LivestreamPlayerOverlay(call = call)
