@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,7 +46,7 @@ public fun IncomingCallDetails(
     isVideoType: Boolean = true,
     participants: List<MemberState>,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
         ParticipantAvatars(members = participants)
 
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))

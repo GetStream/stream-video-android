@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -139,7 +141,7 @@ public fun OutgoingCallContent(
         modifier = modifier,
         backgroundContent = backgroundContent,
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
             if (isShowingHeader) {
                 headerContent?.invoke(this)
             }
@@ -152,8 +154,7 @@ public fun OutgoingCallContent(
 
             detailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = topPadding),
+                    .align(Alignment.CenterHorizontally),
                 participants = participants,
                 isVideoType = isVideoType,
             )
@@ -162,7 +163,7 @@ public fun OutgoingCallContent(
         controlsContent?.invoke(this) ?: OutgoingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.componentHeightM),
+                .padding(bottom = VideoTheme.dimens.genericXxl),
             isVideoCall = isVideoType,
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,

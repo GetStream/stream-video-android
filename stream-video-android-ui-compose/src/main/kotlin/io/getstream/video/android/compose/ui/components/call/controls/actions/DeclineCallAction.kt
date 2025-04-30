@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.DeclineCall
 
@@ -42,9 +43,11 @@ public fun DeclineCallAction(
     icon: ImageVector? = null,
     bgColor: Color? = null,
     iconTint: Color? = null,
+    style: StreamFixedSizeButtonStyle? = null,
 ): Unit = GenericAction(
     modifier = modifier,
     enabled = enabled,
+    style = style,
     onAction = { onCallAction(DeclineCall) },
     icon = icon ?: Icons.Default.Call,
     color = bgColor ?: VideoTheme.colors.alertWarning,

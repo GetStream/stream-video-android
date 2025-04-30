@@ -45,7 +45,7 @@ class MicrophoneManagerTest {
 
         val microphoneManager = spyk(actual)
         val slot = slot<() -> Unit>()
-        every { microphoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
+        every { microphoneManager.setup(any(), capture(slot)) } answers { slot.captured.invoke() }
         every {
             microphoneManager["ifAudioHandlerInitialized"](
                 any<(AudioSwitchHandler) -> Unit>(),
@@ -58,17 +58,17 @@ class MicrophoneManagerTest {
 
         // When
         microphoneManager.enable() // 1
-        microphoneManager.select(null) // 2
-        microphoneManager.resume() // 3, 4, Resume calls enable internally, thus two invocations
-        microphoneManager.disable() // 5
-        microphoneManager.pause() // 6
-        microphoneManager.setEnabled(true) // 7, 8, calls enable internally
-        microphoneManager.setEnabled(false) // 9, 10, calls disable internally
+        microphoneManager.select(null) // 0
+        microphoneManager.resume() // 2, 3, Resume calls enable internally, thus two invocations
+        microphoneManager.disable() // 4
+        microphoneManager.pause() // 5
+        microphoneManager.setEnabled(true) // 6, 7, calls enable internally
+        microphoneManager.setEnabled(false) // 8, 9, calls disable internally
 
         // Then
-        verify(exactly = 10) {
+        verify(exactly = 9) {
             // Setup will be called exactly 10 times
-            microphoneManager.setup(any())
+            microphoneManager.setup(any(), any())
         }
     }
 
@@ -107,7 +107,7 @@ class MicrophoneManagerTest {
         every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
 
         val slot = slot<() -> Unit>()
-        every { microphoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
+        every { microphoneManager.setup(any(), capture(slot)) } answers { slot.captured.invoke() }
 
         // When
         microphoneManager.setup()
@@ -115,7 +115,7 @@ class MicrophoneManagerTest {
         microphoneManager.resume() // Should call setup again
 
         // Then
-        verify(exactly = 2) {
+        verify(exactly = 1) {
             // Setup was called twice
             microphoneManager.setup(any())
         }
@@ -123,9 +123,7 @@ class MicrophoneManagerTest {
             microphoneManager.setup(any()) // Manual call
             microphoneManager.cleanup() // Manual call
             microphoneManager.resume() // Manual call
-            microphoneManager.setup(
-                any(),
-            ) // Automatic as part of enforce setup strategy of resume()
+            microphoneManager.setup(any(), any()) // Auto. Part of enforce setup strategy of resume
         }
     }
 
@@ -144,7 +142,7 @@ class MicrophoneManagerTest {
         every { mockCallState.ownCapabilities.value } returns listOf(OwnCapability.SendAudio)
 
         val slot = slot<() -> Unit>()
-        every { spyMicrophoneManager.setup(capture(slot)) } answers { slot.captured.invoke() }
+        every { spyMicrophoneManager.setup(any(), capture(slot)) } answers { slot.captured.invoke() }
 
         // When
         spyMicrophoneManager.priorStatus = DeviceStatus.Enabled

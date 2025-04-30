@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
@@ -115,18 +115,14 @@ public fun AudioCallContent(
         call = call,
         isVideoType = false,
         detailsContent = detailsContent ?: { members, topPadding ->
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = topPadding),
-            ) {
+            Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
+                ParticipantAvatars(members = members)
+                Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
                 ParticipantInformation(
                     isVideoType = false,
                     callStatus = CallStatus.Calling(durationText),
-                    participants = members,
+                    members = members,
                 )
-                Spacer(modifier = Modifier.size(16.dp))
-                ParticipantAvatars(participants = members)
             }
         },
         onBackPressed = onBackPressed,
@@ -196,22 +192,27 @@ public fun AudioOnlyCallContent(
             .fillMaxSize()
             .background(color = VideoTheme.colors.baseSheetTertiary),
     ) {
-        Column {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .align(Alignment.Center),
+            verticalArrangement = Arrangement.Center,
+        ) {
             if (isShowingHeader) headerContent?.invoke(this)
 
-            detailsContent?.invoke(this, remoteParticipants, VideoTheme.dimens.spacingM) ?: AudioOnlyCallDetails(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = VideoTheme.dimens.spacingM),
-                participants = remoteParticipants,
-                duration = durationText,
-            )
+            detailsContent?.invoke(this, remoteParticipants, VideoTheme.dimens.spacingM)
+                ?: AudioOnlyCallDetails(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    participants = remoteParticipants,
+                    duration = durationText,
+                )
         }
 
         controlsContent?.invoke(this) ?: AudioOnlyCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.componentHeightM),
+                .padding(bottom = VideoTheme.dimens.genericXxl),
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
         )
@@ -231,7 +232,7 @@ public fun AudioOnlyCallDetails(
     duration: String,
     participants: List<ParticipantState>,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
         ParticipantAvatars(participants = participants)
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -265,12 +266,13 @@ public fun AudioOnlyCallControls(
         ToggleMicrophoneAction(
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
+            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
+            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
         )
 
         LeaveCallAction(
             onCallAction = onCallAction,
+            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )
     }
 }

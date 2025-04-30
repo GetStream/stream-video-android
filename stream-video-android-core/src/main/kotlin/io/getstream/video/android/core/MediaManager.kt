@@ -29,6 +29,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioHandler
@@ -138,7 +139,7 @@ class SpeakerManager(
      * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
      * */
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
-        microphoneManager.enforceSetup {
+        microphoneManager.enforceSetup(preferSpeaker = enable) {
             val devices = devices.value
             if (enable) {
                 val speaker =
@@ -354,6 +355,7 @@ class MicrophoneManager(
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
+    internal var selectedDeviceBeforeHeadset: StreamAudioDevice? = null
 
     /** Currently selected device */
     val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
@@ -420,10 +422,12 @@ class MicrophoneManager(
      * Select a specific device
      */
     fun select(device: StreamAudioDevice?) {
-        enforceSetup {
-            logger.i { "selecting device $device" }
-            ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
-            _selectedDevice.value = device
+        logger.i { "selecting device $device" }
+        ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+        _selectedDevice.value = device
+
+        if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
+            selectedDeviceBeforeHeadset = device
         }
     }
 
@@ -443,7 +447,7 @@ class MicrophoneManager(
     fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
 
     // Internal logic
-    internal fun setup(onAudioDevicesUpdate: (() -> Unit)? = null) {
+    internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
         var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
 
         if (setupCompleted) {
@@ -460,16 +464,33 @@ class MicrophoneManager(
 
         if (canHandleDeviceSwitch()) {
             if (!::audioHandler.isInitialized) { // This check is atomic
-                audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
-                    logger.i { "audio devices. selected $selected, available devices are $devices" }
+                audioHandler = AudioSwitchHandler(
+                    context = mediaManager.context,
+                    preferredDeviceList = listOf(
+                        AudioDevice.BluetoothHeadset::class.java,
+                        AudioDevice.WiredHeadset::class.java,
+                    ) + if (preferSpeaker) {
+                        listOf(
+                            AudioDevice.Speakerphone::class.java,
+                            AudioDevice.Earpiece::class.java,
+                        )
+                    } else {
+                        listOf(
+                            AudioDevice.Earpiece::class.java,
+                            AudioDevice.Speakerphone::class.java,
+                        )
+                    },
+                    audioDeviceChangeListener = { devices, selected ->
+                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
-                    _devices.value = devices.map { it.fromAudio() }
-                    _selectedDevice.value = selected?.fromAudio()
+                        _devices.value = devices.map { it.fromAudio() }
+                        _selectedDevice.value = selected?.fromAudio()
 
-                    capturedOnAudioDevicesUpdate?.invoke()
-                    capturedOnAudioDevicesUpdate = null
-                    setupCompleted = true
-                }
+                        capturedOnAudioDevicesUpdate?.invoke()
+                        capturedOnAudioDevicesUpdate = null
+                        setupCompleted = true
+                    },
+                )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()
@@ -479,7 +500,10 @@ class MicrophoneManager(
         }
     }
 
-    internal fun enforceSetup(actual: () -> Unit) = setup(onAudioDevicesUpdate = actual)
+    internal fun enforceSetup(preferSpeaker: Boolean = false, actual: () -> Unit) = setup(
+        preferSpeaker,
+        onAudioDevicesUpdate = actual,
+    )
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
