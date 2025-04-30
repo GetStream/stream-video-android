@@ -1041,7 +1041,7 @@ public class CallState(
             cancelTimeout()
             RingingState.Active
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
-            rejectedBy.contains(createdBy?.id)
+            (rejectedBy.contains(createdBy?.id) && hasRingingCall)
         ) {
             call.leave()
             cancelTimeout()
