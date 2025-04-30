@@ -40,6 +40,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
@@ -502,6 +503,7 @@ internal open class CallService : Service() {
                     }
 
                     is RingingState.RejectedByAll -> {
+                        call.reject(RejectReason.Decline)
                         callSoundPlayer?.stopCallSound()
                         stopService()
                     }
