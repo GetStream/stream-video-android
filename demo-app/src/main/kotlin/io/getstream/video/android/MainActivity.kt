@@ -116,6 +116,10 @@ class MainActivity : ComponentActivity() {
                         // Monitor the ringingState on a non-null call
                         call.state.ringingState.collectLatest {
                             if (it is RingingState.Incoming) {
+                                Log.d(
+                                    "Noob",
+                                    "AppVisibilityTracker.isInForeground = ${AppVisibilityTracker.isInForeground}, isProcessInForeground = ${isInForeground()}",
+                                )
                                 if (isInForeground()) {
                                     startIncomingCallActivity(call)
                                 }
@@ -130,7 +134,7 @@ class MainActivity : ComponentActivity() {
     fun isInForeground(): Boolean {
         val appProcessInfo = ActivityManager.RunningAppProcessInfo()
         ActivityManager.getMyMemoryState(appProcessInfo)
-        return (
+        return AppVisibilityTracker.isInForeground && (
             appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
                 appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
             )
