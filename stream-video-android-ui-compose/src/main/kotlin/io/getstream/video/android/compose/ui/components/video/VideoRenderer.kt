@@ -115,7 +115,7 @@ public fun VideoRenderer(
                 if (mediaTrack != null) {
                     Box(
                         modifier = videoRendererConfig.modifiers.containerModifier.invoke(this)
-                            .testTag("Stream_ParticipantVideoWithCamera"),
+                            .testTag("Stream_VideoViewWithMediaTrack"),
                         contentAlignment = Alignment.Center,
                     ) {
                         AndroidView(

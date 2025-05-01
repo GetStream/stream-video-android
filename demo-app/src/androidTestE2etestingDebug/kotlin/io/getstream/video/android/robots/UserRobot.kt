@@ -225,7 +225,17 @@ class UserRobot {
         return this
     }
 
-    fun waitForParticipantsToJoin(count: Int, timeOutMillis: Long = 30.seconds): UserRobot {
+    fun acceptCallRecording(): UserRobot {
+        CallPage.RecordingButtons.accept.waitToAppear(timeOutMillis = 10.seconds).click()
+        return this
+    }
+
+    fun declineCallRecording(): UserRobot {
+        CallPage.RecordingButtons.leave.waitToAppear(timeOutMillis = 10.seconds).click()
+        return this
+    }
+
+    fun waitForParticipantsToJoin(count: Int = 1, timeOutMillis: Long = 30.seconds): UserRobot {
         val user = 1
         val participants = user + count
         CallPage.participantsCountBadge
