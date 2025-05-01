@@ -114,13 +114,13 @@ internal class Publisher(
             try {
                 it.transceiver.stop()
             } catch (e: Exception) {
-                logger.w { "Transceiver already stopped." }
+                logger.w { "Transceiver already stopped: ${e.message}" }
             }
 
             try {
                 it.transceiver.dispose()
             } catch (e: Exception) {
-                logger.w { "Transceiver already disposed." }
+                logger.w { "Transceiver already disposed: ${e.message}" }
             }
         }
     }
