@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
 
@@ -37,17 +38,17 @@ import io.getstream.video.android.core.call.state.LeaveCall
 public fun LeaveCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    style: StreamFixedSizeButtonStyle? = null,
     onCallAction: (LeaveCall) -> Unit,
-): Unit = ToggleAction(
+): Unit = GenericAction(
     modifier = modifier,
     enabled = enabled,
-    isActionActive = false,
-    onStyle = VideoTheme.styles.buttonStyles.alertIconButtonStyle(),
-    offStyle = VideoTheme.styles.buttonStyles.alertIconButtonStyle(),
-    iconOnOff = Pair(Icons.Default.CallEnd, Icons.Default.CallEnd),
-) {
-    onCallAction(LeaveCall)
-}
+    style = style,
+    onAction = { onCallAction(LeaveCall) },
+    icon = Icons.Default.CallEnd,
+    color = VideoTheme.colors.alertWarning,
+    iconTint = VideoTheme.colors.basePrimary,
+)
 
 @Preview
 @Composable
