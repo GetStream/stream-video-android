@@ -83,7 +83,7 @@ class SpeakerManager(
     val volume: StateFlow<Int?> = _volume
 
     /** The status of the audio */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
 
     /** Represents whether the speakerphone is enabled */
@@ -436,6 +436,14 @@ class MicrophoneManager(
         logger.i { "selecting device $device" }
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
+
+        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value) {
+            mediaManager.speaker._status.value = DeviceStatus.Disabled
+        }
+
+        if (device is StreamAudioDevice.Speakerphone) {
+            mediaManager.speaker._status.value = DeviceStatus.Enabled
+        }
 
         if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
             selectedDeviceBeforeHeadset = device
