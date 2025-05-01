@@ -437,7 +437,7 @@ class MicrophoneManager(
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
 
-        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value) {
+        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
             mediaManager.speaker._status.value = DeviceStatus.Disabled
         }
 
