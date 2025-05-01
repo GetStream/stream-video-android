@@ -18,6 +18,7 @@
 
 package io.getstream.video.android.compose.ui.components.video
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -101,14 +102,20 @@ public fun VideoRenderer(
 
                 var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-                DisposableEffect(call, video) {
-                    // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-                    call.setVisibility(sessionId, trackType, true)
+                Log.d("VideoRenderer", "Updating visibility : ${videoRendererConfig.updateVisibility}")
+                if (videoRendererConfig.updateVisibility) {
+                    Log.d("VideoRenderer", "Updating visibility")
+                    DisposableEffect(call, video) {
+                        // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+                        call.setVisibility(sessionId, trackType, true)
+                        Log.d("VideoRenderer", "Updating visibility ${true}")
 
-                    onDispose {
-                        cleanTrack(view, mediaTrack)
-                        // inform the call that we no longer want to render this video track
-                        call.setVisibility(sessionId, trackType, false)
+                        onDispose {
+                            cleanTrack(view, mediaTrack)
+                            // inform the call that we no longer want to render this video track
+                            call.setVisibility(sessionId, trackType, false)
+                            Log.d("VideoRenderer", "Updating visibility ${false}")
+                        }
                     }
                 }
 
