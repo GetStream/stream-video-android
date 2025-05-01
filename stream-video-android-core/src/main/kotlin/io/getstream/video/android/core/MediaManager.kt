@@ -144,7 +144,14 @@ class SpeakerManager(
             if (enable) {
                 val speaker =
                     devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-                selectedBeforeSpeaker = selectedDevice.value
+                selectedBeforeSpeaker = selectedDevice.value.takeUnless {
+                    it is StreamAudioDevice.Speakerphone
+                } ?: devices.firstOrNull {
+                    it !is StreamAudioDevice.Speakerphone
+                }
+
+                logger.d { "#deviceDebug; selectedBeforeSpeaker: $selectedBeforeSpeaker" }
+
                 _speakerPhoneEnabled.value = true
                 microphoneManager.select(speaker)
             } else {
@@ -154,9 +161,13 @@ class SpeakerManager(
                     devices.filterIsInstance(defaultFallback::class.java)
                 }?.firstOrNull()
                 val fallback =
-                    defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                        it !is StreamAudioDevice.Speakerphone
-                    }
+                    defaultFallbackFromType
+                        ?: selectedBeforeSpeaker.takeIf {
+                            it !is StreamAudioDevice.Speakerphone && devices.contains(it)
+                        }
+                        ?: devices.firstOrNull {
+                            it !is StreamAudioDevice.Speakerphone
+                        }
                 microphoneManager.select(fallback)
             }
         }
