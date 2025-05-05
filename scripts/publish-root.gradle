@@ -1,4 +1,5 @@
 import io.getstream.video.android.Configuration
+import java.text.SimpleDateFormat
 
 // Create variables with empty default values
 ext["ossrhUsername"] = ''
@@ -26,6 +27,16 @@ if (secretPropsFile.exists()) {
   ext["snapshot"] = System.getenv('SNAPSHOT')
 }
 
+def timestamp = new SimpleDateFormat('yyyyMMddHHmm').with {
+    timeZone = TimeZone.getTimeZone('UTC')               // keep CI & local builds identical
+    format(new Date())
+}
+if (snapshot) {
+    ext['rootVersionName'] = "${Configuration.snapshotBasedVersionName}-" +
+            "${timestamp}-SNAPSHOT"
+} else {
+    ext['rootVersionName'] = Configuration.versionName
+}
 if (snapshot) {
   ext["rootVersionName"] = Configuration.snapshotVersionName
 } else {
