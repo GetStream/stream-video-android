@@ -160,14 +160,17 @@ class SpeakerManager(
                 val defaultFallbackFromType = defaultFallback?.let {
                     devices.filterIsInstance(defaultFallback::class.java)
                 }?.firstOrNull()
-                val fallback =
-                    defaultFallbackFromType
-                        ?: selectedBeforeSpeaker.takeIf {
-                            it !is StreamAudioDevice.Speakerphone && devices.contains(it)
-                        }
-                        ?: devices.firstOrNull {
-                            it !is StreamAudioDevice.Speakerphone
-                        }
+
+                val firstNonSpeaker = devices.firstOrNull { it !is StreamAudioDevice.Speakerphone }
+
+                val fallback: StreamAudioDevice? = when {
+                    defaultFallbackFromType != null -> defaultFallbackFromType
+                    selectedBeforeSpeaker != null &&
+                        selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
+                        devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
+                    else -> firstNonSpeaker
+                }
+
                 microphoneManager.select(fallback)
             }
         }
