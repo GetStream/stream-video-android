@@ -5451,7 +5451,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getAudioFilter ()Lio/getstream/video/android/core/call/audio/InputAudioFilter;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
-	public final fun getEvents ()Lkotlinx/coroutines/flow/MutableSharedFlow;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getLocalMicrophoneAudioLevel ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
@@ -5528,7 +5527,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun takeScreenshot (Lio/getstream/video/android/core/model/VideoTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun toggleAudioProcessing ()Z
 	public final fun unpinForEveryone (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun unsubscribe (Lio/getstream/video/android/core/EventSubscription;)Z
 	public final fun update (Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateClosedCaptionsSettings (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
