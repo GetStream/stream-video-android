@@ -553,11 +553,6 @@ public class RtcSession internal constructor(
     private fun listenToMediaChanges() {
         logger.d { "[trackPublishing] listenToMediaChanges" }
         coroutineScope.launch {
-            // We don't want to publish video track if there is no camera resolution
-            if (call.camera.resolution.value == null) {
-                return@launch
-            }
-
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
                 val canUserSendVideo = call.state.ownCapabilities.value.contains(
@@ -565,6 +560,12 @@ public class RtcSession internal constructor(
                 )
 
                 if (it == DeviceStatus.Enabled) {
+                    val resolution = call.mediaManager.camera.resolution.value
+                    if (resolution == null) {
+                        logger.d { "Camera resolution is null. This will result in an empty video track." }
+                    } else {
+                        logger.d { "Camera resolution: $resolution" }
+                    }
                     if (canUserSendVideo) {
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
 
@@ -580,6 +581,8 @@ public class RtcSession internal constructor(
                                 video = track as org.webrtc.VideoTrack,
                             ),
                         )
+                    } else {
+                        logger.d { "[listenToMediaChanges#enableCamera] No capability to send video." }
                     }
                 } else {
                     setMuteState(isEnabled = false, TrackType.TRACK_TYPE_VIDEO)

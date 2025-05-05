@@ -43,6 +43,7 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -558,7 +559,7 @@ public sealed class CameraDirection {
  * camera.resolution // the selected camera resolution
  *
  */
-public class CameraManager(
+class CameraManager(
     public val mediaManager: MediaManagerImpl,
     public val eglBaseContext: EglBase.Context,
     defaultCameraDirection: CameraDirection = CameraDirection.Front,
@@ -689,6 +690,9 @@ public class CameraManager(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
+            if (_resolution.value == null) {
+                retryResolutionSelection()
+            }
 
             if (!triggeredByFlip) {
                 setup(force = true)
@@ -762,6 +766,9 @@ public class CameraManager(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
+            if (_resolution.value == null) {
+                retryResolutionSelection()
+            }
             _availableResolutions.value =
                 selectedDevice.supportedFormats?.toList() ?: emptyList()
 
@@ -857,6 +864,27 @@ public class CameraManager(
             supportedFormats = supportedFormats,
             maxResolution = maxResolution,
         )
+    }
+
+    private fun retryResolutionSelection(retries: Int = 5) {
+        mediaManager.scope.launch {
+            repeat(retries) { attempt ->
+                delay((1000L * (attempt + 1)).coerceAtLeast(3000L))
+                val selectedDevice = selectedDevice.value
+                if (selectedDevice != null) {
+                    val desired = selectDesiredResolution(
+                        selectedDevice.supportedFormats,
+                        mediaManager.call.state.settings.value?.video,
+                    )
+                    if (desired != null) {
+                        _resolution.value = desired
+                        startCapture()
+                        return@launch
+                    }
+                }
+            }
+            logger.w { "Resolution selection failed after $retries retries" }
+        }
     }
 }
 
