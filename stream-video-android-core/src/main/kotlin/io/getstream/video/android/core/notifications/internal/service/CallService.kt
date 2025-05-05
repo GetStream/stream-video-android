@@ -651,7 +651,7 @@ internal open class CallService : Service() {
     private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoClient) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            call.subscribe { event ->
+            call.events.collect { event ->
                 logger.i { "Received event in service: $event" }
                 when (event) {
                     is CallAcceptedEvent -> {
