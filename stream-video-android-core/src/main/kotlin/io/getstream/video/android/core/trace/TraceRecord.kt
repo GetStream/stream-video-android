@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.trace
 
 import java.util.concurrent.locks.ReentrantLock
@@ -15,7 +31,7 @@ data class TraceRecord(
     val tag: String,
     val id: String?,
     val data: Any?,
-    val timestamp: Long
+    val timestamp: Long,
 )
 
 /**
@@ -56,8 +72,8 @@ class Tracer(private val id: String?) {
                     tag = tag,
                     id = id,
                     data = data,
-                    timestamp = System.currentTimeMillis()
-                )
+                    timestamp = System.currentTimeMillis(),
+                ),
             )
         }
     }
@@ -78,7 +94,7 @@ class Tracer(private val id: String?) {
             snapshot = snapshot,
             rollback = {
                 lock.withLock { buffer.addAll(0, snapshot) }
-            }
+            },
         )
     }
 
@@ -96,5 +112,5 @@ class Tracer(private val id: String?) {
  */
 data class TraceSlice(
     val snapshot: List<TraceRecord>,
-    val rollback: () -> Unit
+    val rollback: () -> Unit,
 )

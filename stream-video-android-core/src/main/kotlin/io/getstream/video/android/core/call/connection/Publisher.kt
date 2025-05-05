@@ -76,7 +76,7 @@ internal class Publisher(
     private val sessionId: String,
     private val rejoin: () -> Unit,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
-    private val tracer: Tracer = Tracer("publisher")
+    private val tracer: Tracer = Tracer("publisher"),
 ) : StreamPeerConnection(
     coroutineScope,
     type,
