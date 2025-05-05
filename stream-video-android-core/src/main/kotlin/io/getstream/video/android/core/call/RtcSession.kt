@@ -558,7 +558,12 @@ public class RtcSession internal constructor(
                 )
 
                 if (it == DeviceStatus.Enabled) {
-                    logger.d { "Camera resolution: ${call.mediaManager.camera.resolution.value}" }
+                    val resolution = call.mediaManager.camera.resolution.value
+                    if (resolution == null) {
+                        logger.d { "Camera resolution is null. This will result in an empty video track." }
+                    } else {
+                        logger.d { "Camera resolution: $resolution" }
+                    }
                     if (canUserSendVideo) {
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
 
