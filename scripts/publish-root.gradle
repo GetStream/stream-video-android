@@ -32,7 +32,7 @@ def timestamp = new SimpleDateFormat('yyyyMMddHHmm').with {
     format(new Date())
 }
 if (snapshot) {
-    ext['rootVersionName'] = "${Configuration.snapshoBasetVersionName}-" +
+    ext['rootVersionName'] = "${Configuration.snapshoBasedVersionName}-" +
             "${timestamp}-SNAPSHOT"
 } else {
     ext['rootVersionName'] = Configuration.versionName
