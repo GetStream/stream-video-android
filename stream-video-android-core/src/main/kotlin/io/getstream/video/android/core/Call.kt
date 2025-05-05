@@ -137,7 +137,7 @@ public class Call(
     internal val clientImpl = client as StreamVideoClient
 
     // Atomic controls
-    private val atomicLeave = AtomicUnitCall()
+    private var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
@@ -398,6 +398,7 @@ public class Call(
 
         var result: Result<RtcSession>
 
+        atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
