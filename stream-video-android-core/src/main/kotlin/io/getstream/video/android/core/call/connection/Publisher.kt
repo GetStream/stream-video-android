@@ -111,8 +111,17 @@ internal class Publisher(
 
     private fun dispose() {
         transceiverCache.items().forEach {
-            it.transceiver.stop()
-            it.transceiver.dispose()
+            try {
+                it.transceiver.stop()
+            } catch (e: Exception) {
+                logger.w { "Transceiver already stopped: ${e.message}" }
+            }
+
+            try {
+                it.transceiver.dispose()
+            } catch (e: Exception) {
+                logger.w { "Transceiver already disposed: ${e.message}" }
+            }
         }
     }
 
@@ -287,8 +296,10 @@ internal class Publisher(
             val (option, transceiver) = item
             val hasPublishOption = transceiverCache.has(option)
             if (!hasPublishOption) continue
-            transceiver.stop()
-            transceiver.dispose()
+            safeCall {
+                transceiver.stop()
+                transceiver.dispose()
+            }
             transceiverCache.remove(option)
         }
     }
