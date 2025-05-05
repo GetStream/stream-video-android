@@ -72,10 +72,12 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
+import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CompletableJob
@@ -762,7 +764,9 @@ public class RtcSession internal constructor(
         track?.enableAudio(audioEnabled)
     }
 
-    fun cleanup() {
+    private val atomicCleanup = AtomicUnitCall()
+
+    fun cleanup() = atomicCleanup {
         logger.i { "[cleanup] #sfu; #track; no args" }
 
         coroutineScope.launch {
@@ -772,8 +776,10 @@ public class RtcSession internal constructor(
         sfuConnectionMigrationModule = null
 
         // cleanup the publisher and subcriber peer connections
-        subscriber?.connection?.close()
-        publisher?.close(true)
+        safeCall {
+            subscriber?.connection?.close()
+            publisher?.close(true)
+        }
 
         subscriber = null
         publisher = null
@@ -782,8 +788,10 @@ public class RtcSession internal constructor(
         tracks.filter { it.key != sessionId }.values.map { it.values }.flatten()
             .forEach { wrapper ->
                 try {
-                    wrapper.asAudioTrack()?.audio?.dispose()
-                    wrapper.asVideoTrack()?.video?.dispose()
+                    safeCall {
+                        wrapper.asAudioTrack()?.audio?.dispose()
+                        wrapper.asVideoTrack()?.video?.dispose()
+                    }
                 } catch (e: Exception) {
                     logger.w { "Error disposing track: ${e.message}" }
                 }
