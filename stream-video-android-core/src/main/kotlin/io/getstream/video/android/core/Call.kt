@@ -1067,7 +1067,7 @@ public class Call(
     private fun monitorHeadset() {
         microphone.devices.onEach { availableDevices ->
             logger.d {
-                "[monitorHeadset] new available devices, prev selected: ${microphone.selectedDeviceBeforeHeadset}"
+                "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
             }
 
             val bluetoothHeadset = availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
@@ -1082,7 +1082,7 @@ public class Call(
             } else {
                 logger.d { "[monitorHeadset] no headset found" }
 
-                microphone.selectedDeviceBeforeHeadset?.let { deviceBeforeHeadset ->
+                microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
                     logger.d { "[monitorHeadset] before device selected" }
                     microphone.select(deviceBeforeHeadset)
                 }

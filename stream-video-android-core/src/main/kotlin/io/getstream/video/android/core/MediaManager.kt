@@ -83,7 +83,7 @@ class SpeakerManager(
     val volume: StateFlow<Int?> = _volume
 
     /** The status of the audio */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
 
     /** Represents whether the speakerphone is enabled */
@@ -144,7 +144,14 @@ class SpeakerManager(
             if (enable) {
                 val speaker =
                     devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-                selectedBeforeSpeaker = selectedDevice.value
+                selectedBeforeSpeaker = selectedDevice.value.takeUnless {
+                    it is StreamAudioDevice.Speakerphone
+                } ?: devices.firstOrNull {
+                    it !is StreamAudioDevice.Speakerphone
+                }
+
+                logger.d { "#deviceDebug; selectedBeforeSpeaker: $selectedBeforeSpeaker" }
+
                 _speakerPhoneEnabled.value = true
                 microphoneManager.select(speaker)
             } else {
@@ -153,10 +160,17 @@ class SpeakerManager(
                 val defaultFallbackFromType = defaultFallback?.let {
                     devices.filterIsInstance(defaultFallback::class.java)
                 }?.firstOrNull()
-                val fallback =
-                    defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                        it !is StreamAudioDevice.Speakerphone
-                    }
+
+                val firstNonSpeaker = devices.firstOrNull { it !is StreamAudioDevice.Speakerphone }
+
+                val fallback: StreamAudioDevice? = when {
+                    defaultFallbackFromType != null -> defaultFallbackFromType
+                    selectedBeforeSpeaker != null &&
+                        selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
+                        devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
+                    else -> firstNonSpeaker
+                }
+
                 microphoneManager.select(fallback)
             }
         }
@@ -355,7 +369,7 @@ class MicrophoneManager(
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
-    internal var selectedDeviceBeforeHeadset: StreamAudioDevice? = null
+    internal var nonHeadsetFallbackDevice: StreamAudioDevice? = null
 
     /** Currently selected device */
     val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
@@ -426,8 +440,16 @@ class MicrophoneManager(
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
 
+        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+            mediaManager.speaker._status.value = DeviceStatus.Disabled
+        }
+
+        if (device is StreamAudioDevice.Speakerphone) {
+            mediaManager.speaker._status.value = DeviceStatus.Enabled
+        }
+
         if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
-            selectedDeviceBeforeHeadset = device
+            nonHeadsetFallbackDevice = device
         }
     }
 
