@@ -42,6 +42,8 @@ private val defaultVideoComponentModifier: BoxScope.() -> Modifier =
             .align(Alignment.Center)
     }
 
+private val defaultUpdateVisibility = true
+
 /**
  * The [VideoRenderer] consists of two components one [Box] that acts as a container and another [AndroidView] that holds the actual [TextureView] for rendering the video.
  * Only modify these modifiers if you want to change the default behavior of the [VideoRenderer] and understand exactly the effect they have on the layout.
@@ -90,6 +92,7 @@ public data class VideoRendererConfig(
     val mirrorStream: Boolean = false,
     val modifiers: VideoRendererModifiersConfig = VideoRendererModifiersConfig(),
     val scalingType: VideoScalingType = defaultScalingType,
+    val updateVisibility: Boolean = defaultUpdateVisibility,
     val fallbackContent: @Composable (Call) -> Unit = {},
 )
 
@@ -99,6 +102,7 @@ public data class VideoRendererConfigCreationScope(
     public var mirrorStream: Boolean = false,
     public var modifiers: VideoRendererModifiersConfig = VideoRendererModifiersConfig(),
     public var videoScalingType: VideoScalingType = defaultScalingType,
+    public var updateVisibility: Boolean = defaultUpdateVisibility,
     public var fallbackContent: @Composable (Call) -> Unit = {
         DefaultMediaTrackFallbackContent(
             modifier = Modifier,
@@ -120,6 +124,7 @@ public inline fun videoRenderConfig(
         mirrorStream = scope.mirrorStream,
         modifiers = scope.modifiers,
         scalingType = scope.videoScalingType,
+        updateVisibility = scope.updateVisibility,
         fallbackContent = scope.fallbackContent,
     )
 }
