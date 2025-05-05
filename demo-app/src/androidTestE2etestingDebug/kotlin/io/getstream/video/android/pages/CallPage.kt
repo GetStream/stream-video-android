@@ -36,6 +36,9 @@ class CallPage {
         val chatButton = By.res("Stream_ChatButton")
         val connectionQualityIndicator = By.res("Stream_ParticipantNetworkQualityIndicator")
         val callInfoView = By.res("Stream_CallInfoView") // duration, recording, reconnecting
+        val recordingIcon = By.res("Stream_RecordingIcon")
+        val videoView = By.res("Stream_VideoView")
+        val videoViewWithMediaTrack = By.res("Stream_VideoViewWithMediaTrack")
 
 //        val participantEvent = By.res("") // not implemented in the demo app yet
 //        val minimizedCallView = By.res("") // not implemented in the demo app yet
@@ -51,7 +54,7 @@ class CallPage {
 
     class RecordingButtons {
         companion object {
-            val start = By.text("Continue")
+            val accept = By.text("Continue")
             val leave = By.text("Leave")
             val end = By.text("End")
             val cancel = By.text("Cancel")
@@ -79,8 +82,8 @@ class CallPage {
             val networkQualityIndicator = By.res("Stream_ParticipantNetworkQualityIndicator")
             val microphoneEnabledIcon = By.res("Stream_ParticipantMicrophone_Enabled_true")
             val microphoneDisabledIcon = By.res("Stream_ParticipantMicrophone_Enabled_false")
-            val videoWindow = By.res("Stream_ParticipantVideoView")
-            val videoWindowWithCamera = By.res("Stream_ParticipantVideoWithCamera")
+            val videoView = CallPage.videoView
+            val videoViewWithMediaTrack = CallPage.videoViewWithMediaTrack
             val spotlightView = By.res("Stream_SpotlightView")
             val gridView = By.res("Stream_GridView")
             val screenSharingLabel = By.res("Stream_ParticipantScreenSharingLabel")

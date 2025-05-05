@@ -6340,7 +6340,7 @@ public abstract interface class io/getstream/video/android/core/audio/AudioHandl
 
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
-	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Landroid/content/Context;Ljava/util/List;Lkotlin/jvm/functions/Function2;)V
 	public final fun selectDevice (Lcom/twilio/audioswitch/AudioDevice;)V
 	public fun start ()V
 	public fun stop ()V
@@ -10816,14 +10816,6 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$WebSocketEventLost : io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$WebSocketEventLost;
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/sounds/CallSoundPlayer {
-	public fun <init> (Landroid/content/Context;)V
-	public final fun cleanUpAudioResources ()V
-	public final fun playCallSound (Landroid/net/Uri;Z)V
-	public static synthetic fun playCallSound$default (Lio/getstream/video/android/core/sounds/CallSoundPlayer;Landroid/net/Uri;ZILjava/lang/Object;)V
-	public final fun stopCallSound ()V
 }
 
 public abstract interface class io/getstream/video/android/core/sounds/MutedRingingConfig {
