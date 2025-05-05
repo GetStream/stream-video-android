@@ -820,7 +820,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             onSuccess = { call ->
                 cachedCall = call
                 lifecycleScope.launch {
-                    cachedCall.events.collectLatest { event ->
+                    cachedCall.events.collect { event ->
                         onCallEvent(cachedCall, event)
                     }
                 }
