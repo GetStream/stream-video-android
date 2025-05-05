@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * An atomic call that is executed only once, no matter how many consecutive calls are made.
  */
-class AtomicUnitCall {
+internal class AtomicUnitCall {
     private var called = AtomicBoolean(false)
 
     /**

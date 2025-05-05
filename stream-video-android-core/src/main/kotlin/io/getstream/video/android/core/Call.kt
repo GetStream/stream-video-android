@@ -136,6 +136,9 @@ public class Call(
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
 
+    // Atomic controls
+    private val atomicLeave = AtomicUnitCall()
+
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
@@ -748,7 +751,7 @@ public class Call(
         leave(disconnectionReason = null)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = safeCall {
+    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
@@ -759,7 +762,7 @@ public class Call(
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return
+            return@atomicLeave
         }
         isDestroyed = true
 
