@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AtomicUnitCallTest {
