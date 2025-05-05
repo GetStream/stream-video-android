@@ -293,6 +293,7 @@ public class StreamPeerConnectionFactory(
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidateRequest,
             maxBitRate = maxPublishingBitrate,
+            tracer = tracer,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,

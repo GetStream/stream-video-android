@@ -31,6 +31,7 @@ import io.getstream.video.android.core.call.connection.utils.toVideoDimension
 import io.getstream.video.android.core.call.connection.utils.toVideoLayers
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.defaultConstraints
@@ -75,6 +76,7 @@ internal class Publisher(
     private val sessionId: String,
     private val rejoin: () -> Unit,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
+    private val tracer: Tracer = Tracer("publisher")
 ) : StreamPeerConnection(
     coroutineScope,
     type,
@@ -83,6 +85,7 @@ internal class Publisher(
     onNegotiationNeeded,
     onIceCandidate,
     maxBitRate,
+    tracer,
 ) {
     private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
@@ -94,6 +97,8 @@ internal class Publisher(
             negotiate(false)
         }
     }
+
+    fun getTrace() = tracer.take()
 
     fun currentOptions() =
         safeCallWithDefault(emptyList()) { transceiverCache.items().map { it.publishOption } }

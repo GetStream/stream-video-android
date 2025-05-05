@@ -28,6 +28,7 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toRtcCandidate
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +71,7 @@ open class StreamPeerConnection(
     private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
     private val maxBitRate: Int,
+    private val tracer: Tracer,
 ) : PeerConnection.Observer {
 
     private val localDescriptionMutex = Mutex()
