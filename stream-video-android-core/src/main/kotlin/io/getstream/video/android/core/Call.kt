@@ -78,7 +78,6 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -87,6 +86,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -748,7 +748,7 @@ public class Call(
         leave(disconnectionReason = null)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = safeCall {
+    private fun leave(disconnectionReason: Throwable?) {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
@@ -1000,12 +1000,26 @@ public class Call(
         return sub
     }
 
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
     public fun subscribe(
         listener: VideoEventListener<VideoEvent>,
     ): EventSubscription = synchronized(subscriptions) {
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
         return sub
+    }
+
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
+    public fun unsubscribe(eventSubscription: EventSubscription) = synchronized(subscriptions) {
+        subscriptions.remove(eventSubscription)
     }
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
@@ -1046,6 +1060,8 @@ public class Call(
         return clientImpl.updateMembers(type, id, request)
     }
 
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -1061,6 +1077,10 @@ public class Call(
                     }
                 }
             }
+        }
+
+        if (!events.tryEmit(event)) {
+            logger.e { "Failed to emit event to observers: [event: $event]" }
         }
     }
 

@@ -57,6 +57,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -526,7 +527,7 @@ internal open class CallService : Service() {
     private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoClient) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            call.subscribe { event ->
+            call.events.collectLatest { event ->
                 logger.i { "Received event in service: $event" }
                 when (event) {
                     is CallAcceptedEvent -> {

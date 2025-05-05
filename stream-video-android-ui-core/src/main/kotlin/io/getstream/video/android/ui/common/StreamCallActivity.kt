@@ -40,7 +40,6 @@ import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.EventSubscription
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
@@ -125,7 +124,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
     }
 
     // Internal state
-    private var callEventSubscription: EventSubscription? = null
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
@@ -821,9 +819,10 @@ public abstract class StreamCallActivity : ComponentActivity() {
             cid,
             onSuccess = { call ->
                 cachedCall = call
-                callEventSubscription?.dispose()
-                callEventSubscription = cachedCall.subscribe { event ->
-                    onCallEvent(cachedCall, event)
+                lifecycleScope.launch {
+                    cachedCall.events.collectLatest { event ->
+                        onCallEvent(cachedCall, event)
+                    }
                 }
                 callSocketConnectionMonitor = lifecycleScope.launch(Dispatchers.IO) {
                     cachedCall.state.connection.collectLatest {
