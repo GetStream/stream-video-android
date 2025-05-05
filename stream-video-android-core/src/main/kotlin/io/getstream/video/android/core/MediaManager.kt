@@ -366,7 +366,7 @@ class MicrophoneManager(
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
-    internal var selectedDeviceBeforeHeadset: StreamAudioDevice? = null
+    internal var nonHeadsetFallbackDevice: StreamAudioDevice? = null
 
     /** Currently selected device */
     val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
@@ -446,7 +446,7 @@ class MicrophoneManager(
         }
 
         if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
-            selectedDeviceBeforeHeadset = device
+            nonHeadsetFallbackDevice = device
         }
     }
 
