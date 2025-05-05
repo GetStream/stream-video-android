@@ -77,8 +77,8 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -135,6 +135,9 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
+
+    // Atomic controls
+    private var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
@@ -395,6 +398,7 @@ public class Call(
 
         var result: Result<RtcSession>
 
+        atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
@@ -748,7 +752,7 @@ public class Call(
         leave(disconnectionReason = null)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = safeCall {
+    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
@@ -759,7 +763,7 @@ public class Call(
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return
+            return@atomicLeave
         }
         isDestroyed = true
 
