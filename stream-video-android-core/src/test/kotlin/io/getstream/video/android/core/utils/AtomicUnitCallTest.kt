@@ -27,7 +27,7 @@ class AtomicUnitCallTest {
         atomicUnitCall {
             executed = true
         }
-        assert(executed)
+        assertTrue(executed)
     }
 
     @Test
