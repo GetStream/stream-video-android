@@ -870,6 +870,9 @@ class CameraManager(
         mediaManager.scope.launch {
             repeat(retries) { attempt ->
                 delay((1000L * (attempt + 1)).coerceAtLeast(3000L))
+                if (_resolution.value != null) {
+                    return@launch
+                }
                 val selectedDevice = selectedDevice.value
                 if (selectedDevice != null) {
                     val desired = selectDesiredResolution(
