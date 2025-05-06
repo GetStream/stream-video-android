@@ -356,9 +356,13 @@ class MicrophoneManager(
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     private lateinit var audioHandler: AudioHandler
-    private var setupCompleted: Boolean = false
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
+
+    @Volatile
+    private var isSetupInProgress = false
+    private var setupCompleted: Boolean = false
+    private val pendingSetupCallbacks = mutableListOf<() -> Unit>()
 
     // Exposed state
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
@@ -471,22 +475,26 @@ class MicrophoneManager(
 
     // Internal logic
     internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
-        var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
+        synchronized(this) {
+            if (setupCompleted) {
+                onAudioDevicesUpdate?.invoke()
+                return
+            }
 
-        if (setupCompleted) {
-            capturedOnAudioDevicesUpdate?.invoke()
-            capturedOnAudioDevicesUpdate = null
+            if (isSetupInProgress) {
+                onAudioDevicesUpdate?.let { pendingSetupCallbacks.add(it) }
+                return
+            }
 
-            return
-        }
+            isSetupInProgress = true
+            onAudioDevicesUpdate?.let { pendingSetupCallbacks.add(it) }
 
-        audioManager = mediaManager.context.getSystemService()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
-        }
+            audioManager = mediaManager.context.getSystemService()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
+            }
 
-        if (canHandleDeviceSwitch()) {
-            if (!::audioHandler.isInitialized) { // This check is atomic
+            if (canHandleDeviceSwitch()) {
                 audioHandler = AudioSwitchHandler(
                     context = mediaManager.context,
                     preferredDeviceList = listOf(
@@ -504,22 +512,22 @@ class MicrophoneManager(
                         )
                     },
                     audioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
-
                         _devices.value = devices.map { it.fromAudio() }
                         _selectedDevice.value = selected?.fromAudio()
 
-                        capturedOnAudioDevicesUpdate?.invoke()
-                        capturedOnAudioDevicesUpdate = null
                         setupCompleted = true
-                    },
-                )
+                        isSetupInProgress = false
 
-                logger.d { "[setup] Calling start on instance $audioHandler" }
+                        pendingSetupCallbacks.forEach { it.invoke() }
+                        pendingSetupCallbacks.clear()
+                    }
+                )
                 audioHandler.start()
+            } else {
+                isSetupInProgress = false
+                pendingSetupCallbacks.clear()
+                logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
             }
-        } else {
-            logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
     }
 
