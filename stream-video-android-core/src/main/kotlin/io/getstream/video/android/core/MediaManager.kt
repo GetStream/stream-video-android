@@ -43,6 +43,7 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -83,7 +84,7 @@ class SpeakerManager(
     val volume: StateFlow<Int?> = _volume
 
     /** The status of the audio */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
 
     /** Represents whether the speakerphone is enabled */
@@ -144,7 +145,14 @@ class SpeakerManager(
             if (enable) {
                 val speaker =
                     devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-                selectedBeforeSpeaker = selectedDevice.value
+                selectedBeforeSpeaker = selectedDevice.value.takeUnless {
+                    it is StreamAudioDevice.Speakerphone
+                } ?: devices.firstOrNull {
+                    it !is StreamAudioDevice.Speakerphone
+                }
+
+                logger.d { "#deviceDebug; selectedBeforeSpeaker: $selectedBeforeSpeaker" }
+
                 _speakerPhoneEnabled.value = true
                 microphoneManager.select(speaker)
             } else {
@@ -153,10 +161,17 @@ class SpeakerManager(
                 val defaultFallbackFromType = defaultFallback?.let {
                     devices.filterIsInstance(defaultFallback::class.java)
                 }?.firstOrNull()
-                val fallback =
-                    defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                        it !is StreamAudioDevice.Speakerphone
-                    }
+
+                val firstNonSpeaker = devices.firstOrNull { it !is StreamAudioDevice.Speakerphone }
+
+                val fallback: StreamAudioDevice? = when {
+                    defaultFallbackFromType != null -> defaultFallbackFromType
+                    selectedBeforeSpeaker != null &&
+                        selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
+                        devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
+                    else -> firstNonSpeaker
+                }
+
                 microphoneManager.select(fallback)
             }
         }
@@ -355,7 +370,7 @@ class MicrophoneManager(
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
-    internal var selectedDeviceBeforeHeadset: StreamAudioDevice? = null
+    internal var nonHeadsetFallbackDevice: StreamAudioDevice? = null
 
     /** Currently selected device */
     val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
@@ -426,8 +441,16 @@ class MicrophoneManager(
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
 
+        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+            mediaManager.speaker._status.value = DeviceStatus.Disabled
+        }
+
+        if (device is StreamAudioDevice.Speakerphone) {
+            mediaManager.speaker._status.value = DeviceStatus.Enabled
+        }
+
         if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
-            selectedDeviceBeforeHeadset = device
+            nonHeadsetFallbackDevice = device
         }
     }
 
@@ -536,7 +559,7 @@ public sealed class CameraDirection {
  * camera.resolution // the selected camera resolution
  *
  */
-public class CameraManager(
+class CameraManager(
     public val mediaManager: MediaManagerImpl,
     public val eglBaseContext: EglBase.Context,
     defaultCameraDirection: CameraDirection = CameraDirection.Front,
@@ -667,6 +690,9 @@ public class CameraManager(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
+            if (_resolution.value == null) {
+                retryResolutionSelection()
+            }
 
             if (!triggeredByFlip) {
                 setup(force = true)
@@ -740,6 +766,9 @@ public class CameraManager(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
+            if (_resolution.value == null) {
+                retryResolutionSelection()
+            }
             _availableResolutions.value =
                 selectedDevice.supportedFormats?.toList() ?: emptyList()
 
@@ -835,6 +864,27 @@ public class CameraManager(
             supportedFormats = supportedFormats,
             maxResolution = maxResolution,
         )
+    }
+
+    private fun retryResolutionSelection(retries: Int = 5) {
+        mediaManager.scope.launch {
+            repeat(retries) { attempt ->
+                delay((1000L * (attempt + 1)).coerceAtLeast(3000L))
+                val selectedDevice = selectedDevice.value
+                if (selectedDevice != null) {
+                    val desired = selectDesiredResolution(
+                        selectedDevice.supportedFormats,
+                        mediaManager.call.state.settings.value?.video,
+                    )
+                    if (desired != null) {
+                        _resolution.value = desired
+                        startCapture()
+                        return@launch
+                    }
+                }
+            }
+            logger.w { "Resolution selection failed after $retries retries" }
+        }
     }
 }
 

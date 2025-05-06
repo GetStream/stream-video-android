@@ -296,7 +296,7 @@ public class CallState(
             }
         }
 
-        // TODO: could optimize performance by subscribing only to relevant events
+        // The caller i.e. `livestream` is deprecated as well
         call.subscribe {
             logger.v { "[livestreamFlow] #track; event.type: ${it.getEventType()}" }
             if (it is TrackPublishedEvent) {

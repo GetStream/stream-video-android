@@ -77,8 +77,8 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -87,6 +87,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -135,6 +136,9 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
+
+    // Atomic controls
+    private var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
@@ -395,6 +399,7 @@ public class Call(
 
         var result: Result<RtcSession>
 
+        atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
@@ -748,7 +753,7 @@ public class Call(
         leave(disconnectionReason = null)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = safeCall {
+    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
@@ -759,7 +764,7 @@ public class Call(
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return
+            return@atomicLeave
         }
         isDestroyed = true
 
@@ -1000,12 +1005,26 @@ public class Call(
         return sub
     }
 
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
     public fun subscribe(
         listener: VideoEventListener<VideoEvent>,
     ): EventSubscription = synchronized(subscriptions) {
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
         return sub
+    }
+
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
+    public fun unsubscribe(eventSubscription: EventSubscription) = synchronized(subscriptions) {
+        subscriptions.remove(eventSubscription)
     }
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
@@ -1046,6 +1065,8 @@ public class Call(
         return clientImpl.updateMembers(type, id, request)
     }
 
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -1062,12 +1083,16 @@ public class Call(
                 }
             }
         }
+
+        if (!events.tryEmit(event)) {
+            logger.e { "Failed to emit event to observers: [event: $event]" }
+        }
     }
 
     private fun monitorHeadset() {
         microphone.devices.onEach { availableDevices ->
             logger.d {
-                "[monitorHeadset] new available devices, prev selected: ${microphone.selectedDeviceBeforeHeadset}"
+                "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
             }
 
             val bluetoothHeadset = availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
@@ -1082,7 +1107,7 @@ public class Call(
             } else {
                 logger.d { "[monitorHeadset] no headset found" }
 
-                microphone.selectedDeviceBeforeHeadset?.let { deviceBeforeHeadset ->
+                microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
                     logger.d { "[monitorHeadset] before device selected" }
                     microphone.select(deviceBeforeHeadset)
                 }
