@@ -20,11 +20,25 @@ import android.app.PendingIntent
 import io.getstream.video.android.model.StreamCallId
 
 /**
- * The sole purpose of this class is to assist in making changes in a non-breaking way until we make
- * next major release in later 2025
+ * Temporary helper to support non-breaking changes to notification handling
+ * until the next major SDK release (planned for late 2025).
+ *
+ * This class enables backward-compatible features (e.g., title overrides)
+ * without altering the public API or introducing breaking changes.
+ *
+ * Note: This should be deprecated and cleaned up as part of the major version update.
  */
 internal object NotificationsMigrationHelper {
 
+    /**
+     * Maps PendingIntent instances to their corresponding StreamCallId for incoming calls.
+     *
+     * Used to associate contextual call information (e.g., call type) with notifications,
+     * enabling features like custom titles based on call type.
+     *
+     * Note: This map is size-limited (max 10 entries) to avoid memory bloat.
+     * Oldest entries are evicted automatically using a FIFO policy.
+     */
     internal val incomingCallMap = object : LinkedHashMap<PendingIntent, StreamCallId>(
         10,
         0.75f,

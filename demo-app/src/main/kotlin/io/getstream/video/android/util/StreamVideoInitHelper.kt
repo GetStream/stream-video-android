@@ -18,7 +18,6 @@ package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
@@ -28,21 +27,21 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.core.R
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.socket.common.token.TokenProvider
-import io.getstream.video.android.core.sounds.RingingConfig
-import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
+import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
+import io.getstream.video.android.util.StreamVideoInitHelper.context
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -187,35 +186,6 @@ object StreamVideoInitHelper {
         ).enqueue()
     }
 
-    val myRingingConfig = object : RingingConfig {
-        override val incomingCallSoundUri: Uri
-            get() = R.raw.call_incoming_sound.toUriOrNull(context)
-        override val outgoingCallSoundUri: Uri
-            get() = R.raw.call_outgoing_sound.toUriOrNull(context)
-    }
-
-    val myAudioRingingConfig = object : RingingConfig {
-        override val incomingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_audio.toUriOrNull(
-                context,
-            )
-        override val outgoingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_audio.toUriOrNull(
-                context,
-            )
-    }
-
-    val myVideoRingingConfig = object : RingingConfig {
-        override val incomingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_video.toUriOrNull(
-                context,
-            )
-        override val outgoingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_video.toUriOrNull(
-                context,
-            )
-    }
-
     /** Sets up and returns the [StreamVideo] required to connect to the API. */
     private fun initializeStreamVideo(
         context: Context,
@@ -253,15 +223,7 @@ object StreamVideoInitHelper {
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
             callServiceConfigRegistry = CallServiceConfigRegistry(),
-            sounds = Sounds(
-                audioCallRingingConfig = myAudioRingingConfig,
-                ringingConfig = myRingingConfig,
-                videoCallRingingConfig = myVideoRingingConfig,
-            ),
+            sounds = defaultResourcesRingingConfig(context).toSounds(),
         ).build()
     }
 }
-
-private fun Int.toUriOrNull(context: Context): Uri = Uri.parse(
-    "android.resource://${context.packageName}/$this",
-)

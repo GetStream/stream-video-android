@@ -69,6 +69,40 @@ public data class Sounds(
  * @param ringingConfig The configuration for incoming and outgoing call sounds.
  * @param mutedRingingConfig The configuration for handling incoming and outgoing call sounds if device is muted. Can be null.
  * @return A [Sounds] object containing the specified configurations.
+ * 
+ * 
+ * Prepares a [Sounds] configuration that specifies custom incoming and outgoing
+ * sounds for different call types — audio and video.
+ * 
+ * You can override the default sounds by placing `.mp3` or `.wav` files in your
+ * `res/raw/` directory and referencing them via their resource IDs.
+ * 
+ * ### Sample usage:
+ * 
+ * ```kotlin
+ * val audioRingingConfig = object : RingingConfig {
+ *     override val incomingCallSoundUri: Uri
+ *         get() = R.raw.audio_call_ringtone.toUriOrNull(context)
+ * 
+ *     override val outgoingCallSoundUri: Uri
+ *         get() = R.raw.audio_call_ringtone.toUriOrNull(context)
+ * }
+ * 
+ * val videoRingingConfig = object : RingingConfig {
+ *     override val incomingCallSoundUri: Uri
+ *         get() = R.raw.video_call_ringtone.toUriOrNull(context)
+ * 
+ *     override val outgoingCallSoundUri: Uri
+ *         get() = R.raw.video_call_ringtone.toUriOrNull(context)
+ * }
+ * 
+ * val sounds = Sounds(
+ *     audioCallRingingConfig = audioRingingConfig,
+ *     videoCallRingingConfig = videoRingingConfig,
+ *     ringingConfig = audioRingingConfig // fallback/default
+ * )
+ * ```
+ * 
  */
 public fun ringingConfig(
     ringingConfig: RingingConfig,
