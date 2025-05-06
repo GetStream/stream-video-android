@@ -137,7 +137,6 @@ public open class DefaultNotificationHandler(
             val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
-
                 /**
                  * Psst! Sorry for ugly code, it is to avoid breaking change
                  */
@@ -229,8 +228,8 @@ public open class DefaultNotificationHandler(
         val callId = NotificationsMigrationHelper.incomingCallMap[acceptCallPendingIntent]
         val contentTextResId = when (callId?.type) {
             "audio_call" -> R.string.stream_video_incoming_audio_call_notification_description
-            "default"    -> R.string.stream_video_incoming_video_call_notification_description
-            else         -> R.string.stream_video_incoming_call_notification_description
+            "default" -> R.string.stream_video_incoming_video_call_notification_description
+            else -> R.string.stream_video_incoming_call_notification_description
         }
 
         createIncomingCallChannel(channelId, showAsHighPriority)

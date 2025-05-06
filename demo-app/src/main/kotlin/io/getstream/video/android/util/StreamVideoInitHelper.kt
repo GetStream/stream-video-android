@@ -196,16 +196,24 @@ object StreamVideoInitHelper {
 
     val myAudioRingingConfig = object : RingingConfig {
         override val incomingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_audio.toUriOrNull(context)
+            get() = io.getstream.video.android.R.raw.stream_notification_sound_audio.toUriOrNull(
+                context,
+            )
         override val outgoingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_audio.toUriOrNull(context)
+            get() = io.getstream.video.android.R.raw.stream_notification_sound_audio.toUriOrNull(
+                context,
+            )
     }
 
     val myVideoRingingConfig = object : RingingConfig {
         override val incomingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_video.toUriOrNull(context)
+            get() = io.getstream.video.android.R.raw.stream_notification_sound_video.toUriOrNull(
+                context,
+            )
         override val outgoingCallSoundUri: Uri
-            get() = io.getstream.video.android.R.raw.stream_notification_sound_video.toUriOrNull(context)
+            get() = io.getstream.video.android.R.raw.stream_notification_sound_video.toUriOrNull(
+                context,
+            )
     }
 
     /** Sets up and returns the [StreamVideo] required to connect to the API. */
@@ -249,9 +257,11 @@ object StreamVideoInitHelper {
                 audioCallRingingConfig = myAudioRingingConfig,
                 ringingConfig = myRingingConfig,
                 videoCallRingingConfig = myVideoRingingConfig,
-            )
+            ),
         ).build()
     }
 }
 
-private fun Int.toUriOrNull(context: Context): Uri = Uri.parse("android.resource://${context.packageName}/$this")
+private fun Int.toUriOrNull(context: Context): Uri = Uri.parse(
+    "android.resource://${context.packageName}/$this",
+)

@@ -172,22 +172,26 @@ private fun Int?.toUriOrNull(context: Context): Uri? =
         }
     }
 
-internal fun getIncomingCallSoundUri(streamVideo: StreamVideoClient, callId: StreamCallId): Uri?{
-    return when(callId.type){
-        CallType.AudioCall.name -> streamVideo.sounds.audioCallRingingConfig?.incomingCallSoundUri
-            ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
-        CallType.Default.name -> streamVideo.sounds.videoCallRingingConfig?.incomingCallSoundUri
-            ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
+internal fun getIncomingCallSoundUri(streamVideo: StreamVideoClient, callId: StreamCallId): Uri? {
+    return when (callId.type) {
+        CallType.AudioCall.name ->
+            streamVideo.sounds.audioCallRingingConfig?.incomingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
+        CallType.Default.name ->
+            streamVideo.sounds.videoCallRingingConfig?.incomingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
         else -> streamVideo.sounds.ringingConfig.incomingCallSoundUri
     }
 }
 
 internal fun getOutgoingCallSoundUri(streamVideo: StreamVideoClient, callId: StreamCallId): Uri? {
-    return when(callId.type){
-        CallType.AudioCall.name -> streamVideo.sounds.audioCallRingingConfig?.outgoingCallSoundUri
-            ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
-        CallType.Default.name -> streamVideo.sounds.videoCallRingingConfig?.outgoingCallSoundUri
-            ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+    return when (callId.type) {
+        CallType.AudioCall.name ->
+            streamVideo.sounds.audioCallRingingConfig?.outgoingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+        CallType.Default.name ->
+            streamVideo.sounds.videoCallRingingConfig?.outgoingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
         else -> streamVideo.sounds.ringingConfig.outgoingCallSoundUri
     }
 }
