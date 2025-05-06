@@ -22,7 +22,10 @@ import android.net.Uri
 import androidx.annotation.RawRes
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.utils.safeCallWithDefault
+import io.getstream.video.android.model.StreamCallId
 
 // Interface & API
 /**
@@ -55,6 +58,8 @@ public interface MutedRingingConfig {
 public data class Sounds(
     val ringingConfig: RingingConfig,
     val mutedRingingConfig: MutedRingingConfig? = null,
+    val audioCallRingingConfig: RingingConfig? = null,
+    val videoCallRingingConfig: RingingConfig? = null,
 )
 
 // Factories
@@ -68,8 +73,10 @@ public data class Sounds(
 public fun ringingConfig(
     ringingConfig: RingingConfig,
     mutedRingingConfig: MutedRingingConfig?,
+    audioCallRingingConfig: RingingConfig?,
+    videoCallRingingConfig: RingingConfig?,
 ): Sounds {
-    return Sounds(ringingConfig, mutedRingingConfig)
+    return Sounds(ringingConfig, mutedRingingConfig, audioCallRingingConfig, videoCallRingingConfig)
 }
 
 /**
@@ -164,3 +171,23 @@ private fun Int?.toUriOrNull(context: Context): Uri? =
             null
         }
     }
+
+internal fun getIncomingCallSoundUri(streamVideo: StreamVideoClient, callId: StreamCallId): Uri?{
+    return when(callId.type){
+        CallType.AudioCall.name -> streamVideo.sounds.audioCallRingingConfig?.incomingCallSoundUri
+            ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
+        CallType.Default.name -> streamVideo.sounds.videoCallRingingConfig?.incomingCallSoundUri
+            ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
+        else -> streamVideo.sounds.ringingConfig.incomingCallSoundUri
+    }
+}
+
+internal fun getOutgoingCallSoundUri(streamVideo: StreamVideoClient, callId: StreamCallId): Uri? {
+    return when(callId.type){
+        CallType.AudioCall.name -> streamVideo.sounds.audioCallRingingConfig?.outgoingCallSoundUri
+            ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+        CallType.Default.name -> streamVideo.sounds.videoCallRingingConfig?.outgoingCallSoundUri
+            ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+        else -> streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+    }
+}

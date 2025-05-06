@@ -44,6 +44,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.internal.NotificationsMigrationHelper
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -136,6 +137,12 @@ public open class DefaultNotificationHandler(
             val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
+
+                /**
+                 * Psst! Sorry for ugly code, it is to avoid breaking change
+                 */
+                NotificationsMigrationHelper.incomingCallMap[acceptCallPendingIntent] = callId
+
                 getIncomingCallNotification(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
@@ -219,14 +226,19 @@ public open class DefaultNotificationHandler(
             },
         )
 
+        val callId = NotificationsMigrationHelper.incomingCallMap[acceptCallPendingIntent]
+        val contentTextResId = when (callId?.type) {
+            "audio_call" -> R.string.stream_video_incoming_audio_call_notification_description
+            "default"    -> R.string.stream_video_incoming_video_call_notification_description
+            else         -> R.string.stream_video_incoming_call_notification_description
+        }
+
         createIncomingCallChannel(channelId, showAsHighPriority)
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
             setContentTitle(callerName)
-            setContentText(
-                application.getString(R.string.stream_video_incoming_call_notification_description),
-            )
+            setContentText(application.getString(contentTextResId))
             setChannelId(channelId)
             setOngoing(true)
             setCategory(NotificationCompat.CATEGORY_CALL)
