@@ -27,7 +27,9 @@ import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
 import io.getstream.video.android.uiautomator.findObjects
+import io.getstream.video.android.uiautomator.seconds
 import io.getstream.video.android.uiautomator.typeText
+import io.getstream.video.android.uiautomator.waitForText
 import io.getstream.video.android.uiautomator.waitToAppear
 
 class UserRobot {
@@ -55,9 +57,20 @@ class UserRobot {
         return this
     }
 
-    fun joinCall(callId: String? = null, camera: Boolean = true, mic: Boolean = true): UserRobot {
+    fun joinCall(
+        callId: String? = null,
+        camera: UserControls? = null,
+        microphone: UserControls? = null,
+    ): UserRobot {
         enterLobby(callId)
-        joinCallFromLobby(camera = camera, mic = mic)
+        if (camera != null) {
+            camera(camera, hard = true)
+        }
+        if (microphone != null) {
+            microphone(microphone, hard = true)
+        }
+        joinCallFromLobby()
+        waitForCallToStart()
         return this
     }
 
@@ -66,29 +79,20 @@ class UserRobot {
             CallDetailsPage.callIdInputField.waitToAppear().typeText(callId)
         }
         CallDetailsPage.joinCallButton.waitToAppear().click()
+        waitForLobbyToOpen()
         return this
     }
 
     // LobbyPage actions
 
-    fun joinCallFromLobby(camera: Boolean = true, mic: Boolean = true): UserRobot {
-        LobbyPage.joinCallButton.waitToAppear()
-        val cameraIsEnabled = LobbyPage.cameraEnabledToggle.findObjects().isNotEmpty()
-        val micIsEnabled = LobbyPage.microphoneEnabledToggle.findObjects().isNotEmpty()
-
-        if (camera && !cameraIsEnabled) {
-            LobbyPage.cameraDisabledToggle.findObject().click()
-        } else if (!camera && cameraIsEnabled) {
-            LobbyPage.cameraEnabledToggle.findObject().click()
-        }
-
-        if (mic && !micIsEnabled) {
-            LobbyPage.microphoneDisabledToggle.findObject().click()
-        } else if (!mic && micIsEnabled) {
-            LobbyPage.microphoneEnabledToggle.findObject().click()
-        }
-
+    fun joinCallFromLobby(): UserRobot {
         LobbyPage.joinCallButton.findObject().click()
+        waitForCallToStart()
+        return this
+    }
+
+    private fun waitForLobbyToOpen(): UserRobot {
+        LobbyPage.closeButton.waitToAppear()
         return this
     }
 
@@ -107,34 +111,79 @@ class UserRobot {
         return this
     }
 
-    fun camera(action: UserControls): UserRobot {
-        CallPage.callInfoView.waitToAppear()
+    fun camera(
+        action: UserControls,
+        hard: Boolean = false, // When true, hard-toggles to ensure server state syncs properly
+    ): UserRobot {
         val isEnabled = CallPage.cameraEnabledToggle.findObjects().isNotEmpty()
 
-        if (action == UserControls.ENABLE && !isEnabled) {
-            CallPage.cameraDisabledToggle.findObject().click()
-        } else if (action == UserControls.DISABLE && isEnabled) {
-            CallPage.cameraEnabledToggle.findObject().click()
+        when {
+            hard -> when (action) {
+                UserControls.ENABLE -> {
+                    if (isEnabled) {
+                        CallPage.cameraEnabledToggle.findObject().click()
+                        CallPage.cameraDisabledToggle.waitToAppear().click()
+                    } else {
+                        CallPage.cameraDisabledToggle.findObject().click()
+                    }
+                }
+                UserControls.DISABLE -> {
+                    if (isEnabled) {
+                        CallPage.cameraEnabledToggle.findObject().click()
+                    } else {
+                        CallPage.cameraDisabledToggle.findObject().click()
+                        CallPage.cameraEnabledToggle.waitToAppear().click()
+                    }
+                }
+            }
+            action == UserControls.ENABLE && !isEnabled -> {
+                CallPage.cameraDisabledToggle.findObject().click()
+            }
+            action == UserControls.DISABLE && isEnabled -> {
+                CallPage.cameraEnabledToggle.findObject().click()
+            }
         }
 
         return this
     }
 
-    fun microphone(action: UserControls): UserRobot {
-        CallPage.callInfoView.waitToAppear()
+    fun microphone(
+        action: UserControls,
+        hard: Boolean = false, // When true, hard-toggles to ensure server state syncs properly
+    ): UserRobot {
         val isEnabled = CallPage.microphoneEnabledToggle.findObjects().isNotEmpty()
 
-        if (action == UserControls.ENABLE && !isEnabled) {
-            CallPage.microphoneDisabledToggle.findObject().click()
-        } else if (action == UserControls.DISABLE && isEnabled) {
-            CallPage.microphoneEnabledToggle.findObject().click()
+        when {
+            hard -> when (action) {
+                UserControls.ENABLE -> {
+                    if (isEnabled) {
+                        CallPage.microphoneEnabledToggle.findObject().click()
+                        CallPage.microphoneDisabledToggle.waitToAppear().click()
+                    } else {
+                        CallPage.microphoneDisabledToggle.findObject().click()
+                    }
+                }
+                UserControls.DISABLE -> {
+                    if (isEnabled) {
+                        CallPage.microphoneEnabledToggle.findObject().click()
+                    } else {
+                        CallPage.microphoneDisabledToggle.findObject().click()
+                        CallPage.microphoneEnabledToggle.waitToAppear().click()
+                    }
+                }
+            }
+            action == UserControls.ENABLE && !isEnabled -> {
+                CallPage.microphoneDisabledToggle.findObject().click()
+            }
+            action == UserControls.DISABLE && isEnabled -> {
+                CallPage.microphoneEnabledToggle.findObject().click()
+            }
         }
 
         return this
     }
 
     fun settings(action: UserControls): UserRobot {
-        CallPage.callInfoView.waitToAppear()
         val isEnabled = CallPage.callSettingsOpenToggle.findObjects().isNotEmpty()
 
         if (action == UserControls.ENABLE && !isEnabled) {
@@ -173,6 +222,30 @@ class UserRobot {
 
     fun moveCornerDraggableView(direction: Direction): UserRobot {
         CallPage.cornerDraggableView.waitToAppear().swipe(direction, 1.0f)
+        return this
+    }
+
+    fun acceptCallRecording(): UserRobot {
+        CallPage.RecordingButtons.accept.waitToAppear(timeOutMillis = 10.seconds).click()
+        return this
+    }
+
+    fun declineCallRecording(): UserRobot {
+        CallPage.RecordingButtons.leave.waitToAppear(timeOutMillis = 10.seconds).click()
+        return this
+    }
+
+    fun waitForParticipantsToJoin(count: Int = 1, timeOutMillis: Long = 30.seconds): UserRobot {
+        val user = 1
+        val participants = user + count
+        CallPage.participantsCountBadge
+            .waitToAppear()
+            .waitForText(expectedText = participants.toString(), timeOutMillis = timeOutMillis)
+        return this
+    }
+
+    private fun waitForCallToStart(): UserRobot {
+        CallPage.callInfoView.waitToAppear()
         return this
     }
 }

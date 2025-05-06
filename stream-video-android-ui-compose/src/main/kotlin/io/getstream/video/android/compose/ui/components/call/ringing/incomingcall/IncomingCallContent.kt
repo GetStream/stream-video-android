@@ -16,9 +16,13 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -146,7 +150,7 @@ public fun IncomingCallContent(
         modifier = modifier,
         backgroundContent = backgroundContent,
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
             if (isShowingHeader) {
                 headerContent?.invoke(this)
             }
@@ -158,17 +162,17 @@ public fun IncomingCallContent(
             }
             detailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = topPadding),
+                    .align(Alignment.CenterHorizontally),
                 isVideoType = isVideoType,
                 participants = participants,
             )
+            Spacer(modifier = Modifier.height(VideoTheme.dimens.genericMax))
         }
 
         controlsContent?.invoke(this) ?: IncomingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.componentPaddingBottom),
+                .padding(bottom = VideoTheme.dimens.genericXxl),
             isVideoCall = isVideoType,
             isMicrophoneEnabled = isMicrophoneEnabled,
             isCameraEnabled = isCameraEnabled,

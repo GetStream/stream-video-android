@@ -28,7 +28,8 @@ import org.json.JSONObject
 import org.junit.Assert.fail
 
 class ParticipantRobot(
-    val debug: Boolean = false,
+    val testName: String,
+    val headless: Boolean = true,
     val record: Boolean = false,
     val logs: Boolean = true,
 ) {
@@ -58,6 +59,7 @@ class ParticipantRobot(
     }
 
     private enum class Config(val value: String) {
+        TEST_NAME("test-name"),
         CALL_ID("call-id"),
         USER_COUNT("user-count"),
         MESSAGE_COUNT("message-count"),
@@ -98,11 +100,12 @@ class ParticipantRobot(
         async: Boolean = true,
     ) {
         val params = mutableMapOf<String, Any>()
+        params[Config.TEST_NAME.value] = testName
         params[Config.CALL_ID.value] = callId
         params[Config.USER_COUNT.value] = userCount
         messageCount?.let { params[Config.MESSAGE_COUNT.value] = it }
         params[Config.CALL_DURATION.value] = callDuration
-        params[DebugActions.SHOW_WINDOW.value] = debug
+        params[DebugActions.SHOW_WINDOW.value] = !headless
         params[DebugActions.PRINT_CONSOLE_LOGS.value] = logs
         params[DebugActions.RECORD_SESSION.value] = record
 

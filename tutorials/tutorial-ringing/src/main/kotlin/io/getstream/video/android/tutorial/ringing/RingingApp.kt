@@ -18,16 +18,19 @@ package io.getstream.video.android.tutorial.ringing
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
+import io.getstream.android.push.PushProvider
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
-import io.getstream.log.Priority
 import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
-import io.getstream.video.android.core.logging.HttpLoggingLevel
-import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 
 class RingingApp : Application() {
 
@@ -48,10 +51,21 @@ class RingingApp : Application() {
             TutorialUser.builtIn.filter { it.id != loggedInUser.id }
         } ?: error("#callees; user not logged in")
 
+        // Use a more robust approach in a production app
+        val fcmToken: String?
+            get() = runBlocking {
+                try {
+                    FirebaseMessaging.getInstance().token.await()
+                } catch (e: Exception) {
+                    Log.e("FCM Token", "Failed to retrieve FCM token", e)
+                    null
+                }
+            }
+
         fun login(context: Context, user: TutorialUser) {
             if (!StreamVideo.isInstalled) {
                 currentUser = user
-                // step2 - initialize StreamVideo. For a production app we recommend adding
+                // Initialize StreamVideo. For a production app we recommend adding
                 // the client to your Application class or di module.
                 StreamVideoBuilder(
                     context = context.applicationContext,
@@ -59,7 +73,6 @@ class RingingApp : Application() {
                     geo = GEO.GlobalEdgeNetwork,
                     user = user.delegate,
                     token = user.token,
-                    loggingLevel = LoggingLevel(Priority.VERBOSE, HttpLoggingLevel.BODY),
                     notificationConfig = NotificationConfig(
                         // Make the notification low priority if the app is in foreground, so its not visible as a popup, since we want to handle
                         // the incoming call in full screen when app is running.
@@ -71,7 +84,6 @@ class RingingApp : Application() {
                                 providerName = "firebase",
                             ),
                         ),
-
                         notificationHandler = CustomNotificationHandler(
                             context.applicationContext as Application,
                         ),
@@ -80,9 +92,21 @@ class RingingApp : Application() {
             }
         }
 
-        fun logout() {
+        suspend fun logout() {
             if (StreamVideo.isInstalled) {
-                StreamVideo.instance().logOut()
+                with(StreamVideo.instance()) {
+                    fcmToken?.let {
+                        deleteDevice(
+                            Device(
+                                id = it,
+                                pushProvider = PushProvider.FIREBASE.key,
+                                pushProviderName = "firebase",
+                            ),
+                        )
+                    }
+                    logOut()
+                }
+
                 StreamVideo.removeClient()
                 currentUser = null
             }

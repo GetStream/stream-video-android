@@ -26,9 +26,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Represents livestreaming content based on the call state provided from the [call].
@@ -38,6 +46,7 @@ import io.getstream.video.android.mock.previewCall
  * @param enablePausing Enables pausing or resuming the livestream video.
  * @param onPausedPlayer Listen to pause or resume the livestream video.
  * @param backstageContent Content shown when the host has not yet started the live stream.
+ * @param videoRendererConfig Configuration for the internal [VideoRenderer]
  * @param rendererContent The rendered stream originating from the host.
  * @param overlayContent Content displayed to indicate participant counts, live stream duration, and device settings controls.
  */
@@ -50,11 +59,30 @@ public fun LivestreamPlayer(
     backstageContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamBackStage()
     },
+    videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
+    livestreamFlow: Flow<ParticipantState.Video?> =
+        call.state.participants.flatMapLatest { participants: List<ParticipantState> ->
+            // For each participant, create a small Flow that watches videoEnabled.
+            val participantVideoFlows = participants.map { participant ->
+                participant.videoEnabled.map { enabled -> participant to enabled }
+            }
+            // Combine these Flows: whenever a participant’s videoEnabled changes,
+            // we re-calculate which participants have video.
+            combine(participantVideoFlows) { participantEnabledPairs ->
+                participantEnabledPairs
+                    .filter { (_, isEnabled) -> isEnabled }
+                    .map { (participant, _) -> participant }
+            }
+        }.flatMapLatest { participantWithVideo ->
+            participantWithVideo.firstOrNull()?.video ?: flow { emit(null) }
+        },
     rendererContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamRenderer(
             call = call,
             enablePausing = enablePausing,
             onPausedPlayer = onPausedPlayer,
+            configuration = videoRendererConfig,
+            livestreamFlow = livestreamFlow,
         )
     },
     overlayContent: @Composable BoxScope.(Call) -> Unit = {

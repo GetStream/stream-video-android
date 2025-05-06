@@ -41,23 +41,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 internal fun LivestreamRenderer(
     call: Call,
+    configuration: VideoRendererConfig = videoRenderConfig(),
     enablePausing: Boolean,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
+    livestreamFlow: Flow<ParticipantState.Video?> = call.state.livestream,
 ) {
-    val livestream by call.state.livestream.collectAsStateWithLifecycle()
+    val livestream by livestreamFlow.collectAsStateWithLifecycle(null)
     var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
     var isPaused by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         VideoRenderer(
+            videoRendererConfig = configuration,
             modifier = Modifier
                 .fillMaxSize()
                 .clickable(enabled = enablePausing) {

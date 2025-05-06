@@ -55,8 +55,8 @@ internal class SortedParticipantsState(
     init {
         internalFlow = channelFlow {
             // Respond to call events
-            call.subscribe {
-                scope.launch {
+            scope.launch {
+                call.events.collectLatest {
                     sortAndPublish(lastSortOrder, participants.value, pinnedParticipants.value)
                 }
             }

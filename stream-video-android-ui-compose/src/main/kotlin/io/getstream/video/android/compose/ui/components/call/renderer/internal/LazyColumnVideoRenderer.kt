@@ -23,10 +23,14 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
@@ -129,12 +133,17 @@ private fun ListVideoRenderer(
         )
     },
 ) {
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     videoRenderer.invoke(
         modifier,
         call,
         participant,
         style.copy(
-            isFocused = participant.sessionId == dominantSpeaker?.sessionId,
+            isFocused = isDomSpeakerSpeaking && participant.sessionId == dominantSpeaker?.sessionId,
         ),
     )
 }

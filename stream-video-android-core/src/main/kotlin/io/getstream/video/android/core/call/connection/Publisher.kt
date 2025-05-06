@@ -33,6 +33,8 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
+import io.getstream.video.android.core.utils.defaultConstraints
+import io.getstream.video.android.core.utils.iceRestartConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
@@ -109,14 +111,29 @@ internal class Publisher(
 
     private fun dispose() {
         transceiverCache.items().forEach {
-            it.transceiver.stop()
-            it.transceiver.dispose()
+            try {
+                it.transceiver.stop()
+            } catch (e: Exception) {
+                logger.w { "Transceiver already stopped: ${e.message}" }
+            }
+
+            try {
+                it.transceiver.dispose()
+            } catch (e: Exception) {
+                logger.w { "Transceiver already disposed: ${e.message}" }
+            }
         }
     }
 
     @VisibleForTesting
     public suspend fun negotiate(iceRestart: Boolean = false) {
-        val offer = super.createOffer().getOrThrow()
+        val offer = super.createOffer(
+            if (iceRestart) {
+                iceRestartConstraints
+            } else {
+                defaultConstraints
+            },
+        ).getOrThrow()
         val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
 
         if (isIceRestarting) {
@@ -279,8 +296,10 @@ internal class Publisher(
             val (option, transceiver) = item
             val hasPublishOption = transceiverCache.has(option)
             if (!hasPublishOption) continue
-            transceiver.stop()
-            transceiver.dispose()
+            safeCall {
+                transceiver.stop()
+                transceiver.dispose()
+            }
             transceiverCache.remove(option)
         }
     }

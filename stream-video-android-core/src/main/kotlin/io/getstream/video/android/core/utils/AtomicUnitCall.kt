@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.tests
+package io.getstream.video.android.core.utils
 
-import io.getstream.video.android.robots.ParticipantRobot.Options.WITH_CAMERA
-import io.qameta.allure.kotlin.Allure.step
-import io.qameta.allure.kotlin.AllureId
-import org.junit.Test
+import java.util.concurrent.atomic.AtomicBoolean
 
-class SampleTests : StreamTestCase() {
+/**
+ * An atomic call that is executed only once, no matter how many consecutive calls are made.
+ */
+internal class AtomicUnitCall {
+    private var called = AtomicBoolean(false)
 
-    @AllureId("")
-    @Test
-    fun test_sample() {
-        step("GIVEN user joins the call") {
-            userRobot.joinCall(callId)
-        }
-        step("AND participant joins the call") {
-            participantRobot.joinCall(callId, options = arrayOf(WITH_CAMERA))
+    /**
+     * Executes the given block of code only once, no matter how many consecutive calls are made.
+     */
+    operator fun invoke(block: () -> Unit) {
+        if (called.compareAndSet(false, true)) {
+            safeCall {
+                block()
+            }
         }
     }
 }

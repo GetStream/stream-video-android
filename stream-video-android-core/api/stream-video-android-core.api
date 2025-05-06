@@ -5,7 +5,6 @@ public abstract interface class io/getstream/android/video/generated/apis/Produc
 	public abstract fun createDevice (Lio/getstream/android/video/generated/models/CreateDeviceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createGuest (Lio/getstream/android/video/generated/models/CreateGuestRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteCall (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/DeleteCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun deleteCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/DeleteCallRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun deleteDevice (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteRecording (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun deleteTranscription (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -17,49 +16,35 @@ public abstract interface class io/getstream/android/video/generated/apis/Produc
 	public abstract fun getOrCreateCall (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/GetOrCreateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun getOrCreateCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/GetOrCreateCallRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun goLive (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/GoLiveRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun goLive$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/GoLiveRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun joinCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/JoinCallRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun listDevices (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun listRecordings (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun listTranscriptions (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun muteUsers (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/MuteUsersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun muteUsers$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/MuteUsersRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryAggregateCallStats (Lio/getstream/android/video/generated/models/QueryAggregateCallStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun queryAggregateCallStats$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Lio/getstream/android/video/generated/models/QueryAggregateCallStatsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryCallMembers (Lio/getstream/android/video/generated/models/QueryCallMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryCallStats (Lio/getstream/android/video/generated/models/QueryCallStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun queryCallStats$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Lio/getstream/android/video/generated/models/QueryCallStatsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryCalls (Ljava/lang/String;Lio/getstream/android/video/generated/models/QueryCallsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryCalls$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Lio/getstream/android/video/generated/models/QueryCallsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun rejectCall (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/RejectCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun rejectCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/RejectCallRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun requestPermission (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/RequestPermissionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun sendCallEvent (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/SendCallEventRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun sendCallEvent$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/SendCallEventRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun sendVideoReaction (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/SendReactionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startClosedCaptions (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StartClosedCaptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun startClosedCaptions$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StartClosedCaptionsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun startHLSBroadcasting (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startRTMPBroadcasts (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StartRTMPBroadcastsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun startRecording (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StartRecordingRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun startRecording$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StartRecordingRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun startTranscription (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StartTranscriptionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun startTranscription$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StartTranscriptionRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun stopAllRTMPBroadcasts (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopClosedCaptions (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StopClosedCaptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun stopClosedCaptions$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StopClosedCaptionsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun stopHLSBroadcasting (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopLive (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StopLiveRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun stopLive$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StopLiveRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun stopRecording (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopTranscription (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StopTranscriptionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun stopTranscription$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/StopTranscriptionRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun unblockUser (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/UnblockUserRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateCall (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/UpdateCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun updateCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/UpdateCallRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun updateCallMembers (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/UpdateCallMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun updateCallMembers$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/UpdateCallMembersRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun updateUserPermissions (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/UpdateUserPermissionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun videoConnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun videoPin (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/PinRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -5466,6 +5451,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getAudioFilter ()Lio/getstream/video/android/core/call/audio/InputAudioFilter;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
+	public final fun getEvents ()Lkotlinx/coroutines/flow/MutableSharedFlow;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getLocalMicrophoneAudioLevel ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMicrophone ()Lio/getstream/video/android/core/MicrophoneManager;
@@ -5542,6 +5528,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun takeScreenshot (Lio/getstream/video/android/core/model/VideoTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun toggleAudioProcessing ()Z
 	public final fun unpinForEveryone (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun unsubscribe (Lio/getstream/video/android/core/EventSubscription;)Z
 	public final fun update (Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateClosedCaptionsSettings (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
@@ -6355,7 +6342,7 @@ public abstract interface class io/getstream/video/android/core/audio/AudioHandl
 
 public final class io/getstream/video/android/core/audio/AudioSwitchHandler : io/getstream/video/android/core/audio/AudioHandler {
 	public static final field Companion Lio/getstream/video/android/core/audio/AudioSwitchHandler$Companion;
-	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function2;)V
+	public fun <init> (Landroid/content/Context;Ljava/util/List;Lkotlin/jvm/functions/Function2;)V
 	public final fun selectDevice (Lcom/twilio/audioswitch/AudioDevice;)V
 	public fun start ()V
 	public fun stop ()V
@@ -6517,8 +6504,10 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;Z)V
-	public final fun createAnswer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun createOffer (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun createAnswer (Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createAnswer$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun createOffer (Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun createOffer$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnection;Lorg/webrtc/MediaConstraints;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun getAudioTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun getConnection ()Lorg/webrtc/PeerConnection;
 	public final fun getStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -10828,26 +10817,37 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class io/getstream/video/android/core/sounds/MutedRingingConfig {
+	public abstract fun getPlayIncomingSoundIfMuted ()Z
+	public abstract fun getPlayOutgoingSoundIfMuted ()Z
+}
+
 public abstract interface class io/getstream/video/android/core/sounds/RingingConfig {
 	public abstract fun getIncomingCallSoundUri ()Landroid/net/Uri;
 	public abstract fun getOutgoingCallSoundUri ()Landroid/net/Uri;
 }
 
 public final class io/getstream/video/android/core/sounds/RingingConfigKt {
+	public static final fun defaultMutedRingingConfig (ZZ)Lio/getstream/video/android/core/sounds/MutedRingingConfig;
+	public static synthetic fun defaultMutedRingingConfig$default (ZZILjava/lang/Object;)Lio/getstream/video/android/core/sounds/MutedRingingConfig;
 	public static final fun defaultResourcesRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun deviceRingtoneRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun emptyRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public static final fun resRingingConfig (Landroid/content/Context;II)Lio/getstream/video/android/core/sounds/RingingConfig;
+	public static final fun ringingConfig (Lio/getstream/video/android/core/sounds/RingingConfig;Lio/getstream/video/android/core/sounds/MutedRingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
 	public static final fun toSounds (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
 	public static final fun uriRingingConfig (Landroid/net/Uri;Landroid/net/Uri;)Lio/getstream/video/android/core/sounds/RingingConfig;
 }
 
 public final class io/getstream/video/android/core/sounds/Sounds {
-	public fun <init> (Lio/getstream/video/android/core/sounds/RingingConfig;)V
+	public fun <init> (Lio/getstream/video/android/core/sounds/RingingConfig;Lio/getstream/video/android/core/sounds/MutedRingingConfig;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/sounds/RingingConfig;Lio/getstream/video/android/core/sounds/MutedRingingConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lio/getstream/video/android/core/sounds/RingingConfig;
-	public final fun copy (Lio/getstream/video/android/core/sounds/RingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
+	public final fun component2 ()Lio/getstream/video/android/core/sounds/MutedRingingConfig;
+	public final fun copy (Lio/getstream/video/android/core/sounds/RingingConfig;Lio/getstream/video/android/core/sounds/MutedRingingConfig;)Lio/getstream/video/android/core/sounds/Sounds;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingConfig;Lio/getstream/video/android/core/sounds/MutedRingingConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/sounds/Sounds;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMutedRingingConfig ()Lio/getstream/video/android/core/sounds/MutedRingingConfig;
 	public final fun getRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

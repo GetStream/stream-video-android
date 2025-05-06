@@ -29,6 +29,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioHandler
@@ -42,6 +43,7 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -82,7 +84,7 @@ class SpeakerManager(
     val volume: StateFlow<Int?> = _volume
 
     /** The status of the audio */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
 
     /** Represents whether the speakerphone is enabled */
@@ -138,12 +140,19 @@ class SpeakerManager(
      * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
      * */
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
-        microphoneManager.enforceSetup {
+        microphoneManager.enforceSetup(preferSpeaker = enable) {
             val devices = devices.value
             if (enable) {
                 val speaker =
                     devices.filterIsInstance<StreamAudioDevice.Speakerphone>().firstOrNull()
-                selectedBeforeSpeaker = selectedDevice.value
+                selectedBeforeSpeaker = selectedDevice.value.takeUnless {
+                    it is StreamAudioDevice.Speakerphone
+                } ?: devices.firstOrNull {
+                    it !is StreamAudioDevice.Speakerphone
+                }
+
+                logger.d { "#deviceDebug; selectedBeforeSpeaker: $selectedBeforeSpeaker" }
+
                 _speakerPhoneEnabled.value = true
                 microphoneManager.select(speaker)
             } else {
@@ -152,10 +161,17 @@ class SpeakerManager(
                 val defaultFallbackFromType = defaultFallback?.let {
                     devices.filterIsInstance(defaultFallback::class.java)
                 }?.firstOrNull()
-                val fallback =
-                    defaultFallbackFromType ?: selectedBeforeSpeaker ?: devices.firstOrNull {
-                        it !is StreamAudioDevice.Speakerphone
-                    }
+
+                val firstNonSpeaker = devices.firstOrNull { it !is StreamAudioDevice.Speakerphone }
+
+                val fallback: StreamAudioDevice? = when {
+                    defaultFallbackFromType != null -> defaultFallbackFromType
+                    selectedBeforeSpeaker != null &&
+                        selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
+                        devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
+                    else -> firstNonSpeaker
+                }
+
                 microphoneManager.select(fallback)
             }
         }
@@ -354,6 +370,7 @@ class MicrophoneManager(
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
+    internal var nonHeadsetFallbackDevice: StreamAudioDevice? = null
 
     /** Currently selected device */
     val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
@@ -420,10 +437,20 @@ class MicrophoneManager(
      * Select a specific device
      */
     fun select(device: StreamAudioDevice?) {
-        enforceSetup {
-            logger.i { "selecting device $device" }
-            ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
-            _selectedDevice.value = device
+        logger.i { "selecting device $device" }
+        ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+        _selectedDevice.value = device
+
+        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+            mediaManager.speaker._status.value = DeviceStatus.Disabled
+        }
+
+        if (device is StreamAudioDevice.Speakerphone) {
+            mediaManager.speaker._status.value = DeviceStatus.Enabled
+        }
+
+        if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
+            nonHeadsetFallbackDevice = device
         }
     }
 
@@ -443,7 +470,7 @@ class MicrophoneManager(
     fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
 
     // Internal logic
-    internal fun setup(onAudioDevicesUpdate: (() -> Unit)? = null) {
+    internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
         var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
 
         if (setupCompleted) {
@@ -460,27 +487,46 @@ class MicrophoneManager(
 
         if (canHandleDeviceSwitch()) {
             if (!::audioHandler.isInitialized) { // This check is atomic
-                audioHandler = AudioSwitchHandler(mediaManager.context) { devices, selected ->
-                    logger.i { "audio devices. selected $selected, available devices are $devices" }
+                audioHandler = AudioSwitchHandler(
+                    context = mediaManager.context,
+                    preferredDeviceList = listOf(
+                        AudioDevice.BluetoothHeadset::class.java,
+                        AudioDevice.WiredHeadset::class.java,
+                    ) + if (preferSpeaker) {
+                        listOf(
+                            AudioDevice.Speakerphone::class.java,
+                            AudioDevice.Earpiece::class.java,
+                        )
+                    } else {
+                        listOf(
+                            AudioDevice.Earpiece::class.java,
+                            AudioDevice.Speakerphone::class.java,
+                        )
+                    },
+                    audioDeviceChangeListener = { devices, selected ->
+                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
-                    _devices.value = devices.map { it.fromAudio() }
-                    _selectedDevice.value = selected?.fromAudio()
+                        _devices.value = devices.map { it.fromAudio() }
+                        _selectedDevice.value = selected?.fromAudio()
 
-                    capturedOnAudioDevicesUpdate?.invoke()
-                    capturedOnAudioDevicesUpdate = null
-                }
+                        capturedOnAudioDevicesUpdate?.invoke()
+                        capturedOnAudioDevicesUpdate = null
+                        setupCompleted = true
+                    },
+                )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()
             }
-
-            setupCompleted = true
         } else {
             logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
     }
 
-    internal fun enforceSetup(actual: () -> Unit) = setup(onAudioDevicesUpdate = actual)
+    internal fun enforceSetup(preferSpeaker: Boolean = false, actual: () -> Unit) = setup(
+        preferSpeaker,
+        onAudioDevicesUpdate = actual,
+    )
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
@@ -644,6 +690,9 @@ public class CameraManager(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
+            if (_resolution.value == null) {
+                retryResolutionSelection()
+            }
 
             if (!triggeredByFlip) {
                 setup(force = true)
@@ -717,6 +766,9 @@ public class CameraManager(
                 selectedDevice.supportedFormats,
                 mediaManager.call.state.settings.value?.video,
             )
+            if (_resolution.value == null) {
+                retryResolutionSelection()
+            }
             _availableResolutions.value =
                 selectedDevice.supportedFormats?.toList() ?: emptyList()
 
@@ -812,6 +864,27 @@ public class CameraManager(
             supportedFormats = supportedFormats,
             maxResolution = maxResolution,
         )
+    }
+
+    private fun retryResolutionSelection(retries: Int = 5) {
+        mediaManager.scope.launch {
+            repeat(retries) { attempt ->
+                delay((1000L * (attempt + 1)).coerceAtLeast(3000L))
+                val selectedDevice = selectedDevice.value
+                if (selectedDevice != null) {
+                    val desired = selectDesiredResolution(
+                        selectedDevice.supportedFormats,
+                        mediaManager.call.state.settings.value?.video,
+                    )
+                    if (desired != null) {
+                        _resolution.value = desired
+                        startCapture()
+                        return@launch
+                    }
+                }
+            }
+            logger.w { "Resolution selection failed after $retries retries" }
+        }
     }
 }
 

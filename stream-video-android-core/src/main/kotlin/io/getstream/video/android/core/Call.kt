@@ -56,6 +56,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -76,8 +77,8 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -86,8 +87,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -132,6 +136,9 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
+
+    // Atomic controls
+    private var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
@@ -392,6 +399,7 @@ public class Call(
 
         var result: Result<RtcSession>
 
+        atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
@@ -523,7 +531,7 @@ public class Call(
             session?.publisher?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.publisher?.connection?.restartIce()
+                        session?.publisher?.restartIce()
                     }
 
                     else -> {
@@ -539,35 +547,6 @@ public class Call(
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session?.requestSubscriberIceRestart()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-        monitorPublisherStateJob?.cancel()
-        monitorPublisherStateJob = scope.launch {
-            session?.subscriber?.state?.collect {
-                when (it) {
-                    PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        rejoin()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-
-        monitorSubscriberStateJob?.cancel()
-        monitorSubscriberStateJob = scope.launch {
-            session?.subscriber?.state?.collect {
-                when (it) {
-                    PeerConnection.PeerConnectionState.FAILED, PeerConnection.PeerConnectionState.DISCONNECTED -> {
-                        rejoin()
                     }
 
                     else -> {
@@ -774,7 +753,7 @@ public class Call(
         leave(disconnectionReason = null)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = safeCall {
+    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
@@ -785,7 +764,7 @@ public class Call(
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return
+            return@atomicLeave
         }
         isDestroyed = true
 
@@ -1026,12 +1005,26 @@ public class Call(
         return sub
     }
 
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
     public fun subscribe(
         listener: VideoEventListener<VideoEvent>,
     ): EventSubscription = synchronized(subscriptions) {
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
         return sub
+    }
+
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
+    public fun unsubscribe(eventSubscription: EventSubscription) = synchronized(subscriptions) {
+        subscriptions.remove(eventSubscription)
     }
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
@@ -1072,6 +1065,8 @@ public class Call(
         return clientImpl.updateMembers(type, id, request)
     }
 
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -1088,6 +1083,36 @@ public class Call(
                 }
             }
         }
+
+        if (!events.tryEmit(event)) {
+            logger.e { "Failed to emit event to observers: [event: $event]" }
+        }
+    }
+
+    private fun monitorHeadset() {
+        microphone.devices.onEach { availableDevices ->
+            logger.d {
+                "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
+            }
+
+            val bluetoothHeadset = availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
+            val wiredHeadset = availableDevices.find { it is StreamAudioDevice.WiredHeadset }
+
+            if (bluetoothHeadset != null) {
+                logger.d { "[monitorHeadset] BT headset selected" }
+                microphone.select(bluetoothHeadset)
+            } else if (wiredHeadset != null) {
+                logger.d { "[monitorHeadset] wired headset found" }
+                microphone.select(wiredHeadset)
+            } else {
+                logger.d { "[monitorHeadset] no headset found" }
+
+                microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
+                    logger.d { "[monitorHeadset] before device selected" }
+                    microphone.select(deviceBeforeHeadset)
+                }
+            }
+        }.launchIn(scope)
     }
 
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
@@ -1103,10 +1128,10 @@ public class Call(
                         callSettings.audio.speakerDefaultOn
                 }
 
-            speaker.setEnabled(
-                enabled = enableSpeaker,
-            )
+            speaker.setEnabled(enabled = enableSpeaker)
         }
+
+        monitorHeadset()
 
         // Camera
         if (camera.status.value is DeviceStatus.NotSelected) {

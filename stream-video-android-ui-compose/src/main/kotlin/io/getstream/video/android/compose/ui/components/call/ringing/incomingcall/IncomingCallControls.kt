@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
@@ -57,6 +58,8 @@ public fun IncomingCallControls(
     ) {
         DeclineCallAction(
             onCallAction = onCallAction,
+            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
+
         )
 
         if (isMicrophoneEnabled != null) {
@@ -70,8 +73,10 @@ public fun IncomingCallControls(
 
         if (isVideoCall) {
             ToggleCameraAction(
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
+                    1.5f,
+                ),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )
@@ -79,6 +84,7 @@ public fun IncomingCallControls(
 
         AcceptCallAction(
             onCallAction = onCallAction,
+            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )
     }
 }

@@ -17,8 +17,8 @@ before_all do |lane|
   end
 end
 
-lane :start_video_buddy do
-  install_video_buddy
+lane :start_video_buddy do |options|
+  install_video_buddy unless options[:debug]
   stop_video_buddy if is_localhost
   sh("stream-video-buddy server --port #{video_buddy_port} > video-buddy-server.log 2>&1 &")
 end
@@ -120,12 +120,11 @@ lane :rubocop do
 end
 
 lane :install_video_buddy do
-  playwright_version = '1.51.1'
-  sh("npm list -g playwright | grep -q '#{playwright_version}' || " \
-     "npm install -g playwright@#{playwright_version}")
+  playwright_version = '1.52.0'
+  sh("npm install -g playwright@#{playwright_version}")
   sh('npx playwright install chromium')
 
-  stream_video_buddy_version = '1.6.24'
+  stream_video_buddy_version = '1.6.27'
   sh("npm list -g stream-video-buddy | grep -q '#{stream_video_buddy_version}' || " \
      "npm install -g 'https://github.com/GetStream/stream-video-buddy##{stream_video_buddy_version}'")
 end
