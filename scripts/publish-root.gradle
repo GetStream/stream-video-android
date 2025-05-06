@@ -37,11 +37,6 @@ if (snapshot) {
 } else {
     ext['rootVersionName'] = Configuration.versionName
 }
-if (snapshot) {
-  ext["rootVersionName"] = Configuration.snapshotVersionName
-} else {
-  ext["rootVersionName"] = Configuration.versionName
-}
 
 // Set up Sonatype repository
 nexusPublishing {
