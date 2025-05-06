@@ -138,7 +138,10 @@ public open class DefaultNotificationHandler(
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                 /**
-                 * Psst! Sorry for ugly code, it is to avoid breaking change
+                 * Temporary workaround to associate the callId with its PendingIntent
+                 * without introducing a breaking change in the public API.
+                 *
+                 * Note: This should be refactored or removed in the next major release.
                  */
                 NotificationsMigrationHelper.incomingCallMap[acceptCallPendingIntent] = callId
 

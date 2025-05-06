@@ -33,15 +33,12 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.socket.common.token.TokenProvider
-import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
-import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
-import io.getstream.video.android.util.StreamVideoInitHelper.context
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -223,7 +220,6 @@ object StreamVideoInitHelper {
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
             callServiceConfigRegistry = CallServiceConfigRegistry(),
-            sounds = defaultResourcesRingingConfig(context).toSounds(),
         ).build()
     }
 }

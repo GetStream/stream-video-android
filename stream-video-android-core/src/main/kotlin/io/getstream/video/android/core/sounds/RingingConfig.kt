@@ -68,6 +68,8 @@ public data class Sounds(
  *
  * @param ringingConfig The configuration for incoming and outgoing call sounds.
  * @param mutedRingingConfig The configuration for handling incoming and outgoing call sounds if device is muted. Can be null.
+ * @param audioCallRingingConfig The configuration for incoming and outgoing [CallType.AudioCall] sounds.
+ * @param videoCallRingingConfig The configuration for incoming and outgoing [CallType.Default] sounds.
  * @return A [Sounds] object containing the specified configurations.
  * 
  * 
