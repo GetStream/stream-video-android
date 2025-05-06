@@ -520,7 +520,7 @@ class MicrophoneManager(
 
                         pendingSetupCallbacks.forEach { it.invoke() }
                         pendingSetupCallbacks.clear()
-                    }
+                    },
                 )
                 audioHandler.start()
             } else {
