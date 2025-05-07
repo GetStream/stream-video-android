@@ -72,7 +72,7 @@ class CallLifecycleTests : StreamTestCase() {
                 .joinCall(callId)
         }
         step("THEN user observes the alert that participant joined") {
-            // FIXME: there is no alert at the moment
+            // TODO: There is no alert at the moment, see: linear.app/stream/issue/AND-522
         }
         step("AND there is one participant on the call") {
             userRobot
@@ -83,7 +83,7 @@ class CallLifecycleTests : StreamTestCase() {
             // simulated by call duration timeout
         }
         step("THEN user observes the alert that participant left") {
-            // FIXME: there is no alert at the moment
+            // TODO: There is no alert at the moment, see: linear.app/stream/issue/AND-522
         }
         step("AND there are no participants on the call") {
             userRobot
@@ -94,7 +94,7 @@ class CallLifecycleTests : StreamTestCase() {
             participantRobot.joinCall(callId)
         }
         step("THEN user observes the alert that participant joined") {
-            // FIXME: there is no alert at the moment
+            // TODO: There is no alert at the moment, see: linear.app/stream/issue/AND-522
         }
         step("AND there is one participant on the call") {
             userRobot
