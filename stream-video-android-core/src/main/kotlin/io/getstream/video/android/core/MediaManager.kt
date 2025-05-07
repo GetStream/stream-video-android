@@ -471,22 +471,22 @@ class MicrophoneManager(
 
     // Internal logic
     internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
-        var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
+        synchronized(this) {
+            var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
 
-        if (setupCompleted) {
-            capturedOnAudioDevicesUpdate?.invoke()
-            capturedOnAudioDevicesUpdate = null
+            if (setupCompleted) {
+                capturedOnAudioDevicesUpdate?.invoke()
+                capturedOnAudioDevicesUpdate = null
 
-            return
-        }
+                return
+            }
 
-        audioManager = mediaManager.context.getSystemService()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
-        }
+            audioManager = mediaManager.context.getSystemService()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
+            }
 
-        if (canHandleDeviceSwitch()) {
-            if (!::audioHandler.isInitialized) { // This check is atomic
+            if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
                 audioHandler = AudioSwitchHandler(
                     context = mediaManager.context,
                     preferredDeviceList = listOf(
@@ -509,17 +509,18 @@ class MicrophoneManager(
                         _devices.value = devices.map { it.fromAudio() }
                         _selectedDevice.value = selected?.fromAudio()
 
+                        setupCompleted = true
+
                         capturedOnAudioDevicesUpdate?.invoke()
                         capturedOnAudioDevicesUpdate = null
-                        setupCompleted = true
                     },
                 )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()
+            } else {
+                logger.d { "[MediaManager#setup] Usage is MEDIA or audioHandle is already initialized" }
             }
-        } else {
-            logger.d { "[MediaManager#setup] usage is MEDIA, cannot handle device switch" }
         }
     }
 
