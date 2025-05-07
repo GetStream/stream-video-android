@@ -560,7 +560,7 @@ public sealed class CameraDirection {
  * camera.resolution // the selected camera resolution
  *
  */
-public class CameraManager(
+class CameraManager(
     public val mediaManager: MediaManagerImpl,
     public val eglBaseContext: EglBase.Context,
     defaultCameraDirection: CameraDirection = CameraDirection.Front,
