@@ -107,6 +107,13 @@ private fun IncomingCallOptionsPreview() {
                 isCameraEnabled = false,
                 onCallAction = { },
             )
+            Spacer(modifier = Modifier.size(16.dp))
+            IncomingCallControls(
+                isVideoCall = true,
+                isMicrophoneEnabled = true,
+                isCameraEnabled = true,
+                onCallAction = { },
+            )
         }
     }
 }
