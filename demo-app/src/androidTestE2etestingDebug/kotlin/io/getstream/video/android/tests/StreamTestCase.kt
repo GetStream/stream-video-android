@@ -101,7 +101,6 @@ abstract class StreamTestCase {
     }
 
     private fun generateCallId() {
-        val uuid = UUID.randomUUID().toString().split("-")
-        callId = if (uuid.isNotEmpty()) uuid.first() else "Test"
+        callId = UUID.randomUUID().toString().split("-").first()
     }
 }
