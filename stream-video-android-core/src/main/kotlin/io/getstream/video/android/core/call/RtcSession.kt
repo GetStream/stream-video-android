@@ -251,7 +251,7 @@ public class RtcSession internal constructor(
 
     private val traces = mutableListOf<TraceRecord>()
     internal val statsReportJob = call.scope.launch {
-        while(true) {
+        while (true) {
             delay(10000)
         }
     }

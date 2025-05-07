@@ -38,7 +38,7 @@ data class TraceRecord(
  *
  * @return an array of the values
  */
-fun TraceRecord.serialize() : Array<Any?> = arrayOf(tag, id, data, timestamp)
+fun TraceRecord.serialize(): Array<Any?> = arrayOf(tag, id, data, timestamp)
 
 /**
  * An append-only, thread-safe trace buffer that can be snapshotted and rolled back.
@@ -94,7 +94,7 @@ class Tracer(private val id: String?) {
         return TraceSlice(
             snapshot = snapshot,
             rollback = {
-                synchronized(buffer)  {
+                synchronized(buffer) {
                     buffer.addAll(0, snapshot)
                 }
             },

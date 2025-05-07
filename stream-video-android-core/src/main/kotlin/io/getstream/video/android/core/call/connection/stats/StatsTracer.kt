@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection.stats
 
 import io.getstream.video.android.core.call.stats.toRtcCodecStats
@@ -40,7 +56,9 @@ class StatsTracer(
      *  * delta-compressed stats (diff vs previous poll)
      *  * the raw [RTCStatsReport]
      */
-    suspend fun get(trackIdToTrackType: Map<String, TrackType>,): ComputedStats = suspendCancellableCoroutine { cont ->
+    suspend fun get(
+        trackIdToTrackType: Map<String, TrackType>,
+    ): ComputedStats = suspendCancellableCoroutine { cont ->
         pc.getStats { report ->
             val currentStats = report.statsMap
 
@@ -61,8 +79,8 @@ class StatsTracer(
                 ComputedStats(
                     performanceStats = perfStats,
                     delta = delta,
-                    stats = report
-                )
+                    stats = report,
+                ),
             )
         }
     }
@@ -71,7 +89,7 @@ class StatsTracer(
 
     private fun getEncodeStats(
         trackIdToTrackType: Map<String, TrackType>,
-        stats: Map<String, RTCStats>
+        stats: Map<String, RTCStats>,
     ): List<PerformanceStats> {
         val result = mutableListOf<PerformanceStats>()
 
@@ -91,9 +109,8 @@ class StatsTracer(
                     .toDouble()
 
                 val frameTime = if (dfSent > 0) {
-                    dtEncode.div(dfSent).times(1000)   // ms / frame
+                    dtEncode.div(dfSent).times(1000) // ms / frame
                 } else { 0.0 }
-
 
                 frameTimeHistory.add(frameTime)
                 fpsHistory.add(rtp.framesPerSecond ?: 0.0)
@@ -112,8 +129,8 @@ class StatsTracer(
                     target_bitrate = rtp.targetBitrate?.roundToInt() ?: 0,
                     video_dimension = VideoDimension(
                         width = rtp.frameWidth?.toInt() ?: 0,
-                        height = rtp.frameHeight?.toInt() ?: 0
-                    )
+                        height = rtp.frameHeight?.toInt() ?: 0,
+                    ),
                 )
             }
         return result
@@ -121,7 +138,7 @@ class StatsTracer(
 
     private fun getDecodeStats(
         trackIdToTrackType: Map<String, TrackType>,
-        stats: Map<String, RTCStats>
+        stats: Map<String, RTCStats>,
     ): List<PerformanceStats> {
         // pick the inbound-rtp entry with the largest frame area (active track)
         val rtp = stats.values
@@ -139,7 +156,7 @@ class StatsTracer(
             .toDouble()
 
         val frameTime = if (dfDecoded > 0) {
-            dtDecode.div(dfDecoded).times(1000)   // ms / frame
+            dtDecode.div(dfDecoded).times(1000) // ms / frame
         } else {
             0.0
         }
@@ -156,9 +173,9 @@ class StatsTracer(
                 avg_fps = fpsHistory.averageOrNull()?.toFloat() ?: 0f,
                 video_dimension = VideoDimension(
                     width = rtp.frameWidth?.toInt() ?: 0,
-                    height = rtp.frameHeight?.toInt() ?: 0
-                )
-            )
+                    height = rtp.frameHeight?.toInt() ?: 0,
+                ),
+            ),
         )
     }
 }
@@ -172,7 +189,7 @@ private fun codecFrom(stats: Map<String, RTCStats>, codecId: String?): Codec? =
                 name = it.mimeType ?: "",
                 clock_rate = it.clockRate?.toInt() ?: 0,
                 payload_type = it.payloadType?.toInt() ?: 0,
-                fmtp = it.sdpFmtpLine ?: ""
+                fmtp = it.sdpFmtpLine ?: "",
             )
         }
 
@@ -198,7 +215,6 @@ private fun deltaCompression(
     oldStats: Map<String, RTCStats>,
     newStats: Map<String, RTCStats>,
 ): Map<String, Any?> {
-
     val diff = mutableMapOf<String, MutableMap<String, Any?>>()
     var latestTs = Double.MIN_VALUE
 
@@ -217,7 +233,7 @@ private fun deltaCompression(
 
         /* ---------- include record only if something changed ---------- */
         if (changed.isNotEmpty() || old == null) {
-            changed["type"] = current.type          // keep the record type
+            changed["type"] = current.type // keep the record type
             changed["timestamp"] = current.timestampUs
             diff[id] = changed
         }
@@ -228,7 +244,6 @@ private fun deltaCompression(
     }
     return diff
 }
-
 
 /**
  * Wrapper returned by [StatsTracer.get] that contains:
@@ -246,7 +261,3 @@ data class ComputedStats(
     /** High-level, human-readable performance numbers for each track. */
     val performanceStats: List<PerformanceStats>,
 )
-
-
-
-
