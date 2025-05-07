@@ -62,7 +62,6 @@ import io.getstream.video.android.compose.ui.components.call.ringing.RingingCall
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.CallType
@@ -404,18 +403,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         onBackPressed: () -> Unit,
         onCallAction: (CallAction) -> Unit,
     ) {
-        // We know call.get was called within StreamCallActivity, so we have updated settings
-        val callSettings by call.state.settings.collectAsStateWithLifecycle()
-        val microphoneStatus by call.microphone.status.collectAsStateWithLifecycle()
-        val cameraStatus by call.camera.status.collectAsStateWithLifecycle()
-
-        if (cameraStatus == DeviceStatus.NotSelected) {
-            call.camera.setEnabled(callSettings?.video?.cameraDefaultOn ?: false)
-        }
-        if (microphoneStatus == DeviceStatus.NotSelected) {
-            call.microphone.setEnabled(callSettings?.audio?.micDefaultOn ?: false)
-        }
-
         io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent(
             call = call,
             isVideoType = isVideoType,
