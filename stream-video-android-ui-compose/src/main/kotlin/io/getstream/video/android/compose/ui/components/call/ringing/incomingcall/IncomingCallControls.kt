@@ -64,8 +64,10 @@ public fun IncomingCallControls(
 
         if (isMicrophoneEnabled != null) {
             ToggleMicrophoneAction(
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
+                    1.5f,
+                ),
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 onCallAction = onCallAction,
             )
