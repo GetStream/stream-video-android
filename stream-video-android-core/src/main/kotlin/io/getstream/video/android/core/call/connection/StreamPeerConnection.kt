@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.connection.stats.StatsTracer
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.stats.toRtcStats
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
@@ -27,6 +28,7 @@ import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
+import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.model.toRtcCandidate
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
@@ -49,6 +51,8 @@ import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
+import org.webrtc.StatsReport
+import stream.video.sfu.models.TrackType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -82,6 +86,8 @@ open class StreamPeerConnection(
     internal var remoteSdp: SessionDescription? = null
     private val iceCandidates = mutableListOf<IceCandidate>()
     private val typeTag = type.stringify()
+
+    internal val statsReport = StatsTracer(connection, type.toPeerType())
 
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)

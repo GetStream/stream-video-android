@@ -79,6 +79,18 @@ message SendStatsRequest {
   }
 
   Telemetry telemetry = 11;
+  models.RTMPIngress rtmp = 12;
+  string subscriber_rtc_stats = 13 [deprecated = true];
+  string publisher_rtc_stats = 14 [deprecated = true];
+  string rtc_stats = 15;
+  // Encode stats for the publisher
+  repeated models.PerformanceStats encode_stats = 16;
+  // Decode stats for the subscriber
+  repeated models.PerformanceStats decode_stats = 17;
+  // user_session id can change during reconnects, this helps us to
+  // identify the user across reconnects and should remain consistent until the user explicitly
+  // disconnects, is kicked or the call is ended.
+  string unified_session_id = 18;
 }
 
 message SendStatsResponse {

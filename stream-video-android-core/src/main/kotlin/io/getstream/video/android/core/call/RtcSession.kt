@@ -72,6 +72,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
+import io.getstream.video.android.core.trace.TraceRecord
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildRemoteIceServers
@@ -247,6 +248,13 @@ public class RtcSession internal constructor(
         MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
             null,
         )
+
+    private val traces = mutableListOf<TraceRecord>()
+    internal val statsReportJob = call.scope.launch {
+        while(true) {
+            delay(10000)
+        }
+    }
 
     // run all calls on a supervisor job so we can easily cancel them
 
@@ -1436,6 +1444,7 @@ public class RtcSession internal constructor(
                     webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
                     publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
                     subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
+                    // rtc_stats = , Tracer instances
                     android = AndroidState(
                         thermal_state = androidThermalState,
                         is_power_saver_mode = powerSaving,

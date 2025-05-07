@@ -16,8 +16,7 @@
 
 package io.getstream.video.android.core.trace
 
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
+import java.util.Collections
 
 /**
  * A single trace item captured by [Tracer].
@@ -35,27 +34,31 @@ data class TraceRecord(
 )
 
 /**
+ * Serialize the [TraceRecord].
+ *
+ * @return an array of the values
+ */
+fun TraceRecord.serialize() : Array<Any?> = arrayOf(tag, id, data, timestamp)
+
+/**
  * An append-only, thread-safe trace buffer that can be snapshotted and rolled back.
  *
  * All state mutations are guarded by [lock], ensuring atomicity across threads.
  */
 class Tracer(private val id: String?) {
 
-    private val buffer: MutableList<TraceRecord> = mutableListOf()
+    private val buffer: MutableList<TraceRecord> = Collections.synchronizedList(mutableListOf())
     private var enabled: Boolean = true
-    private val lock = ReentrantLock()
 
     /**
      * Enables or disables tracing.
      *
      * Switching state clears any existing buffered entries.
      */
-    fun setEnabled(enabled: Boolean) {
-        lock.withLock {
-            if (this.enabled == enabled) return
-            this.enabled = enabled
-            buffer.clear()
-        }
+    fun setEnabled(enabled: Boolean) = synchronized(buffer) {
+        if (this.enabled == enabled) return
+        this.enabled = enabled
+        buffer.clear()
     }
 
     /**
@@ -64,18 +67,16 @@ class Tracer(private val id: String?) {
      * The lambda form matches the original TypeScript API and can be stored or passed
      * around as a function reference.
      */
-    fun trace(tag: String, data: Any?) {
-        lock.withLock {
-            if (!enabled) return@withLock
-            buffer.add(
-                TraceRecord(
-                    tag = tag,
-                    id = id,
-                    data = data,
-                    timestamp = System.currentTimeMillis(),
-                ),
-            )
-        }
+    fun trace(tag: String, data: Any?) = synchronized(buffer) {
+        if (!enabled) return@synchronized
+        buffer.add(
+            TraceRecord(
+                tag = tag,
+                id = id,
+                data = data,
+                timestamp = System.currentTimeMillis(),
+            ),
+        )
     }
 
     /**
@@ -85,7 +86,7 @@ class Tracer(private val id: String?) {
      * of the buffer, preserving original ordering.
      */
     fun take(): TraceSlice {
-        val snapshot: List<TraceRecord> = lock.withLock {
+        val snapshot: List<TraceRecord> = synchronized(buffer) {
             val copy = buffer.toList()
             buffer.clear()
             copy
@@ -93,14 +94,16 @@ class Tracer(private val id: String?) {
         return TraceSlice(
             snapshot = snapshot,
             rollback = {
-                lock.withLock { buffer.addAll(0, snapshot) }
+                synchronized(buffer)  {
+                    buffer.addAll(0, snapshot)
+                }
             },
         )
     }
 
     /** Permanently discards all buffered trace entries. */
-    fun dispose() {
-        lock.withLock { buffer.clear() }
+    fun dispose() = synchronized(buffer) {
+        buffer.clear()
     }
 }
 
