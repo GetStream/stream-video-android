@@ -12,7 +12,16 @@ on:
           - major
 
 jobs:
+  pre_release_check:
+    name: Pre release check
+    runs-on: ubuntu-24.04
+    environment: 'publish'
+    steps:
+      - name: Check
+        id: pre_release_check_step
+        run: echo "Pre release check"
   publish:
+    needs: pre_release_check
     uses: GetStream/android-ci-actions/.github/workflows/release-new-version.yml@main
     with:
       ref: "develop"
