@@ -38,7 +38,7 @@ class ParticipantRobot(
     private var callRecordingDuration: Int? = null
     private var messageCount: Int? = null
     private var userCount: Int = 1
-    private var callDuration: Double = 30.0
+    private var callDuration: Int = 30
 
     enum class Options(val value: String) {
         WITH_CAMERA("camera"),
@@ -78,7 +78,7 @@ class ParticipantRobot(
         return this
     }
 
-    fun setCallDuration(duration: Double): ParticipantRobot {
+    fun setCallDuration(duration: Int): ParticipantRobot {
         callDuration = duration
         return this
     }
