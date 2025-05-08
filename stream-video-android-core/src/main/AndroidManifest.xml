@@ -77,7 +77,11 @@
                 <action android:name="io.getstream.video.android.action.LEAVE_CALL" />
             </intent-filter>
         </receiver>
-        <activity android:name=".notifications.internal.DismissNotificationActivity" />
+        <activity
+            android:name=".notifications.internal.DismissNotificationActivity"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
 
         <receiver android:name=".notifications.internal.receivers.StopScreenshareBroadcastReceiver"
             android:exported="false">

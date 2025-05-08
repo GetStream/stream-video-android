@@ -40,10 +40,12 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
+import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
@@ -502,6 +504,9 @@ internal open class CallService : Service() {
                     }
 
                     is RingingState.RejectedByAll -> {
+                        ClientScope().launch {
+                            call.reject(RejectReason.Decline)
+                        }
                         callSoundPlayer?.stopCallSound()
                         stopService()
                     }
@@ -521,7 +526,7 @@ internal open class CallService : Service() {
     private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoClient) {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
-            call.subscribe { event ->
+            call.events.collect { event ->
                 logger.i { "Received event in service: $event" }
                 when (event) {
                     is CallAcceptedEvent -> {

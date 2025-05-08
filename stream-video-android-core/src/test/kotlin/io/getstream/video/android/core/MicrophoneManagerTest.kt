@@ -27,6 +27,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -42,6 +43,11 @@ class MicrophoneManagerTest {
         val context = mockk<Context>(relaxed = true)
         every { mediaManager.context } returns context
         every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
+
+        val speakerManager = mockk<SpeakerManager>(relaxed = true)
+        val isEnabledStateFlow = MutableStateFlow(true)
+        every { speakerManager.isEnabled } returns isEnabledStateFlow
+        every { mediaManager.speaker } returns speakerManager
 
         val microphoneManager = spyk(actual)
         val slot = slot<() -> Unit>()
