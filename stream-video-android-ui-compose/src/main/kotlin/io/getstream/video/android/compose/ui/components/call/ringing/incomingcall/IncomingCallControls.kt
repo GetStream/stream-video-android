@@ -91,7 +91,8 @@ public fun IncomingCallControls(
     }
 }
 
-@Preview
+@Preview(name = "Small Phone - 320dp", widthDp = 320)
+@Preview(name = "Normal Phone - 411dp", widthDp = 411)
 @Composable
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
