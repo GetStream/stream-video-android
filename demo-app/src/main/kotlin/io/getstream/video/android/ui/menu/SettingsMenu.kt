@@ -196,7 +196,12 @@ internal fun SettingsMenu(
             is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
             is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
         }
-        AudioDeviceUiState(it, it.name, icon, it.audio.name == selectedMicroPhoneDevice?.audio?.name)
+        AudioDeviceUiState(
+            it,
+            it.name,
+            icon,
+            it.audio.name == selectedMicroPhoneDevice?.audio?.name,
+        )
     }
 
     val isSpeakerEnabled by call.speaker.isEnabled.collectAsStateWithLifecycle()
@@ -294,7 +299,7 @@ internal fun SettingsMenu(
                 loadTranscriptions = onLoadTranscriptions,
                 audioDeviceUiStateList = audioDeviceUiStateList,
                 isSpeakerEnabled = isSpeakerEnabled,
-                onSpeakerToggleAction = onSpeakerToggleAction
+                onSpeakerToggleAction = onSpeakerToggleAction,
             ),
         )
     }
@@ -365,7 +370,7 @@ private fun SettingsMenuPreview() {
                 transcriptionUiState = TranscriptionAvailableUiState,
                 onToggleTranscription = {},
                 loadTranscriptions = { emptyList() },
-                audioDeviceUiStateList = emptyList()
+                audioDeviceUiStateList = emptyList(),
             ),
         )
     }
