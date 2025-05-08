@@ -28,6 +28,8 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.trace.Tracer
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -293,7 +295,7 @@ public class StreamPeerConnectionFactory(
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidateRequest,
             maxBitRate = maxPublishingBitrate,
-            tracer = tracer,
+            tracer = Tracer(type.toPeerType().name),
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,

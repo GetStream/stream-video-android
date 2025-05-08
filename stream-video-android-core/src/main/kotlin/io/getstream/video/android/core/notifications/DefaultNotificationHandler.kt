@@ -117,6 +117,7 @@ public open class DefaultNotificationHandler(
                 logger.e { "Couldn't find any activity for $ACTION_MISSED_CALL" }
                 intentResolver.getDefaultPendingIntent()
             }
+        StreamVideo.instance().state.ringingCall
         showMissedCallNotification(
             intent,
             callDisplayName,

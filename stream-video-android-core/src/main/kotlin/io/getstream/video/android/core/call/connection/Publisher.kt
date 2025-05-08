@@ -132,6 +132,12 @@ internal class Publisher(
 
     @VisibleForTesting
     public suspend fun negotiate(iceRestart: Boolean = false) {
+
+        if (isIceRestarting) {
+            logger.i { "ICE restart in progress, skipping negotiation" }
+            return
+        }
+
         val offer = super.createOffer(
             if (iceRestart) {
                 iceRestartConstraints
@@ -141,10 +147,6 @@ internal class Publisher(
         ).getOrThrow()
         val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
 
-        if (isIceRestarting) {
-            logger.i { "ICE restart in progress, skipping negotiation" }
-            return
-        }
 
         if (trackInfos.isEmpty()) {
             logger.e { ("Can't negotiate without announcing any tracks") }

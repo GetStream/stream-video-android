@@ -6500,7 +6500,7 @@ public abstract interface class io/getstream/video/android/core/call/audio/Input
 }
 
 public class io/getstream/video/android/core/call/connection/StreamPeerConnection : org/webrtc/PeerConnection$Observer {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;I)V
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILio/getstream/video/android/core/trace/Tracer;)V
 	public final fun addAudioTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;)V
 	public final fun addIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun addVideoTransceiver (Lorg/webrtc/MediaStreamTrack;Ljava/util/List;Z)V
@@ -6553,6 +6553,26 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun setAudioRecordDataCallback (Lkotlin/jvm/functions/Function4;)V
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
 	public final fun toggleAudioProcessing ()Z
+}
+
+public final class io/getstream/video/android/core/call/connection/stats/ComputedStats {
+	public fun <init> (Lorg/webrtc/RTCStatsReport;Ljava/util/Map;Ljava/util/List;)V
+	public final fun component1 ()Lorg/webrtc/RTCStatsReport;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Lorg/webrtc/RTCStatsReport;Ljava/util/Map;Ljava/util/List;)Lio/getstream/video/android/core/call/connection/stats/ComputedStats;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/connection/stats/ComputedStats;Lorg/webrtc/RTCStatsReport;Ljava/util/Map;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/core/call/connection/stats/ComputedStats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDelta ()Ljava/util/Map;
+	public final fun getPerformanceStats ()Ljava/util/List;
+	public final fun getStats ()Lorg/webrtc/RTCStatsReport;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/call/connection/stats/StatsTracer {
+	public fun <init> (Lorg/webrtc/PeerConnection;Lstream/video/sfu/models/PeerType;)V
+	public final fun get (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
@@ -10853,6 +10873,48 @@ public final class io/getstream/video/android/core/sounds/Sounds {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/trace/TraceRecord {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/Object;
+	public final fun component4 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;J)Lio/getstream/video/android/core/trace/TraceRecord;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/trace/TraceRecord;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;JILjava/lang/Object;)Lio/getstream/video/android/core/trace/TraceRecord;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/Object;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getTag ()Ljava/lang/String;
+	public final fun getTimestamp ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/trace/TraceRecordKt {
+	public static final fun serialize (Lio/getstream/video/android/core/trace/TraceRecord;)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/trace/TraceSlice {
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;)Lio/getstream/video/android/core/trace/TraceSlice;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/trace/TraceSlice;Ljava/util/List;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lio/getstream/video/android/core/trace/TraceSlice;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRollback ()Lkotlin/jvm/functions/Function0;
+	public final fun getSnapshot ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/trace/Tracer {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun dispose ()V
+	public final fun setEnabled (Z)V
+	public final fun take ()Lio/getstream/video/android/core/trace/TraceSlice;
+	public final fun trace (Ljava/lang/String;Ljava/lang/Object;)V
+}
+
 public final class io/getstream/video/android/core/utils/AndroidUtilsKt {
 	public static final fun shouldShowRequestPermissionsRationale (Landroid/app/Activity;[Ljava/lang/String;)Z
 }
@@ -13000,14 +13062,15 @@ public final class stream/video/sfu/event/ReconnectDetails : com/squareup/wire/M
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/event/ReconnectDetails$Companion;
 	public fun <init> ()V
-	public fun <init> (Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
-	public synthetic fun <init> (Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lokio/ByteString;)Lstream/video/sfu/event/ReconnectDetails;
-	public static synthetic fun copy$default (Lstream/video/sfu/event/ReconnectDetails;Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/ReconnectDetails;
+	public fun <init> (Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)Lstream/video/sfu/event/ReconnectDetails;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/ReconnectDetails;Lstream/video/sfu/models/WebsocketReconnectStrategy;Ljava/util/List;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/ReconnectDetails;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAnnounced_tracks ()Ljava/util/List;
 	public final fun getFrom_sfu_id ()Ljava/lang/String;
 	public final fun getPrevious_session_id ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
 	public final fun getReconnect_attempt ()I
 	public final fun getStrategy ()Lstream/video/sfu/models/WebsocketReconnectStrategy;
 	public final fun getSubscriptions ()Ljava/util/List;
@@ -13666,6 +13729,30 @@ public final class stream/video/sfu/models/PeerType$Companion {
 	public final fun fromValue (I)Lstream/video/sfu/models/PeerType;
 }
 
+public final class stream/video/sfu/models/PerformanceStats : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/sfu/models/PerformanceStats$Companion;
+	public fun <init> ()V
+	public fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;FFLstream/video/sfu/models/VideoDimension;ILokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;FFLstream/video/sfu/models/VideoDimension;ILokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;FFLstream/video/sfu/models/VideoDimension;ILokio/ByteString;)Lstream/video/sfu/models/PerformanceStats;
+	public static synthetic fun copy$default (Lstream/video/sfu/models/PerformanceStats;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;FFLstream/video/sfu/models/VideoDimension;ILokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/PerformanceStats;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAvg_fps ()F
+	public final fun getAvg_frame_time_ms ()F
+	public final fun getCodec ()Lstream/video/sfu/models/Codec;
+	public final fun getTarget_bitrate ()I
+	public final fun getTrack_type ()Lstream/video/sfu/models/TrackType;
+	public final fun getVideo_dimension ()Lstream/video/sfu/models/VideoDimension;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/sfu/models/PerformanceStats$Companion {
+}
+
 public final class stream/video/sfu/models/Pin : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/models/Pin$Companion;
@@ -13710,6 +13797,31 @@ public final class stream/video/sfu/models/PublishOption : com/squareup/wire/Mes
 }
 
 public final class stream/video/sfu/models/PublishOption$Companion {
+}
+
+public final class stream/video/sfu/models/RTMPIngress : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/sfu/models/RTMPIngress$Companion;
+	public fun <init> ()V
+	public fun <init> (IIDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (IIDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (IIDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;)Lstream/video/sfu/models/RTMPIngress;
+	public static synthetic fun copy$default (Lstream/video/sfu/models/RTMPIngress;IIDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/RTMPIngress;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEncoder ()Ljava/lang/String;
+	public final fun getFrame_rate ()D
+	public final fun getHeight ()I
+	public final fun getRemote_addr ()Ljava/lang/String;
+	public final fun getSoftware ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public final fun getWidth ()I
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/sfu/models/RTMPIngress$Companion {
 }
 
 public final class stream/video/sfu/models/Sdk : com/squareup/wire/Message {
@@ -14084,20 +14196,27 @@ public final class stream/video/sfu/signal/SendStatsRequest : com/squareup/wire/
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/signal/SendStatsRequest$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lokio/ByteString;)Lstream/video/sfu/signal/SendStatsRequest;
-	public static synthetic fun copy$default (Lstream/video/sfu/signal/SendStatsRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/signal/SendStatsRequest;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;)Lstream/video/sfu/signal/SendStatsRequest;
+	public static synthetic fun copy$default (Lstream/video/sfu/signal/SendStatsRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/InputDevices;Lstream/video/sfu/models/AndroidState;Lstream/video/sfu/models/AppleState;Lstream/video/sfu/signal/Telemetry;Lstream/video/sfu/models/RTMPIngress;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/signal/SendStatsRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAndroid ()Lstream/video/sfu/models/AndroidState;
 	public final fun getApple ()Lstream/video/sfu/models/AppleState;
 	public final fun getAudio_devices ()Lstream/video/sfu/models/InputDevices;
+	public final fun getDecode_stats ()Ljava/util/List;
+	public final fun getEncode_stats ()Ljava/util/List;
+	public final fun getPublisher_rtc_stats ()Ljava/lang/String;
 	public final fun getPublisher_stats ()Ljava/lang/String;
+	public final fun getRtc_stats ()Ljava/lang/String;
+	public final fun getRtmp ()Lstream/video/sfu/models/RTMPIngress;
 	public final fun getSdk ()Ljava/lang/String;
 	public final fun getSdk_version ()Ljava/lang/String;
 	public final fun getSession_id ()Ljava/lang/String;
+	public final fun getSubscriber_rtc_stats ()Ljava/lang/String;
 	public final fun getSubscriber_stats ()Ljava/lang/String;
 	public final fun getTelemetry ()Lstream/video/sfu/signal/Telemetry;
+	public final fun getUnified_session_id ()Ljava/lang/String;
 	public final fun getVideo_devices ()Lstream/video/sfu/models/InputDevices;
 	public final fun getWebrtc_version ()Ljava/lang/String;
 	public fun hashCode ()I
