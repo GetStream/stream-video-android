@@ -31,6 +31,7 @@ import android.annotation.SuppressLint
 import io.getstream.chat.android.e2e.test.rules.RetryRule
 import io.getstream.video.android.robots.ParticipantRobot
 import io.getstream.video.android.robots.UserRobot
+import io.getstream.video.android.robots.VideoView
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.grantPermission
 import io.getstream.video.android.uiautomator.startApp
@@ -46,6 +47,7 @@ abstract class StreamTestCase {
 
     val userRobot = UserRobot()
     lateinit var participantRobot: ParticipantRobot
+    val allViews: Array<VideoView> = arrayOf(VideoView.GRID, VideoView.DYNAMIC, VideoView.SPOTLIGHT)
     lateinit var callId: String
     private val headlessBrowser = true
     private val recordBrowser = true
@@ -99,7 +101,6 @@ abstract class StreamTestCase {
     }
 
     private fun generateCallId() {
-        val uuid = UUID.randomUUID().toString().split("-")
-        callId = if (uuid.isNotEmpty()) uuid.first() else "Test"
+        callId = UUID.randomUUID().toString().split("-").first()
     }
 }

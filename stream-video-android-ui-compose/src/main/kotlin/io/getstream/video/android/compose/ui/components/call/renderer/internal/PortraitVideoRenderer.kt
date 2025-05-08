@@ -30,6 +30,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -93,6 +95,11 @@ internal fun BoxScope.PortraitVideoRenderer(
         return
     }
 
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     when (callParticipants.size) {
         1, 2 -> {
@@ -106,7 +113,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                 call,
                 participant,
                 style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                    isFocused = isDomSpeakerSpeaking && (dominantSpeaker?.sessionId == participant.sessionId),
                 ),
             )
         }
@@ -177,7 +184,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                                 call,
                                 participant,
                                 style.copy(
-                                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                                    isFocused = isDomSpeakerSpeaking && (dominantSpeaker?.sessionId == participant.sessionId),
                                 ),
                             )
                         }
@@ -228,6 +235,11 @@ private fun ParticipantColumn(
     dominantSpeaker: ParticipantState?,
     expectedColumnSize: Int = remoteParticipants.size,
 ) {
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     Column(modifier) {
         repeat(remoteParticipants.size) {
             val participant = remoteParticipants[it]
@@ -236,7 +248,7 @@ private fun ParticipantColumn(
                 call,
                 participant,
                 style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                    isFocused = isDomSpeakerSpeaking && (dominantSpeaker?.sessionId == participant.sessionId),
                 ),
             )
         }

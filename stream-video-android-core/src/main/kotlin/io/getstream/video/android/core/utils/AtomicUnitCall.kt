@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.pages
+package io.getstream.video.android.core.utils
 
-import androidx.test.uiautomator.By
+import java.util.concurrent.atomic.AtomicBoolean
 
-class LoginPage {
+/**
+ * An atomic call that is executed only once, no matter how many consecutive calls are made.
+ */
+internal class AtomicUnitCall {
+    private var called = AtomicBoolean(false)
 
-    companion object {
-        val builtInUserSignInButton = By.res("Stream_BuiltInUserSignIn")
-        val googleSignInButton = By.res("Stream_GoogleSignIn")
-        val randomUserSignInButton = By.res("Stream_RandomUserSignIn")
-        val emailSignIn = By.res("Stream_EmailSignIn")
-        val loginButton = By.text("Login")
+    /**
+     * Executes the given block of code only once, no matter how many consecutive calls are made.
+     */
+    operator fun invoke(block: () -> Unit) {
+        if (called.compareAndSet(false, true)) {
+            safeCall {
+                block()
+            }
+        }
     }
 }

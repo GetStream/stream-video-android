@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonElevation
@@ -411,4 +412,12 @@ public open class ButtonStyleProvider {
                 ),
             ),
         )
+}
+
+internal fun StreamFixedSizeButtonStyle.fillCircle(fraction: Float): StreamFixedSizeButtonStyle {
+    return this.copyFixed(
+        width * fraction,
+        height * fraction,
+        shape = CircleShape,
+    )
 }

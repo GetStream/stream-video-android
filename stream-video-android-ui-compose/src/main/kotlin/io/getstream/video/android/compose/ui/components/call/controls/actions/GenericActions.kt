@@ -44,7 +44,23 @@ public fun GenericAction(
     modifier = modifier,
     enabled = enabled,
     icon = icon,
-    style = style ?: VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
+    style = style?.let {
+        it.copyFixed(
+            shape = shape ?: it.shape,
+            colors = color?.let {
+                ButtonDefaults.buttonColors(
+                    backgroundColor = color,
+                    disabledBackgroundColor = color.copy(alpha = 0.16f),
+                )
+            }
+                ?: it.colors,
+            iconStyle = it.iconStyle.copy(
+                default = it.iconStyle.default.copy(
+                    color = iconTint ?: it.iconStyle.default.color,
+                ),
+            ),
+        )
+    } ?: VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
         .let {
             it.copyFixed(
                 shape = shape ?: it.shape,

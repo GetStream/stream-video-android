@@ -17,9 +17,17 @@
 package io.getstream.video.android.robots
 
 import io.getstream.video.android.pages.CallPage
+import io.getstream.video.android.uiautomator.findObject
+import io.getstream.video.android.uiautomator.findObjects
 import io.getstream.video.android.uiautomator.isDisplayed
+import io.getstream.video.android.uiautomator.seconds
+import io.getstream.video.android.uiautomator.waitForCount
 import io.getstream.video.android.uiautomator.waitForText
 import io.getstream.video.android.uiautomator.waitToAppear
+import io.getstream.video.android.uiautomator.waitToDisappear
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 
 fun UserRobot.assertCallControls(microphone: Boolean, camera: Boolean): UserRobot {
@@ -43,11 +51,72 @@ fun UserRobot.assertCallControls(microphone: Boolean, camera: Boolean): UserRobo
     return this
 }
 
+fun UserRobot.assertThatCallIsEnded(): UserRobot {
+    assertFalse(CallPage.hangUpButton.waitToDisappear().isDisplayed())
+    return this
+}
+
 fun UserRobot.assertParticipantsCountOnCall(count: Int): UserRobot {
     val user = 1
-    val participants = user + count
+    val participants = (user + count).toString()
     CallPage.participantsCountBadge
         .waitToAppear()
-        .waitForText(expectedText = participants.toString())
+        .waitForText(expectedText = participants)
+    assertEquals(participants, CallPage.participantsCountBadge.findObject().text)
+    return this
+}
+
+fun UserRobot.assertParticipantMicrophone(isEnabled: Boolean): UserRobot {
+    if (isEnabled) {
+        assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.waitToAppear().isDisplayed())
+    } else {
+        assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.waitToAppear().isDisplayed())
+    }
+    return this
+}
+
+fun UserRobot.assertMediaTracks(count: Int): UserRobot {
+    if (count > 0) {
+        val mediaTracks = CallPage.ParticipantView.videoViewWithMediaTrack.waitForCount(count)
+        assertEquals(count, mediaTracks.size)
+    } else {
+        CallPage.ParticipantView.videoViewWithMediaTrack.waitToDisappear()
+        assertEquals(count, CallPage.ParticipantView.videoViewWithMediaTrack.findObjects().size)
+    }
+    return this
+}
+
+fun UserRobot.assertConnectionQualityIndicator(): UserRobot {
+    assertTrue(CallPage.ParticipantView.networkQualityIndicator.waitToAppear().isDisplayed())
+    return this
+}
+
+fun UserRobot.assertRecordingView(isDisplayed: Boolean): UserRobot {
+    val label = "Recording"
+    if (isDisplayed) {
+        assertTrue(CallPage.recordingIcon.waitToAppear().isDisplayed())
+        assertEquals(label, CallPage.callInfoView.findObject().text)
+    } else {
+        assertFalse(CallPage.recordingIcon.waitToDisappear().isDisplayed())
+        assertNotEquals(label, CallPage.callInfoView.findObject().text)
+    }
+    return this
+}
+
+fun UserRobot.assertCallDurationView(isDisplayed: Boolean): UserRobot {
+    val callDurationViewText = CallPage.callInfoView.waitToAppear().text
+    assertEquals(isDisplayed, Regex("\\d+s").containsMatchIn(callDurationViewText))
+    return this
+}
+
+fun UserRobot.assertParticipantScreenSharingView(isDisplayed: Boolean): UserRobot {
+    val screenSharingView = CallPage.ParticipantView.screenSharingView
+    if (isDisplayed) {
+        assertTrue(screenSharingView.waitToAppear(timeOutMillis = 10.seconds).isDisplayed())
+        assertTrue(CallPage.ParticipantView.screenSharingLabel.waitToAppear().isDisplayed())
+    } else {
+        assertFalse(screenSharingView.waitToDisappear(timeOutMillis = 10.seconds).isDisplayed())
+        assertFalse(CallPage.ParticipantView.screenSharingLabel.waitToDisappear().isDisplayed())
+    }
     return this
 }

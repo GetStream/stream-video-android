@@ -296,7 +296,7 @@ public class CallState(
             }
         }
 
-        // TODO: could optimize performance by subscribing only to relevant events
+        // The caller i.e. `livestream` is deprecated as well
         call.subscribe {
             logger.v { "[livestreamFlow] #track; event.type: ${it.getEventType()}" }
             if (it is TrackPublishedEvent) {
@@ -1041,7 +1041,7 @@ public class CallState(
             cancelTimeout()
             RingingState.Active
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
-            rejectedBy.contains(createdBy?.id)
+            (rejectedBy.contains(createdBy?.id) && hasRingingCall)
         ) {
             call.leave()
             cancelTimeout()
@@ -1147,6 +1147,7 @@ public class CallState(
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
+                    call.leave()
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }

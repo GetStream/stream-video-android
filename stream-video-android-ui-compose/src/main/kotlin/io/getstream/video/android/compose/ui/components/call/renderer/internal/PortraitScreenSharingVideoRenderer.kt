@@ -32,6 +32,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,6 +97,11 @@ internal fun PortraitScreenSharingVideoRenderer(
     val sharingParticipant = session.participant
     val me by call.state.me.collectAsStateWithLifecycle()
 
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         LazyVerticalGrid(
@@ -125,7 +132,7 @@ internal fun PortraitScreenSharingVideoRenderer(
                         call,
                         participant,
                         style.copy(
-                            isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                            isFocused = isDomSpeakerSpeaking && dominantSpeaker?.sessionId == participant.sessionId,
                         ),
                     )
                 }

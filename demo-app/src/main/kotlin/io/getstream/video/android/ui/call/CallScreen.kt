@@ -432,7 +432,7 @@ fun CallScreen(
                         },
                         videoRenderer = { modifier, call, participant, style ->
                             ParticipantVideo(
-                                modifier = modifier.testTag("Stream_ParticipantVideoView"),
+                                modifier = modifier.testTag("Stream_VideoView"),
                                 call = call,
                                 participant = participant,
                                 style = style,
