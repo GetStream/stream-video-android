@@ -14,6 +14,7 @@ on:
 jobs:
   publish:
     uses: GetStream/android-ci-actions/.github/workflows/release-new-version.yml@main
+    environment: 'publish'
     with:
       ref: "develop"
       bump: ${{ inputs.bump }}
