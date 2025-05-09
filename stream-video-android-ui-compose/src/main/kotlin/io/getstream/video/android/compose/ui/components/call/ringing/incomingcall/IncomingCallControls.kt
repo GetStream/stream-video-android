@@ -32,6 +32,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.call.state.CallAction
 
 /**
@@ -46,6 +47,7 @@ import io.getstream.video.android.core.call.state.CallAction
 public fun IncomingCallControls(
     modifier: Modifier = Modifier,
     isVideoCall: Boolean,
+    isMicrophoneEnabled: Boolean? = null,
     isCameraEnabled: Boolean,
     onCallAction: (CallAction) -> Unit,
 ) {
@@ -59,6 +61,17 @@ public fun IncomingCallControls(
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
 
         )
+
+        if (isMicrophoneEnabled != null) {
+            ToggleMicrophoneAction(
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
+                    1.5f,
+                ),
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                onCallAction = onCallAction,
+            )
+        }
 
         if (isVideoCall) {
             ToggleCameraAction(
@@ -78,7 +91,8 @@ public fun IncomingCallControls(
     }
 }
 
-@Preview
+@Preview(name = "Small Phone - 320dp", widthDp = 320)
+@Preview(name = "Normal Phone - 411dp", widthDp = 411)
 @Composable
 private fun IncomingCallOptionsPreview() {
     VideoTheme {
@@ -92,6 +106,13 @@ private fun IncomingCallOptionsPreview() {
             IncomingCallControls(
                 isVideoCall = true,
                 isCameraEnabled = false,
+                onCallAction = { },
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            IncomingCallControls(
+                isVideoCall = true,
+                isMicrophoneEnabled = true,
+                isCameraEnabled = true,
                 onCallAction = { },
             )
         }
