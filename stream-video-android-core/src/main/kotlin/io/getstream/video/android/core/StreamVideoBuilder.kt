@@ -28,6 +28,7 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.NotificationConfigRegistry
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
@@ -136,6 +137,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
     private val callUpdatesAfterLeave: Boolean = false,
+    private var notificationConfigRegistry: NotificationConfigRegistry =
+        NotificationConfigRegistry(),
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -260,6 +263,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
+            notificationConfigRegistry = notificationConfigRegistry,
         )
 
         if (user.type == UserType.Guest) {

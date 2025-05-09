@@ -41,9 +41,11 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.internal.NotificationsMigrationHelper
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -136,6 +138,14 @@ public open class DefaultNotificationHandler(
             val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
+                /**
+                 * Temporary workaround to associate the callId with its PendingIntent
+                 * without introducing a breaking change in the public API.
+                 *
+                 * Note: This should be refactored or removed in the next major release.
+                 */
+                NotificationsMigrationHelper.incomingCallMap[acceptCallPendingIntent] = callId
+
                 getIncomingCallNotification(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
@@ -219,14 +229,19 @@ public open class DefaultNotificationHandler(
             },
         )
 
+        val callId = NotificationsMigrationHelper.incomingCallMap[acceptCallPendingIntent]
+        val notificationRegistry = StreamVideo.instance().state.notificationConfigRegistry
+        var callNotificationConfig = notificationRegistry.get(CallType.AnyMarker.name)
+        callId?.type?.let { callType ->
+            callNotificationConfig = notificationRegistry.get(callType)
+        }
+        val incomingCallNotificationStateConfig = callNotificationConfig.states[CallNotificationState.INCOMING]!! // TODO just for testing will remove it
         createIncomingCallChannel(channelId, showAsHighPriority)
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
             setContentTitle(callerName)
-            setContentText(
-                application.getString(R.string.stream_video_incoming_call_notification_description),
-            )
+            setContentText(incomingCallNotificationStateConfig.contentText)
             setChannelId(channelId)
             setOngoing(true)
             setCategory(NotificationCompat.CATEGORY_CALL)
