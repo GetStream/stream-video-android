@@ -24,7 +24,7 @@ import io.getstream.video.android.core.sounds.defaultMutedRingingConfig
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 
 enum class CallNotificationState {
-    INCOMING
+    INCOMING,
 }
 
 data class CallNotificationConfig(
@@ -52,7 +52,6 @@ object DefaultCallNotificationConfigs {
             ),
         ),
     )
-
 
     val default: CallNotificationConfig = CallNotificationConfig(
         states = mapOf(
