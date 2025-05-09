@@ -9880,12 +9880,7 @@ public final class io/getstream/video/android/core/notifications/CallNotificatio
 }
 
 public final class io/getstream/video/android/core/notifications/CallNotificationState : java/lang/Enum {
-	public static final field DECLINED Lio/getstream/video/android/core/notifications/CallNotificationState;
-	public static final field ENDED Lio/getstream/video/android/core/notifications/CallNotificationState;
 	public static final field INCOMING Lio/getstream/video/android/core/notifications/CallNotificationState;
-	public static final field MISSED Lio/getstream/video/android/core/notifications/CallNotificationState;
-	public static final field ONGOING Lio/getstream/video/android/core/notifications/CallNotificationState;
-	public static final field OUTGOING Lio/getstream/video/android/core/notifications/CallNotificationState;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/CallNotificationState;
 	public static fun values ()[Lio/getstream/video/android/core/notifications/CallNotificationState;
@@ -9896,7 +9891,6 @@ public final class io/getstream/video/android/core/notifications/DefaultCallNoti
 	public final fun getAll ()Ljava/util/Map;
 	public final fun getAudioCall ()Lio/getstream/video/android/core/notifications/CallNotificationConfig;
 	public final fun getDefault ()Lio/getstream/video/android/core/notifications/CallNotificationConfig;
-	public final fun getLivestream ()Lio/getstream/video/android/core/notifications/CallNotificationConfig;
 }
 
 public class io/getstream/video/android/core/notifications/DefaultNotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler, io/getstream/video/android/core/notifications/NotificationHandler {
@@ -9958,23 +9952,6 @@ public final class io/getstream/video/android/core/notifications/DefaultStreamIn
 	public final fun searchOutgoingCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;I)Landroid/app/PendingIntent;
 	public static synthetic fun searchOutgoingCallPendingIntent$default (Lio/getstream/video/android/core/notifications/DefaultStreamIntentResolver;Lio/getstream/video/android/model/StreamCallId;IILjava/lang/Object;)Landroid/app/PendingIntent;
 	public final fun searchRejectCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;)Landroid/app/PendingIntent;
-}
-
-public final class io/getstream/video/android/core/notifications/NotificationActionButtons {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/notifications/NotificationActionButtons;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationActionButtons;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationActionButtons;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getExtra ()Ljava/lang/String;
-	public final fun getPrimary ()Ljava/lang/String;
-	public final fun getSecondary ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/notifications/NotificationConfig {
@@ -10058,16 +10035,14 @@ public final class io/getstream/video/android/core/notifications/NotificationHan
 
 public final class io/getstream/video/android/core/notifications/NotificationStateConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;Lio/getstream/video/android/core/notifications/NotificationActionButtons;)V
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;Lio/getstream/video/android/core/notifications/NotificationActionButtons;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lkotlin/jvm/functions/Function1;
 	public final fun component3 ()Lio/getstream/video/android/core/sounds/MutedRingingConfig;
-	public final fun component4 ()Lio/getstream/video/android/core/notifications/NotificationActionButtons;
-	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;Lio/getstream/video/android/core/notifications/NotificationActionButtons;)Lio/getstream/video/android/core/notifications/NotificationStateConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationStateConfig;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;Lio/getstream/video/android/core/notifications/NotificationActionButtons;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationStateConfig;
+	public final fun copy (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;)Lio/getstream/video/android/core/notifications/NotificationStateConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationStateConfig;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lio/getstream/video/android/core/sounds/MutedRingingConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationStateConfig;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getActionButtons ()Lio/getstream/video/android/core/notifications/NotificationActionButtons;
 	public final fun getContentText ()Ljava/lang/String;
 	public final fun getMutedRingingConfig ()Lio/getstream/video/android/core/sounds/MutedRingingConfig;
 	public final fun getRingingConfig (Landroid/content/Context;)Lio/getstream/video/android/core/sounds/RingingConfig;
