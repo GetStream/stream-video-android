@@ -24,12 +24,7 @@ import io.getstream.video.android.core.sounds.defaultMutedRingingConfig
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 
 enum class CallNotificationState {
-    INCOMING,
-    OUTGOING,
-    ONGOING,
-    MISSED,
-    DECLINED,
-    ENDED,
+    INCOMING
 }
 
 data class CallNotificationConfig(
@@ -40,16 +35,9 @@ data class NotificationStateConfig(
     val contentText: String? = null,
     val ringingConfigBuilder: ((Context) -> RingingConfig)? = null,
     val mutedRingingConfig: MutedRingingConfig? = null,
-    val actionButtons: NotificationActionButtons? = null,
 ) {
     fun getRingingConfig(context: Context): RingingConfig? = ringingConfigBuilder?.invoke(context)
 }
-
-data class NotificationActionButtons(
-    val primary: String? = null,
-    val secondary: String? = null,
-    val extra: String? = null,
-)
 
 object DefaultCallNotificationConfigs {
 
@@ -61,44 +49,10 @@ object DefaultCallNotificationConfigs {
                     defaultResourcesRingingConfig(context)
                 },
                 mutedRingingConfig = defaultMutedRingingConfig(),
-                actionButtons = NotificationActionButtons(
-                    primary = "Accept",
-                    secondary = "Decline",
-                ),
-            ),
-            CallNotificationState.OUTGOING to NotificationStateConfig(
-                contentText = "Calling...",
-                ringingConfigBuilder = { context ->
-                    defaultResourcesRingingConfig(context)
-                },
-                actionButtons = NotificationActionButtons(
-                    secondary = "Cancel",
-                ),
-            ),
-            CallNotificationState.ONGOING to NotificationStateConfig(
-                contentText = "On Audio Call",
-                actionButtons = NotificationActionButtons(
-                    primary = "Mute",
-                    secondary = "End",
-                ),
             ),
         ),
     )
 
-    val livestream: CallNotificationConfig = CallNotificationConfig(
-        states = mapOf(
-            CallNotificationState.INCOMING to NotificationStateConfig(
-                contentText = "Live Event Starting",
-                actionButtons = NotificationActionButtons(
-                    primary = "Join",
-                    secondary = "Dismiss",
-                ),
-            ),
-            CallNotificationState.ONGOING to NotificationStateConfig(
-                contentText = "Watching Livestream",
-            ),
-        ),
-    )
 
     val default: CallNotificationConfig = CallNotificationConfig(
         states = mapOf(
@@ -107,17 +61,12 @@ object DefaultCallNotificationConfigs {
                 ringingConfigBuilder = { context ->
                     defaultResourcesRingingConfig(context)
                 },
-                actionButtons = NotificationActionButtons(
-                    primary = "Answer",
-                    secondary = "Dismiss",
-                ),
             ),
         ),
     )
 
     val all: Map<String, CallNotificationConfig> = mapOf(
         CallType.AudioCall.name to audioCall,
-        CallType.Livestream.name to livestream,
         CallType.Default.name to default,
         CallType.AnyMarker.name to default,
     )
