@@ -49,7 +49,7 @@ object DefaultCallNotificationConfigs {
     )
 
     internal val audioCallIncomingNotificationStateConfig = NotificationStateConfig(
-        contentText = "Incoming Audio Call",
+        contentText = "Incoming audio call",
         ringingConfigBuilder = { context ->
             defaultResourcesRingingConfig(context)
         },
@@ -63,7 +63,7 @@ object DefaultCallNotificationConfigs {
     )
 
     internal val defaultCallIncomingNotificationStateConfig = NotificationStateConfig(
-        contentText = "Incoming Audio Call",
+        contentText = "Incoming video call",
         ringingConfigBuilder = { context ->
             defaultResourcesRingingConfig(context)
         },
