@@ -51,12 +51,18 @@ fun UserRobot.assertCallControls(microphone: Boolean, camera: Boolean): UserRobo
     return this
 }
 
+fun UserRobot.assertThatCallIsEnded(): UserRobot {
+    assertFalse(CallPage.hangUpButton.waitToDisappear().isDisplayed())
+    return this
+}
+
 fun UserRobot.assertParticipantsCountOnCall(count: Int): UserRobot {
     val user = 1
-    val participants = user + count
+    val participants = (user + count).toString()
     CallPage.participantsCountBadge
         .waitToAppear()
-        .waitForText(expectedText = participants.toString())
+        .waitForText(expectedText = participants)
+    assertEquals(participants, CallPage.participantsCountBadge.findObject().text)
     return this
 }
 
