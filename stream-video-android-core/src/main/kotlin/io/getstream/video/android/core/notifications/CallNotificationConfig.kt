@@ -40,27 +40,39 @@ data class NotificationStateConfig(
 }
 
 object DefaultCallNotificationConfigs {
+    internal val anyMakerCallIncomingNotificationStateConfig = NotificationStateConfig(
+        contentText = "Incoming Call",
+        ringingConfigBuilder = { context ->
+            defaultResourcesRingingConfig(context)
+        },
+        mutedRingingConfig = defaultMutedRingingConfig(),
+    )
+
+    internal val audioCallIncomingNotificationStateConfig = NotificationStateConfig(
+        contentText = "Incoming Audio Call",
+        ringingConfigBuilder = { context ->
+            defaultResourcesRingingConfig(context)
+        },
+        mutedRingingConfig = defaultMutedRingingConfig(),
+    )
 
     val audioCall: CallNotificationConfig = CallNotificationConfig(
         states = mapOf(
-            CallNotificationState.INCOMING to NotificationStateConfig(
-                contentText = "Incoming Audio Call",
-                ringingConfigBuilder = { context ->
-                    defaultResourcesRingingConfig(context)
-                },
-                mutedRingingConfig = defaultMutedRingingConfig(),
-            ),
+            CallNotificationState.INCOMING to audioCallIncomingNotificationStateConfig,
         ),
+    )
+
+    internal val defaultCallIncomingNotificationStateConfig = NotificationStateConfig(
+        contentText = "Incoming Audio Call",
+        ringingConfigBuilder = { context ->
+            defaultResourcesRingingConfig(context)
+        },
+        mutedRingingConfig = defaultMutedRingingConfig(),
     )
 
     val default: CallNotificationConfig = CallNotificationConfig(
         states = mapOf(
-            CallNotificationState.INCOMING to NotificationStateConfig(
-                contentText = "Incoming Video Call",
-                ringingConfigBuilder = { context ->
-                    defaultResourcesRingingConfig(context)
-                },
-            ),
+            CallNotificationState.INCOMING to defaultCallIncomingNotificationStateConfig,
         ),
     )
 

@@ -235,7 +235,10 @@ public open class DefaultNotificationHandler(
         callId?.type?.let { callType ->
             callNotificationConfig = notificationRegistry.get(callType)
         }
-        val incomingCallNotificationStateConfig = callNotificationConfig.states[CallNotificationState.INCOMING]!! // TODO just for testing will remove it
+        val incomingCallNotificationStateConfig =
+            callNotificationConfig.states[CallNotificationState.INCOMING]
+                ?: DefaultCallNotificationConfigs.anyMakerCallIncomingNotificationStateConfig
+
         createIncomingCallChannel(channelId, showAsHighPriority)
 
         return getNotification {
