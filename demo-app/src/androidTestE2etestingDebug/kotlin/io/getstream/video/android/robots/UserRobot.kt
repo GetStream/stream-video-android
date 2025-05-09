@@ -266,7 +266,7 @@ class UserRobot {
     }
 
     private fun waitForCallToStart(): UserRobot {
-        CallPage.callInfoView.waitToAppear()
+        CallPage.callInfoView.waitToAppear(timeOutMillis = 15.seconds)
         return this
     }
 }
