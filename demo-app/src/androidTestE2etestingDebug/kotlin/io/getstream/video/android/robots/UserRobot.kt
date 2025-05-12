@@ -23,6 +23,7 @@ import io.getstream.video.android.pages.DirectCallPage
 import io.getstream.video.android.pages.DirectCallPage.Companion.audioCallButton
 import io.getstream.video.android.pages.DirectCallPage.Companion.videoCallButton
 import io.getstream.video.android.pages.LobbyPage
+import io.getstream.video.android.pages.LoginPage
 import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
@@ -46,7 +47,27 @@ class UserRobot {
         return this
     }
 
+    // LoginPage actions
+
+    fun loginWithEmail(email: String): UserRobot {
+        LoginPage.emailSignIn.waitToAppear().click()
+        device.typeText(email) // using shell because UIAutomator does not see the input field
+        LoginPage.loginButton.findObject().click()
+        return this
+    }
+
+    fun loginAsRandomUser(): UserRobot {
+        LoginPage.randomUserSignInButton.waitToAppear().click()
+        return this
+    }
+
     // CallDetailsPage actions
+
+    fun logout(): UserRobot {
+        CallDetailsPage.wheelIcon.waitToAppear().click()
+        CallDetailsPage.signOutButton.waitToAppear().click()
+        return this
+    }
 
     fun directCall(video: Boolean): UserRobot {
         CallDetailsPage.wheelIcon.waitToAppear().click()
@@ -235,7 +256,7 @@ class UserRobot {
         return this
     }
 
-    fun waitForParticipantsToJoin(count: Int = 1, timeOutMillis: Long = 30.seconds): UserRobot {
+    fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 30.seconds): UserRobot {
         val user = 1
         val participants = user + count
         CallPage.participantsCountBadge
@@ -245,7 +266,7 @@ class UserRobot {
     }
 
     private fun waitForCallToStart(): UserRobot {
-        CallPage.callInfoView.waitToAppear()
+        CallPage.callInfoView.waitToAppear(timeOutMillis = 15.seconds)
         return this
     }
 }
