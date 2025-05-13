@@ -35,7 +35,7 @@ public fun UiDevice.stopApp() {
 }
 
 public fun UiDevice.typeText(text: String) {
-    executeShellCommand("input text '$text'")
+    executeShellCommand("input text $text")
 }
 
 public fun UiObject2.typeText(text: String): UiObject2 {

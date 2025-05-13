@@ -23,7 +23,8 @@ class LoginPage {
     companion object {
         val builtInUserSignInButton = By.res("Stream_BuiltInUserSignIn")
         val googleSignInButton = By.res("Stream_GoogleSignIn")
-        val emailSignIn = By.res("Stream_EmailSignIn")
         val randomUserSignInButton = By.res("Stream_RandomUserSignIn")
+        val emailSignIn = By.res("Stream_EmailSignIn")
+        val loginButton = By.text("Login")
     }
 }
