@@ -123,6 +123,7 @@ internal fun QueryCallsResponse.toQueriedCalls(
     watchedCalls: List<Call> = emptyList(),
 ): QueriedCalls {
     return QueriedCalls(
+        original = this,
         calls = calls.toCallData(),
         next = next,
         watchedCalls = watchedCalls,
