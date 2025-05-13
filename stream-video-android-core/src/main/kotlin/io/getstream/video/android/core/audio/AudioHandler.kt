@@ -70,7 +70,6 @@ public class AudioSwitchHandler(
                     )
                     audioSwitch = switch
                     switch.start(audioDeviceChangeListener)
-                    switch.activate()
                 }
             }
         }
