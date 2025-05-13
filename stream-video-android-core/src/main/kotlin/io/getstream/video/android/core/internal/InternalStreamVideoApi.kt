@@ -29,3 +29,16 @@ package io.getstream.video.android.core.internal
     level = RequiresOptIn.Level.ERROR,
 )
 public annotation class InternalStreamVideoApi
+
+@Target(
+    AnnotationTarget.CLASS,
+    AnnotationTarget.PROPERTY,
+    AnnotationTarget.CONSTRUCTOR,
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.TYPEALIAS,
+)
+@Retention(AnnotationRetention.BINARY)
+@RequiresOptIn(
+    message = "This is an experimental API. It may change in the future or maybe removed.",
+    level = RequiresOptIn.Level.WARNING,
+)public annotation class ExperimentalStreamVideoApi

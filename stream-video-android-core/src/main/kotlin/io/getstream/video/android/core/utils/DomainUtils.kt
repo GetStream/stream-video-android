@@ -120,6 +120,7 @@ internal fun UserResponse.toUser(): User {
 @JvmSynthetic
 internal fun QueryCallsResponse.toQueriedCalls(): QueriedCalls {
     return QueriedCalls(
+        original = this,
         calls = calls.toCallData(),
         next = next,
         prev = prev,
