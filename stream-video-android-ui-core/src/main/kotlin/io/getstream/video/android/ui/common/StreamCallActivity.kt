@@ -76,7 +76,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         private const val EXTRA_MEMBERS_ARRAY: String = "members_extra"
 
         // Extra default values
-        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = true
+        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = false
         private val defaultExtraMembers = emptyList<String>()
         private val logger by taggedLogger("DefaultCallActivity")
 
