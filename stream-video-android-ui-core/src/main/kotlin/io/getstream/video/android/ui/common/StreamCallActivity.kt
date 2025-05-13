@@ -65,6 +65,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
 
 @OptIn(StreamCallActivityDelicateApi::class)
 public abstract class StreamCallActivity : ComponentActivity() {
@@ -75,7 +76,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         private const val EXTRA_MEMBERS_ARRAY: String = "members_extra"
 
         // Extra default values
-        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = false
+        private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = true
         private val defaultExtraMembers = emptyList<String>()
         private val logger by taggedLogger("DefaultCallActivity")
 
@@ -126,6 +127,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
+    private val atomicBoolean = AtomicBoolean(false)
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
@@ -135,6 +137,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             finish()
         }
     }
+
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong" }
         onFailed(error)
@@ -432,6 +435,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
      */
     public open fun onBackPressed(call: Call) {
         leave(call, onSuccessFinish, onErrorFinish)
+    }
+
+    override fun finish() {
+        if (!atomicBoolean.get()) {
+            atomicBoolean.set(true)
+            super.finish()
+        }
     }
 
     // Decision making
