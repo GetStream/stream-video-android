@@ -162,7 +162,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             }
 
             when (callAction) {
-                is LeaveCall, is DeclineCall, is CancelCall -> {
+                is LeaveCall, is DeclineCall, is CancelCall-> {
                     CallDisconnectedContent(call)
                 }
 
