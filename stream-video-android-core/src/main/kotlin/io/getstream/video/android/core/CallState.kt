@@ -709,13 +709,13 @@ public class CallState(
             }
 
             is CallCreatedEvent -> {
-                updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
+                updateFromResponse(event.call)
             }
 
             is CallRingEvent -> {
-                updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
+                updateFromResponse(event.call)
             }
 
             is CallUpdatedEvent -> {
@@ -1330,9 +1330,9 @@ public class CallState(
     }
 
     fun updateFromResponse(response: JoinCallResponse) {
-        updateFromResponse(response.call)
         _ownCapabilities.value = response.ownCapabilities
         updateFromResponse(response.members)
+        updateFromResponse(response.call)
     }
 
     fun getMember(userId: String): MemberState? {
