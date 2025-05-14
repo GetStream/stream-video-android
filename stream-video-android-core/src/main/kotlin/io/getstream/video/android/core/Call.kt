@@ -77,6 +77,8 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -1223,10 +1225,18 @@ public class Call(
     fun cleanup() {
         // monitor.stop()
         session?.cleanup()
-        supervisorJob.cancel()
+        shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup()
         session = null
+    }
+
+    //This will allow the Rest APIs to be executed which are in queue before leave
+    private fun shutDownJobsGracefully() {
+        UserScope(ClientScope()).launch {
+            supervisorJob.children.forEach { it.join() }
+            supervisorJob.cancel()
+        }
     }
 
     suspend fun ring(): Result<GetCallResponse> {
