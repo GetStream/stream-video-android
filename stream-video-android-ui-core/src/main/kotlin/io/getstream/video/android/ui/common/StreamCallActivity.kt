@@ -127,7 +127,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
-    private val atomicBoolean = AtomicBoolean(false)
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
@@ -435,13 +434,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
      */
     public open fun onBackPressed(call: Call) {
         leave(call, onSuccessFinish, onErrorFinish)
-    }
-
-    override fun finish() {
-        if (!atomicBoolean.get()) {
-            atomicBoolean.set(true)
-            super.finish()
-        }
     }
 
     // Decision making
