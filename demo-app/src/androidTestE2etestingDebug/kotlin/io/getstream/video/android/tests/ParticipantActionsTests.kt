@@ -19,6 +19,7 @@ package io.getstream.video.android.tests
 import io.getstream.video.android.robots.ParticipantRobot.Actions
 import io.getstream.video.android.robots.ParticipantRobot.Options
 import io.getstream.video.android.robots.UserControls
+import io.getstream.video.android.robots.VideoView
 import io.getstream.video.android.robots.assertCallDurationView
 import io.getstream.video.android.robots.assertConnectionQualityIndicator
 import io.getstream.video.android.robots.assertMediaTracks
@@ -86,7 +87,7 @@ class ParticipantActionsTests : StreamTestCase() {
                 userRobot.setView(view)
             }
             step("THEN user observes that participant's camera is enabled") {
-                userRobot.assertMediaTracks(count = 1)
+                userRobot.assertMediaTracks(count = 1, view = VideoView.GRID)
             }
         }
     }
@@ -106,7 +107,7 @@ class ParticipantActionsTests : StreamTestCase() {
                 userRobot.setView(view)
             }
             step("THEN user observes that participant's camera is disabled") {
-                userRobot.assertMediaTracks(count = 0)
+                userRobot.assertMediaTracks(count = 0, view = VideoView.GRID)
             }
         }
     }
