@@ -45,7 +45,7 @@ class JoinCallTest : IntegrationTestBase() {
 
     @Test
     fun `test latency measurements`() = runTest {
-        IntegrationTestState.call == null
+        IntegrationTestState.call = null
         // latency measurements for different urls
         // for each urls we measure 3 times sequentially (so you cache the connection)
         // average is calculated using the second and third measurement
