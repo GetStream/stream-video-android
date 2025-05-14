@@ -19,6 +19,7 @@ package io.getstream.video.android.core.rtc
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.base.IntegrationTestState
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -44,6 +45,7 @@ class JoinCallTest : IntegrationTestBase() {
 
     @Test
     fun `test latency measurements`() = runTest {
+        IntegrationTestState.call == null
         // latency measurements for different urls
         // for each urls we measure 3 times sequentially (so you cache the connection)
         // average is calculated using the second and third measurement
