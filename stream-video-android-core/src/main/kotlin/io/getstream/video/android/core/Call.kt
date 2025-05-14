@@ -1231,7 +1231,7 @@ public class Call(
         session = null
     }
 
-    //This will allow the Rest APIs to be executed which are in queue before leave
+    // This will allow the Rest APIs to be executed which are in queue before leave
     private fun shutDownJobsGracefully() {
         UserScope(ClientScope()).launch {
             supervisorJob.children.forEach { it.join() }
