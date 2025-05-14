@@ -516,7 +516,7 @@ internal open class CallService : Service() {
                     }
 
                     else -> {
-                        // Do nothing
+                        callSoundPlayer?.stopCallSound()
                     }
                 }
             }
