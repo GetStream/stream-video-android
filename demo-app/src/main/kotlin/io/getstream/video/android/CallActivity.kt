@@ -50,6 +50,7 @@ class CallActivity : ComposeStreamCallActivity() {
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
     override val configuration: StreamCallActivityConfiguration =
         StreamCallActivityConfiguration(
+            closeScreenOnCallEnded = false,
             canSkipPermissionRationale = false,
         )
 
