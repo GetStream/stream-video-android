@@ -103,6 +103,8 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.sorting.SortedParticipantsState
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.toUser
@@ -1138,7 +1140,7 @@ public class CallState(
 
     private fun startRingingTimer() {
         ringingTimerJob?.cancel()
-        ringingTimerJob = scope.launch {
+        ringingTimerJob = UserScope(ClientScope()).launch {
             val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
 
             if (autoCancelTimeout != null && autoCancelTimeout > 0) {
