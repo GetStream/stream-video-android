@@ -23,6 +23,7 @@ import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.base.IntegrationTestState
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.SortField
@@ -351,6 +352,7 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Setting the speaking while muted flag will reset itself after delay`() = runTest {
         // we can make multiple calls, this should have no impact on the reset logic or duration
+        IntegrationTestState.call = null
         val speakingWhileMuted = call.state.speakingWhileMuted
         call.state.markSpeakingAsMuted()
         call.state.markSpeakingAsMuted()

@@ -29,6 +29,7 @@ import io.getstream.android.video.generated.models.UnblockedUserEvent
 import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.base.IntegrationTestState
 import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -39,6 +40,7 @@ import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.permission.PermissionRequest
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -50,6 +52,12 @@ import stream.video.sfu.models.TrackType
 
 @RunWith(RobolectricTestRunner::class)
 class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false) {
+
+    @Before
+    fun setup() {
+        IntegrationTestState.call = null
+    }
+
     @Test
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event

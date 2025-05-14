@@ -529,8 +529,13 @@ internal class StreamVideoClient internal constructor(
         }
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
-            calls[selectedCid]?.fireEvent(event)
-            queriedCalls[selectedCid]?.fireEvent(event)
+            safeCall {
+                calls[selectedCid]?.fireEvent(event)
+            }
+
+            safeCall {
+                queriedCalls[selectedCid]?.fireEvent(event)
+            }
         }
 
         if (selectedCid.isNotEmpty()) {
@@ -549,12 +554,20 @@ internal class StreamVideoClient internal constructor(
             }
 
             // Update calls as usual
-            calls[selectedCid]?.let {
-                it.state.handleEvent(event)
-                it.session?.handleEvent(event)
-                it.handleEvent(event)
+            safeCall {
+                calls[selectedCid]?.let {
+                    it.state.handleEvent(event)
+                    it.session?.handleEvent(event)
+                    it.handleEvent(event)
+                }
             }
-            queriedCalls[selectedCid]?.state?.handleEvent(event)
+
+            safeCall {
+                queriedCalls[selectedCid]?.let {
+                    it.state.handleEvent(event)
+                    it.handleEvent(event)
+                }
+            }
         }
     }
 
