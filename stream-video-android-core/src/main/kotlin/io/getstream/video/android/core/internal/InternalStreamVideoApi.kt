@@ -41,5 +41,5 @@ public annotation class InternalStreamVideoApi
 @RequiresOptIn(
     message = "This is an experimental API. It may change in the future or maybe removed.",
     level = RequiresOptIn.Level.WARNING,
-    )
+)
 public annotation class ExperimentalStreamVideoApi
