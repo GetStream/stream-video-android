@@ -28,6 +28,7 @@ import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
 import io.getstream.video.android.uiautomator.findObjects
+import io.getstream.video.android.uiautomator.retryOnStaleObjectException
 import io.getstream.video.android.uiautomator.seconds
 import io.getstream.video.android.uiautomator.typeText
 import io.getstream.video.android.uiautomator.waitForText
@@ -259,9 +260,11 @@ class UserRobot {
     fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 30.seconds): UserRobot {
         val user = 1
         val participants = user + count
-        CallPage.participantsCountBadge
-            .waitToAppear()
-            .waitForText(expectedText = participants.toString(), timeOutMillis = timeOutMillis)
+        device.retryOnStaleObjectException {
+            CallPage.participantsCountBadge
+                .waitToAppear()
+                .waitForText(expectedText = participants.toString(), timeOutMillis = timeOutMillis)
+        }
         return this
     }
 
