@@ -18,7 +18,6 @@ package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.QueryCallsResponse
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 
 @Stable
