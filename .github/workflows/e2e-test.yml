@@ -47,6 +47,7 @@ jobs:
       matrix:
         include:
           - batch: 0
+          - batch: 1
       fail-fast: false
     env:
       ANDROID_API_LEVEL: 34
