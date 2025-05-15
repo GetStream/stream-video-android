@@ -18,10 +18,12 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.CallSettingsRequest
+import io.getstream.android.video.generated.models.CustomVideoEvent
 import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.base.IntegrationTestState
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.SortField
@@ -200,21 +202,94 @@ class CallStateTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `Querying calls should populate the state`() = runTest {
-//        val createResult = client.call("default", randomUUID()).create(custom=mapOf("color" to "green"))
-//        assertSuccess(createResult)
+    fun `Querying calls without watch should NOT populate the state`() = runTest {
         val filters = mutableMapOf("color" to "green")
+        client.cleanup()
         val queryResult = client.queryCalls(filters, limit = 1)
         assertSuccess(queryResult)
         // verify the call has settings setup correctly
         queryResult.onSuccess {
             assertThat(it.calls.size).isGreaterThan(0)
             it.calls.forEach {
-                val call = clientImpl.call(it.call.type, it.call.id)
+                val call = clientImpl.queriedCall(it.call.type, it.call.id)
+                assertThat(call.state.settings.value).isNull()
+            }
+        }
+    }
+
+    @Test
+    fun `Querying calls with watch true should populate the state`() = runTest {
+        val filters = mutableMapOf("color" to "green")
+        val queryResult = client.queryCalls(filters, limit = 1, watch = true)
+        assertSuccess(queryResult)
+        // verify the call has settings setup correctly
+        queryResult.onSuccess {
+            assertThat(it.calls.size).isGreaterThan(0)
+            it.calls.forEach {
+                val call = clientImpl.queriedCall(it.call.type, it.call.id)
                 assertThat(call.state.settings.value).isNotNull()
             }
         }
     }
+
+    @Test
+    fun `Querying calls with watch true should return watched calls list in the result`() =
+        runTest {
+            val filters = mutableMapOf("color" to "green")
+            val queryResult = client.queryCalls(filters, limit = 1, watch = true)
+            assertSuccess(queryResult)
+            // verify the call has settings setup correctly
+            queryResult.onSuccess {
+                assertThat(it.calls.size).isGreaterThan(0)
+                assertEquals(1, it.watchedCalls.size)
+                assertThat(it.watchedCalls.first().state.settings.value).isNotNull()
+                val watchedCall = it.calls.first()
+                val call = clientImpl.queriedCall(watchedCall.call.type, watchedCall.call.id)
+                assertEquals(call.cid, watchedCall.call.cid)
+                assertEquals(it.watchedCalls.first().cid, call.cid)
+                assertEquals(it.watchedCalls.first().cid, watchedCall.call.cid)
+            }
+        }
+
+    @Test
+    fun `Querying calls with watch false should NOT return watched calls list in the result`() =
+        runTest {
+            val filters = mutableMapOf("color" to "green")
+            client.cleanup()
+            val queryResult = client.queryCalls(filters, limit = 1, watch = false)
+            assertSuccess(queryResult)
+            // verify the call has settings setup correctly
+            queryResult.onSuccess {
+                assertThat(it.calls.size).isGreaterThan(0)
+                assertEquals(0, it.watchedCalls.size)
+            }
+        }
+
+    @Test
+    fun `Querying calls with watch true gets event updates`() =
+        runTest {
+            val filters = mutableMapOf("color" to "green")
+            client.cleanup()
+            val queryResult = client.queryCalls(filters, limit = 1, watch = true)
+            assertSuccess(queryResult)
+            queryResult.onSuccess {
+                assertThat(it.calls.size).isGreaterThan(0)
+                assertEquals(1, it.watchedCalls.size)
+                val first = it.watchedCalls.first()
+                val cid = first.cid
+                first.subscribe { event ->
+                    assertEquals("custom", event.getEventType())
+                }
+                val event = CustomVideoEvent(
+                    callCid = cid,
+                    createdAt = nowUtc,
+                    custom = emptyMap(),
+                    user = testData.users.values.first().toUserResponse(),
+                    type = "custom",
+                )
+                clientImpl.fireEvent(event, cid)
+            }
+        }
 
     @Test
     fun `Query calls pagination works`() = runTest {
@@ -277,6 +352,7 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Setting the speaking while muted flag will reset itself after delay`() = runTest {
         // we can make multiple calls, this should have no impact on the reset logic or duration
+        IntegrationTestState.call = null
         val speakingWhileMuted = call.state.speakingWhileMuted
         call.state.markSpeakingAsMuted()
         call.state.markSpeakingAsMuted()

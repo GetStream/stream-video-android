@@ -144,7 +144,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
         if (IntegrationTestState.call != null) {
             IntegrationTestState.call!!
         } else {
-            val call = client.call("default", randomUUID())
+            val call = clientImpl.call("default", randomUUID())
             call.peerConnectionFactory = mockedPCFactory
             IntegrationTestState.call = call
             runBlocking {
