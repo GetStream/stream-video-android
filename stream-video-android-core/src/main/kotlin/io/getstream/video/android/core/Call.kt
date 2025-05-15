@@ -759,25 +759,47 @@ public class Call(
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
+        // Always detach from the SFU and stop ongoing jobs that *must* die.
+        session?.leaveWithReason(disconnectionReason?.message ?: "user")
+        session?.cleanup()
+        session = null
+
+        leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
         sfuEvents?.cancel()
-        state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
-        if (isDestroyed) {
-            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return@atomicLeave
-        }
-        isDestroyed = true
+        reconnectJob?.cancel()
+        callStatsReportingJob?.cancel()
 
-        sfuSocketReconnectionTime = null
-        stopScreenSharing()
-        (client as StreamVideoClient).onCallCleanUp(this)
-        camera.disable()
-        microphone.disable()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
-        cleanup()
+        // Decide on full vs. soft cleanup.
+        if (!clientImpl.enableCallUpdatesAfterLeave) {
+            state._connection.value = RealtimeConnection.Disconnected
+            camera.disable()
+            microphone.disable()
+            stopScreenSharing()
+            mediaManager.cleanup() // <-- heavy-weight destroy
+            supervisorJob.cancel() // kills Call.scope forever
+            client.state.removeActiveCall() // stops foreground service
+            client.state.removeRingingCall()
+            isDestroyed = true
+            logger.v { "[leave] full cleanup completed" }
+        } else {
+            // Keep coroutine scope & MediaManager alive, just reset devices.
+            camera.disable()
+            microphone.disable()
+            stopScreenSharing()
+
+            // Clear runtime state so the next join() starts fresh.
+            state.resetAfterLeave() // ← implement a light-weight reset in CallState
+            statsReport.value = null
+            statLatencyHistory.value = listOf(0, 0, 0)
+            reconnectAttepmts = 0
+            lastDisconnect = 0L
+            isDestroyed = false // allow a future join()
+            state._connection.value = RealtimeConnection.PreJoin
+
+            logger.v { "[leave] soft cleanup completed – Call instance reusable" }
+        }
     }
 
     /** ends the call for yourself as well as other users */

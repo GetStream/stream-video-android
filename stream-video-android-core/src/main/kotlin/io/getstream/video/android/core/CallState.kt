@@ -1466,6 +1466,48 @@ public class CallState(
             null
         }
     }
+
+    /**
+     * Clears only the pieces of state that belong to the *previous* WebRTC/SFU
+     * session, while leaving the persistent call context (participants list,
+     * members, settings, custom fields, …) intact.
+     *
+     * After this runs you can safely invoke Call.join() again and keep receiving
+     * coordinator / participant-count events without any null-pointer surprises.
+     */
+    internal fun resetAfterLeave() {
+        _connection.value = RealtimeConnection.PreJoin
+        _session.value = null // will be repopulated by the next join()
+        _ringingState.value = RingingState.Idle
+        _acceptedBy.value = emptySet()
+        _rejectedBy.value = emptySet()
+
+        participantsVisibilityMonitor?.cancel()
+        participantsVisibilityMonitor = null
+        ringingTimerJob?.cancel()
+        ringingTimerJob = null
+        autoJoiningCall?.cancel()
+        autoJoiningCall = null
+        speakingWhileMutedResetJob?.cancel()
+        speakingWhileMutedResetJob = null
+        _dominantSpeaker.value = null
+        _activeSpeakers.value = emptyList()
+        _screenSharingSession.value = null
+        _participantVideoEnabledOverrides.value = emptyMap()
+
+        // ── 4. Media / live flags & misc flows ────────────────────────────────
+        _recording.value = false
+        _broadcasting.value = false
+        _transcribing.value = false
+        _speakingWhileMuted.value = false
+        _errors.value = emptyList()
+        _reactions.value = emptyList()
+
+        _localPins.value = emptyMap() // local pins reference old sessionIds
+        _serverPins.value = emptyMap() // will be refreshed on next /join
+
+        logger.v { "[CallState.resetAfterLeave] soft reset done – ready for next join()" }
+    }
 }
 
 private fun MemberResponse.toMemberState(): MemberState {
