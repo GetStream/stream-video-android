@@ -762,7 +762,6 @@ public class Call(
         session?.cleanup()
         session = null
 
-        leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
         sfuEvents?.cancel()
