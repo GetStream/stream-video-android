@@ -756,8 +756,6 @@ public class Call(
     }
 
     private fun leave(disconnectionReason: Throwable?) = atomicLeave {
-        session?.leaveWithReason(disconnectionReason?.message ?: "user")
-        session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
         // Always detach from the SFU and stop ongoing jobs that *must* die.
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
