@@ -135,6 +135,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             finish()
         }
     }
+
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong" }
         onFailed(error)
@@ -727,13 +728,10 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val connectionState = call.state.connection.value
-                if (connectionState == RealtimeConnection.Disconnected) {
-                    val total = call.state.participantCounts.value?.total
-                    logger.d { "Participant left, remaining: $total" }
-                    if (total != null && total <= 2) {
-                        onLastParticipant(call)
-                    }
+                val total = call.state.participantCounts.value?.total
+                logger.d { "Participant left, remaining: $total" }
+                if (total != null && total <= 2) {
+                    onLastParticipant(call)
                 }
             }
         }
