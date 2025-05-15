@@ -18,6 +18,7 @@ package io.getstream.video.android.robots
 
 import androidx.test.uiautomator.BySelector
 import io.getstream.video.android.pages.CallPage
+import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
 import io.getstream.video.android.uiautomator.findObjects
@@ -59,13 +60,16 @@ fun UserRobot.assertThatCallIsEnded(): UserRobot {
     return this
 }
 
-fun UserRobot.assertParticipantsCountOnCall(count: Int): UserRobot {
+fun UserRobot.assertParticipantsCountOnCall(
+    count: Int,
+    timeOutMillis: Long = defaultTimeout,
+): UserRobot {
     val user = 1
     val participants = (user + count).toString()
     val actualCount = device.retryOnStaleObjectException {
         CallPage.participantsCountBadge
             .waitToAppear()
-            .waitForText(expectedText = participants)
+            .waitForText(expectedText = participants, timeOutMillis = timeOutMillis)
             .text
     }
     assertEquals(participants, actualCount)
