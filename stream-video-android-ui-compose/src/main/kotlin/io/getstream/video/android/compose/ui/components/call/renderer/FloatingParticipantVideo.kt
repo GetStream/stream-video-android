@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.core.Call
@@ -109,8 +108,6 @@ public fun BoxScope.FloatingParticipantVideo(
 
     val paddingOffset = density.run { VideoTheme.dimens.spacingS.toPx() }
 
-    val track by participant.videoTrack.collectAsStateWithLifecycle()
-
     if (LocalInspectionMode.current) {
         val width = VideoTheme.dimens.genericMax * 2
         val height = width * 1.2f
@@ -142,57 +139,55 @@ public fun BoxScope.FloatingParticipantVideo(
         return
     }
 
-    if (track != null) {
-        Card(
-            elevation = 8.dp,
-            modifier = Modifier
-                .align(alignment)
-                .size(
-                    height = VideoTheme.dimens.genericMax * 2.2f,
-                    width = VideoTheme.dimens.genericMax * 1.5f,
-                )
-                .offset { IntOffset(offset.x.toInt(), offset.y.toInt()) }
-                .pointerInput(parentBounds) {
-                    detectDragGestures { change, dragAmount ->
-                        change.consume()
+    Card(
+        elevation = 8.dp,
+        modifier = Modifier
+            .align(alignment)
+            .size(
+                height = VideoTheme.dimens.genericMax * 2.2f,
+                width = VideoTheme.dimens.genericMax * 1.5f,
+            )
+            .offset { IntOffset(offset.x.toInt(), offset.y.toInt()) }
+            .pointerInput(parentBounds) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
 
-                        val newOffsetX = (offsetX + dragAmount.x)
-                            .coerceAtLeast(
-                                -calculateHorizontalOffsetBounds(
-                                    parentBounds = parentBounds,
-                                    paddingValues = PaddingValues(0.dp),
-                                    floatingVideoSize = videoSize,
-                                    density = density,
-                                    offset = paddingOffset * 2,
-                                ),
-                            )
-                            .coerceAtMost(
-                                0f,
-                            )
+                    val newOffsetX = (offsetX + dragAmount.x)
+                        .coerceAtLeast(
+                            -calculateHorizontalOffsetBounds(
+                                parentBounds = parentBounds,
+                                paddingValues = PaddingValues(0.dp),
+                                floatingVideoSize = videoSize,
+                                density = density,
+                                offset = paddingOffset * 2,
+                            ),
+                        )
+                        .coerceAtMost(
+                            0f,
+                        )
 
-                        val newOffsetY = (offsetY + dragAmount.y)
-                            .coerceAtLeast(0f)
-                            .coerceAtMost(
-                                calculateVerticalOffsetBounds(
-                                    parentBounds = parentBounds,
-                                    paddingValues = PaddingValues(0.dp),
-                                    floatingVideoSize = videoSize,
-                                    density = density,
-                                    offset = paddingOffset * 2,
-                                ),
-                            )
+                    val newOffsetY = (offsetY + dragAmount.y)
+                        .coerceAtLeast(0f)
+                        .coerceAtMost(
+                            calculateVerticalOffsetBounds(
+                                parentBounds = parentBounds,
+                                paddingValues = PaddingValues(0.dp),
+                                floatingVideoSize = videoSize,
+                                density = density,
+                                offset = paddingOffset * 2,
+                            ),
+                        )
 
-                        offsetX = newOffsetX
-                        offsetY = newOffsetY
-                    }
+                    offsetX = newOffsetX
+                    offsetY = newOffsetY
                 }
-                .then(modifier)
-                .padding(VideoTheme.dimens.spacingS)
-                .onGloballyPositioned { videoSize = it.size },
-            shape = VideoTheme.shapes.dialog,
-        ) {
-            videoRenderer.invoke(participant)
-        }
+            }
+            .then(modifier)
+            .padding(VideoTheme.dimens.spacingS)
+            .onGloballyPositioned { videoSize = it.size },
+        shape = VideoTheme.shapes.dialog,
+    ) {
+        videoRenderer.invoke(participant)
     }
 }
 
