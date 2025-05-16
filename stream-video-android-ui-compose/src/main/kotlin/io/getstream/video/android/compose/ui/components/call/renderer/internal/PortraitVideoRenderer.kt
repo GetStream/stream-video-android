@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -133,7 +132,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         }
 
         4 -> {
-            val columnSize  = Pair(2, 2)
+            val columnSize = Pair(2, 2)
             Row(modifier) {
                 ParticipantColumn(
                     modifier = modifier.weight(1f),
