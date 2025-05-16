@@ -43,10 +43,11 @@ data class CallSessionParticipantJoinedEvent(
     val participant: io.getstream.android.video.generated.models.CallParticipantResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
-
+    val type: kotlin.String = "call.session_participant_joined"
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }
