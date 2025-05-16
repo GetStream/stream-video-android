@@ -41,6 +41,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.notifications.CallNotificationState
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
@@ -475,14 +476,30 @@ internal open class CallService : Service() {
             val call = streamVideo.call(callId.type, callId.id)
             call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
+                val notificationConfig = streamVideo.notificationConfigRegistry.get(callId.type)
 
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
-                            callSoundPlayer?.playCallSound(
-                                streamVideo.sounds.ringingConfig.incomingCallSoundUri,
-                                streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
+                            val notificationStateConfig = notificationConfig.states[CallNotificationState.INCOMING]!!
+                            val ringingConfig = notificationStateConfig.getRingingConfig(
+                                this@CallService,
                             )
+                            val mutedRingingConfig = notificationStateConfig.mutedRingingConfig
+
+                            if (ringingConfig != null) {
+                                callSoundPlayer?.playCallSound(
+                                    ringingConfig.incomingCallSoundUri,
+                                    mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
+                                )
+                            } else {
+                                // deprecated code
+                                callSoundPlayer?.playCallSound(
+                                    streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                                    streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted
+                                        ?: false,
+                                )
+                            }
                         } else {
                             callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
@@ -490,10 +507,26 @@ internal open class CallService : Service() {
 
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
-                            callSoundPlayer?.playCallSound(
-                                streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
-                                streamVideo.sounds.mutedRingingConfig?.playOutgoingSoundIfMuted ?: false,
-                            )
+                            val notificationStateConfig =
+                                notificationConfig.states[CallNotificationState.INCOMING]!!
+                            val ringingConfig =
+                                notificationStateConfig.getRingingConfig(this@CallService)
+                            val mutedRingingConfig = notificationStateConfig.mutedRingingConfig
+
+                            if (ringingConfig != null) {
+                                callSoundPlayer?.playCallSound(
+                                    ringingConfig.outgoingCallSoundUri,
+                                    mutedRingingConfig?.playOutgoingSoundIfMuted
+                                        ?: false,
+                                )
+                            } else {
+                                // deprecated code
+                                callSoundPlayer?.playCallSound(
+                                    streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
+                                    streamVideo.sounds.mutedRingingConfig?.playOutgoingSoundIfMuted
+                                        ?: false,
+                                )
+                            }
                         } else {
                             callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
