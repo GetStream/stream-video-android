@@ -16,6 +16,7 @@
 
 package io.getstream.video.android
 
+import android.app.ActivityManager
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -115,13 +116,28 @@ class MainActivity : ComponentActivity() {
                         // Monitor the ringingState on a non-null call
                         call.state.ringingState.collectLatest {
                             if (it is RingingState.Incoming) {
-                                startIncomingCallActivity(call)
+                                Log.d(
+                                    "Noob",
+                                    "AppVisibilityTracker.isInForeground = ${AppVisibilityTracker.isInForeground}, isProcessInForeground = ${isInForeground()}",
+                                )
+                                if (isInForeground()) {
+                                    startIncomingCallActivity(call)
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    fun isInForeground(): Boolean {
+        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+        ActivityManager.getMyMemoryState(appProcessInfo)
+        return AppVisibilityTracker.isInForeground && (
+            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+            )
     }
 
     fun startIncomingCallActivity(call: Call) {

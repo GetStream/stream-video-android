@@ -18,6 +18,9 @@ package io.getstream.video.android
 
 import android.app.Application
 import android.content.Context
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamFlavors
@@ -52,6 +55,20 @@ class App : Application() {
                 useRandomUserAsFallback = false,
             )
         }
+        ProcessLifecycleOwner.get().lifecycle.addObserver(AppVisibilityTracker)
+    }
+}
+
+object AppVisibilityTracker : DefaultLifecycleObserver {
+    var isInForeground = false
+        private set
+
+    override fun onStart(owner: LifecycleOwner) {
+        isInForeground = true
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        isInForeground = false
     }
 }
 
