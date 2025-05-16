@@ -187,19 +187,23 @@ internal class StreamVideoClient internal constructor(
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
+    private val destroyedCalls = mutableListOf<Call>()
 
     val socketImpl = coordinatorConnectionModule.socketConnection
 
     fun onCallCleanUp(call: Call) {
-        if (!enableCallUpdatesAfterLeave) {
-            logger.d { "[cleanup] Removing call from cache: ${call.cid}" }
-            calls.remove(call.cid)
+        if (enableCallUpdatesAfterLeave) {
+            logger.d { "[cleanup] Call updates are required, preserve the instance: ${call.cid}" }
+            destroyedCalls.add(call)
         }
+        logger.d { "[cleanup] Removing call from cache: ${call.cid}" }
+        calls.remove(call.cid)
     }
 
     override fun cleanup() {
         // remove all cached calls
         calls.clear()
+        destroyedCalls.clear()
         // stop all running coroutines
         scope.cancel()
         // call cleanup on the active call
@@ -517,6 +521,11 @@ internal class StreamVideoClient internal constructor(
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.fireEvent(event)
+            safeCall {
+                destroyedCalls.forEach {
+                    fireEvent(event)
+                }
+            }
         }
 
         if (selectedCid.isNotEmpty()) {
@@ -539,6 +548,15 @@ internal class StreamVideoClient internal constructor(
                 it.state.handleEvent(event)
                 it.session?.handleEvent(event)
                 it.handleEvent(event)
+            }
+            safeCall {
+                destroyedCalls.forEach { call ->
+                    call.let {
+                        // No session here
+                        it.state.handleEvent(event)
+                        it.handleEvent(event)
+                    }
+                }
             }
         }
     }
