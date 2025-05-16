@@ -47,6 +47,8 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.sounds.CallSoundPlayer
+import io.getstream.video.android.core.sounds.getIncomingCallSoundUri
+import io.getstream.video.android.core.sounds.getOutgoingCallSoundUri
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
@@ -479,8 +481,9 @@ internal open class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
+                            val callSoundUri = getIncomingCallSoundUri(streamVideo, callId)
                             callSoundPlayer?.playCallSound(
-                                streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                                callSoundUri,
                                 streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
                             )
                         } else {
@@ -489,9 +492,10 @@ internal open class CallService : Service() {
                     }
 
                     is RingingState.Outgoing -> {
+                        val callSoundOutgoingUri = getOutgoingCallSoundUri(streamVideo, callId)
                         if (!it.acceptedByCallee) {
                             callSoundPlayer?.playCallSound(
-                                streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
+                                callSoundOutgoingUri,
                                 streamVideo.sounds.mutedRingingConfig?.playOutgoingSoundIfMuted ?: false,
                             )
                         } else {
