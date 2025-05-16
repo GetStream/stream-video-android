@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import android.media.AudioAttributes
+import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
 import io.getstream.android.video.generated.models.AcceptCallResponse
@@ -187,19 +188,23 @@ internal class StreamVideoClient internal constructor(
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
+    private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
 
     val socketImpl = coordinatorConnectionModule.socketConnection
 
     fun onCallCleanUp(call: Call) {
-        if (!enableCallUpdatesAfterLeave) {
-            logger.d { "[cleanup] Removing call from cache: ${call.cid}" }
-            calls.remove(call.cid)
+        if (enableCallUpdatesAfterLeave) {
+            logger.d { "[cleanup] Call updates are required, preserve the instance: ${call.cid}" }
+            destroyedCalls.put(call.hashCode(), call)
         }
+        logger.d { "[cleanup] Removing call from cache: ${call.cid}" }
+        calls.remove(call.cid)
     }
 
     override fun cleanup() {
         // remove all cached calls
         calls.clear()
+        destroyedCalls.evictAll()
         // stop all running coroutines
         scope.cancel()
         // call cleanup on the active call
@@ -517,6 +522,11 @@ internal class StreamVideoClient internal constructor(
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.fireEvent(event)
+            safeCall {
+                destroyedCalls.snapshot().forEach { (_, call) ->
+                    call.fireEvent(event)
+                }
+            }
         }
 
         if (selectedCid.isNotEmpty()) {
@@ -539,6 +549,15 @@ internal class StreamVideoClient internal constructor(
                 it.state.handleEvent(event)
                 it.session?.handleEvent(event)
                 it.handleEvent(event)
+            }
+            safeCall {
+                destroyedCalls.snapshot().forEach { (_, call) ->
+                    call.let {
+                        // No session here
+                        it.state.handleEvent(event)
+                        it.handleEvent(event)
+                    }
+                }
             }
         }
     }

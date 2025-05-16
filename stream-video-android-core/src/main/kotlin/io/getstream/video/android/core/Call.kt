@@ -757,7 +757,6 @@ public class Call(
 
     private fun leave(disconnectionReason: Throwable?) = atomicLeave {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
-        session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -772,11 +771,11 @@ public class Call(
 
         sfuSocketReconnectionTime = null
         stopScreenSharing()
-        (client as StreamVideoClient).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
+        (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
 
