@@ -114,7 +114,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
             )
         }
 
-        3, 4 -> {
+        3 -> {
             val rowItemWeight = 1f / callParticipants.size
             Row(modifier = modifier) {
                 remoteParticipants.take(callParticipants.size - 1).forEach { participant ->
@@ -129,6 +129,31 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         ),
                     )
                 }
+            }
+        }
+
+        4 -> {
+            val rowSize = Pair(2, 2)
+            Column(modifier) {
+                ParticipantRow(
+                    modifier = Modifier.weight(1f),
+                    participants = callParticipants.take(rowSize.first),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                )
+                ParticipantRow(
+                    modifier = Modifier.weight(1f),
+                    participants = callParticipants.takeLast(rowSize.second),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                    expectedRowSize = rowSize.first,
+                )
             }
         }
 
@@ -193,7 +218,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
         }
     }
 
-    if (callParticipants.size in 2..4) {
+    if (callParticipants.size in 2..3) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null || LocalInspectionMode.current) {

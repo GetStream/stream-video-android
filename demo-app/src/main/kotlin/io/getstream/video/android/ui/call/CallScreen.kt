@@ -390,6 +390,15 @@ fun CallScreen(
                                             ),
                                         )
                                     }
+                                    ToggleCameraAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_CameraToggle_Enabled_$isCameraEnabled",
+                                            ),
+                                        isCameraEnabled = isCameraEnabled,
+                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ToggleMicrophoneAction(
                                         modifier = Modifier
                                             .testTag(
@@ -401,15 +410,6 @@ fun CallScreen(
                                                 it.isEnabled,
                                             )
                                         },
-                                    )
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                                    ToggleCameraAction(
-                                        modifier = Modifier
-                                            .testTag(
-                                                "Stream_CameraToggle_Enabled_$isCameraEnabled",
-                                            ),
-                                        isCameraEnabled = isCameraEnabled,
-                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                 }

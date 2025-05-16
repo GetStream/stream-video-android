@@ -390,6 +390,7 @@ public fun BoxScope.ParticipantLabel(
                 Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                 GenericIndicator {
                     Icon(
+                        modifier = Modifier.padding(horizontal = 4.dp),
                         imageVector = Icons.Filled.PushPin,
                         contentDescription = "Pin",
                         tint = Color.White,
