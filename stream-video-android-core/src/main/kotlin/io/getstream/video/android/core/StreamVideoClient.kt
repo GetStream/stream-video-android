@@ -523,7 +523,7 @@ internal class StreamVideoClient internal constructor(
             calls[selectedCid]?.fireEvent(event)
             safeCall {
                 destroyedCalls.forEach {
-                    fireEvent(event)
+                    it.fireEvent(event)
                 }
             }
         }
