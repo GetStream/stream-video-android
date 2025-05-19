@@ -87,18 +87,7 @@ fun defaultStreamMenu(
     onToggleClosedCaptions: () -> Unit = {},
     closedCaptionUiState: ClosedCaptionUiState,
     audioDeviceUiStateList: List<AudioDeviceUiState> = emptyList(),
-    isSpeakerEnabled: Boolean = true,
-    onSpeakerToggleAction: () -> Unit = {},
 ) = buildList<MenuItem> {
-    val speakerText = if (isSpeakerEnabled) "Turn off Speaker" else "Turn on Speaker"
-    add(
-        ActionMenuItem(
-            title = speakerText,
-            icon = Icons.Default.SpatialAudioOff,
-            highlight = false,
-            action = onSpeakerToggleAction,
-        ),
-    )
     if (noiseCancellationFeatureEnabled) {
         add(
             ActionMenuItem(

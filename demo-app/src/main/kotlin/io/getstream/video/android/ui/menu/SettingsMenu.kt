@@ -204,15 +204,6 @@ internal fun SettingsMenu(
         )
     }
 
-    val isSpeakerEnabled by call.speaker.isEnabled.collectAsStateWithLifecycle()
-    val onSpeakerToggleAction: () -> Unit = {
-        if (isSpeakerEnabled) {
-            call.speaker.disable()
-        } else {
-            call.speaker.setEnabled(true)
-        }
-    }
-
     val onLoadTranscriptions: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
         when (it) {
             is PermissionStatus.Granted -> {
@@ -298,8 +289,6 @@ internal fun SettingsMenu(
                 onToggleTranscription = onToggleTranscription,
                 loadTranscriptions = onLoadTranscriptions,
                 audioDeviceUiStateList = audioDeviceUiStateList,
-                isSpeakerEnabled = isSpeakerEnabled,
-                onSpeakerToggleAction = onSpeakerToggleAction,
             ),
         )
     }
