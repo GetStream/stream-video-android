@@ -29,6 +29,6 @@ class CallDetailsPage {
         val callIdInputField = By.res("Stream_CallIdInputField")
         val wheelIcon = By.res("Stream_SettingsIcon")
         val directCallButton = By.res("Stream_DirectCallButton")
-        val signOutButton = By.res("Stream_SignOutButton")
+        val signOutButton = By.text("Sign out")
     }
 }

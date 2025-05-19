@@ -40,6 +40,7 @@ import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
@@ -134,6 +135,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             finish()
         }
     }
+
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong" }
         onFailed(error)
@@ -189,6 +191,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             onSuccess = { instanceState, persistentState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
                 onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                    applyDashboardSettings(successCall)
                     onCreate(instanceState, persistentState, successCall)
                 }
             },
@@ -214,6 +217,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             onSuccess = { instanceState, persistedState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
                 onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                    applyDashboardSettings(successCall)
                     onCreate(instanceState, persistedState, successCall)
                 }
             },
@@ -724,13 +728,10 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val connectionState = call.state.connection.value
-                if (connectionState == RealtimeConnection.Disconnected) {
-                    val total = call.state.participantCounts.value?.total
-                    logger.d { "Participant left, remaining: $total" }
-                    if (total != null && total <= 2) {
-                        onLastParticipant(call)
-                    }
+                val total = call.state.participantCounts.value?.total
+                logger.d { "Participant left, remaining: $total" }
+                if (total != null && total <= 2) {
+                    onLastParticipant(call)
                 }
             }
         }
@@ -789,6 +790,25 @@ public abstract class StreamCallActivity : ComponentActivity() {
             else -> {
                 // No-op
             }
+        }
+    }
+
+    /**
+     * Used to apply dashboard settings to the call.
+     * By default, it enables or disables the microphone and camera based on the settings.
+     *
+     * @param call the call
+     */
+    public open fun applyDashboardSettings(call: Call) {
+        val callSettings = call.state.settings.value
+        val microphoneStatus = call.microphone.status.value
+        val cameraStatus = call.camera.status.value
+
+        if (microphoneStatus == DeviceStatus.NotSelected) {
+            call.microphone.setEnabled(callSettings?.audio?.micDefaultOn == true)
+        }
+        if (cameraStatus == DeviceStatus.NotSelected) {
+            call.camera.setEnabled(callSettings?.video?.cameraDefaultOn == true)
         }
     }
 

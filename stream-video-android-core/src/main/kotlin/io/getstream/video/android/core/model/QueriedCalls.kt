@@ -17,10 +17,14 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
+import io.getstream.android.video.generated.models.QueryCallsResponse
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 
 @Stable
 public data class QueriedCalls(
     public val calls: List<CallData>,
+    @ExperimentalStreamVideoApi
+    public val original: QueryCallsResponse,
     public val next: String?,
     public val prev: String?,
 )

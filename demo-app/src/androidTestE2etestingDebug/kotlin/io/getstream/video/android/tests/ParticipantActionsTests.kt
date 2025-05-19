@@ -19,6 +19,7 @@ package io.getstream.video.android.tests
 import io.getstream.video.android.robots.ParticipantRobot.Actions
 import io.getstream.video.android.robots.ParticipantRobot.Options
 import io.getstream.video.android.robots.UserControls
+import io.getstream.video.android.robots.VideoView
 import io.getstream.video.android.robots.assertCallDurationView
 import io.getstream.video.android.robots.assertConnectionQualityIndicator
 import io.getstream.video.android.robots.assertMediaTracks
@@ -39,7 +40,7 @@ class ParticipantActionsTests : StreamTestCase() {
         }
         step("AND participant joins the call and turns on mic") {
             participantRobot.joinCall(callId, arrayOf(Options.WITH_MICROPHONE))
-            userRobot.waitForParticipantsToJoin()
+            userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
             step("WHEN user turns on ${view.name} view") {
@@ -59,7 +60,7 @@ class ParticipantActionsTests : StreamTestCase() {
         }
         step("AND participant joins the call and turns off mic") {
             participantRobot.joinCall(callId)
-            userRobot.waitForParticipantsToJoin()
+            userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
             step("WHEN user turns on ${view.name} view") {
@@ -79,14 +80,14 @@ class ParticipantActionsTests : StreamTestCase() {
         }
         step("AND participant joins the call and turns camera on") {
             participantRobot.joinCall(callId, arrayOf(Options.WITH_CAMERA))
-            userRobot.waitForParticipantsToJoin()
+            userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
             step("WHEN user turns on ${view.name} view") {
                 userRobot.setView(view)
             }
             step("THEN user observes that participant's camera is enabled") {
-                userRobot.assertMediaTracks(count = 1)
+                userRobot.assertMediaTracks(count = 1, view = VideoView.GRID)
             }
         }
     }
@@ -99,14 +100,14 @@ class ParticipantActionsTests : StreamTestCase() {
         }
         step("AND participant joins the call and turns camera off") {
             participantRobot.joinCall(callId)
-            userRobot.waitForParticipantsToJoin()
+            userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
             step("WHEN user turns on ${view.name} view") {
                 userRobot.setView(view)
             }
             step("THEN user observes that participant's camera is disabled") {
-                userRobot.assertMediaTracks(count = 0)
+                userRobot.assertMediaTracks(count = 0, view = VideoView.GRID)
             }
         }
     }
@@ -119,7 +120,7 @@ class ParticipantActionsTests : StreamTestCase() {
         }
         step("AND participant joins the call") {
             participantRobot.joinCall(callId, arrayOf(Options.WITH_CAMERA))
-            userRobot.waitForParticipantsToJoin()
+            userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
             step("WHEN user turns on ${view.name} view") {
@@ -144,7 +145,7 @@ class ParticipantActionsTests : StreamTestCase() {
         }
         step("WHEN participants join the call and one of them starts recording") {
             userRobot
-                .waitForParticipantsToJoin()
+                .waitForParticipantsOnCall()
                 .acceptCallRecording()
         }
         for (view in allViews) {
@@ -180,7 +181,7 @@ class ParticipantActionsTests : StreamTestCase() {
             participantRobot
                 .setScreenSharingDuration(10)
                 .joinCall(callId, actions = arrayOf(Actions.SHARE_SCREEN))
-            userRobot.waitForParticipantsToJoin()
+            userRobot.waitForParticipantsOnCall()
         }
         step("THEN user observers participant's screen") {
             userRobot.assertParticipantScreenSharingView(isDisplayed = true)
