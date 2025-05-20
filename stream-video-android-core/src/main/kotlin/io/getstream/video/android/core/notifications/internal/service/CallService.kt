@@ -250,7 +250,9 @@ internal open class CallService : Service() {
         val intentCallId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         val intentCallDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
 
-        logger.i { "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger" }
+        logger.i {
+            "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger, Callservice hashcode: ${hashCode()}"
+        }
 
         val started = if (intentCallId != null && streamVideo != null && trigger != null) {
             // Promote early to foreground service
@@ -363,6 +365,9 @@ internal open class CallService : Service() {
                 callSoundPlayer = CallSoundPlayer(applicationContext)
             } else if (trigger == TRIGGER_OUTGOING_CALL) {
                 callSoundPlayer = CallSoundPlayer(applicationContext)
+            }
+            logger.d {
+                "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
             }
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
@@ -668,11 +673,13 @@ internal open class CallService : Service() {
     }
 
     override fun onDestroy() {
+        logger.d { "[onDestroy], Callservice hashcode: ${hashCode()}" }
         stopService()
         super.onDestroy()
     }
 
     override fun stopService(name: Intent?): Boolean {
+        logger.d { "[stopService(name)], Callservice hashcode: ${hashCode()}" }
         stopService()
         return super.stopService(name)
     }
@@ -698,6 +705,11 @@ internal open class CallService : Service() {
         unregisterToggleCameraBroadcastReceiver()
 
         // Call sounds
+        /**
+         * Temp Fix!! The observeRingingState scope was getting cancelled and as a result,
+         * ringing state was not properly updated
+         */
+        callSoundPlayer?.stopCallSound()
         callSoundPlayer?.cleanUpAudioResources()
 
         // Stop any jobs
