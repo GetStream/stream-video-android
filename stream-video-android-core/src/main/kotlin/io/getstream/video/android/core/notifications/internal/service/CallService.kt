@@ -362,8 +362,9 @@ internal open class CallService : Service() {
 
             if (trigger == TRIGGER_INCOMING_CALL) {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
-                callSoundPlayer = CallSoundPlayer(applicationContext)
-            } else if (trigger == TRIGGER_OUTGOING_CALL) {
+            }
+
+            if (callSoundPlayer != null) {
                 callSoundPlayer = CallSoundPlayer(applicationContext)
             }
             logger.d {
@@ -675,6 +676,7 @@ internal open class CallService : Service() {
     override fun onDestroy() {
         logger.d { "[onDestroy], Callservice hashcode: ${hashCode()}" }
         stopService()
+        callSoundPlayer?.cleanUpAudioResources()
         super.onDestroy()
     }
 
@@ -710,7 +712,6 @@ internal open class CallService : Service() {
          * ringing state was not properly updated
          */
         callSoundPlayer?.stopCallSound()
-        callSoundPlayer?.cleanUpAudioResources()
 
         // Stop any jobs
         serviceScope.cancel()
