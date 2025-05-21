@@ -4,7 +4,12 @@ on:
   push:
     branches:
       - develop
+      - main
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: ${{ !contains(github.ref, 'main')}}
 
 jobs:
   distribute_stream_video_calls_to_google_play:
