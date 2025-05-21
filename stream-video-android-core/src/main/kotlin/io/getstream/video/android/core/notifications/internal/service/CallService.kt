@@ -364,7 +364,7 @@ internal open class CallService : Service() {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
             }
 
-            if (callSoundPlayer != null) {
+            if (callSoundPlayer == null) {
                 callSoundPlayer = CallSoundPlayer(applicationContext)
             }
             logger.d {
