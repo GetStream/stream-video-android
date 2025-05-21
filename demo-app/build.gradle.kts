@@ -153,7 +153,7 @@ android {
             register("productionRelease") {
                 enabled.set(true)
                 serviceAccountCredentials.set(serviceAccountCredentialsFile)
-                track.set(System.getenv("PLAY_PUBLISH_TRACK"))
+                track.set(providers.environmentVariable("PLAY_PUBLISH_TRACK").orElse("internal"))
                 defaultToAppBundles.set(true)
                 resolutionStrategy.set(ResolutionStrategy.AUTO)
             }
