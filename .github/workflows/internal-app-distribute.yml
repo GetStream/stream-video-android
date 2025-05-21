@@ -11,6 +11,9 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: ${{ !contains(github.ref, 'main')}}
 
+env:
+  PLAY_PUBLISH_TRACK: ${{ github.ref_name == 'main' && 'alpha' || 'internal' }}
+
 jobs:
   distribute_stream_video_calls_to_google_play:
     name: Distribute Stream Video Calls to Google Play
