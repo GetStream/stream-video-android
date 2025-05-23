@@ -16,19 +16,20 @@
 
 package io.getstream.video.android.uiautomator
 
-import android.annotation.SuppressLint
 import androidx.test.uiautomator.UiDevice
 
 /**
  * Grant app permissions.
  */
-@SuppressLint("NewApi")
-public fun UiDevice.grantPermission(permission: String) =
-    instrumentation.uiAutomation.grantRuntimePermission(packageName, permission)
+public fun UiDevice.grantPermission(permission: String): String =
+    executeShellCommand(
+        "pm grant ${io.getstream.video.android.uiautomator.packageName} $permission",
+    )
 
 /**
  * Revoke app permissions.
  */
-@SuppressLint("NewApi")
-public fun UiDevice.revokePermission(permission: String) =
-    instrumentation.uiAutomation.revokeRuntimePermission(packageName, permission)
+public fun UiDevice.revokePermission(permission: String): String =
+    executeShellCommand(
+        "pm revoke ${io.getstream.video.android.uiautomator.packageName} $permission",
+    )
