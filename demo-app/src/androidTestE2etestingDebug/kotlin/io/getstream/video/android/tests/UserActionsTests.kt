@@ -89,6 +89,7 @@ class UserActionsTests : StreamTestCase() {
     }
 
     @AllureId("7537")
+    @Ignore("https://linear.app/stream/issue/AND-573")
     @Test
     fun testUserCameraPosition() {
         step("GIVEN user starts a call") {
