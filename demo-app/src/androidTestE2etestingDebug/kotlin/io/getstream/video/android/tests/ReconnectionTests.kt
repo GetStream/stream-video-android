@@ -59,8 +59,8 @@ class ReconnectionTests : StreamTestCase() {
         step("WHEN user loses the internet connection") {
             device.disableInternetConnection()
         }
-        step("AND user restores the connection after 10 seconds") {
-            userRobot.sleep(10.seconds)
+        step("AND user restores the connection after 5 seconds") {
+            userRobot.sleep(5.seconds)
             device.enableInternetConnection()
         }
         step("THEN there are $participants participants on the call") {
@@ -99,7 +99,6 @@ class ReconnectionTests : StreamTestCase() {
         step("AND user restores the connection after 5 seconds") {
             userRobot.sleep(5.seconds)
             device.enableInternetConnection()
-            userRobot.sleep(5.seconds) // to make sure the connection is back
         }
         step("THEN user still can see that participant is sharing the screen") {
             userRobot.assertParticipantScreenSharingView(isDisplayed = true)
@@ -133,7 +132,6 @@ class ReconnectionTests : StreamTestCase() {
         step("AND user restores the connection after 5 seconds") {
             userRobot.sleep(5.seconds)
             device.enableInternetConnection()
-            userRobot.sleep(5.seconds) // to make sure the connection is back
         }
         step("THEN user still can see that participant is recording the call") {
             userRobot.assertRecordingView(isDisplayed = true)
