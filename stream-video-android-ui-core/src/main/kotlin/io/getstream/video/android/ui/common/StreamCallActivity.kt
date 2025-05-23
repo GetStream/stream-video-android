@@ -596,6 +596,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     ) {
         logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
         lifecycleScope.launch(Dispatchers.IO) {
+            call.state.cancelTimeout()
             val result = call.reject(reason)
             result.onOutcome(call, onSuccess, onError)
             // Leave regardless of outcome
