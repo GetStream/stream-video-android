@@ -39,6 +39,7 @@ class CallPage {
         val recordingIcon = By.res("Stream_RecordingIcon")
         val videoView = By.res("Stream_VideoView")
         val videoViewWithMediaTrack = By.res("Stream_VideoViewWithMediaTrack")
+        val raisedHand = By.res("TODO") // https://linear.app/stream/issue/AND-562
 
 //        val participantEvent = By.res("") // not implemented in the demo app yet
 //        val minimizedCallView = By.res("") // not implemented in the demo app yet
@@ -58,6 +59,28 @@ class CallPage {
             val leave = By.text("Leave")
             val end = By.text("End")
             val cancel = By.text("Cancel")
+        }
+    }
+
+    class SettingsMenu {
+        companion object {
+            val raiseHandButton = By.text("✋ Raise hand")
+            val lowerHandButton = By.text("TODO") // https://linear.app/stream/issue/AND-562
+            val defaultBackgroundEnabledToggle = By.res(
+                "Stream_Background_Filled.AccountCircle_On",
+            )
+            val defaultBackgroundDisabledToggle = By.res(
+                "Stream_Background_Filled.AccountCircle_Off",
+            )
+            val blurBackgroundEnabledToggle = By.res("Stream_Background_Filled.BlurOn_On")
+            val blurBackgroundDisabledToggle = By.res("Stream_Background_Filled.BlurOn_Off")
+            val imageBackgroundEnabledToggle = By.res("Stream_Background_Image_On")
+            val imageBackgroundDisabledToggle = By.res("Stream_Background_Image_Off")
+            val noiseCancellationButton = By.text("Noise cancellation")
+            val startTranscriptionButton = By.text("Transcribe the call")
+            val stopTranscriptionButton = By.text("Stop transcription")
+            val startClosedCaptionButton = By.text("Start Closed Caption")
+            val stopClosedCaptionButton = By.text("Stop Closed Caption")
         }
     }
 
@@ -88,12 +111,6 @@ class CallPage {
             val gridView = By.res("Stream_GridView")
             val screenSharingLabel = By.res("Stream_ParticipantScreenSharingLabel")
             val screenSharingView = By.res("Stream_ParticipantsScreenSharingView")
-        }
-    }
-
-    class Chat {
-        companion object {
-            val closeButton = By.res("Stream_CloseChatButton")
         }
     }
 }

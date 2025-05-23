@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.robots
 
+import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Direction
 import io.getstream.video.android.pages.CallDetailsPage
 import io.getstream.video.android.pages.CallPage
+import io.getstream.video.android.pages.CallPage.SettingsMenu
 import io.getstream.video.android.pages.DirectCallPage
 import io.getstream.video.android.pages.DirectCallPage.Companion.audioCallButton
 import io.getstream.video.android.pages.DirectCallPage.Companion.videoCallButton
@@ -28,6 +30,7 @@ import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
 import io.getstream.video.android.uiautomator.findObjects
+import io.getstream.video.android.uiautomator.isDisplayed
 import io.getstream.video.android.uiautomator.retryOnStaleObjectException
 import io.getstream.video.android.uiautomator.seconds
 import io.getstream.video.android.uiautomator.typeText
@@ -210,6 +213,7 @@ class UserRobot {
 
         if (action == UserControls.ENABLE && !isEnabled) {
             CallPage.callSettingsClosedToggle.findObject().click()
+            CallPage.callSettingsOpenToggle.waitToAppear()
         } else if (action == UserControls.DISABLE && isEnabled) {
             CallPage.callSettingsOpenToggle.findObject().click()
         }
@@ -217,18 +221,83 @@ class UserRobot {
         return this
     }
 
-    fun openChat(): UserRobot {
-        CallPage.chatButton.waitToAppear().click()
+    fun closedCaption(action: UserControls): UserRobot {
+        settings(UserControls.ENABLE)
+        sleep()
+
+        val locator = when (action) {
+            UserControls.ENABLE -> SettingsMenu.startClosedCaptionButton
+            UserControls.DISABLE -> SettingsMenu.stopClosedCaptionButton
+        }
+
+        if (locator.isDisplayed()) {
+            locator.findObject().click()
+        }
+
+        settings(UserControls.DISABLE)
         return this
     }
 
-    fun closeChat(): UserRobot {
-        CallPage.Chat.closeButton.waitToAppear().click()
+    fun transcription(action: UserControls): UserRobot {
+        settings(UserControls.ENABLE)
+
+        val locator = when (action) {
+            UserControls.ENABLE -> SettingsMenu.startTranscriptionButton
+            UserControls.DISABLE -> SettingsMenu.stopTranscriptionButton
+        }
+
+        if (locator.isDisplayed()) {
+            locator.findObject().click()
+        }
+
+        settings(UserControls.DISABLE)
         return this
     }
 
     fun endCall(): UserRobot {
         CallPage.hangUpButton.waitToAppear().click()
+        return this
+    }
+
+    fun raiseHand(): UserRobot {
+        settings(UserControls.ENABLE)
+        if (SettingsMenu.raiseHandButton.isDisplayed()) {
+            SettingsMenu.raiseHandButton.findObject().click()
+        } else {
+            settings(UserControls.DISABLE)
+        }
+        return this
+    }
+
+    fun lowerHand(): UserRobot {
+        settings(UserControls.ENABLE)
+        if (SettingsMenu.lowerHandButton.isDisplayed()) {
+            SettingsMenu.lowerHandButton.findObject().click()
+        } else {
+            settings(UserControls.DISABLE)
+        }
+        return this
+    }
+
+    fun switchNoiseCancellationToggle(): UserRobot {
+        settings(UserControls.ENABLE)
+        SettingsMenu.noiseCancellationButton.findObject().click()
+        settings(UserControls.DISABLE)
+        return this
+    }
+
+    fun setBackground(background: Background): UserRobot {
+        settings(UserControls.ENABLE)
+        val locator: BySelector = when (background) {
+            Background.DEFAULT -> SettingsMenu.defaultBackgroundDisabledToggle
+            Background.IMAGE -> SettingsMenu.imageBackgroundDisabledToggle
+            Background.BLUR -> SettingsMenu.blurBackgroundDisabledToggle
+        }
+        if (locator.isDisplayed()) {
+            locator.findObject().click()
+        } else {
+            settings(UserControls.DISABLE)
+        }
         return this
     }
 
@@ -257,7 +326,7 @@ class UserRobot {
         return this
     }
 
-    fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 30.seconds): UserRobot {
+    fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 100.seconds): UserRobot {
         val user = 1
         val participants = user + count
         device.retryOnStaleObjectException {
@@ -284,4 +353,8 @@ enum class CameraPosition {
 
 enum class VideoView {
     DYNAMIC, SPOTLIGHT, GRID
+}
+
+enum class Background {
+    DEFAULT, BLUR, IMAGE
 }

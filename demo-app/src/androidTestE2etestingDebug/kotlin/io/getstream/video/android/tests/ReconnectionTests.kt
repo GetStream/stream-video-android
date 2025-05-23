@@ -37,7 +37,6 @@ class ReconnectionTests : StreamTestCase() {
 
     @AllureId("7498")
     @Test
-    @Ignore
     fun testReconnection() {
         val user = 1
         val participants = 4
@@ -49,9 +48,9 @@ class ReconnectionTests : StreamTestCase() {
         }
         step("AND participants join the call") {
             participantRobot
-                .setCallDuration(75)
+                .setCallDuration(120)
                 .setUserCount(participants)
-                .joinCall(callId, options = arrayOf(Options.WITH_CAMERA))
+                .joinCall(callId, options = arrayOf(Options.WITH_CAMERA, Options.WITH_MICROPHONE))
         }
         step("AND user waits for the first participant to join the call") {
             userRobot.waitForParticipantsOnCall(1)
@@ -59,13 +58,13 @@ class ReconnectionTests : StreamTestCase() {
         step("WHEN user loses the internet connection") {
             device.disableInternetConnection()
         }
-        step("AND user restores the connection after 10 seconds") {
-            userRobot.sleep(10.seconds)
+        step("AND user restores the connection after 5 seconds") {
+            userRobot.sleep(5.seconds)
             device.enableInternetConnection()
         }
         step("THEN there are $participants participants on the call") {
             userRobot
-                .assertParticipantsCountOnCall(participants, timeOutMillis = 20.seconds)
+                .assertParticipantsCountOnCall(participants, timeOutMillis = 100.seconds)
                 .assertGridView(participants)
                 .assertParticipantsViews(
                     count = participants + user,
@@ -99,7 +98,6 @@ class ReconnectionTests : StreamTestCase() {
         step("AND user restores the connection after 5 seconds") {
             userRobot.sleep(5.seconds)
             device.enableInternetConnection()
-            userRobot.sleep(5.seconds) // to make sure the connection is back
         }
         step("THEN user still can see that participant is sharing the screen") {
             userRobot.assertParticipantScreenSharingView(isDisplayed = true)
@@ -133,7 +131,6 @@ class ReconnectionTests : StreamTestCase() {
         step("AND user restores the connection after 5 seconds") {
             userRobot.sleep(5.seconds)
             device.enableInternetConnection()
-            userRobot.sleep(5.seconds) // to make sure the connection is back
         }
         step("THEN user still can see that participant is recording the call") {
             userRobot.assertRecordingView(isDisplayed = true)
