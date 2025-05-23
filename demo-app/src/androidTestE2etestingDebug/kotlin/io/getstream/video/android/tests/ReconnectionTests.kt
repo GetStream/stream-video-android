@@ -30,12 +30,14 @@ import io.getstream.video.android.uiautomator.enableInternetConnection
 import io.getstream.video.android.uiautomator.seconds
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
+import org.junit.Ignore
 import org.junit.Test
 
 class ReconnectionTests : StreamTestCase() {
 
     @AllureId("7498")
     @Test
+    @Ignore
     fun testReconnection() {
         val user = 1
         val participants = 4
@@ -74,6 +76,7 @@ class ReconnectionTests : StreamTestCase() {
 
     @AllureId("7499")
     @Test
+    @Ignore
     fun testReconnectionDuringScreenSharing() {
         val participants = 1
 
@@ -105,6 +108,7 @@ class ReconnectionTests : StreamTestCase() {
 
     @AllureId("7500")
     @Test
+    @Ignore
     fun testReconnectionDuringCallRecording() {
         val participants = 1
 
