@@ -43,10 +43,11 @@ data class CallHLSBroadcastingStartedEvent(
     val call: io.getstream.android.video.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
-
+    val type: kotlin.String = "call.hls_broadcasting_started"
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

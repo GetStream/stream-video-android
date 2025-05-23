@@ -35,6 +35,5 @@ data class UpdateCallMembersResponse(
     val duration: kotlin.String,
 
     @Json(name = "members")
-    val members:
-    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse>,
+    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList()
 )

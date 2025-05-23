@@ -40,10 +40,11 @@ data class CallRtmpBroadcastStartedEvent(
     val name: kotlin.String,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
-
+    val type: kotlin.String = "call.rtmp_broadcast_started"
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }
