@@ -37,7 +37,6 @@ class ReconnectionTests : StreamTestCase() {
 
     @AllureId("7498")
     @Test
-    @Ignore
     fun testReconnection() {
         val user = 1
         val participants = 4
@@ -65,7 +64,7 @@ class ReconnectionTests : StreamTestCase() {
         }
         step("THEN there are $participants participants on the call") {
             userRobot
-                .assertParticipantsCountOnCall(participants, timeOutMillis = 20.seconds)
+                .assertParticipantsCountOnCall(participants, timeOutMillis = 45.seconds)
                 .assertGridView(participants)
                 .assertParticipantsViews(
                     count = participants + user,
