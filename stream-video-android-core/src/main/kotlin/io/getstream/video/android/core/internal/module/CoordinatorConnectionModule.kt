@@ -23,6 +23,7 @@ import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.interceptor.StreamOkhttpInterceptorRegistry
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.token.TokenProvider
@@ -79,7 +80,11 @@ internal class CoordinatorConnectionModule(
         .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
+        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .apply {
+            StreamOkhttpInterceptorRegistry.applyTo(this)
+        }
+        .build()
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
