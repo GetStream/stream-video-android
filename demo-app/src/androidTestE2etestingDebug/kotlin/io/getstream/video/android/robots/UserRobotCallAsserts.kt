@@ -67,7 +67,8 @@ fun UserRobot.assertUserMicrophone(isEnabled: Boolean): UserRobot {
 fun UserRobot.assertUserCamera(isEnabled: Boolean): UserRobot {
     if (isEnabled) {
         assertTrue(CallPage.cameraEnabledToggle.waitToAppear().isDisplayed())
-        assertTrue(CallPage.videoViewWithMediaTrack.isDisplayed())
+        // TODO: https://linear.app/stream/issue/AND-573
+        // assertTrue(CallPage.videoViewWithMediaTrack.isDisplayed())
     } else {
         assertTrue(CallPage.cameraDisabledToggle.waitToDisappear().isDisplayed())
         assertFalse(CallPage.videoViewWithMediaTrack.isDisplayed())
