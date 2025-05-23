@@ -28,6 +28,10 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.HeadsetMic
+import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +51,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -183,6 +188,22 @@ internal fun SettingsMenu(
         }
     }
 
+    val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
+    val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
+        val icon = when (it) {
+            is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+            is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+            is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+            is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+        }
+        AudioDeviceUiState(
+            it,
+            it.name,
+            icon,
+            it.audio.name == selectedMicroPhoneDevice?.audio?.name,
+        )
+    }
+
     val onLoadTranscriptions: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
         when (it) {
             is PermissionStatus.Granted -> {
@@ -267,6 +288,7 @@ internal fun SettingsMenu(
                 transcriptionUiState = transcriptionUiState,
                 onToggleTranscription = onToggleTranscription,
                 loadTranscriptions = onLoadTranscriptions,
+                audioDeviceUiStateList = audioDeviceUiStateList,
             ),
         )
     }
@@ -337,6 +359,7 @@ private fun SettingsMenuPreview() {
                 transcriptionUiState = TranscriptionAvailableUiState,
                 onToggleTranscription = {},
                 loadTranscriptions = { emptyList() },
+                audioDeviceUiStateList = emptyList(),
             ),
         )
     }

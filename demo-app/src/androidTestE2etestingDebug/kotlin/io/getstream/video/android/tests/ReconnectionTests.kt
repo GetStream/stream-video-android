@@ -30,6 +30,7 @@ import io.getstream.video.android.uiautomator.enableInternetConnection
 import io.getstream.video.android.uiautomator.seconds
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
+import org.junit.Ignore
 import org.junit.Test
 
 class ReconnectionTests : StreamTestCase() {

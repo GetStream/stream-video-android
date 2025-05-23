@@ -80,7 +80,7 @@ playAppUpdate = "2.1.0"
 hilt = "2.52"
 leakCanary = "2.13"
 binaryCompatabilityValidator = "0.16.3"
-playPublisher = "3.8.4"
+playPublisher = "3.12.1"
 
 googleMlKitSelfieSegmentation = "16.0.0-beta6"
 
