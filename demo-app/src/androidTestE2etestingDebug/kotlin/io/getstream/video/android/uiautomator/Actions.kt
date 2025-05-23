@@ -131,10 +131,15 @@ public fun UiDevice.waitForInternetConnection(timeoutMs: Long = 10000, intervalM
     throw IllegalStateException("There is no internet connection.")
 }
 
-public fun UiDevice.dumpWindowHierarchy() {
+public fun UiDevice.dumpWindowHierarchy(print: Boolean = true): String {
     val outputStream = ByteArrayOutputStream()
-    io.getstream.video.android.uiautomator.device.dumpWindowHierarchy(outputStream)
-    println(outputStream.toString("UTF-8"))
+    device.dumpWindowHierarchy(outputStream)
+
+    val outputString = outputStream.toString("UTF-8")
+    if (print) {
+        println(outputString)
+    }
+    return outputString
 }
 
 public fun <T> UiDevice.retryOnStaleObjectException(retries: Int = 3, action: () -> T): T {
@@ -149,8 +154,7 @@ public fun <T> UiDevice.retryOnStaleObjectException(retries: Int = 3, action: ()
     return action()
 }
 
-public fun UiDevice.takeScreenshot(scale: Float = 1.0f, quality: Int = 100): InputStream? {
+public fun UiDevice.takeScreenshot(scale: Float = 1.0f, quality: Int = 100): InputStream {
     val tempFile = File.createTempFile("screenshot_", ".png", appContext.cacheDir)
-    if (!this.takeScreenshot(tempFile, scale, quality)) return null
     return tempFile.inputStream()
 }

@@ -19,6 +19,7 @@ package io.getstream.chat.android.e2e.test.rules
 import android.database.sqlite.SQLiteDatabase
 import androidx.test.platform.app.InstrumentationRegistry
 import io.getstream.video.android.uiautomator.device
+import io.getstream.video.android.uiautomator.dumpWindowHierarchy
 import io.getstream.video.android.uiautomator.takeScreenshot
 import io.qameta.allure.kotlin.Allure
 import org.junit.rules.TestRule
@@ -51,21 +52,31 @@ public class RetryRule(private val count: Int) : TestRule {
                 for (i in 0 until retryCount) {
                     try {
                         System.err.println("${description.displayName}: run #${i + 1} started.")
+                        device.executeShellCommand("logcat -c")
                         base.evaluate()
                         return
                     } catch (t: Throwable) {
                         System.err.println("${description.displayName}: run #${i + 1} failed.")
                         databaseOperations.clearDatabases()
                         caughtThrowable = t
-                        val inputStream = device.takeScreenshot()
-                        if (inputStream != null) {
-                            Allure.attachment(
-                                name = "shot_${i + 1}",
-                                content = inputStream,
-                                type = "image/png",
-                                fileExtension = ".png",
-                            )
-                        }
+                        Allure.attachment(
+                            name = "shot_${i + 1}",
+                            type = "image/png",
+                            fileExtension = ".png",
+                            content = device.takeScreenshot(),
+                        )
+                        Allure.attachment(
+                            name = "view_${i + 1}",
+                            type = "text/xml",
+                            fileExtension = ".xml",
+                            content = device.dumpWindowHierarchy(print = false),
+                        )
+                        Allure.attachment(
+                            name = "log_${i + 1}",
+                            type = "text/plain",
+                            fileExtension = ".txt",
+                            content = device.executeShellCommand("logcat -d"),
+                        )
                     }
                 }
 

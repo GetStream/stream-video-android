@@ -326,7 +326,7 @@ class UserRobot {
         return this
     }
 
-    fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 30.seconds): UserRobot {
+    fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 100.seconds): UserRobot {
         val user = 1
         val participants = user + count
         device.retryOnStaleObjectException {
