@@ -18,6 +18,9 @@ package io.getstream.chat.android.e2e.test.rules
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.test.platform.app.InstrumentationRegistry
+import io.getstream.video.android.uiautomator.device
+import io.getstream.video.android.uiautomator.takeScreenshot
+import io.qameta.allure.kotlin.Allure
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -47,13 +50,22 @@ public class RetryRule(private val count: Int) : TestRule {
 
                 for (i in 0 until retryCount) {
                     try {
-                        System.err.println("${description.displayName}: run #${(i + 1)} started.")
+                        System.err.println("${description.displayName}: run #${i + 1} started.")
                         base.evaluate()
                         return
                     } catch (t: Throwable) {
-                        System.err.println("${description.displayName}: run #${(i + 1)} failed.")
+                        System.err.println("${description.displayName}: run #${i + 1} failed.")
                         databaseOperations.clearDatabases()
                         caughtThrowable = t
+                        val inputStream = device.takeScreenshot()
+                        if (inputStream != null) {
+                            Allure.attachment(
+                                name = "shot_${i + 1}",
+                                content = inputStream,
+                                type = "image/png",
+                                fileExtension = ".png",
+                            )
+                        }
                     }
                 }
 

@@ -70,7 +70,7 @@ fun UserRobot.assertUserCamera(isEnabled: Boolean): UserRobot {
         // TODO: https://linear.app/stream/issue/AND-573
         // assertTrue(CallPage.videoViewWithMediaTrack.isDisplayed())
     } else {
-        assertTrue(CallPage.cameraDisabledToggle.waitToDisappear().isDisplayed())
+        assertTrue(CallPage.cameraDisabledToggle.waitToAppear().isDisplayed())
         assertFalse(CallPage.videoViewWithMediaTrack.isDisplayed())
     }
     return this

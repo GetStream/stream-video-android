@@ -26,6 +26,8 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import io.getstream.video.android.EXTRA_CALL_ID
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.InputStream
 
 public fun UiDevice.startApp(callId: String) {
     val intent = testContext.packageManager.getLaunchIntentForPackage(packageName)
@@ -145,4 +147,10 @@ public fun <T> UiDevice.retryOnStaleObjectException(retries: Int = 3, action: ()
         }
     }
     return action()
+}
+
+public fun UiDevice.takeScreenshot(scale: Float = 1.0f, quality: Int = 100): InputStream? {
+    val tempFile = File.createTempFile("screenshot_", ".png", appContext.cacheDir)
+    if (!this.takeScreenshot(tempFile, scale, quality)) return null
+    return tempFile.inputStream()
 }
