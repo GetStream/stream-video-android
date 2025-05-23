@@ -64,7 +64,6 @@ class LayoutTests : StreamTestCase() {
     }
 
     @AllureId("7501")
-    @Ignore("https://linear.app/stream/issue/AND-361")
     @Test
     fun testThreeParticipantsOnTheCall() {
         assertParticipantsOnTheCall(participants = 3, callDuration = 60)

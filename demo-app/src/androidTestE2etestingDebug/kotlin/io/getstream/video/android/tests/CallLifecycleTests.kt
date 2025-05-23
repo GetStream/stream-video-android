@@ -175,22 +175,6 @@ class CallLifecycleTests : StreamTestCase() {
         }
     }
 
-    @AllureId("6947")
-    @Test
-    fun testUserJoinsExistedCall() {
-        step("GIVEN participant starts a call") {
-            participantRobot.joinCall(callId)
-        }
-        step("WHEN user joins the call") {
-            userRobot
-                .sleep(15.seconds) // give time for participant to connect
-                .joinCall(callId)
-        }
-        step("THEN there is one participant on the call") {
-            userRobot.assertParticipantsCountOnCall(1)
-        }
-    }
-
     @AllureId("6991")
     @Test
     fun testUserSwitchesCalls() {

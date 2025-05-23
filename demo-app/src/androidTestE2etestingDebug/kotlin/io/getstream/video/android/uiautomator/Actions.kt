@@ -16,12 +16,18 @@
 
 package io.getstream.video.android.uiautomator
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import io.getstream.video.android.EXTRA_CALL_ID
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.InputStream
 
 public fun UiDevice.startApp(callId: String) {
     val intent = testContext.packageManager.getLaunchIntentForPackage(packageName)
@@ -98,6 +104,7 @@ public fun UiDevice.goToForeground() {
 public fun UiDevice.enableInternetConnection() {
     executeShellCommand("svc data enable")
     executeShellCommand("svc wifi enable")
+    waitForInternetConnection()
 }
 
 public fun UiDevice.disableInternetConnection() {
@@ -105,10 +112,34 @@ public fun UiDevice.disableInternetConnection() {
     executeShellCommand("svc wifi disable")
 }
 
-public fun UiDevice.dumpWindowHierarchy() {
+@SuppressLint("NewApi")
+public fun UiDevice.waitForInternetConnection(timeoutMs: Long = 10000, intervalMs: Long = 500) {
+    val connectivityManager = appContext.getSystemService(
+        Context.CONNECTIVITY_SERVICE,
+    ) as ConnectivityManager
+
+    val startTime = System.currentTimeMillis()
+    while (System.currentTimeMillis() - startTime < timeoutMs) {
+        val activeNetwork = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+        val hasInternet = capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+
+        if (hasInternet) return
+        Thread.sleep(intervalMs)
+    }
+
+    throw IllegalStateException("There is no internet connection.")
+}
+
+public fun UiDevice.dumpWindowHierarchy(print: Boolean = true): String {
     val outputStream = ByteArrayOutputStream()
-    io.getstream.video.android.uiautomator.device.dumpWindowHierarchy(outputStream)
-    println(outputStream.toString("UTF-8"))
+    device.dumpWindowHierarchy(outputStream)
+
+    val outputString = outputStream.toString("UTF-8")
+    if (print) {
+        println(outputString)
+    }
+    return outputString
 }
 
 public fun <T> UiDevice.retryOnStaleObjectException(retries: Int = 3, action: () -> T): T {
@@ -121,4 +152,9 @@ public fun <T> UiDevice.retryOnStaleObjectException(retries: Int = 3, action: ()
         }
     }
     return action()
+}
+
+public fun UiDevice.takeScreenshot(scale: Float = 1.0f, quality: Int = 100): InputStream {
+    val tempFile = File.createTempFile("screenshot_", ".png", appContext.cacheDir)
+    return tempFile.inputStream()
 }
