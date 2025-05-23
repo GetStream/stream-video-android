@@ -39,7 +39,7 @@ class CallPage {
         val recordingIcon = By.res("Stream_RecordingIcon")
         val videoView = By.res("Stream_VideoView")
         val videoViewWithMediaTrack = By.res("Stream_VideoViewWithMediaTrack")
-        val raisedHand = By.res("FIXME") // https://linear.app/stream/issue/AND-562
+        val raisedHand = By.res("TODO") // https://linear.app/stream/issue/AND-562
 
 //        val participantEvent = By.res("") // not implemented in the demo app yet
 //        val minimizedCallView = By.res("") // not implemented in the demo app yet
@@ -65,7 +65,7 @@ class CallPage {
     class SettingsMenu {
         companion object {
             val raiseHandButton = By.text("✋ Raise hand")
-            val lowerHandButton = By.text("FIXME") // https://linear.app/stream/issue/AND-562
+            val lowerHandButton = By.text("TODO") // https://linear.app/stream/issue/AND-562
             val defaultBackgroundEnabledToggle = By.res(
                 "Stream_Background_Filled.AccountCircle_On",
             )
