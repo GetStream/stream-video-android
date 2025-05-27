@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.video.android.core.randomString
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
@@ -143,5 +144,3 @@ internal class TokenUtilsTest(
         )
     }
 }
-
-private val charPool: CharArray = (('a'..'z') + ('A'..'Z') + ('0'..'9')).toCharArray()
