@@ -64,7 +64,6 @@ class LayoutTests : StreamTestCase() {
     }
 
     @AllureId("7501")
-    @Ignore("https://linear.app/stream/issue/AND-361")
     @Test
     fun testThreeParticipantsOnTheCall() {
         assertParticipantsOnTheCall(participants = 3, callDuration = 60)
@@ -88,7 +87,7 @@ class LayoutTests : StreamTestCase() {
                 .setUserCount(participants)
                 .setCallDuration(callDuration)
                 .joinCall(callId, options = arrayOf(Options.WITH_CAMERA))
-            userRobot.waitForParticipantsOnCall(participants, timeOutMillis = callDuration.seconds)
+            userRobot.waitForParticipantsOnCall(participants, timeOutMillis = 120.seconds)
         }
         step("AND user enables grid view") {
             userRobot.setView(VideoView.GRID)

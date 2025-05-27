@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.tests
 
-import io.getstream.video.android.robots.ParticipantRobot.Actions
-import io.getstream.video.android.robots.ParticipantRobot.Options
-import io.getstream.video.android.robots.UserControls
+import io.getstream.video.android.robots.ParticipantRobot.Actions.RECORD_CALL
+import io.getstream.video.android.robots.ParticipantRobot.Actions.SHARE_SCREEN
+import io.getstream.video.android.robots.ParticipantRobot.Options.WITH_CAMERA
+import io.getstream.video.android.robots.ParticipantRobot.Options.WITH_MICROPHONE
+import io.getstream.video.android.robots.UserControls.DISABLE
 import io.getstream.video.android.robots.VideoView
 import io.getstream.video.android.robots.assertCallDurationView
 import io.getstream.video.android.robots.assertConnectionQualityIndicator
@@ -39,7 +41,7 @@ class ParticipantActionsTests : StreamTestCase() {
             userRobot.joinCall()
         }
         step("AND participant joins the call and turns on mic") {
-            participantRobot.joinCall(callId, arrayOf(Options.WITH_MICROPHONE))
+            participantRobot.joinCall(callId, arrayOf(WITH_MICROPHONE))
             userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
@@ -76,10 +78,10 @@ class ParticipantActionsTests : StreamTestCase() {
     @Test
     fun testParticipantEnablesCamera() {
         step("GIVEN user starts a call") {
-            userRobot.joinCall(camera = UserControls.DISABLE)
+            userRobot.joinCall(camera = DISABLE)
         }
         step("AND participant joins the call and turns camera on") {
-            participantRobot.joinCall(callId, arrayOf(Options.WITH_CAMERA))
+            participantRobot.joinCall(callId, arrayOf(WITH_CAMERA))
             userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
@@ -96,7 +98,7 @@ class ParticipantActionsTests : StreamTestCase() {
     @Test
     fun testParticipantDisablesCamera() {
         step("GIVEN user starts a call") {
-            userRobot.joinCall(camera = UserControls.DISABLE)
+            userRobot.joinCall(camera = DISABLE)
         }
         step("AND participant joins the call and turns camera off") {
             participantRobot.joinCall(callId)
@@ -119,7 +121,7 @@ class ParticipantActionsTests : StreamTestCase() {
             userRobot.joinCall()
         }
         step("AND participant joins the call") {
-            participantRobot.joinCall(callId, arrayOf(Options.WITH_CAMERA))
+            participantRobot.joinCall(callId, arrayOf(WITH_CAMERA))
             userRobot.waitForParticipantsOnCall()
         }
         for (view in allViews) {
@@ -141,7 +143,7 @@ class ParticipantActionsTests : StreamTestCase() {
         step("AND participant joins the call and starts recording the call for 10 seconds") {
             participantRobot
                 .setCallRecordingDuration(15)
-                .joinCall(callId, actions = arrayOf(Actions.RECORD_CALL))
+                .joinCall(callId, actions = arrayOf(RECORD_CALL))
         }
         step("WHEN participants join the call and one of them starts recording") {
             userRobot
@@ -180,7 +182,7 @@ class ParticipantActionsTests : StreamTestCase() {
         step("WHEN participant joins the call and shares the screen for 3 seconds") {
             participantRobot
                 .setScreenSharingDuration(10)
-                .joinCall(callId, actions = arrayOf(Actions.SHARE_SCREEN))
+                .joinCall(callId, actions = arrayOf(SHARE_SCREEN))
             userRobot.waitForParticipantsOnCall()
         }
         step("THEN user observers participant's screen") {

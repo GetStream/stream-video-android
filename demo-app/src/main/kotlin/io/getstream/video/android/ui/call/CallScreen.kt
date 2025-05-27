@@ -581,7 +581,8 @@ fun CallScreen(
                         IconButton(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(top = 10.dp, end = 10.dp),
+                                .padding(top = 10.dp, end = 10.dp)
+                                .testTag("Stream_InviteCloseButton"),
                             onClick = { showShareDialog = false },
                         ) {
                             Icon(
