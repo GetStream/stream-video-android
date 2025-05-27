@@ -19,10 +19,12 @@ package io.getstream.video.android.tutorial.livestream
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,12 +42,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
@@ -91,6 +95,7 @@ private fun LiveHostContent(
     val localParticipant by call.state.localParticipant.collectAsState()
     val video = localParticipant?.video?.collectAsState()?.value
     val duration by call.state.duration.collectAsState()
+    val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -160,18 +165,31 @@ private fun LiveHostContent(
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                ToggleCameraAction(isCameraEnabled = isCameraEnabled) {
-                    call.camera.setEnabled(it.isEnabled)
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Row {
+                        ToggleCameraAction(isCameraEnabled = isCameraEnabled) {
+                            call.camera.setEnabled(it.isEnabled)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        FlipCameraAction {
+                            call.camera.flip()
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        LeaveCallAction {
+                            call.leave()
+                            navController.popBackStack()
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row {
+                        ToggleMicrophoneAction(isMicrophoneEnabled = isMicrophoneEnabled) {
+                            call.microphone.setEnabled(
+                                it.isEnabled,
+                            )
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                FlipCameraAction {
-                    call.camera.flip()
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                LeaveCallAction {
-                    call.leave()
-                    navController.popBackStack()
-                }
+
             }
         },
     ) {
