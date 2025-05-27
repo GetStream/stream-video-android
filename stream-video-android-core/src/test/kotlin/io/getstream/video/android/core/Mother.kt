@@ -1,6 +1,8 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.model.User
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneId
@@ -59,3 +61,25 @@ public fun randomUser(
     updatedAt = updatedAt,
     teams = teams,
 )
+
+/**
+ * Provides a GET request with a configurable [url].
+ */
+fun randomGetRequest(
+    url: String = "http://${randomString()}",
+): Request =
+    Request.Builder()
+        .url(url)
+        .build()
+
+/**
+ * Provides a POST request with a configurable [url] and [body].
+ */
+fun randomPostRequest(
+    url: String = "http://${randomString()}",
+    body: String = randomString(),
+): Request =
+    Request.Builder()
+        .url(url)
+        .post(body.toRequestBody())
+        .build()
