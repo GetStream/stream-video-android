@@ -16,34 +16,31 @@
 
 package io.getstream.video.android.core.socket.common.token
 
-internal class TokenManagerImpl : TokenManager {
+internal class TokenManagerImpl(
+    private var provider: CacheableTokenProvider,
+) : TokenManager {
     @Volatile
-    private var token: String = EMPTY_TOKEN
-    private lateinit var provider: TokenProvider
+    private var token: String
 
-    override fun updateToken(token: String) {
-        this.token = token
+    init {
+        token = provider.getCachedToken()
     }
 
-    override suspend fun ensureTokenLoaded() {
+    override fun updateTokenProvider(provider: CacheableTokenProvider) {
+        this.provider = provider
+        this.token = provider.getCachedToken()
+    }
+
+    override fun ensureTokenLoaded() {
         if (!hasToken()) {
             loadSync()
         }
     }
 
-    override suspend fun loadSync(): String {
+    override fun loadSync(): String {
         return provider.loadToken().also {
             this.token = it
         }
-    }
-
-    override fun setTokenProvider(provider: CacheableTokenProvider) {
-        this.provider = provider
-        this.token = provider.getCachedToken()
-    }
-
-    override fun hasTokenProvider(): Boolean {
-        return this::provider.isInitialized
     }
 
     override fun getToken(): String = token

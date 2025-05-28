@@ -32,6 +32,7 @@ import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
@@ -48,7 +49,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import stream.video.sfu.event.JoinRequest
 
-class SfuSocketConnection(
+internal class SfuSocketConnection(
     private val apiKey: ApiKey,
     /** The URL to connect to */
     private val url: String,
@@ -61,7 +62,7 @@ class SfuSocketConnection(
     /** Lifecycle */
     private val lifecycle: Lifecycle,
     /** Token provider */
-    private val tokenProvider: TokenProvider,
+    private val tokenManager: TokenManager,
 ) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
     SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken, JoinRequest> {
 
@@ -70,7 +71,6 @@ class SfuSocketConnection(
     }
 
     private val logger by taggedLogger("Video:SfuSocket")
-    private val tokenManager = TokenManagerImpl()
     private val internalSocket: SfuSocket = SfuSocket(
         wssUrl = url,
         apiKey = apiKey,
@@ -97,11 +97,6 @@ class SfuSocketConnection(
         extraBufferCapacity = 100,
     )
     private val connectionId: MutableStateFlow<String?> = MutableStateFlow(null)
-
-    // Initialization
-    init {
-        tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
-    }
 
     override fun onCreated() {
         super.onCreated()
@@ -164,12 +159,6 @@ class SfuSocketConnection(
     override suspend fun disconnect() {
         logger.d { "[disconnect] Disconnecting socket" }
         internalSocket.disconnect()
-    }
-
-    override fun updateToken(token: SfuToken) {
-        throw UnsupportedOperationException(
-            "Update token is not supported for SFU. Create a new socket instead.",
-        )
     }
 
     override suspend fun reconnect(data: JoinRequest, force: Boolean) {

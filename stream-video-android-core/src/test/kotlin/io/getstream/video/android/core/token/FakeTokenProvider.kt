@@ -22,7 +22,7 @@ internal class FakeTokenProvider(vararg val tokens: String) : TokenProvider {
 
     var tokenId = 0
 
-    override suspend fun loadToken(): String {
+    override fun loadToken(): String {
         return tokens[tokenId++]
     }
 }

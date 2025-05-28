@@ -25,6 +25,9 @@ import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.core.trace.Tracer
@@ -58,8 +61,11 @@ internal class CoordinatorConnectionModule(
     override val lifecycle: Lifecycle,
     override val tracer: Tracer = Tracer("coordinator"),
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
+
+    private val tokenManager = TokenManagerImpl(CacheableTokenProvider(tokenProvider))
+
     // Internals
-    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
+    private val authInterceptor = CoordinatorAuthInterceptor(tokenManager, apiKey)
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder().baseUrl(apiUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
@@ -101,12 +107,13 @@ internal class CoordinatorConnectionModule(
         networkStateProvider = networkStateProvider,
         scope = scope,
         lifecycle = lifecycle,
-        tokenProvider = tokenProvider,
+        tokenManager = tokenManager,
     )
 
-    override fun updateToken(token: UserToken) {
-        socketConnection.updateToken(token)
-        authInterceptor.token = token
+    override fun updateToken(token: UserToken?) {
+        token?.let { CacheableTokenProvider(ConstantTokenProvider(it)) }
+            ?.let { tokenManager.updateTokenProvider(it) }
+        ?: tokenManager.loadSync()
     }
 
     override fun updateAuthType(authType: String) {

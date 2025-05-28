@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.internal.module
 
+import io.getstream.video.android.core.socket.common.token.TokenManager
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException
@@ -24,8 +25,8 @@ import java.io.IOException
  * CoordinatorAuthInterceptor adds the token authentication to the API calls
  */
 internal class CoordinatorAuthInterceptor(
+    val tokenManager: TokenManager,
     var apiKey: String,
-    var token: String,
     var authType: String = "jwt",
 ) : Interceptor {
 
@@ -41,9 +42,11 @@ internal class CoordinatorAuthInterceptor(
             original.url
         }
 
+        tokenManager.ensureTokenLoaded()
+
         val updated = original.newBuilder()
             .url(updatedUrl)
-            .addHeader(HEADER_AUTHORIZATION, token)
+            .addHeader(HEADER_AUTHORIZATION, tokenManager.getToken())
             .header(STREAM_AUTH_TYPE, authType)
             .build()
 

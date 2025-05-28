@@ -36,6 +36,7 @@ import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
@@ -63,7 +64,7 @@ import okhttp3.OkHttpClient
  * - Flow to avoid concurrency related bugs
  * - Ability to wait till the socket is connected (important to prevent race conditions)
  */
-public open class CoordinatorSocketConnection(
+internal open class CoordinatorSocketConnection(
     private val apiKey: ApiKey,
     /** The URL to connect to */
     private val url: String,
@@ -80,13 +81,13 @@ public open class CoordinatorSocketConnection(
     /** Lifecycle */
     private val lifecycle: Lifecycle,
     /** Token provider */
-    private val tokenProvider: TokenProvider,
+    private val tokenManager: TokenManager,
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
     SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
 
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
-    private val tokenManager = TokenManagerImpl()
+
 
     // Internal state
     private val logger by taggedLogger("Video:Socket")
@@ -117,11 +118,6 @@ public open class CoordinatorSocketConnection(
     }
 
     private val state: StateFlow<VideoSocketState> = internalSocket.state()
-
-    // Init
-    init {
-        tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
-    }
 
     // Extension opportunity for subclasses
     override fun onCreated() {
@@ -215,6 +211,7 @@ public open class CoordinatorSocketConnection(
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
     override suspend fun connect(connectData: User) {
+        tokenManager.ensureTokenLoaded()
         internalSocket.connectUser(connectData, connectData.isAnonymous())
     }
 
@@ -223,8 +220,4 @@ public open class CoordinatorSocketConnection(
     }
 
     override suspend fun disconnect() = internalSocket.disconnect()
-
-    override fun updateToken(token: UserToken) {
-        tokenManager.updateToken(token)
-    }
 }

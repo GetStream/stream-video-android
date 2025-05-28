@@ -21,7 +21,10 @@ import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenManager
+import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trace.tracedWith
@@ -45,6 +48,9 @@ internal class SfuConnectionModule(
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
+    private val tokenManager: TokenManager = TokenManagerImpl(
+        CacheableTokenProvider(ConstantTokenProvider(userToken)),
+    )
     override val http: OkHttpClient = buildSfuOkHttpClient()
 
     private val signalRetrofitClient: Retrofit by lazy {
@@ -54,7 +60,7 @@ internal class SfuConnectionModule(
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
-        val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
+        val authInterceptor = CoordinatorAuthInterceptor(tokenManager, apiKey)
         return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = loggingLevel.httpLoggingLevel.level
@@ -86,14 +92,16 @@ internal class SfuConnectionModule(
         apiKey = apiKey,
         scope = scope,
         httpClient = http,
-        tokenProvider = ConstantTokenProvider(userToken),
+        tokenManager = tokenManager,
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
     )
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 
-    override fun updateToken(token: SfuToken) {
-        _internalSocketConnection.updateToken(token)
+    override fun updateToken(token: SfuToken?) {
+        throw UnsupportedOperationException(
+            "Update token is not supported for SFU. Create a new socket instead.",
+        )
     }
 
     override fun updateAuthType(authType: String) {

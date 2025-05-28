@@ -45,7 +45,9 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.webrtc.ManagedAudioProcessingFactory
 import java.net.ConnectException
 
@@ -101,7 +103,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val legacyTokenProvider: (suspend (error: Throwable?) -> String)? = null,
     private val tokenProvider: TokenProvider = legacyTokenProvider?.let { legacy ->
         object : TokenProvider {
-            override suspend fun loadToken(): String = legacy.invoke(null)
+            override fun loadToken(): String = runBlocking(Dispatchers.IO) { legacy.invoke(null) }
         }
     } ?: ConstantTokenProvider(token),
     private val loggingLevel: LoggingLevel = LoggingLevel(),
