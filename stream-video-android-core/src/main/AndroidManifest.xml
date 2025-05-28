@@ -109,11 +109,23 @@
         <service
             android:name=".notifications.internal.service.LivestreamViewerService"
             android:foregroundServiceType="mediaPlayback"
-            android:exported="false" />
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
 
         <service
             android:name=".notifications.internal.service.AudioCallService"
             android:foregroundServiceType="microphone|shortService"
             android:exported="false" />
+
+        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>
