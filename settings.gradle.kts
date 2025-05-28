@@ -16,6 +16,14 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
+        maven(url="https://developer.huawei.com/repo/") {
+            content {
+                includeGroup("com.huawei.agconnect")
+                includeGroup("com.huawei.android.hms")
+                includeGroup("com.huawei.hms")
+                includeGroup("com.huawei.hmf")
+            }
+        }
     }
 }
 

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2024 Stream.io Inc. All rights reserved.
+
+     Licensed under the Stream License;
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- For Android < 10 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
+
+    <application
+        android:name="io.getstream.video.android.App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Dogfooding"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+
+        <profileable
+            android:shell="true"
+            tools:targetApi="29" />
+
+        <activity
+            android:name="io.getstream.video.android.MainActivity"
+            android:exported="true"
+            android:theme="@style/Dogfooding"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".DeeplinkingActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter
+                android:autoVerify="true"
+                android:label="@string/filter_call_link">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="getstream.io" />
+                <data android:host="pronto.getstream.io" />
+                <data android:host="staging.getstream.io" />
+                <data android:host="stream-calls-dogfood.vercel.app"/>
+                <data android:pathPrefix="/join" />
+                <data android:pathPrefix="/video/demos/join" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".CallActivity"
+            android:supportsPictureInPicture="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:showOnLockScreen="true"
+            android:launchMode="singleTop"
+            android:exported="false">
+            <intent-filter android:priority="1">
+                <action android:name="io.getstream.video.android.action.INCOMING_CALL" />
+                <action android:name="io.getstream.video.android.action.NOTIFICATION" />
+                <action android:name="io.getstream.video.android.action.LIVE_CALL" />
+                <action android:name="io.getstream.video.android.action.ONGOING_CALL" />
+                <action android:name="io.getstream.video.android.action.ACCEPT_CALL" />
+                <action android:name="io.getstream.video.android.action.OUTGOING_CALL" />
+            </intent-filter>
+        </activity>
+
+        <!-- Prevent firebase from using advertisement ID -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+
+        <!-- Remove SDK Firebase Messaging Services -->
+        <service
+            android:name="io.getstream.android.push.firebase.ChatFirebaseMessagingService"
+            android:exported="false"
+            tools:node="remove"
+            tools:ignore="MissingPlaceholder">
+            <intent-filter android:priority="-1" >
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="io.getstream.video.android.push.firebase.DemoAppFirebaseService"
+            android:exported="false"
+            tools:node="remove"
+            tools:ignore="MissingPlaceholder">
+            <intent-filter android:priority="-1" >
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Replace SDK Xiaomi Messaging Receiver -->
+        <receiver
+            android:name="io.getstream.android.push.xiaomi.ChatXiaomiMessagingReceiver"
+            android:exported="true"
+        >
+            <intent-filter  android:priority="-1" >
+                <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
+            </intent-filter>
+            <intent-filter  android:priority="-1" >
+                <action android:name="com.xiaomi.mipush.MESSAGE_ARRIVED" />
+            </intent-filter>
+            <intent-filter  android:priority="-1" >
+                <action android:name="com.xiaomi.mipush.ERROR" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="io.getstream.video.android.push.xiaomi.DemoAppXiaomiMessagingReceiver"
+            android:exported="true"
+        >
+            <intent-filter  android:priority="-1" >
+                <action android:name="com.xiaomi.mipush.RECEIVE_MESSAGE" />
+            </intent-filter>
+            <intent-filter  android:priority="-1" >
+                <action android:name="com.xiaomi.mipush.MESSAGE_ARRIVED" />
+            </intent-filter>
+            <intent-filter  android:priority="-1" >
+                <action android:name="com.xiaomi.mipush.ERROR" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Replace SDK Huawei Messaging Services -->
+        <service
+            android:name="io.getstream.android.push.huawei.ChatHuaweiMessagingService"
+            android:exported="false"
+            tools:node="remove"
+        >
+            <intent-filter android:priority="-1" >
+                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="io.getstream.video.android.push.huawei.DemoAppHuaweiMessagingService"
+            android:exported="false"
+        >
+            <intent-filter android:priority="-1" >
+                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

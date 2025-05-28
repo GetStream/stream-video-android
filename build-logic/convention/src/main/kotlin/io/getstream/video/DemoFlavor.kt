@@ -18,6 +18,7 @@ enum class VideoDemoFlavor(val dimension: FlavorDimension, val applicationIdSuff
     development(FlavorDimension.contentType, applicationIdSuffix = ".dogfooding"),
     e2etesting(FlavorDimension.contentType, applicationIdSuffix = ".e2etesting"),
     production(FlavorDimension.contentType),
+//    overridepush(FlavorDimension.contentType, ".dogfooding")
 }
 
 fun configureFlavors(
@@ -35,6 +36,10 @@ fun configureFlavors(
                         if (it.applicationIdSuffix != null) {
                             applicationIdSuffix = it.applicationIdSuffix
                         }
+
+//                        manifestPlaceholders["enableStreamFcmService"] =
+//                            if (it == VideoDemoFlavor.overridepush) "remove" else "merge"
+
                     }
                     proguardFiles("benchmark-rules.pro")
                 }
