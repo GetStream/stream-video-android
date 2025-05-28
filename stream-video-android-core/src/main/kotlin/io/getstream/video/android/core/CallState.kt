@@ -306,8 +306,6 @@ public class CallState(
 
                 if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = true
-                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
-                    participant._audioEnabled.value = true
                 }
             }
 
@@ -316,8 +314,6 @@ public class CallState(
 
                 if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = false
-                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
-                    participant._audioEnabled.value = false
                 }
             }
 
@@ -327,6 +323,61 @@ public class CallState(
         // emit livestream Video
         logger.d { "[livestreamFlow] #track; no args" }
         emitLivestreamVideo()
+
+        awaitClose { }
+    }
+
+    private val livestreamAudioFlow: Flow<ParticipantState.Audio?> = channelFlow {
+        fun emitLivestreamAudio() {
+            val participants = participants.value
+
+            val filteredAudio = participants.firstOrNull {
+                it.audio.value?.enabled == true
+            }?.audio?.value
+
+            scope.launch {
+                if (_backstage.value) {
+                    send(null)
+                } else {
+                    send(filteredAudio)
+                }
+            }
+        }
+
+        scope.launch {
+            _participants.collect {
+                logger.v {
+                    "[livestreamAudioFlow] #track; participants: ${it.size} =>" + "${it.map { "${it.value.userId.value} - ${it.value.audio.value?.enabled}" }}"
+                }
+                emitLivestreamAudio()
+            }
+        }
+
+        // The caller i.e. `livestream` is deprecated as well
+        call.subscribe {
+            logger.v { "[livestreamAudioFlow] #track; event.type: ${it.getEventType()}" }
+            if (it is TrackPublishedEvent) {
+                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+
+                 if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = true
+                }
+            }
+
+            if (it is TrackUnpublishedEvent) {
+                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+
+                if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                    participant._audioEnabled.value = false
+                }
+            }
+
+            emitLivestreamAudio()
+        }
+
+        // emit livestream audio
+        logger.d { "[livestreamAudioFlow] #track; no args" }
+        emitLivestreamAudio()
 
         awaitClose { }
     }
@@ -346,6 +397,9 @@ public class CallState(
     )
     val livestream: StateFlow<ParticipantState.Video?> =
         livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
+
+    val livestreamAudio: StateFlow<ParticipantState.Audio?> =
+        livestreamAudioFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,

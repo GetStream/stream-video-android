@@ -59,6 +59,7 @@ internal fun LivestreamRenderer(
     livestreamFlow: Flow<ParticipantState.Video?> = call.state.livestream,
 ) {
     val livestream by livestreamFlow.collectAsStateWithLifecycle(null)
+    val livestreamAudio by call.state.livestreamAudio.collectAsStateWithLifecycle(null)
     var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
     var isPaused by rememberSaveable { mutableStateOf(false) }
 
@@ -70,6 +71,7 @@ internal fun LivestreamRenderer(
                 .clickable(enabled = enablePausing) {
                     if (onPausedPlayer != null) {
                         isPaused = !isPaused
+                        livestreamAudio?.track?.audio?.setEnabled(!isPaused)
                         livestream?.track?.video?.setEnabled(!isPaused)
                         onPausedPlayer.invoke(isPaused)
 
