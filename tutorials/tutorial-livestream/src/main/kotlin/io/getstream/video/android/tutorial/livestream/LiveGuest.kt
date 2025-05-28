@@ -29,6 +29,7 @@ import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
+import io.getstream.video.android.tutorial.livestream.ui.TutorialLivestreamPlayerOverlay
 
 @Composable
 fun LiveAudience(
@@ -53,7 +54,10 @@ fun LiveAudience(
     }
 
     Box {
-        LivestreamPlayer(call = call)
+        LivestreamPlayer(
+            call = call,
+            overlayContent = { TutorialLivestreamPlayerOverlay(call = call) },
+        )
         CallAppBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)

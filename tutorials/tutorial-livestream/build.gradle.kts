@@ -50,4 +50,5 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.navigation)
+    implementation(libs.audioswitch)
 }

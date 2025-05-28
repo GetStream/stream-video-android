@@ -359,7 +359,7 @@ public class CallState(
             if (it is TrackPublishedEvent) {
                 val participant = getOrCreateParticipant(it.sessionId, it.userId)
 
-                 if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
                     participant._audioEnabled.value = true
                 }
             }
@@ -399,7 +399,9 @@ public class CallState(
         livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
     val livestreamAudio: StateFlow<ParticipantState.Audio?> =
-        livestreamAudioFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
+        livestreamAudioFlow.debounce(
+            1000,
+        ).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
