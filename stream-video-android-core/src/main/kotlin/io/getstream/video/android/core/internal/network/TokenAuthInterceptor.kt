@@ -10,7 +10,7 @@ import okhttp3.Response
 
 internal class TokenAuthInterceptor(
     private val tokenManager: TokenManager,
-    private val authType: () -> String,
+    private val authType: () -> String = { "jwt" }
 ) : Interceptor {
 
     private val logger by taggedLogger("Call:TokenAuthInterceptor")

@@ -20,7 +20,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.internal.network.TokenAuthInterceptor
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManager
@@ -60,12 +62,14 @@ internal class SfuConnectionModule(
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
-        val authInterceptor = CoordinatorAuthInterceptor(tokenManager, apiKey)
-        return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
-            HttpLoggingInterceptor().apply {
-                level = loggingLevel.httpLoggingLevel.level
-            },
-        ).retryOnConnectionFailure(true)
+        return OkHttpClient.Builder()
+            .addInterceptor(ApiKeyInterceptor(apiKey))
+            .addInterceptor(TokenAuthInterceptor(tokenManager))
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = loggingLevel.httpLoggingLevel.level
+                },
+            ).retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
