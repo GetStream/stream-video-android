@@ -14,6 +14,12 @@ internal class TokenAuthInterceptor(
 ) : Interceptor {
 
     private val logger by taggedLogger("Call:TokenAuthInterceptor")
+    private val format by lazy {
+        Json {
+            prettyPrint = true
+            ignoreUnknownKeys = true
+        }
+    }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         tokenManager.ensureTokenLoaded()
@@ -35,10 +41,6 @@ internal class TokenAuthInterceptor(
     private fun Response.isAuthError(): Boolean {
         if (isSuccessful) return false
         return try {
-            val format = Json {
-                prettyPrint = true
-                ignoreUnknownKeys = true
-            }
             val errorCode = format
                 .decodeFromString<ErrorResponse>(peekBody(Long.MAX_VALUE).string())
                 .code
