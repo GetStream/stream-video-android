@@ -311,6 +311,30 @@ public open class DefaultNotificationHandler(
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? {
+        val client = (StreamVideo.instance() as StreamVideoClient)
+        val mediaNotificationCallTypes = client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
+        return if (mediaNotificationCallTypes.contains(callId.type)) {
+            createMinimalMediaStyleNotification(
+                callId,
+                getMediaNotificationConfig(),
+                remoteParticipantCount,
+            )?.build()
+        } else {
+            getSimpleOngoingCallNotification(
+                callId,
+                callDisplayName,
+                isOutgoingCall,
+                remoteParticipantCount,
+            )
+        }
+    }
+
+    private fun getSimpleOngoingCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String?,
+        isOutgoingCall: Boolean,
+        remoteParticipantCount: Int,
+    ): Notification? {
         val notificationId = callId.hashCode() // Notification ID
 
         // Intents
