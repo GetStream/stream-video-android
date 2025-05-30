@@ -721,7 +721,10 @@ public open class DefaultNotificationHandler(
 
     override fun getMediaNotificationConfig(): MediaNotificationConfig {
         return MediaNotificationConfig(
-            MediaNotificationContent("LiveStream in progress", "Tag to go back to the livestream"),
+            MediaNotificationContent(
+                application.getString(R.string.stream_video_livestream_notification_title),
+                application.getString(R.string.stream_video_livestream_notification_description),
+            ),
             MediaNotificationVisuals(android.R.drawable.ic_media_play, null),
             null,
         )
