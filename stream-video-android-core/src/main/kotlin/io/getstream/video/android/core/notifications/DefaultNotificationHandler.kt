@@ -26,6 +26,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -33,6 +35,7 @@ import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
+import androidx.media.session.MediaButtonReceiver
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
@@ -41,6 +44,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -279,6 +283,7 @@ public open class DefaultNotificationHandler(
     }
 
     override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+        logger.d { "[onNotification] callId: ${callId.id}" }
         val notificationId = callId.hashCode()
         intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
             ?.let { notificationPendingIntent ->
@@ -291,6 +296,7 @@ public open class DefaultNotificationHandler(
     }
 
     override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+        logger.d { "[onLiveCall] callId: ${callId.id}" }
         val notificationId = callId.hashCode()
         intentResolver.searchLiveCallPendingIntent(callId, notificationId)
             ?.let { liveCallPendingIntent ->
@@ -352,7 +358,7 @@ public open class DefaultNotificationHandler(
                 }
             }
             .setContentTitle(
-                if (isOutgoingCall) {
+                if (isOutgoingCall) { // Noob False in viewer livestream
                     application.getString(R.string.stream_video_outgoing_call_notification_title)
                 } else {
                     application.getString(R.string.stream_video_ongoing_call_notification_title)
@@ -370,6 +376,99 @@ public open class DefaultNotificationHandler(
                 ),
                 remoteParticipantCount,
             )
+            .build()
+    }
+
+    override fun getOngoingCallNotificationLiveStreamViewer(
+        callId: StreamCallId,
+        callDisplayName: String?,
+        isOutgoingCall: Boolean,
+        remoteParticipantCount: Int,
+        mediaSession: MediaSessionCompat,
+        context: Context,
+    ): Notification? {
+        val notificationId = callId.hashCode() // Notification ID
+
+        // Intents
+        val onClickIntent = if (isOutgoingCall) {
+            intentResolver.searchOutgoingCallPendingIntent(
+                callId,
+                notificationId,
+            )
+        } else {
+            intentResolver.searchOngoingCallPendingIntent(
+                callId,
+                notificationId,
+            )
+        }
+        val hangUpIntent = if (isOutgoingCall) {
+            intentResolver.searchRejectCallPendingIntent(callId)
+        } else {
+            intentResolver.searchEndCallPendingIntent(callId)
+        }
+
+        // Channel preparation
+        val ongoingCallsChannelId = application.getString(
+            R.string.stream_video_ongoing_call_notification_channel_id,
+        )
+
+        createOnGoingChannel(ongoingCallsChannelId)
+
+        if (hangUpIntent == null) {
+            logger.e { "End call intent is null, not showing notification!" }
+            return null
+        }
+
+        // Build notification
+        return NotificationCompat.Builder(application, ongoingCallsChannelId)
+            .setSmallIcon(notificationIconRes)
+            .also {
+                // If the intent is configured, clicking the notification will return to the call
+                if (onClickIntent != null) {
+                    it.setContentIntent(onClickIntent)
+                } else {
+                    logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
+                }
+            }
+            .setContentTitle(
+                if (isOutgoingCall) { // Noob False in viewer livestream
+                    application.getString(R.string.stream_video_outgoing_call_notification_title)
+                } else {
+                    application.getString(R.string.stream_video_ongoing_call_notification_title)
+                },
+            )
+            .setContentText(
+                application.getString(R.string.stream_video_ongoing_call_notification_description),
+            )
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .apply {
+                if (callId.type == CallType.Livestream.name) {
+                    setStyle(
+                        androidx.media.app.NotificationCompat.MediaStyle()
+                            .setMediaSession(mediaSession.sessionToken)
+                            .setShowActionsInCompactView(0, 1),
+                    )
+                        .addAction(
+                            R.drawable.stream_video_ic_play,
+                            "Play",
+                            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                context,
+                                PlaybackStateCompat.ACTION_PLAY,
+                            ),
+                        )
+                        .addAction(
+                            R.drawable.stream_video_ic_pause,
+                            "Pause",
+                            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                                context,
+                                PlaybackStateCompat.ACTION_PAUSE,
+                            ),
+                        )
+                } else {
+                    throw RuntimeException("Rahul")
+                }
+            }
             .build()
     }
 
@@ -464,13 +563,13 @@ public open class DefaultNotificationHandler(
                                 }
 
                                 // Use latest call display name in notification
-                                getOngoingCallNotification(
-                                    callId = StreamCallId.fromCallCid(call.cid),
-                                    callDisplayName = callDisplayName,
-                                    remoteParticipantCount = currentRemoteParticipantCount,
-                                )?.let {
-                                    onUpdate(it)
-                                }
+//                                getOngoingCallNotification( //Noob livestream viewer 2,3 (ongoing call),  livestream viewer 2,3 (leave) //Bc idhar bhi tep na padega code
+//                                    callId = StreamCallId.fromCallCid(call.cid),
+//                                    callDisplayName = callDisplayName,
+//                                    remoteParticipantCount = currentRemoteParticipantCount,
+//                                )?.let {
+//                                    onUpdate(it)
+//                                }
                             }
                         }
                     }
@@ -587,7 +686,7 @@ public open class DefaultNotificationHandler(
                 ),
             )
         } else {
-            addAction(getLeaveAction(hangUpIntent))
+            addAction(getLeaveAction(hangUpIntent)) // Noob viewer livestream in xiaomi
         }
     }
 

@@ -18,6 +18,8 @@ package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.Context
+import android.support.v4.media.session.MediaSessionCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -58,6 +60,15 @@ internal object NoOpNotificationHandler : NotificationHandler {
         localUser: User,
         onUpdate: (Notification) -> Unit,
     ) { /* NoOp */ }
+
+    override fun getOngoingCallNotificationLiveStreamViewer(
+        callId: StreamCallId,
+        callDisplayName: String?,
+        isOutgoingCall: Boolean,
+        remoteParticipantCount: Int,
+        mediaSession: MediaSessionCompat,
+        context: Context,
+    ): Notification? = null
 
     override fun onPermissionDenied() { /* NoOp */ }
     override fun onPermissionGranted() { /* NoOp */ }

@@ -18,6 +18,8 @@ package io.getstream.video.android.core.notifications
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.Context
+import android.support.v4.media.session.MediaSessionCompat
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
@@ -119,6 +121,15 @@ public interface NotificationHandler : NotificationPermissionHandler {
         localUser: User,
         onUpdate: (Notification) -> Unit,
     )
+
+    fun getOngoingCallNotificationLiveStreamViewer(
+        callId: StreamCallId,
+        callDisplayName: String?,
+        isOutgoingCall: Boolean,
+        remoteParticipantCount: Int,
+        mediaSession: MediaSessionCompat,
+        context: Context,
+    ): Notification?
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
