@@ -39,7 +39,7 @@ internal open class LivestreamAudioCallService : CallService() {
 /**
  * Due to the nature of the livestream calls, the service that is used is of different type.
  */
-internal class LivestreamViewerService : LivestreamCallService() {
-    override val logger: TaggedLogger by taggedLogger("LivestreamViewerService")
-    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-}
+// internal class LivestreamViewerService : LivestreamCallService() {
+//    override val logger: TaggedLogger by taggedLogger("LivestreamViewerService")
+//    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+// }

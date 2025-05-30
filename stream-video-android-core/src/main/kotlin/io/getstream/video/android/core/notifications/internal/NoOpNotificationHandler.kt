@@ -20,7 +20,9 @@ import android.app.Notification
 import android.app.PendingIntent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -63,4 +65,10 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun onPermissionGranted() { /* NoOp */ }
     override fun onPermissionRationale() { /* NoOp */ }
     override fun onPermissionRequested() { /* NoOp */ }
+
+    @ExperimentalStreamVideoApi
+    override fun createMediaNotification(
+        callId: StreamCallId,
+        config: MediaNotificationConfig,
+    ): Notification? = null
 }

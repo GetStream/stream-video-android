@@ -25,10 +25,7 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.Person
-import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
@@ -37,8 +34,11 @@ import io.getstream.video.android.core.ForegroundDetector
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationBuilder
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -77,6 +77,7 @@ public open class DefaultNotificationHandler(
     private val notificationBuilder = CallNotificationBuilder(application, notificationIconRes)
     private val foregroundDetector = ForegroundDetector()
     private val notificationUpdater = NotificationUpdater(application)
+    internal val mediaNotificationBuilder = MediaNotificationBuilder(application)
 
     protected val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also { manager ->
@@ -334,8 +335,7 @@ public open class DefaultNotificationHandler(
         notificationId: Int,
         builder: NotificationCompat.Builder.() -> Unit,
     ) {
-        val notification = getNotification(builder)
-        notificationManager.notify(notificationId, notification)
+        // Do nothing
     }
 
     open fun getNotification(
@@ -349,37 +349,7 @@ public open class DefaultNotificationHandler(
         callDisplayName: String,
         remoteParticipantCount: Int,
     ): NotificationCompat.Builder = apply {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            setStyle(
-                CallStyle.forOngoingCall(
-                    Person.Builder()
-                        .setName(callDisplayName)
-                        .apply {
-                            if (remoteParticipantCount == 0) {
-                                // Just one user in the call
-                                setIcon(
-                                    IconCompat.createWithResource(
-                                        application,
-                                        R.drawable.stream_video_ic_user,
-                                    ),
-                                )
-                            } else if (remoteParticipantCount > 1) {
-                                // More than one user in the call
-                                setIcon(
-                                    IconCompat.createWithResource(
-                                        application,
-                                        R.drawable.stream_video_ic_user_group,
-                                    ),
-                                )
-                            }
-                        }
-                        .build(),
-                    hangUpIntent,
-                ),
-            )
-        } else {
-            addAction(getLeaveAction(hangUpIntent))
-        }
+        // Do nothing
     }
 
     open fun NotificationCompat.Builder.addCallActions(
@@ -387,30 +357,7 @@ public open class DefaultNotificationHandler(
         rejectCallPendingIntent: PendingIntent,
         callDisplayName: String?,
     ): NotificationCompat.Builder = apply {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            setStyle(
-                CallStyle.forIncomingCall(
-                    Person.Builder()
-                        .setName(callDisplayName ?: "Unknown")
-                        .apply {
-                            if (callDisplayName == null) {
-                                setIcon(
-                                    IconCompat.createWithResource(
-                                        application,
-                                        R.drawable.stream_video_ic_user,
-                                    ),
-                                )
-                            }
-                        }
-                        .build(),
-                    rejectCallPendingIntent,
-                    acceptCallPendingIntent,
-                ),
-            )
-        } else {
-            addAction(getAcceptAction(acceptCallPendingIntent))
-            addAction(getRejectAction(rejectCallPendingIntent))
-        }
+        // Do nothing
     }
 
     open fun getLeaveAction(intent: PendingIntent): NotificationCompat.Action {
@@ -450,5 +397,13 @@ public open class DefaultNotificationHandler(
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
         }
+    }
+
+    @ExperimentalStreamVideoApi
+    override fun createMediaNotification(
+        callId: StreamCallId,
+        config: MediaNotificationConfig,
+    ): Notification? {
+        return mediaNotificationBuilder.createMediaNotification(callId, config)
     }
 }
