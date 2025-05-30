@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 internal class StreamNotificationManager private constructor(
     private val context: Context,
     private var scope: CoroutineScope,
-    private val notificationConfig: NotificationConfig,
+    internal val notificationConfig: NotificationConfig,
     private var api: ProductvideoApi,
     internal val deviceTokenStorage: DeviceTokenStorage,
     private val notificationPermissionManager: NotificationPermissionManager?,

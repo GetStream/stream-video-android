@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications
 
 import io.getstream.android.push.PushDeviceGenerator
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler
 
 public data class NotificationConfig(
@@ -37,4 +38,9 @@ public data class NotificationConfig(
      * If `true`, call notifications will receive subsequent updates, based on the number of participants and other data.
      */
     val enableCallNotificationUpdates: Boolean = true,
+    /**
+     * List of call types (as Strings) for which media notifications should be enabled.
+     * Allows support for custom user-defined call types.
+     */
+    val mediaNotificationCallTypes: Set<String> = hashSetOf(CallType.Livestream.name),
 )

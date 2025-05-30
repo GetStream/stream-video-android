@@ -280,40 +280,8 @@ internal open class CallService : Service() {
                 }
             }
 
-            val notificationData: Pair<Notification?, Int> = when (trigger) {
-                TRIGGER_ONGOING_CALL -> Pair(
-                    first = streamVideo.getOngoingCallNotification(
-                        callId = intentCallId,
-                        callDisplayName = intentCallDisplayName,
-                    ),
-                    second = intentCallId.hashCode(),
-                )
-
-                TRIGGER_INCOMING_CALL -> Pair(
-                    first = streamVideo.getRingingCallNotification(
-                        ringingState = RingingState.Incoming(),
-                        callId = intentCallId,
-                        callDisplayName = intentCallDisplayName,
-                        shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
-                    ),
-                    second = INCOMING_CALL_NOTIFICATION_ID,
-                )
-
-                TRIGGER_OUTGOING_CALL -> Pair(
-                    first = streamVideo.getRingingCallNotification(
-                        ringingState = RingingState.Outgoing(),
-                        callId = intentCallId,
-                        callDisplayName = getString(
-                            R.string.stream_video_outgoing_call_notification_title,
-                        ),
-                    ),
-                    second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
-                )
-
-                TRIGGER_REMOVE_INCOMING_CALL -> Pair(null, INCOMING_CALL_NOTIFICATION_ID)
-
-                else -> Pair(null, intentCallId.hashCode())
-            }
+            val notificationData: Pair<Notification?, Int> =
+                getNotificationPair(trigger, streamVideo, intentCallId, intentCallDisplayName)
 
             val notification = notificationData.first
             if (notification != null) {
@@ -374,6 +342,44 @@ internal open class CallService : Service() {
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
         }
+    }
+
+    open fun getNotificationPair(trigger: String, streamVideo: StreamVideoClient, streamCallId: StreamCallId, intentCallDisplayName: String?): Pair<Notification?, Int> {
+        val notificationData: Pair<Notification?, Int> = when (trigger) {
+            TRIGGER_ONGOING_CALL -> Pair(
+                first = streamVideo.getOngoingCallNotification(
+                    callId = streamCallId,
+                    callDisplayName = intentCallDisplayName,
+                ),
+                second = streamCallId.hashCode(),
+            )
+
+            TRIGGER_INCOMING_CALL -> Pair(
+                first = streamVideo.getRingingCallNotification(
+                    ringingState = RingingState.Incoming(),
+                    callId = streamCallId,
+                    callDisplayName = intentCallDisplayName,
+                    shouldHaveContentIntent = streamVideo.state.activeCall.value == null,
+                ),
+                second = INCOMING_CALL_NOTIFICATION_ID,
+            )
+
+            TRIGGER_OUTGOING_CALL -> Pair(
+                first = streamVideo.getRingingCallNotification(
+                    ringingState = RingingState.Outgoing(),
+                    callId = streamCallId,
+                    callDisplayName = getString(
+                        R.string.stream_video_outgoing_call_notification_title,
+                    ),
+                ),
+                second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
+            )
+
+            TRIGGER_REMOVE_INCOMING_CALL -> Pair(null, INCOMING_CALL_NOTIFICATION_ID)
+
+            else -> Pair(null, streamCallId.hashCode())
+        }
+        return notificationData
     }
 
     private fun maybePromoteToForegroundService(
@@ -696,12 +702,12 @@ internal open class CallService : Service() {
             val notificationId = callId.hashCode()
             notificationManager.cancel(notificationId)
 
-            logger.i { "[stopService]. Cancelled notification: $notificationId" }
+            logger.i { "[stopService]. Cancelled notificationId: $notificationId" }
         }
 
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
-        logger.i { "[stopService]. Cancelled incoming call notification: $INCOMING_CALL_NOTIFICATION_ID" }
+        logger.i { "[stopService]. Cancelled incoming call notificationId: $INCOMING_CALL_NOTIFICATION_ID" }
 
         // Camera privacy
         unregisterToggleCameraBroadcastReceiver()
