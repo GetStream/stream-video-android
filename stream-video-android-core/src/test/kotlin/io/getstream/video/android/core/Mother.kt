@@ -1,22 +1,8 @@
-/*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
- *
- * Licensed under the Stream License;
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package io.getstream.video.android.core.utils
+package io.getstream.video.android.core
 
 import io.getstream.video.android.model.User
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneId
@@ -75,3 +61,25 @@ public fun randomUser(
     updatedAt = updatedAt,
     teams = teams,
 )
+
+/**
+ * Provides a GET request with a configurable [url].
+ */
+fun randomGetRequest(
+    url: String = "http://${randomString()}",
+): Request =
+    Request.Builder()
+        .url(url)
+        .build()
+
+/**
+ * Provides a POST request with a configurable [url] and [body].
+ */
+fun randomPostRequest(
+    url: String = "http://${randomString()}",
+    body: String = randomString(),
+): Request =
+    Request.Builder()
+        .url(url)
+        .post(body.toRequestBody())
+        .build()
