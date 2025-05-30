@@ -347,7 +347,7 @@ internal open class CallService : Service() {
     open fun getNotificationPair(trigger: String, streamVideo: StreamVideoClient, streamCallId: StreamCallId, intentCallDisplayName: String?): Pair<Notification?, Int> {
         val notificationData: Pair<Notification?, Int> = when (trigger) {
             TRIGGER_ONGOING_CALL -> Pair(
-                first = streamVideo.getOngoingCallNotification( // Noob livestream viewer 1 (ongoing) , livestream viewer 1 (leave)
+                first = streamVideo.getOngoingCallNotification(
                     callId = streamCallId,
                     callDisplayName = intentCallDisplayName,
                 ),
