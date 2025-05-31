@@ -35,5 +35,5 @@ data class PerSDKUsageReport(
     val total: kotlin.Int,
 
     @Json(name = "by_version")
-    val byVersion: kotlin.collections.Map<kotlin.String, kotlin.Int>,
+    val byVersion: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap()
 )

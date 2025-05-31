@@ -35,8 +35,7 @@ data class QueryCallStatsResponse(
     val duration: kotlin.String,
 
     @Json(name = "reports")
-    val reports:
-    kotlin.collections.List<io.getstream.android.video.generated.models.CallStatsReportSummaryResponse>,
+    val reports: kotlin.collections.List<io.getstream.android.video.generated.models.CallStatsReportSummaryResponse> = emptyList(),
 
     @Json(name = "next")
     val next: kotlin.String? = null,

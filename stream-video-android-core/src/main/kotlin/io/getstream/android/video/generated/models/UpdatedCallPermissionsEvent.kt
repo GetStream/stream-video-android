@@ -39,13 +39,13 @@ data class UpdatedCallPermissionsEvent(
 
     @Json(name = "own_capabilities")
     val ownCapabilities:
-    kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability>,
+    kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "user")
     val user: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.permissions_updated",
 ) :
     io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 

@@ -32,6 +32,5 @@ import kotlin.collections.List
 
 data class StartRTMPBroadcastsRequest(
     @Json(name = "broadcasts")
-    val broadcasts:
-    kotlin.collections.List<io.getstream.android.video.generated.models.RTMPBroadcastRequest>,
+    val broadcasts: kotlin.collections.List<io.getstream.android.video.generated.models.RTMPBroadcastRequest> = emptyList()
 )
