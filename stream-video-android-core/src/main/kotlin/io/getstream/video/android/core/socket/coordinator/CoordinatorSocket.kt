@@ -32,6 +32,7 @@ import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.CallAwareConnectionPolicy
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.HealthMonitor
+import io.getstream.video.android.core.socket.common.SocketConnectionPolicy
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.SocketStateConnectionPolicy
@@ -63,6 +64,7 @@ internal open class CoordinatorSocket(
     private val userScope: UserScope,
     private val lifecycleObserver: StreamLifecycleObserver,
     private val networkStateProvider: NetworkStateProvider,
+    private val socketConnectionPolicies: List<SocketConnectionPolicy>,
 ) {
     private var streamWebSocket: StreamWebSocket<VideoEvent, VideoParser>? = null
     open val logger by taggedLogger(TAG)
@@ -80,7 +82,7 @@ internal open class CoordinatorSocket(
             coordinatorSocketStateService.onWebSocketEventLost()
         },
     )
-    private val connectionPolicies = listOf(
+    private val connectionPolicies = socketConnectionPolicies + listOf(
         CallAwareConnectionPolicy(StreamVideo.instanceState),
         SocketStateConnectionPolicy(state()),
     )
