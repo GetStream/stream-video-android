@@ -22,7 +22,10 @@ import android.net.Uri
 import androidx.annotation.RawRes
 import io.getstream.log.StreamLog
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.utils.safeCallWithDefault
+import io.getstream.video.android.model.StreamCallId
 
 // Interface & API
 /**
@@ -55,6 +58,8 @@ public interface MutedRingingConfig {
 public data class Sounds(
     val ringingConfig: RingingConfig,
     val mutedRingingConfig: MutedRingingConfig? = null,
+    val audioCallRingingConfig: RingingConfig? = null,
+    val videoCallRingingConfig: RingingConfig? = null,
 )
 
 // Factories
@@ -63,13 +68,51 @@ public data class Sounds(
  *
  * @param ringingConfig The configuration for incoming and outgoing call sounds.
  * @param mutedRingingConfig The configuration for handling incoming and outgoing call sounds if device is muted. Can be null.
+ * @param audioCallRingingConfig The configuration for incoming and outgoing [CallType.AudioCall] sounds.
+ * @param videoCallRingingConfig The configuration for incoming and outgoing [CallType.Default] sounds.
  * @return A [Sounds] object containing the specified configurations.
+ *
+ *
+ * Prepares a [Sounds] configuration that specifies custom incoming and outgoing
+ * sounds for different call types — audio and video.
+ *
+ * You can override the default sounds by placing `.mp3` or `.wav` files in your
+ * `res/raw/` directory and referencing them via their resource IDs.
+ *
+ * ### Sample usage:
+ *
+ * ```kotlin
+ * val audioRingingConfig = object : RingingConfig {
+ *     override val incomingCallSoundUri: Uri
+ *         get() = R.raw.audio_call_ringtone.toUriOrNull(context)
+ *
+ *     override val outgoingCallSoundUri: Uri
+ *         get() = R.raw.audio_call_ringtone.toUriOrNull(context)
+ * }
+ *
+ * val videoRingingConfig = object : RingingConfig {
+ *     override val incomingCallSoundUri: Uri
+ *         get() = R.raw.video_call_ringtone.toUriOrNull(context)
+ *
+ *     override val outgoingCallSoundUri: Uri
+ *         get() = R.raw.video_call_ringtone.toUriOrNull(context)
+ * }
+ *
+ * val sounds = Sounds(
+ *     audioCallRingingConfig = audioRingingConfig,
+ *     videoCallRingingConfig = videoRingingConfig,
+ *     ringingConfig = audioRingingConfig // fallback/default
+ * )
+ * ```
+ *
  */
 public fun ringingConfig(
     ringingConfig: RingingConfig,
     mutedRingingConfig: MutedRingingConfig?,
+    audioCallRingingConfig: RingingConfig?,
+    videoCallRingingConfig: RingingConfig?,
 ): Sounds {
-    return Sounds(ringingConfig, mutedRingingConfig)
+    return Sounds(ringingConfig, mutedRingingConfig, audioCallRingingConfig, videoCallRingingConfig)
 }
 
 /**
@@ -164,3 +207,27 @@ private fun Int?.toUriOrNull(context: Context): Uri? =
             null
         }
     }
+
+internal fun getIncomingCallSoundUri(streamVideo: StreamVideoClient, callId: StreamCallId): Uri? {
+    return when (callId.type) {
+        CallType.AudioCall.name ->
+            streamVideo.sounds.audioCallRingingConfig?.incomingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
+        CallType.Default.name ->
+            streamVideo.sounds.videoCallRingingConfig?.incomingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.incomingCallSoundUri
+        else -> streamVideo.sounds.ringingConfig.incomingCallSoundUri
+    }
+}
+
+internal fun getOutgoingCallSoundUri(streamVideo: StreamVideoClient, callId: StreamCallId): Uri? {
+    return when (callId.type) {
+        CallType.AudioCall.name ->
+            streamVideo.sounds.audioCallRingingConfig?.outgoingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+        CallType.Default.name ->
+            streamVideo.sounds.videoCallRingingConfig?.outgoingCallSoundUri
+                ?: streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+        else -> streamVideo.sounds.ringingConfig.outgoingCallSoundUri
+    }
+}
