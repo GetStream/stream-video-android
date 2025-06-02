@@ -24,6 +24,7 @@ import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
+import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.internal.network.TokenAuthInterceptor
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -35,6 +36,7 @@ import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConne
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
+import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -63,7 +65,12 @@ internal class CoordinatorConnectionModule(
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
 
     private val tokenManager = TokenManagerImpl(CacheableTokenProvider(tokenProvider))
-    private var authType: String = "jwt"
+    private val authTypeProvider = AuthTypeProvider()
+        .also {
+            if (user.type in listOf(UserType.Guest, UserType.Anonymous)) {
+                it.setAuthType(AuthTypeProvider.AuthType.ANONYMOUS)
+            }
+        }
 
     // Internals
     private val retrofit: Retrofit by lazy {
@@ -77,7 +84,7 @@ internal class CoordinatorConnectionModule(
     override val http: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(HeadersInterceptor(HeadersUtil()))
         .addInterceptor(ApiKeyInterceptor(apiKey))
-        .addInterceptor(TokenAuthInterceptor(tokenManager) { authType })
+        .addInterceptor(TokenAuthInterceptor(tokenManager, authTypeProvider::getAuthType))
         .addInterceptor(
             HttpLoggingInterceptor {
                 streamLog(tag = "Video:Http") { it }
@@ -117,7 +124,7 @@ internal class CoordinatorConnectionModule(
             ?: tokenManager.loadSync()
     }
 
-    override fun updateAuthType(authType: String) {
-        this.authType = authType
+    override fun updateAuthType(authType: AuthTypeProvider.AuthType) {
+        this.authTypeProvider.setAuthType(authType)
     }
 }
