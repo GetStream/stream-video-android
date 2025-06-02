@@ -265,10 +265,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         if (user.type == UserType.Guest) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
             client.setupGuestUser(user)
-        } else if (user.type == UserType.Anonymous) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
         }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)

@@ -21,6 +21,7 @@ import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
+import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.internal.network.TokenAuthInterceptor
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
@@ -108,7 +109,7 @@ internal class SfuConnectionModule(
         )
     }
 
-    override fun updateAuthType(authType: String) {
+    override fun updateAuthType(authType: AuthTypeProvider.AuthType) {
         throw UnsupportedOperationException("Not supported for SFU, do not call.")
     }
 }

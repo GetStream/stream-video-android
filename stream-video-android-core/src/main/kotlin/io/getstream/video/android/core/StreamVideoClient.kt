@@ -453,7 +453,7 @@ internal class StreamVideoClient internal constructor(
                 throw IllegalStateException("Failed to create guest user")
             }
             response.onSuccess {
-                coordinatorConnectionModule.updateAuthType("jwt")
+                coordinatorConnectionModule.updateAuthType(AuthTypeProvider.AuthType.JWT)
                 coordinatorConnectionModule.updateToken(it.accessToken)
             }
         }
