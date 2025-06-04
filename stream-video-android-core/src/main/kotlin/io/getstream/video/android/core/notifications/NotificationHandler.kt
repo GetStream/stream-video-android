@@ -21,11 +21,12 @@ import android.app.PendingIntent
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 
-public interface NotificationHandler : NotificationPermissionHandler {
+public interface NotificationHandler : NotificationPermissionHandler, MediaNotificationHandler {
     /**
      * Customize the notification when you receive a push notification for ringing call,
      * which has further two types [RingingState.Incoming] and [RingingState.Outgoing]
