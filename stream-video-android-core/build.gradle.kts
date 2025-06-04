@@ -193,6 +193,8 @@ dependencies {
     // crypto
     implementation(libs.tink)
 
+    implementation(libs.androidx.media.media)
+
     // unit tests
     testImplementation(libs.stream.result)
     testImplementation(libs.stream.result.call)

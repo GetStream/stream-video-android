@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -44,7 +45,7 @@ fun LiveAudience(
     )
 
     // Step 2 - join a call, which type is `default` and id is `123`.
-    val call = client.call("livestream", callId)
+    val call = remember(callId) { client.call("livestream", callId) }
 
     LaunchedEffect(call) {
         call.microphone.setEnabled(false, fromUser = true)

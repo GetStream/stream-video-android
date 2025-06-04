@@ -93,6 +93,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.RTMP
@@ -1167,7 +1168,8 @@ public class CallState(
         _ringingState.value = state
     }
 
-    private fun cancelTimeout() {
+    @InternalStreamVideoApi
+    fun cancelTimeout() {
         ringingTimerJob?.cancel()
         ringingTimerJob = null
     }
