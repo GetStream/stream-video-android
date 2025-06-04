@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -27,6 +28,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,8 +49,11 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.ui.common.R
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 
 @Composable
 internal fun LivestreamRenderer(
@@ -58,11 +63,24 @@ internal fun LivestreamRenderer(
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
     livestreamFlow: Flow<ParticipantState.Video?> = call.state.livestream,
 ) {
-    val livestream by livestreamFlow.collectAsStateWithLifecycle(null)
-    val livestreamAudio by call.state.livestreamAudio.collectAsStateWithLifecycle(null)
-    var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
     var isPaused by rememberSaveable { mutableStateOf(false) }
+    val livestream by livestreamFlow
+        .filter { !isPaused }
+        .collectAsStateWithLifecycle(null)
+    var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
+
+    LaunchedEffect(Unit) {
+        call.state.livestream.collectLatest {
+            val video = it?.track?.video
+            val isHostVideoEnabled = video?.enabled()
+            Log.d("Noob", "is host video enabled: $isHostVideoEnabled")
+        }
+    }
+
+    LaunchedEffect(isPaused) {
+        call.speaker.setEnabled(!isPaused)
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         VideoRenderer(
             videoRendererConfig = configuration,
@@ -71,12 +89,14 @@ internal fun LivestreamRenderer(
                 .clickable(enabled = enablePausing) {
                     if (onPausedPlayer != null) {
                         isPaused = !isPaused
-                        livestreamAudio?.track?.audio?.setEnabled(!isPaused)
-                        livestream?.track?.video?.setEnabled(!isPaused)
                         onPausedPlayer.invoke(isPaused)
+
+                        val hostVideoTrack = livestream?.track?.video
+                        Log.d("Noob", "isPaused=${isPaused}, hostVideoTrack=${hostVideoTrack?.id()}")
 
                         if (isPaused) {
                             videoTextureView?.pauseVideo()
+
                         } else {
                             videoTextureView?.resumeVideo()
                         }
@@ -98,7 +118,7 @@ internal fun LivestreamRenderer(
             Image(
                 modifier = Modifier.alpha(0.75f),
                 painter = painterResource(
-                    id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_play,
+                    id = R.drawable.stream_video_ic_play,
                 ),
                 contentDescription = null,
             )

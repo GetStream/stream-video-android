@@ -328,59 +328,6 @@ public class CallState(
         awaitClose { }
     }
 
-    private val livestreamAudioFlow: Flow<ParticipantState.Audio?> = channelFlow {
-        fun emitLivestreamAudio() {
-            val participants = participants.value
-            val filteredAudio = participants.firstOrNull {
-                it.audio.value?.enabled == true
-            }?.audio?.value
-            scope.launch {
-                if (_backstage.value) {
-                    send(null)
-                } else {
-                    send(filteredAudio)
-                }
-            }
-        }
-
-        scope.launch {
-            _participants.collect {
-                logger.v {
-                    "[livestreamAudioFlow] #track; participants: ${it.size} =>" + "${it.map { "${it.value.userId.value} - ${it.value.audio.value?.enabled}" }}"
-                }
-                emitLivestreamAudio()
-            }
-        }
-
-        // The caller i.e. `livestream` is deprecated as well
-        call.subscribe {
-            logger.v { "[livestreamAudioFlow] #track; event.type: ${it.getEventType()}" }
-            if (it is TrackPublishedEvent) {
-                val participant = getOrCreateParticipant(it.sessionId, it.userId)
-
-                if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
-                    participant._audioEnabled.value = true
-                }
-            }
-
-            if (it is TrackUnpublishedEvent) {
-                val participant = getOrCreateParticipant(it.sessionId, it.userId)
-
-                if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
-                    participant._audioEnabled.value = false
-                }
-            }
-
-            emitLivestreamAudio()
-        }
-
-        // emit livestream Video
-        logger.d { "[livestreamAudioFlow] #track; no args" }
-        emitLivestreamAudio()
-
-        awaitClose { }
-    }
-
     @Deprecated(
         message = "The correct approach is to find the participant with video from the participants list or if the id of the user who is host is known query that one directly.",
         level = DeprecationLevel.WARNING,
@@ -412,10 +359,6 @@ public class CallState(
                          """,
         ),
     )
-    val livestreamAudio: StateFlow<ParticipantState.Audio?> =
-        livestreamAudioFlow.debounce(
-            1000,
-        ).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
