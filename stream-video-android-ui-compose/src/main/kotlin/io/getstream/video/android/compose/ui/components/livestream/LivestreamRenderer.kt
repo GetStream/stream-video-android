@@ -69,7 +69,6 @@ internal fun LivestreamRenderer(
         .collectAsStateWithLifecycle(null)
     var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-
     LaunchedEffect(Unit) {
         call.state.livestream.collectLatest {
             val video = it?.track?.video
@@ -92,11 +91,10 @@ internal fun LivestreamRenderer(
                         onPausedPlayer.invoke(isPaused)
 
                         val hostVideoTrack = livestream?.track?.video
-                        Log.d("Noob", "isPaused=${isPaused}, hostVideoTrack=${hostVideoTrack?.id()}")
+                        Log.d("Noob", "isPaused=$isPaused, hostVideoTrack=${hostVideoTrack?.id()}")
 
                         if (isPaused) {
                             videoTextureView?.pauseVideo()
-
                         } else {
                             videoTextureView?.resumeVideo()
                         }

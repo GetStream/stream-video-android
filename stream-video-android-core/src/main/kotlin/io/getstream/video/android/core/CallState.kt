@@ -359,7 +359,6 @@ public class CallState(
                          """,
         ),
     )
-
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
         call,
