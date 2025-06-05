@@ -23,8 +23,13 @@ import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.internal.network.TokenAuthInterceptor
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.model.ApiKey
@@ -56,8 +61,11 @@ internal class CoordinatorConnectionModule(
     override val userToken: UserToken,
     override val lifecycle: Lifecycle,
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
+
+    private val tokenManager = TokenManagerImpl(CacheableTokenProvider(tokenProvider))
+    private var authType: String = "jwt"
+
     // Internals
-    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder().baseUrl(apiUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
@@ -66,10 +74,11 @@ internal class CoordinatorConnectionModule(
     }
 
     // API
-    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
-        HeadersInterceptor(HeadersUtil()),
-    )
-        .addInterceptor(authInterceptor).addInterceptor(
+    override val http: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(HeadersInterceptor(HeadersUtil()))
+        .addInterceptor(ApiKeyInterceptor(apiKey))
+        .addInterceptor(TokenAuthInterceptor(tokenManager) { authType })
+        .addInterceptor(
             HttpLoggingInterceptor {
                 streamLog(tag = "Video:Http") { it }
             }.apply {
@@ -79,7 +88,8 @@ internal class CoordinatorConnectionModule(
         .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
+        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .build()
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
@@ -98,15 +108,16 @@ internal class CoordinatorConnectionModule(
         networkStateProvider = networkStateProvider,
         scope = scope,
         lifecycle = lifecycle,
-        tokenProvider = tokenProvider,
+        tokenManager = tokenManager,
     )
 
-    override fun updateToken(token: UserToken) {
-        socketConnection.updateToken(token)
-        authInterceptor.token = token
+    override fun updateToken(token: UserToken?) {
+        token?.let { CacheableTokenProvider(ConstantTokenProvider(it)) }
+            ?.let { tokenManager.updateTokenProvider(it) }
+        ?: tokenManager.loadSync()
     }
 
     override fun updateAuthType(authType: String) {
-        authInterceptor.authType = authType
+        this.authType = authType
     }
 }

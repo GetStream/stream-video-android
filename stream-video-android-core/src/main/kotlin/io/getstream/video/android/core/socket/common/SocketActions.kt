@@ -65,11 +65,6 @@ interface SocketActions<EventIn, EventOut, Error, State, Token, ConnectData> {
     public suspend fun disconnect()
 
     /**
-     * Update the token from the outside.
-     */
-    fun updateToken(token: Token)
-
-    /**
      * Get the connection id.
      */
     fun connectionId(): StateFlow<String?>
