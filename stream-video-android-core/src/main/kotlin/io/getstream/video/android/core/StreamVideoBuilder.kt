@@ -45,9 +45,7 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.webrtc.ManagedAudioProcessingFactory
 import java.net.ConnectException
 

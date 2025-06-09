@@ -114,7 +114,7 @@ internal class CoordinatorConnectionModule(
     override fun updateToken(token: UserToken?) {
         token?.let { CacheableTokenProvider(ConstantTokenProvider(it)) }
             ?.let { tokenManager.updateTokenProvider(it) }
-        ?: tokenManager.loadSync()
+            ?: tokenManager.loadSync()
     }
 
     override fun updateAuthType(authType: String) {

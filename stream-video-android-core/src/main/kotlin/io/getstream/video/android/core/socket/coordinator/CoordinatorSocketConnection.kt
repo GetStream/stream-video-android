@@ -35,10 +35,7 @@ import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManager
-import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.core.utils.mapState
@@ -87,7 +84,6 @@ internal open class CoordinatorSocketConnection(
 
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
-
 
     // Internal state
     private val logger by taggedLogger("Video:Socket")
