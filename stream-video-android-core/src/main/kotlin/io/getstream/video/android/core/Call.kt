@@ -36,14 +36,12 @@ import io.getstream.android.video.generated.models.ListTranscriptionsResponse
 import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.android.video.generated.models.PinResponse
 import io.getstream.android.video.generated.models.RejectCallResponse
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionResponse
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
 import io.getstream.android.video.generated.models.StopLiveResponse
 import io.getstream.android.video.generated.models.StopTranscriptionResponse
-import io.getstream.android.video.generated.models.UnpinResponse
 import io.getstream.android.video.generated.models.UpdateCallMembersRequest
 import io.getstream.android.video.generated.models.UpdateCallMembersResponse
 import io.getstream.android.video.generated.models.UpdateCallRequest
@@ -317,11 +315,11 @@ public class Call internal constructor(
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
-        val response = clientImpl.getCall(type, id)
-        response.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return response
+        return videoApi.oldGetCall(type, id)
+            .await()
+            .onSuccess {
+                state.updateFromResponse(it)
+            }
     }
 
     /** Create a call. You can create a call client side, many apps prefer to do this server side though */
@@ -379,7 +377,7 @@ public class Call internal constructor(
             settingsOverride = settingsOverride,
             startsAt = startsAt,
         )
-        val response = clientImpl.updateCall(type, id, request)
+        val response = videoApi.oldUpdateCall(type, id, custom, startsAt).await()
         response.onSuccess {
             state.updateFromResponse(it)
         }
@@ -799,18 +797,23 @@ public class Call internal constructor(
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> {
         // end the call for everyone
-        val result = clientImpl.endCall(type, id)
+        val result = videoApi.endCall(type, id).await()
         // cleanup
         leave()
         return result
     }
 
-    suspend fun pinForEveryone(sessionId: String, userId: String): Result<PinResponse> {
-        return clientImpl.pinForEveryone(type, id, sessionId, userId)
+    suspend fun pinForEveryone(sessionId: String, userId: String): Result<Unit> {
+        return videoApi.videoPin(
+            type = type,
+            callId = id,
+            sessionId = sessionId,
+            userId = userId,
+        ).await()
     }
 
-    suspend fun unpinForEveryone(sessionId: String, userId: String): Result<UnpinResponse> {
-        return clientImpl.unpinForEveryone(type, id, sessionId, userId)
+    suspend fun unpinForEveryone(sessionId: String, userId: String): Result<Unit> {
+        return videoApi.videoUnpin(type, id, sessionId, userId).await()
     }
 
     suspend fun sendReaction(
@@ -818,7 +821,7 @@ public class Call internal constructor(
         emoji: String? = null,
         custom: Map<String, Any>? = null,
     ): Result<SendReactionResponse> {
-        return clientImpl.sendReaction(this.type, id, type, emoji, custom)
+        return videoApi.oldSendVideoReaction(this.type, id, type, emoji, custom).await()
     }
 
     suspend fun queryMembers(
@@ -828,7 +831,7 @@ public class Call internal constructor(
         prev: String? = null,
         next: String? = null,
     ): Result<QueriedMembers> {
-        return clientImpl.queryMembersInternal(
+        return videoApi.oldQueryCallMembers(
             type = type,
             id = id,
             filter = filter,
@@ -836,7 +839,9 @@ public class Call internal constructor(
             prev = prev,
             next = next,
             limit = limit,
-        ).onSuccess { state.updateFromResponse(it) }.map { it.toQueriedMembers() }
+        )
+            .await()
+            .onSuccess { state.updateFromResponse(it) }.map { it.toQueriedMembers() }
     }
 
     suspend fun muteAllUsers(
@@ -850,7 +855,7 @@ public class Call internal constructor(
             video = video,
             screenShare = screenShare,
         )
-        return clientImpl.muteUsers(type, id, request)
+        return videoApi.oldMuteUsers(type, id, request).await()
     }
 
     fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
@@ -943,39 +948,39 @@ public class Call internal constructor(
         startRecording: Boolean = false,
         startTranscription: Boolean = false,
     ): Result<GoLiveResponse> {
-        val result = clientImpl.goLive(
+        val result = videoApi.oldGoLive(
             type = type,
             id = id,
             startHls = startHls,
             startRecording = startRecording,
             startTranscription = startTranscription,
-        )
+        ).await()
         result.onSuccess { state.updateFromResponse(it) }
 
         return result
     }
 
     suspend fun stopLive(): Result<StopLiveResponse> {
-        val result = clientImpl.stopLive(type, id)
-        result.onSuccess { state.updateFromResponse(it) }
-        return result
+        return videoApi.oldStopLive(type, id)
+            .await()
+            .onSuccess { state.updateFromResponse(it) }
     }
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> {
-        return clientImpl.sendCustomEvent(this.type, this.id, data)
+        return videoApi.oldSendCallEvent(this.type, this.id, data).await()
     }
 
     /** Permissions */
     suspend fun requestPermissions(vararg permission: String): Result<Unit> {
-        return clientImpl.requestPermissions(type, id, permission.toList())
+        return videoApi.requestPermission(type, id, permission.toList()).await()
     }
 
     suspend fun startRecording(): Result<Any> {
-        return clientImpl.startRecording(type, id)
+        return videoApi.startRecording(type, id).await()
     }
 
     suspend fun stopRecording(): Result<Any> {
-        return clientImpl.stopRecording(type, id)
+        return videoApi.stopRecording(type, id).await()
     }
 
     /**
@@ -1001,14 +1006,15 @@ public class Call internal constructor(
     }
 
     suspend fun startHLS(): Result<Any> {
-        return clientImpl.startBroadcasting(type, id)
+        return videoApi.oldStartHLSBroadcasting(type, id)
+            .await()
             .onSuccess {
                 state.updateFromResponse(it)
             }
     }
 
     suspend fun stopHLS(): Result<Any> {
-        return clientImpl.stopBroadcasting(type, id)
+        return videoApi.stopHLSBroadcasting(type, id).await()
     }
 
     public fun subscribeFor(
@@ -1046,14 +1052,14 @@ public class Call internal constructor(
     }
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
-        return clientImpl.blockUser(type, id, userId)
+        return videoApi.oldBlockUser(type, id, userId).await()
     }
 
     // TODO: add removeMember (single)
 
     public suspend fun removeMembers(userIds: List<String>): Result<UpdateCallMembersResponse> {
         val request = UpdateCallMembersRequest(removeMembers = userIds)
-        return clientImpl.updateMembers(type, id, request)
+        return videoApi.oldUpdateCallMembers(type, id, request).await()
     }
 
     public suspend fun grantPermissions(
@@ -1064,7 +1070,7 @@ public class Call internal constructor(
             userId = userId,
             grantedPermissions = permissions,
         )
-        return clientImpl.updateUserPermissions(type, id, request)
+        return videoApi.oldUpdateUserPermissions(type, id, request).await()
     }
 
     public suspend fun revokePermissions(
@@ -1075,12 +1081,12 @@ public class Call internal constructor(
             userId = userId,
             revokedPermissions = permissions,
         )
-        return clientImpl.updateUserPermissions(type, id, request)
+        return videoApi.oldUpdateUserPermissions(type, id, request).await()
     }
 
     public suspend fun updateMembers(memberRequests: List<MemberRequest>): Result<UpdateCallMembersResponse> {
         val request = UpdateCallMembersRequest(updateMembers = memberRequests)
-        return clientImpl.updateMembers(type, id, request)
+        return videoApi.oldUpdateCallMembers(type, id, request).await()
     }
 
     val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
@@ -1176,7 +1182,7 @@ public class Call internal constructor(
      * @param sessionId - if session ID is supplied, only recordings for that session will be loaded.
      */
     suspend fun listRecordings(sessionId: String? = null): Result<ListRecordingsResponse> {
-        return clientImpl.listRecordings(type, id, sessionId)
+        return videoApi.oldListRecordings(type, id).await()
     }
 
     suspend fun muteUser(
@@ -1192,7 +1198,7 @@ public class Call internal constructor(
             video = video,
             screenShare = screenShare,
         )
-        return clientImpl.muteUsers(type, id, request)
+        return videoApi.oldMuteUsers(type, id, request).await()
     }
 
     suspend fun muteUsers(
@@ -1208,7 +1214,7 @@ public class Call internal constructor(
             video = video,
             screenShare = screenShare,
         )
-        return clientImpl.muteUsers(type, id, request)
+        return videoApi.oldMuteUsers(type, id, request).await()
     }
 
     @VisibleForTesting
@@ -1219,19 +1225,21 @@ public class Call internal constructor(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<JoinCallResponse> {
-        val result = clientImpl.joinCall(
+        val result = videoApi.oldJoinCall(
             type, id,
             create = create != null,
-            members = create?.memberRequestsFromIds(),
+            membersId = (
+                    create?.memberIds.orEmpty() +
+                            create?.members.orEmpty().map { it.userId }
+                    ).takeUnless { it.isEmpty() },
             custom = create?.custom,
-            settingsOverride = create?.settings,
             startsAt = create?.startsAt,
             team = create?.team,
             ring = ring,
             notify = notify,
             location = location,
             migratingFrom = migratingFrom,
-        )
+        ).await()
         result.onSuccess {
             state.updateFromResponse(it)
         }
@@ -1257,12 +1265,14 @@ public class Call internal constructor(
 
     suspend fun ring(): Result<GetCallResponse> {
         logger.d { "[ring] #ringing; no args" }
-        return clientImpl.ring(type, id)
+        return videoApi.oldGetCall(type, id, ring = true)
+            .await()
     }
 
     suspend fun notify(): Result<GetCallResponse> {
         logger.d { "[notify] #ringing; no args" }
-        return clientImpl.notify(type, id)
+        return videoApi.oldGetCall(type, id, notify = true)
+            .await()
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
@@ -1271,12 +1281,12 @@ public class Call internal constructor(
 
         clientImpl.state.removeRingingCall()
         clientImpl.state.maybeStopForegroundService(call = this)
-        return clientImpl.accept(type, id)
+        return videoApi.oldAcceptCall(type, id).await()
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason" }
-        return clientImpl.reject(type, id, reason)
+        return videoApi.oldRejectCall(type, id, reason).await()
     }
 
     fun processAudioSample(audioSample: AudioSamples) {
@@ -1289,14 +1299,14 @@ public class Call internal constructor(
         custom: Map<String, Any>? = null,
     ) {
         scope.launch {
-            clientImpl.collectFeedback(
+            videoApi.collectUserFeedback(
                 callType = type,
                 id = id,
                 sessionId = sessionId,
                 rating = rating,
                 reason = reason,
                 custom = custom,
-            )
+            ).await()
         }
     }
 
@@ -1356,23 +1366,23 @@ public class Call internal constructor(
     }
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> {
-        return clientImpl.startTranscription(type, id)
+        return videoApi.oldStartTranscription(type, id).await()
     }
 
     suspend fun stopTranscription(): Result<StopTranscriptionResponse> {
-        return clientImpl.stopTranscription(type, id)
+        return videoApi.oldStopTranscription(type, id).await()
     }
 
     suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
-        return clientImpl.listTranscription(type, id)
+        return videoApi.oldListTranscriptions(type, id).await()
     }
 
     suspend fun startClosedCaptions(): Result<io.getstream.android.video.generated.models.StartClosedCaptionsResponse> {
-        return clientImpl.startClosedCaptions(type, id)
+        return videoApi.oldStartClosedCaptions(type, id).await()
     }
 
     suspend fun stopClosedCaptions(): Result<io.getstream.android.video.generated.models.StopClosedCaptionsResponse> {
-        return clientImpl.stopClosedCaptions(type, id)
+        return videoApi.oldStopClosedCaptions(type, id).await()
     }
 
     fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
