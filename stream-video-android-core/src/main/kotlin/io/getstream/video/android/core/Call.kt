@@ -68,6 +68,7 @@ import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -127,17 +128,35 @@ const val sfuReconnectTimeoutMillis = 30_000
  *
  */
 @Stable
-public class Call(
-    internal val client: StreamVideo,
+public class Call internal constructor(
+    internal val clientImpl: StreamVideoClient,
+    internal val videoApi: VideoApi,
     val type: String,
     val id: String,
     val user: User,
 ) {
+
+    @Deprecated(
+        message = "Use the constructor with VideoApi instead",
+        replaceWith = ReplaceWith("Call(videoApi, type, id, user)"),
+    )
+    constructor(
+        client: StreamVideo,
+        type: String,
+        id: String,
+        user: User,
+    ) : this(
+        clientImpl = client as StreamVideoClient,
+        videoApi = client.videoApi,
+        type = type,
+        id = id,
+        user = user,
+    )
+
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     internal var reconnectAttepmts = 0
-    internal val clientImpl = client as StreamVideoClient
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
@@ -150,7 +169,7 @@ public class Call(
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    val state = CallState(clientImpl, this, user, scope)
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
@@ -316,36 +335,34 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<GetOrCreateCallResponse> {
-        val response = if (members != null) {
-            clientImpl.getOrCreateCallFullMembers(
+        val response = (if (members != null) {
+            videoApi.oldGetOrCreateCall(
                 type = type,
                 id = id,
                 members = members,
                 custom = custom,
-                settingsOverride = settings,
                 startsAt = startsAt,
                 team = team,
                 ring = ring,
                 notify = notify,
             )
         } else {
-            clientImpl.getOrCreateCall(
+            videoApi.oldGetOrCreateCall(
                 type = type,
                 id = id,
-                memberIds = memberIds,
+                members = memberIds?.map { MemberRequest(it) },
                 custom = custom,
-                settingsOverride = settings,
                 startsAt = startsAt,
                 team = team,
                 ring = ring,
                 notify = notify,
             )
-        }
+        }).await()
 
         response.onSuccess {
             state.updateFromResponse(it)
             if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
+                clientImpl.state.addRingingCall(this, RingingState.Outgoing())
             }
         }
         return response
@@ -489,7 +506,7 @@ public class Call(
                 sessionId = this.sessionId,
                 apiKey = clientImpl.apiKey,
                 lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                client = client,
+                client = clientImpl,
                 call = this,
                 sfuUrl = sfuUrl,
                 sfuWsUrl = sfuWsUrl,
@@ -508,7 +525,7 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
-        client.state.setActiveCall(this)
+        clientImpl.state.setActiveCall(this)
         monitorSession(result.value)
         return Success(value = session!!)
     }
@@ -773,9 +790,9 @@ public class Call(
         stopScreenSharing()
         camera.disable()
         microphone.disable()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
-        (client as StreamVideoClient).onCallCleanUp(this)
+        clientImpl.state.removeActiveCall() // Will also stop CallService
+        clientImpl.state.removeRingingCall()
+        clientImpl.onCallCleanUp(this)
         cleanup()
     }
 
