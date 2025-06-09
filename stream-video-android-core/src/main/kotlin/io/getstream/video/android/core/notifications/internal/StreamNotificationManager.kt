@@ -20,21 +20,18 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import io.getstream.android.push.PushDevice
-import io.getstream.android.push.PushProvider
 import io.getstream.android.push.permissions.NotificationPermissionManager
 import io.getstream.android.push.permissions.NotificationPermissionStatus
 import io.getstream.android.push.permissions.NotificationPermissionStatus.DENIED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.GRANTED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.RATIONALE_NEEDED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.REQUESTED
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.CreateDeviceRequest
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
-import io.getstream.result.flatMapSuspend
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -45,10 +42,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 internal class StreamNotificationManager private constructor(
-    private val context: Context,
     private var scope: CoroutineScope,
     internal val notificationConfig: NotificationConfig,
-    private var api: ProductvideoApi,
+    private var videoApi: VideoApi,
     internal val deviceTokenStorage: DeviceTokenStorage,
     private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
@@ -75,10 +71,9 @@ internal class StreamNotificationManager private constructor(
         val newDevice = pushDevice.toDevice()
         return pushDevice
             .takeUnless { newDevice == deviceTokenStorage.userDevice.firstOrNull() }
-            ?.toCreateDeviceRequest()
-            ?.flatMapSuspend { createDeviceRequest ->
+            ?.let { createDeviceRequest ->
                 try {
-                    api.createDevice(createDeviceRequest)
+                    videoApi.createDevice(createDeviceRequest)
                     deviceTokenStorage.updateUserDevice(pushDevice.toDevice())
                     Result.Success(newDevice)
                 } catch (e: Exception) {
@@ -105,9 +100,8 @@ internal class StreamNotificationManager private constructor(
      */
     suspend fun deleteDevice(device: Device): Result<Unit> {
         logger.d { "[deleteDevice] device: $device" }
-        val userId = StreamVideo.instanceOrNull()?.user?.id
         return try {
-            api.deleteDevice(device.id)
+            videoApi.deleteDevice(device.id)
             removeStoredDevice(device)
             Result.Success(Unit)
         } catch (e: Exception) {
@@ -122,20 +116,6 @@ internal class StreamNotificationManager private constructor(
             pushProviderName = this.providerName ?: "",
         )
 
-    private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
-        when (pushProvider) {
-            PushProvider.FIREBASE -> Result.Success(CreateDeviceRequest.PushProvider.Firebase)
-            PushProvider.HUAWEI -> Result.Success(CreateDeviceRequest.PushProvider.Huawei)
-            PushProvider.XIAOMI -> Result.Success(CreateDeviceRequest.PushProvider.Xiaomi)
-            PushProvider.UNKNOWN -> Result.Failure(Error.GenericError("Unsupported PushProvider"))
-        }.map {
-            CreateDeviceRequest(
-                id = token,
-                pushProvider = it,
-                pushProviderName = providerName,
-            )
-        }
-
     internal companion object {
 
         private val logger: TaggedLogger by taggedLogger("StreamVideo:Notifications")
@@ -147,13 +127,13 @@ internal class StreamNotificationManager private constructor(
             context: Context,
             scope: CoroutineScope,
             notificationConfig: NotificationConfig,
-            api: ProductvideoApi,
+            videoApi: VideoApi,
             deviceTokenStorage: DeviceTokenStorage,
         ): StreamNotificationManager {
             synchronized(this) {
                 if (Companion::internalStreamNotificationManager.isInitialized) {
                     internalStreamNotificationManager.scope = scope
-                    internalStreamNotificationManager.api = api
+                    internalStreamNotificationManager.videoApi = videoApi
                 } else {
                     val application = context.applicationContext as? Application
                     val updatedNotificationConfig =
@@ -179,10 +159,9 @@ internal class StreamNotificationManager private constructor(
                         )
                     }
                     internalStreamNotificationManager = StreamNotificationManager(
-                        context,
                         scope,
                         updatedNotificationConfig,
-                        api,
+                        videoApi,
                         deviceTokenStorage,
                         notificationPermissionManager,
                     )

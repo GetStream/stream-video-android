@@ -230,7 +230,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
-            api = coordinatorConnectionModule.api,
+            videoApi = coordinatorConnectionModule.videoApi,
             deviceTokenStorage = deviceTokenStorage,
         )
 
