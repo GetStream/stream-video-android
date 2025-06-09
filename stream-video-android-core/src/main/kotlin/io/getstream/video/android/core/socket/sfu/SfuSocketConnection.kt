@@ -31,10 +31,7 @@ import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManager
-import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.ApiKey

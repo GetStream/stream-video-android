@@ -38,13 +38,11 @@ import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
-import io.getstream.video.android.model.UserType
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.runBlocking
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
