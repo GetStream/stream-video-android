@@ -84,7 +84,9 @@ import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
+import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
+import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
@@ -153,6 +155,7 @@ internal class StreamVideoClient internal constructor(
     internal var token: String,
     private val lifecycle: Lifecycle,
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
+    internal val videoApi: VideoApi,
     internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
     internal val enableCallNotificationUpdates: Boolean,

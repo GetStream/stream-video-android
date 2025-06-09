@@ -22,7 +22,10 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
+import io.getstream.video.android.core.WAIT_FOR_CONNECTION_ID_TIMEOUT
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.internal.VideoApi
+import io.getstream.video.android.core.internal.VideoService
 import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
 import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -39,6 +42,8 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -124,6 +129,26 @@ internal class CoordinatorConnectionModule(
         token?.let { CacheableTokenProvider(ConstantTokenProvider(it)) }
             ?.let { tokenManager.updateTokenProvider(it) }
             ?: tokenManager.loadSync()
+    }
+
+    val videoApi: VideoApi by lazy {
+        VideoService(
+            scope = scope,
+            api = api,
+            tokenManager = tokenManager,
+            getConnectionId = ::waitForConnectionId,
+            authTypeProvider = authTypeProvider,
+        )
+    }
+
+    private suspend fun waitForConnectionId(): String? {
+        // The Coordinator WS connection can take a moment to set up - this can be an issue
+        // if we jump right into the call from a deep link and we connect the call quickly.
+        // We return null on timeout. The Coordinator WS will update the connectionId later
+        // after it reconnects (it will call queryCalls)
+        return withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
+            socketConnection.connectionId().first { it != null }
+        }
     }
 
     override fun updateAuthType(authType: AuthTypeProvider.AuthType) {

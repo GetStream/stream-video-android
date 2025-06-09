@@ -250,6 +250,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
+            videoApi = coordinatorConnectionModule.videoApi,
             streamNotificationManager = streamNotificationManager,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
