@@ -21,57 +21,9 @@ import android.media.AudioAttributes
 import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
-import io.getstream.android.video.generated.models.AcceptCallResponse
-import io.getstream.android.video.generated.models.BlockUserRequest
-import io.getstream.android.video.generated.models.BlockUserResponse
 import io.getstream.android.video.generated.models.CallAcceptedEvent
-import io.getstream.android.video.generated.models.CallRequest
-import io.getstream.android.video.generated.models.CallSettingsRequest
-import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
-import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.CreateGuestRequest
 import io.getstream.android.video.generated.models.CreateGuestResponse
-import io.getstream.android.video.generated.models.GetCallResponse
-import io.getstream.android.video.generated.models.GetOrCreateCallRequest
-import io.getstream.android.video.generated.models.GetOrCreateCallResponse
-import io.getstream.android.video.generated.models.GoLiveRequest
-import io.getstream.android.video.generated.models.GoLiveResponse
-import io.getstream.android.video.generated.models.JoinCallRequest
-import io.getstream.android.video.generated.models.JoinCallResponse
-import io.getstream.android.video.generated.models.ListRecordingsResponse
-import io.getstream.android.video.generated.models.ListTranscriptionsResponse
-import io.getstream.android.video.generated.models.MemberRequest
-import io.getstream.android.video.generated.models.MuteUsersResponse
-import io.getstream.android.video.generated.models.PinRequest
-import io.getstream.android.video.generated.models.QueryCallMembersRequest
-import io.getstream.android.video.generated.models.QueryCallMembersResponse
-import io.getstream.android.video.generated.models.QueryCallsRequest
-import io.getstream.android.video.generated.models.RejectCallRequest
-import io.getstream.android.video.generated.models.RejectCallResponse
-import io.getstream.android.video.generated.models.RequestPermissionRequest
-import io.getstream.android.video.generated.models.SendCallEventRequest
-import io.getstream.android.video.generated.models.SendCallEventResponse
-import io.getstream.android.video.generated.models.SendReactionRequest
-import io.getstream.android.video.generated.models.SendReactionResponse
-import io.getstream.android.video.generated.models.StartClosedCaptionsRequest
-import io.getstream.android.video.generated.models.StartClosedCaptionsResponse
-import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
-import io.getstream.android.video.generated.models.StartRecordingRequest
-import io.getstream.android.video.generated.models.StartTranscriptionRequest
-import io.getstream.android.video.generated.models.StartTranscriptionResponse
-import io.getstream.android.video.generated.models.StopClosedCaptionsRequest
-import io.getstream.android.video.generated.models.StopClosedCaptionsResponse
-import io.getstream.android.video.generated.models.StopLiveRequest
-import io.getstream.android.video.generated.models.StopLiveResponse
-import io.getstream.android.video.generated.models.StopTranscriptionRequest
-import io.getstream.android.video.generated.models.StopTranscriptionResponse
-import io.getstream.android.video.generated.models.UnblockUserRequest
-import io.getstream.android.video.generated.models.UnpinRequest
-import io.getstream.android.video.generated.models.UpdateCallMembersRequest
-import io.getstream.android.video.generated.models.UpdateCallMembersResponse
-import io.getstream.android.video.generated.models.UpdateCallRequest
-import io.getstream.android.video.generated.models.UpdateCallResponse
-import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.android.video.generated.models.UserRequest
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.android.video.generated.models.WSCallEvent
@@ -88,13 +40,9 @@ import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.model.EdgeData
-import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueriedMembers
-import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
-import io.getstream.video.android.core.model.UpdateUserPermissionsData
-import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
@@ -104,8 +52,6 @@ import io.getstream.video.android.core.permission.android.DefaultStreamPermissio
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.LatencyResult
@@ -113,9 +59,7 @@ import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
-import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
-import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
@@ -127,11 +71,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
@@ -139,7 +81,6 @@ import okhttp3.Response
 import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
 import java.util.*
-import kotlin.coroutines.Continuation
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -156,11 +97,9 @@ internal class StreamVideoClient internal constructor(
     private val lifecycle: Lifecycle,
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val videoApi: VideoApi,
-    internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
     internal val streamNotificationManager: StreamNotificationManager,
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
-    internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     internal val crashOnMissingPermission: Boolean = false,
@@ -185,7 +124,6 @@ internal class StreamVideoClient internal constructor(
     /** if true we fail fast on errors instead of logging them */
 
     internal var guestUserJob: Deferred<Unit>? = null
-    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     public override val userId = user.id
 
@@ -267,24 +205,6 @@ internal class StreamVideoClient internal constructor(
             -> true
 
             else -> false
-        }
-    }
-
-    /**
-     * @see StreamVideo.updateCall
-     */
-    suspend fun updateCall(
-        type: String,
-        id: String,
-        request: UpdateCallRequest,
-    ): Result<UpdateCallResponse> {
-        logger.d { "[updateCall] type: $type, id: $id, request: $request" }
-        return apiCall {
-            coordinatorConnectionModule.api.updateCall(
-                type = type,
-                id = id,
-                updateCallRequest = request,
-            )
         }
     }
 
@@ -552,107 +472,6 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
-    internal suspend fun getCall(type: String, id: String): Result<GetCallResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.getCall(
-                type = type,
-                id = id,
-                connectionId = waitForConnectionId(),
-            )
-        }
-    }
-
-    // caller: DIAL and wait answer
-    internal suspend fun getOrCreateCall(
-        type: String,
-        id: String,
-        memberIds: List<String>? = null,
-        custom: Map<String, Any>? = null,
-        settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
-        team: String? = null,
-        ring: Boolean,
-        notify: Boolean,
-    ): Result<GetOrCreateCallResponse> {
-        val members = memberIds?.map {
-            MemberRequest(
-                userId = it,
-            )
-        }
-
-        return getOrCreateCallFullMembers(
-            type = type,
-            id = id,
-            members = members,
-            custom = custom,
-            settingsOverride = settingsOverride,
-            startsAt = startsAt,
-            team = team,
-            ring = ring,
-            notify = notify,
-        )
-    }
-
-    internal suspend fun getOrCreateCallFullMembers(
-        type: String,
-        id: String,
-        members: List<MemberRequest>? = null,
-        custom: Map<String, Any>? = null,
-        settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
-        team: String? = null,
-        ring: Boolean,
-        notify: Boolean,
-    ): Result<GetOrCreateCallResponse> {
-        logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
-
-        return apiCall {
-            coordinatorConnectionModule.api.getOrCreateCall(
-                type = type,
-                id = id,
-                getOrCreateCallRequest = GetOrCreateCallRequest(
-                    data = CallRequest(
-                        members = members,
-                        custom = custom,
-                        settingsOverride = settingsOverride,
-                        startsAt = startsAt,
-                        team = team,
-                    ),
-                    ring = ring,
-                    notify = notify,
-                ),
-                connectionId = waitForConnectionId(),
-            )
-        }
-    }
-
-    private suspend fun waitForConnectionId(): String? {
-        // The Coordinator WS connection can take a moment to set up - this can be an issue
-        // if we jump right into the call from a deep link and we connect the call quickly.
-        // We return null on timeout. The Coordinator WS will update the connectionId later
-        // after it reconnects (it will call queryCalls)
-        val connectionId = withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
-            val value =
-                coordinatorConnectionModule.socketConnection.connectionId().first { it != null }
-            value
-        }.also {
-            logger.d { "[waitForConnectionId]: $it" }
-        }
-        return connectionId ?: testSessionId
-    }
-
-    internal suspend fun inviteUsers(
-        type: String,
-        id: String,
-        users: List<User>,
-    ): Result<Unit> {
-        logger.d { "[inviteUsers] users: $users" }
-
-        return apiCall {
-            error("TODO: not support yet")
-        }
-    }
-
     /**
      * Measures and prepares the latency which describes how much time it takes to ping the server.
      *
@@ -670,96 +489,6 @@ internal class StreamVideoClient internal constructor(
             results
         }
 
-    suspend fun joinCall(
-        type: String,
-        id: String,
-        create: Boolean = false,
-        members: List<MemberRequest>? = null,
-        custom: Map<String, Any>? = null,
-        settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
-        team: String? = null,
-        ring: Boolean = false,
-        notify: Boolean = false,
-        location: String,
-        migratingFrom: String?,
-    ): Result<JoinCallResponse> {
-        val joinCallRequest = JoinCallRequest(
-            create = create,
-            data = CallRequest(
-                members = members,
-                custom = custom,
-                settingsOverride = settingsOverride,
-                startsAt = startsAt,
-                team = team,
-            ),
-            ring = ring,
-            notify = notify,
-            location = location,
-            migratingFrom = migratingFrom,
-        )
-
-        val result = apiCall {
-            coordinatorConnectionModule.api.joinCall(
-                type = type,
-                id = id,
-                joinCallRequest = joinCallRequest,
-                connectionId = waitForConnectionId(),
-            )
-        }
-        return result
-    }
-
-    suspend fun updateMembers(
-        type: String,
-        id: String,
-        request: UpdateCallMembersRequest,
-    ): Result<UpdateCallMembersResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.updateCallMembers(type, id, request)
-        }
-    }
-
-    internal suspend fun sendCustomEvent(
-        type: String,
-        id: String,
-        dataJson: Map<String, Any>,
-    ): Result<SendCallEventResponse> {
-        logger.d { "[sendCustomEvent] callCid: $type:$id, dataJson: $dataJson" }
-
-        return apiCall {
-            coordinatorConnectionModule.api.sendCallEvent(
-                type,
-                id,
-                SendCallEventRequest(custom = dataJson),
-            )
-        }
-    }
-
-    internal suspend fun queryMembersInternal(
-        type: String,
-        id: String,
-        filter: Map<String, Any>?,
-        sort: List<SortField>,
-        prev: String?,
-        next: String?,
-        limit: Int,
-    ): Result<QueryCallMembersResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.queryCallMembers(
-                QueryCallMembersRequest(
-                    type = type,
-                    id = id,
-                    filterConditions = filter,
-                    sort = sort.map { it.toRequest() },
-                    prev = prev,
-                    next = next,
-                    limit = limit,
-                ),
-            )
-        }
-    }
-
     override suspend fun queryMembers(
         type: String,
         id: String,
@@ -769,7 +498,7 @@ internal class StreamVideoClient internal constructor(
         next: String?,
         limit: Int,
     ): Result<QueriedMembers> {
-        return queryMembersInternal(
+        return videoApi.queryCallMembers(
             type = type,
             id = id,
             filter = filter,
@@ -777,96 +506,7 @@ internal class StreamVideoClient internal constructor(
             prev = prev,
             next = next,
             limit = limit,
-        ).map { it.toQueriedMembers() }
-    }
-
-    suspend fun blockUser(type: String, id: String, userId: String): Result<BlockUserResponse> {
-        logger.d { "[blockUser] callCid: $type:$id, userId: $userId" }
-
-        return apiCall {
-            coordinatorConnectionModule.api.blockUser(
-                type,
-                id,
-                BlockUserRequest(userId),
-            )
-        }
-    }
-
-    suspend fun unblockUser(type: String, id: String, userId: String): Result<Unit> {
-        logger.d { "[unblockUser] callCid: $type:$id, userId: $userId" }
-
-        return apiCall {
-            coordinatorConnectionModule.api.unblockUser(
-                type,
-                id,
-                UnblockUserRequest(userId),
-            )
-        }
-    }
-
-    suspend fun pinForEveryone(type: String, callId: String, sessionId: String, userId: String) =
-        apiCall {
-            coordinatorConnectionModule.api.videoPin(
-                type,
-                callId,
-                PinRequest(
-                    sessionId,
-                    userId,
-                ),
-            )
-        }
-
-    suspend fun unpinForEveryone(type: String, callId: String, sessionId: String, userId: String) =
-        apiCall {
-            coordinatorConnectionModule.api.videoUnpin(
-                type,
-                callId,
-                UnpinRequest(
-                    sessionId,
-                    userId,
-                ),
-            )
-        }
-
-    suspend fun endCall(type: String, id: String): Result<Unit> {
-        return apiCall { coordinatorConnectionModule.api.endCall(type, id) }
-    }
-
-    suspend fun goLive(
-        type: String,
-        id: String,
-        startHls: Boolean,
-        startRecording: Boolean,
-        startTranscription: Boolean,
-    ): Result<GoLiveResponse> {
-        logger.d { "[goLive] callCid: $type:$id" }
-
-        return apiCall {
-            coordinatorConnectionModule.api.goLive(
-                type = type,
-                id = id,
-                goLiveRequest = GoLiveRequest(
-                    startHls = startHls,
-                    startRecording = startRecording,
-                    startTranscription = startTranscription,
-                ),
-            )
-        }
-    }
-
-    suspend fun stopLive(type: String, id: String): Result<StopLiveResponse> {
-        return apiCall { coordinatorConnectionModule.api.stopLive(type, id, StopLiveRequest()) }
-    }
-
-    suspend fun muteUsers(
-        type: String,
-        id: String,
-        muteUsersData: MuteUsersData,
-    ): Result<MuteUsersResponse> {
-        val request = muteUsersData.toRequest()
-        return apiCall {
-            coordinatorConnectionModule.api.muteUsers(type, id, request)
-        }
+        ).await()
     }
 
     /**
@@ -881,137 +521,22 @@ internal class StreamVideoClient internal constructor(
         watch: Boolean,
     ): Result<QueriedCalls> {
         logger.d { "[queryCalls] filters: $filters, sort: $sort, limit: $limit, watch: $watch" }
-        val request = QueryCallsRequest(
-            filterConditions = filters,
-            sort = sort.map { it.toRequest() },
-            limit = limit,
-            prev = prev,
-            next = next,
-            watch = watch,
-        )
-        val result = apiCall {
-            coordinatorConnectionModule.api.queryCalls(
-                queryCallsRequest = request,
-                connectionId = waitForConnectionId(),
-            )
-        }
-        if (result.isSuccess) {
-            // update state for these calls
-            result.onSuccess {
+        val result = videoApi.oldQueryCalls(
+            filters,
+            sort,
+            limit,
+            prev,
+            next,
+            watch,
+        ).await()
+            .onSuccess {
                 it.calls.forEach { callData ->
                     val call = this.call(callData.call.type, callData.call.id)
                     call.state.updateFromResponse(callData)
                 }
             }
-        }
 
         return result.map { it.toQueriedCalls() }
-    }
-
-    suspend fun requestPermissions(
-        type: String,
-        id: String,
-        permissions: List<String>,
-    ): Result<Unit> {
-        logger.d { "[requestPermissions] callCid: $type:$id, permissions: $permissions" }
-
-        return apiCall {
-            coordinatorConnectionModule.api.requestPermission(
-                type,
-                id,
-                RequestPermissionRequest(permissions),
-            )
-        }
-    }
-
-    suspend fun startBroadcasting(type: String, id: String): Result<StartHLSBroadcastingResponse> {
-        logger.d { "[startBroadcasting] callCid: $type $id" }
-
-        return apiCall { coordinatorConnectionModule.api.startHLSBroadcasting(type, id) }
-    }
-
-    suspend fun stopBroadcasting(type: String, id: String): Result<Unit> {
-        return apiCall { coordinatorConnectionModule.api.stopHLSBroadcasting(type, id) }
-    }
-
-    suspend fun startRecording(
-        type: String,
-        id: String,
-        externalStorage: String? = null,
-    ): Result<Unit> {
-        return apiCall {
-            val req = StartRecordingRequest(externalStorage)
-            coordinatorConnectionModule.api.startRecording(type, id, req)
-        }
-    }
-
-    suspend fun stopRecording(type: String, id: String): Result<Unit> {
-        return apiCall {
-            coordinatorConnectionModule.api.stopRecording(type, id)
-        }
-    }
-
-    suspend fun updateUserPermissions(
-        type: String,
-        id: String,
-        updateUserPermissionsData: UpdateUserPermissionsData,
-    ): Result<UpdateUserPermissionsResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.updateUserPermissions(
-                type,
-                id,
-                updateUserPermissionsData.toRequest(),
-            )
-        }
-    }
-
-    suspend fun listRecordings(
-        type: String,
-        id: String,
-        sessionId: String?,
-    ): Result<ListRecordingsResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.listRecordings(type, id)
-        }
-    }
-
-    suspend fun sendReaction(
-        callType: String,
-        id: String,
-        type: String,
-        emoji: String? = null,
-        custom: Map<String, Any>? = null,
-    ): Result<SendReactionResponse> {
-        val request = SendReactionRequest(type, custom = custom, emojiCode = emoji)
-
-        logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
-
-        return apiCall {
-            coordinatorConnectionModule.api.sendVideoReaction(callType, id, request)
-        }
-    }
-
-    internal suspend fun collectFeedback(
-        callType: String,
-        id: String,
-        sessionId: String,
-        rating: Int,
-        reason: String?,
-        custom: Map<String, Any>?,
-    ) = apiCall {
-        coordinatorConnectionModule.api.collectUserFeedback(
-            type = callType,
-            id = id,
-            session = sessionId,
-            collectUserFeedbackRequest = CollectUserFeedbackRequest(
-                rating = rating,
-                sdk = "stream-video-android",
-                userSessionId = sessionId,
-                sdkVersion = BuildConfig.STREAM_VIDEO_VERSION,
-                reason = reason,
-                custom = custom,
-            ),
-        )
     }
 
     /**
@@ -1019,12 +544,7 @@ internal class StreamVideoClient internal constructor(
      */
     override suspend fun getEdges(): Result<List<EdgeData>> {
         logger.d { "[getEdges] no params" }
-
-        return apiCall {
-            val result = coordinatorConnectionModule.api.getEdges()
-
-            result.edges.map { it.toEdge() }
-        }
+        return videoApi.getEdges().await()
     }
 
     /**
@@ -1043,7 +563,7 @@ internal class StreamVideoClient internal constructor(
         return if (calls.contains(cid)) {
             calls[cid]!!
         } else {
-            val call = Call(this, type, idOrRandom, user)
+            val call = Call(this, videoApi, type, idOrRandom, user)
             calls[cid] = call
             call
         }
@@ -1076,78 +596,6 @@ internal class StreamVideoClient internal constructor(
             }
             val locationHeader = response.headers["X-Amz-Cf-Pop"]
             locationHeader?.take(3) ?: "missing-location"
-        }
-    }
-
-    internal suspend fun accept(type: String, id: String): Result<AcceptCallResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.acceptCall(type, id)
-        }
-    }
-
-    internal suspend fun reject(
-        type: String,
-        id: String,
-        reason: RejectReason? = null,
-    ): Result<RejectCallResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.rejectCall(type, id, RejectCallRequest(reason?.alias))
-        }
-    }
-
-    internal suspend fun notify(type: String, id: String): Result<GetCallResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.getCall(type = type, id = id, notify = true)
-        }
-    }
-
-    internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.getCall(type = type, id = id, ring = true)
-        }
-    }
-
-    suspend fun startTranscription(
-        type: String,
-        id: String,
-        externalStorage: String? = null,
-    ): Result<StartTranscriptionResponse> {
-        return apiCall {
-            val startTranscriptionRequest =
-                StartTranscriptionRequest(transcriptionExternalStorage = externalStorage)
-            coordinatorConnectionModule.api.startTranscription(type, id, startTranscriptionRequest)
-        }
-    }
-
-    suspend fun stopTranscription(type: String, id: String): Result<StopTranscriptionResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.stopTranscription(type, id, StopTranscriptionRequest())
-        }
-    }
-
-    suspend fun listTranscription(type: String, id: String): Result<ListTranscriptionsResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.listTranscriptions(type, id)
-        }
-    }
-
-    suspend fun startClosedCaptions(type: String, id: String): Result<StartClosedCaptionsResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.startClosedCaptions(
-                type,
-                id,
-                StartClosedCaptionsRequest(),
-            )
-        }
-    }
-
-    suspend fun stopClosedCaptions(type: String, id: String): Result<StopClosedCaptionsResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.stopClosedCaptions(
-                type,
-                id,
-                StopClosedCaptionsRequest(),
-            )
         }
     }
 }
