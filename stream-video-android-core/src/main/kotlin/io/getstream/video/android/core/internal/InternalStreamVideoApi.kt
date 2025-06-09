@@ -42,4 +42,6 @@ public annotation class InternalStreamVideoApi
     message = "This is an experimental API. It may change in the future or maybe removed.",
     level = RequiresOptIn.Level.WARNING,
 )
-public annotation class ExperimentalStreamVideoApi
+public annotation class ExperimentalStreamVideoApi(
+    val message: String = "This is an experimental API. It may change in the future or maybe removed.",
+)
