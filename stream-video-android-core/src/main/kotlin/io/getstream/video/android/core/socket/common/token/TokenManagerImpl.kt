@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.socket.common.token
 
+import kotlinx.coroutines.runBlocking
+
 internal class TokenManagerImpl(
     private var provider: CacheableTokenProvider,
 ) : TokenManager {
@@ -37,9 +39,9 @@ internal class TokenManagerImpl(
         }
     }
 
-    override fun loadSync(): String {
-        return provider.loadToken().also {
-            this.token = it
+    override fun loadSync(): String = runBlocking {
+        provider.loadToken().also {
+            token = it
         }
     }
 

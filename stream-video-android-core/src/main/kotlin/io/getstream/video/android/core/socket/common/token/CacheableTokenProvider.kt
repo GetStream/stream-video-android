@@ -24,7 +24,7 @@ package io.getstream.video.android.core.socket.common.token
  */
 internal class CacheableTokenProvider(private val tokenProvider: TokenProvider) : TokenProvider {
     private var cachedToken = ""
-    override fun loadToken(): String = tokenProvider.loadToken().also { cachedToken = it }
+    override suspend fun loadToken(): String = tokenProvider.loadToken().also { cachedToken = it }
 
     /**
      * Obtain the cached token.

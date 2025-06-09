@@ -17,5 +17,5 @@
 package io.getstream.video.android.core.socket.common.token
 
 internal class ConstantTokenProvider(private val token: String) : TokenProvider {
-    override fun loadToken(): String = token
+    override suspend fun loadToken(): String = token
 }

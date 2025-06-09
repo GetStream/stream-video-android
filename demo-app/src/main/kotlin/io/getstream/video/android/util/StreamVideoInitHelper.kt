@@ -210,13 +210,13 @@ object StreamVideoInitHelper {
                 hideRingingNotificationInForeground = true,
             ),
             tokenProvider = object : TokenProvider {
-                override fun loadToken(): String = runBlocking {
+                override suspend fun loadToken(): String {
                     val email = user.custom?.get("email")
                     val authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = email,
                     )
-                    authData.token
+                    return authData.token
                 }
             },
             appName = "Stream Video Demo App",

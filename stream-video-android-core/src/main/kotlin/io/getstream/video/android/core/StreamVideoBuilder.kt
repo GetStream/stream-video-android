@@ -103,7 +103,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val legacyTokenProvider: (suspend (error: Throwable?) -> String)? = null,
     private val tokenProvider: TokenProvider = legacyTokenProvider?.let { legacy ->
         object : TokenProvider {
-            override fun loadToken(): String = runBlocking(Dispatchers.IO) { legacy.invoke(null) }
+            override suspend fun loadToken(): String = legacy.invoke(null)
         }
     } ?: ConstantTokenProvider(token),
     private val loggingLevel: LoggingLevel = LoggingLevel(),
