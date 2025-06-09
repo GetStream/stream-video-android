@@ -1,10 +1,24 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.internal
 
 import io.getstream.android.push.PushDevice
 import io.getstream.android.video.generated.models.AcceptCallResponse
 import io.getstream.android.video.generated.models.BlockUserResponse
-import io.getstream.android.video.generated.models.CallSettingsRequest
-import io.getstream.android.video.generated.models.CollectUserFeedbackResponse
 import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
@@ -51,7 +65,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be removed in the future. It is exposing the " +
-                "raw GetCallResponse object, which is not recommended for public use.",
+            "raw GetCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("getCall(type, id, ring, notify)"),
     )
     fun oldQueryCallMembers(
@@ -76,7 +90,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be removed in the future. It is exposing the " +
-                "raw GetCallResponse object, which is not recommended for public use.",
+            "raw GetCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("getCall(type, id, ring, notify)"),
     )
     fun oldGetCall(
@@ -85,7 +99,6 @@ internal interface VideoApi {
         ring: Boolean? = null,
         notify: Boolean? = null,
     ): Call<GetCallResponse>
-
 
     fun getCall(
         type: String,
@@ -96,7 +109,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw UpdateCallResponse object, which is not recommended for public use.",
+            "raw UpdateCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("updateCall(type, id, custom, startsAt)"),
     )
     fun oldUpdateCall(
@@ -105,7 +118,6 @@ internal interface VideoApi {
         custom: Map<String, Any>?,
         startsAt: OffsetDateTime?,
     ): Call<UpdateCallResponse>
-
 
     fun updateCall(
         type: String,
@@ -116,8 +128,10 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw GetOrCreateCallResponse object, which is not recommended for public use.",
-        replaceWith = ReplaceWith("getOrCreateCall(type, id, members, custom, settingsOverride, startsAt, team, ring, notify)"),
+            "raw GetOrCreateCallResponse object, which is not recommended for public use.",
+        replaceWith = ReplaceWith(
+            "getOrCreateCall(type, id, members, custom, settingsOverride, startsAt, team, ring, notify)",
+        ),
     )
     fun oldGetOrCreateCall(
         type: String,
@@ -143,7 +157,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw AcceptCallResponse object, which is not recommended for public use.",
+            "raw AcceptCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("acceptCall(type, id)"),
     )
     fun oldAcceptCall(
@@ -158,7 +172,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw BlockUserResponse object, which is not recommended for public use.",
+            "raw BlockUserResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("blockUser(type, id, userId)"),
     )
     fun oldBlockUser(
@@ -175,7 +189,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw SendCallEventResponse object, which is not recommended for public use.",
+            "raw SendCallEventResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("sendCallEvent(type, id, dataJson)"),
     )
     fun oldSendCallEvent(
@@ -190,7 +204,6 @@ internal interface VideoApi {
         dataJson: Map<String, Any>,
     ): Call<Unit>
 
-
     fun collectUserFeedback(
         callType: String,
         id: String,
@@ -202,7 +215,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw GoLiveResponse object, which is not recommended for public use.",
+            "raw GoLiveResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("goLive(type, id, startHls, startRecording, startTranscription)"),
     )
     fun oldGoLive(
@@ -223,8 +236,10 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw JoinCallResponse object, which is not recommended for public use.",
-        replaceWith = ReplaceWith("joinCall(type, id, create, members, custom, settingsOverride, startsAt, team, ring, notify, location, migratingFrom)"),
+            "raw JoinCallResponse object, which is not recommended for public use.",
+        replaceWith = ReplaceWith(
+            "joinCall(type, id, create, members, custom, settingsOverride, startsAt, team, ring, notify, location, migratingFrom)",
+        ),
     )
     fun oldJoinCall(
         type: String,
@@ -261,7 +276,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw UpdateCallMembersResponse object, which is not recommended for public use.",
+            "raw UpdateCallMembersResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("updateCallMembers(type, id, request)"),
     )
     fun oldUpdateCallMembers(
@@ -279,7 +294,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw MuteUsersResponse object, which is not recommended for public use.",
+            "raw MuteUsersResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("muteUsers(type, id, muteUsersData)"),
     )
     fun oldMuteUsers(
@@ -296,7 +311,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw PinResponse object, which is not recommended for public use.",
+            "raw PinResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("videoPin(type, callId, sessionId, userId)"),
     )
     fun oldVideoPin(
@@ -315,7 +330,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw SendReactionResponse object, which is not recommended for public use.",
+            "raw SendReactionResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("sendVideoReaction(callType, id, type, emoji, custom)"),
     )
     fun oldSendVideoReaction(
@@ -336,7 +351,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw ListRecordingsResponse object, which is not recommended for public use.",
+            "raw ListRecordingsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("listRecordings(type, id)"),
     )
     fun oldListRecordings(
@@ -351,7 +366,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw RejectCallResponse object, which is not recommended for public use.",
+            "raw RejectCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("rejectCall(type, id, reason)"),
     )
     fun oldRejectCall(
@@ -374,32 +389,32 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StartHLSBroadcastingResponse object, which is not recommended for public use.",
+            "raw StartHLSBroadcastingResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("startHLSBroadcasting(type, id)"),
     )
     fun oldStartHLSBroadcasting(
         type: String,
-        id: String
+        id: String,
     ): Call<StartHLSBroadcastingResponse>
 
     fun startHLSBroadcasting(
         type: String,
-        id: String
+        id: String,
     ): Call<String>
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StartClosedCaptionsResponse object, which is not recommended for public use.",
+            "raw StartClosedCaptionsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("startClosedCaptions(type, id)"),
     )
     fun oldStartClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<StartClosedCaptionsResponse>
 
     fun startClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit>
 
     fun startRecording(
@@ -410,7 +425,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StartTranscriptionResponse object, which is not recommended for public use.",
+            "raw StartTranscriptionResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("startTranscription(type, id, externalStorage)"),
     )
     fun oldStartTranscription(
@@ -427,90 +442,90 @@ internal interface VideoApi {
 
     fun stopHLSBroadcasting(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit>
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StopClosedCaptionsResponse object, which is not recommended for public use.",
+            "raw StopClosedCaptionsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("stopClosedCaptions(type, id)"),
     )
     fun oldStopClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<StopClosedCaptionsResponse>
 
     fun stopClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit>
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StopLiveResponse object, which is not recommended for public use.",
+            "raw StopLiveResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("stopLive(type, id)"),
     )
     fun oldStopLive(
         type: String,
-        id: String
+        id: String,
     ): Call<StopLiveResponse>
 
     fun stopLive(
         type: String,
-        id: String
+        id: String,
     ): Call<CallInfo>
 
     fun stopRecording(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit>
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StopTranscriptionResponse object, which is not recommended for public use.",
+            "raw StopTranscriptionResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("stopTranscription(type, id)"),
     )
     fun oldStopTranscription(
         type: String,
-        id: String
+        id: String,
     ): Call<StopTranscriptionResponse>
 
     fun stopTranscription(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit>
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw ListTranscriptionsResponse object, which is not recommended for public use.",
+            "raw ListTranscriptionsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("listTranscriptions(type, id)"),
     )
     fun oldListTranscriptions(
         type: String,
-        id: String
+        id: String,
     ): Call<ListTranscriptionsResponse>
 
     fun listTranscriptions(
         type: String,
-        id: String
+        id: String,
     ): Call<List<CallTranscription>>
 
     fun unblockUser(
         type: String,
         id: String,
-        userId: String
+        userId: String,
     ): Call<Unit>
 
     fun videoUnpin(
         type: String,
         callId: String,
         sessionId: String,
-        userId: String
+        userId: String,
     ): Call<Unit>
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw UpdateUserPermissionsResponse object, which is not recommended for public use.",
+            "raw UpdateUserPermissionsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("updateUserPermissions(type, id, updateUserPermissionsData)"),
     )
     fun oldUpdateUserPermissions(
@@ -527,7 +542,7 @@ internal interface VideoApi {
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw QueryCallsResponse object, which is not recommended for public use.",
+            "raw QueryCallsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("oldQueryCalls(filters, sort, limit, prev, next, watch)"),
     )
     fun oldQueryCalls(

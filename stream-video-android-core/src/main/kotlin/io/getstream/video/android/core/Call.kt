@@ -334,29 +334,31 @@ public class Call internal constructor(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<GetOrCreateCallResponse> {
-        val response = (if (members != null) {
-            videoApi.oldGetOrCreateCall(
-                type = type,
-                id = id,
-                members = members,
-                custom = custom,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-            )
-        } else {
-            videoApi.oldGetOrCreateCall(
-                type = type,
-                id = id,
-                members = memberIds?.map { MemberRequest(it) },
-                custom = custom,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-            )
-        }).await()
+        val response = (
+            if (members != null) {
+                videoApi.oldGetOrCreateCall(
+                    type = type,
+                    id = id,
+                    members = members,
+                    custom = custom,
+                    startsAt = startsAt,
+                    team = team,
+                    ring = ring,
+                    notify = notify,
+                )
+            } else {
+                videoApi.oldGetOrCreateCall(
+                    type = type,
+                    id = id,
+                    members = memberIds?.map { MemberRequest(it) },
+                    custom = custom,
+                    startsAt = startsAt,
+                    team = team,
+                    ring = ring,
+                    notify = notify,
+                )
+            }
+            ).await()
 
         response.onSuccess {
             state.updateFromResponse(it)
@@ -1246,9 +1248,9 @@ public class Call internal constructor(
             type, id,
             create = create != null,
             membersId = (
-                    create?.memberIds.orEmpty() +
-                            create?.members.orEmpty().map { it.userId }
-                    ).takeUnless { it.isEmpty() },
+                create?.memberIds.orEmpty() +
+                    create?.members.orEmpty().map { it.userId }
+                ).takeUnless { it.isEmpty() },
             custom = create?.custom,
             startsAt = create?.startsAt,
             team = create?.team,

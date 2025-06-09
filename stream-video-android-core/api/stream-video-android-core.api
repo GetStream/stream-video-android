@@ -9116,6 +9116,7 @@ public final class io/getstream/video/android/core/header/VersionPrefixHeader$Ui
 }
 
 public abstract interface annotation class io/getstream/video/android/core/internal/ExperimentalStreamVideoApi : java/lang/annotation/Annotation {
+	public abstract fun message ()Ljava/lang/String;
 }
 
 public abstract interface annotation class io/getstream/video/android/core/internal/InternalStreamVideoApi : java/lang/annotation/Annotation {
@@ -9323,6 +9324,23 @@ public final class io/getstream/video/android/core/model/CallStatus$Incoming : i
 public final class io/getstream/video/android/core/model/CallStatus$Outgoing : io/getstream/video/android/core/model/CallStatus {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/CallStatus$Outgoing;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/CallTranscription {
+	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public final fun component1 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lio/getstream/video/android/core/model/CallTranscription;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallTranscription;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallTranscription;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndTime ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getFilename ()Ljava/lang/String;
+	public final fun getStartTime ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -9804,6 +9822,20 @@ public final class io/getstream/video/android/core/model/StreamPeerType : java/l
 
 public final class io/getstream/video/android/core/model/StreamPeerTypeKt {
 	public static final fun toPeerType (Lio/getstream/video/android/core/model/StreamPeerType;)Lstream/video/sfu/models/PeerType;
+}
+
+public final class io/getstream/video/android/core/model/UpdateMemberData {
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;)Lio/getstream/video/android/core/model/UpdateMemberData;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/UpdateMemberData;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/core/model/UpdateMemberData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getUserId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/model/UpdateUserPermissionsData {

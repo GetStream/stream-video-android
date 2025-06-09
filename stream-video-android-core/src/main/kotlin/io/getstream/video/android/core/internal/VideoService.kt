@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.internal
 
 import io.getstream.android.push.PushDevice
@@ -104,7 +120,7 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be removed in the future. It is exposing the " +
-                "raw GetCallResponse object, which is not recommended for public use.",
+            "raw GetCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("getCall(type, id, ring, notify)"),
     )
     override fun oldQueryCallMembers(
@@ -137,24 +153,24 @@ internal class VideoService(
         sort: List<SortField>,
         prev: String?,
         next: String?,
-        limit: Int
+        limit: Int,
     ): Call<QueryCallMembersResponse> = createCall {
-            api.queryCallMembers(
-                QueryCallMembersRequest(
-                    type = type,
-                    id = id,
-                    filterConditions = filter,
-                    sort = sort.map { it.toRequest() },
-                    prev = prev,
-                    next = next,
-                    limit = limit,
-                ),
-            )
-        }
+        api.queryCallMembers(
+            QueryCallMembersRequest(
+                type = type,
+                id = id,
+                filterConditions = filter,
+                sort = sort.map { it.toRequest() },
+                prev = prev,
+                next = next,
+                limit = limit,
+            ),
+        )
+    }
 
     @Deprecated(
         message = "This is an internal API that will be removed in the future. It is exposing the " +
-                "raw GetCallResponse object, which is not recommended for public use.",
+            "raw GetCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("getCall(type, id, ring, notify)"),
     )
     override fun oldGetCall(
@@ -173,7 +189,7 @@ internal class VideoService(
         type: String,
         id: String,
         ring: Boolean?,
-        notify: Boolean?
+        notify: Boolean?,
     ): Call<CallData> {
         return apiGetCall(
             type = type,
@@ -200,7 +216,7 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw UpdateCallResponse object, which is not recommended for public use.",
+            "raw UpdateCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("updateCall(type, id, custom, startsAt)"),
     )
     override fun oldUpdateCall(
@@ -245,8 +261,10 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw GetOrCreateCallResponse object, which is not recommended for public use.",
-        replaceWith = ReplaceWith("getOrCreateCall(type, id, members, custom, settingsOverride, startsAt, team, ring, notify)"),
+            "raw GetOrCreateCallResponse object, which is not recommended for public use.",
+        replaceWith = ReplaceWith(
+            "getOrCreateCall(type, id, members, custom, settingsOverride, startsAt, team, ring, notify)",
+        ),
     )
     override fun oldGetOrCreateCall(
         type: String,
@@ -288,7 +306,6 @@ internal class VideoService(
         notify = notify,
     ).map { it.toCallData() }
 
-
     private fun apiGetOrCreateCall(
         type: String,
         id: String,
@@ -318,7 +335,7 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw AcceptCallResponse object, which is not recommended for public use.",
+            "raw AcceptCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("acceptCall(type, id)"),
     )
     override fun oldAcceptCall(
@@ -333,14 +350,14 @@ internal class VideoService(
 
     private fun apiAcceptCall(
         type: String,
-        id: String
+        id: String,
     ): Call<AcceptCallResponse> = createCall {
         api.acceptCall(type, id)
     }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw BlockUserResponse object, which is not recommended for public use.",
+            "raw BlockUserResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("blockUser(type, id, userId)"),
     )
     override fun oldBlockUser(
@@ -358,7 +375,7 @@ internal class VideoService(
     private fun apiBlockUser(
         type: String,
         id: String,
-        userId: String
+        userId: String,
     ): Call<BlockUserResponse> = createCall {
         api.blockUser(
             type,
@@ -369,7 +386,7 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw SendCallEventResponse object, which is not recommended for public use.",
+            "raw SendCallEventResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("sendCallEvent(type, id, dataJson)"),
     )
     override fun oldSendCallEvent(
@@ -387,14 +404,14 @@ internal class VideoService(
     private fun apiSendCallEvent(
         type: String,
         id: String,
-        dataJson: Map<String, Any>
+        dataJson: Map<String, Any>,
     ): Call<SendCallEventResponse> = createCall {
-            api.sendCallEvent(
-                type,
-                id,
-                SendCallEventRequest(custom = dataJson),
-            )
-        }
+        api.sendCallEvent(
+            type,
+            id,
+            SendCallEventRequest(custom = dataJson),
+        )
+    }
 
     override fun collectUserFeedback(
         callType: String,
@@ -421,7 +438,7 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw GoLiveResponse object, which is not recommended for public use.",
+            "raw GoLiveResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("goLive(type, id, startHls, startRecording, startTranscription)"),
     )
     override fun oldGoLive(
@@ -446,23 +463,25 @@ internal class VideoService(
         id: String,
         startHls: Boolean,
         startRecording: Boolean,
-        startTranscription: Boolean
+        startTranscription: Boolean,
     ): Call<GoLiveResponse> = createCall {
-            api.goLive(
-                type = type,
-                id = id,
-                goLiveRequest = GoLiveRequest(
-                    startHls = startHls,
-                    startRecording = startRecording,
-                    startTranscription = startTranscription,
-                ),
-            )
-        }
+        api.goLive(
+            type = type,
+            id = id,
+            goLiveRequest = GoLiveRequest(
+                startHls = startHls,
+                startRecording = startRecording,
+                startTranscription = startTranscription,
+            ),
+        )
+    }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw JoinCallResponse object, which is not recommended for public use.",
-        replaceWith = ReplaceWith("joinCall(type, id, create, members, custom, settingsOverride, startsAt, team, ring, notify, location, migratingFrom)"),
+            "raw JoinCallResponse object, which is not recommended for public use.",
+        replaceWith = ReplaceWith(
+            "joinCall(type, id, create, members, custom, settingsOverride, startsAt, team, ring, notify, location, migratingFrom)",
+        ),
     )
     override fun oldJoinCall(
         type: String,
@@ -487,7 +506,7 @@ internal class VideoService(
         location,
         migratingFrom,
         type,
-        id
+        id,
     )
 
     override fun joinCall(
@@ -513,7 +532,7 @@ internal class VideoService(
         location,
         migratingFrom,
         type,
-        id
+        id,
     ).map { it.toCallData() }
 
     private fun apiJoinCall(
@@ -527,29 +546,29 @@ internal class VideoService(
         location: String,
         migratingFrom: String?,
         type: String,
-        id: String
+        id: String,
     ): Call<JoinCallResponse> = createCall {
-            val joinCallRequest = JoinCallRequest(
-                create = create,
-                data = CallRequest(
-                    members = membersId?.map { MemberRequest(it) },
-                    custom = custom,
-                    startsAt = startsAt,
-                    team = team,
-                ),
-                ring = ring,
-                notify = notify,
-                location = location,
-                migratingFrom = migratingFrom,
-            )
+        val joinCallRequest = JoinCallRequest(
+            create = create,
+            data = CallRequest(
+                members = membersId?.map { MemberRequest(it) },
+                custom = custom,
+                startsAt = startsAt,
+                team = team,
+            ),
+            ring = ring,
+            notify = notify,
+            location = location,
+            migratingFrom = migratingFrom,
+        )
 
-            api.joinCall(
-                type = type,
-                id = id,
-                joinCallRequest = joinCallRequest,
-                connectionId = getConnectionId(),
-            )
-        }
+        api.joinCall(
+            type = type,
+            id = id,
+            joinCallRequest = joinCallRequest,
+            connectionId = getConnectionId(),
+        )
+    }
 
     override fun endCall(
         type: String,
@@ -560,7 +579,7 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw UpdateCallMembersResponse object, which is not recommended for public use.",
+            "raw UpdateCallMembersResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("updateCallMembers(type, id, request)"),
     )
     override fun oldUpdateCallMembers(
@@ -593,14 +612,14 @@ internal class VideoService(
     private fun apiOldUpdateCallMembers(
         type: String,
         id: String,
-        request: UpdateCallMembersRequest
+        request: UpdateCallMembersRequest,
     ) = createCall {
         api.updateCallMembers(type, id, request)
     }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw MuteUsersResponse object, which is not recommended for public use.",
+            "raw MuteUsersResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("muteUsers(type, id, muteUsersData)"),
     )
     override fun oldMuteUsers(
@@ -618,15 +637,15 @@ internal class VideoService(
     private fun apiMuteUsers(
         muteUsersData: MuteUsersData,
         type: String,
-        id: String
+        id: String,
     ): Call<MuteUsersResponse> = createCall {
-            val request = muteUsersData.toRequest()
-            api.muteUsers(type, id, request)
-        }
+        val request = muteUsersData.toRequest()
+        api.muteUsers(type, id, request)
+    }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw PinResponse object, which is not recommended for public use.",
+            "raw PinResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("videoPin(type, callId, sessionId, userId)"),
     )
     override fun oldVideoPin(
@@ -647,21 +666,21 @@ internal class VideoService(
         type: String,
         callId: String,
         sessionId: String,
-        userId: String
+        userId: String,
     ) = createCall {
-            api.videoPin(
-                type,
-                callId,
-                PinRequest(
-                    sessionId,
-                    userId,
-                ),
-            )
-        }
+        api.videoPin(
+            type,
+            callId,
+            PinRequest(
+                sessionId,
+                userId,
+            ),
+        )
+    }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw SendReactionResponse object, which is not recommended for public use.",
+            "raw SendReactionResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("sendVideoReaction(callType, id, type, emoji, custom)"),
     )
     override fun oldSendVideoReaction(
@@ -686,15 +705,15 @@ internal class VideoService(
         custom: Map<String, Any>?,
         emoji: String?,
         callType: String,
-        id: String
+        id: String,
     ): Call<SendReactionResponse> = createCall {
-            val request = SendReactionRequest(type, custom = custom, emojiCode = emoji)
-            api.sendVideoReaction(callType, id, request)
-        }
+        val request = SendReactionRequest(type, custom = custom, emojiCode = emoji)
+        api.sendVideoReaction(callType, id, request)
+    }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw ListRecordingsResponse object, which is not recommended for public use.",
+            "raw ListRecordingsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("listRecordings(type, id)"),
     )
     override fun oldListRecordings(
@@ -710,14 +729,14 @@ internal class VideoService(
 
     private fun apiOldListRecordings(
         type: String,
-        id: String
+        id: String,
     ) = createCall {
         api.listRecordings(type, id)
     }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw RejectCallResponse object, which is not recommended for public use.",
+            "raw RejectCallResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("rejectCall(type, id, reason)"),
     )
     override fun oldRejectCall(
@@ -735,10 +754,10 @@ internal class VideoService(
     private fun apiRejectCall(
         type: String,
         id: String,
-        reason: RejectReason?
+        reason: RejectReason?,
     ): Call<RejectCallResponse> = createCall {
-            api.rejectCall(type, id, RejectCallRequest(reason?.alias))
-        }
+        api.rejectCall(type, id, RejectCallRequest(reason?.alias))
+    }
 
     override fun requestPermission(
         type: String,
@@ -754,50 +773,50 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StartHLSBroadcastingResponse object, which is not recommended for public use.",
+            "raw StartHLSBroadcastingResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("startHLSBroadcasting(type, id)"),
     )
     override fun oldStartHLSBroadcasting(
         type: String,
-        id: String
+        id: String,
     ): Call<StartHLSBroadcastingResponse> = apiStartHLSBroadcasting(type, id)
 
     override fun startHLSBroadcasting(
         type: String,
-        id: String
+        id: String,
     ): Call<String> = apiStartHLSBroadcasting(type, id)
         .map { it.playlistUrl }
 
     private fun apiStartHLSBroadcasting(
         type: String,
-        id: String
+        id: String,
     ): Call<StartHLSBroadcastingResponse> = createCall { api.startHLSBroadcasting(type, id) }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StartClosedCaptionsResponse object, which is not recommended for public use.",
+            "raw StartClosedCaptionsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("startClosedCaptions(type, id)"),
     )
     override fun oldStartClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<StartClosedCaptionsResponse> = apiStartClosedCaptions(type, id)
 
     override fun startClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit> = apiStartClosedCaptions(type, id).toUnitCall()
 
     private fun apiStartClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<StartClosedCaptionsResponse> = createCall {
-            api.startClosedCaptions(
-                type,
-                id,
-                StartClosedCaptionsRequest(),
-            )
-        }
+        api.startClosedCaptions(
+            type,
+            id,
+            StartClosedCaptionsRequest(),
+        )
+    }
 
     override fun startRecording(
         type: String,
@@ -810,13 +829,13 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StartTranscriptionResponse object, which is not recommended for public use.",
+            "raw StartTranscriptionResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("startTranscription(type, id, externalStorage)"),
     )
     override fun oldStartTranscription(
         type: String,
         id: String,
-        externalStorage: String?
+        externalStorage: String?,
     ): Call<StartTranscriptionResponse> = apiStartTranscription(externalStorage, type, id)
 
     override fun startTranscription(
@@ -828,46 +847,46 @@ internal class VideoService(
     private fun apiStartTranscription(
         externalStorage: String?,
         type: String,
-        id: String
+        id: String,
     ): Call<StartTranscriptionResponse> = createCall {
-            val startTranscriptionRequest =
-                StartTranscriptionRequest(transcriptionExternalStorage = externalStorage)
-            api.startTranscription(type, id, startTranscriptionRequest)
-        }
+        val startTranscriptionRequest =
+            StartTranscriptionRequest(transcriptionExternalStorage = externalStorage)
+        api.startTranscription(type, id, startTranscriptionRequest)
+    }
 
     override fun stopHLSBroadcasting(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit> = createCall {
         api.stopHLSBroadcasting(type, id)
     }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw StopClosedCaptionsResponse object, which is not recommended for public use.",
+            "raw StopClosedCaptionsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("stopClosedCaptions(type, id)"),
     )
     override fun oldStopClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<StopClosedCaptionsResponse> = apiStopClosedCaptions(type, id)
 
     override fun stopClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit> = apiStopClosedCaptions(type, id)
         .toUnitCall()
 
     private fun apiStopClosedCaptions(
         type: String,
-        id: String
+        id: String,
     ) = createCall {
-            api.stopClosedCaptions(
-                type,
-                id,
-                StopClosedCaptionsRequest(),
-            )
-        }
+        api.stopClosedCaptions(
+            type,
+            id,
+            StopClosedCaptionsRequest(),
+        )
+    }
 
     override fun oldStopLive(
         type: String,
@@ -876,19 +895,19 @@ internal class VideoService(
 
     override fun stopLive(
         type: String,
-        id: String
+        id: String,
     ): Call<CallInfo> = apiStopLive(type, id).map { it.call.toCallInfo() }
 
     private fun apiStopLive(
         type: String,
-        id: String
+        id: String,
     ): Call<StopLiveResponse> = createCall {
         api.stopLive(type, id, StopLiveRequest())
     }
 
     override fun stopRecording(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit> = createCall {
         api.stopRecording(type, id)
     }
@@ -899,37 +918,37 @@ internal class VideoService(
 
     override fun stopTranscription(
         type: String,
-        id: String
+        id: String,
     ): Call<Unit> = createCall {
         api.stopTranscription(type, id, StopTranscriptionRequest())
     }
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw ListTranscriptionsResponse object, which is not recommended for public use.",
+            "raw ListTranscriptionsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("listTranscriptions(type, id)"),
     )
     override fun oldListTranscriptions(
         type: String,
-        id: String
+        id: String,
     ): Call<ListTranscriptionsResponse> = apiListTranscriptions(type, id)
 
     override fun listTranscriptions(
         type: String,
-        id: String
+        id: String,
     ): Call<List<CallTranscription>> = apiListTranscriptions(type, id).map { it.toTranscriptions() }
 
     private fun apiListTranscriptions(
         type: String,
-        id: String
+        id: String,
     ) = createCall {
-            api.listTranscriptions(type, id)
-        }
+        api.listTranscriptions(type, id)
+    }
 
     override fun unblockUser(
         type: String,
         id: String,
-        userId: String
+        userId: String,
     ): Call<Unit> = createCall {
         api.unblockUser(
             type,
@@ -942,7 +961,7 @@ internal class VideoService(
         type: String,
         callId: String,
         sessionId: String,
-        userId: String
+        userId: String,
     ): Call<Unit> = createCall {
         api.videoUnpin(
             type,
@@ -957,7 +976,7 @@ internal class VideoService(
     override fun oldUpdateUserPermissions(
         type: String,
         id: String,
-        updateUserPermissionsData: UpdateUserPermissionsData
+        updateUserPermissionsData: UpdateUserPermissionsData,
     ): Call<UpdateUserPermissionsResponse> {
         TODO("Not yet implemented")
     }
@@ -976,7 +995,7 @@ internal class VideoService(
 
     @Deprecated(
         message = "This is an internal API that will be change in the future. It is exposing the " +
-                "raw QueryCallsResponse object, which is not recommended for public use.",
+            "raw QueryCallsResponse object, which is not recommended for public use.",
         replaceWith = ReplaceWith("oldQueryCalls(filters, sort, limit, prev, next, watch)"),
     )
     override fun oldQueryCalls(
@@ -1004,21 +1023,21 @@ internal class VideoService(
         limit: Int,
         prev: String?,
         next: String?,
-        watch: Boolean
+        watch: Boolean,
     ) = createCall {
-            val request = QueryCallsRequest(
-                filterConditions = filters,
-                sort = sort.map { it.toRequest() },
-                limit = limit,
-                prev = prev,
-                next = next,
-                watch = watch,
-            )
-            api.queryCalls(
-                queryCallsRequest = request,
-                connectionId = getConnectionId(),
-            )
-        }
+        val request = QueryCallsRequest(
+            filterConditions = filters,
+            sort = sort.map { it.toRequest() },
+            limit = limit,
+            prev = prev,
+            next = next,
+            watch = watch,
+        )
+        api.queryCalls(
+            queryCallsRequest = request,
+            connectionId = getConnectionId(),
+        )
+    }
 
     override fun deleteDevice(deviceId: String): Call<Unit> = createCall {
         api.deleteDevice(deviceId)
@@ -1043,13 +1062,15 @@ internal class VideoService(
                     image = user.image,
                     name = user.name,
                     custom = user.custom,
-                )
-            )
+                ),
+            ),
         )
     }
         .doOnResult(scope) { result ->
             result.onSuccess {
-                tokenManager.updateTokenProvider(CacheableTokenProvider(ConstantTokenProvider(it.accessToken)))
+                tokenManager.updateTokenProvider(
+                    CacheableTokenProvider(ConstantTokenProvider(it.accessToken)),
+                )
                 authTypeProvider.setAuthType(AuthTypeProvider.AuthType.JWT)
             }
         }
