@@ -37,7 +37,6 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import stream.video.sfu.models.Participant
-import kotlin.math.log
 
 internal class Subscriber(
     private val sessionId: String,
@@ -58,14 +57,32 @@ internal class Subscriber(
     },
     maxBitRate = 0 // Set as needed
 ) {
+
+    /**
+     * Represents a received media stream.
+     *
+     * @property sessionId The session ID of the participant.
+     * @property trackType The type of track.
+     * @property mediaStream The media stream.
+     */
+    data class ReceivedMediaStream(
+        val sessionId: String,
+        val trackType: TrackType,
+        val mediaStream: MediaTrack,
+    )
+
     companion object {
+        /**
+         * Default video dimension.
+         */
         val defaultVideoDimension = VideoDimension(720, 1080)
     }
-    internal var onAddStream: ((MediaStream) -> Unit) = { _ -> }
 
-    // Track dimensions state for this subscriber
+    // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<String, ConcurrentHashMap<TrackType, TrackDimensions>>()
     private val subscriptions = ConcurrentHashMap<String, TrackSubscriptionDetails>()
+    // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
+    private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> = ConcurrentHashMap()
 
     /**
      * Returns the track dimensions for this subscriber.
@@ -80,9 +97,6 @@ internal class Subscriber(
      * @return [List] of all subscriptions.
      */
     fun subscriptions() = subscriptions.values.toList()
-
-    // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
-    private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> = ConcurrentHashMap()
 
     /**
      * Returns the track for the given [sessionId] and [type].
@@ -270,6 +284,7 @@ internal class Subscriber(
     }
 
     fun setTrackDimension(
+        viewportId: String,
         sessionId: String,
         trackType: TrackType,
         visible: Boolean,
@@ -293,12 +308,6 @@ internal class Subscriber(
             pendingStreams.clear()
         }
     }
-
-    data class ReceivedMediaStream(
-        val sessionId: String,
-        val trackType: TrackType,
-        val mediaStream: MediaTrack,
-    )
 
     private val streamsFlow = MutableSharedFlow<ReceivedMediaStream>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 100)
 

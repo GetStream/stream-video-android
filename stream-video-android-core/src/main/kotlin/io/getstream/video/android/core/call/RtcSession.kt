@@ -1286,11 +1286,12 @@ public class RtcSession internal constructor(
         trackType: TrackType,
         visible: Boolean,
         dimensions: VideoDimension = Subscriber.defaultVideoDimension,
+        viewportId: String = sessionId,
     ) {
         logger.v {
             "[updateTrackDimensions] #track; #sfu; #manual-quality-selection; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
         }
-        subscriber?.setTrackDimension(sessionId, trackType, visible, dimensions)
+        subscriber?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
         coroutineScope.launch {
             subscriber?.setVideoSubscriptions(
                 trackOverridesHandler,
