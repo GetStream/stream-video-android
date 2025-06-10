@@ -100,7 +100,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
 
         val skipTypes = listOf("certificate", "data-channel")
         val trackToParticipant = call.session?.trackIdToParticipant?.value ?: emptyMap()
-        val displayingAt = call.session?.subscriber?.trackDimensions?.value ?: emptyMap()
+        val displayingAt = call.session?.subscriber?.viewportDimensions() ?: emptyMap()
 
         val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
 
@@ -243,7 +243,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
     }
 
     fun updateLocalStats() {
-        val displayingAt = call.session?.subscriber?.trackDimensions?.value ?: emptyMap()
+        val displayingAt = call.session?.subscriber?.viewportDimensions() ?: emptyMap()
         val resolution = call.camera.resolution.value
         val availableResolutions = call.camera.availableResolutions.value
         val maxResolution = availableResolutions.maxByOrNull { it.width * it.height }

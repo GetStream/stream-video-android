@@ -7,7 +7,6 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
@@ -16,13 +15,6 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.retryWhen
-import kotlinx.coroutines.launch
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -38,6 +30,7 @@ import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.concurrent.ConcurrentHashMap
 import io.getstream.result.Result
+import stream.video.sfu.models.Participant
 
 internal class Subscriber(
     private val sessionId: String,
@@ -65,17 +58,25 @@ internal class Subscriber(
     internal var onAddStream: ((MediaStream) -> Unit) = { _ -> }
 
     // Track dimensions state for this subscriber
-    val trackDimensions = MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(emptyMap())
-    val subscriptions = MutableStateFlow<List<TrackSubscriptionDetails>>(emptyList())
-
-    // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
-    private val _tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> = ConcurrentHashMap()
+    private val trackDimensions = ConcurrentHashMap<String, ConcurrentHashMap<TrackType, TrackDimensions>>()
+    private val subscriptions = ConcurrentHashMap<String, TrackSubscriptionDetails>()
 
     /**
-     * @return [Map] of all tracks for all participants.
+     * Returns the track dimensions for this subscriber.
+     *
+     * @return [Map] of track dimensions.
      */
-    val tracks: Map<String, Map<TrackType, MediaTrack>>
-        get() = _tracks
+    fun viewportDimensions(): Map<String, Map<TrackType, TrackDimensions>> = trackDimensions.toMap()
+
+    /**
+     * Returns all subscriptions.
+     *
+     * @return [List] of all subscriptions.
+     */
+    fun subscriptions() = subscriptions.values.toList()
+
+    // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
+    private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> = ConcurrentHashMap()
 
     /**
      * Returns the track for the given [sessionId] and [type].
@@ -85,8 +86,8 @@ internal class Subscriber(
      * @return [MediaTrack] for the given [sessionId] and [type].
      */
     fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
-        _tracks.putIfAbsent(sessionId, ConcurrentHashMap())
-        return _tracks[sessionId]?.get(type)
+        tracks.putIfAbsent(sessionId, ConcurrentHashMap())
+        return tracks[sessionId]?.get(type)
     }
 
     /**
@@ -97,25 +98,17 @@ internal class Subscriber(
      * @param track The track to set.
      */
     fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
-        _tracks.putIfAbsent(sessionId, ConcurrentHashMap())
-        _tracks[sessionId]?.set(type, track)
-    }
-
-    /**
-     * Removes the tracks for the given [sessionId].
-     *
-     * @param sessionId The session ID of the participant.
-     * @return [ConcurrentHashMap] of all tracks for the given [sessionId].
-     */
-    fun removeTracks(sessionId: String): ConcurrentHashMap<TrackType, MediaTrack>? {
-        return _tracks.remove(sessionId)
+        tracks.putIfAbsent(sessionId, ConcurrentHashMap())
+        tracks[sessionId]?.set(type, track)
     }
 
     /**
      * Removes all tracks.
      */
-    fun clearTracks() {
-        _tracks.clear()
+    fun clear() {
+        tracks.clear()
+        trackDimensions.clear()
+        subscriptions.clear()
     }
 
     /**
@@ -178,17 +171,20 @@ internal class Subscriber(
      */
     suspend fun setVideoSubscriptions(trackOverridesHandler: TrackOverridesHandler, participants: List<ParticipantState>, remoteParticipants: List<ParticipantState>, useDefaults: Boolean = false) : Result<UpdateSubscriptionsResponse> = safeSuspendingCallWithResult {
         logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
-        var tracks = if (useDefaults) {
+        val tracks = if (useDefaults) {
             // default is to subscribe to the top 5 sorted participants
             defaultTracks(participants)
         } else {
             // if we're not using the default, sub to visible tracks
             visibleTracks(remoteParticipants)
         }.let(trackOverridesHandler::applyOverrides)
-        subscriptions.value = tracks
+
+        val newTracks = tracks.associateBy { it.session_id }
+        subscriptions.putAll(newTracks)
+
         val request = UpdateSubscriptionsRequest(
             session_id = sessionId,
-            tracks = subscriptions.value,
+            tracks = subscriptions.map { it.value },
         )
         sfuClient.updateSubscriptions(request)
     }
@@ -232,7 +228,7 @@ internal class Subscriber(
     }
 
     private fun visibleTracks(remoteParticipants: List<ParticipantState>): List<TrackSubscriptionDetails> {
-        val trackDisplayResolution = trackDimensions.value
+        val trackDisplayResolution = trackDimensions
         val tracks = remoteParticipants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
 
@@ -257,6 +253,21 @@ internal class Subscriber(
             return
         }
         this.onAddStream.invoke(stream)
+    }
+
+    fun participantLeft(participant: Participant) {
+        tracks.remove(participant.session_id)
+        trackDimensions.remove(participant.session_id)
+    }
+
+    fun setTrackDimension(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        dimensions: VideoDimension
+    ) {
+        trackDimensions.putIfAbsent(sessionId, ConcurrentHashMap())
+        trackDimensions[sessionId]?.put(trackType, TrackDimensions(dimensions, visible))
     }
 }
 

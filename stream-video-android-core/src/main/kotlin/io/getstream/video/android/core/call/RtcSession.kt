@@ -83,7 +83,6 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
@@ -95,7 +94,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
@@ -112,7 +110,6 @@ import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
-import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.SessionDescription
 import retrofit2.HttpException
@@ -126,7 +123,6 @@ import stream.video.sfu.models.ClientDetails
 import stream.video.sfu.models.Device
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.OS
-import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.Sdk
@@ -139,11 +135,7 @@ import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.Reconnection
-import stream.video.sfu.signal.SendAnswerRequest
-import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.SendStatsRequest
-import stream.video.sfu.signal.SetPublisherRequest
-import stream.video.sfu.signal.SetPublisherResponse
 import stream.video.sfu.signal.Telemetry
 import stream.video.sfu.signal.TrackMuteState
 import stream.video.sfu.signal.TrackSubscriptionDetails
@@ -254,8 +246,6 @@ public class RtcSession internal constructor(
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
     //var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
-    @OptIn(FlowPreview::class)
-    val trackDimensionsDebounced get() = subscriber?.trackDimensions?.debounce(100)
     internal val trackOverridesHandler = TrackOverridesHandler(
         onOverridesUpdate = {
             setVideoSubscriptions()
@@ -372,13 +362,6 @@ public class RtcSession internal constructor(
         }
 
         listenToSfuSocket()
-        coroutineScope.launch {
-            // call update participant subscriptions debounced
-            trackDimensionsDebounced?.collect {
-                logger.v { "<init> #sfu; #track; trackDimensions: $it" }
-                setVideoSubscriptions()
-            }
-        }
 
         call.peerConnectionFactory.setAudioSampleCallback { it ->
             call.processAudioSample(it)
@@ -770,7 +753,7 @@ public class RtcSession internal constructor(
             sfuConnectionMigrationModule?.socketConnection?.disconnect()
         }
         sfuConnectionMigrationModule = null
-        subscriber?.clearTracks()
+        subscriber?.clear()
 
         // cleanup the publisher and subcriber peer connections
         safeCall {
@@ -1031,8 +1014,8 @@ public class RtcSession internal constructor(
                     }
 
                     is ParticipantLeftEvent -> {
-                        removeParticipantTracks(event.participant)
-                        removeParticipantTrackDimensions(event.participant)
+                        subscriber?.participantLeft(event.participant)
+                        subscriber?.setVideoSubscriptions(trackOverridesHandler, call.state.participants.value, call.state.remoteParticipants.value)
                     }
 
                     is ICETrickleEvent -> {
@@ -1122,29 +1105,6 @@ public class RtcSession internal constructor(
 
     internal val publisherPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
     internal val subscriberPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
-
-    private fun removeParticipantTracks(participant: Participant) {
-        subscriber?.removeTracks(participant.session_id).also {
-            if (it == null) {
-                logger.e {
-                    "[handleEvent] Failed to remove track on ParticipantLeft " + "- track ID: ${participant.session_id}). Tracks: $it"
-                }
-            }
-        }
-    }
-
-    private fun removeParticipantTrackDimensions(participant: Participant) {
-        logger.v { "[removeParticipantTrackDimensions] #sfu; #track; participant: $participant" }
-        val newTrackDimensions = subscriber?.trackDimensions?.value?.toMutableMap() ?: return
-        newTrackDimensions.remove(participant.session_id).also {
-            if (it == null) {
-                logger.e {
-                    "[handleEvent] Failed to remove track dimension on ParticipantLeft " + "- track ID: ${participant.session_id}). TrackDimensions: $newTrackDimensions"
-                }
-            }
-        }
-        subscriber?.trackDimensions?.value = newTrackDimensions
-    }
 
     /**
      Section, basic webrtc calls
@@ -1404,28 +1364,14 @@ public class RtcSession internal constructor(
         logger.v {
             "[updateTrackDimensions] #track; #sfu; #manual-quality-selection; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
         }
-        // The map contains all track dimensions for all participants
-        dynascaleLogger.d { "updating dimensions $sessionId $visible $dimensions" }
-
-        // first we make a copy of the dimensions
-        val trackDimensionsMap = subscriber?.trackDimensions?.value?.toMutableMap() ?: return
-
-        // next we get or create the dimensions for this participants
-        val participantTrackDimensions =
-            trackDimensionsMap[sessionId]?.toMutableMap() ?: mutableMapOf()
-
-        // last we get the dimensions for this specific track type
-        val oldTrack = participantTrackDimensions[trackType] ?: TrackDimensions(
-            dimensions = dimensions,
-            visible = visible,
-        )
-        val newTrack = oldTrack.copy(visible = visible, dimensions = dimensions)
-        participantTrackDimensions[trackType] = newTrack
-
-        trackDimensionsMap[sessionId] = participantTrackDimensions
-
-        // Updates are debounced
-        subscriber?.trackDimensions?.value = trackDimensionsMap
+        subscriber?.setTrackDimension(sessionId, trackType, visible, dimensions)
+        coroutineScope.launch {
+            subscriber?.setVideoSubscriptions(
+                trackOverridesHandler,
+                call.state.participants.value,
+                call.state.remoteParticipants.value
+            )
+        }
     }
 
     private fun listenToSubscriberConnection() {
@@ -1442,7 +1388,7 @@ public class RtcSession internal constructor(
 
     internal fun currentSfuInfo(): Triple<String, List<TrackSubscriptionDetails>, List<TrackInfo>> {
         val previousSessionId = sessionId
-        val currentSubscriptions = subscriber?.subscriptions?.value ?: emptyList()
+        val currentSubscriptions = subscriber?.subscriptions() ?: emptyList()
         val publisherTracks = getPublisherTracksForReconnect()
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
