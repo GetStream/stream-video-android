@@ -223,7 +223,6 @@ public class RtcSession internal constructor(
 
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
         MutableStateFlow(emptyMap())
-    private var syncSubscriberCandidates: Job? = null
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
     private var subscriberListenJob: Job? = null
@@ -1328,7 +1327,6 @@ public class RtcSession internal constructor(
      * - Sends the answer back to the SFU
      */
     suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
-        syncSubscriberCandidates?.cancel()
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         if (subscriber == null) {
             subscriberPendingEvents.add(offerEvent)
@@ -1462,16 +1460,6 @@ public class RtcSession internal constructor(
         )
     }
 
-    // reply to when we get an offer from the SFU
-    internal suspend fun sendAnswer(request: SendAnswerRequest): Result<SendAnswerResponse> =
-        wrapAPICall {
-            val result = sfuConnectionModule.api.sendAnswer(request)
-            result.error?.let {
-                throw RtcException(error = it, message = it.message)
-            }
-            result
-        }
-
     // send whenever we have a new ice candidate
     private suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
         wrapAPICall {
@@ -1481,18 +1469,6 @@ public class RtcSession internal constructor(
             }
             result
         }
-
-    // call after onNegotiation Needed
-    private suspend fun setPublisher(request: SetPublisherRequest): Result<SetPublisherResponse> {
-        logger.d { "[setPublisher] #sfu; request $request" }
-        return wrapAPICall {
-            val result = sfuConnectionModule.api.setPublisher(request)
-            result.error?.let {
-                throw RtcException(error = it, message = it.message)
-            }
-            result
-        }
-    }
 
     // share what size and which participants we're looking at
     internal suspend fun updateSubscriptions(
