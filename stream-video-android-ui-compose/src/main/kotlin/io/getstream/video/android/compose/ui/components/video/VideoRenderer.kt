@@ -93,7 +93,6 @@ public fun VideoRenderer(
         videoRendererConfig.fallbackContent.invoke(call)
 
         if (video?.enabled == true) {
-
             val viewportId = remember(call, video) {
                 try {
                     UUID.randomUUID().toString()
