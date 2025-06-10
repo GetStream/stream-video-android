@@ -77,7 +77,6 @@ import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.defaultConstraints
-import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
@@ -106,7 +105,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
-import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
@@ -336,7 +334,9 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             subscriber?.streams()?.collect {
                 val (sessionId, trackType, track) = it
-                logger.d { "[streams] #sfu; #track; sessionId: $sessionId, trackType: $trackType, mediaStream: $track" }
+                logger.d {
+                    "[streams] #sfu; #track; sessionId: $sessionId, trackType: $trackType, mediaStream: $track"
+                }
                 setTrack(sessionId, trackType, track)
             }
         }
@@ -367,7 +367,7 @@ public class RtcSession internal constructor(
 
         participantsMonitoringJob = coroutineScope.launch {
             call.state.participants.collect {
-                subscriber?.setTrackLookupPrefixes(it.associate { it.trackLookupPrefix to it.sessionId})
+                subscriber?.setTrackLookupPrefixes(it.associate { it.trackLookupPrefix to it.sessionId })
             }
         }
 
@@ -872,7 +872,7 @@ public class RtcSession internal constructor(
                 trackOverridesHandler,
                 participants,
                 remoteParticipants,
-                useDefaults
+                useDefaults,
             )
         }
         logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
@@ -941,7 +941,11 @@ public class RtcSession internal constructor(
 
                     is ParticipantLeftEvent -> {
                         subscriber?.participantLeft(event.participant)
-                        subscriber?.setVideoSubscriptions(trackOverridesHandler, call.state.participants.value, call.state.remoteParticipants.value)
+                        subscriber?.setVideoSubscriptions(
+                            trackOverridesHandler,
+                            call.state.participants.value,
+                            call.state.remoteParticipants.value,
+                        )
                     }
 
                     is ICETrickleEvent -> {
@@ -1255,7 +1259,7 @@ public class RtcSession internal constructor(
     }
 
     // share what size and which participants we're looking at
-    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =  subscriber?.restartIce() ?: Failure(
+    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> = subscriber?.restartIce() ?: Failure(
         io.getstream.result.Error.ThrowableError(
             "Subscriber is null",
             Exception("Subscriber is null"),
@@ -1296,7 +1300,7 @@ public class RtcSession internal constructor(
             subscriber?.setVideoSubscriptions(
                 trackOverridesHandler,
                 call.state.participants.value,
-                call.state.remoteParticipants.value
+                call.state.remoteParticipants.value,
             )
         }
     }

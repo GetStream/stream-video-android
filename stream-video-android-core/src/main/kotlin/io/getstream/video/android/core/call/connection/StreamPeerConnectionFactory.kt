@@ -309,7 +309,7 @@ public class StreamPeerConnectionFactory(
         sessionId: String,
         sfuClient: SignalServerService,
         configuration: PeerConnection.RTCConfiguration,
-        onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit
+        onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,

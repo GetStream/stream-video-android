@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection
 
 import io.getstream.result.Result
@@ -5,14 +21,12 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.model.AudioTrack
-import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.trySetEnabled
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
-import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.spyk
@@ -21,30 +35,23 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.AudioTrack as RtcAudioTrack
-import org.webrtc.MediaConstraints
-import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
-import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.ICERestartRequest
-import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import org.webrtc.AudioTrack as RtcAudioTrack
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubscriberTest {
@@ -90,12 +97,14 @@ class SubscriberTest {
         // Stub out super‑class SDP related suspend functions
         justRun { subscriber["setRemoteDescription"](any<SessionDescription>()) }
         justRun { subscriber["setLocalDescription"](any<SessionDescription>()) }
-        //coEvery { subscriber["createAnswer"](any()) } returns Result.Success(fakeAnswer)
+        // coEvery { subscriber["createAnswer"](any()) } returns Result.Success(fakeAnswer)
 
         // Stub SFU calls
         coEvery { mockSignalServer.sendAnswer(any()) } returns mockk(relaxed = true)
         coEvery { mockSignalServer.iceRestart(any()) } returns mockk(relaxed = true)
-        coEvery { mockSignalServer.updateSubscriptions(any()) } returns UpdateSubscriptionsResponse() // default instance
+        coEvery {
+            mockSignalServer.updateSubscriptions(any())
+        } returns UpdateSubscriptionsResponse() // default instance
     }
 
     //region Negotiation & ICE
@@ -105,9 +114,11 @@ class SubscriberTest {
         subscriber.restartIce()
 
         coVerify {
-            mockSignalServer.iceRestart(match<ICERestartRequest> {
-                it.session_id == "session-id" && it.peer_type == PeerType.PEER_TYPE_SUBSCRIBER
-            })
+            mockSignalServer.iceRestart(
+                match<ICERestartRequest> {
+                    it.session_id == "session-id" && it.peer_type == PeerType.PEER_TYPE_SUBSCRIBER
+                },
+            )
         }
     }
     //endregion
@@ -119,7 +130,7 @@ class SubscriberTest {
         every {
             mockPeerConnection.addTransceiver(
                 any<MediaStreamTrack.MediaType>(),
-                any()
+                any(),
             )
         } returns mockk<RtpTransceiver>()
 
@@ -135,7 +146,8 @@ class SubscriberTest {
         }
         verify(exactly = 1) {
             mockPeerConnection.addTransceiver(
-                MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO, any()
+                MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
+                any(),
             )
         }
     }
@@ -249,17 +261,16 @@ class SubscriberTest {
     private fun mockParticipant(userId: String, sessionId: String): ParticipantState {
         return mockk(relaxed = true) {
             every { this@mockk.userId } returns MutableStateFlow(
-                userId
+                userId,
             )
             every { this@mockk.sessionId } returns sessionId
             every { this@mockk.videoEnabled } returns MutableStateFlow(
-                true
+                true,
             )
             every { this@mockk.screenSharingEnabled } returns MutableStateFlow(
-                false
+                false,
             )
         }
     }
     //endregion
-
 }

@@ -26,14 +26,10 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
-import io.getstream.video.android.core.call.connection.StreamPeerConnection
-import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
-import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceServer
-import io.getstream.video.android.core.model.VideoTrack
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -57,9 +53,7 @@ import org.junit.Before
 import org.junit.Test
 import org.webrtc.SessionDescription
 import stream.video.sfu.models.PeerType
-import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.SendAnswerResponse
-import stream.video.sfu.signal.TrackSubscriptionDetails
 
 class RtcSessionTest2 {
 
@@ -353,7 +347,6 @@ class RtcSessionTest2 {
                 rtcSession.publisherPendingEvents.isEmpty(),
             )
         }
-
 
     @Test
     fun `cleanup disconnects SFU, closes peer connections, and clears tracks`() = runTest {

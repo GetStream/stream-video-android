@@ -385,11 +385,11 @@ public class Call(
         if (!permissionPass) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
-                        "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
-                        "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
-                        "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
-                        "otherwise the service will fail to start, resulting in a crash.\n" +
-                        "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
+                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
+                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
+                    "otherwise the service will fail to start, resulting in a crash.\n" +
+                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
             }
         }
         // if we are a guest user, make sure we wait for the token before running the join flow
@@ -415,7 +415,7 @@ public class Call(
                 } else {
                     logger.w {
                         "[join] Call settings were null - this should never happen after a call" +
-                                "is joined. MediaManager will not be initialised with server settings."
+                            "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
                 return result
@@ -733,7 +733,7 @@ public class Call(
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
-                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }
@@ -836,11 +836,22 @@ public class Call(
         )
         return clientImpl.muteUsers(type, id, request)
     }
-    fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean, viewportId: String = sessionId) {
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+    ) {
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(sessionId, trackType, visible, Subscriber.defaultVideoDimension, viewportId)
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            Subscriber.defaultVideoDimension,
+            viewportId,
+        )
     }
 
     fun handleEvent(event: VideoEvent) {
@@ -880,8 +891,8 @@ public class Call(
                     val height = videoRenderer.measuredHeight
                     logger.i {
                         "[initRenderer.onFirstFrameRendered] #sfu; #track; " +
-                                "trackType: $trackType, dimension: ($width - $height), " +
-                                "sessionId: $sessionId"
+                            "trackType: $trackType, dimension: ($width - $height), " +
+                            "sessionId: $sessionId"
                     }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateTrackDimensions(
@@ -889,7 +900,7 @@ public class Call(
                             trackType,
                             true,
                             VideoDimension(width, height),
-                            viewportId
+                            viewportId,
                         )
                     }
                     onRendered(videoRenderer)
@@ -904,10 +915,10 @@ public class Call(
                     val height = videoRenderer.measuredHeight
                     logger.v {
                         "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
-                                "trackType: $trackType, " +
-                                "dimension1: ($width - $height), " +
-                                "dimension2: ($videoWidth - $videoHeight), " +
-                                "sessionId: $sessionId"
+                            "trackType: $trackType, " +
+                            "dimension1: ($width - $height), " +
+                            "dimension2: ($videoWidth - $videoHeight), " +
+                            "sessionId: $sessionId"
                     }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
@@ -1130,7 +1141,7 @@ public class Call(
                     true
                 } else {
                     callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
-                            callSettings.audio.speakerDefaultOn
+                        callSettings.audio.speakerDefaultOn
                 }
 
             speaker.setEnabled(enabled = enableSpeaker)

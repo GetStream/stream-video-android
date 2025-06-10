@@ -1,63 +1,77 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection
 
-import androidx.annotation.VisibleForTesting
-import io.getstream.log.taggedLogger
+import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
+import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
+import stream.video.sfu.models.Participant
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.SendAnswerRequest
+import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.concurrent.ConcurrentHashMap
-import io.getstream.result.Result
-import io.getstream.video.android.core.call.utils.stringify
-import io.getstream.video.android.core.model.AudioTrack
-import io.getstream.video.android.core.model.VideoTrack
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import stream.video.sfu.models.Participant
-import stream.video.sfu.signal.SendAnswerResponse
 
 internal class Subscriber(
     private val sessionId: String,
     private val sfuClient: SignalServerService,
     private val coroutineScope: CoroutineScope,
-    onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?
+    onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : StreamPeerConnection(
     coroutineScope = coroutineScope,
     type = StreamPeerType.SUBSCRIBER,
     mediaConstraints = MediaConstraints(),
-    onStreamAdded = { _ ->  },
+    onStreamAdded = { _ -> },
     onNegotiationNeeded = { _, _ -> },
     onIceCandidate = { candidate, _ ->
         onIceCandidateRequest?.invoke(
             candidate,
-            StreamPeerType.SUBSCRIBER
+            StreamPeerType.SUBSCRIBER,
         )
     },
-    maxBitRate = 0 // Set as needed
+    maxBitRate = 0, // Set as needed
 ) {
 
     /**
@@ -89,8 +103,10 @@ internal class Subscriber(
     // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
     private val subscriptions = ConcurrentHashMap<String, TrackSubscriptionDetails>()
+
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
-    private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> = ConcurrentHashMap()
+    private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
+        ConcurrentHashMap()
 
     /**
      * Returns the track dimensions for this subscriber.
@@ -184,7 +200,7 @@ internal class Subscriber(
      *
      * @param offerSdp The offer SDP from the SFU.
      */
-    suspend fun negotiate(offerSdp: String) : Result<SendAnswerResponse> {
+    suspend fun negotiate(offerSdp: String): Result<SendAnswerResponse> {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
         val result = setRemoteDescription(offerDescription).flatMap {
             createAnswer()
@@ -192,7 +208,9 @@ internal class Subscriber(
             setLocalDescription(answerSdp).map { answerSdp }
         }.flatMap { answerSdp ->
             val request = SendAnswerRequest(
-                PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId,
+                PeerType.PEER_TYPE_SUBSCRIBER,
+                answerSdp.description,
+                sessionId,
             )
             safeCallWithResult {
                 sfuClient.sendAnswer(request)
@@ -218,7 +236,12 @@ internal class Subscriber(
      *
      * @param useDefaults Whether to use the default tracks or not.
      */
-    suspend fun setVideoSubscriptions(trackOverridesHandler: TrackOverridesHandler, participants: List<ParticipantState>, remoteParticipants: List<ParticipantState>, useDefaults: Boolean = false) : Result<UpdateSubscriptionsResponse> = safeSuspendingCallWithResult {
+    suspend fun setVideoSubscriptions(
+        trackOverridesHandler: TrackOverridesHandler,
+        participants: List<ParticipantState>,
+        remoteParticipants: List<ParticipantState>,
+        useDefaults: Boolean = false,
+    ): Result<UpdateSubscriptionsResponse> = safeSuspendingCallWithResult {
         logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
         val tracks = if (useDefaults) {
             // default is to subscribe to the top 5 sorted participants
@@ -244,11 +267,11 @@ internal class Subscriber(
     internal fun addTransceivers() {
         connection.addTransceiver(
             MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
-            RtpTransceiver.RtpTransceiverInit(RtpTransceiver.RtpTransceiverDirection.RECV_ONLY)
+            RtpTransceiver.RtpTransceiverInit(RtpTransceiver.RtpTransceiverDirection.RECV_ONLY),
         )
         connection.addTransceiver(
             MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
-            RtpTransceiver.RtpTransceiverInit(RtpTransceiver.RtpTransceiverDirection.RECV_ONLY)
+            RtpTransceiver.RtpTransceiverInit(RtpTransceiver.RtpTransceiverDirection.RECV_ONLY),
         )
     }
 
@@ -317,9 +340,12 @@ internal class Subscriber(
         sessionId: String,
         trackType: TrackType,
         visible: Boolean,
-        dimensions: VideoDimension
+        dimensions: VideoDimension,
     ) {
-        trackDimensions.putIfAbsent(ViewportCompositeKey(sessionId, viewportId, trackType), TrackDimensions(dimensions, visible))
+        trackDimensions.putIfAbsent(
+            ViewportCompositeKey(sessionId, viewportId, trackType),
+            TrackDimensions(dimensions, visible),
+        )
     }
 
     private val trackPrefixToSessionIdMap = ConcurrentHashMap<String, String>()
@@ -339,9 +365,14 @@ internal class Subscriber(
         }
     }
 
-    private val streamsFlow = MutableSharedFlow<ReceivedMediaStream>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 100)
+    private val streamsFlow =
+        MutableSharedFlow<ReceivedMediaStream>(
+            replay = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            extraBufferCapacity = 100,
+        )
 
-    fun streams() : Flow<ReceivedMediaStream> = streamsFlow
+    fun streams(): Flow<ReceivedMediaStream> = streamsFlow
 
     private fun onNewStream(mediaStream: MediaStream) {
         logger.d { "[addStream] #sfu; #track; mediaStream: $mediaStream" }
@@ -353,7 +384,9 @@ internal class Subscriber(
             return
         }
         val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
-        logger.d { "[addStream] #sfu; #track; trackPrefix: $trackPrefix, trackTypeString: $trackTypeString" }
+        logger.d {
+            "[addStream] #sfu; #track; trackPrefix: $trackPrefix, trackTypeString: $trackTypeString"
+        }
         val sessionId = trackPrefixToSessionIdMap[trackPrefix]
         if (sessionId == null || trackPrefixToSessionIdMap[trackPrefix].isNullOrEmpty()) {
             logger.d { "[addStream] skipping unrecognized trackPrefix $trackPrefix $mediaStream.id" }
@@ -368,7 +401,7 @@ internal class Subscriber(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
@@ -394,11 +427,7 @@ internal class Subscriber(
             setTrack(sessionId, trackType, videoTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, videoTrack))
         }
-
     }
 
     fun trackIdToParticipant(): Map<String, String> = trackIdToParticipant.toMap()
 }
-
-
-
