@@ -71,6 +71,12 @@ internal class Subscriber(
         val mediaStream: MediaTrack,
     )
 
+    private data class ViewportCompositeKey(
+        val sessionId: String,
+        val viewportId: String,
+        val trackType: TrackType,
+    )
+
     companion object {
         /**
          * Default video dimension.
@@ -79,7 +85,7 @@ internal class Subscriber(
     }
 
     // Track dimensions and viewport visibility state for this subscriber
-    private val trackDimensions = ConcurrentHashMap<String, ConcurrentHashMap<TrackType, TrackDimensions>>()
+    private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
     private val subscriptions = ConcurrentHashMap<String, TrackSubscriptionDetails>()
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
     private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> = ConcurrentHashMap()
@@ -89,7 +95,27 @@ internal class Subscriber(
      *
      * @return [Map] of track dimensions.
      */
-    fun viewportDimensions(): Map<String, Map<TrackType, TrackDimensions>> = trackDimensions.toMap()
+    fun viewportDimensions(): Map<String, Map<TrackType, TrackDimensions>> {
+        val result = mutableMapOf<String, Map<TrackType, TrackDimensions>>()
+        trackDimensions.forEach { (key, value) ->
+            val added = result[key.sessionId]
+            if (added != null) {
+                val currentDimension = added[key.trackType]
+                if (currentDimension != null) {
+                    if (currentDimension.dimensions.height * currentDimension.dimensions.width <
+                        value.dimensions.height * value.dimensions.width
+                    ) {
+                        result[key.sessionId] = added + Pair(key.trackType, value)
+                    }
+                } else {
+                    result[key.sessionId] = added + Pair(key.trackType, value)
+                }
+            } else {
+                result[key.sessionId] = mapOf(Pair(key.trackType, value))
+            }
+        }
+        return result
+    }
 
     /**
      * Returns all subscriptions.
@@ -253,7 +279,7 @@ internal class Subscriber(
     private fun visibleTracks(remoteParticipants: List<ParticipantState>): List<TrackSubscriptionDetails> {
         val trackDisplayResolution = trackDimensions
         val tracks = remoteParticipants.map { participant ->
-            val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
+            val trackDisplay = trackDisplayResolution.filter { it.key.sessionId == participant.sessionId }
 
             trackDisplay.entries.filter { it.value.visible }.map { display ->
                 logger.i {
@@ -261,7 +287,7 @@ internal class Subscriber(
                 }
                 TrackSubscriptionDetails(
                     user_id = participant.userId.value,
-                    track_type = display.key,
+                    track_type = display.key.trackType,
                     dimension = display.value.dimensions,
                     session_id = participant.sessionId,
                 )
@@ -280,7 +306,7 @@ internal class Subscriber(
 
     fun participantLeft(participant: Participant) {
         tracks.remove(participant.session_id)
-        trackDimensions.remove(participant.session_id)
+        trackDimensions.keys.removeAll { it.sessionId == participant.session_id }
     }
 
     fun setTrackDimension(
@@ -290,8 +316,7 @@ internal class Subscriber(
         visible: Boolean,
         dimensions: VideoDimension
     ) {
-        trackDimensions.putIfAbsent(sessionId, ConcurrentHashMap())
-        trackDimensions[sessionId]?.put(trackType, TrackDimensions(dimensions, visible))
+        trackDimensions.putIfAbsent(ViewportCompositeKey(viewportId, sessionId, trackType), TrackDimensions(dimensions, visible))
     }
 
     private val trackPrefixToSessionIdMap = ConcurrentHashMap<String, String>()
