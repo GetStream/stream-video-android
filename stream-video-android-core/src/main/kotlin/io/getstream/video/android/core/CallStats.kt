@@ -99,7 +99,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
         // also see https://github.com/GetStream/stream-video-js/blob/main/packages/client/src/stats/state-store-stats-reporter.ts
 
         val skipTypes = listOf("certificate", "data-channel")
-        val trackToParticipant = call.session?.trackIdToParticipant?.value ?: emptyMap()
+        val trackToParticipant = call.session?.subscriber?.trackIdToParticipant() ?: emptyMap()
         val displayingAt = call.session?.subscriber?.viewportDimensions() ?: emptyMap()
 
         val statGroups = mutableMapOf<String, MutableList<RTCStats>>()

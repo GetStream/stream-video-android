@@ -213,9 +213,6 @@ public class RtcSession internal constructor(
         )
     },
 ) {
-
-    internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
-        MutableStateFlow(emptyMap())
     private var muteStateSyncJob: Job? = null
     private var subscriberListenJob: Job? = null
 
@@ -226,26 +223,10 @@ public class RtcSession internal constructor(
         get() = sfuConnectionModule.socketConnection
 
     private val logger by taggedLogger("Video:RtcSession")
-    private val dynascaleLogger by taggedLogger("Video:RtcSession:Dynascale")
-
-    internal val lastVideoStreamAdded = MutableStateFlow<MediaStream?>(null)
-
     internal val _peerConnectionStates =
         MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
             null,
         )
-
-    // run all calls on a supervisor job so we can easily cancel them
-
-    //internal val defaultVideoDimension = VideoDimension(1080, 2340)
-
-    // participants by session id -> participant state
-    private val trackPrefixToSessionIdMap =
-        call.state.participants.mapState { it.associate { it.trackLookupPrefix to it.sessionId } }
-
-    // We need to update tracks for all participants
-    // It's cleaner to store here and have the participant state reference to it
-    //var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
     internal val trackOverridesHandler = TrackOverridesHandler(
         onOverridesUpdate = {
             setVideoSubscriptions()
@@ -260,8 +241,6 @@ public class RtcSession internal constructor(
     )
 
     private fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
-        subscriber?.setTrack(sessionId, type, track)
-
         when (type) {
             TrackType.TRACK_TYPE_VIDEO -> {
                 call.state.getParticipantBySessionId(sessionId)?.setVideoTrack(track.asVideoTrack())
@@ -288,6 +267,7 @@ public class RtcSession internal constructor(
     }
 
     private fun setLocalTrack(type: TrackType, track: MediaTrack) {
+        subscriber?.setTrack(sessionId, type, track)
         return setTrack(sessionId, type, track)
     }
 
@@ -300,13 +280,8 @@ public class RtcSession internal constructor(
     private val connectionConfiguration: PeerConnection.RTCConfiguration
         get() = buildConnectionConfiguration(iceServers)
 
-    /** subscriber peer connection is used for subs */
     internal var subscriber: Subscriber? = null
-
     internal var publisher: Publisher? = null
-
-    /** publisher for publishing, using 2 peer connections prevents race conditions in the offer/answer cycle */
-    // internal var publisher: StreamPeerConnection? = null
 
     internal lateinit var sfuConnectionModule: SfuConnectionModule
 
@@ -357,10 +332,14 @@ public class RtcSession internal constructor(
         setSfuConnectionModule(sfuConnectionModule)
 
         subscriber = createSubscriber()
-        subscriber?.onAddStream = {
-            addStream(it)
-        }
 
+        coroutineScope.launch {
+            subscriber?.streams()?.collect {
+                val (sessionId, trackType, track) = it
+                logger.d { "[streams] #sfu; #track; sessionId: $sessionId, trackType: $trackType, mediaStream: $track" }
+                setTrack(sessionId, trackType, track)
+            }
+        }
         listenToSfuSocket()
 
         call.peerConnectionFactory.setAudioSampleCallback { it ->
@@ -377,11 +356,20 @@ public class RtcSession internal constructor(
         }
     }
 
+    private var participantsMonitoringJob: Job? = null
+
     private fun listenToSfuSocket() {
         // cancel any old socket monitoring if needed
         eventJob?.cancel()
         errorJob?.cancel()
         stateJob?.cancel()
+        participantsMonitoringJob?.cancel()
+
+        participantsMonitoringJob = coroutineScope.launch {
+            call.state.participants.collect {
+                subscriber?.setTrackLookupPrefixes(it.associate { it.trackLookupPrefix to it.sessionId})
+            }
+        }
 
         // State
         // Start listening to connection state on new SFU connection
@@ -623,68 +611,6 @@ public class RtcSession internal constructor(
                     publisher?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE)
                 }
             }
-        }
-    }
-
-    /**
-     * A single media stream contains multiple tracks. We receive it from the subcriber peer connection
-     *
-     * Loop over the audio and video tracks
-     * Update the local tracks
-     *
-     * Audio is available from the start.
-     * Video only becomes available after we update the subscription
-     */
-    private fun addStream(mediaStream: MediaStream) {
-        val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
-        val sessionId = trackPrefixToSessionIdMap.value[trackPrefix]
-
-        if (sessionId == null || trackPrefixToSessionIdMap.value[trackPrefix].isNullOrEmpty()) {
-            logger.d { "[addStream] skipping unrecognized trackPrefix $trackPrefix $mediaStream.id" }
-            return
-        }
-
-        val trackTypeMap = mapOf(
-            "TRACK_TYPE_UNSPECIFIED" to TrackType.TRACK_TYPE_UNSPECIFIED,
-            "TRACK_TYPE_AUDIO" to TrackType.TRACK_TYPE_AUDIO,
-            "TRACK_TYPE_VIDEO" to TrackType.TRACK_TYPE_VIDEO,
-            "TRACK_TYPE_SCREEN_SHARE" to TrackType.TRACK_TYPE_SCREEN_SHARE,
-            "TRACK_TYPE_SCREEN_SHARE_AUDIO" to TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
-        )
-        val trackType =
-            trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
-
-        logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
-        mediaStream.audioTracks.forEach { track ->
-            logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
-            track.setEnabled(true)
-            val audioTrack = AudioTrack(
-                streamId = mediaStream.id,
-                audio = track,
-            )
-            val current = trackIdToParticipant.value.toMutableMap()
-            current[track.id()] = sessionId
-            trackIdToParticipant.value = current
-
-            setTrack(sessionId, trackType, audioTrack)
-        }
-
-        mediaStream.videoTracks.forEach { track ->
-            logger.w { "[addStream] #sfu; #track; videoTrack: ${track.stringify()}" }
-            track.setEnabled(true)
-            val videoTrack = VideoTrack(
-                streamId = mediaStream.id,
-                video = track,
-            )
-            val current = trackIdToParticipant.value.toMutableMap()
-            current[track.id()] = sessionId
-            trackIdToParticipant.value = current
-
-            setTrack(sessionId, trackType, videoTrack)
-        }
-        if (mediaStream.videoTracks.isNotEmpty()) {
-            lastVideoStreamAdded.value = mediaStream
         }
     }
 

@@ -30,7 +30,14 @@ import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.concurrent.ConcurrentHashMap
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.model.AudioTrack
+import io.getstream.video.android.core.model.VideoTrack
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import stream.video.sfu.models.Participant
+import kotlin.math.log
 
 internal class Subscriber(
     private val sessionId: String,
@@ -41,7 +48,7 @@ internal class Subscriber(
     coroutineScope = coroutineScope,
     type = StreamPeerType.SUBSCRIBER,
     mediaConstraints = MediaConstraints(),
-    onStreamAdded = { _ -> },
+    onStreamAdded = { _ ->  },
     onNegotiationNeeded = { _, _ -> },
     onIceCandidate = { candidate, _ ->
         onIceCandidateRequest?.invoke(
@@ -51,7 +58,6 @@ internal class Subscriber(
     },
     maxBitRate = 0 // Set as needed
 ) {
-    private val subscriberLogger by taggedLogger("Video:Subscriber")
     companion object {
         val defaultVideoDimension = VideoDimension(720, 1080)
     }
@@ -115,7 +121,7 @@ internal class Subscriber(
      * Disables all tracks.
      */
     fun disable() = safeCall {
-        subscriberLogger.d { "Disable all transceivers" }
+        logger.d { "Disable all transceivers" }
         connection.transceivers?.forEach {
             it.receiver.track()?.trySetEnabled(false)
         }
@@ -125,7 +131,7 @@ internal class Subscriber(
      * Enables all tracks.
      */
     fun enable() = safeCall {
-        subscriberLogger.d { "Enable all transceivers" }
+        logger.d { "Enable all transceivers" }
         connection.transceivers?.forEach {
             it.receiver.track()?.trySetEnabled(true)
         }
@@ -186,6 +192,9 @@ internal class Subscriber(
             session_id = sessionId,
             tracks = subscriptions.map { it.value },
         )
+
+        logger.d { "[setVideoSubscriptions] #sfu; #track; subscriptions: $subscriptions" }
+        logger.d { "[setVideoSubscriptions] #sfu; #track; request: $request" }
         sfuClient.updateSubscriptions(request)
     }
 
@@ -233,7 +242,7 @@ internal class Subscriber(
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
 
             trackDisplay.entries.filter { it.value.visible }.map { display ->
-                subscriberLogger.i {
+                logger.i {
                     "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}"
                 }
                 TrackSubscriptionDetails(
@@ -252,7 +261,7 @@ internal class Subscriber(
             logger.w { "[onAddStream] #sfu; #track; stream is null" }
             return
         }
-        this.onAddStream.invoke(stream)
+        onNewStream(stream)
     }
 
     fun participantLeft(participant: Participant) {
@@ -269,6 +278,87 @@ internal class Subscriber(
         trackDimensions.putIfAbsent(sessionId, ConcurrentHashMap())
         trackDimensions[sessionId]?.put(trackType, TrackDimensions(dimensions, visible))
     }
+
+    private val trackPrefixToSessionIdMap = ConcurrentHashMap<String, String>()
+    private val trackIdToParticipant = ConcurrentHashMap<String, String>()
+    private val pendingStreams = mutableListOf<MediaStream>()
+
+    fun setTrackLookupPrefixes(lookupPrefixes: Map<String, String>) = synchronized(pendingStreams) {
+        logger.d { "[setTrackLookupPrefixes] #sfu; #track; lookupPrefixes: $lookupPrefixes" }
+        trackPrefixToSessionIdMap.putAll(lookupPrefixes)
+        if (pendingStreams.isNotEmpty()) {
+            pendingStreams.forEach {
+                onNewStream(it)
+            }
+            pendingStreams.clear()
+        }
+    }
+
+    data class ReceivedMediaStream(
+        val sessionId: String,
+        val trackType: TrackType,
+        val mediaStream: MediaTrack,
+    )
+
+    private val streamsFlow = MutableSharedFlow<ReceivedMediaStream>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 100)
+
+    fun streams() : Flow<ReceivedMediaStream> = streamsFlow
+
+    private fun onNewStream(mediaStream: MediaStream) {
+        logger.d { "[addStream] #sfu; #track; mediaStream: $mediaStream" }
+        if (trackPrefixToSessionIdMap.isEmpty()) {
+            logger.d { "[addStream] #sfu; #track; trackPrefixToSessionIdMap is empty, adding to pending" }
+            synchronized(pendingStreams) {
+                pendingStreams.add(mediaStream)
+            }
+            return
+        }
+        val (trackPrefix, trackTypeString) = mediaStream.id.split(':')
+        logger.d { "[addStream] #sfu; #track; trackPrefix: $trackPrefix, trackTypeString: $trackTypeString" }
+        val sessionId = trackPrefixToSessionIdMap[trackPrefix]
+        if (sessionId == null || trackPrefixToSessionIdMap[trackPrefix].isNullOrEmpty()) {
+            logger.d { "[addStream] skipping unrecognized trackPrefix $trackPrefix $mediaStream.id" }
+            return
+        }
+        val trackTypeMap = mapOf(
+            "TRACK_TYPE_UNSPECIFIED" to TrackType.TRACK_TYPE_UNSPECIFIED,
+            "TRACK_TYPE_AUDIO" to TrackType.TRACK_TYPE_AUDIO,
+            "TRACK_TYPE_VIDEO" to TrackType.TRACK_TYPE_VIDEO,
+            "TRACK_TYPE_SCREEN_SHARE" to TrackType.TRACK_TYPE_SCREEN_SHARE,
+            "TRACK_TYPE_SCREEN_SHARE_AUDIO" to TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO,
+        )
+        val trackType =
+            trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+
+        logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
+        mediaStream.audioTracks.forEach { track ->
+            logger.v { "[addStream] #sfu; audioTrack: ${track.stringify()}" }
+            track.setEnabled(true)
+            val audioTrack = AudioTrack(
+                streamId = mediaStream.id,
+                audio = track,
+            )
+            trackIdToParticipant[track.id()] = sessionId
+            setTrack(sessionId, trackType, audioTrack)
+            streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, audioTrack))
+        }
+
+        mediaStream.videoTracks.forEach { track ->
+            logger.w { "[addStream] #sfu; #track; videoTrack: ${track.stringify()}" }
+            track.setEnabled(true)
+            val videoTrack = VideoTrack(
+                streamId = mediaStream.id,
+                video = track,
+            )
+            trackIdToParticipant[track.id()] = sessionId
+            setTrack(sessionId, trackType, videoTrack)
+            streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, videoTrack))
+        }
+
+    }
+
+    fun trackIdToParticipant(): Map<String, String> = trackIdToParticipant.toMap()
 }
 
 
