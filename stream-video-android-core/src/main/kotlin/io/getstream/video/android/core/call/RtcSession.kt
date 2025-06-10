@@ -83,6 +83,7 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
@@ -254,10 +255,8 @@ public class RtcSession internal constructor(
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
     //var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
-    val trackDimensions = MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
-        emptyMap(),
-    )
-    val trackDimensionsDebounced = trackDimensions.debounce(100)
+    @OptIn(FlowPreview::class)
+    val trackDimensionsDebounced get() = subscriber?.trackDimensions?.debounce(100)
     internal val trackOverridesHandler = TrackOverridesHandler(
         onOverridesUpdate = {
             setVideoSubscriptions()
@@ -376,7 +375,7 @@ public class RtcSession internal constructor(
         listenToSfuSocket()
         coroutineScope.launch {
             // call update participant subscriptions debounced
-            trackDimensionsDebounced.collect {
+            trackDimensionsDebounced?.collect {
                 logger.v { "<init> #sfu; #track; trackDimensions: $it" }
                 setVideoSubscriptions()
             }
@@ -784,7 +783,6 @@ public class RtcSession internal constructor(
         publisher = null
 
         // cleanup all non-local tracks
-        trackDimensions.value = emptyMap()
         supervisorJob.cancel()
     }
 
@@ -986,7 +984,7 @@ public class RtcSession internal constructor(
 
     internal fun visibleTracks(): List<TrackSubscriptionDetails> {
         val participants = call.state.remoteParticipants.value
-        val trackDisplayResolution = trackDimensions.value
+        val trackDisplayResolution = subscriber?.trackDimensions?.value ?: emptyMap()
 
         val tracks = participants.map { participant ->
             val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
@@ -1233,7 +1231,7 @@ public class RtcSession internal constructor(
 
     private fun removeParticipantTrackDimensions(participant: Participant) {
         logger.v { "[removeParticipantTrackDimensions] #sfu; #track; participant: $participant" }
-        val newTrackDimensions = trackDimensions.value.toMutableMap()
+        val newTrackDimensions = subscriber?.trackDimensions?.value?.toMutableMap() ?: return
         newTrackDimensions.remove(participant.session_id).also {
             if (it == null) {
                 logger.e {
@@ -1241,7 +1239,7 @@ public class RtcSession internal constructor(
                 }
             }
         }
-        trackDimensions.value = newTrackDimensions
+        subscriber?.trackDimensions?.value = newTrackDimensions
     }
 
     /**
@@ -1506,7 +1504,7 @@ public class RtcSession internal constructor(
         dynascaleLogger.d { "updating dimensions $sessionId $visible $dimensions" }
 
         // first we make a copy of the dimensions
-        val trackDimensionsMap = trackDimensions.value.toMutableMap()
+        val trackDimensionsMap = subscriber?.trackDimensions?.value?.toMutableMap() ?: return
 
         // next we get or create the dimensions for this participants
         val participantTrackDimensions =
@@ -1523,7 +1521,7 @@ public class RtcSession internal constructor(
         trackDimensionsMap[sessionId] = participantTrackDimensions
 
         // Updates are debounced
-        trackDimensions.value = trackDimensionsMap
+        subscriber?.trackDimensions?.value = trackDimensionsMap
     }
 
     private fun listenToSubscriberConnection() {
