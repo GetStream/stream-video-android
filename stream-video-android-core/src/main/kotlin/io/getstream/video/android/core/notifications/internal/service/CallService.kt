@@ -250,7 +250,9 @@ internal open class CallService : Service() {
         val intentCallId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         val intentCallDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
 
-        logger.i { "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger" }
+        logger.i {
+            "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger, Callservice hashcode: ${hashCode()}"
+        }
 
         val started = if (intentCallId != null && streamVideo != null && trigger != null) {
             // Promote early to foreground service
@@ -360,9 +362,13 @@ internal open class CallService : Service() {
 
             if (trigger == TRIGGER_INCOMING_CALL) {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
+            }
+
+            if (callSoundPlayer == null) {
                 callSoundPlayer = CallSoundPlayer(applicationContext)
-            } else if (trigger == TRIGGER_OUTGOING_CALL) {
-                callSoundPlayer = CallSoundPlayer(applicationContext)
+            }
+            logger.d {
+                "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
             }
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
@@ -516,7 +522,7 @@ internal open class CallService : Service() {
                     }
 
                     else -> {
-                        // Do nothing
+                        callSoundPlayer?.stopCallSound()
                     }
                 }
             }
@@ -668,11 +674,14 @@ internal open class CallService : Service() {
     }
 
     override fun onDestroy() {
+        logger.d { "[onDestroy], Callservice hashcode: ${hashCode()}" }
         stopService()
+        callSoundPlayer?.cleanUpAudioResources()
         super.onDestroy()
     }
 
     override fun stopService(name: Intent?): Boolean {
+        logger.d { "[stopService(name)], Callservice hashcode: ${hashCode()}" }
         stopService()
         return super.stopService(name)
     }
@@ -698,7 +707,11 @@ internal open class CallService : Service() {
         unregisterToggleCameraBroadcastReceiver()
 
         // Call sounds
-        callSoundPlayer?.cleanUpAudioResources()
+        /**
+         * Temp Fix!! The observeRingingState scope was getting cancelled and as a result,
+         * ringing state was not properly updated
+         */
+        callSoundPlayer?.stopCallSound()
 
         // Stop any jobs
         serviceScope.cancel()

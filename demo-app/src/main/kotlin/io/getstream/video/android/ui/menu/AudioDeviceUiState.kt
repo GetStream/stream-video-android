@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.ui.menu
 
-import androidx.compose.runtime.Stable
-import io.getstream.android.video.generated.models.QueryCallsResponse
-import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import androidx.compose.ui.graphics.vector.ImageVector
+import io.getstream.video.android.core.audio.StreamAudioDevice
 
-@Stable
-public data class QueriedCalls(
-    public val calls: List<CallData>,
-    @ExperimentalStreamVideoApi
-    public val original: QueryCallsResponse,
-    public val next: String?,
-    public val prev: String?,
+data class AudioDeviceUiState(
+    val streamAudioDevice: StreamAudioDevice,
+    val text: String,
+    val icon: ImageVector, // Assuming it's a drawable resource ID
+    val highlight: Boolean,
 )

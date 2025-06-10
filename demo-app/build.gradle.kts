@@ -153,7 +153,7 @@ android {
             register("productionRelease") {
                 enabled.set(true)
                 serviceAccountCredentials.set(serviceAccountCredentialsFile)
-                track.set("internal")
+                track.set(providers.environmentVariable("PLAY_PUBLISH_TRACK").orElse("internal"))
                 defaultToAppBundles.set(true)
                 resolutionStrategy.set(ResolutionStrategy.AUTO)
             }
@@ -290,6 +290,8 @@ dependencies {
 
     // Http
     implementation(libs.okhttp)
+
+    implementation(libs.audioswitch)
 
     // Also Leak Canary added in the previous block
 

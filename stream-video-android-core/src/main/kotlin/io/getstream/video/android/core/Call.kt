@@ -60,6 +60,7 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -77,6 +78,8 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -755,7 +758,6 @@ public class Call(
 
     private fun leave(disconnectionReason: Throwable?) = atomicLeave {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
-        session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -770,11 +772,11 @@ public class Call(
 
         sfuSocketReconnectionTime = null
         stopScreenSharing()
-        (client as StreamVideoClient).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
+        (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
 
@@ -834,12 +836,22 @@ public class Call(
         )
         return clientImpl.muteUsers(type, id, request)
     }
-
-    fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+    ) {
         logger.i {
-            "[setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible"
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(sessionId, trackType, visible)
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            Subscriber.defaultVideoDimension,
+            viewportId,
+        )
     }
 
     fun handleEvent(event: VideoEvent) {
@@ -866,6 +878,7 @@ public class Call(
         sessionId: String,
         trackType: TrackType,
         onRendered: (VideoTextureViewRenderer) -> Unit = {},
+        viewportId: String = sessionId,
     ) {
         logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
 
@@ -887,6 +900,7 @@ public class Call(
                             trackType,
                             true,
                             VideoDimension(width, height),
+                            viewportId,
                         )
                     }
                     onRendered(videoRenderer)
@@ -913,6 +927,7 @@ public class Call(
                             trackType,
                             true,
                             VideoDimension(videoWidth, videoHeight),
+                            viewportId,
                         )
                     }
                 }
@@ -1095,7 +1110,8 @@ public class Call(
                 "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
             }
 
-            val bluetoothHeadset = availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
+            val bluetoothHeadset =
+                availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
             val wiredHeadset = availableDevices.find { it is StreamAudioDevice.WiredHeadset }
 
             if (bluetoothHeadset != null) {
@@ -1223,10 +1239,18 @@ public class Call(
     fun cleanup() {
         // monitor.stop()
         session?.cleanup()
-        supervisorJob.cancel()
+        shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup()
         session = null
+    }
+
+    // This will allow the Rest APIs to be executed which are in queue before leave
+    private fun shutDownJobsGracefully() {
+        UserScope(ClientScope()).launch {
+            supervisorJob.children.forEach { it.join() }
+            supervisorJob.cancel()
+        }
     }
 
     suspend fun ring(): Result<GetCallResponse> {

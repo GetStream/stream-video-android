@@ -26,13 +26,10 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
-import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
-import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceServer
-import io.getstream.video.android.core.model.VideoTrack
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -56,9 +53,7 @@ import org.junit.Before
 import org.junit.Test
 import org.webrtc.SessionDescription
 import stream.video.sfu.models.PeerType
-import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.SendAnswerResponse
-import stream.video.sfu.signal.TrackSubscriptionDetails
 
 class RtcSessionTest2 {
 
@@ -267,54 +262,6 @@ class RtcSessionTest2 {
         }
 
     @Test
-    fun `setVideoSubscriptions with useDefaults=true updates subscriptions and calls updateSubscriptions on SFU`() =
-        runTest(UnconfinedTestDispatcher()) {
-            // Given
-            val sessionId = "test-session-id"
-            val apiKey = "test-api-key"
-            val sfuUrl = "https://test-sfu.stream.com"
-            val sfuWsUrl = "wss://test-sfu.stream.com"
-            val sfuToken = "fake-sfu-token"
-            val remoteIceServers = emptyList<IceServer>()
-            val rtcSession = spyk(
-                RtcSession(
-                    client = mockStreamVideo,
-                    powerManager = mockPowerManager,
-                    call = mockCall,
-                    sessionId = sessionId,
-                    apiKey = apiKey,
-                    lifecycle = mockLifecycle,
-                    sfuUrl = sfuUrl,
-                    sfuWsUrl = sfuWsUrl,
-                    sfuToken = sfuToken,
-                    clientImpl = mockVideoClient,
-                    coroutineScope = testScope,
-                    remoteIceServers = remoteIceServers,
-                    sfuConnectionModuleProvider = { mockk(relaxed = true) },
-                ),
-            )
-            val mockTrackSub = TrackSubscriptionDetails(
-                user_id = "user-123",
-                track_type = TrackType.TRACK_TYPE_VIDEO,
-                dimension = rtcSession.defaultVideoDimension,
-                session_id = "session-123",
-            )
-            every { rtcSession.defaultTracks() } returns listOf(mockTrackSub)
-
-            // When
-            rtcSession.setVideoSubscriptions(useDefaults = true)
-
-            // Then
-            val currentSubs = rtcSession.subscriptions.value
-            assertEquals("Should have 1 track from defaultTracks()", 1, currentSubs.size)
-            assertEquals(
-                "Should match our mock track subscription",
-                mockTrackSub,
-                currentSubs.first(),
-            )
-        }
-
-    @Test
     fun `handleIceTrickle adds event to publisherPendingEvents if publisher is null`() = runTest {
         // Given an RtcSession with no publisher set (publisher = null by default until fully joined)
         val rtcSession = RtcSession(
@@ -402,55 +349,6 @@ class RtcSessionTest2 {
         }
 
     @Test
-    fun `handleIceTrickle calls subscriberhandleNewIceCandidate if peerType=SUBSCRIBER`() =
-        runTest {
-            // Given
-            val rtcSession = spyk(
-                RtcSession(
-                    client = mockStreamVideo,
-                    powerManager = mockPowerManager,
-                    call = mockCall,
-                    sessionId = "session-id",
-                    apiKey = "api-key",
-                    lifecycle = mockLifecycle,
-                    sfuUrl = "https://test-sfu.stream.com",
-                    sfuWsUrl = "wss://test-sfu.stream.com",
-                    sfuToken = "fake-sfu-token",
-                    clientImpl = mockVideoClient,
-                    coroutineScope = testScope,
-                    remoteIceServers = emptyList(),
-                    sfuConnectionModuleProvider = { mockk(relaxed = true) },
-                ),
-            )
-            val mockSubscriber = mockk<StreamPeerConnection>(relaxed = true)
-            rtcSession.subscriber = mockSubscriber
-            every { rtcSession.subscriber } returns mockSubscriber
-            assertNotNull("subscriber must not be null", mockSubscriber)
-
-            val event = ICETrickleEvent(
-                candidate = """{
-            "sdpMid": "0",
-            "sdpMLineIndex": 0,
-            "candidate": "candidate-data",
-            "usernameFragment": "fake-username-frag"}
-                """.trimIndent(),
-                peerType = PeerType.PEER_TYPE_SUBSCRIBER,
-            )
-
-            // When
-            rtcSession.handleIceTrickle(event)
-
-            // Then
-            coVerify {
-                mockSubscriber.handleNewIceCandidate(any())
-            }
-            assertTrue(
-                "publisherPendingEvents should be empty",
-                rtcSession.publisherPendingEvents.isEmpty(),
-            )
-        }
-
-    @Test
     fun `cleanup disconnects SFU, closes peer connections, and clears tracks`() = runTest {
         // Given
         val sessionId = "test-session-id"
@@ -475,17 +373,12 @@ class RtcSessionTest2 {
         rtcSession.publisher = publisher
         val mockSocketConnection = rtcSession.sfuConnectionModule.socketConnection
         coJustRun { mockSocketConnection.disconnect() }
-        rtcSession.tracks["user-remote-sessionId"] = mutableMapOf(
-            TrackType.TRACK_TYPE_AUDIO to AudioTrack("remote-audio-id", mockk(relaxed = true)),
-            TrackType.TRACK_TYPE_VIDEO to VideoTrack("remote-video-id", mockk(relaxed = true)),
-        )
 
         // When
         rtcSession.cleanup()
 
         // Then
         coVerify { publisher.close(any()) }
-        assertTrue(rtcSession.tracks.isEmpty())
     }
 
     private fun <T> RtcSession.fieldValue(name: String): T? {

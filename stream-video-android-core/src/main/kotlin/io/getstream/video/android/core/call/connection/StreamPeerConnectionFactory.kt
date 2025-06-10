@@ -307,6 +307,29 @@ public class StreamPeerConnectionFactory(
         return peerConnection
     }
 
+    internal fun makeSubscriber(
+        coroutineScope: CoroutineScope,
+        sessionId: String,
+        sfuClient: SignalServerService,
+        configuration: PeerConnection.RTCConfiguration,
+        onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
+    ): Subscriber {
+        val peerConnection = Subscriber(
+            sessionId = sessionId,
+            sfuClient = sfuClient,
+            coroutineScope = coroutineScope,
+            onIceCandidateRequest = onIceCandidateRequest,
+        )
+        val connection = makePeerConnectionInternal(
+            configuration = configuration,
+            observer = peerConnection,
+        )
+        webRtcLogger.d { "type $peerConnection is now monitoring $connection" }
+        peerConnection.initialize(connection)
+        peerConnection.addTransceivers()
+        return peerConnection
+    }
+
     internal fun makePublisher(
         me: ParticipantState,
         mediaManager: MediaManagerImpl,

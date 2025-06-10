@@ -16,10 +16,14 @@
 
 package io.getstream.video.android.robots
 
+import androidx.test.uiautomator.BySelector
 import io.getstream.video.android.pages.CallPage
+import io.getstream.video.android.uiautomator.defaultTimeout
+import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
 import io.getstream.video.android.uiautomator.findObjects
 import io.getstream.video.android.uiautomator.isDisplayed
+import io.getstream.video.android.uiautomator.retryOnStaleObjectException
 import io.getstream.video.android.uiautomator.seconds
 import io.getstream.video.android.uiautomator.waitForCount
 import io.getstream.video.android.uiautomator.waitForText
@@ -56,13 +60,19 @@ fun UserRobot.assertThatCallIsEnded(): UserRobot {
     return this
 }
 
-fun UserRobot.assertParticipantsCountOnCall(count: Int): UserRobot {
+fun UserRobot.assertParticipantsCountOnCall(
+    count: Int,
+    timeOutMillis: Long = defaultTimeout,
+): UserRobot {
     val user = 1
     val participants = (user + count).toString()
-    CallPage.participantsCountBadge
-        .waitToAppear()
-        .waitForText(expectedText = participants)
-    assertEquals(participants, CallPage.participantsCountBadge.findObject().text)
+    val actualCount = device.retryOnStaleObjectException {
+        CallPage.participantsCountBadge
+            .waitToAppear()
+            .waitForText(expectedText = participants, timeOutMillis = timeOutMillis)
+            .text
+    }
+    assertEquals(participants, actualCount)
     return this
 }
 
@@ -75,13 +85,27 @@ fun UserRobot.assertParticipantMicrophone(isEnabled: Boolean): UserRobot {
     return this
 }
 
-fun UserRobot.assertMediaTracks(count: Int): UserRobot {
+fun UserRobot.assertMediaTracks(count: Int, view: VideoView): UserRobot {
+    val locator = CallPage.ParticipantView.videoViewWithMediaTrack
+    return assertViews(count, view, locator)
+}
+
+fun UserRobot.assertParticipantsViews(count: Int, view: VideoView): UserRobot {
+    val locator = CallPage.ParticipantView.videoView
+    return assertViews(count, view, locator)
+}
+
+private fun UserRobot.assertViews(count: Int, view: VideoView, locator: BySelector): UserRobot {
     if (count > 0) {
-        val mediaTracks = CallPage.ParticipantView.videoViewWithMediaTrack.waitForCount(count)
-        assertEquals(count, mediaTracks.size)
+        val expectedCount = when {
+            count > 6 && view == VideoView.GRID -> 6
+            count > 4 && view == VideoView.SPOTLIGHT -> 4
+            else -> count
+        }
+        val viewsCount = locator.waitForCount(expectedCount).size
+        assertEquals(expectedCount, viewsCount)
     } else {
-        CallPage.ParticipantView.videoViewWithMediaTrack.waitToDisappear()
-        assertEquals(count, CallPage.ParticipantView.videoViewWithMediaTrack.findObjects().size)
+        assertEquals(count, locator.waitToDisappear().findObjects().size)
     }
     return this
 }
@@ -118,5 +142,21 @@ fun UserRobot.assertParticipantScreenSharingView(isDisplayed: Boolean): UserRobo
         assertFalse(screenSharingView.waitToDisappear(timeOutMillis = 10.seconds).isDisplayed())
         assertFalse(CallPage.ParticipantView.screenSharingLabel.waitToDisappear().isDisplayed())
     }
+    return this
+}
+
+fun UserRobot.assertGridView(participants: Int): UserRobot {
+    if (participants >= 3) {
+        assertFalse(CallPage.cornerDraggableView.waitToDisappear().isDisplayed())
+    } else {
+        assertTrue(CallPage.cornerDraggableView.waitToAppear().isDisplayed())
+    }
+    assertTrue(CallPage.ParticipantView.gridView.waitToAppear().isDisplayed())
+    return this
+}
+
+fun UserRobot.assertSpotlightView(): UserRobot {
+    assertTrue(CallPage.ParticipantView.spotlightView.waitToAppear().isDisplayed())
+    assertFalse(CallPage.cornerDraggableView.waitToDisappear().isDisplayed())
     return this
 }
