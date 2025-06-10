@@ -1,5 +1,6 @@
 package io.getstream.video.android.core.call.connection
 
+import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.ParticipantState
@@ -37,6 +38,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import stream.video.sfu.models.Participant
+import stream.video.sfu.signal.SendAnswerResponse
 
 internal class Subscriber(
     private val sessionId: String,
@@ -81,7 +83,7 @@ internal class Subscriber(
         /**
          * Default video dimension.
          */
-        val defaultVideoDimension = VideoDimension(720, 1080)
+        val defaultVideoDimension = VideoDimension(720, 1280)
     }
 
     // Track dimensions and viewport visibility state for this subscriber
@@ -182,7 +184,7 @@ internal class Subscriber(
      *
      * @param offerSdp The offer SDP from the SFU.
      */
-    suspend fun negotiate(offerSdp: String) {
+    suspend fun negotiate(offerSdp: String) : Result<SendAnswerResponse> {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
         val result = setRemoteDescription(offerDescription).flatMap {
             createAnswer()
@@ -197,6 +199,7 @@ internal class Subscriber(
             }
         }
         logger.d { "Subscriber negotiate: $result" }
+        return result
     }
 
     /**
@@ -316,7 +319,7 @@ internal class Subscriber(
         visible: Boolean,
         dimensions: VideoDimension
     ) {
-        trackDimensions.putIfAbsent(ViewportCompositeKey(viewportId, sessionId, trackType), TrackDimensions(dimensions, visible))
+        trackDimensions.putIfAbsent(ViewportCompositeKey(sessionId, viewportId, trackType), TrackDimensions(dimensions, visible))
     }
 
     private val trackPrefixToSessionIdMap = ConcurrentHashMap<String, String>()
