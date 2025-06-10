@@ -253,7 +253,7 @@ public class RtcSession internal constructor(
 
     // We need to update tracks for all participants
     // It's cleaner to store here and have the participant state reference to it
-    var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
+    //var tracks: MutableMap<String, MutableMap<TrackType, MediaTrack>> = mutableMapOf()
     val trackDimensions = MutableStateFlow<Map<String, Map<TrackType, TrackDimensions>>>(
         emptyMap(),
     )
@@ -266,18 +266,13 @@ public class RtcSession internal constructor(
         logger = logger,
     )
 
-    private fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
-        if (!tracks.containsKey(sessionId)) {
-            tracks[sessionId] = mutableMapOf()
-        }
-        return tracks[sessionId]?.get(type)
-    }
+    private fun getTrack(sessionId: String, type: TrackType): MediaTrack? = subscriber?.getTrack(
+        sessionId,
+        type,
+    )
 
     private fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
-        if (!tracks.containsKey(sessionId)) {
-            tracks[sessionId] = mutableMapOf()
-        }
-        tracks[sessionId]?.set(type, track)
+        subscriber?.setTrack(sessionId, type, track)
 
         when (type) {
             TrackType.TRACK_TYPE_VIDEO -> {
@@ -777,6 +772,7 @@ public class RtcSession internal constructor(
             sfuConnectionMigrationModule?.socketConnection?.disconnect()
         }
         sfuConnectionMigrationModule = null
+        subscriber?.clearTracks()
 
         // cleanup the publisher and subcriber peer connections
         safeCall {
@@ -788,18 +784,6 @@ public class RtcSession internal constructor(
         publisher = null
 
         // cleanup all non-local tracks
-        tracks.filter { it.key != sessionId }.values.map { it.values }.flatten()
-            .forEach { wrapper ->
-                try {
-                    safeCall {
-                        wrapper.asAudioTrack()?.audio?.dispose()
-                        wrapper.asVideoTrack()?.video?.dispose()
-                    }
-                } catch (e: Exception) {
-                    logger.w { "Error disposing track: ${e.message}" }
-                }
-            }
-        tracks.clear()
         trackDimensions.value = emptyMap()
         supervisorJob.cancel()
     }
@@ -1238,10 +1222,10 @@ public class RtcSession internal constructor(
     internal val subscriberPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
 
     private fun removeParticipantTracks(participant: Participant) {
-        tracks.remove(participant.session_id).also {
+        subscriber?.removeTracks(participant.session_id).also {
             if (it == null) {
                 logger.e {
-                    "[handleEvent] Failed to remove track on ParticipantLeft " + "- track ID: ${participant.session_id}). Tracks: $tracks"
+                    "[handleEvent] Failed to remove track on ParticipantLeft " + "- track ID: ${participant.session_id}). Tracks: $it"
                 }
             }
         }
