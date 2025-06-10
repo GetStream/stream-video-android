@@ -224,7 +224,6 @@ public class RtcSession internal constructor(
 
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
         MutableStateFlow(emptyMap())
-    private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
     private var subscriberListenJob: Job? = null
 
@@ -246,7 +245,7 @@ public class RtcSession internal constructor(
 
     // run all calls on a supervisor job so we can easily cancel them
 
-    internal val defaultVideoDimension = VideoDimension(1080, 2340)
+    //internal val defaultVideoDimension = VideoDimension(1080, 2340)
 
     // participants by session id -> participant state
     private val trackPrefixToSessionIdMap =
@@ -947,68 +946,6 @@ public class RtcSession internal constructor(
     }
 
     /**
-     * This is called when you are look at a different set of participants
-     * or at a different size
-     *
-     * It tells the SFU that we want to receive person a's video at 1080p, and person b at 360p
-     *
-     * Since the viewmodel knows what's actually displayed
-     */
-    internal fun defaultTracks(): List<TrackSubscriptionDetails> {
-        val sortedParticipants = call.state.participants.value
-        val otherParticipants = sortedParticipants.filter { it.sessionId != sessionId }.take(5)
-        val tracks = mutableListOf<TrackSubscriptionDetails>()
-        otherParticipants.forEach { participant ->
-            if (participant.videoEnabled.value) {
-                val track = TrackSubscriptionDetails(
-                    user_id = participant.userId.value,
-                    track_type = TrackType.TRACK_TYPE_VIDEO,
-                    dimension = defaultVideoDimension,
-                    session_id = participant.sessionId,
-                )
-                tracks.add(track)
-            }
-            if (participant.screenSharingEnabled.value) {
-                val track = TrackSubscriptionDetails(
-                    user_id = participant.userId.value,
-                    track_type = TrackType.TRACK_TYPE_SCREEN_SHARE,
-                    dimension = defaultVideoDimension,
-                    session_id = participant.sessionId,
-                )
-                tracks.add(track)
-            }
-        }
-
-        return tracks
-    }
-
-    internal fun visibleTracks(): List<TrackSubscriptionDetails> {
-        val participants = call.state.remoteParticipants.value
-        val trackDisplayResolution = subscriber?.trackDimensions?.value ?: emptyMap()
-
-        val tracks = participants.map { participant ->
-            val trackDisplay = trackDisplayResolution[participant.sessionId] ?: emptyMap()
-
-            trackDisplay.entries.filter { it.value.visible }.map { display ->
-                dynascaleLogger.i {
-                    "[visibleTracks] $sessionId subscribing ${participant.sessionId} to : ${display.key}"
-                }
-                TrackSubscriptionDetails(
-                    user_id = participant.userId.value,
-                    track_type = display.key,
-                    dimension = display.value.dimensions,
-                    session_id = participant.sessionId,
-                )
-            }
-        }.flatten()
-        return tracks
-    }
-
-    internal val subscriptions: MutableStateFlow<List<TrackSubscriptionDetails>> = MutableStateFlow(
-        emptyList(),
-    )
-
-    /**
      * Tells the SFU which video tracks we want to subscribe to
      * - it sends the resolutions we're displaying the video at so the SFU can decide which track to send
      * - when switching SFU we should repeat this info
@@ -1019,50 +956,17 @@ public class RtcSession internal constructor(
      * -- we cap at 30 retries to prevent endless loops
      */
     internal fun setVideoSubscriptions(useDefaults: Boolean = false) {
-        logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
-        var tracks = if (useDefaults) {
-            // default is to subscribe to the top 5 sorted participants
-            defaultTracks()
-        } else {
-            // if we're not using the default, sub to visible tracks
-            visibleTracks()
-        }.let(trackOverridesHandler::applyOverrides)
-
-        subscriptions.value = tracks
-        val currentSfu = sfuUrl
-
-        subscriptionSyncJob?.cancel()
-        subscriptionSyncJob = coroutineScope.launch {
-            flow {
-                val request = UpdateSubscriptionsRequest(
-                    session_id = sessionId,
-                    tracks = subscriptions.value,
-                )
-                dynascaleLogger.d {
-                    "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; UpdateSubscriptionsRequest: $request"
-                }
-                val sessionToDimension = tracks.map { it.session_id to it.dimension }
-                dynascaleLogger.v {
-                    "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Subscribing to: $sessionToDimension"
-                }
-                val result = updateSubscriptions(request)
-                dynascaleLogger.v {
-                    "[setVideoSubscriptions] #sfu; #track; #manual-quality-selection; Result: $result"
-                }
-                emit(result.getOrThrow())
-            }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
-                val sameValue = tracks == subscriptions.value
-                val sameSfu = currentSfu == sfuUrl
-                val isPermanent = isPermanentError(cause)
-                val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
-                val delayInMs = if (attempt <= 1) 100L else if (attempt <= 3) 300L else 2500L
-                logger.w {
-                    "updating subscriptions failed with error $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
-                }
-                delay(delayInMs)
-                willRetry
-            }.collect()
+        val participants = call.state.participants.value
+        val remoteParticipants = call.state.remoteParticipants.value
+        coroutineScope.launch {
+            subscriber?.setVideoSubscriptions(
+                trackOverridesHandler,
+                participants,
+                remoteParticipants,
+                useDefaults
+            )
         }
+        logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
     }
 
     fun handleEvent(event: VideoEvent) {
@@ -1495,7 +1399,7 @@ public class RtcSession internal constructor(
         sessionId: String,
         trackType: TrackType,
         visible: Boolean,
-        dimensions: VideoDimension = defaultVideoDimension,
+        dimensions: VideoDimension = Subscriber.defaultVideoDimension,
     ) {
         logger.v {
             "[updateTrackDimensions] #track; #sfu; #manual-quality-selection; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
@@ -1538,7 +1442,7 @@ public class RtcSession internal constructor(
 
     internal fun currentSfuInfo(): Triple<String, List<TrackSubscriptionDetails>, List<TrackInfo>> {
         val previousSessionId = sessionId
-        val currentSubscriptions = subscriptions.value
+        val currentSubscriptions = subscriber?.subscriptions?.value ?: emptyList()
         val publisherTracks = getPublisherTracksForReconnect()
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
