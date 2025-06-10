@@ -223,16 +223,11 @@ public class RtcSession internal constructor(
 
     internal val trackIdToParticipant: MutableStateFlow<Map<String, String>> =
         MutableStateFlow(emptyMap())
-    private var syncSubscriberAnswer: Job? = null
     private var syncSubscriberCandidates: Job? = null
-    private var syncPublisherJob: Job? = null
     private var subscriptionSyncJob: Job? = null
     private var muteStateSyncJob: Job? = null
     private var subscriberListenJob: Job? = null
 
-    private var videoTransceiverInitialized: Boolean = false
-    private var audioTransceiverInitialized: Boolean = false
-    private var screenshareTransceiverInitialized: Boolean = false
     private var stateJob: Job? = null
     private var errorJob: Job? = null
     private var eventJob: Job? = null
@@ -879,19 +874,6 @@ public class RtcSession internal constructor(
             sessionId = sessionId,
             onIceCandidateRequest = ::sendIceCandidate,
         )
-        peerConnection.connection.addTransceiver(
-            MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
-            RtpTransceiver.RtpTransceiverInit(
-                RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
-            ),
-        )
-
-        peerConnection.connection.addTransceiver(
-            MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO,
-            RtpTransceiver.RtpTransceiverInit(
-                RtpTransceiver.RtpTransceiverDirection.RECV_ONLY,
-            ),
-        )
         return peerConnection
     }
 
@@ -1115,6 +1097,7 @@ public class RtcSession internal constructor(
                         call.state.replaceParticipants(participantStates)
                         sfuConnectionModule.socketConnection.whenConnected {
                             publisher = createPublisher(event.publishOptions)
+                            processPendingSubscriberEvents()
                             processPendingPublisherEvents()
                             connectRtc()
                         }
@@ -1195,6 +1178,7 @@ public class RtcSession internal constructor(
     }
 
     private val publisherPendingEventsMutex = Mutex(false)
+    private val subscriberPendingEventsMutex = Mutex(false)
     private suspend fun RtcSession.processPendingPublisherEvents() =
         publisherPendingEventsMutex.withLock {
             logger.v {
@@ -1224,8 +1208,35 @@ public class RtcSession internal constructor(
             }
             publisherPendingEvents.clear()
         }
+    private suspend fun RtcSession.processPendingSubscriberEvents() =
+        subscriberPendingEventsMutex.withLock {
+            logger.v {
+                "[processPendingSubscriberEvents] #sfu; #track; subscriberPendingEvents: $subscriberPendingEvents"
+            }
+            for (pendingEvent in subscriberPendingEvents) {
+                when (pendingEvent) {
+                    is ICETrickleEvent -> {
+                        handleIceTrickle(pendingEvent)
+                    }
+
+                    is ICERestartEvent -> {
+                        requestSubscriberIceRestart()
+                    }
+
+                    is SubscriberOfferEvent -> {
+                        handleSubscriberOffer(pendingEvent)
+                    }
+
+                    else -> {
+                        logger.w { "Unknown event type: $pendingEvent" }
+                    }
+                }
+            }
+            subscriberPendingEvents.clear()
+        }
 
     internal val publisherPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
+    internal val subscriberPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
 
     private fun removeParticipantTracks(participant: Participant) {
         tracks.remove(participant.session_id).also {
@@ -1286,6 +1297,14 @@ public class RtcSession internal constructor(
             publisherPendingEvents.add(event)
             return
         }
+
+        if (event.peerType == PeerType.PEER_TYPE_SUBSCRIBER && subscriber == null) {
+            logger.v {
+                "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; subscriber is null, adding to pending"
+            }
+            subscriberPendingEvents.add(event)
+            return
+        }
         logger.d {
             "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; candidate: ${event.candidate}"
         }
@@ -1312,16 +1331,10 @@ public class RtcSession internal constructor(
         syncSubscriberCandidates?.cancel()
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         if (subscriber == null) {
-            subscriber = createSubscriber()
+            subscriberPendingEvents.add(offerEvent)
+            return
         }
         subscriber?.negotiate(offerEvent.sdp)
-        syncSubscriberCandidates = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.events().collect { event ->
-                if (event is ICETrickleEvent) {
-                    handleIceTrickle(event)
-                }
-            }
-        }
     }
 
     internal fun getPublisherTracksForReconnect(): List<TrackInfo> {

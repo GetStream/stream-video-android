@@ -1,10 +1,12 @@
 package io.getstream.video.android.core.call.connection
 
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
