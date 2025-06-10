@@ -327,13 +327,15 @@ internal class Subscriber(
     private val pendingStreams = mutableListOf<MediaStream>()
 
     fun setTrackLookupPrefixes(lookupPrefixes: Map<String, String>) = synchronized(pendingStreams) {
-        logger.d { "[setTrackLookupPrefixes] #sfu; #track; lookupPrefixes: $lookupPrefixes" }
-        trackPrefixToSessionIdMap.putAll(lookupPrefixes)
-        if (pendingStreams.isNotEmpty()) {
-            pendingStreams.forEach {
-                onNewStream(it)
+        safeCall {
+            logger.d { "[setTrackLookupPrefixes] #sfu; #track; lookupPrefixes: $lookupPrefixes" }
+            trackPrefixToSessionIdMap.putAll(lookupPrefixes)
+            if (pendingStreams.isNotEmpty()) {
+                pendingStreams.forEach {
+                    onNewStream(it)
+                }
+                pendingStreams.clear()
             }
-            pendingStreams.clear()
         }
     }
 
