@@ -45,6 +45,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
+import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
@@ -323,7 +324,7 @@ public class RtcSession internal constructor(
         get() = buildConnectionConfiguration(iceServers)
 
     /** subscriber peer connection is used for subs */
-    public var subscriber: StreamPeerConnection? = null
+    internal var subscriber: Subscriber? = null
 
     internal var publisher: Publisher? = null
 
@@ -372,12 +373,17 @@ public class RtcSession internal constructor(
         logger.i { "<init> #sfu; #track; no args" }
 
         // step 1 setup the peer connections
-        subscriber = createSubscriber()
         // publisher = createPublisher()
 
         listenToSubscriberConnection()
         val sfuConnectionModule: SfuConnectionModule = sfuConnectionModuleProvider.invoke()
         setSfuConnectionModule(sfuConnectionModule)
+
+        subscriber = createSubscriber()
+        subscriber?.onAddStream = {
+            addStream(it)
+        }
+
         listenToSfuSocket()
         coroutineScope.launch {
             // call update participant subscriptions debounced
@@ -864,14 +870,13 @@ public class RtcSession internal constructor(
     }
 
     @VisibleForTesting
-    public fun createSubscriber(): StreamPeerConnection {
+    internal fun createSubscriber(): Subscriber {
         logger.i { "[createSubscriber] #sfu; no args" }
-        val peerConnection = call.peerConnectionFactory.makePeerConnection(
+        val peerConnection = call.peerConnectionFactory.makeSubscriber(
             coroutineScope = coroutineScope,
             configuration = connectionConfiguration,
-            type = StreamPeerType.SUBSCRIBER,
-            mediaConstraints = defaultConstraints,
-            onStreamAdded = { addStream(it) }, // addTrack
+            sfuClient = sfuConnectionModule.api,
+            sessionId = sessionId,
             onIceCandidateRequest = ::sendIceCandidate,
         )
         peerConnection.connection.addTransceiver(
@@ -1304,83 +1309,18 @@ public class RtcSession internal constructor(
      * - Sends the answer back to the SFU
      */
     suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
-        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
-        val subscriber = subscriber ?: return
-
         syncSubscriberCandidates?.cancel()
-
-        // step 1 - receive the offer and set it to the remote
-        val offerDescription = SessionDescription(
-            SessionDescription.Type.OFFER,
-            offerEvent.sdp,
-        )
-        subscriber.setRemoteDescription(offerDescription)
-
-        // step 2 - create the answer
-        val answerResult = subscriber.createAnswer()
-        if (answerResult !is Success) {
-            logger.w {
-                "[handleSubscriberOffer] #sfu; #subscriber; rejected (createAnswer failed): $answerResult"
-            }
-            return
+        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
+        if (subscriber == null) {
+            subscriber = createSubscriber()
         }
-        val answerSdp = answerResult.value
-        logger.v { "[handleSubscriberOffer] #sfu; #subscriber; answerSdp: ${answerSdp.description}" }
-
-        // step 3 - set local description
-        val setAnswerResult = subscriber.setLocalDescription(answerSdp)
-        if (setAnswerResult !is Success) {
-            logger.w {
-                "[handleSubscriberOffer] #sfu; #subscriber; rejected (setAnswer failed): $setAnswerResult"
+        subscriber?.negotiate(offerEvent.sdp)
+        syncSubscriberCandidates = coroutineScope.launch {
+            sfuConnectionModule.socketConnection.events().collect { event ->
+                if (event is ICETrickleEvent) {
+                    handleIceTrickle(event)
+                }
             }
-            return
-        }
-        subscriberSdpAnswer.value = answerSdp
-        // TODO: we could handle SFU changes by having a coroutine job per SFU and just cancel it when it switches
-        // TODO: retry behaviour could be cleaned up into 3 different extension functions for better readability
-        // see: https://www.notion.so/stream-wiki/Video-Development-Guide-fef3ece1c643455889f2c0fdba74a89d
-        val currentSfu = sfuUrl
-
-        // prevent running multiple of these at the same time
-        // if there's already a job active. cancel it
-        syncSubscriberAnswer?.cancel()
-        // start a new job
-        // this code is a bit more complicated due to the retry behaviour
-        syncSubscriberAnswer = coroutineScope.launch {
-            flow {
-                // step 4 - send the answer
-                logger.v { "[handleSubscriberOffer] #sfu; #subscriber; setAnswerResult: $setAnswerResult" }
-                val sendAnswerRequest = SendAnswerRequest(
-                    PeerType.PEER_TYPE_SUBSCRIBER, answerSdp.description, sessionId,
-                )
-                val sendAnswerResult = sendAnswer(sendAnswerRequest)
-                logger.v { "[handleSubscriberOffer] #sfu; #subscriber; sendAnswerResult: $sendAnswerResult" }
-                emit(sendAnswerResult.getOrThrow())
-
-                // setRemoteDescription has been called and everything is ready - we can
-                // now start handling the ICE subscriber candidates queue
-                syncSubscriberCandidates = coroutineScope.launch {
-                    sfuConnectionModule.socketConnection.events().collect { event ->
-                        if (event is ICETrickleEvent) {
-                            handleIceTrickle(event)
-                        }
-                    }
-                }
-            }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
-                val sameValue = answerSdp == subscriberSdpAnswer.value
-                val sameSfu = currentSfu == sfuUrl
-                val isPermanent = isPermanentError(cause)
-                val willRetry = !isPermanent && sameValue && sameSfu && attempt <= 3
-                val delayInMs = if (attempt <= 1) 10L else if (attempt <= 2) 30L else 100L
-                logger.w {
-                    "sendAnswer failed $cause, retry attempt: $attempt. will retry $willRetry in $delayInMs ms"
-                }
-                delay(delayInMs)
-                willRetry
-            }.catch {
-                logger.e { "setPublisher failed after 3 retries, asking the call monitor to do an ice restart" }
-                coroutineScope.launch { call.rejoin() }
-            }.collect()
         }
     }
 
@@ -1554,13 +1494,12 @@ public class RtcSession internal constructor(
     }
 
     // share what size and which participants we're looking at
-    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> = wrapAPICall {
-        val request = ICERestartRequest(
-            session_id = sessionId,
-            peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
-        )
-        sfuConnectionModule.api.iceRestart(request)
-    }
+    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =  subscriber?.restartIce() ?: Failure(
+        io.getstream.result.Error.ThrowableError(
+            "Subscriber is null",
+            Exception("Subscriber is null"),
+        ),
+    )
 
     suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = wrapAPICall {
         val request = ICERestartRequest(
