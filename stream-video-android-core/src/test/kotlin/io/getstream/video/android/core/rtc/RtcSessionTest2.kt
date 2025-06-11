@@ -245,17 +245,9 @@ class RtcSessionTest2 {
             rtcSession.handleSubscriberOffer(offerEvent)
 
             coVerify {
-                subscriber!!.setRemoteDescription(
+                subscriber!!.negotiate(
                     match {
-                        it.description.contains("fake-offer-sdp") && it.type == SessionDescription.Type.OFFER
-                    },
-                )
-            }
-            coVerify { subscriber!!.createAnswer() }
-            coVerify {
-                subscriber!!.setLocalDescription(
-                    match {
-                        it.description.contains("fake-answer-sdp") && it.type == SessionDescription.Type.ANSWER
+                        it.contains("fake-offer-sdp")
                     },
                 )
             }

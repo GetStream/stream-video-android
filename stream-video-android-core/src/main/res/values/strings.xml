@@ -40,6 +40,8 @@
     <string name="stream_video_ongoing_call_notification_channel_title">Ongoing Calls</string>
     <string name="stream_video_ongoing_call_notification_channel_description">Ongoing call notifications</string>
     <string name="stream_video_ongoing_call_notification_title">Call in Progress</string>
+    <string name="stream_video_livestream_notification_title">Livestream in Progress</string>
+    <string name="stream_video_livestream_notification_description">Tap to go back to the livestream</string>
     <string name="stream_video_ongoing_group_call_notification_title">Group Call in Progress</string>
     <string name="stream_video_ongoing_call_notification_description">Tap to go back to the call</string>
     <string name="stream_video_call_setup_notification_channel_id" translatable="false">call_setup</string>

@@ -45,6 +45,9 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -309,6 +312,30 @@ public open class DefaultNotificationHandler(
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? {
+        val client = (StreamVideo.instance() as StreamVideoClient)
+        val mediaNotificationCallTypes = client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
+        return if (mediaNotificationCallTypes.contains(callId.type)) {
+            createMinimalMediaStyleNotification(
+                callId,
+                getMediaNotificationConfig(),
+                remoteParticipantCount,
+            )?.build()
+        } else {
+            getSimpleOngoingCallNotification(
+                callId,
+                callDisplayName,
+                isOutgoingCall,
+                remoteParticipantCount,
+            )
+        }
+    }
+
+    private fun getSimpleOngoingCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String?,
+        isOutgoingCall: Boolean,
+        remoteParticipantCount: Int,
+    ): Notification? {
         val notificationId = callId.hashCode() // Notification ID
 
         // Intents
@@ -542,6 +569,7 @@ public open class DefaultNotificationHandler(
     ) {
         val notification = getNotification(builder)
         notificationManager.notify(notificationId, notification)
+        logger.d { "[showNotification] with notificationId: $notificationId" }
     }
 
     open fun getNotification(
@@ -667,6 +695,65 @@ public open class DefaultNotificationHandler(
     open fun getChannelDescription(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_description,
     )
+
+    override fun createMinimalMediaStyleNotification(
+        callId: StreamCallId,
+        mediaNotificationConfig: MediaNotificationConfig,
+        remoteParticipantCount: Int,
+    ): NotificationCompat.Builder? {
+        val notificationId = callId.hashCode() // Notification ID
+
+        // Intents
+        val onClickIntent = mediaNotificationConfig.contentIntent
+            ?: intentResolver.searchOngoingCallPendingIntent(
+                callId,
+                notificationId,
+            )
+
+        // Channel preparation
+        val ongoingCallsChannelId = application.getString(
+            R.string.stream_video_ongoing_call_notification_channel_id,
+        )
+
+        createOnGoingChannel(ongoingCallsChannelId)
+
+        val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
+
+        // Build notification
+        return NotificationCompat.Builder(application, ongoingCallsChannelId)
+            .also {
+                // If the intent is configured, clicking the notification will return to the call
+                if (onClickIntent != null) {
+                    it.setContentIntent(onClickIntent)
+                } else {
+                    logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
+                }
+            }
+            .setContentTitle(mediaNotificationConfig.mediaNotificationContent.contentTitle)
+            .setContentText(mediaNotificationConfig.mediaNotificationContent.contentText)
+            .setLargeIcon(mediaNotificationConfig.mediaNotificationVisuals.bannerBitmap)
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setStyle(mediaStyle).apply {
+                if (mediaNotificationConfig.mediaNotificationVisuals.smallIcon != null) {
+                    setSmallIcon(mediaNotificationConfig.mediaNotificationVisuals.smallIcon)
+                }
+                if (mediaNotificationConfig.mediaNotificationVisuals.bannerBitmap != null) {
+                    setLargeIcon(mediaNotificationConfig.mediaNotificationVisuals.bannerBitmap)
+                }
+            }
+    }
+
+    override fun getMediaNotificationConfig(): MediaNotificationConfig {
+        return MediaNotificationConfig(
+            MediaNotificationContent(
+                application.getString(R.string.stream_video_livestream_notification_title),
+                application.getString(R.string.stream_video_livestream_notification_description),
+            ),
+            MediaNotificationVisuals(android.R.drawable.ic_media_play, null),
+            null,
+        )
+    }
 
     companion object {
 

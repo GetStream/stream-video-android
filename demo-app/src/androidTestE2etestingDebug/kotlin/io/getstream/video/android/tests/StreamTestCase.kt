@@ -35,9 +35,6 @@ import io.getstream.video.android.robots.VideoView
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.grantPermission
 import io.getstream.video.android.uiautomator.startApp
-import io.qameta.allure.android.rules.LogcatRule
-import io.qameta.allure.android.rules.ScreenshotRule
-import io.qameta.allure.android.rules.WindowHierarchyRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -54,16 +51,6 @@ abstract class StreamTestCase {
 
     @get:Rule
     var testName: TestName = TestName()
-
-    @get:Rule
-    val screenshotRule =
-        ScreenshotRule(mode = ScreenshotRule.Mode.FAILURE, screenshotName = "screenshot")
-
-    @get:Rule
-    val logcatRule = LogcatRule()
-
-    @get:Rule
-    val windowHierarchyRule = WindowHierarchyRule()
 
     @get:Rule
     val retryRule = RetryRule(count = 3)
