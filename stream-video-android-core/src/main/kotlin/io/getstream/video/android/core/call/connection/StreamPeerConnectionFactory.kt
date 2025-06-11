@@ -29,6 +29,7 @@ import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
@@ -365,7 +366,7 @@ public class StreamPeerConnectionFactory(
             tracer = tracer,
             rejoin = rejoin,
         )
-        peerConnection.tracer().trace("create", configuration)
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
         val connection = makePeerConnectionInternal(
             configuration = configuration,
             observer = peerConnection,
