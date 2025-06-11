@@ -181,7 +181,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         }
 
     // Platform restriction
-    public final override fun onCreate(savedInstanceState: Bundle?) {
+    public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onPreCreate(savedInstanceState, null)
         logger.d { "Entered [onCreate(Bundle?)" }
@@ -204,7 +204,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         )
     }
 
-    public final override fun onCreate(
+    public override fun onCreate(
         savedInstanceState: Bundle?,
         persistentState: PersistableBundle?,
     ) {
@@ -230,28 +230,28 @@ public abstract class StreamCallActivity : ComponentActivity() {
         )
     }
 
-    public final override fun onResume() {
+    public override fun onResume() {
         super.onResume()
         withCachedCall {
             onResume(it)
         }
     }
 
-    public final override fun onUserLeaveHint() {
+    public override fun onUserLeaveHint() {
         withCachedCall {
             onUserLeaveHint(it)
             super.onUserLeaveHint()
         }
     }
 
-    public final override fun onPause() {
+    public override fun onPause() {
         withCachedCall {
             onPause(it)
             super.onPause()
         }
     }
 
-    public final override fun onStop() {
+    public override fun onStop() {
         withCachedCall {
             onStop(it)
             super.onStop()
@@ -478,7 +478,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * Note: Callbacks are posted on [Dispatchers.Main] dispatcher.
      *
      * @param cid the call ID
-     * @param members the call members
      * @param onSuccess callback where the [Call] object is returned
      * @param onError callback when the [Call] was not returned.
      */
