@@ -312,12 +312,14 @@ public class StreamPeerConnectionFactory(
         sessionId: String,
         sfuClient: SignalServerService,
         configuration: PeerConnection.RTCConfiguration,
+        tracer: Tracer,
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
             sfuClient = sfuClient,
             coroutineScope = coroutineScope,
+            tracer = tracer,
             onIceCandidateRequest = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(
@@ -343,6 +345,7 @@ public class StreamPeerConnectionFactory(
         maxPublishingBitrate: Int = 1_200_000,
         sfuClient: SignalServerService,
         sessionId: String,
+        tracer: Tracer,
         rejoin: () -> Unit = {},
     ): Publisher {
         val peerConnection = Publisher(
@@ -359,8 +362,10 @@ public class StreamPeerConnectionFactory(
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidate,
             maxBitRate = maxPublishingBitrate,
+            tracer = tracer,
             rejoin = rejoin,
         )
+        peerConnection.tracer().trace("create", configuration)
         val connection = makePeerConnectionInternal(
             configuration = configuration,
             observer = peerConnection,

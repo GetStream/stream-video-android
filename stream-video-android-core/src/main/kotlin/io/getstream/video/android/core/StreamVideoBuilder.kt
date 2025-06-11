@@ -136,6 +136,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
     private val callUpdatesAfterLeave: Boolean = false,
+    private val enableStatsReporting: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -260,6 +261,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
+            enableStatsCollection = enableStatsReporting
         )
 
         if (user.type == UserType.Guest) {

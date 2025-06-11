@@ -76,7 +76,7 @@ internal class Publisher(
     private val sessionId: String,
     private val rejoin: () -> Unit,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
-    private val tracer: Tracer = Tracer("publisher"),
+    private val tracer: Tracer,
 ) : StreamPeerConnection(
     coroutineScope,
     type,
@@ -98,7 +98,7 @@ internal class Publisher(
         }
     }
 
-    fun getTrace() = tracer.take()
+    fun tracer() : Tracer = tracer
 
     fun currentOptions() =
         safeCallWithDefault(emptyList()) { transceiverCache.items().map { it.publishOption } }
@@ -111,7 +111,7 @@ internal class Publisher(
             stopPublishing()
         }
         dispose()
-        connection.close()
+        close()
     }
 
     private fun dispose() {

@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call.connection
 
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.stats.StatsTracer
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.stats.toRtcStats
@@ -30,6 +31,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toDomainCandidate
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.model.toRtcCandidate
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.stringify
@@ -51,6 +53,7 @@ import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
+import org.webrtc.StatsReport
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -85,11 +88,11 @@ open class StreamPeerConnection(
     private val iceCandidates = mutableListOf<IceCandidate>()
     private val typeTag = type.stringify()
 
-    internal val statsReport = StatsTracer(connection, type.toPeerType())
-
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
+
+    open fun stats() : ComputedStats? = null
 
     internal val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
@@ -162,6 +165,7 @@ open class StreamPeerConnection(
                 it,
                 mediaConstraints,
             )
+            tracer.trace(PeerConnectionTraceKey.CREATE_OFFER.value, mediaConstraints)
         }
     }
 
@@ -174,7 +178,19 @@ open class StreamPeerConnection(
         mediaConstraints: MediaConstraints = defaultConstraints,
     ): Result<SessionDescription> {
         logger.d { "[createAnswer] #sfu; #$typeTag; no args" }
-        return createValue { connection.createAnswer(it, mediaConstraints) }
+        return createValue { connection.createAnswer(it, mediaConstraints) }.also { result ->
+            logger.d { "[createAnswer] #sfu; #$typeTag; result: $result" }
+            when (result) {
+                is Result.Success -> {
+                    logger.d { "[createAnswer] #sfu; #$typeTag; sdp: ${result.value.description}" }
+                    tracer.trace(PeerConnectionTraceKey.CREATE_ANSWER.value, result.value.description)
+                }
+
+                is Result.Failure -> {
+                    logger.e { "[createAnswer] #sfu; #$typeTag; error: ${result.value.message}" }
+                }
+            }
+        }
     }
 
     /**
@@ -200,7 +216,7 @@ open class StreamPeerConnection(
             }
 
             logger.d { "[setRemoteDescription] #ice; #sfu; #$typeTag; result: $result" }
-
+            tracer.trace(PeerConnectionTraceKey.SET_REMOTE_DESCRIPTION.value, sessionDescription.description)
             if (result.isSuccess) processIceCandidates()
         }
 
@@ -238,6 +254,7 @@ open class StreamPeerConnection(
             setValue {
                 // Never call this in parallel
                 connection.setLocalDescription(it, sdp)
+                tracer.trace(PeerConnectionTraceKey.SET_LOCAL_DESCRIPTION.value, sdp.description)
             }
         }
     }
@@ -270,6 +287,7 @@ open class StreamPeerConnection(
         logger.d { "[addIceCandidate] #sfu; #$typeTag; rtcIceCandidate: $rtcIceCandidate" }
         return connection.addRtcIceCandidate(rtcIceCandidate).also {
             logger.v { "[addIceCandidate] #sfu; #$typeTag; completed: $it" }
+            tracer.trace(PeerConnectionTraceKey.ADD_ICE_CANDIDATE.value, rtcIceCandidate)
         }
     }
 
@@ -465,6 +483,7 @@ open class StreamPeerConnection(
      */
     override fun onRenegotiationNeeded() {
         logger.w { "[onRenegotiationNeeded] #sfu; #$typeTag; no args" }
+        tracer.trace(PeerConnectionTraceKey.ON_NEGOTIATION_NEEDED.value, null)
         onNegotiationNeeded?.invoke(this, type)
     }
 
@@ -486,12 +505,14 @@ open class StreamPeerConnection(
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState
+        tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState)
     }
 
     // better to monitor onConnectionChange for the state
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         logger.i { "[onIceConnectionChange] #ice; #sfu; #$typeTag; newState: $newState" }
         iceState.value = newState
+        tracer.trace(PeerConnectionTraceKey.ON_ICE_CONNECTION_STATE_CHANGE.value, newState)
         when (newState) {
             PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
             }
@@ -501,6 +522,12 @@ open class StreamPeerConnection(
 
             else -> Unit
         }
+    }
+
+    fun close() {
+        logger.i { "[close] #sfu; #$typeTag; no args" }
+        tracer.trace(PeerConnectionTraceKey.CLOSE.value, null)
+        connection.close()
     }
 
     /**
@@ -542,6 +569,7 @@ open class StreamPeerConnection(
     }
 
     override fun onSignalingChange(newState: PeerConnection.SignalingState?) {
+        tracer.trace(PeerConnectionTraceKey.ON_SIGNALING_STATE_CHANGE.value, newState)
         logger.d { "[onSignalingChange] #sfu; #$typeTag; newState: $newState" }
     }
 
@@ -550,14 +578,17 @@ open class StreamPeerConnection(
     }
 
     override fun onIceGatheringChange(newState: PeerConnection.IceGatheringState?) {
+        tracer.trace(PeerConnectionTraceKey.ON_ICE_GATHERING_STATE_CHANGE.value, newState)
         logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
     }
 
     override fun onIceCandidatesRemoved(iceCandidates: Array<out org.webrtc.IceCandidate>?) {
+        tracer.trace(PeerConnectionTraceKey.ON_ICE_CANDIDATE.value, iceCandidates)
         logger.i { "[onIceCandidatesRemoved] #sfu; #$typeTag; iceCandidates: $iceCandidates" }
     }
 
     override fun onIceCandidateError(event: IceCandidateErrorEvent?) {
+
         logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
     }
 
@@ -569,7 +600,10 @@ open class StreamPeerConnection(
         logger.i { "[onTrack] #sfu; #$typeTag; transceiver: $transceiver" }
     }
 
-    override fun onDataChannel(channel: DataChannel?): Unit = Unit
+    override fun onDataChannel(channel: DataChannel?) {
+        tracer.trace(PeerConnectionTraceKey.ON_DATA_CHANNEL.value, channel)
+        logger.i { "[onDataChannel] #sfu; #$typeTag; channel: $channel" }
+    }
 
     override fun toString(): String =
         "StreamPeerConnection(type='$typeTag', constraints=$mediaConstraints)"

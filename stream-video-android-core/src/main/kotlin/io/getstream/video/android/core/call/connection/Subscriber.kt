@@ -29,6 +29,7 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithResult
@@ -58,6 +59,7 @@ internal class Subscriber(
     private val sessionId: String,
     private val sfuClient: SignalServerService,
     private val coroutineScope: CoroutineScope,
+    private val tracer: Tracer,
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : StreamPeerConnection(
     coroutineScope = coroutineScope,
@@ -71,6 +73,7 @@ internal class Subscriber(
             StreamPeerType.SUBSCRIBER,
         )
     },
+    tracer = tracer,
     maxBitRate = 0, // Set as needed
 ) {
 
@@ -103,6 +106,7 @@ internal class Subscriber(
     // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
     private val subscriptions = ConcurrentHashMap<String, TrackSubscriptionDetails>()
+    private val trackIdToTrackType = ConcurrentHashMap<String, TrackType>()
 
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
     private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
@@ -412,6 +416,7 @@ internal class Subscriber(
                 audio = track,
             )
             trackIdToParticipant[track.id()] = sessionId
+            trackIdToTrackType[track.id()] = trackType
             setTrack(sessionId, trackType, audioTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, audioTrack))
         }
@@ -424,6 +429,7 @@ internal class Subscriber(
                 video = track,
             )
             trackIdToParticipant[track.id()] = sessionId
+            trackIdToTrackType[track.id()] = trackType
             setTrack(sessionId, trackType, videoTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, videoTrack))
         }

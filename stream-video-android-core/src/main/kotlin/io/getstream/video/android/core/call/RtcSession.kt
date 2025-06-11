@@ -51,8 +51,11 @@ import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.RtcException
+import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -60,6 +63,7 @@ import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
+import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
@@ -73,7 +77,11 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.TraceRecord
+import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.trace.TracerFactory
+import io.getstream.video.android.core.trace.serialize
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildRemoteIceServers
@@ -107,6 +115,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
+import org.json.JSONArray
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStatsReport
@@ -201,6 +210,7 @@ public class RtcSession internal constructor(
     private val supervisorJob: CompletableJob = SupervisorJob(),
     private val coroutineScope: CoroutineScope =
         CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
+    private val tracerFactory: TracerFactory = TracerFactory(clientImpl.enableStatsCollection),
     private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
         SfuConnectionModule(
             context = clientImpl.context,
@@ -222,17 +232,17 @@ public class RtcSession internal constructor(
     internal val socket
         get() = sfuConnectionModule.socketConnection
 
+
+    private val publisherTracer = tracerFactory.tracer("pub")
+    private val subscriberTracer = tracerFactory.tracer("sub")
+    private val sfuTracer = tracerFactory.tracer("sfu")
+
     private val logger by taggedLogger("Video:RtcSession")
     internal val _peerConnectionStates =
         MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
             null,
         )
-    private val traces = mutableListOf<TraceRecord>()
-    internal val statsReportJob = call.scope.launch {
-        while (true) {
-            delay(10000)
-        }
-    }
+
     internal val trackOverridesHandler = TrackOverridesHandler(
         onOverridesUpdate = {
             setVideoSubscriptions()
@@ -403,6 +413,7 @@ public class RtcSession internal constructor(
         // listen to socket events and errors
         eventJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.events().collect {
+                traceEvent(it)
                 clientImpl.fireEvent(it, call.cid)
             }
         }
@@ -439,6 +450,40 @@ public class RtcSession internal constructor(
                     it.streamError.extractCause()
                         ?: IllegalStateException("Error emitted without a cause on SFU connection."),
                 ) { "permanent failure on socket connection" }
+            }
+        }
+    }
+
+    private fun traceEvent(it: SfuDataEvent) = safeCall {
+        when (it) {
+            is ChangePublishQualityEvent -> {
+                sfuTracer.trace(
+                    PeerConnectionTraceKey.CHANGE_PUBLISH_QUALITY.value,
+                    it.changePublishQuality
+                )
+            }
+
+            is ChangePublishOptionsEvent -> {
+                sfuTracer.trace(
+                    PeerConnectionTraceKey.CHANGE_PUBLISH_OPTIONS.value,
+                    it.change,
+                )
+            }
+
+            is GoAwayEvent -> {
+                sfuTracer.trace(PeerConnectionTraceKey.GO_AWAY.value, it)
+            }
+
+            is CallEndedSfuEvent -> {
+                sfuTracer.trace(PeerConnectionTraceKey.CALL_ENDED.value, it)
+            }
+
+            is ErrorEvent -> {
+                sfuTracer.trace(PeerConnectionTraceKey.SFU_ERROR.value, it)
+            }
+
+            else -> {
+                // Don't trace this event.
             }
         }
     }
@@ -673,6 +718,10 @@ public class RtcSession internal constructor(
             "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, videoEnabled: $videoEnabled, audioEnabled: $audioEnabled"
         }
         val track = getTrack(sessionId, trackType)
+        if (track == null) {
+            logger.w { "Track not found for $sessionId and $trackType" }
+            setScreenShareTrack()
+        }
         track?.enableVideo(videoEnabled)
         track?.enableAudio(audioEnabled)
     }
@@ -691,7 +740,7 @@ public class RtcSession internal constructor(
 
         // cleanup the publisher and subcriber peer connections
         safeCall {
-            subscriber?.connection?.close()
+            subscriber?.close()
             publisher?.close(true)
         }
 
@@ -769,6 +818,7 @@ public class RtcSession internal constructor(
             configuration = connectionConfiguration,
             sfuClient = sfuConnectionModule.api,
             sessionId = sessionId,
+            tracer = subscriberTracer,
             onIceCandidateRequest = ::sendIceCandidate,
         )
         return peerConnection
@@ -831,7 +881,7 @@ public class RtcSession internal constructor(
         dummyPeerConnection?.connection?.transceivers?.forEach {
             it.stop()
         }
-        dummyPeerConnection?.connection?.close()
+        dummyPeerConnection?.close()
     }
 
     @VisibleForTesting
@@ -846,6 +896,7 @@ public class RtcSession internal constructor(
             coroutineScope = coroutineScope,
             mediaConstraints = defaultConstraints,
             onNegotiationNeeded = { _, _ -> },
+            tracer = publisherTracer,
             onIceCandidate = ::sendIceCandidate,
         ) {
             coroutineScope.launch {
@@ -1137,6 +1188,14 @@ public class RtcSession internal constructor(
         return subscriber?.getStats()
     }
 
+    fun List<Array<Any?>>.toJson(): String {
+        val outer = JSONArray()
+        for (inner in this) {
+            outer.put(JSONArray(inner))   // wraps each Array into its own JSONArray
+        }
+        return outer.toString()           // compact JSON → use .toString(2) for pretty
+    }
+
     internal suspend fun sendCallStats(
         report: CallStatsReport,
         connectionTimeSeconds: Float? = null,
@@ -1163,36 +1222,41 @@ public class RtcSession internal constructor(
                 logger.d { "[sendCallStats] #powerSaveMode state: $powerSaveMode" }
                 powerSaveMode ?: false
             }
-            sfuConnectionModule.api.sendStats(
-                sendStatsRequest = SendStatsRequest(
-                    session_id = sessionId,
-                    sdk = "stream-android",
-                    sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
-                    webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
-                    publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
-                    subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
-                    // rtc_stats = , Tracer instances
-                    android = AndroidState(
-                        thermal_state = androidThermalState,
-                        is_power_saver_mode = powerSaving,
-                    ),
-                    telemetry = safeCallWithDefault(null) {
-                        if (connectionTimeSeconds != null) {
-                            Telemetry(
-                                connection_time_seconds = connectionTimeSeconds.toFloat(),
-                            )
-                        } else if (reconnectionTimeSeconds != null) {
-                            Telemetry(
-                                reconnection = Reconnection(
-                                    time_seconds = reconnectionTimeSeconds.first.toFloat(),
-                                    strategy = reconnectionTimeSeconds.second,
-                                ),
-                            )
-                        } else {
-                            null
-                        }
-                    },
+            val rtc_stats = tracerFactory.tracers().flatMap {
+                it.take().snapshot.map { it.serialize() }
+            }.toJson()
+            val sendStatsRequest = SendStatsRequest(
+                session_id = sessionId,
+                sdk = "stream-android",
+                sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
+                webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
+                publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
+                subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
+                rtc_stats = rtc_stats,
+                android = AndroidState(
+                    thermal_state = androidThermalState,
+                    is_power_saver_mode = powerSaving,
                 ),
+                telemetry = safeCallWithDefault(null) {
+                    if (connectionTimeSeconds != null) {
+                        Telemetry(
+                            connection_time_seconds = connectionTimeSeconds.toFloat(),
+                        )
+                    } else if (reconnectionTimeSeconds != null) {
+                        Telemetry(
+                            reconnection = Reconnection(
+                                time_seconds = reconnectionTimeSeconds.first.toFloat(),
+                                strategy = reconnectionTimeSeconds.second,
+                            ),
+                        )
+                    } else {
+                        null
+                    }
+                },
+            )
+            logger.d { "[sendCallStats] #sfu; #track; request: $rtc_stats" }
+            sfuConnectionModule.api.sendStats(
+                sendStatsRequest = sendStatsRequest,
             )
         }
 
@@ -1348,6 +1412,8 @@ public class RtcSession internal constructor(
             preferred_publish_options = publisher?.currentOptions() ?: emptyList(),
             reconnect_details = reconnectDetails,
         )
+        publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request)
+
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
         coroutineScope.launch {
@@ -1383,7 +1449,7 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.disconnect()
         }
         publisher?.close(true)
-        subscriber?.connection?.close()
+        subscriber?.close()
     }
 
     internal fun prepareReconnect() {
