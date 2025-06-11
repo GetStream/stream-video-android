@@ -99,8 +99,8 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
         // also see https://github.com/GetStream/stream-video-js/blob/main/packages/client/src/stats/state-store-stats-reporter.ts
 
         val skipTypes = listOf("certificate", "data-channel")
-        val trackToParticipant = call.session?.trackIdToParticipant?.value ?: emptyMap()
-        val displayingAt = call.session?.trackDimensions?.value ?: emptyMap()
+        val trackToParticipant = call.session?.subscriber?.trackIdToParticipant() ?: emptyMap()
+        val displayingAt = call.session?.subscriber?.viewportDimensions() ?: emptyMap()
 
         val statGroups = mutableMapOf<String, MutableList<RTCStats>>()
 
@@ -243,7 +243,7 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
     }
 
     fun updateLocalStats() {
-        val displayingAt = call.session?.trackDimensions?.value ?: emptyMap()
+        val displayingAt = call.session?.subscriber?.viewportDimensions() ?: emptyMap()
         val resolution = call.camera.resolution.value
         val availableResolutions = call.camera.availableResolutions.value
         val maxResolution = availableResolutions.maxByOrNull { it.width * it.height }
