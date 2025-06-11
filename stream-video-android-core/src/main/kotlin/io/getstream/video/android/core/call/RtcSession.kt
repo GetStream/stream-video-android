@@ -1223,13 +1223,17 @@ public class RtcSession internal constructor(
 
             val publisherRtcStats = publisher?.stats()
             val subscriberRtcStast = subscriber?.stats()
-            val publisher_rtc_stats = publisherRtcStats?.let { parser.toJson(it) } ?: ""
-            val subscriber_rtc_stats = subscriberRtcStast?.let { parser.toJson(it) } ?: ""
+            val publisher_rtc_stats = publisherRtcStats?.let { parser.toJson(it.delta) } ?: ""
+            val subscriber_rtc_stats = subscriberRtcStast?.let { parser.toJson(it.delta) } ?: ""
             logger.d { "[sendCallStats] #sfu; #track; publisher_rtc_stats: $publisher_rtc_stats" }
             logger.d { "[sendCallStats] #sfu; #track; subscriber_rtc_stats: $subscriber_rtc_stats" }
             val rtc_stats = tracerFactory.tracers().flatMap {
                 it.take().snapshot.map { it.serialize() }
+            }.toMutableList().apply {
+                add(TraceRecord("getstats", "sub", subscriber_rtc_stats, System.currentTimeMillis()).serialize())
+                add(TraceRecord("getstats", "pub", publisher_rtc_stats, System.currentTimeMillis()).serialize())
             }.toJson()
+            logger.d { "[sendCallStats] #sfu; #track; rtc_stats: $rtc_stats" }
             val sendStatsRequest = SendStatsRequest(
                 session_id = sessionId,
                 sdk = "stream-android",
@@ -1238,8 +1242,8 @@ public class RtcSession internal constructor(
                 publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
                 subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
                 rtc_stats = rtc_stats,
-                publisher_rtc_stats = publisher_rtc_stats,
-                subscriber_rtc_stats = subscriber_rtc_stats,
+                encode_stats = publisherRtcStats?.performanceStats ?: emptyList(),
+                decode_stats = subscriberRtcStast?.performanceStats ?: emptyList(),
                 android = AndroidState(
                     thermal_state = androidThermalState,
                     is_power_saver_mode = powerSaving,
