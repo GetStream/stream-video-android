@@ -718,10 +718,6 @@ public class RtcSession internal constructor(
             "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, videoEnabled: $videoEnabled, audioEnabled: $audioEnabled"
         }
         val track = getTrack(sessionId, trackType)
-        if (track == null) {
-            logger.w { "Track not found for $sessionId and $trackType" }
-            setScreenShareTrack()
-        }
         track?.enableVideo(videoEnabled)
         track?.enableAudio(audioEnabled)
     }

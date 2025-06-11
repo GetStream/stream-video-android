@@ -105,7 +105,7 @@ internal class Subscriber(
 
     // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
-    private val subscriptions = ConcurrentHashMap<String, TrackSubscriptionDetails>()
+    private val subscriptions = ConcurrentHashMap<Pair<String, TrackType>, TrackSubscriptionDetails>()
     private val trackIdToTrackType = ConcurrentHashMap<String, TrackType>()
 
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
@@ -255,7 +255,7 @@ internal class Subscriber(
             visibleTracks(remoteParticipants)
         }.let(trackOverridesHandler::applyOverrides)
 
-        val newTracks = tracks.associateBy { it.session_id }
+        val newTracks = tracks.associateBy { it.session_id to it.track_type }
         subscriptions.putAll(newTracks)
 
         val request = UpdateSubscriptionsRequest(
