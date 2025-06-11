@@ -140,6 +140,8 @@ open class StreamPeerConnection(
 
     internal var statsTracer: StatsTracer? = null
 
+    fun tracer() : Tracer = tracer
+
     /**
      * Initialize a [StreamPeerConnection] using a WebRTC [PeerConnection].
      *

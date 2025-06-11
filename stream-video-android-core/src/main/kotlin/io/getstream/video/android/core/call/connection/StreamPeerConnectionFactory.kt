@@ -330,6 +330,8 @@ public class StreamPeerConnectionFactory(
         webRtcLogger.d { "type $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
         peerConnection.addTransceivers()
+
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
         return peerConnection
     }
 
@@ -366,13 +368,13 @@ public class StreamPeerConnectionFactory(
             tracer = tracer,
             rejoin = rejoin,
         )
-        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
         val connection = makePeerConnectionInternal(
             configuration = configuration,
             observer = peerConnection,
         )
         webRtcLogger.d { "type ${StreamPeerType.PUBLISHER} $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
 
         return peerConnection
     }

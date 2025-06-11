@@ -99,8 +99,6 @@ internal class Publisher(
         }
     }
 
-    fun tracer() : Tracer = tracer
-
     fun currentOptions() =
         safeCallWithDefault(emptyList()) { transceiverCache.items().map { it.publishOption } }
 
