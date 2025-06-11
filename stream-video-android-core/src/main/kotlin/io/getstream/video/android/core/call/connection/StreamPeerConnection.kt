@@ -53,8 +53,6 @@ import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
-import org.webrtc.StatsReport
-import stream.video.sfu.models.TrackType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -93,7 +91,7 @@ open class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
-    open suspend fun stats() : ComputedStats? = null
+    open suspend fun stats(): ComputedStats? = null
 
     internal val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
@@ -140,7 +138,7 @@ open class StreamPeerConnection(
 
     internal var statsTracer: StatsTracer? = null
 
-    fun tracer() : Tracer = tracer
+    fun tracer(): Tracer = tracer
 
     /**
      * Initialize a [StreamPeerConnection] using a WebRTC [PeerConnection].
@@ -188,7 +186,10 @@ open class StreamPeerConnection(
             when (result) {
                 is Result.Success -> {
                     logger.d { "[createAnswer] #sfu; #$typeTag; sdp: ${result.value.description}" }
-                    tracer.trace(PeerConnectionTraceKey.CREATE_ANSWER.value, result.value.description)
+                    tracer.trace(
+                        PeerConnectionTraceKey.CREATE_ANSWER.value,
+                        result.value.description,
+                    )
                 }
 
                 is Result.Failure -> {
@@ -221,7 +222,10 @@ open class StreamPeerConnection(
             }
 
             logger.d { "[setRemoteDescription] #ice; #sfu; #$typeTag; result: $result" }
-            tracer.trace(PeerConnectionTraceKey.SET_REMOTE_DESCRIPTION.value, sessionDescription.description)
+            tracer.trace(
+                PeerConnectionTraceKey.SET_REMOTE_DESCRIPTION.value,
+                sessionDescription.description,
+            )
             if (result.isSuccess) processIceCandidates()
         }
 
@@ -593,7 +597,6 @@ open class StreamPeerConnection(
     }
 
     override fun onIceCandidateError(event: IceCandidateErrorEvent?) {
-
         logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
     }
 
@@ -605,11 +608,17 @@ open class StreamPeerConnection(
         logger.i { "[onTrack] #sfu; #$typeTag; transceiver: $transceiver" }
         val sender = transceiver?.sender
         if (sender != null) {
-            tracer.trace(PeerConnectionTraceKey.ON_TRACK.value, "${sender.track()?.kind()}:${sender.track()?.id()} ${sender.streams}")
+            tracer.trace(
+                PeerConnectionTraceKey.ON_TRACK.value,
+                "${sender.track()?.kind()}:${sender.track()?.id()} ${sender.streams}",
+            )
         }
         val receiver = transceiver?.receiver
         if (receiver != null) {
-            tracer.trace(PeerConnectionTraceKey.ON_TRACK.value, "${receiver.track()?.kind()}:${receiver.track()?.id()}")
+            tracer.trace(
+                PeerConnectionTraceKey.ON_TRACK.value,
+                "${receiver.track()?.kind()}:${receiver.track()?.id()}",
+            )
         }
     }
 

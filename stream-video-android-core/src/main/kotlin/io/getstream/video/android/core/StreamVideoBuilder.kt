@@ -261,7 +261,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
-            enableStatsCollection = enableStatsReporting
+            enableStatsCollection = enableStatsReporting,
         )
 
         if (user.type == UserType.Guest) {

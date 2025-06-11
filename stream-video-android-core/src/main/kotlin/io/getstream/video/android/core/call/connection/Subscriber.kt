@@ -107,7 +107,8 @@ internal class Subscriber(
 
     // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
-    private val subscriptions = ConcurrentHashMap<Pair<String, TrackType>, TrackSubscriptionDetails>()
+    private val subscriptions =
+        ConcurrentHashMap<Pair<String, TrackType>, TrackSubscriptionDetails>()
     private val trackIdToTrackType = ConcurrentHashMap<String, TrackType>()
 
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))

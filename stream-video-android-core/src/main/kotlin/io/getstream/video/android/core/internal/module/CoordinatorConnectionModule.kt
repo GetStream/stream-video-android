@@ -56,7 +56,7 @@ internal class CoordinatorConnectionModule(
     override val apiKey: ApiKey,
     override val userToken: UserToken,
     override val lifecycle: Lifecycle,
-    override val tracer: Tracer = Tracer("coordinator")
+    override val tracer: Tracer = Tracer("coordinator"),
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
     // Internals
     private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)

@@ -63,7 +63,6 @@ import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
-import io.getstream.video.android.core.events.SfuSocketError
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
@@ -81,14 +80,12 @@ import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.TraceRecord
-import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trace.TracerFactory
 import io.getstream.video.android.core.trace.serialize
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.defaultConstraints
-import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
@@ -233,7 +230,6 @@ public class RtcSession internal constructor(
     private var eventJob: Job? = null
     internal val socket
         get() = sfuConnectionModule.socketConnection
-
 
     private val publisherTracer = tracerFactory.tracer("pub")
     private val subscriberTracer = tracerFactory.tracer("sub")
@@ -461,7 +457,7 @@ public class RtcSession internal constructor(
             is ChangePublishQualityEvent -> {
                 sfuTracer.trace(
                     PeerConnectionTraceKey.CHANGE_PUBLISH_QUALITY.value,
-                    it.changePublishQuality
+                    it.changePublishQuality,
                 )
             }
 
@@ -1189,9 +1185,9 @@ public class RtcSession internal constructor(
     fun List<Array<Any?>>.toJson(): String {
         val outer = JSONArray()
         for (inner in this) {
-            outer.put(JSONArray(inner))   // wraps each Array into its own JSONArray
+            outer.put(JSONArray(inner)) // wraps each Array into its own JSONArray
         }
-        return outer.toString()           // compact JSON → use .toString(2) for pretty
+        return outer.toString() // compact JSON → use .toString(2) for pretty
     }
     private val parser: VideoParser = MoshiVideoParser()
     internal suspend fun sendCallStats(
@@ -1230,8 +1226,22 @@ public class RtcSession internal constructor(
             val rtc_stats = tracerFactory.tracers().flatMap {
                 it.take().snapshot.map { it.serialize() }
             }.toMutableList().apply {
-                add(TraceRecord("getstats", "sub", subscriber_rtc_stats, System.currentTimeMillis()).serialize())
-                add(TraceRecord("getstats", "pub", publisher_rtc_stats, System.currentTimeMillis()).serialize())
+                add(
+                    TraceRecord(
+                        "getstats",
+                        "sub",
+                        subscriber_rtc_stats,
+                        System.currentTimeMillis(),
+                    ).serialize(),
+                )
+                add(
+                    TraceRecord(
+                        "getstats",
+                        "pub",
+                        publisher_rtc_stats,
+                        System.currentTimeMillis(),
+                    ).serialize(),
+                )
             }.toJson()
             logger.d { "[sendCallStats] #sfu; #track; rtc_stats: $rtc_stats" }
             val sendStatsRequest = SendStatsRequest(

@@ -67,9 +67,12 @@ internal class SfuConnectionModule(
     }
 
     // API
-    override val api: SignalServerService = tracedWith(signalRetrofitClient.create(
-        SignalServerService::class.java,
-    ), tracer)
+    override val api: SignalServerService = tracedWith(
+        signalRetrofitClient.create(
+            SignalServerService::class.java,
+        ),
+        tracer,
+    )
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
