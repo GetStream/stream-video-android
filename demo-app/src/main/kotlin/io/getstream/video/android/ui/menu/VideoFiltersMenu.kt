@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.R
@@ -96,6 +97,7 @@ private fun BlurredBackgroundToggleItem(
     onClick: () -> Unit = {},
 ) {
     StreamIconToggleButton(
+        modifier = Modifier.testTag("Stream_Background_${icon.name}_${toggleState.name}"),
         toggleState = rememberUpdatedState(newValue = toggleState),
         onIcon = icon,
         onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
@@ -111,6 +113,7 @@ private fun VirtualBackgroundToggleItem(
     onClick: () -> Unit = {},
 ) {
     StreamDrawableToggleButton(
+        modifier = Modifier.testTag("Stream_Background_Image_${toggleState.name}"),
         toggleState = rememberUpdatedState(newValue = toggleState),
         onDrawable = drawable,
         onStyle = ButtonStyles.drawableToggleButtonStyleOn(),

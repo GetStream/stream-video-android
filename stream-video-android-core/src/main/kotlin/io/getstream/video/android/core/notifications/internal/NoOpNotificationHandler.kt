@@ -18,9 +18,13 @@ package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
 import android.app.PendingIntent
+import androidx.core.app.NotificationCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -63,4 +67,20 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override fun onPermissionGranted() { /* NoOp */ }
     override fun onPermissionRationale() { /* NoOp */ }
     override fun onPermissionRequested() { /* NoOp */ }
+
+    override fun createMinimalMediaStyleNotification(
+        callId: StreamCallId,
+        mediaNotificationConfig: MediaNotificationConfig,
+        remoteParticipantCount: Int,
+    ): NotificationCompat.Builder? {
+        return null
+    }
+
+    override fun getMediaNotificationConfig(): MediaNotificationConfig {
+        return MediaNotificationConfig(
+            MediaNotificationContent("", ""),
+            MediaNotificationVisuals(android.R.drawable.ic_media_play, null),
+            null,
+        )
+    }
 }

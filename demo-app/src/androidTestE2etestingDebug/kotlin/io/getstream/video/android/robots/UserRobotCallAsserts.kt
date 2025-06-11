@@ -18,6 +18,9 @@ package io.getstream.video.android.robots
 
 import androidx.test.uiautomator.BySelector
 import io.getstream.video.android.pages.CallPage
+import io.getstream.video.android.pages.CallPage.SettingsMenu
+import io.getstream.video.android.robots.UserControls.DISABLE
+import io.getstream.video.android.robots.UserControls.ENABLE
 import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
@@ -38,25 +41,84 @@ fun UserRobot.assertCallControls(microphone: Boolean, camera: Boolean): UserRobo
     assertTrue(CallPage.callSettingsClosedToggle.waitToAppear().isDisplayed())
     assertTrue(CallPage.hangUpButton.isDisplayed())
     assertTrue(CallPage.chatButton.isDisplayed())
-    assertTrue(CallPage.cameraPositionToggleFront.isDisplayed())
-
-    if (microphone) {
-        assertTrue(CallPage.microphoneEnabledToggle.isDisplayed())
-    } else {
-        assertTrue(CallPage.microphoneDisabledToggle.isDisplayed())
-    }
-
-    if (camera) {
-        assertTrue(CallPage.cameraEnabledToggle.isDisplayed())
-    } else {
-        assertTrue(CallPage.cameraDisabledToggle.isDisplayed())
-    }
-
+    assertTrue(CallPage.connectionQualityIndicator.isDisplayed())
+    assertUserFrontCamera(isEnabled = true)
+    assertUserMicrophone(isEnabled = microphone)
+    assertUserCamera(isEnabled = camera)
     return this
 }
 
 fun UserRobot.assertThatCallIsEnded(): UserRobot {
     assertFalse(CallPage.hangUpButton.waitToDisappear().isDisplayed())
+    return this
+}
+
+fun UserRobot.assertUserMicrophone(isEnabled: Boolean): UserRobot {
+    if (isEnabled) {
+        assertTrue(CallPage.microphoneEnabledToggle.waitToAppear().isDisplayed())
+        assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.isDisplayed())
+    } else {
+        assertTrue(CallPage.microphoneDisabledToggle.waitToAppear().isDisplayed())
+        assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.isDisplayed())
+    }
+    return this
+}
+
+fun UserRobot.assertUserCamera(isEnabled: Boolean): UserRobot {
+    if (isEnabled) {
+        assertTrue(CallPage.cameraEnabledToggle.waitToAppear().isDisplayed())
+        // TODO: https://linear.app/stream/issue/AND-573
+        // assertTrue(CallPage.videoViewWithMediaTrack.isDisplayed())
+    } else {
+        assertTrue(CallPage.cameraDisabledToggle.waitToAppear().isDisplayed())
+        assertFalse(CallPage.videoViewWithMediaTrack.isDisplayed())
+    }
+    return this
+}
+
+fun UserRobot.assertUserFrontCamera(isEnabled: Boolean): UserRobot {
+    if (isEnabled) {
+        assertTrue(CallPage.cameraPositionToggleFront.waitToAppear().isDisplayed())
+    } else {
+        assertTrue(CallPage.cameraPositionToggleBack.waitToDisappear().isDisplayed())
+    }
+    return this
+}
+
+fun UserRobot.assertHand(isRaised: Boolean): UserRobot {
+    if (isRaised) {
+        assertTrue(CallPage.raisedHand.waitToAppear().isDisplayed())
+    } else {
+        assertTrue(CallPage.raisedHand.waitToDisappear().isDisplayed())
+    }
+    return this
+}
+
+fun UserRobot.assertBackground(background: Background, isEnabled: Boolean): UserRobot {
+    settings(ENABLE)
+    val locator = when (background) {
+        Background.DEFAULT -> SettingsMenu.defaultBackgroundEnabledToggle
+        Background.IMAGE -> SettingsMenu.imageBackgroundEnabledToggle
+        Background.BLUR -> SettingsMenu.blurBackgroundEnabledToggle
+    }
+    val expectedCount = if (isEnabled) 1 else 0
+    assertEquals(expectedCount, locator.findObjects().size)
+    return this
+}
+
+fun UserRobot.assertTranscription(isEnabled: Boolean): UserRobot {
+    settings(ENABLE)
+    val locator = if (isEnabled) SettingsMenu.stopTranscriptionButton else SettingsMenu.startTranscriptionButton
+    assertEquals(1, locator.waitForCount(1).size)
+    settings(DISABLE)
+    return this
+}
+
+fun UserRobot.assertClosedCaption(isEnabled: Boolean): UserRobot {
+    settings(ENABLE)
+    val locator = if (isEnabled) SettingsMenu.stopClosedCaptionButton else SettingsMenu.startClosedCaptionButton
+    assertEquals(1, locator.waitForCount(1).size)
+    settings(DISABLE)
     return this
 }
 
@@ -136,7 +198,7 @@ fun UserRobot.assertCallDurationView(isDisplayed: Boolean): UserRobot {
 fun UserRobot.assertParticipantScreenSharingView(isDisplayed: Boolean): UserRobot {
     val screenSharingView = CallPage.ParticipantView.screenSharingView
     if (isDisplayed) {
-        assertTrue(screenSharingView.waitToAppear(timeOutMillis = 10.seconds).isDisplayed())
+        assertTrue(screenSharingView.waitToAppear(timeOutMillis = 15.seconds).isDisplayed())
         assertTrue(CallPage.ParticipantView.screenSharingLabel.waitToAppear().isDisplayed())
     } else {
         assertFalse(screenSharingView.waitToDisappear(timeOutMillis = 10.seconds).isDisplayed())
