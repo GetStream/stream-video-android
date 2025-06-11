@@ -759,7 +759,7 @@ class CameraManager(
 
         initDeviceList()
 
-        val devicesMatchingDirection = devices.filter { it.direction == _direction.value }
+        val devicesMatchingDirection = filterDevicesByAvailableDirection(devices, _direction.value)
         val selectedDevice = devicesMatchingDirection.firstOrNull()
         if (selectedDevice != null) {
             _selectedDevice.value = selectedDevice
@@ -777,6 +777,27 @@ class CameraManager(
                 "CaptureThread", eglBaseContext,
             )
             setupCompleted = true
+        }
+    }
+
+    /**
+     * Returns a list of camera devices filtered by the preferred direction (e.g., FRONT or BACK).
+     * If no device matches the preferred direction, the original list is returned unfiltered.
+     *
+     * This ensures graceful fallback behavior on devices with non-standard or limited camera configurations.
+     *
+     * @param devices The full list of available camera devices.
+     * @param preferredDirection The camera direction to prioritize.
+     * @return A list of devices matching the preferred direction, or all devices if none match.
+     */
+    private fun filterDevicesByAvailableDirection(
+        devices: List<CameraDeviceWrapped>,
+        preferredDirection: CameraDirection,
+    ): List<CameraDeviceWrapped> {
+        return if (devices.any { it.direction == preferredDirection }) {
+            devices.filter { it.direction == preferredDirection }
+        } else {
+            devices
         }
     }
 
