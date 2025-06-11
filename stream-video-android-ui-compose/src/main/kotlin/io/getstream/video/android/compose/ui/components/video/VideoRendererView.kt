@@ -27,6 +27,7 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import java.util.UUID
 
 /**
  * Renders a single video track based on the call state.
@@ -47,6 +48,8 @@ public class VideoRendererView : VideoTextureViewRenderer {
      * The video track that should be drawn.
      */
     private val video: ParticipantState.Media? = null
+
+    private val viewportId = UUID.randomUUID().toString()
 
     /**
      * An interface that will be invoked when the video is rendered.
@@ -81,12 +84,13 @@ public class VideoRendererView : VideoTextureViewRenderer {
             sessionId = sessionId,
             trackType = trackType,
             onRendered = onRendered,
+            viewportId = viewportId,
         )
         setScalingType(scalingType = videoScalingType.toCommonScalingType())
         setupVideo(mediaTrack)
 
         // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-        call.setVisibility(sessionId, trackType, true)
+        call.setVisibility(sessionId, trackType, true, viewportId)
     }
 
     private fun setupVideo(mediaTrack: MediaTrack?) {
@@ -120,7 +124,7 @@ public class VideoRendererView : VideoTextureViewRenderer {
 
             // inform the call that we no longer want to render this video track
             val call = StreamVideo.instance().call(type = streamCallId.type, id = streamCallId.id)
-            call.setVisibility(sessionId, trackType, false)
+            call.setVisibility(sessionId, trackType, false, viewportId)
         }
     }
 }
