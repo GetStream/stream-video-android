@@ -77,4 +77,5 @@ dependencies {
     // preview
     compileOnly(project(":stream-video-android-previewdata"))
     testImplementation(project(":stream-video-android-previewdata"))
+    implementation(libs.audioswitch)
 }

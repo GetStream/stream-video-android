@@ -38,6 +38,7 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -201,6 +202,28 @@ class SpeakerManager(
             if (it > 0) {
                 setVolume(it)
             }
+        }
+    }
+
+    /**
+     * We will soon finalize this api
+     */
+    @ExperimentalStreamVideoApi
+    fun select(device: StreamAudioDevice?) {
+        logger.i { "selecting device $device" }
+        microphoneManager.ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+        microphoneManager._selectedDevice.value = device
+
+//        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+//            _status.value = DeviceStatus.Disabled
+//        }
+
+//        if (device is StreamAudioDevice.Speakerphone) {
+        _status.value = DeviceStatus.Enabled
+//        }
+//
+        if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
+            microphoneManager.nonHeadsetFallbackDevice = device
         }
     }
 }
@@ -369,7 +392,7 @@ class MicrophoneManager(
     /** Represents whether the audio is enabled */
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
-    private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
+    internal val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
     internal var nonHeadsetFallbackDevice: StreamAudioDevice? = null
 
     /** Currently selected device */
@@ -467,6 +490,7 @@ class MicrophoneManager(
         setupCompleted = false
     }
 
+//    fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
     fun canHandleDeviceSwitch() = true
 
     // Internal logic
@@ -487,22 +511,23 @@ class MicrophoneManager(
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
+                val preferredDeviceList = listOf(
+                    AudioDevice.BluetoothHeadset::class.java,
+                    AudioDevice.WiredHeadset::class.java,
+                ) + if (preferSpeaker) {
+                    listOf(
+                        AudioDevice.Speakerphone::class.java,
+                        AudioDevice.Earpiece::class.java,
+                    )
+                } else {
+                    listOf(
+                        AudioDevice.Earpiece::class.java,
+                        AudioDevice.Speakerphone::class.java,
+                    )
+                }
                 audioHandler = AudioSwitchHandler(
                     context = mediaManager.context,
-                    preferredDeviceList = listOf(
-                        AudioDevice.BluetoothHeadset::class.java,
-                        AudioDevice.WiredHeadset::class.java,
-                    ) + if (preferSpeaker) {
-                        listOf(
-                            AudioDevice.Speakerphone::class.java,
-                            AudioDevice.Earpiece::class.java,
-                        )
-                    } else {
-                        listOf(
-                            AudioDevice.Earpiece::class.java,
-                            AudioDevice.Speakerphone::class.java,
-                        )
-                    },
+                    preferredDeviceList = preferredDeviceList,
                     audioDeviceChangeListener = { devices, selected ->
                         logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
@@ -529,7 +554,7 @@ class MicrophoneManager(
         onAudioDevicesUpdate = actual,
     )
 
-    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
+    internal fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
             then(this.audioHandler as AudioSwitchHandler)
         } else {

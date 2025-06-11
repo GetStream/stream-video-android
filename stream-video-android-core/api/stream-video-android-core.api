@@ -6233,6 +6233,7 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun pause ()V
 	public final fun resume ()V
+	public final fun select (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/SpeakerManager;ZZILjava/lang/Object;)V
 	public final fun setSpeakerPhone (ZLio/getstream/video/android/core/audio/StreamAudioDevice;)V

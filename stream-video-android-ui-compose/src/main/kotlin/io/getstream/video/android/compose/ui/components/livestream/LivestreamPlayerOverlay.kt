@@ -28,6 +28,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.HeadsetMic
+import androidx.compose.material.icons.filled.SettingsVoice
+import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,12 +50,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSettingsAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
+import io.getstream.video.android.compose.ui.components.menu.base.ActionMenuItem
+import io.getstream.video.android.compose.ui.components.menu.base.DynamicMenu
+import io.getstream.video.android.compose.ui.components.menu.base.MenuItem
+import io.getstream.video.android.compose.ui.components.menu.base.SubMenuItem
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -146,9 +159,19 @@ private fun BoxScope.LiveControls(call: Call) {
     val speakerphoneEnabled by if (LocalInspectionMode.current) {
         remember { mutableStateOf(true) }
     } else {
-        call.speaker.isEnabled.collectAsStateWithLifecycle()
+        call.speaker.isEnabled.collectAsStateWithLifecycle() // TODO Rahul, Since we allow any speaker to be available, so the logic should be like, call.audioOutput.isEnabled()
     }
+
     var isShowingSettingMenu by remember { mutableStateOf(false) }
+    if (isShowingSettingMenu) {
+        SettingsMenu(call, onDeviceSelected = {
+            call.speaker.select(
+                it,
+            ) // TODO Rahul, Refactor this api, itt should be call.speaker.select(..)
+        }) {
+            isShowingSettingMenu = false
+        }
+    }
 
     Row(modifier = Modifier.align(Alignment.CenterEnd)) {
         ToggleSpeakerphoneAction(
@@ -163,6 +186,68 @@ private fun BoxScope.LiveControls(call: Call) {
             isShowingSettings = !isShowingSettingMenu,
             onCallAction = {
                 isShowingSettingMenu = !isShowingSettingMenu
+            },
+        )
+    }
+}
+
+@Composable
+private fun SettingsMenu(
+    call: Call,
+    onDeviceSelected: (StreamAudioDevice) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Popup(
+        offset = IntOffset(
+            0,
+            -100,
+        ),
+        alignment = Alignment.BottomStart,
+        onDismissRequest = { onDismiss() },
+        properties = PopupProperties(
+            usePlatformDefaultWidth = false,
+        ),
+    ) {
+        val availableSpeakerDevices by call.speaker.devices.collectAsStateWithLifecycle()
+        val selectedSpeakerDevice by call.speaker.selectedDevice.collectAsStateWithLifecycle()
+        val audioDeviceUiStateList: List<AudioDeviceUiState> = availableSpeakerDevices
+            .filterNot { it is StreamAudioDevice.Earpiece }
+            .map {
+                val icon = when (it) {
+                    is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+                    is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+                    is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+                    is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+                }
+                AudioDeviceUiState(
+                    it,
+                    it.name,
+                    icon,
+                    it.audio.name == selectedSpeakerDevice?.audio?.name,
+                )
+            }
+
+        DynamicMenu(
+            header = {},
+            items = buildList<MenuItem> {
+                add(
+                    SubMenuItem(
+                        title = "Choose speaker device",
+                        icon = Icons.Default.SettingsVoice,
+                        items = audioDeviceUiStateList.map {
+                            ActionMenuItem(
+                                title = it.text,
+                                icon = it.icon,
+                                action = {
+                                    onDismiss()
+
+                                    onDeviceSelected(it.streamAudioDevice)
+                                },
+                                highlight = it.highlight,
+                            )
+                        },
+                    ),
+                )
             },
         )
     }

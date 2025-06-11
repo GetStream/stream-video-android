@@ -48,6 +48,7 @@ fun LiveAudience(
     val call = remember(callId) { client.call("livestream", callId) }
 
     LaunchedEffect(call) {
+        call.speaker.setEnabled(true)
         call.microphone.setEnabled(false, fromUser = true)
         call.camera.setEnabled(false, fromUser = true)
         call.join()
