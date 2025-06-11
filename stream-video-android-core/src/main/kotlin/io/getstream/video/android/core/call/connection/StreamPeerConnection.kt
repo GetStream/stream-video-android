@@ -54,6 +54,7 @@ import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import org.webrtc.StatsReport
+import stream.video.sfu.models.TrackType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -92,7 +93,7 @@ open class StreamPeerConnection(
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
 
-    open fun stats() : ComputedStats? = null
+    open suspend fun stats() : ComputedStats? = null
 
     internal val logger by taggedLogger("Call:PeerConnection:$typeTag")
 
@@ -137,6 +138,8 @@ open class StreamPeerConnection(
         logger.i { "<init> #sfu; #$typeTag; mediaConstraints: $mediaConstraints" }
     }
 
+    internal var statsTracer: StatsTracer? = null
+
     /**
      * Initialize a [StreamPeerConnection] using a WebRTC [PeerConnection].
      *
@@ -145,7 +148,7 @@ open class StreamPeerConnection(
     public fun initialize(peerConnection: PeerConnection) {
         logger.d { "[initialize] #sfu; #$typeTag; peerConnection: $peerConnection" }
         this.connection = peerConnection
-
+        this.statsTracer = StatsTracer(connection, type.toPeerType())
         this.state.value = this.connection.connectionState()
         this.iceState.value = this.connection.iceConnectionState()
     }

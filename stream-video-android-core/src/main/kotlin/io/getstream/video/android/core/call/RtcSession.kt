@@ -75,6 +75,8 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.socket.common.VideoParser
+import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
@@ -1191,7 +1193,7 @@ public class RtcSession internal constructor(
         }
         return outer.toString()           // compact JSON → use .toString(2) for pretty
     }
-
+    private val parser: VideoParser = MoshiVideoParser()
     internal suspend fun sendCallStats(
         report: CallStatsReport,
         connectionTimeSeconds: Float? = null,
@@ -1218,6 +1220,13 @@ public class RtcSession internal constructor(
                 logger.d { "[sendCallStats] #powerSaveMode state: $powerSaveMode" }
                 powerSaveMode ?: false
             }
+
+            val publisherRtcStats = publisher?.stats()
+            val subscriberRtcStast = subscriber?.stats()
+            val publisher_rtc_stats = publisherRtcStats?.let { parser.toJson(it) } ?: ""
+            val subscriber_rtc_stats = subscriberRtcStast?.let { parser.toJson(it) } ?: ""
+            logger.d { "[sendCallStats] #sfu; #track; publisher_rtc_stats: $publisher_rtc_stats" }
+            logger.d { "[sendCallStats] #sfu; #track; subscriber_rtc_stats: $subscriber_rtc_stats" }
             val rtc_stats = tracerFactory.tracers().flatMap {
                 it.take().snapshot.map { it.serialize() }
             }.toJson()
@@ -1229,6 +1238,8 @@ public class RtcSession internal constructor(
                 publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
                 subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
                 rtc_stats = rtc_stats,
+                publisher_rtc_stats = publisher_rtc_stats,
+                subscriber_rtc_stats = subscriber_rtc_stats,
                 android = AndroidState(
                     thermal_state = androidThermalState,
                     is_power_saver_mode = powerSaving,

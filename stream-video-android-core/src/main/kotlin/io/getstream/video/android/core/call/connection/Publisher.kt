@@ -20,6 +20,7 @@ import androidx.annotation.VisibleForTesting
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
 import io.getstream.video.android.core.call.connection.utils.computeTransceiverEncodings
@@ -174,6 +175,14 @@ internal class Publisher(
             // Set ice trickle
         }
         isIceRestarting = false
+    }
+
+    override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
+        return statsTracer?.get(
+            transceiverCache.items().associate {
+                it.transceiver.sender.track()?.id() to it.publishOption.track_type
+            }.filterKeys { it != null }.mapKeys { it.key!! },
+        )
     }
 
     /**

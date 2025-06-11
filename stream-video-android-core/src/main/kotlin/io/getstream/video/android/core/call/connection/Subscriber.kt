@@ -21,6 +21,7 @@ import io.getstream.result.flatMap
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
+import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
@@ -32,6 +33,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import kotlinx.coroutines.CoroutineScope
@@ -111,6 +113,10 @@ internal class Subscriber(
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
     private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
         ConcurrentHashMap()
+
+    override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
+        return statsTracer?.get(trackIdToTrackType)
+    }
 
     /**
      * Returns the track dimensions for this subscriber.
