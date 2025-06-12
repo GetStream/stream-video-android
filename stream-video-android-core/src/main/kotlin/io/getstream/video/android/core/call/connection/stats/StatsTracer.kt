@@ -201,49 +201,71 @@ private fun <T> trimHistory(history: ArrayDeque<T>, keep: Int) {
 }
 
 /**
- * Builds a delta-compressed snapshot of [newStats] against [oldStats].
+ * Strips unchanged fields from `newStats` (compared with `oldStats`) and
+ * normalises timestamps, mimicking the original JavaScript logic.
  *
- *  * For every stats record (`id`) we keep **only** the members that changed
- *    since the previous poll (or the whole record if it is new).
- *  * The largest timestamp in the new report is placed in the top-level
- *    `"timestamp"` field; records carrying that timestamp have it replaced by 0
- *    so the client can reconstruct absolute time.
+ * The function:
+ * 1. Clones `newStats` so the caller’s map is left untouched.
+ * 2. Drops the `id` field from every report.
+ * 3. Removes every key whose value is identical to the one in `oldStats`.
+ * 4. Finds the most-recent `timestamp` across all reports, moves it to a
+ *    top-level `"timestamp"` entry, and sets that same field to `0` inside
+ *    the report(s) that carried it.
  *
- *  The result is roughly an order of magnitude smaller than the full report.
+ * @return a mutable map containing the compressed reports plus the
+ *         top-level `"timestamp"`.
  */
-private fun deltaCompression(
+fun deltaCompression(
     oldStats: Map<String, RTCStats>,
-    newStats: Map<String, RTCStats>,
-): Map<String, Any?> {
-    val diff = mutableMapOf<String, MutableMap<String, Any?>>()
-    var latestTs = Double.MIN_VALUE
+    newStats: Map<String, RTCStats>
+): MutableMap<String, Any?> {
 
-    newStats.forEach { (id, current) ->
+    // Result the caller can freely mutate / serialise
+    val delta: MutableMap<String, MutableMap<String, Any?>> = mutableMapOf()
 
-        val old = oldStats[id]
-        val changed = mutableMapOf<String, Any?>()
+    // ── 1. Build per-report diffs ───────────────────────────────────────────
+    for ((id, newReport) in newStats) {
 
-        /* ---------- compare member fields ---------- */
-        current.members.forEach { (key, value) ->
-            val oldValue = old?.members?.get(key)
-            if (oldValue != value) {
-                changed[key] = value
-            }
+        val diff: MutableMap<String, Any?> = mutableMapOf()
+
+        val oldReport = oldStats[id]
+
+        /* Compare scalar fields first. The JS impl always removed "id" from
+         * each report, so we never put it in the diff. */
+        if (oldReport == null || oldReport.type != newReport.type)
+            diff["type"] = newReport.type
+
+        /* Members comparison mirrors the JS inner loop. */
+        for ((name, value) in newReport.members) {
+            val oldValue = oldReport?.members?.get(name)
+            if (value != oldValue) diff[name] = value
         }
 
-        /* ---------- include record only if something changed ---------- */
-        if (changed.isNotEmpty() || old == null) {
-            changed["type"] = current.type // keep the record type
-            changed["timestamp"] = current.timestampUs
-            diff[id] = changed
-        }
+        /* Timestamp is handled after we know which report(s) are latest,
+         * but we still copy it so we can search for the max. */
+        diff["timestamp"] = newReport.timestampUs
 
-        if (current.timestampUs > latestTs) {
-            latestTs = current.timestampUs
-        }
+        delta[id] = diff
     }
-    return diff
+
+    // ── 2. Find the latest timestamp ────────────────────────────────────────
+    val latest = delta.values
+        .mapNotNull { (it["timestamp"] as? Number)?.toLong() }
+        .maxOrNull() ?: Long.MIN_VALUE
+
+    // ── 3. Normalise timestamps & set top-level field ───────────────────────
+    for (report in delta.values) {
+        val ts = (report["timestamp"] as? Number)?.toLong() ?: continue
+        if (ts == latest) report["timestamp"] = 0L
+    }
+
+    val result = mutableMapOf<String, Any?>()
+    result.putAll(delta)
+    result["timestamp"] = latest / 1000
+    return result
 }
+
+
 
 /**
  * Wrapper returned by [StatsTracer.get] that contains:

@@ -1219,10 +1219,8 @@ public class RtcSession internal constructor(
 
             val publisherRtcStats = publisher?.stats()
             val subscriberRtcStast = subscriber?.stats()
-            val publisherDeltaStats = publisherRtcStats?.let { parser.toJson(it.delta) } ?: ""
-            val subscriberDeltaStats = subscriberRtcStast?.let { parser.toJson(it.delta) } ?: ""
-            publisherTracer.trace("getstats", publisherDeltaStats)
-            subscriberTracer.trace("getstats", subscriberDeltaStats)
+            publisherTracer.trace("getstats", publisherRtcStats?.delta)
+            subscriberTracer.trace("getstats", publisherRtcStats?.delta)
 
             val rtcStats = tracerManager.tracers().flatMap {
                 it.take().snapshot.map { it.serialize() }
