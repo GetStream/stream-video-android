@@ -44,7 +44,7 @@ data class CustomVideoEvent(
     val user: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "custom",
 ) :
     io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 

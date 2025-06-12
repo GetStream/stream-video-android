@@ -32,7 +32,7 @@ import kotlin.collections.List
 
 data class HLSSettingsRequest(
     @Json(name = "quality_tracks")
-    val qualityTracks: kotlin.collections.List<kotlin.String>,
+    val qualityTracks: kotlin.collections.List<kotlin.String> = emptyList(),
 
     @Json(name = "auto_on")
     val autoOn: kotlin.Boolean? = null,

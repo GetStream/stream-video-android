@@ -32,6 +32,5 @@ import kotlin.collections.List
 
 data class SDKUsageReportResponse(
     @Json(name = "daily")
-    val daily:
-    kotlin.collections.List<io.getstream.android.video.generated.models.DailyAggregateSDKUsageReportResponse>,
+    val daily: kotlin.collections.List<io.getstream.android.video.generated.models.DailyAggregateSDKUsageReportResponse> = emptyList()
 )
