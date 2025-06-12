@@ -32,10 +32,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
@@ -46,8 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSettingsAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -144,14 +148,24 @@ private fun BoxScope.LiveControls(call: Call) {
     } else {
         call.speaker.isEnabled.collectAsStateWithLifecycle()
     }
+    var isShowingSettingMenu by remember { mutableStateOf(false) }
 
-    ToggleSpeakerphoneAction(
-        modifier = Modifier
-            .align(Alignment.CenterEnd)
-            .size(45.dp),
-        isSpeakerphoneEnabled = speakerphoneEnabled,
-        onCallAction = { callAction -> call.speaker.setEnabled(callAction.isEnabled) },
-    )
+    Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+        ToggleSpeakerphoneAction(
+            modifier = Modifier
+                .size(45.dp),
+            isSpeakerphoneEnabled = speakerphoneEnabled,
+            onCallAction = { callAction -> call.speaker.setEnabled(callAction.isEnabled) },
+        )
+
+        ToggleSettingsAction(
+            modifier = Modifier.size(45.dp),
+            isShowingSettings = !isShowingSettingMenu,
+            onCallAction = {
+                isShowingSettingMenu = !isShowingSettingMenu
+            },
+        )
+    }
 }
 
 @Preview
@@ -164,3 +178,10 @@ private fun LivestreamPlayerOverlayPreview() {
         }
     }
 }
+
+private data class AudioDeviceUiState(
+    val streamAudioDevice: StreamAudioDevice,
+    val text: String,
+    val icon: ImageVector, // Assuming it's a drawable resource ID
+    val highlight: Boolean,
+)
