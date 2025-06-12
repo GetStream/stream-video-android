@@ -16,10 +16,13 @@
 
 package io.getstream.video.android.core.trace
 
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
+
 /**
  * All trace-key strings emitted by the peer-connection layer.
  */
-enum class PeerConnectionTraceKey(val value: String) {
+@InternalStreamVideoApi
+internal enum class PeerConnectionTraceKey(val value: String) {
 
     CREATE("create"),
     JOIN_REQUEST("joinRequest"),

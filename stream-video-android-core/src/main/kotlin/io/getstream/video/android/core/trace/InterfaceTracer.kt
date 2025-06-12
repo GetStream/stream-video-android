@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
-inline fun <reified T> tracedWith(
+internal inline fun <reified T> tracedWith(
     target: T,
     tracer: Tracer,
 ): T {
@@ -36,7 +36,7 @@ inline fun <reified T> tracedWith(
  * @param target The target object to count the invocations of.
  * @param config The configuration for the counter.
  */
-class InterfaceMethodInvocationCounter<T>(
+internal class InterfaceMethodInvocationCounter<T>(
     private val tracer: Tracer,
     private val target: T,
 ) : InvocationHandler {

@@ -16,12 +16,14 @@
 
 package io.getstream.video.android.core.trace
 
+import io.getstream.video.android.core.utils.safeCall
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Factory that provides [Tracer] instances.
  */
-class TracerFactory(private var enabled: Boolean = true) {
+internal class TracerManager(private var enabled: Boolean = true) {
+
     /**
      * All tracers created by this factory.
      */
@@ -42,9 +44,11 @@ class TracerFactory(private var enabled: Boolean = true) {
     }
 
     /** Clears all tracers. */
-    fun clear() {
-        tracers.clear()
-    }
+    fun clear() =
+        safeCall {
+            tracers.values.forEach { it.dispose() }
+            tracers.clear()
+        }
 
     /**
      * Enables or disables tracing.

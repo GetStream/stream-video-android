@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.trace
 
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import java.util.Collections
 
 /**
@@ -26,6 +27,7 @@ import java.util.Collections
  * @property data Arbitrary payload supplied by the caller.
  * @property timestamp Epoch-millis when the entry was recorded.
  */
+@InternalStreamVideoApi
 data class TraceRecord(
     val tag: String,
     val id: String?,
@@ -38,6 +40,7 @@ data class TraceRecord(
  *
  * @return an array of the values
  */
+@InternalStreamVideoApi
 fun TraceRecord.serialize(): Array<Any?> = arrayOf(tag, id, data, timestamp)
 
 /**
@@ -45,6 +48,7 @@ fun TraceRecord.serialize(): Array<Any?> = arrayOf(tag, id, data, timestamp)
  *
  * All state mutations are guarded by [lock], ensuring atomicity across threads.
  */
+@InternalStreamVideoApi
 class Tracer(private val id: String?) {
 
     private val buffer: MutableList<TraceRecord> = Collections.synchronizedList(mutableListOf())
@@ -113,6 +117,8 @@ class Tracer(private val id: String?) {
  * @property snapshot The list of entries captured at the time of [Tracer.take].
  * @property rollback Restores the snapshot to the head of the originating buffer.
  */
+
+@InternalStreamVideoApi
 data class TraceSlice(
     val snapshot: List<TraceRecord>,
     val rollback: () -> Unit,

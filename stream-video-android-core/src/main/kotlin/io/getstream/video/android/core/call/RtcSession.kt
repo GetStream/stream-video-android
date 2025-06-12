@@ -79,8 +79,7 @@ import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
-import io.getstream.video.android.core.trace.TraceRecord
-import io.getstream.video.android.core.trace.TracerFactory
+import io.getstream.video.android.core.trace.TracerManager
 import io.getstream.video.android.core.trace.serialize
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
@@ -209,7 +208,7 @@ public class RtcSession internal constructor(
     private val supervisorJob: CompletableJob = SupervisorJob(),
     private val coroutineScope: CoroutineScope =
         CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
-    private val tracerFactory: TracerFactory = TracerFactory(clientImpl.enableStatsCollection),
+    private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
     private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
         SfuConnectionModule(
             context = clientImpl.context,
@@ -231,9 +230,9 @@ public class RtcSession internal constructor(
     internal val socket
         get() = sfuConnectionModule.socketConnection
 
-    private val publisherTracer = tracerFactory.tracer("pub")
-    private val subscriberTracer = tracerFactory.tracer("sub")
-    private val sfuTracer = tracerFactory.tracer("sfu")
+    private val publisherTracer = tracerManager.tracer("pub")
+    private val subscriberTracer = tracerManager.tracer("sub")
+    private val sfuTracer = tracerManager.tracer("sfu")
 
     private val logger by taggedLogger("Video:RtcSession")
     internal val _peerConnectionStates =
@@ -1182,7 +1181,7 @@ public class RtcSession internal constructor(
         return subscriber?.getStats()
     }
 
-    fun List<Array<Any?>>.toJson(): String {
+    internal fun List<Array<Any?>>.toJson(): String {
         val outer = JSONArray()
         for (inner in this) {
             outer.put(JSONArray(inner)) // wraps each Array into its own JSONArray
@@ -1190,6 +1189,7 @@ public class RtcSession internal constructor(
         return outer.toString() // compact JSON → use .toString(2) for pretty
     }
     private val parser: VideoParser = MoshiVideoParser()
+
     internal suspend fun sendCallStats(
         report: CallStatsReport,
         connectionTimeSeconds: Float? = null,
@@ -1219,31 +1219,17 @@ public class RtcSession internal constructor(
 
             val publisherRtcStats = publisher?.stats()
             val subscriberRtcStast = subscriber?.stats()
-            val publisher_rtc_stats = publisherRtcStats?.let { parser.toJson(it.delta) } ?: ""
-            val subscriber_rtc_stats = subscriberRtcStast?.let { parser.toJson(it.delta) } ?: ""
-            logger.d { "[sendCallStats] #sfu; #track; publisher_rtc_stats: $publisher_rtc_stats" }
-            logger.d { "[sendCallStats] #sfu; #track; subscriber_rtc_stats: $subscriber_rtc_stats" }
-            val rtc_stats = tracerFactory.tracers().flatMap {
+            val publisherDeltaStats = publisherRtcStats?.let { parser.toJson(it.delta) } ?: ""
+            val subscriberDeltaStats = subscriberRtcStast?.let { parser.toJson(it.delta) } ?: ""
+            publisherTracer.trace("getstats", publisherDeltaStats)
+            subscriberTracer.trace("getstats", subscriberDeltaStats)
+
+            val rtc_stats = tracerManager.tracers().flatMap {
                 it.take().snapshot.map { it.serialize() }
-            }.toMutableList().apply {
-                add(
-                    TraceRecord(
-                        "getstats",
-                        "sub",
-                        subscriber_rtc_stats,
-                        System.currentTimeMillis(),
-                    ).serialize(),
-                )
-                add(
-                    TraceRecord(
-                        "getstats",
-                        "pub",
-                        publisher_rtc_stats,
-                        System.currentTimeMillis(),
-                    ).serialize(),
-                )
-            }.toJson()
+            }.toMutableList().toJson()
+
             logger.d { "[sendCallStats] #sfu; #track; rtc_stats: $rtc_stats" }
+
             val sendStatsRequest = SendStatsRequest(
                 session_id = sessionId,
                 sdk = "stream-android",

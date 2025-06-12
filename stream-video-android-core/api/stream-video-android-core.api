@@ -6467,7 +6467,6 @@ public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun requestPublisherIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setScreenShareTrack ()V
-	public final fun toJson (Ljava/util/List;)Ljava/lang/String;
 	public final fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;)V
 	public static synthetic fun updateTrackDimensions$default (Lio/getstream/video/android/core/call/RtcSession;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;ILjava/lang/Object;)V
 }
@@ -10928,92 +10927,6 @@ public final class io/getstream/video/android/core/sounds/Sounds {
 	public final fun getRingingConfig ()Lio/getstream/video/android/core/sounds/RingingConfig;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/trace/InterfaceMethodInvocationCounter : java/lang/reflect/InvocationHandler {
-	public fun <init> (Lio/getstream/video/android/core/trace/Tracer;Ljava/lang/Object;)V
-	public fun invoke (Ljava/lang/Object;Ljava/lang/reflect/Method;[Ljava/lang/Object;)Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/trace/PeerConnectionTraceKey : java/lang/Enum {
-	public static final field ADD_ICE_CANDIDATE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field CALL_ENDED Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field CHANGE_PUBLISH_OPTIONS Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field CHANGE_PUBLISH_QUALITY Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field CLOSE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field CREATE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field CREATE_ANSWER Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field CREATE_OFFER Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field GO_AWAY Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field JOIN_REQUEST Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_CONNECTION_STATE_CHANGE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_DATA_CHANNEL Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_ICE_CANDIDATE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_ICE_CONNECTION_STATE_CHANGE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_ICE_GATHERING_STATE_CHANGE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_NEGOTIATION_NEEDED Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_SIGNALING_STATE_CHANGE Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field ON_TRACK Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field SET_LOCAL_DESCRIPTION Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field SET_REMOTE_DESCRIPTION Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static final field SFU_ERROR Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getValue ()Ljava/lang/String;
-	public fun toString ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-	public static fun values ()[Lio/getstream/video/android/core/trace/PeerConnectionTraceKey;
-}
-
-public final class io/getstream/video/android/core/trace/TraceRecord {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;J)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/Object;
-	public final fun component4 ()J
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;J)Lio/getstream/video/android/core/trace/TraceRecord;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/trace/TraceRecord;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;JILjava/lang/Object;)Lio/getstream/video/android/core/trace/TraceRecord;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getData ()Ljava/lang/Object;
-	public final fun getId ()Ljava/lang/String;
-	public final fun getTag ()Ljava/lang/String;
-	public final fun getTimestamp ()J
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/trace/TraceRecordKt {
-	public static final fun serialize (Lio/getstream/video/android/core/trace/TraceRecord;)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/trace/TraceSlice {
-	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun component2 ()Lkotlin/jvm/functions/Function0;
-	public final fun copy (Ljava/util/List;Lkotlin/jvm/functions/Function0;)Lio/getstream/video/android/core/trace/TraceSlice;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/trace/TraceSlice;Ljava/util/List;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lio/getstream/video/android/core/trace/TraceSlice;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getRollback ()Lkotlin/jvm/functions/Function0;
-	public final fun getSnapshot ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/trace/Tracer {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun dispose ()V
-	public final fun setEnabled (Z)V
-	public final fun take ()Lio/getstream/video/android/core/trace/TraceSlice;
-	public final fun trace (Ljava/lang/String;Ljava/lang/Object;)V
-}
-
-public final class io/getstream/video/android/core/trace/TracerFactory {
-	public fun <init> ()V
-	public fun <init> (Z)V
-	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun clear ()V
-	public final fun setEnabled (Z)V
-	public final fun tracer (Ljava/lang/String;)Lio/getstream/video/android/core/trace/Tracer;
-	public final fun tracers ()Ljava/util/List;
 }
 
 public final class io/getstream/video/android/core/utils/AndroidUtilsKt {

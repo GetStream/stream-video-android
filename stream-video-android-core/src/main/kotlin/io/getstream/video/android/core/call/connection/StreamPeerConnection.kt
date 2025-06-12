@@ -36,9 +36,7 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.webrtc.CandidatePairChangeEvent
@@ -80,7 +78,8 @@ open class StreamPeerConnection(
 
     private val localDescriptionMutex = Mutex()
     private val remoteDescriptionMutex = Mutex()
-    private val iceCandidatesMutex = Mutex() // Not needed in current logic flow, but kept it for safety.
+    private val iceCandidatesMutex =
+        Mutex() // Not needed in current logic flow, but kept it for safety.
 
     internal var localSdp: SessionDescription? = null
     internal var remoteSdp: SessionDescription? = null
@@ -119,6 +118,7 @@ open class StreamPeerConnection(
             PeerConnection.PeerConnectionState.CONNECTED,
             PeerConnection.PeerConnectionState.CONNECTING,
             -> true
+
             else -> false
         }
     }
@@ -128,6 +128,7 @@ open class StreamPeerConnection(
             PeerConnection.PeerConnectionState.CLOSED,
             PeerConnection.PeerConnectionState.FAILED,
             -> true
+
             else -> false
         }
     }
@@ -545,25 +546,23 @@ open class StreamPeerConnection(
     public suspend fun getStats(): RtcStatsReport? {
         return suspendCoroutine { cont ->
             connection.getStats { origin ->
-                coroutineScope.launch(Dispatchers.IO) {
-                    if (DEBUG_STATS) {
+                if (DEBUG_STATS) {
+                    logger.v {
+                        "[getStats] #sfu; #$typeTag; " +
+                            "stats.keys: ${origin?.statsMap?.keys}"
+                    }
+                    origin?.statsMap?.values?.forEach {
                         logger.v {
                             "[getStats] #sfu; #$typeTag; " +
-                                "stats.keys: ${origin?.statsMap?.keys}"
-                        }
-                        origin?.statsMap?.values?.forEach {
-                            logger.v {
-                                "[getStats] #sfu; #$typeTag; " +
-                                    "report.type: ${it.type}, report.members: $it"
-                            }
+                                "report.type: ${it.type}, report.members: $it"
                         }
                     }
-                    try {
-                        cont.resume(origin?.let { RtcStatsReport(it, it.toRtcStats()) })
-                    } catch (e: Throwable) {
-                        logger.e(e) { "[getStats] #sfu; #$typeTag; failed: $e" }
-                        cont.resume(null)
-                    }
+                }
+                try {
+                    cont.resume(origin?.let { RtcStatsReport(it, it.toRtcStats()) })
+                } catch (e: Throwable) {
+                    logger.e(e) { "[getStats] #sfu; #$typeTag; failed: $e" }
+                    cont.resume(null)
                 }
             }
         }
