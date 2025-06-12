@@ -235,6 +235,7 @@ public class RtcSession internal constructor(
     private val sfuTracer = tracerManager.tracer("sfu")
 
     private val logger by taggedLogger("Video:RtcSession")
+    private val parser: VideoParser = MoshiVideoParser()
     internal val _peerConnectionStates =
         MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
             null,
@@ -1188,7 +1189,6 @@ public class RtcSession internal constructor(
         }
         return outer.toString() // compact JSON → use .toString(2) for pretty
     }
-    private val parser: VideoParser = MoshiVideoParser()
 
     internal suspend fun sendCallStats(
         report: CallStatsReport,
