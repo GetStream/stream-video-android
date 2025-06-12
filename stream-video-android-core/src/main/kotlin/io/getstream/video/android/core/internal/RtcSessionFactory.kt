@@ -21,7 +21,7 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.model.Credentials
 import io.getstream.video.android.model.ApiKey
 import kotlinx.coroutines.CoroutineScope
 
@@ -33,10 +33,7 @@ internal class RtcSessionFactory(
 ) {
 
     fun create(
-        sfuUrl: String,
-        sfuWsUrl: String,
-        sfuToken: String,
-        remoteIceServers: List<IceServer>,
+        credentials: Credentials,
         streamVideo: StreamVideo,
         call: Call,
         sessionId: String,
@@ -46,10 +43,10 @@ internal class RtcSessionFactory(
             call = call,
             lifecycle = lifecycle,
             apiKey = apiKey,
-            sfuUrl = sfuUrl,
-            sfuWsUrl = sfuWsUrl,
-            sfuToken = sfuToken,
-            remoteIceServers = remoteIceServers,
+            sfuUrl = credentials.server.url,
+            sfuWsUrl = credentials.server.wsUrl,
+            sfuToken = credentials.token,
+            remoteIceServers = credentials.iceServers,
             powerManager = powerManager,
             coroutineScope = coroutineScope,
             sessionId = sessionId,
