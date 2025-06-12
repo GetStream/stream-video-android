@@ -16,10 +16,8 @@
 
 package io.getstream.video.android.core
 
-import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.PowerManager
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
@@ -81,7 +79,6 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toDomain
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User

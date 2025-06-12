@@ -19,7 +19,6 @@ package io.getstream.video.android.core.internal.module
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
-import io.getstream.android.video.generated.models.Credentials
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
 import io.getstream.video.android.core.internal.network.AuthTypeProvider

@@ -9182,16 +9182,18 @@ public final class io/getstream/video/android/core/model/AudioTrack : io/getstre
 }
 
 public final class io/getstream/video/android/core/model/CallData {
-	public fun <init> (Ljava/util/List;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;Lio/getstream/video/android/core/model/CallUser;)V
+	public fun <init> (Ljava/util/List;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;Lio/getstream/video/android/core/model/CallUser;Lio/getstream/video/android/core/model/Credentials;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lio/getstream/video/android/core/model/CallInfo;
 	public final fun component3 ()Ljava/util/List;
 	public final fun component4 ()Lio/getstream/video/android/core/model/CallUser;
-	public final fun copy (Ljava/util/List;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;Lio/getstream/video/android/core/model/CallUser;)Lio/getstream/video/android/core/model/CallData;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallData;Ljava/util/List;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;Lio/getstream/video/android/core/model/CallUser;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallData;
+	public final fun component5 ()Lio/getstream/video/android/core/model/Credentials;
+	public final fun copy (Ljava/util/List;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;Lio/getstream/video/android/core/model/CallUser;Lio/getstream/video/android/core/model/Credentials;)Lio/getstream/video/android/core/model/CallData;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/CallData;Ljava/util/List;Lio/getstream/video/android/core/model/CallInfo;Ljava/util/List;Lio/getstream/video/android/core/model/CallUser;Lio/getstream/video/android/core/model/Credentials;ILjava/lang/Object;)Lio/getstream/video/android/core/model/CallData;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBlockedUsersIds ()Ljava/util/List;
 	public final fun getCall ()Lio/getstream/video/android/core/model/CallInfo;
+	public final fun getCredentials ()Lio/getstream/video/android/core/model/Credentials;
 	public final fun getMembers ()Ljava/util/List;
 	public final fun getOwnMembership ()Lio/getstream/video/android/core/model/CallUser;
 	public fun hashCode ()I
@@ -9386,6 +9388,21 @@ public final class io/getstream/video/android/core/model/CallUserState {
 	public final fun getOnline ()Z
 	public final fun getTrackIdPrefix ()Ljava/lang/String;
 	public final fun getVideo ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/Credentials {
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/Server;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/getstream/video/android/core/model/Server;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/Server;Ljava/util/List;)Lio/getstream/video/android/core/model/Credentials;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/Credentials;Ljava/lang/String;Lio/getstream/video/android/core/model/Server;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/core/model/Credentials;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIceServers ()Ljava/util/List;
+	public final fun getServer ()Lio/getstream/video/android/core/model/Server;
+	public final fun getToken ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -9774,6 +9791,21 @@ public final class io/getstream/video/android/core/model/ScreenSharingSession {
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/ScreenSharingSession;Lio/getstream/video/android/core/ParticipantState;ILjava/lang/Object;)Lio/getstream/video/android/core/model/ScreenSharingSession;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/Server {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/model/Server;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/Server;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/Server;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun getWsUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
