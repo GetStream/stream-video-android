@@ -1182,7 +1182,7 @@ public class RtcSession internal constructor(
         return subscriber?.getStats()
     }
 
-    internal fun List<Array<Any?>>.toJson(): String {
+    private fun List<Array<Any?>>.toJson(): String {
         val outer = JSONArray()
         for (inner in this) {
             outer.put(JSONArray(inner)) // wraps each Array into its own JSONArray
@@ -1224,11 +1224,11 @@ public class RtcSession internal constructor(
             publisherTracer.trace("getstats", publisherDeltaStats)
             subscriberTracer.trace("getstats", subscriberDeltaStats)
 
-            val rtc_stats = tracerManager.tracers().flatMap {
+            val rtcStats = tracerManager.tracers().flatMap {
                 it.take().snapshot.map { it.serialize() }
             }.toMutableList().toJson()
 
-            logger.d { "[sendCallStats] #sfu; #track; rtc_stats: $rtc_stats" }
+            logger.d { "[sendCallStats] #sfu; #track; rtc_stats: $rtcStats" }
 
             val sendStatsRequest = SendStatsRequest(
                 session_id = sessionId,
@@ -1237,7 +1237,7 @@ public class RtcSession internal constructor(
                 webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
                 publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
                 subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
-                rtc_stats = rtc_stats,
+                rtc_stats = rtcStats,
                 encode_stats = publisherRtcStats?.performanceStats ?: emptyList(),
                 decode_stats = subscriberRtcStast?.performanceStats ?: emptyList(),
                 android = AndroidState(
@@ -1261,7 +1261,7 @@ public class RtcSession internal constructor(
                     }
                 },
             )
-            logger.d { "[sendCallStats] #sfu; #track; request: $rtc_stats" }
+            logger.d { "[sendCallStats] #sfu; #track; request: $rtcStats" }
             sfuConnectionModule.api.sendStats(
                 sendStatsRequest = sendStatsRequest,
             )
