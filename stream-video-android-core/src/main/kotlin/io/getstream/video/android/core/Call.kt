@@ -77,12 +77,12 @@ import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCallWithDefault
+import io.getstream.video.android.core.utils.toDomain
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -498,19 +498,12 @@ public class Call internal constructor(
         if (result !is Success) {
             return result as Failure
         }
-        val sfuToken = result.value.credentials.token
-        val sfuUrl = result.value.credentials.server.url
-        val sfuWsUrl = result.value.credentials.server.wsEndpoint
-        val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
 
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
             rtcSessionFactory.create(
-                sfuUrl = sfuUrl,
-                sfuWsUrl = sfuWsUrl,
-                sfuToken = sfuToken,
-                remoteIceServers = iceServers,
+                credentials = result.value.credentials.toDomain(),
                 streamVideo = clientImpl,
                 call = this,
                 sessionId = sessionId,
@@ -673,10 +666,7 @@ public class Call internal constructor(
                 this.state.removeParticipant(prevSessionId)
                 session.prepareRejoin()
                 this.session = rtcSessionFactory.create(
-                    sfuUrl = cred.server.url,
-                    sfuWsUrl = cred.server.wsEndpoint,
-                    sfuToken = cred.token,
-                    remoteIceServers = cred.iceServers.map { it.toIceServer() },
+                    credentials = cred.toDomain(),
                     streamVideo = clientImpl,
                     call = this,
                     sessionId = sessionId,
@@ -723,10 +713,7 @@ public class Call internal constructor(
                 )
                 session.prepareRejoin()
                 val newSession = rtcSessionFactory.create(
-                    sfuUrl = cred.server.url,
-                    sfuWsUrl = cred.server.wsEndpoint,
-                    sfuToken = cred.token,
-                    remoteIceServers = cred.iceServers.map { it.toIceServer() },
+                    credentials = cred.toDomain(),
                     streamVideo = clientImpl,
                     call = this,
                     sessionId = sessionId,

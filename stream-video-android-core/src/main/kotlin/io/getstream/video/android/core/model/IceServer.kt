@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import io.getstream.android.video.generated.models.ICEServer
 import java.io.Serializable
 
 @Stable
@@ -26,11 +25,3 @@ public data class IceServer(
     val username: String,
     val password: String,
 ) : Serializable
-
-internal fun ICEServer.toIceServer(): IceServer {
-    return IceServer(
-        urls = urls,
-        username = username,
-        password = password,
-    )
-}
