@@ -22,15 +22,27 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
+import io.getstream.video.android.core.WAIT_FOR_CONNECTION_ID_TIMEOUT
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.internal.VideoApi
+import io.getstream.video.android.core.internal.VideoService
+import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
+import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.internal.network.TokenAuthInterceptor
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
+import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -56,8 +68,16 @@ internal class CoordinatorConnectionModule(
     override val userToken: UserToken,
     override val lifecycle: Lifecycle,
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
+
+    private val tokenManager = TokenManagerImpl(CacheableTokenProvider(tokenProvider))
+    private val authTypeProvider = AuthTypeProvider()
+        .also {
+            if (user.type in listOf(UserType.Guest, UserType.Anonymous)) {
+                it.setAuthType(AuthTypeProvider.AuthType.ANONYMOUS)
+            }
+        }
+
     // Internals
-    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder().baseUrl(apiUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
@@ -66,10 +86,11 @@ internal class CoordinatorConnectionModule(
     }
 
     // API
-    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
-        HeadersInterceptor(HeadersUtil()),
-    )
-        .addInterceptor(authInterceptor).addInterceptor(
+    override val http: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(HeadersInterceptor(HeadersUtil()))
+        .addInterceptor(ApiKeyInterceptor(apiKey))
+        .addInterceptor(TokenAuthInterceptor(tokenManager, authTypeProvider::getAuthType))
+        .addInterceptor(
             HttpLoggingInterceptor {
                 streamLog(tag = "Video:Http") { it }
             }.apply {
@@ -79,7 +100,8 @@ internal class CoordinatorConnectionModule(
         .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
+        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .build()
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
@@ -98,15 +120,36 @@ internal class CoordinatorConnectionModule(
         networkStateProvider = networkStateProvider,
         scope = scope,
         lifecycle = lifecycle,
-        tokenProvider = tokenProvider,
+        tokenManager = tokenManager,
     )
 
-    override fun updateToken(token: UserToken) {
-        socketConnection.updateToken(token)
-        authInterceptor.token = token
+    override fun updateToken(token: UserToken?) {
+        token?.let { CacheableTokenProvider(ConstantTokenProvider(it)) }
+            ?.let { tokenManager.updateTokenProvider(it) }
+            ?: tokenManager.loadSync()
     }
 
-    override fun updateAuthType(authType: String) {
-        authInterceptor.authType = authType
+    val videoApi: VideoApi by lazy {
+        VideoService(
+            scope = scope,
+            api = api,
+            tokenManager = tokenManager,
+            getConnectionId = ::waitForConnectionId,
+            authTypeProvider = authTypeProvider,
+        )
+    }
+
+    private suspend fun waitForConnectionId(): String? {
+        // The Coordinator WS connection can take a moment to set up - this can be an issue
+        // if we jump right into the call from a deep link and we connect the call quickly.
+        // We return null on timeout. The Coordinator WS will update the connectionId later
+        // after it reconnects (it will call queryCalls)
+        return withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
+            socketConnection.connectionId().first { it != null }
+        }
+    }
+
+    override fun updateAuthType(authType: AuthTypeProvider.AuthType) {
+        this.authTypeProvider.setAuthType(authType)
     }
 }

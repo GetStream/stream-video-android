@@ -17,7 +17,12 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
+import io.getstream.android.push.PushDevice
+import io.getstream.android.push.PushProvider
+import io.getstream.android.video.generated.models.CreateDeviceRequest
 import io.getstream.android.video.generated.models.SortParamRequest
+import io.getstream.result.Error
+import io.getstream.result.Result
 
 /**
  * Represents the data required to apply a sorting method to queries.
@@ -59,6 +64,20 @@ public fun SortData.toRequest(): SortParamRequest {
         field = sortField,
     )
 }
+
+internal fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =
+    when (pushProvider) {
+        PushProvider.FIREBASE -> Result.Success(CreateDeviceRequest.PushProvider.Firebase)
+        PushProvider.HUAWEI -> Result.Success(CreateDeviceRequest.PushProvider.Huawei)
+        PushProvider.XIAOMI -> Result.Success(CreateDeviceRequest.PushProvider.Xiaomi)
+        PushProvider.UNKNOWN -> Result.Failure(Error.GenericError("Unsupported PushProvider"))
+    }.map {
+        CreateDeviceRequest(
+            id = token,
+            pushProvider = it,
+            pushProviderName = providerName,
+        )
+    }
 
 /**
  * Represents the default sorting direction.

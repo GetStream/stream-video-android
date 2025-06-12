@@ -20,8 +20,14 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
+import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.internal.network.TokenAuthInterceptor
+import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenManager
+import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.SfuToken
@@ -42,6 +48,9 @@ internal class SfuConnectionModule(
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
+    private val tokenManager: TokenManager = TokenManagerImpl(
+        CacheableTokenProvider(ConstantTokenProvider(userToken)),
+    )
     override val http: OkHttpClient = buildSfuOkHttpClient()
 
     private val signalRetrofitClient: Retrofit by lazy {
@@ -51,12 +60,14 @@ internal class SfuConnectionModule(
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
-        val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
-        return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
-            HttpLoggingInterceptor().apply {
-                level = loggingLevel.httpLoggingLevel.level
-            },
-        ).retryOnConnectionFailure(true)
+        return OkHttpClient.Builder()
+            .addInterceptor(ApiKeyInterceptor(apiKey))
+            .addInterceptor(TokenAuthInterceptor(tokenManager))
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = loggingLevel.httpLoggingLevel.level
+                },
+            ).retryOnConnectionFailure(true)
             .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
             .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
@@ -80,17 +91,19 @@ internal class SfuConnectionModule(
         apiKey = apiKey,
         scope = scope,
         httpClient = http,
-        tokenProvider = ConstantTokenProvider(userToken),
+        tokenManager = tokenManager,
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
     )
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 
-    override fun updateToken(token: SfuToken) {
-        _internalSocketConnection.updateToken(token)
+    override fun updateToken(token: SfuToken?) {
+        throw UnsupportedOperationException(
+            "Update token is not supported for SFU. Create a new socket instead.",
+        )
     }
 
-    override fun updateAuthType(authType: String) {
+    override fun updateAuthType(authType: AuthTypeProvider.AuthType) {
         throw UnsupportedOperationException("Not supported for SFU, do not call.")
     }
 }
