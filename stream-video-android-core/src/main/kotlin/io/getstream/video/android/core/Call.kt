@@ -166,7 +166,6 @@ public class Call internal constructor(
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
-    private var powerManager: PowerManager? = null
 
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
@@ -311,9 +310,6 @@ public class Call internal constructor(
             soundInputProcessor.currentAudioLevel.collect {
                 audioLevelOutputHelper.rampToValue(it)
             }
-        }
-        powerManager = safeCallWithDefault(null) {
-            clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
     }
 
