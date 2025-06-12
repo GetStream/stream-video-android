@@ -37,6 +37,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,6 +63,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -98,7 +101,6 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.models.builtInUsers
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.tooling.util.StreamFlavors
-import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
@@ -116,7 +118,7 @@ fun LoginScreen(
     navigateToCallJoin: () -> Unit,
 ) {
     VideoTheme {
-        LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
+//        LockScreenOrientation(orientation = Configuration.ORIENTATION_UNDEFINED)
         val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
         val isLoading by remember(uiState) {
             mutableStateOf(
@@ -139,7 +141,7 @@ fun LoginScreen(
             navigateToCallJoin = navigateToCallJoin,
         )
 
-        LoginContent(
+        LoginContentResponsive(
             availableEnvs = availableEnvs,
             selectedEnv = selectedEnv,
             availableLogins = availableLogins,
@@ -193,7 +195,50 @@ fun LoginScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun LoginContent(
+private fun LoginContentResponsive(
+    autoLogIn: Boolean,
+    isLoading: Boolean,
+    showEmailLoginDialog: () -> Unit = {},
+    showBuiltInUserDialog: () -> Unit = {},
+    reloadSdk: () -> Unit = {},
+    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
+    availableEnvs: List<StreamEnvironment>,
+    selectedEnv: StreamEnvironment?,
+    availableLogins: List<String>,
+) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (isLandscape) {
+        LoginContentLandscape(
+            autoLogIn,
+            isLoading,
+            showEmailLoginDialog,
+            showBuiltInUserDialog,
+            reloadSdk,
+            login,
+            availableEnvs,
+            selectedEnv,
+            availableLogins
+        )
+    } else {
+        LoginContentPortrait(
+            autoLogIn,
+            isLoading,
+            showEmailLoginDialog,
+            showBuiltInUserDialog,
+            reloadSdk,
+            login,
+            availableEnvs,
+            selectedEnv,
+            availableLogins
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun LoginContentPortrait(
     autoLogIn: Boolean,
     isLoading: Boolean,
     showEmailLoginDialog: () -> Unit = {},
@@ -210,65 +255,131 @@ private fun LoginContent(
             .background(color = VideoTheme.colors.baseSheetPrimary),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        selectedEnv?.let {
-            Box(modifier = Modifier.align(Alignment.End)) {
-                SelectableDialog(
-                    items = availableEnvs,
-                    selectedItem = it,
-                    onItemSelected = { env ->
-                        AppConfig.selectEnv(env)
-                        reloadSdk()
-                    },
-                )
-            }
-        }
-        Column(
-            modifier = Modifier
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .semantics { testTagsAsResourceId = true },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+
+        EnvironmentSelectionDialog(
+            modifier = Modifier.align(Alignment.End),
+            reloadSdk = reloadSdk,
+            availableEnvs = availableEnvs,
+            selectedEnv = selectedEnv
+        )
+        Logo(Modifier.fillMaxWidth(), selectedEnv)
+        Spacer(modifier = Modifier.weight(1f)) // Pushes the following views to the bottom
+        LoginButtons(
+            Modifier.wrapContentHeight(),
+            isLoading,
+            showEmailLoginDialog,
+            showBuiltInUserDialog,
+            login,
+            availableLogins,
+            1
+        )
+        LoadingIndicator(Modifier.align(Alignment.CenterHorizontally), isLoading)
+    }
+}
+
+@Composable
+private fun LoadingIndicator(modifier: Modifier, isLoading: Boolean) {
+    if (isLoading) {
+        CircularProgressIndicator(
+            modifier = modifier,
+            color = VideoTheme.colors.brandPrimary,
+        )
+    }
+}
+
+@Composable
+private fun EnvironmentSelectionDialog(
+    modifier: Modifier,
+    reloadSdk: () -> Unit = {},
+    availableEnvs: List<StreamEnvironment>,
+    selectedEnv: StreamEnvironment?,
+) {
+    selectedEnv?.let {
+        Box(
+            modifier = modifier
         ) {
-            Image(
-                modifier = Modifier.size(width = 254.dp, height = 179.dp),
-                painter = painterResource(id = R.drawable.stream_calls_logo),
-                contentDescription = null,
-            )
-
-            Spacer(modifier = Modifier.height(27.dp))
-
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    append("Stream\n")
-                    append(
-                        AnnotatedString(
-                            "[Video Calling]\n",
-                            spanStyle = SpanStyle(VideoTheme.colors.brandGreen),
-                        ),
-                    )
-                    append(selectedEnv?.displayName ?: "")
+            SelectableDialog(
+                items = availableEnvs,
+                selectedItem = it,
+                onItemSelected = { env ->
+                    AppConfig.selectEnv(env)
+                    reloadSdk()
                 },
-                color = Color.White,
-                fontSize = 24.sp,
             )
-            Spacer(modifier = Modifier.height(30.dp))
         }
+    }
+}
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .background(
-                    color = VideoTheme.colors.baseSheetSecondary,
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+@Composable
+private fun Logo(modifier: Modifier, selectedEnv: StreamEnvironment?) {
+    Column(
+        modifier = modifier
+//            .wrapContentHeight()
+//            .fillMaxWidth()
+            .semantics { testTagsAsResourceId = true },
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            modifier = Modifier.size(width = 254.dp, height = 179.dp),
+            painter = painterResource(id = R.drawable.stream_calls_logo),
+            contentDescription = null,
+        )
+
+        Spacer(modifier = Modifier.height(27.dp))
+
+        Text(
+//            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            text = buildAnnotatedString {
+                append("Stream\n")
+                append(
+                    AnnotatedString(
+                        "[Video Calling]\n",
+                        spanStyle = SpanStyle(VideoTheme.colors.brandGreen),
+                    ),
                 )
-                .padding(horizontal = 24.dp, vertical = 32.dp),
-        ) {
-            if (!isLoading) {
-                availableLogins.forEach {
-                    when (it) {
+                append(selectedEnv?.displayName ?: "")
+            },
+            color = Color.White,
+            fontSize = 24.sp,
+        )
+        Spacer(modifier = Modifier.height(30.dp))
+    }
+}
+
+@Composable
+private fun LoginButtons(
+    modifier: Modifier,
+    isLoading: Boolean,
+    showEmailLoginDialog: () -> Unit = {},
+    showBuiltInUserDialog: () -> Unit = {},
+    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
+    availableLogins: List<String>,
+    columnSize: Int,
+) {
+    Column(
+        modifier = modifier
+//            .align(Alignment.CenterHorizontally)
+            .background(
+                color = VideoTheme.colors.baseSheetSecondary,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            )
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+    ) {
+        if (!isLoading) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columnSize), // This defines your 2 columns
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth(),
+//                    .weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.spacingM), // Spacing between columns
+                verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.spacingM), // Spacing between rows
+            ) {
+                items(availableLogins.size) { index ->
+
+                    when (availableLogins[index]) {
                         "built-in" -> {
                             StreamButton(
                                 modifier = Modifier
@@ -336,27 +447,70 @@ private fun LoginContent(
                 }
             }
 
-            if (BuildConfig.BUILD_TYPE == "benchmark") {
-                StreamButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 55.dp)
-                        .testTag("authenticate"),
-                    text = "Login for Benchmark",
-                    style = ButtonStyles.secondaryButtonStyle(),
-                    onClick = {
-                        login(null, LoginEvent.SignInSuccess("benchmark.test@getstream.io"))
-                    },
-                )
-            }
         }
 
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                color = VideoTheme.colors.brandPrimary,
+        if (BuildConfig.BUILD_TYPE == "benchmark") {
+            StreamButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 55.dp)
+                    .testTag("authenticate"),
+                text = "Login for Benchmark",
+                style = ButtonStyles.secondaryButtonStyle(),
+                onClick = {
+                    login(null, LoginEvent.SignInSuccess("benchmark.test@getstream.io"))
+                },
             )
         }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun LoginContentLandscape(
+    autoLogIn: Boolean,
+    isLoading: Boolean,
+    showEmailLoginDialog: () -> Unit = {},
+    showBuiltInUserDialog: () -> Unit = {},
+    reloadSdk: () -> Unit = {},
+    login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
+    availableEnvs: List<StreamEnvironment>,
+    selectedEnv: StreamEnvironment?,
+    availableLogins: List<String>,
+) {
+
+    Box {
+
+        Row {
+            Logo(
+                Modifier
+                    .weight(1f), selectedEnv
+            )
+//            Box(modifier = Modifier.background(Color.Red)
+//                .size(100.dp))
+//            Column {
+            LoginButtons(
+                Modifier
+                    .weight(1f)
+                    .padding(top = 80.dp),
+                isLoading,
+                showEmailLoginDialog,
+                showBuiltInUserDialog,
+                login,
+                availableLogins,
+                2
+            )
+//            }
+        }
+        EnvironmentSelectionDialog(
+            modifier = Modifier.align(Alignment.TopEnd),
+            reloadSdk, availableEnvs, selectedEnv
+        )
+
+        LoadingIndicator(
+            Modifier.align(Alignment.Center),
+            isLoading
+        )
     }
 }
 
@@ -572,7 +726,22 @@ private fun HandleLoginUiStates(
 private fun LoginScreenPreview() {
     VideoTheme {
         val env = StreamEnvironment(env = "demo", displayName = "Demo")
-        LoginContent(
+        LoginContentPortrait(
+            autoLogIn = false,
+            isLoading = false,
+            availableEnvs = listOf(env),
+            selectedEnv = env,
+            availableLogins = listOf("google", "email", "guest"),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LoginScreenLandscapePreview() {
+    VideoTheme {
+        val env = StreamEnvironment(env = "demo", displayName = "Demo")
+        LoginContentLandscape(
             autoLogIn = false,
             isLoading = false,
             availableEnvs = listOf(env),
