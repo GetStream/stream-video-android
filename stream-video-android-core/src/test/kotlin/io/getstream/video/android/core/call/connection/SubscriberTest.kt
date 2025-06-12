@@ -88,6 +88,7 @@ class SubscriberTest {
                 sfuClient = mockSignalServer,
                 coroutineScope = testScope,
                 onIceCandidateRequest = null,
+                tracer = mockk(relaxed = true),
             ),
             recordPrivateCalls = true,
         ) {
