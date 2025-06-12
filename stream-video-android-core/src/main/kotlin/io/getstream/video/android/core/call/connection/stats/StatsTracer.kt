@@ -215,7 +215,7 @@ private fun <T> trimHistory(history: ArrayDeque<T>, keep: Int) {
  * @return a mutable map containing the compressed reports plus the
  *         top-level `"timestamp"`.
  */
-fun deltaCompression(
+private fun deltaCompression(
     oldStats: Map<String, RTCStats>,
     newStats: Map<String, RTCStats>,
 ): MutableMap<String, Any?> {
