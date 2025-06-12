@@ -217,23 +217,22 @@ private fun <T> trimHistory(history: ArrayDeque<T>, keep: Int) {
  */
 fun deltaCompression(
     oldStats: Map<String, RTCStats>,
-    newStats: Map<String, RTCStats>
+    newStats: Map<String, RTCStats>,
 ): MutableMap<String, Any?> {
-
     // Result the caller can freely mutate / serialise
     val delta: MutableMap<String, MutableMap<String, Any?>> = mutableMapOf()
 
     // ── 1. Build per-report diffs ───────────────────────────────────────────
     for ((id, newReport) in newStats) {
-
         val diff: MutableMap<String, Any?> = mutableMapOf()
 
         val oldReport = oldStats[id]
 
         /* Compare scalar fields first. The JS impl always removed "id" from
          * each report, so we never put it in the diff. */
-        if (oldReport == null || oldReport.type != newReport.type)
+        if (oldReport == null || oldReport.type != newReport.type) {
             diff["type"] = newReport.type
+        }
 
         /* Members comparison mirrors the JS inner loop. */
         for ((name, value) in newReport.members) {
@@ -264,8 +263,6 @@ fun deltaCompression(
     result["timestamp"] = latest / 1000
     return result
 }
-
-
 
 /**
  * Wrapper returned by [StatsTracer.get] that contains:

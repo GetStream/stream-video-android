@@ -607,17 +607,23 @@ open class StreamPeerConnection(
         logger.i { "[onTrack] #sfu; #$typeTag; transceiver: $transceiver" }
         val sender = transceiver?.sender
         if (sender != null) {
-            tracer.trace(
-                PeerConnectionTraceKey.ON_TRACK.value,
-                "${sender.track()?.kind()}:${sender.track()?.id()} ${sender.streams}",
-            )
+            val track = sender.track()
+            if (track != null) {
+                tracer.trace(
+                    PeerConnectionTraceKey.ON_TRACK.value,
+                    "${track.kind()}:${track.id()} ${sender.streams}",
+                )
+            }
         }
         val receiver = transceiver?.receiver
         if (receiver != null) {
-            tracer.trace(
-                PeerConnectionTraceKey.ON_TRACK.value,
-                "${receiver.track()?.kind()}:${receiver.track()?.id()}",
-            )
+            val track = receiver.track()
+            if (track != null) {
+                tracer.trace(
+                    PeerConnectionTraceKey.ON_TRACK.value,
+                    "${track.kind()}:${track.id()}",
+                )
+            }
         }
     }
 
