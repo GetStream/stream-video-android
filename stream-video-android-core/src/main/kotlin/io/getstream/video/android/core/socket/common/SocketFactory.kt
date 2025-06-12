@@ -19,6 +19,7 @@ package io.getstream.video.android.core.socket.common
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.interceptor.StreamWebSocketListenerRegistry
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.UnsupportedEncodingException
@@ -34,7 +35,10 @@ internal class SocketFactory<V, P : GenericParser<V>, C : ConnectionConf>(
     fun <T : VideoEvent> createSocket(connectionConf: C, tag: String): StreamWebSocket<V, P> {
         val request = buildRequest(connectionConf)
         logger.i { "[createSocket] new web socket: ${request.url}" }
-        return StreamWebSocket(tag, parser) { httpClient.newWebSocket(request, it) }
+        return StreamWebSocket(tag, parser) { baseListener ->
+            val wrappedListener = StreamWebSocketListenerRegistry.wrap(baseListener)
+            httpClient.newWebSocket(request, wrappedListener)
+        }
     }
 
     @Throws(UnsupportedEncodingException::class)
