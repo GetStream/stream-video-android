@@ -721,7 +721,12 @@ private fun HandleLoginUiStates(
     }
 }
 
-@Preview
+@Preview(
+    name = "Portrait Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=411dp,height=891dp,dpi=420"
+)
 @Composable
 private fun LoginScreenPreview() {
     VideoTheme {
@@ -736,7 +741,12 @@ private fun LoginScreenPreview() {
     }
 }
 
-@Preview
+@Preview(
+    name = "Landscape Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=891dp,height=411dp,dpi=420"
+)
 @Composable
 private fun LoginScreenLandscapePreview() {
     VideoTheme {
