@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core.token
 
+import io.getstream.video.android.core.positiveRandomInt
+import io.getstream.video.android.core.randomString
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
-import io.getstream.video.android.core.utils.positiveRandomInt
-import io.getstream.video.android.core.utils.randomString
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
