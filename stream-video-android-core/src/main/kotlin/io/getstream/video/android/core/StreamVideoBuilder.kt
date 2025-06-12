@@ -259,6 +259,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
+            rtcSessionFactory = coordinatorConnectionModule.rtcSessionFactory,
         )
 
         if (user.type == UserType.Guest) {

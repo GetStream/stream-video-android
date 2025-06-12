@@ -66,6 +66,7 @@ import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.internal.RtcSessionFactory
 import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
@@ -129,6 +130,7 @@ const val sfuReconnectTimeoutMillis = 30_000
 public class Call internal constructor(
     internal val clientImpl: StreamVideoClient,
     internal val videoApi: VideoApi,
+    private val rtcSessionFactory: RtcSessionFactory,
     val type: String,
     val id: String,
     val user: User,
@@ -146,6 +148,7 @@ public class Call internal constructor(
     ) : this(
         clientImpl = client as StreamVideoClient,
         videoApi = client.videoApi,
+        rtcSessionFactory = client.rtcSessionFactory,
         type = type,
         id = id,
         user = user,
@@ -502,17 +505,14 @@ public class Call internal constructor(
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
-            RtcSession(
-                sessionId = this.sessionId,
-                apiKey = clientImpl.apiKey,
-                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                client = clientImpl,
-                call = this,
+            rtcSessionFactory.create(
                 sfuUrl = sfuUrl,
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
                 remoteIceServers = iceServers,
-                powerManager = powerManager,
+                streamVideo = clientImpl,
+                call = this,
+                sessionId = sessionId,
             )
         }
 
@@ -671,19 +671,14 @@ public class Call internal constructor(
                 )
                 this.state.removeParticipant(prevSessionId)
                 session.prepareRejoin()
-                this.session = RtcSession(
-                    clientImpl,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
+                this.session = rtcSessionFactory.create(
+                    sfuUrl = cred.server.url,
+                    sfuWsUrl = cred.server.wsEndpoint,
+                    sfuToken = cred.token,
+                    remoteIceServers = cred.iceServers.map { it.toIceServer() },
+                    streamVideo = clientImpl,
+                    call = this,
+                    sessionId = sessionId,
                 )
                 this.session?.connect(reconnectDetails, currentOptions)
                 session.cleanup()
@@ -726,19 +721,14 @@ public class Call internal constructor(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
-                val newSession = RtcSession(
-                    clientImpl,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
+                val newSession = rtcSessionFactory.create(
+                    sfuUrl = cred.server.url,
+                    sfuWsUrl = cred.server.wsEndpoint,
+                    sfuToken = cred.token,
+                    remoteIceServers = cred.iceServers.map { it.toIceServer() },
+                    streamVideo = clientImpl,
+                    call = this,
+                    sessionId = sessionId,
                 )
                 val oldSession = this.session
                 this.session = newSession
