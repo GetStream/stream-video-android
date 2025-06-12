@@ -457,27 +457,27 @@ public class RtcSession internal constructor(
             is ChangePublishQualityEvent -> {
                 sfuTracer.trace(
                     PeerConnectionTraceKey.CHANGE_PUBLISH_QUALITY.value,
-                    it.changePublishQuality,
+                    parser.toJson(it.changePublishQuality),
                 )
             }
 
             is ChangePublishOptionsEvent -> {
                 sfuTracer.trace(
                     PeerConnectionTraceKey.CHANGE_PUBLISH_OPTIONS.value,
-                    it.change,
+                    parser.toJson(it.change.publish_options),
                 )
             }
 
             is GoAwayEvent -> {
-                sfuTracer.trace(PeerConnectionTraceKey.GO_AWAY.value, it)
+                sfuTracer.trace(PeerConnectionTraceKey.GO_AWAY.value, parser.toJson(it))
             }
 
             is CallEndedSfuEvent -> {
-                sfuTracer.trace(PeerConnectionTraceKey.CALL_ENDED.value, it)
+                sfuTracer.trace(PeerConnectionTraceKey.CALL_ENDED.value, parser.toJson(it))
             }
 
             is ErrorEvent -> {
-                sfuTracer.trace(PeerConnectionTraceKey.SFU_ERROR.value, it)
+                sfuTracer.trace(PeerConnectionTraceKey.SFU_ERROR.value, parser.toJson(it))
             }
 
             else -> {
