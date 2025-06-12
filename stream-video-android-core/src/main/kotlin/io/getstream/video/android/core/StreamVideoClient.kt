@@ -36,6 +36,7 @@ import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
+import io.getstream.video.android.core.internal.RtcSessionFactory
 import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.AuthTypeProvider
@@ -109,6 +110,7 @@ internal class StreamVideoClient internal constructor(
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
+    internal val rtcSessionFactory: RtcSessionFactory,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -563,7 +565,7 @@ internal class StreamVideoClient internal constructor(
         return if (calls.contains(cid)) {
             calls[cid]!!
         } else {
-            val call = Call(this, videoApi, type, idOrRandom, user)
+            val call = Call(this, videoApi, rtcSessionFactory, type, idOrRandom, user)
             calls[cid] = call
             call
         }

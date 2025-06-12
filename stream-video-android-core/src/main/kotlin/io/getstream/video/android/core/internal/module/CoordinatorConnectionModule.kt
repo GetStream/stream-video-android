@@ -24,6 +24,7 @@ import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.WAIT_FOR_CONNECTION_ID_TIMEOUT
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.internal.RtcSessionFactory
 import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.internal.VideoService
 import io.getstream.video.android.core.internal.network.ApiKeyInterceptor
@@ -138,6 +139,17 @@ internal class CoordinatorConnectionModule(
             tokenManager = tokenManager,
             getConnectionId = ::waitForConnectionId,
             authTypeProvider = authTypeProvider,
+        )
+    }
+
+    val rtcSessionFactory: RtcSessionFactory by lazy {
+        RtcSessionFactory(
+            lifecycle = lifecycle,
+            apiKey = apiKey,
+            powerManager = context.getSystemService(
+                Context.POWER_SERVICE,
+            ) as android.os.PowerManager,
+            coroutineScope = scope,
         )
     }
 

@@ -261,6 +261,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
+            rtcSessionFactory = coordinatorConnectionModule.rtcSessionFactory,
         )
 
         if (user.type == UserType.Guest) {
