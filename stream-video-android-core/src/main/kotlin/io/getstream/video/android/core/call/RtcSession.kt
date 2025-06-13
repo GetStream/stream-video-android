@@ -195,7 +195,7 @@ data class TrackDimensions(
  */
 public class RtcSession internal constructor(
     client: StreamVideo,
-    private val sessionCounter: Int = 1,
+    private val sessionCounter: Int = 0,
     private val powerManager: PowerManager?,
     private val call: Call,
     private val sessionId: String,
@@ -219,7 +219,7 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 2000L,
             userToken = sfuToken,
             lifecycle = lifecycle,
-            tracer = tracerManager.tracer("$sessionCounter-sfu")
+            tracer = tracerManager.tracer("$sessionCounter-sfu"),
         )
     },
 ) {
@@ -1239,7 +1239,7 @@ public class RtcSession internal constructor(
                 subscriber_stats = report.toJson(StreamPeerType.SUBSCRIBER),
                 rtc_stats = rtcStats,
                 encode_stats = publisherRtcStats?.performanceStats ?: emptyList(),
-                decode_stats = subscriberRtcStast?.performanceStats ?: emptyList(),
+                decode_stats = subscriberRtcStats?.performanceStats ?: emptyList(),
                 android = AndroidState(
                     thermal_state = androidThermalState,
                     is_power_saver_mode = powerSaving,

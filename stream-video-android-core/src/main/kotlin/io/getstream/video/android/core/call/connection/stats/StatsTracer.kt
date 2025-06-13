@@ -20,6 +20,7 @@ import io.getstream.video.android.core.call.stats.toRtcCodecStats
 import io.getstream.video.android.core.call.stats.toRtcInboundRtpVideoStreamStats
 import io.getstream.video.android.core.call.stats.toRtcOutboundRtpVideoStreamStats
 import io.getstream.video.android.core.call.stats.toRtcVideoSourceStats
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStats
@@ -41,6 +42,7 @@ import kotlin.math.roundToInt
  *
  * @internal
  */
+@InternalStreamVideoApi
 class StatsTracer(
     private val pc: PeerConnection,
     private val peerType: PeerType,
@@ -270,6 +272,7 @@ private fun deltaCompression(
  *  * a delta-compressed diff against the previous poll,
  *  * high-level performance metrics (encode / decode).
  */
+@InternalStreamVideoApi
 data class ComputedStats(
     /** Full statistics snapshot from the current [RTCStatsReport]. */
     val stats: RTCStatsReport,

@@ -6568,11 +6568,6 @@ public final class io/getstream/video/android/core/call/connection/stats/Compute
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/call/connection/stats/StatsTracer {
-	public fun <init> (Lorg/webrtc/PeerConnection;Lstream/video/sfu/models/PeerType;)V
-	public final fun get (Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/signal/socket/RTCEventMapper;
 	public final fun mapEvent (Lstream/video/sfu/event/SfuEvent;)Lio/getstream/video/android/core/events/SfuDataEvent;
