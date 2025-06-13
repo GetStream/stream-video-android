@@ -1,10 +1,14 @@
 package io.getstream.video.android.core.trace
 
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.unmockkAll
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 
 class TracerManagerTest {
     private lateinit var manager: TracerManager
