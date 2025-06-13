@@ -67,11 +67,7 @@ class StatsTracer(
                 else -> getEncodeStats(trackIdToTrackType, currentStats)
             }
 
-            val delta = if (currentStats.values.isNotEmpty()) {
-                deltaCompression(previousStats, currentStats)
-            } else {
-                emptyMap()
-            }
+            val delta = deltaCompression(previousStats, currentStats)
 
             // keep only the last two values so we don’t average over an ever-growing list
             trimHistory(frameTimeHistory, 2)

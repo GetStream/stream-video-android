@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.connection
 
+import androidx.annotation.VisibleForTesting
 import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.ParticipantState
@@ -385,7 +386,8 @@ internal class Subscriber(
 
     fun streams(): Flow<ReceivedMediaStream> = streamsFlow
 
-    private fun onNewStream(mediaStream: MediaStream) {
+    @VisibleForTesting
+    internal fun onNewStream(mediaStream: MediaStream) {
         logger.d { "[addStream] #sfu; #track; mediaStream: $mediaStream" }
         if (trackPrefixToSessionIdMap.isEmpty()) {
             logger.d { "[addStream] #sfu; #track; trackPrefixToSessionIdMap is empty, adding to pending" }
