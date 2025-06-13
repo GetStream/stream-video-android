@@ -150,15 +150,9 @@ fun CallJoinScreen(
             },
         )
 
-        if (isLandscape) {
-            // Do nothing
-        } else {
-            Spacer(modifier = Modifier.size(VideoTheme.dimens.genericMax))
-        }
-
-
         CallJoinBody(
             modifier = Modifier
+                .fillMaxHeight()
                 .align(Alignment.CenterHorizontally)
                 .verticalScroll(rememberScrollState())
                 .weight(1f),
@@ -467,7 +461,6 @@ private fun CallActualContentLandscape(
             StreamLogo(Modifier.size(72.dp))
             Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
             AppName()
-            Spacer(modifier = Modifier.height(12.dp))
             Description(text = stringResource(id = R.string.join_description))
             Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
 
