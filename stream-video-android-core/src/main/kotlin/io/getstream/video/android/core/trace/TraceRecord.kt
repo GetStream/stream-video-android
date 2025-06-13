@@ -55,6 +55,11 @@ class Tracer(private val id: String?) {
     private var enabled: Boolean = true
 
     /**
+     * Returns true if tracing is enabled, false otherwise.
+     */
+    fun isEnabled() = enabled
+
+    /**
      * Enables or disables tracing.
      *
      * Switching state clears any existing buffered entries.
