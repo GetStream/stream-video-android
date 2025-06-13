@@ -499,7 +499,7 @@ private fun LoginContentLandscape(
             LoginButtons(
                 Modifier
                     .weight(1f)
-                    .padding(top = 80.dp),
+                    .padding(top = 80.dp, end = 16.dp),
                 isLoading,
                 showEmailLoginDialog,
                 showBuiltInUserDialog,
