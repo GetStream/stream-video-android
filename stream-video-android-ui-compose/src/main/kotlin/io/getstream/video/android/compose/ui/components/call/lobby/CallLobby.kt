@@ -133,9 +133,10 @@ public fun CallLobby(
     MediaPiPLifecycle(call = call)
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+    val screenHeightDp = configuration.screenHeightDp
 
     val boxModifier = Modifier
-        .then(if (isPortrait) Modifier.height(280.dp) else Modifier.height(200.dp))
+        .responsiveHeight(isPortrait, screenHeightDp)
         .fillMaxWidth()
         .clip(RoundedCornerShape(12.dp))
 
@@ -238,4 +239,16 @@ private fun CallLobbyPreview() {
             ),
         )
     }
+}
+
+private fun Modifier.responsiveHeight(isPortrait: Boolean, screenHeightDp: Int): Modifier {
+    val isSmallDevice = screenHeightDp <= 640
+    val height = if (isPortrait && isSmallDevice) {
+        180.dp
+    } else if (isPortrait) {
+        280.dp
+    } else {
+        200.dp
+    }
+    return this.then(Modifier.height(height))
 }
