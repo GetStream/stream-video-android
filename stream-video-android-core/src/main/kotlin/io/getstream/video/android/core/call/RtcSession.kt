@@ -195,6 +195,7 @@ data class TrackDimensions(
  */
 public class RtcSession internal constructor(
     client: StreamVideo,
+    private val sessionCounter: Int = 1,
     private val powerManager: PowerManager?,
     private val call: Call,
     private val sessionId: String,
@@ -230,9 +231,9 @@ public class RtcSession internal constructor(
     internal val socket
         get() = sfuConnectionModule.socketConnection
 
-    private val publisherTracer = tracerManager.tracer("pub")
-    private val subscriberTracer = tracerManager.tracer("sub")
-    private val sfuTracer = tracerManager.tracer("sfu")
+    private val publisherTracer = tracerManager.tracer("$sessionCounter-pub")
+    private val subscriberTracer = tracerManager.tracer("$sessionCounter-sub")
+    private val sfuTracer = tracerManager.tracer("$sessionCounter-sfu")
 
     private val logger by taggedLogger("Video:RtcSession")
     private val parser: VideoParser = MoshiVideoParser()
