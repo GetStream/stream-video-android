@@ -68,6 +68,7 @@ class StreamPeerConnectionTest {
                 onNegotiationNeeded = null,
                 onIceCandidate = null,
                 maxBitRate = 2_000_000,
+                tracer = mockk(relaxed = true),
             ) {},
         ) {
             every { initialize(any()) } just Runs
@@ -162,7 +163,8 @@ class StreamPeerConnectionTest {
             onStreamAdded = null,
             onNegotiationNeeded = null,
             onIceCandidate = null,
-            maxBitRate = 2_000_000, // set an explicit maxBitRate
+            maxBitRate = 2_000_000,
+            tracer = mockk(relaxed = true),
         ) {}
 
         val streamIds = listOf("camera-stream-id")
@@ -214,7 +216,8 @@ class StreamPeerConnectionTest {
             onStreamAdded = null,
             onNegotiationNeeded = null,
             onIceCandidate = null,
-            maxBitRate = 2_000_000, // We'll set 2M, but screenshare uses 1M
+            maxBitRate = 2_000_000,
+            tracer = mockk(relaxed = true),
         ) {}
 
         val streamIds = listOf("screen-stream-id")

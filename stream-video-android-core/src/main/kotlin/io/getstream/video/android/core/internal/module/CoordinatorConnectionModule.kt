@@ -27,6 +27,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -55,6 +56,7 @@ internal class CoordinatorConnectionModule(
     override val apiKey: ApiKey,
     override val userToken: UserToken,
     override val lifecycle: Lifecycle,
+    override val tracer: Tracer = Tracer("coordinator"),
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
     // Internals
     private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
@@ -66,6 +68,7 @@ internal class CoordinatorConnectionModule(
     }
 
     // API
+
     override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
         HeadersInterceptor(HeadersUtil()),
     )
