@@ -359,16 +359,22 @@ private fun LoginButtons(
     availableLogins: List<String>,
     columnSize: Int,
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    if (!isLoading) {
     Column(
         modifier = modifier
 //            .align(Alignment.CenterHorizontally)
             .background(
                 color = VideoTheme.colors.baseSheetSecondary,
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                shape = if (isLandscape) {
+                    RoundedCornerShape(24.dp)
+                } else {
+                    RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                }
             )
             .padding(horizontal = 24.dp, vertical = 32.dp),
     ) {
-        if (!isLoading) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(columnSize), // This defines your 2 columns
                 modifier = Modifier
