@@ -32,6 +32,7 @@ import io.getstream.video.android.core.call.connection.utils.toVideoDimension
 import io.getstream.video.android.core.call.connection.utils.toVideoLayers
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
@@ -207,10 +208,12 @@ internal class Publisher(
                         logger.d { "[trackPublishing] Track already exists." }
                         senderTrack.trySetEnabled(true)
                         logTrack(senderTrack)
+                        traceTrack(trackType, senderTrack.id())
                         return senderTrack
                     } else {
                         logger.d { "[trackPublishing] Track is disposed, creating new one." }
                         val newTrack = newTrackFromSource(publishOption.track_type)
+                        traceTrack(trackType, newTrack.id())
                         sender.setTrack(newTrack, true)
                         return newTrack
                     }
@@ -219,6 +222,7 @@ internal class Publisher(
                     logger.w { "Failed to set track for ${publishOption.track_type}, creating new transceiver" }
                     transceiverCache.remove(publishOption)
                     val fallbackTrack = newTrackFromSource(publishOption.track_type)
+                    traceTrack(trackType, fallbackTrack.id())
                     addTransceiver(captureFormat, fallbackTrack, publishOption)
                     return fallbackTrack
                 }
@@ -322,7 +326,8 @@ internal class Publisher(
             val sender = transceiver.sender
             val senderTrack = sender.track()
             senderTrack?.let { track ->
-                track.trySetEnabled(false)
+                val result = track.trySetEnabled(false)
+                tracer().trace("unpublishtrack", "$trackType:${track.id()}:$result")
                 logTrack(track)
             }
         }

@@ -30,6 +30,7 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.safeCall
@@ -424,6 +425,7 @@ internal class Subscriber(
             )
             trackIdToParticipant[track.id()] = sessionId
             trackIdToTrackType[track.id()] = trackType
+            traceTrack(trackType, track.id(), listOf(mediaStream.id))
             setTrack(sessionId, trackType, audioTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, audioTrack))
         }
@@ -437,6 +439,7 @@ internal class Subscriber(
             )
             trackIdToParticipant[track.id()] = sessionId
             trackIdToTrackType[track.id()] = trackType
+            traceTrack(trackType, track.id(), listOf(mediaStream.id))
             setTrack(sessionId, trackType, videoTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, videoTrack))
         }

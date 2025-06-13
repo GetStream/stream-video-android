@@ -34,6 +34,7 @@ import io.getstream.video.android.core.model.toRtcCandidate
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,6 +52,7 @@ import org.webrtc.RtpReceiver
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
+import stream.video.sfu.models.TrackType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.IceCandidate as RtcIceCandidate
@@ -605,25 +607,13 @@ open class StreamPeerConnection(
 
     override fun onTrack(transceiver: RtpTransceiver?) {
         logger.i { "[onTrack] #sfu; #$typeTag; transceiver: $transceiver" }
-        val sender = transceiver?.sender
-        if (sender != null) {
-            val track = sender.track()
-            if (track != null) {
-                tracer.trace(
-                    PeerConnectionTraceKey.ON_TRACK.value,
-                    "${track.kind()}:${track.id()} ${sender.streams}",
-                )
-            }
-        }
-        val receiver = transceiver?.receiver
-        if (receiver != null) {
-            val track = receiver.track()
-            if (track != null) {
-                tracer.trace(
-                    PeerConnectionTraceKey.ON_TRACK.value,
-                    "${track.kind()}:${track.id()}",
-                )
-            }
+    }
+
+    internal fun traceTrack(type: TrackType, trackId: String, streamIds: List<String> = emptyList()) = safeCall {
+        if (streamIds.isNotEmpty()) {
+            tracer.trace(PeerConnectionTraceKey.ON_TRACK.value, "$type:$trackId $streamIds")
+        } else {
+            tracer.trace(PeerConnectionTraceKey.ON_TRACK.value, "$type:$trackId")
         }
     }
 
