@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.6.3
+            <div class="library-version">1.7.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.core.notifications</a><span class="delimiter">/</span><span class="current">NotificationHandler</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Notification</span><wbr><span><span>Handler</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">NotificationHandler</a> : <span data-unresolved-link="io.getstream.android.push.permissions/NotificationPermissionHandler///PointingToDeclaration/">NotificationPermissionHandler</span></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.getstream.video.android.core/-stream-video/index.html">StreamVideo</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-default-notification-handler/index.html">DefaultNotificationHandler</a></div></span></div><div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">NotificationHandler</a> : <span data-unresolved-link="io.getstream.android.push.permissions/NotificationPermissionHandler///PointingToDeclaration/">NotificationPermissionHandler</span>, <a href="../../io.getstream.video.android.core.notifications.medianotifications/-media-notification-handler/index.html">MediaNotificationHandler</a></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.getstream.video.android.core/-stream-video/index.html">StreamVideo</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-default-notification-handler/index.html">DefaultNotificationHandler</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -227,7 +227,37 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Inherited functions</h2>
-        <div class="table"><a data-name="1313996885%2FFunctions%2F-1625990423" anchor-label="onPermissionDenied" id="1313996885%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+        <div class="table"><a data-name="-1461151570%2FFunctions%2F-1625990423" anchor-label="createMinimalMediaStyleNotification" id="-1461151570%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.getstream.video.android.core.notifications.medianotifications/-media-notification-handler/create-minimal-media-style-notification.html"><span>create</span><wbr><span>Minimal</span><wbr><span>Media</span><wbr><span>Style</span><wbr><span><span>Notification</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1461151570%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../io.getstream.video.android.core.notifications.medianotifications/-media-notification-handler/create-minimal-media-style-notification.html"><span class="token function">createMinimalMediaStyleNotification</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callId<span class="token operator">: </span><a href="../../io.getstream.video.android.model/-stream-call-id/index.html">StreamCallId</a><span class="token punctuation">, </span></span><span class="parameter ">mediaNotificationConfig<span class="token operator">: </span><a href="../../io.getstream.video.android.core.notifications.medianotifications/-media-notification-config/index.html">MediaNotificationConfig</a><span class="token punctuation">, </span></span><span class="parameter ">remoteParticipantCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/core/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="241911766%2FFunctions%2F-1625990423" anchor-label="getMediaNotificationConfig" id="241911766%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.getstream.video.android.core.notifications.medianotifications/-media-notification-handler/get-media-notification-config.html"><span>get</span><wbr><span>Media</span><wbr><span>Notification</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="241911766%2FFunctions%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../../io.getstream.video.android.core.notifications.medianotifications/-media-notification-handler/get-media-notification-config.html"><span class="token function">getMediaNotificationConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../io.getstream.video.android.core.notifications.medianotifications/-media-notification-config/index.html">MediaNotificationConfig</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1313996885%2FFunctions%2F-1625990423" anchor-label="onPermissionDenied" id="1313996885%2FFunctions%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">

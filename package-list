@@ -10,6 +10,7 @@ io.getstream.video.android.core.audio
 io.getstream.video.android.core.call
 io.getstream.video.android.core.call.audio
 io.getstream.video.android.core.call.connection
+io.getstream.video.android.core.call.connection.stats
 io.getstream.video.android.core.call.signal.socket
 io.getstream.video.android.core.call.state
 io.getstream.video.android.core.call.stats
@@ -31,6 +32,7 @@ io.getstream.video.android.core.model
 io.getstream.video.android.core.notifications
 io.getstream.video.android.core.notifications.internal.receivers
 io.getstream.video.android.core.notifications.internal.service
+io.getstream.video.android.core.notifications.medianotifications
 io.getstream.video.android.core.permission
 io.getstream.video.android.core.permission.android
 io.getstream.video.android.core.socket
@@ -47,6 +49,7 @@ io.getstream.video.android.core.socket.coordinator.state
 io.getstream.video.android.core.socket.sfu
 io.getstream.video.android.core.socket.sfu.state
 io.getstream.video.android.core.sounds
+io.getstream.video.android.core.trace
 io.getstream.video.android.core.utils
 io.getstream.video.android.datastore.delegate
 io.getstream.video.android.datastore.model
