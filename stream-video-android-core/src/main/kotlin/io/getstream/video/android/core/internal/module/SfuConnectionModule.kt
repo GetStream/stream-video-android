@@ -41,7 +41,7 @@ internal class SfuConnectionModule(
     override val connectionTimeoutInMs: Long,
     override val userToken: SfuToken,
     override val lifecycle: Lifecycle,
-    override val tracer: Tracer = Tracer("sfu"),
+    override val tracer: Tracer,
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic

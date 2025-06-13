@@ -219,6 +219,7 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 2000L,
             userToken = sfuToken,
             lifecycle = lifecycle,
+            tracer = tracerManager.tracer("$sessionCounter-sfu")
         )
     },
 ) {
