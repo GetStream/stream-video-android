@@ -40,6 +40,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
@@ -56,7 +57,11 @@ import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
@@ -75,7 +80,8 @@ internal open class CallService : Service() {
     val handler = CoroutineExceptionHandler { _, exception ->
         logger.e(exception) { "[CallService#Scope] Uncaught exception: $exception" }
     }
-    private val serviceScope: CoroutineScope = CoroutineScope(Dispatchers.IO + handler)
+    private val serviceScope: CoroutineScope =
+        CoroutineScope(Dispatchers.IO + handler + SupervisorJob())
 
     // Camera handling receiver
     private val toggleCameraBroadcastReceiver = ToggleCameraBroadcastReceiver(serviceScope)
@@ -344,7 +350,12 @@ internal open class CallService : Service() {
         }
     }
 
-    open fun getNotificationPair(trigger: String, streamVideo: StreamVideoClient, streamCallId: StreamCallId, intentCallDisplayName: String?): Pair<Notification?, Int> {
+    open fun getNotificationPair(
+        trigger: String,
+        streamVideo: StreamVideoClient,
+        streamCallId: StreamCallId,
+        intentCallDisplayName: String?,
+    ): Pair<Notification?, Int> {
         val notificationData: Pair<Notification?, Int> = when (trigger) {
             TRIGGER_ONGOING_CALL -> Pair(
                 first = streamVideo.getOngoingCallNotification(
@@ -407,7 +418,10 @@ internal open class CallService : Service() {
     }
 
     private fun justNotify(notificationId: Int, notification: Notification) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             NotificationManagerCompat.from(this).notify(notificationId, notification)
         }
     }
@@ -493,7 +507,8 @@ internal open class CallService : Service() {
                         if (!it.acceptedByMe) {
                             callSoundPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.incomingCallSoundUri,
-                                streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
+                                streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted
+                                    ?: false,
                             )
                         } else {
                             callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
@@ -504,7 +519,8 @@ internal open class CallService : Service() {
                         if (!it.acceptedByCallee) {
                             callSoundPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
-                                streamVideo.sounds.mutedRingingConfig?.playOutgoingSoundIfMuted ?: false,
+                                streamVideo.sounds.mutedRingingConfig?.playOutgoingSoundIfMuted
+                                    ?: false,
                             )
                         } else {
                             callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
@@ -595,37 +611,50 @@ internal open class CallService : Service() {
         }
     }
 
+    @OptIn(ExperimentalStreamVideoApi::class)
     private fun observeNotificationUpdates(callId: StreamCallId, streamVideo: StreamVideoClient) {
-        streamVideo.getNotificationUpdates(
-            serviceScope,
-            streamVideo.call(callId.type, callId.id),
-            streamVideo.user,
-        ) { notification ->
-            startForegroundWithServiceType(
-                callId.hashCode(),
-                notification,
-                TRIGGER_ONGOING_CALL,
-                serviceType,
-            )
+        serviceScope.launch {
+            val call = streamVideo.call(callId.type, callId.id)
+            logger.d { "Observing notification updates for call: ${call.cid}" }
+            val notificationUpdateTriggers = streamVideo.streamNotificationManager.notificationConfig.notificationUpdateTriggers(call) ?: combine(
+                call.state.ringingState,
+                call.state.members,
+                call.state.remoteParticipants,
+                call.state.backstage,
+            ) { ringingState, members, remoteParticipants, backstage ->
+                listOf(ringingState, members, remoteParticipants, backstage)
+            }.distinctUntilChanged()
+
+            notificationUpdateTriggers.collectLatest { state ->
+                val ringingState = call.state.ringingState.value
+                val notification = streamVideo.onCallNotificationUpdate(
+                    call = call,
+                )
+                if (notification != null) {
+                    if (ringingState is RingingState.Active) {
+                        justNotify(callId.hashCode(), notification)
+                    } else if (ringingState is RingingState.Outgoing) {
+                        justNotify(INCOMING_CALL_NOTIFICATION_ID, notification)
+                    }
+                }
+            }
         }
     }
 
     private fun registerToggleCameraBroadcastReceiver() {
-        serviceScope.launch {
-            if (!isToggleCameraBroadcastReceiverRegistered) {
-                try {
-                    registerReceiver(
-                        toggleCameraBroadcastReceiver,
-                        IntentFilter().apply {
-                            addAction(Intent.ACTION_SCREEN_ON)
-                            addAction(Intent.ACTION_SCREEN_OFF)
-                            addAction(Intent.ACTION_USER_PRESENT)
-                        },
-                    )
-                    isToggleCameraBroadcastReceiverRegistered = true
-                } catch (e: Exception) {
-                    logger.d { "Unable to register ToggleCameraBroadcastReceiver." }
-                }
+        if (!isToggleCameraBroadcastReceiverRegistered) {
+            try {
+                registerReceiver(
+                    toggleCameraBroadcastReceiver,
+                    IntentFilter().apply {
+                        addAction(Intent.ACTION_SCREEN_ON)
+                        addAction(Intent.ACTION_SCREEN_OFF)
+                        addAction(Intent.ACTION_USER_PRESENT)
+                    },
+                )
+                isToggleCameraBroadcastReceiverRegistered = true
+            } catch (e: Exception) {
+                logger.d { "Unable to register ToggleCameraBroadcastReceiver." }
             }
         }
     }

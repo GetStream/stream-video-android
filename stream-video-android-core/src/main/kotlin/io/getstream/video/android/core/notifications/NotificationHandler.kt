@@ -18,6 +18,7 @@ package io.getstream.video.android.core.notifications
 
 import android.app.Notification
 import android.app.PendingIntent
+import androidx.annotation.WorkerThread
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
@@ -89,6 +90,19 @@ public interface NotificationHandler : NotificationPermissionHandler, MediaNotif
     ): Notification?
 
     /**
+     * Customize the notification when you receive a push notification for ringing call with type [RingingState.Outgoing] and [RingingState.Active]
+     *
+     * NOTE: It is safe to use `runBlocking` in this method. It is always called on a background thread.
+     *
+     * @param call the stream call object.
+     * @return A [Notification] object customized for the ongoing call.
+     */
+    @WorkerThread
+    fun onCallNotificationUpdate(
+        call: Call,
+    ): Notification?
+
+    /**
      * Customize the notification when you receive a push notification for ringing call
      * @param ringingState The current state of ringing call, represented by [RingingState]
      * @param callId An instance of [StreamCallId] representing the call identifier
@@ -114,6 +128,11 @@ public interface NotificationHandler : NotificationPermissionHandler, MediaNotif
      * @param localUser The local Stream user.
      * @param onUpdate Callback to be called when the notification is updated.
      */
+    @Deprecated(
+        level = DeprecationLevel.ERROR,
+        message = "This method is deprecated. Use the getNotificationUpdates method in the NotificationHandler interface instead.",
+        replaceWith = ReplaceWith("onNotificationUpdateSuspend(coroutineScope, call, localUser)"),
+    )
     fun getNotificationUpdates(
         coroutineScope: CoroutineScope,
         call: Call,
@@ -132,7 +151,8 @@ public interface NotificationHandler : NotificationPermissionHandler, MediaNotif
         const val ACTION_LEAVE_CALL = "io.getstream.video.android.action.LEAVE_CALL"
         const val ACTION_ONGOING_CALL = "io.getstream.video.android.action.ONGOING_CALL"
         const val INTENT_EXTRA_CALL_CID: String = "io.getstream.video.android.intent-extra.call_cid"
-        const val INTENT_EXTRA_CALL_DISPLAY_NAME: String = "io.getstream.video.android.intent-extra.call_displayname"
+        const val INTENT_EXTRA_CALL_DISPLAY_NAME: String =
+            "io.getstream.video.android.intent-extra.call_displayname"
 
         const val INTENT_EXTRA_NOTIFICATION_ID: String =
             "io.getstream.video.android.intent-extra.notification_id"

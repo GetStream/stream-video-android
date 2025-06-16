@@ -49,6 +49,9 @@ internal object NoOpNotificationHandler : NotificationHandler {
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? = null
+
+    override fun onCallNotificationUpdate(call: Call): Notification? = null
+
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
@@ -56,6 +59,11 @@ internal object NoOpNotificationHandler : NotificationHandler {
         shouldHaveContentIntent: Boolean,
     ): Notification? = null
     override fun getSettingUpCallNotification(): Notification? = null
+
+    @Deprecated(
+        level = DeprecationLevel.ERROR,
+        message = "This method is deprecated. Use the getNotificationUpdates method in the NotificationHandler interface instead.",
+    )
     override fun getNotificationUpdates(
         coroutineScope: CoroutineScope,
         call: Call,

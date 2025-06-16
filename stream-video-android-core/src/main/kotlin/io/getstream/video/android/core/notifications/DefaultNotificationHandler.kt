@@ -25,7 +25,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.session.MediaSession
 import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -73,7 +72,6 @@ public open class DefaultNotificationHandler(
      * handle this call state and display an incoming call screen.
      */
     val hideRingingNotificationInForeground: Boolean = false,
-
     /**
      * The notification icon for call notifications.
      */
@@ -317,7 +315,8 @@ public open class DefaultNotificationHandler(
         remoteParticipantCount: Int,
     ): Notification? {
         val client = (StreamVideo.instance() as StreamVideoClient)
-        val mediaNotificationCallTypes = client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
+        val mediaNotificationCallTypes =
+            client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
         return if (mediaNotificationCallTypes.contains(callId.type)) {
             createMinimalMediaStyleNotification(
                 callId,
@@ -421,6 +420,67 @@ public open class DefaultNotificationHandler(
         )
     }
 
+    override fun onCallNotificationUpdate(call: Call): Notification? {
+        val ringingState = call.state.ringingState.value
+        val members = call.state.members.value
+        val remoteParticipants = call.state.remoteParticipants.value
+        logger.d { "[onCallNotificationUpdate] #ringingState: ${ringingState}; callId: ${call.cid}" }
+        logger.d { "[onCallNotificationUpdate] #members: ${members}; callId: ${call.cid}" }
+        logger.d { "[onCallNotificationUpdate] #remoteParticipants: ${remoteParticipants}; callId: ${call.cid}" }
+
+        val notification: Notification? = if (ringingState is RingingState.Outgoing) {
+            val remoteMembersCount = members.size - 1
+            val callDisplayName = if (remoteMembersCount != 1) {
+                application.getString(
+                    R.string.stream_video_outgoing_call_notification_title,
+                )
+            } else {
+                members.firstOrNull { member ->
+                    member.user.id != call.state.me.value?.userId?.value
+                }?.user?.name ?: "Unknown"
+            }
+
+            getOngoingCallNotification(
+                callId = StreamCallId.fromCallCid(call.cid),
+                callDisplayName = callDisplayName,
+                isOutgoingCall = true,
+                remoteParticipantCount = remoteMembersCount,
+            )
+        } else if (ringingState is RingingState.Active) {
+            val callDisplayName = if (remoteParticipants.isEmpty()) {
+                // If no remote participants, get simple call notification title
+                application.getString(
+                    R.string.stream_video_ongoing_call_notification_title,
+                )
+            } else {
+                if (remoteParticipants.size > 1) {
+                    // If more than 1 remote participant, get group call notification title
+                    application.getString(
+                        R.string.stream_video_ongoing_group_call_notification_title,
+                    )
+                } else {
+                    // If 1 remote participant, get the name of the remote participant
+                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+                }
+            }
+
+            getOngoingCallNotification(
+                callId = StreamCallId.fromCallCid(call.cid),
+                callDisplayName = callDisplayName,
+                remoteParticipantCount = remoteParticipants.size,
+            )
+        } else {
+            // Else don't update
+            null
+        }
+
+        return notification
+    }
+
+    @Deprecated(
+        level = DeprecationLevel.ERROR,
+        message = "This method is deprecated. Use the getNotificationUpdates method in the NotificationHandler interface instead.",
+    )
     override fun getNotificationUpdates(
         coroutineScope: CoroutineScope,
         call: Call,
@@ -430,10 +490,8 @@ public open class DefaultNotificationHandler(
         val streamVideoClient = StreamVideo.instanceOrNull() as? StreamVideoClient
 
         if (streamVideoClient?.enableCallNotificationUpdates != true) return
-
         coroutineScope.launch {
             var latestRemoteParticipantCount = -1
-
             // Monitor call state and remote participants
             combine(
                 call.state.ringingState,
@@ -474,7 +532,8 @@ public open class DefaultNotificationHandler(
                         val currentRemoteParticipantCount = remoteParticipants.size
                         // If number of remote participants increased or decreased
                         if (currentRemoteParticipantCount != latestRemoteParticipantCount) {
-                            val isSameCase = currentRemoteParticipantCount > 1 && latestRemoteParticipantCount > 1
+                            val isSameCase =
+                                currentRemoteParticipantCount > 1 && latestRemoteParticipantCount > 1
                             latestRemoteParticipantCount = currentRemoteParticipantCount
 
                             if (!isSameCase) {
@@ -706,7 +765,6 @@ public open class DefaultNotificationHandler(
         remoteParticipantCount: Int,
     ): NotificationCompat.Builder? {
         val notificationId = callId.hashCode() // Notification ID
-
         // Intents
         val onClickIntent = mediaNotificationConfig.contentIntent
             ?: intentResolver.searchOngoingCallPendingIntent(
@@ -723,7 +781,12 @@ public open class DefaultNotificationHandler(
         val mediaSession = MediaSessionCompat(application, ongoingCallsChannelId)
 
         val liveMetadata = MediaMetadataCompat.Builder()
-            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1L)
+            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1L).apply {
+                val bannerBitmap = mediaNotificationConfig.mediaNotificationVisuals.bannerBitmap
+                if (bannerBitmap != null) {
+                    putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bannerBitmap)
+                }
+            }
             .build()
         mediaSession.setMetadata(liveMetadata)
 
@@ -731,7 +794,7 @@ public open class DefaultNotificationHandler(
             .setState(
                 PlaybackStateCompat.STATE_PLAYING,
                 PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
-                1f
+                1f,
             ).build()
         mediaSession.setPlaybackState(liveState)
 
@@ -758,9 +821,6 @@ public open class DefaultNotificationHandler(
             .setStyle(mediaStyle).apply {
                 if (mediaNotificationConfig.mediaNotificationVisuals.smallIcon != null) {
                     setSmallIcon(mediaNotificationConfig.mediaNotificationVisuals.smallIcon)
-                }
-                if (mediaNotificationConfig.mediaNotificationVisuals.bannerBitmap != null) {
-                    setLargeIcon(mediaNotificationConfig.mediaNotificationVisuals.bannerBitmap)
                 }
             }
     }
