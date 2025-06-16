@@ -22,6 +22,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.model.Credentials
+import io.getstream.video.android.core.trace.TracerManager
 import io.getstream.video.android.model.ApiKey
 import kotlinx.coroutines.CoroutineScope
 
@@ -29,6 +30,7 @@ internal class RtcSessionFactory(
     private val lifecycle: Lifecycle,
     private val apiKey: ApiKey,
     private val powerManager: PowerManager,
+    private val tracerManager: TracerManager,
     private val coroutineScope: CoroutineScope,
 ) {
 
@@ -50,5 +52,6 @@ internal class RtcSessionFactory(
             powerManager = powerManager,
             coroutineScope = coroutineScope,
             sessionId = sessionId,
+            tracerManager = tracerManager,
         )
 }

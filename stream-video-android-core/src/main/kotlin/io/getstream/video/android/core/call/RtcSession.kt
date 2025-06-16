@@ -209,7 +209,7 @@ public class RtcSession internal constructor(
     private val supervisorJob: CompletableJob = SupervisorJob(),
     private val coroutineScope: CoroutineScope =
         CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
-    private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
+    private val tracerManager: TracerManager,
     private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
         SfuConnectionModule(
             context = clientImpl.context,

@@ -221,6 +221,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
+            enableStatsCollection = enableStatsReporting,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -260,7 +261,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
-            enableStatsCollection = enableStatsReporting,
             rtcSessionFactory = coordinatorConnectionModule.rtcSessionFactory,
         )
 

@@ -109,7 +109,6 @@ internal class StreamVideoClient internal constructor(
     internal val leaveAfterDisconnectSeconds: Long = 30,
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,
-    internal val enableStatsCollection: Boolean = true,
     internal val rtcSessionFactory: RtcSessionFactory,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 

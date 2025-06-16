@@ -38,6 +38,7 @@ import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.trace.TracerManager
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -60,6 +61,7 @@ internal class CoordinatorConnectionModule(
     context: Context,
     tokenProvider: TokenProvider,
     user: User,
+    enableStatsCollection: Boolean,
     override val scope: CoroutineScope,
     // Common API
     override val apiUrl: String,
@@ -142,6 +144,7 @@ internal class CoordinatorConnectionModule(
         )
     }
 
+    private val tracerManager = TracerManager(enableStatsCollection)
     val rtcSessionFactory: RtcSessionFactory by lazy {
         RtcSessionFactory(
             lifecycle = lifecycle,
@@ -150,6 +153,7 @@ internal class CoordinatorConnectionModule(
                 Context.POWER_SERVICE,
             ) as android.os.PowerManager,
             coroutineScope = scope,
+            tracerManager = tracerManager
         )
     }
 
