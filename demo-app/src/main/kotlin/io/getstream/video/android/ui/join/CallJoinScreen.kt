@@ -336,7 +336,6 @@ private fun CallJoinBody(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
 ) {
-    val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(previewUsers[0]) }
     } else {
@@ -344,17 +343,7 @@ private fun CallJoinBody(
     }
 
     if (!isNetworkAvailable) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            StreamLogo(Modifier.size(102.dp))
-            Spacer(modifier = Modifier.height(25.dp))
-            AppName(selectedEnv)
-            Spacer(modifier = Modifier.height(25.dp))
-            Description(text = stringResource(id = R.string.you_are_offline))
-        }
+        NoInternetUiResponsive()
     } else {
         if (user != null) {
             CallActualContentResponsive(
@@ -644,6 +633,48 @@ class BelowElementPositionProvider(
         ).toInt()
 
         return IntOffset(x, y)
+    }
+}
+
+@Composable
+private fun NoInternetUiResponsive() {
+    val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    if (isLandscape) {
+        NoInternetUiLandscape(selectedEnv)
+    } else {
+        NoInternetUiPortrait(selectedEnv)
+    }
+}
+
+@Composable
+private fun NoInternetUiPortrait(selectedEnv: StreamEnvironment) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        StreamLogo(Modifier.size(102.dp))
+        Spacer(modifier = Modifier.height(25.dp))
+        AppName(selectedEnv)
+        Spacer(modifier = Modifier.height(25.dp))
+        Description(text = stringResource(id = R.string.you_are_offline))
+    }
+}
+
+@Composable
+private fun NoInternetUiLandscape(selectedEnv: StreamEnvironment) {
+    Column(
+        modifier = Modifier.fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        StreamLogo(Modifier.size(72.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        AppName(selectedEnv)
+        Spacer(modifier = Modifier.height(12.dp))
+        Description(text = stringResource(id = R.string.you_are_offline))
     }
 }
 
