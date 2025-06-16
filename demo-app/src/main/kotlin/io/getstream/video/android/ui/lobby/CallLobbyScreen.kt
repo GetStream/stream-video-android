@@ -347,7 +347,6 @@ private fun CallLobbyBodyLandscape(
     onToggleMicrophone: (Boolean) -> Unit,
     description: @Composable () -> Unit,
 ) {
-
     Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
         Row() {
             Column(
