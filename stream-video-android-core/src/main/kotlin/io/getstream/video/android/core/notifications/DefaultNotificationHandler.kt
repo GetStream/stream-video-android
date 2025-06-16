@@ -25,7 +25,11 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.session.MediaSession
 import android.os.Build
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -716,8 +720,24 @@ public open class DefaultNotificationHandler(
         )
 
         createOnGoingChannel(ongoingCallsChannelId)
+        val mediaSession = MediaSessionCompat(application, ongoingCallsChannelId)
 
+        val liveMetadata = MediaMetadataCompat.Builder()
+            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1L)
+            .build()
+        mediaSession.setMetadata(liveMetadata)
+
+        val liveState = PlaybackStateCompat.Builder()
+            .setState(
+                PlaybackStateCompat.STATE_PLAYING,
+                PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+                1f
+            ).build()
+        mediaSession.setPlaybackState(liveState)
+
+        // 3. Build the notification as usual -----------------------------------
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
+            .setMediaSession(mediaSession.sessionToken)
 
         // Build notification
         return NotificationCompat.Builder(application, ongoingCallsChannelId)
@@ -733,6 +753,7 @@ public open class DefaultNotificationHandler(
             .setContentText(mediaNotificationConfig.mediaNotificationContent.contentText)
             .setLargeIcon(mediaNotificationConfig.mediaNotificationVisuals.bannerBitmap)
             .setAutoCancel(false)
+            .setShowWhen(false)
             .setOngoing(true)
             .setStyle(mediaStyle).apply {
                 if (mediaNotificationConfig.mediaNotificationVisuals.smallIcon != null) {
