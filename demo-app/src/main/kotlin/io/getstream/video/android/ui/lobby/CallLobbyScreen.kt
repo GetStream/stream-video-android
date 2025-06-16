@@ -94,7 +94,6 @@ fun CallLobbyScreen(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
     onBack: () -> Unit,
 ) {
-//    LockScreenOrientation(orientation = Configuration.ORIENTATION_UNDEFINED)
     val isLoading by callLobbyViewModel.isLoading.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by callLobbyViewModel.microphoneEnabled.collectAsStateWithLifecycle()
     val isCameraEnabled by callLobbyViewModel.cameraEnabled.collectAsStateWithLifecycle()

@@ -114,7 +114,6 @@ fun CallJoinScreen(
     navigateToDirectCallJoin: () -> Unit,
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
-//    LockScreenOrientation(orientation = Configuration.ORIENTATION_UNDEFINED)
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val user by callJoinViewModel.user.collectAsState(initial = null)
 

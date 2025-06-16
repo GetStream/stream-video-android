@@ -119,7 +119,6 @@ fun LoginScreen(
     navigateToCallJoin: () -> Unit,
 ) {
     VideoTheme {
-//        LockScreenOrientation(orientation = Configuration.ORIENTATION_UNDEFINED)
         val uiState by loginViewModel.uiState.collectAsState(initial = LoginUiState.Nothing)
         val isLoading by remember(uiState) {
             mutableStateOf(
