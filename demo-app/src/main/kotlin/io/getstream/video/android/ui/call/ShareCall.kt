@@ -172,7 +172,7 @@ public fun ShareSettingsBoxLandscape(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(VideoTheme.dimens.spacingXl)
+                    .padding(VideoTheme.dimens.spacingXl),
             ) {
                 JoinCallQRCode(shareUrl = shareUrl)
             }
@@ -222,7 +222,6 @@ public fun ShareSettingsBoxLandscape(
                 Spacer(modifier = Modifier.size(16.dp))
             }
         }
-
     }
 }
 
@@ -263,7 +262,7 @@ private fun ShareSettingsBoxPortraitPreview() {
     name = "Landscape Preview",
     showBackground = true,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=891dp,height=411dp,dpi=420"
+    device = "spec:width=891dp,height=411dp,dpi=420",
 )
 @Composable
 private fun ShareSettingsBoxLandscapePreview() {

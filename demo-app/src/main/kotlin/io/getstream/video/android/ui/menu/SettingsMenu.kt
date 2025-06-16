@@ -251,7 +251,7 @@ internal fun SettingsMenu(
                     contentDescription = Icons.Default.Close.name,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp).clickable {
                         onDismissed()
-                    }
+                    },
                 )
                 ReactionsMenu(
                     call = call,

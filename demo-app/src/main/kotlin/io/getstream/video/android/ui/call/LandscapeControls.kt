@@ -127,7 +127,7 @@ fun LandscapeControlsContent(
                 contentDescription = Icons.Default.Close.name,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp).clickable {
                     onDismiss()
-                }
+                },
             )
             ReactionsMenu(call = call, reactionMapper = ReactionMapper.defaultReactionMapper()) {
                 onDismiss()

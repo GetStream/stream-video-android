@@ -102,7 +102,6 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamFlavors
-import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
@@ -393,7 +392,6 @@ private fun CallActualContentResponsive(
     }
 }
 
-
 @Composable
 private fun CallActualContentPortrait(
     modifier: Modifier = Modifier,
@@ -440,7 +438,6 @@ private fun CallActualContentPortrait(
     }
 }
 
-
 @Composable
 private fun CallActualContentLandscape(
     modifier: Modifier = Modifier,
@@ -463,13 +460,14 @@ private fun CallActualContentLandscape(
             AppName()
             Description(text = stringResource(id = R.string.join_description))
             Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
-
         }
 
-        Column(modifier = Modifier
-            .weight(1f)
-            .padding(horizontal = VideoTheme.dimens.spacingM)
-            .align(Alignment.CenterVertically)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = VideoTheme.dimens.spacingM)
+                .align(Alignment.CenterVertically),
+        ) {
             JoinCallForm(prefilledCallId) {
                 onJoinCall(it)
             }
@@ -494,7 +492,6 @@ private fun CallActualContentLandscape(
             )
         }
     }
-
 }
 
 @Composable
@@ -655,7 +652,7 @@ class BelowElementPositionProvider(
     name = "Portrait Preview",
     showBackground = true,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=411dp,height=891dp,dpi=420"
+    device = "spec:width=411dp,height=891dp,dpi=420",
 )
 @Composable
 private fun CallJoinScreenPortraitPreview() {
@@ -669,7 +666,7 @@ private fun CallJoinScreenPortraitPreview() {
     name = "Landscape Preview",
     showBackground = true,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=891dp,height=411dp,dpi=420"
+    device = "spec:width=891dp,height=411dp,dpi=420",
 )
 @Composable
 private fun CallJoinScreenLandscapePreview() {

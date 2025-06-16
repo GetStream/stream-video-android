@@ -144,8 +144,10 @@ private fun Body(
             )
         } else {
             uiState.otherUsers?.let { users ->
-                Column(modifier = Modifier.align(Alignment.TopStart)
-                    .padding(bottom = 80.dp)) {
+                Column(
+                    modifier = Modifier.align(Alignment.TopStart)
+                        .padding(bottom = 80.dp),
+                ) {
                     UserList(
                         entries = users,
                         onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },

@@ -177,7 +177,10 @@ private fun CallLobbyHeaderContent(
 ) {
     Row(
         modifier = Modifier
-            .padding(horizontal = VideoTheme.dimens.spacingM, vertical = VideoTheme.dimens.spacingXs)
+            .padding(
+                horizontal = VideoTheme.dimens.spacingM,
+                vertical = VideoTheme.dimens.spacingXs,
+            )
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -239,7 +242,7 @@ private fun CallLobbyBodyResponsive(
             isMicrophoneEnabled,
             onToggleCamera,
             onToggleMicrophone,
-            description
+            description,
         )
     } else {
         CallLobbyBodyPortrait(
@@ -249,7 +252,7 @@ private fun CallLobbyBodyResponsive(
             isMicrophoneEnabled,
             onToggleCamera,
             onToggleMicrophone,
-            description
+            description,
         )
     }
 }
@@ -347,7 +350,7 @@ private fun CallLobbyBodyLandscape(
     description: @Composable () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
-    //The compose is running on landscape orientation
+    // The compose is running on landscape orientation
     val screenHeightDp = configuration.screenHeightDp.dp
 //    val screenWidthDp = configuration.screenWidthDp.dp
 
@@ -364,7 +367,6 @@ private fun CallLobbyBodyLandscape(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 val onCallAction: (CallAction) -> Unit = { action ->
                     when (action) {
                         is ToggleCamera -> onToggleCamera(action.isEnabled)
@@ -377,12 +379,17 @@ private fun CallLobbyBodyLandscape(
                     call = call,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = VideoTheme.dimens.spacingM,
-                            end = VideoTheme.dimens.spacingM,),
+                        .padding(
+                            start = VideoTheme.dimens.spacingM,
+                            end = VideoTheme.dimens.spacingM,
+                        ),
                     isCameraEnabled = isCameraEnabled,
                     isMicrophoneEnabled = isMicrophoneEnabled,
                     onRenderedContent = {
-                        Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center){
+                        Box(
+                            modifier = Modifier.fillMaxHeight(),
+                            contentAlignment = Alignment.Center,
+                        ) {
                             val videoRendererConfig = remember {
                                 videoRenderConfig {
                                     this.fallbackContent = {
@@ -402,10 +409,9 @@ private fun CallLobbyBodyLandscape(
                                 videoRendererConfig = videoRendererConfig,
                             )
                         }
-
                     },
                     onCallAction = onCallAction,
-                    lobbyControlsContent = {_,_ ->
+                    lobbyControlsContent = { _, _ ->
                         ControlActions(
                             modifier = Modifier.padding(top = paddingForControlButtons),
                             call = call,
@@ -416,7 +422,7 @@ private fun CallLobbyBodyLandscape(
                                 isMicrophoneEnabled = isMicrophoneEnabled,
                             ),
                         )
-                    }
+                    },
                 )
                 if (BuildConfig.BUILD_TYPE == "benchmark") {
                     LaunchedEffect(key1 = Unit) {
@@ -425,42 +431,36 @@ private fun CallLobbyBodyLandscape(
                         onToggleMicrophone(true)
                     }
                 }
-
             }
 
             Column(
                 modifier = modifier
                     .weight(1f)
                     .align(Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 // Text and Spacer elements remain unchanged
 
                 // LaunchedEffect to handle initial setup might need adjustments
                 // based on how you handle benchmarks or initial setup externally
 //                Column(modifier = Modifier.align(Alignment.TopCenter), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        modifier = Modifier.size(36.dp),
-                        imageVector = Icons.Default.Language,
-                        tint = VideoTheme.colors.brandGreen,
-                        contentDescription = "",
-                    )
-                    Text(
-                        modifier = Modifier.padding(VideoTheme.dimens.spacingM),
-                        text = "Set up your test call",
-                        style = VideoTheme.typography.titleS,
-                    )
+                Icon(
+                    modifier = Modifier.size(36.dp),
+                    imageVector = Icons.Default.Language,
+                    tint = VideoTheme.colors.brandGreen,
+                    contentDescription = "",
+                )
+                Text(
+                    modifier = Modifier.padding(VideoTheme.dimens.spacingM),
+                    text = "Set up your test call",
+                    style = VideoTheme.typography.titleS,
+                )
 //                }
 
                 description()
             }
         }
-
-
-
     }
-
-
 }
 
 @Composable
@@ -578,7 +578,7 @@ private fun CallLobbyHeaderPreview() {
     name = "Portrait Preview",
     showBackground = true,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=411dp,height=891dp,dpi=420"
+    device = "spec:width=411dp,height=891dp,dpi=420",
 )
 @Composable
 private fun CallLobbyBodyPortraitPreview() {
@@ -600,7 +600,7 @@ private fun CallLobbyBodyPortraitPreview() {
     name = "Landscape Preview",
     showBackground = true,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=891dp,height=411dp,dpi=420"
+    device = "spec:width=891dp,height=411dp,dpi=420",
 )
 @Composable
 private fun CallLobbyBodyLandscapePreview() {

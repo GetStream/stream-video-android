@@ -220,7 +220,7 @@ private fun LoginContentResponsive(
             login,
             availableEnvs,
             selectedEnv,
-            availableLogins
+            availableLogins,
         )
     } else {
         LoginContentPortrait(
@@ -232,7 +232,7 @@ private fun LoginContentResponsive(
             login,
             availableEnvs,
             selectedEnv,
-            availableLogins
+            availableLogins,
         )
     }
 }
@@ -256,12 +256,11 @@ private fun LoginContentPortrait(
             .background(color = VideoTheme.colors.baseSheetPrimary),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-
         EnvironmentSelectionDialog(
             modifier = Modifier.align(Alignment.End),
             reloadSdk = reloadSdk,
             availableEnvs = availableEnvs,
-            selectedEnv = selectedEnv
+            selectedEnv = selectedEnv,
         )
         Logo(Modifier.fillMaxWidth(), selectedEnv)
         Spacer(modifier = Modifier.weight(1f)) // Pushes the following views to the bottom
@@ -272,7 +271,7 @@ private fun LoginContentPortrait(
             showBuiltInUserDialog,
             login,
             availableLogins,
-            1
+            1,
         )
         LoadingIndicator(Modifier.align(Alignment.CenterHorizontally), isLoading)
     }
@@ -297,7 +296,7 @@ private fun EnvironmentSelectionDialog(
 ) {
     selectedEnv?.let {
         Box(
-            modifier = modifier
+            modifier = modifier,
         ) {
             SelectableDialog(
                 items = availableEnvs,
@@ -362,27 +361,31 @@ private fun LoginButtons(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     if (!isLoading) {
-    Column(
-        modifier = modifier
+        Column(
+            modifier = modifier
 //            .align(Alignment.CenterHorizontally)
-            .background(
-                color = VideoTheme.colors.baseSheetSecondary,
-                shape = if (isLandscape) {
-                    RoundedCornerShape(24.dp)
-                } else {
-                    RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                }
-            )
-            .padding(horizontal = 24.dp, vertical = 32.dp),
-    ) {
+                .background(
+                    color = VideoTheme.colors.baseSheetSecondary,
+                    shape = if (isLandscape) {
+                        RoundedCornerShape(24.dp)
+                    } else {
+                        RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                    },
+                )
+                .padding(horizontal = 24.dp, vertical = 32.dp),
+        ) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(columnSize), // This defines your 2 columns
                 modifier = Modifier
                     .wrapContentHeight()
                     .fillMaxWidth(),
 //                    .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.spacingM), // Spacing between columns
-                verticalArrangement = Arrangement.spacedBy(VideoTheme.dimens.spacingM), // Spacing between rows
+                horizontalArrangement = Arrangement.spacedBy(
+                    VideoTheme.dimens.spacingM,
+                ), // Spacing between columns
+                verticalArrangement = Arrangement.spacedBy(
+                    VideoTheme.dimens.spacingM,
+                ), // Spacing between rows
             ) {
                 items(availableLogins.size) { index ->
 
@@ -453,7 +456,6 @@ private fun LoginButtons(
                     Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
                 }
             }
-
         }
 
         if (BuildConfig.BUILD_TYPE == "benchmark") {
@@ -485,13 +487,12 @@ private fun LoginContentLandscape(
     selectedEnv: StreamEnvironment?,
     availableLogins: List<String>,
 ) {
-
-    Box(modifier = Modifier.fillMaxHeight()
-        , contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
         Row {
             Logo(
                 Modifier
-                    .weight(1f), selectedEnv
+                    .weight(1f),
+                selectedEnv,
             )
 //            Box(modifier = Modifier.background(Color.Red)
 //                .size(100.dp))
@@ -505,18 +506,20 @@ private fun LoginContentLandscape(
                 showBuiltInUserDialog,
                 login,
                 availableLogins,
-                2
+                2,
             )
 //            }
         }
         EnvironmentSelectionDialog(
             modifier = Modifier.align(Alignment.TopEnd),
-            reloadSdk, availableEnvs, selectedEnv
+            reloadSdk,
+            availableEnvs,
+            selectedEnv,
         )
 
         LoadingIndicator(
             Modifier.align(Alignment.Center),
-            isLoading
+            isLoading,
         )
     }
 }
@@ -732,7 +735,7 @@ private fun HandleLoginUiStates(
     name = "Portrait Preview",
     showBackground = true,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=411dp,height=891dp,dpi=420"
+    device = "spec:width=411dp,height=891dp,dpi=420",
 )
 @Composable
 private fun LoginScreenPreview() {
@@ -752,7 +755,7 @@ private fun LoginScreenPreview() {
     name = "Landscape Preview",
     showBackground = true,
     uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=891dp,height=411dp,dpi=420"
+    device = "spec:width=891dp,height=411dp,dpi=420",
 )
 @Composable
 private fun LoginScreenLandscapePreview() {
