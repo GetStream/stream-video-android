@@ -562,11 +562,21 @@ fun CallScreen(
                     context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                 }
                 val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+
+                val configuration = LocalConfiguration.current
+                val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+                val popupYOffset = if (isPortrait) {
+                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt()
+                } else {
+                    0
+                }
+
                 Popup(
                     alignment = Alignment.BottomCenter,
                     offset = IntOffset(
                         0,
-                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
+                        popupYOffset,
                     ),
                 ) {
                     Box {
