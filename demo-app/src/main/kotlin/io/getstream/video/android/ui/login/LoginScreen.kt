@@ -313,8 +313,6 @@ private fun EnvironmentSelectionDialog(
 private fun Logo(modifier: Modifier, selectedEnv: StreamEnvironment?) {
     Column(
         modifier = modifier
-//            .wrapContentHeight()
-//            .fillMaxWidth()
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -328,7 +326,6 @@ private fun Logo(modifier: Modifier, selectedEnv: StreamEnvironment?) {
         Spacer(modifier = Modifier.height(27.dp))
 
         Text(
-//            modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             text = buildAnnotatedString {
                 append("Stream\n")
@@ -362,7 +359,6 @@ private fun LoginButtons(
     if (!isLoading) {
         Column(
             modifier = modifier
-//            .align(Alignment.CenterHorizontally)
                 .background(
                     color = VideoTheme.colors.baseSheetSecondary,
                     shape = if (isLandscape) {
@@ -378,13 +374,12 @@ private fun LoginButtons(
                 modifier = Modifier
                     .wrapContentHeight()
                     .fillMaxWidth(),
-//                    .weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(
                     VideoTheme.dimens.spacingM,
-                ), // Spacing between columns
+                ),
                 verticalArrangement = Arrangement.spacedBy(
                     VideoTheme.dimens.spacingM,
-                ), // Spacing between rows
+                ),
             ) {
                 items(availableLogins.size) { index ->
 
@@ -493,9 +488,6 @@ private fun LoginContentLandscape(
                     .weight(1f),
                 selectedEnv,
             )
-//            Box(modifier = Modifier.background(Color.Red)
-//                .size(100.dp))
-//            Column {
             LoginButtons(
                 Modifier
                     .weight(1f)
@@ -507,7 +499,6 @@ private fun LoginContentLandscape(
                 availableLogins,
                 2,
             )
-//            }
         }
         EnvironmentSelectionDialog(
             modifier = Modifier.align(Alignment.TopEnd),
