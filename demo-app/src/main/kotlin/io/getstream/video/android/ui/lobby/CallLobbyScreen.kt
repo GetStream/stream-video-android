@@ -122,7 +122,6 @@ fun CallLobbyScreen(
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
                     .weight(1f),
-//                    .verticalScroll(rememberScrollState()),
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 isCameraEnabled = isCameraEnabled,
                 onToggleCamera = {
@@ -348,14 +347,6 @@ private fun CallLobbyBodyLandscape(
     onToggleMicrophone: (Boolean) -> Unit,
     description: @Composable () -> Unit,
 ) {
-    val configuration = LocalConfiguration.current
-    // The compose is running on landscape orientation
-    val screenHeightDp = configuration.screenHeightDp.dp
-//    val screenWidthDp = configuration.screenWidthDp.dp
-
-    // Calculate padding based on orientation and screen height
-    val paddingForControlButtons = 0.dp
-    val dynamicPadding = 0.dp
 
     Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
         Row() {
@@ -412,7 +403,7 @@ private fun CallLobbyBodyLandscape(
                     onCallAction = onCallAction,
                     lobbyControlsContent = { _, _ ->
                         ControlActions(
-                            modifier = Modifier.padding(top = paddingForControlButtons),
+                            modifier = Modifier.padding(),
                             call = call,
                             actions = buildDefaultLobbyControlActions(
                                 call = call,
