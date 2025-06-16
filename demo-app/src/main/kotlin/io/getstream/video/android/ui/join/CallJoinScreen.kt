@@ -121,9 +121,6 @@ fun CallJoinScreen(
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
     val isNetworkAvailable by callJoinViewModel.isNetworkAvailable.collectAsStateWithLifecycle()
 
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
     HandleCallJoinUiState(
         callJoinUiState = uiState,
         navigateToCallLobby = navigateToCallLobby,
