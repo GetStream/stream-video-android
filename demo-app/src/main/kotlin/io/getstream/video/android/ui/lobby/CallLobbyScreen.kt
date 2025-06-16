@@ -432,7 +432,6 @@ private fun CallLobbyBodyLandscape(
 
                 // LaunchedEffect to handle initial setup might need adjustments
                 // based on how you handle benchmarks or initial setup externally
-//                Column(modifier = Modifier.align(Alignment.TopCenter), horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     modifier = Modifier.size(36.dp),
                     imageVector = Icons.Default.Language,
@@ -444,8 +443,6 @@ private fun CallLobbyBodyLandscape(
                     text = "Set up your test call",
                     style = VideoTheme.typography.titleS,
                 )
-//                }
-
                 description()
             }
         }
