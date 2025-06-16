@@ -16,11 +16,13 @@
 
 package io.getstream.video.android.core.call.connection
 
+import androidx.annotation.VisibleForTesting
 import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
+import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
@@ -29,8 +31,10 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import kotlinx.coroutines.CoroutineScope
@@ -58,6 +62,7 @@ internal class Subscriber(
     private val sessionId: String,
     private val sfuClient: SignalServerService,
     private val coroutineScope: CoroutineScope,
+    private val tracer: Tracer,
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : StreamPeerConnection(
     coroutineScope = coroutineScope,
@@ -71,6 +76,7 @@ internal class Subscriber(
             StreamPeerType.SUBSCRIBER,
         )
     },
+    tracer = tracer,
     maxBitRate = 0, // Set as needed
 ) {
 
@@ -102,11 +108,17 @@ internal class Subscriber(
 
     // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
-    private val subscriptions = ConcurrentHashMap<String, TrackSubscriptionDetails>()
+    private val subscriptions =
+        ConcurrentHashMap<Pair<String, TrackType>, TrackSubscriptionDetails>()
+    private val trackIdToTrackType = ConcurrentHashMap<String, TrackType>()
 
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
     private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
         ConcurrentHashMap()
+
+    override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
+        return statsTracer?.get(trackIdToTrackType)
+    }
 
     /**
      * Returns the track dimensions for this subscriber.
@@ -251,7 +263,7 @@ internal class Subscriber(
             visibleTracks(remoteParticipants)
         }.let(trackOverridesHandler::applyOverrides)
 
-        val newTracks = tracks.associateBy { it.session_id }
+        val newTracks = tracks.associateBy { it.session_id to it.track_type }
         subscriptions.putAll(newTracks)
 
         val request = UpdateSubscriptionsRequest(
@@ -374,7 +386,8 @@ internal class Subscriber(
 
     fun streams(): Flow<ReceivedMediaStream> = streamsFlow
 
-    private fun onNewStream(mediaStream: MediaStream) {
+    @VisibleForTesting
+    internal fun onNewStream(mediaStream: MediaStream) {
         logger.d { "[addStream] #sfu; #track; mediaStream: $mediaStream" }
         if (trackPrefixToSessionIdMap.isEmpty()) {
             logger.d { "[addStream] #sfu; #track; trackPrefixToSessionIdMap is empty, adding to pending" }
@@ -412,6 +425,8 @@ internal class Subscriber(
                 audio = track,
             )
             trackIdToParticipant[track.id()] = sessionId
+            trackIdToTrackType[track.id()] = trackType
+            traceTrack(trackType, track.id(), listOf(mediaStream.id))
             setTrack(sessionId, trackType, audioTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, audioTrack))
         }
@@ -424,6 +439,8 @@ internal class Subscriber(
                 video = track,
             )
             trackIdToParticipant[track.id()] = sessionId
+            trackIdToTrackType[track.id()] = trackType
+            traceTrack(trackType, track.id(), listOf(mediaStream.id))
             setTrack(sessionId, trackType, videoTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, videoTrack))
         }

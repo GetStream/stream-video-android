@@ -166,6 +166,7 @@ class PublisherTest {
                 sfuClient = mockSignalServerService,
                 sessionId = "session-id",
                 rejoin = { },
+                tracer = mockk(relaxed = true),
                 transceiverCache = mockTransceiverCache,
             ),
         ) {

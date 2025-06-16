@@ -195,6 +195,8 @@ message ReconnectDetails {
   string from_sfu_id = 6;
   // only set in case of rejoin
   string previous_session_id = 7;
+  // the reconnect reason
+  string reason = 8;
 }
 
 message Migration {
