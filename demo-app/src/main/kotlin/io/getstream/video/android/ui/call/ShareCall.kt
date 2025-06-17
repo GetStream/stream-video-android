@@ -20,9 +20,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +40,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,15 +64,29 @@ public fun ShareCallWithOthers(
     context: Context,
 ) {
     val shareUrl = "${env.value?.sharelink}${call.id}"
+    val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    ShareSettingsBox(modifier, call, clipboardManager, shareUrl) {
-        val sendIntent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, shareUrl)
-            type = "text/plain"
+    if (isPortrait) {
+        ShareSettingsBox(modifier, call, clipboardManager, shareUrl) {
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, shareUrl)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            context.startActivity(shareIntent)
         }
-        val shareIntent = Intent.createChooser(sendIntent, null)
-        context.startActivity(shareIntent)
+    } else {
+        ShareSettingsBoxLandscape(modifier, call, clipboardManager, shareUrl) {
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, shareUrl)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            context.startActivity(shareIntent)
+        }
     }
 }
 
@@ -97,7 +114,7 @@ public fun ShareSettingsBox(
             Text(
                 text = "Your meeting is live!",
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Left,
+                textAlign = TextAlign.Center,
                 style = VideoTheme.typography.titleS.copy(fontSize = 20.sp),
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -137,6 +154,78 @@ public fun ShareSettingsBox(
 }
 
 @Composable
+public fun ShareSettingsBoxLandscape(
+    modifier: Modifier = Modifier,
+    call: Call,
+    clipboardManager: ClipboardManager?,
+    shareUrl: String,
+    onShare: (String) -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .background(
+                color = VideoTheme.colors.baseSheetTertiary,
+                shape = VideoTheme.shapes.dialog,
+            ),
+    ) {
+        Row {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(VideoTheme.dimens.spacingXl),
+            ) {
+                JoinCallQRCode(shareUrl = shareUrl)
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(VideoTheme.dimens.spacingL)
+                    .align(Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "Your meeting is live!",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = VideoTheme.typography.titleS.copy(fontSize = 20.sp),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                StreamButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp),
+                    text = "Add others",
+                    icon = Icons.Default.PersonAddAlt1,
+                    style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                    onClick = { onShare(call.id) },
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                StreamButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp),
+                    text = "Call ID: ${call.id}",
+                    textOverflow = TextOverflow.Ellipsis,
+                    icon = Icons.Default.CopyAll,
+                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle().copy(
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = VideoTheme.colors.baseSheetTertiary,
+                            contentColor = VideoTheme.colors.basePrimary,
+                            disabledBackgroundColor = VideoTheme.colors.baseSheetTertiary,
+                        ),
+                    ),
+                    onClick = {
+                        val clipData = ClipData.newPlainText("Call ID", call.id)
+                        clipboardManager?.setPrimaryClip(clipData)
+                    },
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
 private fun JoinCallQRCode(shareUrl: String) {
     Column(
         modifier = Modifier
@@ -156,11 +245,31 @@ private fun JoinCallQRCode(shareUrl: String) {
 
 @Preview
 @Composable
-private fun ShareSettingsBoxPreview() {
+private fun ShareSettingsBoxPortraitPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
 
     VideoTheme {
         ShareSettingsBox(
+            call = previewCall,
+            clipboardManager = null,
+            shareUrl = "http://test/join/123",
+            onShare = {},
+        )
+    }
+}
+
+@Preview(
+    name = "Landscape Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=891dp,height=411dp,dpi=420",
+)
+@Composable
+private fun ShareSettingsBoxLandscapePreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+
+    VideoTheme {
+        ShareSettingsBoxLandscape(
             call = previewCall,
             clipboardManager = null,
             shareUrl = "http://test/join/123",
