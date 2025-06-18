@@ -241,7 +241,7 @@ object StreamVideoInitHelper {
                             callDisplayName: String?,
                             call: Call
                         ): NotificationCompat.Builder {
-                            val imageAddress = "https://scontent.fskp2-1.fna.fbcdn.net/v/t39.30808-6/448360153_943716731048129_4813144535697112397_n.png?_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=Gh5DHVVvEs0Q7kNvwGKirxv&_nc_oc=Adnssp8mU15Zzp3a5_Y5-i2qB9IqvY8_jhN6J1-gKrUoVUA_yh1zm2ZlsrE6XKIXeUc&_nc_zt=23&_nc_ht=scontent.fskp2-1.fna&_nc_gid=vQM_ZgcDdhh_8keiAEMD5A&oh=00_AfPEvOJ6VrHZpMf2E0u7c6LEcuxi85k5FlI9DM5wAQ3XBQ&oe=68586A6C"
+                            val imageAddress = "https://miro.medium.com/v2/resize:fit:4800/format:webp/1*sAn1-7o_pxmxsbdzzDDA4g.png"
                             val bitmap =withContext(Dispatchers.IO) {
                                 URL(imageAddress).openStream().use { BitmapFactory.decodeStream(it) }
                             }
