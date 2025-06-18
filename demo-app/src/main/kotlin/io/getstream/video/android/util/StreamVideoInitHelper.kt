@@ -17,15 +17,11 @@
 package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.support.v4.media.MediaMetadataCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
@@ -41,10 +37,8 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdateInterceptors
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
@@ -53,15 +47,10 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.util.config.AppConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import androidx.core.graphics.createBitmap
-import io.getstream.video.android.R
-import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdateInterceptors
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.net.URL
 
@@ -239,16 +228,16 @@ object StreamVideoInitHelper {
                         override suspend fun onUpdateOngoingCallMediaNotification(
                             builder: NotificationCompat.Builder,
                             callDisplayName: String?,
-                            call: Call
+                            call: Call,
                         ): NotificationCompat.Builder {
                             val imageAddress = "https://miro.medium.com/v2/resize:fit:4800/format:webp/1*sAn1-7o_pxmxsbdzzDDA4g.png"
-                            val bitmap =withContext(Dispatchers.IO) {
+                            val bitmap = withContext(Dispatchers.IO) {
                                 URL(imageAddress).openStream().use { BitmapFactory.decodeStream(it) }
                             }
                             builder.setLargeIcon(bitmap)
                             return builder
                         }
-                    }
+                    },
                 ),
             ),
             tokenProvider = object : TokenProvider {

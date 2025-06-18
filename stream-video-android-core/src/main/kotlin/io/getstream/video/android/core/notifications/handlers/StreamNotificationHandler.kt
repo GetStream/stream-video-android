@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
@@ -192,7 +208,8 @@ open class StreamNotificationBuilderInterceptors {
      * @param remoteParticipantCount Count of remote participant.
      */
     open fun onBuildOngoingCallNotification(
-        builder: NotificationCompat.Builder, callId: StreamCallId,
+        builder: NotificationCompat.Builder,
+        callId: StreamCallId,
         callDisplayName: String? = null,
         isOutgoingCall: Boolean = false,
         remoteParticipantCount: Int = 0,
@@ -207,7 +224,6 @@ open class StreamNotificationBuilderInterceptors {
         return builder
     }
 
-
     /**
      * Intercept the notification builder and modify it before it is posted.
      *
@@ -216,7 +232,7 @@ open class StreamNotificationBuilderInterceptors {
      */
     open fun onBuildMissedCallNotification(
         builder: NotificationCompat.Builder,
-        callDisplayName: String?
+        callDisplayName: String?,
     ): NotificationCompat.Builder {
         return builder
     }
@@ -248,7 +264,7 @@ open class StreamNotificationBuilderInterceptors {
      */
     fun onBuildMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
-        callId: StreamCallId
+        callId: StreamCallId,
     ): MediaMetadataCompat.Builder {
         return builder
     }
@@ -261,7 +277,7 @@ open class StreamNotificationBuilderInterceptors {
      */
     fun onBuildMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,
-        callId: StreamCallId
+        callId: StreamCallId,
     ): PlaybackStateCompat.Builder {
         return builder
     }
@@ -272,10 +288,12 @@ open class StreamNotificationBuilderInterceptors {
      * @param application The application context.
      * @param channelId The channel id.
      */
-    fun onCreateMediaSessionCompat(application: Application, channelId: String): MediaSessionCompat? {
+    fun onCreateMediaSessionCompat(
+        application: Application,
+        channelId: String,
+    ): MediaSessionCompat? {
         return null
     }
-
 }
 
 /**
@@ -293,7 +311,7 @@ open class StreamNotificationUpdateInterceptors {
     open suspend fun onUpdateOngoingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
-        call: Call
+        call: Call,
     ): NotificationCompat.Builder {
         return builder
     }
@@ -323,7 +341,7 @@ open class StreamNotificationUpdateInterceptors {
     open suspend fun onUpdateOutgoingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
-        call: Call
+        call: Call,
     ): NotificationCompat.Builder {
         return builder
     }
@@ -338,8 +356,8 @@ open class StreamNotificationUpdateInterceptors {
     open suspend fun onUpdateIncomingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
-        call: Call
-    ) : NotificationCompat.Builder {
+        call: Call,
+    ): NotificationCompat.Builder {
         return builder
     }
 
@@ -353,7 +371,7 @@ open class StreamNotificationUpdateInterceptors {
     open fun onUpdateMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
         call: Call,
-        callDisplayName: String? = null
+        callDisplayName: String? = null,
     ): MediaMetadataCompat.Builder {
         return builder
     }
@@ -368,7 +386,7 @@ open class StreamNotificationUpdateInterceptors {
     open fun onUpdateMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,
         call: Call,
-        callDisplayName: String? = null
+        callDisplayName: String? = null,
     ): PlaybackStateCompat.Builder {
         return builder
     }
@@ -379,8 +397,10 @@ open class StreamNotificationUpdateInterceptors {
      * @param application The application context.
      * @param channelId The channel id.
      */
-    fun onUpdateMediaSessionCompat(application: Application, channelId: String): MediaSessionCompat? {
+    fun onUpdateMediaSessionCompat(
+        application: Application,
+        channelId: String,
+    ): MediaSessionCompat? {
         return null
     }
-
 }

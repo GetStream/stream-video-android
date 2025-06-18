@@ -42,7 +42,6 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
-import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -52,11 +51,13 @@ import io.getstream.video.android.model.StreamCallId
 public open class StreamDefaultNotificationHandler(
     private val application: Application,
     private val notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
-        application
+        application,
     ),
     private val hideRingingNotificationInForeground: Boolean,
-    private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors = StreamNotificationBuilderInterceptors(),
-    private val updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors = StreamNotificationUpdateInterceptors(),
+    private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
+        StreamNotificationBuilderInterceptors(),
+    private val updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors =
+        StreamNotificationUpdateInterceptors(),
     private val notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
@@ -86,8 +87,10 @@ public open class StreamDefaultNotificationHandler(
             R.string.stream_video_missed_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
         ),
-    )
-) : StreamNotificationHandler, StreamNotificationProvider, StreamNotificationUpdatesProvider,
+    ),
+) : StreamNotificationHandler,
+    StreamNotificationProvider,
+    StreamNotificationUpdatesProvider,
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Call:NotificationHandler")
@@ -144,7 +147,6 @@ public open class StreamDefaultNotificationHandler(
         ).showNotification(notificationId = callId.hashCode())
     }
 
-
     override fun onNotification(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onNotification] callId: ${callId.id}, callDisplayName: $callDisplayName" }
         val notificationId = callId.hashCode()
@@ -164,7 +166,8 @@ public open class StreamDefaultNotificationHandler(
 
     // START REGION: Notification provider
     override fun getMissedCallNotification(
-        callId: StreamCallId, callDisplayName: String?
+        callId: StreamCallId,
+        callDisplayName: String?,
     ): Notification? {
         logger.d { "[getMissedCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName" }
         val notificationId = callId.hashCode()
@@ -176,18 +179,21 @@ public open class StreamDefaultNotificationHandler(
         // Build notification
         val notificationContent = callDisplayName?.let {
             application.getString(
-                R.string.stream_video_missed_call_notification_description, it
+                R.string.stream_video_missed_call_notification_description,
+                it,
             )
         }
         return ensureChannelAndBuildNotification(notificationChannels.missedCallChannel) {
             setSmallIcon(R.drawable.stream_video_ic_call)
             setChannelId(notificationChannels.missedCallChannel.id)
-            setContentTitle(application.getString(R.string.stream_video_missed_call_notification_title))
+            setContentTitle(
+                application.getString(R.string.stream_video_missed_call_notification_title),
+            )
             setContentText(notificationContent)
             setContentIntent(intent).setAutoCancel(true)
             initialNotificationBuilderInterceptor.onBuildMissedCallNotification(
                 this,
-                callDisplayName
+                callDisplayName,
             )
         }
     }
@@ -198,7 +204,9 @@ public open class StreamDefaultNotificationHandler(
         callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? {
-        logger.d { "[getRingingCallNotification] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent" }
+        logger.d {
+            "[getRingingCallNotification] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
+        }
         return if (ringingState is RingingState.Incoming) {
             val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
             val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
@@ -240,9 +248,11 @@ public open class StreamDefaultNotificationHandler(
         callId: StreamCallId,
         callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
-        intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder
+        intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification? {
-        logger.d { "[getRingingCallNotificationInternal] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent" }
+        logger.d {
+            "[getRingingCallNotificationInternal] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
+        }
         return if (ringingState is RingingState.Incoming) {
             val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
             val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
@@ -288,7 +298,9 @@ public open class StreamDefaultNotificationHandler(
         shouldHaveContentIntent: Boolean,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
-        logger.d { "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent" }
+        logger.d {
+            "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
+        }
         return ensureChannelAndBuildNotification(notificationChannels.incomingCallChannel) {
             priority = if (hideRingingNotificationInForeground) {
                 NotificationCompat.PRIORITY_DEFAULT
@@ -328,13 +340,15 @@ public open class StreamDefaultNotificationHandler(
         callerName: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? {
-        logger.d { "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent" }
+        logger.d {
+            "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
+        }
         return getIncomingCallNotificationInternal(
             fullScreenPendingIntent,
             acceptCallPendingIntent,
             rejectCallPendingIntent,
             callerName,
-            shouldHaveContentIntent
+            shouldHaveContentIntent,
         ) {
             initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
                 this,
@@ -373,7 +387,9 @@ public open class StreamDefaultNotificationHandler(
         metadataIntercept: MediaMetadataCompat.Builder.() -> MediaMetadataCompat.Builder = { this },
         mediaSessionIntercept: () -> MediaSessionCompat? = { null },
     ): Notification? {
-        logger.d { "[getOngoingCallNotificationInternal] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount" }
+        logger.d {
+            "[getOngoingCallNotificationInternal] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount"
+        }
         val client = (StreamVideo.instance() as StreamVideoClient)
         val mediaNotificationCallTypes =
             client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
@@ -391,7 +407,7 @@ public open class StreamDefaultNotificationHandler(
                 callDisplayName,
                 isOutgoingCall,
                 remoteParticipantCount,
-                notificationBuildIntercept
+                notificationBuildIntercept,
             )
         }
     }
@@ -402,7 +418,9 @@ public open class StreamDefaultNotificationHandler(
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? {
-        logger.d { "[getOngoingCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount" }
+        logger.d {
+            "[getOngoingCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount"
+        }
         return getOngoingCallNotificationInternal(
             callId,
             callDisplayName,
@@ -440,7 +458,7 @@ public open class StreamDefaultNotificationHandler(
                     isOutgoingCall,
                     remoteParticipantCount,
                 )
-            }
+            },
         )
     }
 
@@ -453,7 +471,9 @@ public open class StreamDefaultNotificationHandler(
         remoteParticipantCount: Int,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification? {
-        logger.d { "[getSimpleOngoingCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount" }
+        logger.d {
+            "[getSimpleOngoingCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount"
+        }
         val notificationId = callId.hashCode() // Notification ID
 
         // Intents
@@ -515,9 +535,11 @@ public open class StreamDefaultNotificationHandler(
         val ringingState = call.state.ringingState.value
         val members = call.state.members.value
         val remoteParticipants = call.state.remoteParticipants.value
-        logger.d { "[onCallNotificationUpdate] #ringingState: ${ringingState}; callId: ${call.cid}" }
-        logger.d { "[onCallNotificationUpdate] #members: ${members}; callId: ${call.cid}" }
-        logger.d { "[onCallNotificationUpdate] #remoteParticipants: ${remoteParticipants}; callId: ${call.cid}" }
+        logger.d { "[onCallNotificationUpdate] #ringingState: $ringingState; callId: ${call.cid}" }
+        logger.d { "[onCallNotificationUpdate] #members: $members; callId: ${call.cid}" }
+        logger.d {
+            "[onCallNotificationUpdate] #remoteParticipants: $remoteParticipants; callId: ${call.cid}"
+        }
 
         val notification: Notification? = if (ringingState is RingingState.Outgoing) {
             logger.d { "[onCallNotificationUpdate] Handling outgoing call" }
@@ -580,10 +602,11 @@ public open class StreamDefaultNotificationHandler(
 
     override suspend fun updateIncomingCallNotification(
         call: Call,
-        callDisplayName: String
+        callDisplayName: String,
     ): Notification? {
-
-        logger.d { "[onUpdateIncomingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName" }
+        logger.d {
+            "[onUpdateIncomingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
+        }
         val callId = StreamCallId.fromCallCid(call.cid)
         return getRingingCallNotificationInternal(
             ringingState = call.state.ringingState.value,
@@ -595,15 +618,14 @@ public open class StreamDefaultNotificationHandler(
                 val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
                 val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
                 val initial = if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
-
-                        initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
-                            this,
-                            fullScreenPendingIntent,
-                            acceptCallPendingIntent,
-                            rejectCallPendingIntent,
-                            callDisplayName,
-                            true,
-                        )
+                    initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
+                        this,
+                        fullScreenPendingIntent,
+                        acceptCallPendingIntent,
+                        rejectCallPendingIntent,
+                        callDisplayName,
+                        true,
+                    )
                 } else {
                     logger.e { "Ringing call notification not shown, one of the intents is null." }
                     this
@@ -611,9 +633,9 @@ public open class StreamDefaultNotificationHandler(
                 updateNotificationBuilderInterceptor.onUpdateIncomingCallNotification(
                     initial,
                     callDisplayName,
-                    call
+                    call,
                 )
-            }
+            },
         )
     }
 
@@ -621,7 +643,9 @@ public open class StreamDefaultNotificationHandler(
         call: Call,
         callDisplayName: String,
     ): Notification? {
-        logger.d { "[updateOngoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName" }
+        logger.d {
+            "[updateOngoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
+        }
         val callId = StreamCallId.fromCallCid(call.cid)
         return getOngoingCallNotificationInternal(
             callId = StreamCallId.fromCallCid(call.cid),
@@ -637,7 +661,7 @@ public open class StreamDefaultNotificationHandler(
                 updateNotificationBuilderInterceptor.onUpdateMediaNotificationPlaybackState(
                     initialInterceptor,
                     call,
-                    callDisplayName
+                    callDisplayName,
                 )
             },
             mediaSessionIntercept = {
@@ -660,7 +684,7 @@ public open class StreamDefaultNotificationHandler(
                 updateNotificationBuilderInterceptor.onUpdateMediaNotificationMetadata(
                     initialInterceptor,
                     call,
-                    callDisplayName
+                    callDisplayName,
                 )
             },
             mediaNotificationIntercept = {
@@ -671,7 +695,7 @@ public open class StreamDefaultNotificationHandler(
                 updateNotificationBuilderInterceptor.onUpdateOngoingCallMediaNotification(
                     initialInterceptor,
                     callDisplayName,
-                    call
+                    call,
                 )
             },
             notificationBuildIntercept = {
@@ -683,17 +707,19 @@ public open class StreamDefaultNotificationHandler(
                 updateNotificationBuilderInterceptor.onUpdateOngoingCallNotification(
                     initial,
                     callDisplayName,
-                    call
+                    call,
                 )
-            }
+            },
         )
     }
 
     override suspend fun updateOutgoingCallNotification(
         call: Call,
-        callDisplayName: String?
+        callDisplayName: String?,
     ): Notification? {
-        logger.d { "[updateOutgoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName" }
+        logger.d {
+            "[updateOutgoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
+        }
         return getRingingCallNotificationInternal(
             ringingState = call.state.ringingState.value,
             callId = StreamCallId.fromCallCid(call.cid),
@@ -709,16 +735,16 @@ public open class StreamDefaultNotificationHandler(
                 updateNotificationBuilderInterceptor.onUpdateOutgoingCallNotification(
                     initial,
                     callDisplayName,
-                    call
+                    call,
                 )
-            }
+            },
         )
     }
 
     private fun Notification?.showNotification(notificationId: Int) {
         this?.let { notification ->
             if (ActivityCompat.checkSelfPermission(
-                    application.applicationContext, Manifest.permission.POST_NOTIFICATIONS
+                    application.applicationContext, Manifest.permission.POST_NOTIFICATIONS,
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 notificationManager.notify(notificationId, notification)
@@ -734,7 +760,9 @@ public open class StreamDefaultNotificationHandler(
         callDisplayName: String,
         remoteParticipantCount: Int,
     ): NotificationCompat.Builder = apply {
-        logger.d { "[addHangUpAction] Adding hang up action for $callDisplayName (remoteParticipantCount=$remoteParticipantCount)" }
+        logger.d {
+            "[addHangUpAction] Adding hang up action for $callDisplayName (remoteParticipantCount=$remoteParticipantCount)"
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 CallStyle.forOngoingCall(
@@ -881,11 +909,10 @@ public open class StreamDefaultNotificationHandler(
 
     private inline fun ensureChannelAndBuildNotification(
         channelInfo: StreamNotificationChannelInfo,
-        builder: NotificationCompat.Builder.() -> NotificationCompat.Builder
+        builder: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
         logger.d { "[ensureChannelAndBuildNotification] channelId: ${channelInfo.id}" }
         channelInfo.create(notificationManager)
         return NotificationCompat.Builder(application, channelInfo.id).let(builder).build()
     }
 }
-

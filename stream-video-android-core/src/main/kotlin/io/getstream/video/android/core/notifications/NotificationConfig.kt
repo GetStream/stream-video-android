@@ -51,5 +51,5 @@ public data class NotificationConfig(
      * This parameters enables customization on which state flows will trigger a notification update.
      */
     @ExperimentalStreamVideoApi
-    val notificationUpdateTriggers : (Call) -> Flow<*>? = { _ -> null },
+    val notificationUpdateTriggers: (Call) -> Flow<*>? = { _ -> null },
 )

@@ -17,21 +17,21 @@
 package io.getstream.video.android.core.notifications
 
 import android.app.Notification
-import android.app.PendingIntent
-import androidx.annotation.WorkerThread
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationHandler
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationProvider
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdatesProvider
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationHandler
-import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 
-public interface NotificationHandler : NotificationPermissionHandler, StreamNotificationHandler, StreamNotificationProvider,
-    StreamNotificationUpdatesProvider, MediaNotificationHandler {
+public interface NotificationHandler :
+    NotificationPermissionHandler,
+    StreamNotificationHandler,
+    StreamNotificationProvider,
+    StreamNotificationUpdatesProvider,
+    MediaNotificationHandler {
 
     /**
      * Get subsequent updates to notifications.

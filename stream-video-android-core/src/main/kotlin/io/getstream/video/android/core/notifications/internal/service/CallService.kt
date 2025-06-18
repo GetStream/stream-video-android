@@ -171,7 +171,9 @@ internal open class CallService : Service() {
             callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
             notification: Notification?,
         ) {
-            StreamLog.d(TAG) { "[showIncomingCall] callId: ${callId.id}, callDisplayName: $callDisplayName, notification: ${notification != null}" }
+            StreamLog.d(TAG) {
+                "[showIncomingCall] callId: ${callId.id}, callDisplayName: $callDisplayName, notification: ${notification != null}"
+            }
             val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
             StreamLog.d(TAG) { "[showIncomingCall] hasActiveCall: $hasActiveCall" }
             safeCallWithResult {
@@ -211,11 +213,15 @@ internal open class CallService : Service() {
                 StreamLog.i(TAG) { "Has permission: $hasPermission" }
                 StreamLog.i(TAG) { "Notification: $notification" }
                 if (hasPermission && notification != null) {
-                    StreamLog.d(TAG) { "[showIncomingCall] Showing notification fallback with ID: $INCOMING_CALL_NOTIFICATION_ID" }
+                    StreamLog.d(TAG) {
+                        "[showIncomingCall] Showing notification fallback with ID: $INCOMING_CALL_NOTIFICATION_ID"
+                    }
                     NotificationManagerCompat.from(context)
                         .notify(INCOMING_CALL_NOTIFICATION_ID, notification)
                 } else {
-                    StreamLog.w(TAG) { "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}" }
+                    StreamLog.w(TAG) {
+                        "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}"
+                    }
                 }
             }
         }
@@ -266,7 +272,9 @@ internal open class CallService : Service() {
         logger.i {
             "[onStartCommand]. callId: ${intentCallId?.id}, trigger: $trigger, Callservice hashcode: ${hashCode()}"
         }
-        logger.d { "[onStartCommand] streamVideo: ${streamVideo != null}, intentCallId: ${intentCallId != null}, trigger: $trigger" }
+        logger.d {
+            "[onStartCommand] streamVideo: ${streamVideo != null}, intentCallId: ${intentCallId != null}, trigger: $trigger"
+        }
 
         val started = if (intentCallId != null && streamVideo != null && trigger != null) {
             logger.d { "[onStartCommand] All required parameters available, proceeding with service start" }
@@ -295,12 +303,16 @@ internal open class CallService : Service() {
                 }
             }
 
-            logger.d { "[onStartCommand] Getting notification for trigger: $trigger, callId: ${intentCallId.id}" }
+            logger.d {
+                "[onStartCommand] Getting notification for trigger: $trigger, callId: ${intentCallId.id}"
+            }
             val notificationData: Pair<Notification?, Int> =
                 getNotificationPair(trigger, streamVideo, intentCallId, intentCallDisplayName)
 
             val notification = notificationData.first
-            logger.d { "[onStartCommand] Notification generated: ${notification != null}, notificationId: ${notificationData.second}" }
+            logger.d {
+                "[onStartCommand] Notification generated: ${notification != null}, notificationId: ${notificationData.second}"
+            }
             if (notification != null) {
                 if (trigger == TRIGGER_INCOMING_CALL) {
                     logger.d { "[onStartCommand] Handling incoming call trigger" }
@@ -333,7 +345,9 @@ internal open class CallService : Service() {
             }
         } else {
             // Service not started, no call Id or stream video
-            logger.e { "Call id or streamVideo or trigger are not available. streamVideo: ${streamVideo != null}, intentCallId: ${intentCallId != null}, trigger: $trigger" }
+            logger.e {
+                "Call id or streamVideo or trigger are not available. streamVideo: ${streamVideo != null}, intentCallId: ${intentCallId != null}, trigger: $trigger"
+            }
             false
         }
 
@@ -370,7 +384,9 @@ internal open class CallService : Service() {
         streamCallId: StreamCallId,
         intentCallDisplayName: String?,
     ): Pair<Notification?, Int> {
-        logger.d { "[getNotificationPair] trigger: $trigger, callId: ${streamCallId.id}, callDisplayName: $intentCallDisplayName" }
+        logger.d {
+            "[getNotificationPair] trigger: $trigger, callId: ${streamCallId.id}, callDisplayName: $intentCallDisplayName"
+        }
         val notificationData: Pair<Notification?, Int> = when (trigger) {
             TRIGGER_ONGOING_CALL -> {
                 logger.d { "[getNotificationPair] Creating ongoing call notification" }
@@ -422,7 +438,9 @@ internal open class CallService : Service() {
                 Pair(null, streamCallId.hashCode())
             }
         }
-        logger.d { "[getNotificationPair] Generated notification: ${notificationData.first != null}, notificationId: ${notificationData.second}" }
+        logger.d {
+            "[getNotificationPair] Generated notification: ${notificationData.first != null}, notificationId: ${notificationData.second}"
+        }
         return notificationData
     }
 
@@ -459,7 +477,9 @@ internal open class CallService : Service() {
             NotificationManagerCompat.from(this).notify(notificationId, notification)
             logger.d { "[justNotify] Notification shown with ID: $notificationId" }
         } else {
-            logger.w { "[justNotify] Permission not granted, cannot show notification with ID: $notificationId" }
+            logger.w {
+                "[justNotify] Permission not granted, cannot show notification with ID: $notificationId"
+            }
         }
     }
 
@@ -478,7 +498,9 @@ internal open class CallService : Service() {
                 TRIGGER_INCOMING_CALL,
                 serviceType,
             ).onError {
-                logger.e { "[showIncomingCall] Failed to start foreground service, falling back to justNotify: $it" }
+                logger.e {
+                    "[showIncomingCall] Failed to start foreground service, falling back to justNotify: $it"
+                }
                 justNotify(notificationId, notification)
             }
         } else {
@@ -693,7 +715,9 @@ internal open class CallService : Service() {
                         }
                     }
                 } else {
-                    logger.w { "[observeNotificationUpdates] No notification generated for ringing state: $ringingState" }
+                    logger.w {
+                        "[observeNotificationUpdates] No notification generated for ringing state: $ringingState"
+                    }
                 }
             }
         }

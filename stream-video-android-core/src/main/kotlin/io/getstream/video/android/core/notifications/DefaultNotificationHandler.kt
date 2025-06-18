@@ -24,13 +24,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.DrawableRes
-import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
@@ -61,7 +59,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import java.util.stream.Stream
 
 public open class DefaultNotificationHandler(
     private val application: Application,
@@ -80,8 +77,10 @@ public open class DefaultNotificationHandler(
      */
     @DrawableRes val notificationIconRes: Int = android.R.drawable.ic_menu_call,
 
-    private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors = StreamNotificationBuilderInterceptors(),
-    private val updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors = StreamNotificationUpdateInterceptors(),
+    private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
+        StreamNotificationBuilderInterceptors(),
+    private val updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors =
+        StreamNotificationUpdateInterceptors(),
     private val notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
@@ -118,7 +117,7 @@ public open class DefaultNotificationHandler(
         initialNotificationBuilderInterceptor = initialNotificationBuilderInterceptor,
         updateNotificationBuilderInterceptor = updateNotificationBuilderInterceptor,
         notificationChannels = notificationChannels,
-    )
+    ),
 ) : NotificationHandler,
     NotificationPermissionHandler by notificationPermissionHandler {
 
@@ -144,12 +143,12 @@ public open class DefaultNotificationHandler(
             ringingState,
             callId,
             callDisplayName,
-            shouldHaveContentIntent
+            shouldHaveContentIntent,
         )
 
     override fun getMissedCallNotification(
         callId: StreamCallId,
-        callDisplayName: String?
+        callDisplayName: String?,
     ): Notification? = delegate.getMissedCallNotification(callId, callDisplayName)
 
     override fun getIncomingCallNotification(
@@ -164,7 +163,7 @@ public open class DefaultNotificationHandler(
             acceptCallPendingIntent,
             rejectCallPendingIntent,
             callerName,
-            shouldHaveContentIntent
+            shouldHaveContentIntent,
         )
 
     override fun getSettingUpCallNotification(): Notification? =
@@ -180,7 +179,7 @@ public open class DefaultNotificationHandler(
             callId,
             callDisplayName,
             isOutgoingCall,
-            remoteParticipantCount
+            remoteParticipantCount,
         )
 
     override fun onNotification(callId: StreamCallId, callDisplayName: String) =
@@ -191,7 +190,7 @@ public open class DefaultNotificationHandler(
 
     @Deprecated(
         "Use notificationChannels and delegate for channel management instead.",
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     open fun createOnGoingChannel(ongoingCallsChannelId: String) {
         notificationChannels.ongoingCallChannel.create(notificationManager)
@@ -214,12 +213,12 @@ public open class DefaultNotificationHandler(
 
     override suspend fun updateIncomingCallNotification(
         call: Call,
-        callDisplayName: String
+        callDisplayName: String,
     ): Notification? = delegate.updateIncomingCallNotification(call, callDisplayName)
 
     @Deprecated(
         "Use notificationChannels and delegate for channel management instead.",
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     open fun maybeCreateChannel(
         channelId: String,
@@ -335,7 +334,7 @@ public open class DefaultNotificationHandler(
 
     @Deprecated(
         "This function is unused and will be removed in a future release.",
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     open fun showNotificationCallNotification(
         notificationPendingIntent: PendingIntent,
@@ -351,7 +350,7 @@ public open class DefaultNotificationHandler(
 
     @Deprecated(
         "This function is unused and will be removed in a future release.",
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     open fun showMissedCallNotification(
         notificationPendingIntent: PendingIntent,
@@ -366,7 +365,7 @@ public open class DefaultNotificationHandler(
 
     @Deprecated(
         "This function is unused and will be removed in a future release.",
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     open fun showLiveCallNotification(
         liveCallPendingIntent: PendingIntent,
@@ -497,9 +496,9 @@ public open class DefaultNotificationHandler(
         val appProcessInfo = ActivityManager.RunningAppProcessInfo()
         ActivityManager.getMyMemoryState(appProcessInfo)
         return (
-                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
-                        appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
-                )
+            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+            )
     }
 
     open fun getChannelId(): String = application.getString(

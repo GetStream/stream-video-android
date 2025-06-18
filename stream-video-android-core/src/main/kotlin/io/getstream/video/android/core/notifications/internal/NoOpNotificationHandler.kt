@@ -30,16 +30,20 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 
 internal object NoOpNotificationHandler : NotificationHandler {
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */
+    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
     }
 
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */
+    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
     }
 
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */
+    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
     }
 
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */
+    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
     }
 
     override fun getIncomingCallNotification(
@@ -60,17 +64,17 @@ internal object NoOpNotificationHandler : NotificationHandler {
     override suspend fun onCallNotificationUpdate(call: Call): Notification? = null
     override suspend fun updateOngoingCallNotification(
         call: Call,
-        callDisplayName: String
+        callDisplayName: String,
     ): Notification? = null
 
     override suspend fun updateOutgoingCallNotification(
         call: Call,
-        callDisplayName: String?
+        callDisplayName: String?,
     ): Notification? = null
 
     override suspend fun updateIncomingCallNotification(
         call: Call,
-        callDisplayName: String
+        callDisplayName: String,
     ): Notification? = null
 
     override fun getRingingCallNotification(
@@ -82,7 +86,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
 
     override fun getMissedCallNotification(
         callId: StreamCallId,
-        callDisplayName: String?
+        callDisplayName: String?,
     ): Notification? = null
 
     override fun getSettingUpCallNotification(): Notification? = null
@@ -96,19 +100,24 @@ internal object NoOpNotificationHandler : NotificationHandler {
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
-    ) { /* NoOp */
+    ) {
+        /* NoOp */
     }
 
-    override fun onPermissionDenied() { /* NoOp */
+    override fun onPermissionDenied() {
+        /* NoOp */
     }
 
-    override fun onPermissionGranted() { /* NoOp */
+    override fun onPermissionGranted() {
+        /* NoOp */
     }
 
-    override fun onPermissionRationale() { /* NoOp */
+    override fun onPermissionRationale() {
+        /* NoOp */
     }
 
-    override fun onPermissionRequested() { /* NoOp */
+    override fun onPermissionRequested() {
+        /* NoOp */
     }
 
     override fun createMinimalMediaStyleNotification(
