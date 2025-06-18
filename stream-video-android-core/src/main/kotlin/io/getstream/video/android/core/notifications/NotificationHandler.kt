@@ -22,102 +22,16 @@ import androidx.annotation.WorkerThread
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationHandler
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationProvider
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdatesProvider
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 
-public interface NotificationHandler : NotificationPermissionHandler, MediaNotificationHandler {
-    /**
-     * Customize the notification when you receive a push notification for ringing call,
-     * which has further two types [RingingState.Incoming] and [RingingState.Outgoing]
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-    fun onRingingCall(callId: StreamCallId, callDisplayName: String)
-
-    /**
-     * Customize the notification when you receive a push notification for Missed Call
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-    fun onMissedCall(callId: StreamCallId, callDisplayName: String)
-
-    /**
-     * Customize the notification when you receive a push notification for general usage
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-    fun onNotification(callId: StreamCallId, callDisplayName: String)
-
-    /**
-     * Customize the notification when you receive a push notification for Live Call
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-    fun onLiveCall(callId: StreamCallId, callDisplayName: String)
-
-    /**
-     * Customize the notification when you receive a push notification for ringing call with type [RingingState.Incoming]
-     * @param fullScreenPendingIntent A high-priority intent that launches an activity in full-screen mode, bypassing the lock screen.
-     * @param acceptCallPendingIntent The intent triggered when accepting the call from the notification.
-     * @param rejectCallPendingIntent The intent triggered when rejecting the call from the notification.
-     * @param callerName The name of the caller to display in the notification
-     * @param shouldHaveContentIntent If true, clicking the notification triggers [fullScreenPendingIntent].
-     * @return A [Notification] object customized for the incoming call.
-     */
-    fun getIncomingCallNotification(
-        fullScreenPendingIntent: PendingIntent,
-        acceptCallPendingIntent: PendingIntent,
-        rejectCallPendingIntent: PendingIntent,
-        callerName: String?,
-        shouldHaveContentIntent: Boolean,
-    ): Notification?
-
-    /**
-     * Customize the notification when you receive a push notification for ringing call with type [RingingState.Outgoing] and [RingingState.Active]
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     * @param isOutgoingCall True if the call is outgoing [RingingState.Outgoing], false if it is an active call [RingingState.Active].
-     * @param remoteParticipantCount Count of remote participant
-     * @return A [Notification] object customized for the ongoing call.
-     */
-    fun getOngoingCallNotification(
-        callId: StreamCallId,
-        callDisplayName: String? = null,
-        isOutgoingCall: Boolean = false,
-        remoteParticipantCount: Int = 0,
-    ): Notification?
-
-    /**
-     * Customize the notification when you receive a push notification for ringing call with type [RingingState.Outgoing] and [RingingState.Active]
-     *
-     * NOTE: It is safe to use `runBlocking` in this method. It is always called on a background thread.
-     *
-     * @param call the stream call object.
-     * @return A [Notification] object customized for the ongoing call.
-     */
-    @WorkerThread
-    fun onCallNotificationUpdate(
-        call: Call,
-    ): Notification?
-
-    /**
-     * Customize the notification when you receive a push notification for ringing call
-     * @param ringingState The current state of ringing call, represented by [RingingState]
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     * @param shouldHaveContentIntent If set to true then it will launch a screen when the user will click on the notification
-     * @return A [Notification] object customized for the ongoing call.
-     */
-    fun getRingingCallNotification(
-        ringingState: RingingState,
-        callId: StreamCallId,
-        callDisplayName: String? = null,
-        shouldHaveContentIntent: Boolean = true,
-    ): Notification?
-
-    fun getSettingUpCallNotification(): Notification?
+public interface NotificationHandler : NotificationPermissionHandler, StreamNotificationHandler, StreamNotificationProvider,
+    StreamNotificationUpdatesProvider, MediaNotificationHandler {
 
     /**
      * Get subsequent updates to notifications.

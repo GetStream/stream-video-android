@@ -17,8 +17,15 @@
 package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.support.v4.media.MediaMetadataCompat
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
@@ -27,11 +34,17 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.app
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
+import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
@@ -42,7 +55,15 @@ import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
+import androidx.core.graphics.createBitmap
+import io.getstream.video.android.R
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdateInterceptors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import java.net.URL
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
@@ -183,6 +204,11 @@ object StreamVideoInitHelper {
         ).enqueue()
     }
 
+    suspend fun loadBitmap(url: String): Bitmap =
+        withContext(Dispatchers.IO) {
+            BitmapFactory.decodeStream(URL(url).openStream())
+        }
+
     /** Sets up and returns the [StreamVideo] required to connect to the API. */
     private fun initializeStreamVideo(
         context: Context,
@@ -206,6 +232,24 @@ object StreamVideoInitHelper {
                     ),
                 ),
                 hideRingingNotificationInForeground = true,
+                notificationHandler = DefaultNotificationHandler(
+                    application = context.app,
+                    hideRingingNotificationInForeground = true,
+                    updateNotificationBuilderInterceptor = object : StreamNotificationUpdateInterceptors() {
+                        override suspend fun onUpdateOngoingCallMediaNotification(
+                            builder: NotificationCompat.Builder,
+                            callDisplayName: String?,
+                            call: Call
+                        ): NotificationCompat.Builder {
+                            val imageAddress = "https://scontent.fskp2-1.fna.fbcdn.net/v/t39.30808-6/448360153_943716731048129_4813144535697112397_n.png?_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=Gh5DHVVvEs0Q7kNvwGKirxv&_nc_oc=Adnssp8mU15Zzp3a5_Y5-i2qB9IqvY8_jhN6J1-gKrUoVUA_yh1zm2ZlsrE6XKIXeUc&_nc_zt=23&_nc_ht=scontent.fskp2-1.fna&_nc_gid=vQM_ZgcDdhh_8keiAEMD5A&oh=00_AfPEvOJ6VrHZpMf2E0u7c6LEcuxi85k5FlI9DM5wAQ3XBQ&oe=68586A6C"
+                            val bitmap =withContext(Dispatchers.IO) {
+                                URL(imageAddress).openStream().use { BitmapFactory.decodeStream(it) }
+                            }
+                            builder.setLargeIcon(bitmap)
+                            return builder
+                        }
+                    }
+                ),
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {

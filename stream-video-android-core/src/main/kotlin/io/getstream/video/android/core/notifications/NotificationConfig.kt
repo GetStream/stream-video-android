@@ -22,7 +22,6 @@ import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.NoOpNotificationHandler
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 
 public data class NotificationConfig(
     val pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
@@ -47,7 +46,6 @@ public data class NotificationConfig(
      * Allows support for custom user-defined call types.
      */
     val mediaNotificationCallTypes: Set<String> = hashSetOf(CallType.Livestream.name),
-
     /**
      * When notification updates are triggered, the update is based on observing internal call state.
      * This parameters enables customization on which state flows will trigger a notification update.

@@ -19,13 +19,18 @@ package io.getstream.video.android.core.notifications.medianotifications
 import androidx.core.app.NotificationCompat
 import io.getstream.video.android.model.StreamCallId
 
+@Deprecated(message = "This interface is deprecated. Use the notification interceptors instead.")
 interface MediaNotificationHandler {
 
+
+    @Deprecated(message = "This interface is deprecated. Use the notification interceptors instead.")
     fun createMinimalMediaStyleNotification(
         callId: StreamCallId,
         mediaNotificationConfig: MediaNotificationConfig,
         remoteParticipantCount: Int,
     ): NotificationCompat.Builder?
 
+
+    @Deprecated(message = "This interface is deprecated. Use the notification interceptors instead.")
     fun getMediaNotificationConfig(): MediaNotificationConfig
 }

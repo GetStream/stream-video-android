@@ -44,10 +44,12 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationBuilderInterceptors
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationChannels
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdateInterceptors
+import io.getstream.video.android.core.notifications.handlers.create
+import io.getstream.video.android.core.notifications.handlers.createChannelInfoFromResIds
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -59,6 +61,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import java.util.stream.Stream
 
 public open class DefaultNotificationHandler(
     private val application: Application,
@@ -76,134 +79,78 @@ public open class DefaultNotificationHandler(
      * The notification icon for call notifications.
      */
     @DrawableRes val notificationIconRes: Int = android.R.drawable.ic_menu_call,
+
+    private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors = StreamNotificationBuilderInterceptors(),
+    private val updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors = StreamNotificationUpdateInterceptors(),
+    private val notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
+        incomingCallChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_incoming_call_notification_channel_id,
+            R.string.stream_video_incoming_call_notification_channel_title,
+            R.string.stream_video_incoming_call_notification_channel_description,
+            NotificationManager.IMPORTANCE_HIGH,
+        ),
+        ongoingCallChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_ongoing_call_notification_channel_id,
+            R.string.stream_video_ongoing_call_notification_channel_title,
+            R.string.stream_video_ongoing_call_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+        outgoingCallChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_outgoing_call_notification_channel_id,
+            R.string.stream_video_outgoing_call_notification_channel_title,
+            R.string.stream_video_outgoing_call_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+        missedCallChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_missed_call_notification_channel_id,
+            R.string.stream_video_missed_call_notification_channel_title,
+            R.string.stream_video_missed_call_notification_channel_description,
+            NotificationManager.IMPORTANCE_HIGH,
+        ),
+    ),
+    private val delegate: StreamDefaultNotificationHandler = StreamDefaultNotificationHandler(
+        application = application,
+        hideRingingNotificationInForeground = hideRingingNotificationInForeground,
+        initialNotificationBuilderInterceptor = initialNotificationBuilderInterceptor,
+        updateNotificationBuilderInterceptor = updateNotificationBuilderInterceptor,
+        notificationChannels = notificationChannels,
+    )
 ) : NotificationHandler,
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Call:NotificationHandler")
     val intentResolver = DefaultStreamIntentResolver(application)
     protected val notificationManager: NotificationManagerCompat by lazy {
-        NotificationManagerCompat.from(application).also {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                it.createNotificationChannel(
-                    NotificationChannelCompat
-                        .Builder(
-                            getChannelId(),
-                            NotificationManager.IMPORTANCE_HIGH,
-                        )
-                        .setName(getChannelName())
-                        .setDescription(getChannelDescription())
-                        .build(),
-                )
-            }
-        }
+        delegate.notificationManager
     }
 
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(
-            application,
-            callId,
-            callDisplayName,
-            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
-                callId,
-                callDisplayName,
-                shouldHaveContentIntent = true,
-            ),
-        )
-    }
+    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) =
+        delegate.onRingingCall(callId, callDisplayName)
 
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
-        logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
-        val notificationId = callId.hashCode()
-        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
-            ?: run {
-                logger.e { "Couldn't find any activity for $ACTION_MISSED_CALL" }
-                intentResolver.getDefaultPendingIntent()
-            }
-        StreamVideo.instance().state.ringingCall
-        showMissedCallNotification(
-            intent,
-            callDisplayName,
-            notificationId,
-        )
-    }
+    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) =
+        delegate.onMissedCall(callId, callDisplayName)
 
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
-    ): Notification? {
-        return if (ringingState is RingingState.Incoming) {
-            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
-            val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
-            val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
-
-            if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
-                getIncomingCallNotification(
-                    fullScreenPendingIntent,
-                    acceptCallPendingIntent,
-                    rejectCallPendingIntent,
-                    callDisplayName,
-                    shouldHaveContentIntent,
-                )
-            } else {
-                logger.e { "Ringing call notification not shown, one of the intents is null." }
-                null
-            }
-        } else if (ringingState is RingingState.Outgoing) {
-            val outgoingCallPendingIntent = intentResolver.searchOutgoingCallPendingIntent(callId)
-            val endCallPendingIntent = intentResolver.searchEndCallPendingIntent(callId)
-
-            if (outgoingCallPendingIntent != null && endCallPendingIntent != null) {
-                getOngoingCallNotification(
-                    callId,
-                    callDisplayName,
-                    isOutgoingCall = true,
-                )
-            } else {
-                logger.e { "Ringing call notification not shown, one of the intents is null." }
-                null
-            }
-        } else {
-            null
-        }
-    }
-
-    override fun getSettingUpCallNotification(): Notification? {
-        val channelId = application.getString(
-            R.string.stream_video_call_setup_notification_channel_id,
+    ): Notification? =
+        delegate.getRingingCallNotification(
+            ringingState,
+            callId,
+            callDisplayName,
+            shouldHaveContentIntent
         )
 
-        maybeCreateChannel(
-            channelId = channelId,
-            context = application,
-            configure = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    name = application.getString(
-                        R.string.stream_video_call_setup_notification_channel_title,
-                    )
-                    description = application.getString(
-                        R.string.stream_video_call_setup_notification_channel_description,
-                    )
-                }
-            },
-        )
-
-        return getNotification {
-            setContentTitle(
-                application.getString(R.string.stream_video_call_setup_notification_title),
-            )
-            setContentText(
-                application.getString(R.string.stream_video_call_setup_notification_description),
-            )
-            setChannelId(channelId)
-            setCategory(NotificationCompat.CATEGORY_CALL)
-            setOngoing(true)
-        }
-    }
+    override fun getMissedCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String?
+    ): Notification? = delegate.getMissedCallNotification(callId, callDisplayName)
 
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
@@ -211,270 +158,87 @@ public open class DefaultNotificationHandler(
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
         shouldHaveContentIntent: Boolean,
-    ): Notification {
-        // if the app is in foreground then don't interrupt the user with a high priority
-        // notification (popup). The application will display an incoming ringing call
-        // screen instead - but this needs to be handled by the application.
-        // The default behaviour is that all notification are high priority
-        val showAsHighPriority = !hideRingingNotificationInForeground || !isInForeground()
-        val channelId = application.getString(
-            if (showAsHighPriority) {
-                R.string.stream_video_incoming_call_notification_channel_id
-            } else {
-                R.string.stream_video_incoming_call_low_priority_notification_channel_id
-            },
+    ): Notification? =
+        delegate.getIncomingCallNotification(
+            fullScreenPendingIntent,
+            acceptCallPendingIntent,
+            rejectCallPendingIntent,
+            callerName,
+            shouldHaveContentIntent
         )
 
-        createIncomingCallChannel(channelId, showAsHighPriority)
-
-        return getNotification {
-            priority = NotificationCompat.PRIORITY_HIGH
-            setContentTitle(callerName)
-            setContentText(
-                application.getString(R.string.stream_video_incoming_call_notification_description),
-            )
-            setChannelId(channelId)
-            setOngoing(true)
-            setCategory(NotificationCompat.CATEGORY_CALL)
-            setFullScreenIntent(fullScreenPendingIntent, true)
-            if (shouldHaveContentIntent) {
-                setContentIntent(fullScreenPendingIntent)
-            } else {
-                val emptyIntent = PendingIntent.getActivity(
-                    application,
-                    0,
-                    Intent(),
-                    PendingIntent.FLAG_IMMUTABLE,
-                )
-                setContentIntent(emptyIntent)
-                setAutoCancel(false)
-            }
-            addCallActions(acceptCallPendingIntent, rejectCallPendingIntent, callerName)
-        }
-    }
-
-    open fun createIncomingCallChannel(channelId: String, showAsHighPriority: Boolean) {
-        maybeCreateChannel(
-            channelId = channelId,
-            context = application,
-            configure = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    name = application.getString(
-                        R.string.stream_video_incoming_call_notification_channel_title,
-                    )
-                    description = application.getString(
-                        if (showAsHighPriority) {
-                            R.string.stream_video_incoming_call_notification_channel_description
-                        } else {
-                            R.string.stream_video_incoming_call_low_priority_notification_channel_description
-                        },
-                    )
-                    importance = if (showAsHighPriority) {
-                        NotificationManager.IMPORTANCE_HIGH
-                    } else {
-                        NotificationManager.IMPORTANCE_LOW
-                    }
-                    this.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    this.setShowBadge(true)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    this.setAllowBubbles(true)
-                }
-            },
-        )
-    }
-
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
-        val notificationId = callId.hashCode()
-        intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
-            ?.let { notificationPendingIntent ->
-                showNotificationCallNotification(
-                    notificationPendingIntent,
-                    callDisplayName,
-                    notificationId,
-                )
-            } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
-    }
-
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
-        val notificationId = callId.hashCode()
-        intentResolver.searchLiveCallPendingIntent(callId, notificationId)
-            ?.let { liveCallPendingIntent ->
-                showLiveCallNotification(
-                    liveCallPendingIntent,
-                    callDisplayName,
-                    notificationId,
-                )
-            } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
-    }
+    override fun getSettingUpCallNotification(): Notification? =
+        delegate.getSettingUpCallNotification()
 
     override fun getOngoingCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
-    ): Notification? {
-        val client = (StreamVideo.instance() as StreamVideoClient)
-        val mediaNotificationCallTypes =
-            client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
-        return if (mediaNotificationCallTypes.contains(callId.type)) {
-            createMinimalMediaStyleNotification(
-                callId,
-                getMediaNotificationConfig(),
-                remoteParticipantCount,
-            )?.build()
-        } else {
-            getSimpleOngoingCallNotification(
-                callId,
-                callDisplayName,
-                isOutgoingCall,
-                remoteParticipantCount,
-            )
-        }
-    }
-
-    private fun getSimpleOngoingCallNotification(
-        callId: StreamCallId,
-        callDisplayName: String?,
-        isOutgoingCall: Boolean,
-        remoteParticipantCount: Int,
-    ): Notification? {
-        val notificationId = callId.hashCode() // Notification ID
-
-        // Intents
-        val onClickIntent = if (isOutgoingCall) {
-            intentResolver.searchOutgoingCallPendingIntent(
-                callId,
-                notificationId,
-            )
-        } else {
-            intentResolver.searchOngoingCallPendingIntent(
-                callId,
-                notificationId,
-            )
-        }
-        val hangUpIntent = if (isOutgoingCall) {
-            intentResolver.searchRejectCallPendingIntent(callId)
-        } else {
-            intentResolver.searchEndCallPendingIntent(callId)
-        }
-
-        // Channel preparation
-        val ongoingCallsChannelId = application.getString(
-            R.string.stream_video_ongoing_call_notification_channel_id,
+    ): Notification? =
+        delegate.getOngoingCallNotification(
+            callId,
+            callDisplayName,
+            isOutgoingCall,
+            remoteParticipantCount
         )
 
-        createOnGoingChannel(ongoingCallsChannelId)
+    override fun onNotification(callId: StreamCallId, callDisplayName: String) =
+        delegate.onNotification(callId, callDisplayName)
 
-        if (hangUpIntent == null) {
-            logger.e { "End call intent is null, not showing notification!" }
-            return null
-        }
+    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) =
+        delegate.onLiveCall(callId, callDisplayName)
 
-        // Build notification
-        return NotificationCompat.Builder(application, ongoingCallsChannelId)
-            .setSmallIcon(notificationIconRes)
-            .also {
-                // If the intent is configured, clicking the notification will return to the call
-                if (onClickIntent != null) {
-                    it.setContentIntent(onClickIntent)
-                } else {
-                    logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
-                }
-            }
-            .setContentTitle(
-                if (isOutgoingCall) {
-                    application.getString(R.string.stream_video_outgoing_call_notification_title)
-                } else {
-                    application.getString(R.string.stream_video_ongoing_call_notification_title)
-                },
-            )
-            .setContentText(
-                application.getString(R.string.stream_video_ongoing_call_notification_description),
-            )
-            .setAutoCancel(false)
-            .setOngoing(true)
-            .addHangUpAction(
-                hangUpIntent,
-                callDisplayName ?: application.getString(
-                    R.string.stream_video_ongoing_call_notification_title,
-                ),
-                remoteParticipantCount,
-            )
-            .build()
-    }
-
+    @Deprecated(
+        "Use notificationChannels and delegate for channel management instead.",
+        level = DeprecationLevel.WARNING
+    )
     open fun createOnGoingChannel(ongoingCallsChannelId: String) {
-        maybeCreateChannel(
-            channelId = ongoingCallsChannelId,
-            context = application,
-            configure = {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    name = application.getString(
-                        R.string.stream_video_ongoing_call_notification_channel_title,
-                    )
-                    description =
-                        application.getString(R.string.stream_video_ongoing_call_notification_channel_description)
-                }
-            },
-        )
+        notificationChannels.ongoingCallChannel.create(notificationManager)
     }
 
-    override fun onCallNotificationUpdate(call: Call): Notification? {
-        val ringingState = call.state.ringingState.value
-        val members = call.state.members.value
-        val remoteParticipants = call.state.remoteParticipants.value
-        logger.d { "[onCallNotificationUpdate] #ringingState: ${ringingState}; callId: ${call.cid}" }
-        logger.d { "[onCallNotificationUpdate] #members: ${members}; callId: ${call.cid}" }
-        logger.d { "[onCallNotificationUpdate] #remoteParticipants: ${remoteParticipants}; callId: ${call.cid}" }
+    override suspend fun onCallNotificationUpdate(call: Call): Notification? =
+        delegate.onCallNotificationUpdate(call)
 
-        val notification: Notification? = if (ringingState is RingingState.Outgoing) {
-            val remoteMembersCount = members.size - 1
-            val callDisplayName = if (remoteMembersCount != 1) {
+    override suspend fun updateOngoingCallNotification(
+        call: Call,
+        callDisplayName: String,
+    ): Notification? =
+        delegate.updateOngoingCallNotification(call, callDisplayName)
+
+    override suspend fun updateOutgoingCallNotification(
+        call: Call,
+        callDisplayName: String?,
+    ): Notification? =
+        delegate.updateOutgoingCallNotification(call, callDisplayName)
+
+    override suspend fun updateIncomingCallNotification(
+        call: Call,
+        callDisplayName: String
+    ): Notification? = delegate.updateIncomingCallNotification(call, callDisplayName)
+
+    @Deprecated(
+        "Use notificationChannels and delegate for channel management instead.",
+        level = DeprecationLevel.WARNING
+    )
+    open fun maybeCreateChannel(
+        channelId: String,
+        context: Context,
+        configure: NotificationChannel.() -> Unit = {},
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
                 application.getString(
-                    R.string.stream_video_outgoing_call_notification_title,
-                )
-            } else {
-                members.firstOrNull { member ->
-                    member.user.id != call.state.me.value?.userId?.value
-                }?.user?.name ?: "Unknown"
-            }
+                    R.string.stream_video_ongoing_call_notification_channel_title,
+                ),
+                NotificationManager.IMPORTANCE_DEFAULT,
+            ).apply(configure)
 
-            getOngoingCallNotification(
-                callId = StreamCallId.fromCallCid(call.cid),
-                callDisplayName = callDisplayName,
-                isOutgoingCall = true,
-                remoteParticipantCount = remoteMembersCount,
-            )
-        } else if (ringingState is RingingState.Active) {
-            val callDisplayName = if (remoteParticipants.isEmpty()) {
-                // If no remote participants, get simple call notification title
-                application.getString(
-                    R.string.stream_video_ongoing_call_notification_title,
-                )
-            } else {
-                if (remoteParticipants.size > 1) {
-                    // If more than 1 remote participant, get group call notification title
-                    application.getString(
-                        R.string.stream_video_ongoing_group_call_notification_title,
-                    )
-                } else {
-                    // If 1 remote participant, get the name of the remote participant
-                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
-                }
-            }
-
-            getOngoingCallNotification(
-                callId = StreamCallId.fromCallCid(call.cid),
-                callDisplayName = callDisplayName,
-                remoteParticipantCount = remoteParticipants.size,
-            )
-        } else {
-            // Else don't update
-            null
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
-
-        return notification
     }
 
     @Deprecated(
@@ -569,27 +333,10 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    open fun maybeCreateChannel(
-        channelId: String,
-        context: Context,
-        configure: NotificationChannel.() -> Unit = {
-        },
-    ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                application.getString(
-                    R.string.stream_video_ongoing_call_notification_channel_title,
-                ),
-                NotificationManager.IMPORTANCE_DEFAULT,
-            ).apply(configure)
-
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
+    @Deprecated(
+        "This function is unused and will be removed in a future release.",
+        level = DeprecationLevel.WARNING
+    )
     open fun showNotificationCallNotification(
         notificationPendingIntent: PendingIntent,
         callDisplayName: String,
@@ -602,6 +349,10 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    @Deprecated(
+        "This function is unused and will be removed in a future release.",
+        level = DeprecationLevel.WARNING
+    )
     open fun showMissedCallNotification(
         notificationPendingIntent: PendingIntent,
         callDisplayName: String,
@@ -613,6 +364,10 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    @Deprecated(
+        "This function is unused and will be removed in a future release.",
+        level = DeprecationLevel.WARNING
+    )
     open fun showLiveCallNotification(
         liveCallPendingIntent: PendingIntent,
         callDisplayName: String,
@@ -742,9 +497,9 @@ public open class DefaultNotificationHandler(
         val appProcessInfo = ActivityManager.RunningAppProcessInfo()
         ActivityManager.getMyMemoryState(appProcessInfo)
         return (
-            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
-                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
-            )
+                appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND ||
+                        appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+                )
     }
 
     open fun getChannelId(): String = application.getString(
