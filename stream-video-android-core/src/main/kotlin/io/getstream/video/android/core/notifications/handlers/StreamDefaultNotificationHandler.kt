@@ -17,10 +17,12 @@
 package io.getstream.video.android.core.notifications.handlers
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -32,6 +34,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
+import androidx.core.content.PermissionChecker
 import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
@@ -41,12 +44,14 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.model.StreamCallId
 
 /**
@@ -96,6 +101,10 @@ public open class StreamDefaultNotificationHandler(
             NotificationManager.IMPORTANCE_HIGH,
         ),
     ),
+    @ExperimentalStreamVideoApi
+    private val permissionChecker: (context: Context, permission: String) -> Int = { context, permission ->
+        ActivityCompat.checkSelfPermission(context, permission)
+    },
 ) : StreamNotificationHandler,
     StreamNotificationProvider,
     StreamNotificationUpdatesProvider,
@@ -750,11 +759,10 @@ public open class StreamDefaultNotificationHandler(
         )
     }
 
+    @SuppressLint("MissingPermission")
     private fun Notification?.showNotification(notificationId: Int) {
         this?.let { notification ->
-            if (ActivityCompat.checkSelfPermission(
-                    application.applicationContext, Manifest.permission.POST_NOTIFICATIONS,
-                ) == PackageManager.PERMISSION_GRANTED
+            if (permissionChecker(application, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
             ) {
                 notificationManager.notify(notificationId, notification)
                 logger.d { "[showNotification] with notificationId: $notificationId" }
