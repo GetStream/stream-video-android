@@ -908,6 +908,8 @@ public open class StreamDefaultNotificationHandler(
             } else {
                 logger.w { "Ongoing intent is null click on the ongoing call notification will not work." }
             }
+            setContentTitle(application.getString(R.string.stream_video_livestream_notification_title))
+            setContentText(application.getString(R.string.stream_video_livestream_notification_title))
             setAutoCancel(false)
             setShowWhen(false)
             setOngoing(true)
