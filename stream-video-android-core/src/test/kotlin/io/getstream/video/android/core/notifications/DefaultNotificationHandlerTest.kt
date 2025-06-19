@@ -63,7 +63,7 @@ class DefaultNotificationHandlerTest {
         // When
         val handler = DefaultNotificationHandler(
             application = mockApplication,
-            hideRingingNotificationInForeground = true
+            hideRingingNotificationInForeground = true,
         )
 
         // Then
@@ -76,7 +76,7 @@ class DefaultNotificationHandlerTest {
         val handler = DefaultNotificationHandler(
             application = mockApplication,
             notificationPermissionHandler = mockNotificationPermissionHandler,
-            hideRingingNotificationInForeground = false
+            hideRingingNotificationInForeground = false,
         )
 
         // Then
@@ -90,8 +90,10 @@ class DefaultNotificationHandlerTest {
         val handler = DefaultNotificationHandler(mockApplication)
 
         // Then
-        assertTrue("DefaultNotificationHandler should implement NotificationPermissionHandler", 
-                  handler is NotificationPermissionHandler)
+        assertTrue(
+            "DefaultNotificationHandler should implement NotificationPermissionHandler",
+            handler is NotificationPermissionHandler,
+        )
     }
 
     @Test
@@ -102,8 +104,10 @@ class DefaultNotificationHandlerTest {
 
         // Then
         assertNotNull("Deprecated DefaultNotificationHandler should still be instantiable", handler)
-        assertTrue("Should implement the permission handler interface", 
-                  handler is NotificationPermissionHandler)
+        assertTrue(
+            "Should implement the permission handler interface",
+            handler is NotificationPermissionHandler,
+        )
     }
 
     @Test
@@ -111,18 +115,22 @@ class DefaultNotificationHandlerTest {
         // Given
         val handlerWithHidden = DefaultNotificationHandler(
             application = mockApplication,
-            hideRingingNotificationInForeground = true
+            hideRingingNotificationInForeground = true,
         )
         val handlerWithoutHidden = DefaultNotificationHandler(
             application = mockApplication,
-            hideRingingNotificationInForeground = false
+            hideRingingNotificationInForeground = false,
         )
 
         // Then
-        assertTrue("Handler with hidden notifications should have property set to true", 
-                  handlerWithHidden.hideRingingNotificationInForeground)
-        assertFalse("Handler without hidden notifications should have property set to false", 
-                   handlerWithoutHidden.hideRingingNotificationInForeground)
+        assertTrue(
+            "Handler with hidden notifications should have property set to true",
+            handlerWithHidden.hideRingingNotificationInForeground,
+        )
+        assertFalse(
+            "Handler without hidden notifications should have property set to false",
+            handlerWithoutHidden.hideRingingNotificationInForeground,
+        )
     }
 
     @Test
@@ -132,8 +140,10 @@ class DefaultNotificationHandlerTest {
 
         // Then
         assertNotNull("Handler should be created successfully", handler)
-        assertFalse("Default hideRingingNotificationInForeground should be false", 
-                   handler.hideRingingNotificationInForeground)
+        assertFalse(
+            "Default hideRingingNotificationInForeground should be false",
+            handler.hideRingingNotificationInForeground,
+        )
     }
 
     @Test
@@ -155,16 +165,16 @@ class DefaultNotificationHandlerTest {
         val handler1 = DefaultNotificationHandler(mockApplication)
         val handler2 = DefaultNotificationHandler(
             application = mockApplication,
-            hideRingingNotificationInForeground = true
+            hideRingingNotificationInForeground = true,
         )
         val handler3 = DefaultNotificationHandler(
             application = mockApplication,
-            notificationPermissionHandler = mockNotificationPermissionHandler
+            notificationPermissionHandler = mockNotificationPermissionHandler,
         )
         val handler4 = DefaultNotificationHandler(
             application = mockApplication,
             notificationPermissionHandler = mockNotificationPermissionHandler,
-            hideRingingNotificationInForeground = true
+            hideRingingNotificationInForeground = true,
         )
 
         // Then - All should be created successfully
@@ -174,13 +184,21 @@ class DefaultNotificationHandlerTest {
         assertNotNull("Handler4 should be created", handler4)
 
         // Verify properties
-        assertFalse("Handler1 should have default hideRingingNotificationInForeground", 
-                   handler1.hideRingingNotificationInForeground)
-        assertTrue("Handler2 should have hideRingingNotificationInForeground set to true", 
-                  handler2.hideRingingNotificationInForeground)
-        assertFalse("Handler3 should have default hideRingingNotificationInForeground", 
-                   handler3.hideRingingNotificationInForeground)
-        assertTrue("Handler4 should have hideRingingNotificationInForeground set to true", 
-                  handler4.hideRingingNotificationInForeground)
+        assertFalse(
+            "Handler1 should have default hideRingingNotificationInForeground",
+            handler1.hideRingingNotificationInForeground,
+        )
+        assertTrue(
+            "Handler2 should have hideRingingNotificationInForeground set to true",
+            handler2.hideRingingNotificationInForeground,
+        )
+        assertFalse(
+            "Handler3 should have default hideRingingNotificationInForeground",
+            handler3.hideRingingNotificationInForeground,
+        )
+        assertTrue(
+            "Handler4 should have hideRingingNotificationInForeground set to true",
+            handler4.hideRingingNotificationInForeground,
+        )
     }
 }

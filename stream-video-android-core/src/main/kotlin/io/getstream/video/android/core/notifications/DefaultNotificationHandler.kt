@@ -266,7 +266,10 @@ public open class DefaultNotificationHandler(
                                 Manifest.permission.POST_NOTIFICATIONS,
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
-                            notificationManager.notify(StreamCallId.fromCallCid(call.cid).hashCode(), notification)
+                            notificationManager.notify(
+                                StreamCallId.fromCallCid(call.cid).hashCode(),
+                                notification,
+                            )
                         }
                     },
                 )

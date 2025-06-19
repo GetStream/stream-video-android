@@ -44,7 +44,7 @@ open class CompatibilityStreamNotificationHandler(
         application,
     ),
     notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(
-        application.applicationContext
+        application.applicationContext,
     ),
     intentResolver: StreamIntentResolver = DefaultStreamIntentResolver(application),
     hideRingingNotificationInForeground: Boolean = false,
@@ -98,7 +98,7 @@ open class CompatibilityStreamNotificationHandler(
         message = "Deprecated method. Use the onCallNotificationUpdate method instead.",
         level = DeprecationLevel.ERROR,
         replaceWith =
-            ReplaceWith("onCallNotificationUpdate(call)"),
+        ReplaceWith("onCallNotificationUpdate(call)"),
     )
     override fun getNotificationUpdates(
         coroutineScope: CoroutineScope,

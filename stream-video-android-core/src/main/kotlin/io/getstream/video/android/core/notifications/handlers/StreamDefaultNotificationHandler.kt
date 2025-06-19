@@ -55,7 +55,7 @@ import io.getstream.video.android.model.StreamCallId
 public open class StreamDefaultNotificationHandler(
     private val application: Application,
     private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(
-        application.applicationContext
+        application.applicationContext,
     ),
     private val notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
