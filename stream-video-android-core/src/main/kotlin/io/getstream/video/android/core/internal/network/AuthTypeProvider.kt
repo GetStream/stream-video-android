@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.model
+package io.getstream.video.android.core.internal.network
 
-import androidx.compose.runtime.Stable
-import java.io.Serializable
+internal class AuthTypeProvider {
+    private var authType: AuthType = AuthType.JWT
 
-@Stable
-public data class IceServer(
-    val urls: List<String>,
-    val username: String,
-    val password: String,
-) : Serializable
+    fun getAuthType(): String {
+        return authType.value
+    }
+
+    fun setAuthType(authType: AuthType) {
+        this.authType = authType
+    }
+
+    internal enum class AuthType(val value: String) {
+        JWT("jwt"),
+        ANONYMOUS("anonymous"),
+    }
+}

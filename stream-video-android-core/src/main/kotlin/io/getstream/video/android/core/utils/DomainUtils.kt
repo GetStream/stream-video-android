@@ -18,30 +18,116 @@ package io.getstream.video.android.core.utils
 
 import io.getstream.android.video.generated.models.CallRecording
 import io.getstream.android.video.generated.models.CallStateResponseFields
+import io.getstream.android.video.generated.models.Credentials
 import io.getstream.android.video.generated.models.EdgeResponse
+import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetOrCreateCallResponse
+import io.getstream.android.video.generated.models.GoLiveResponse
+import io.getstream.android.video.generated.models.ICEServer
+import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.ListRecordingsResponse
+import io.getstream.android.video.generated.models.ListTranscriptionsResponse
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.QueryCallMembersResponse
 import io.getstream.android.video.generated.models.QueryCallsResponse
 import io.getstream.android.video.generated.models.ReactionResponse
+import io.getstream.android.video.generated.models.SendReactionResponse
+import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.CallData
+import io.getstream.video.android.core.model.CallInfo
 import io.getstream.video.android.core.model.CallRecordingData
+import io.getstream.video.android.core.model.CallTranscription
 import io.getstream.video.android.core.model.CallUser
 import io.getstream.video.android.core.model.CallUserState
 import io.getstream.video.android.core.model.EdgeData
+import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.model.Member
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.ReactionData
+import io.getstream.video.android.core.model.Server
 import io.getstream.video.android.core.model.toCallInfo
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.User.Companion.isLocalUser
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import java.util.Date
+
+internal fun GetCallResponse.toCallData(): CallData {
+    return CallData(
+        blockedUsersIds = call.blockedUserIds,
+        call = call.toCallInfo(),
+        members = members.map { it.toCallUser() },
+        ownMembership = membership?.toCallUser(),
+        credentials = null,
+    )
+}
+
+internal fun UpdateCallResponse.toCallData(): CallData {
+    return CallData(
+        blockedUsersIds = call.blockedUserIds,
+        call = call.toCallInfo(),
+        members = members.map { it.toCallUser() },
+        ownMembership = membership?.toCallUser(),
+        credentials = null,
+    )
+}
+
+internal fun GetOrCreateCallResponse.toCallData(): CallData {
+    return CallData(
+        blockedUsersIds = call.blockedUserIds,
+        call = call.toCallInfo(),
+        members = members.map { it.toCallUser() },
+        ownMembership = membership?.toCallUser(),
+        credentials = null,
+    )
+}
+
+internal fun JoinCallResponse.toCallData(): CallData {
+    return CallData(
+        blockedUsersIds = call.blockedUserIds,
+        call = call.toCallInfo(),
+        members = members.map { it.toCallUser() },
+        ownMembership = membership?.toCallUser(),
+        credentials = credentials.toDomain(),
+    )
+}
+
+internal fun Credentials.toDomain(): io.getstream.video.android.core.model.Credentials =
+    io.getstream.video.android.core.model.Credentials(
+        token = token,
+        server = Server(
+            name = server.edgeName,
+            url = server.url,
+            wsUrl = server.wsEndpoint,
+        ),
+        iceServers = iceServers.map { it.toIceServer() },
+    )
+
+internal fun ICEServer.toIceServer(): IceServer = IceServer(
+    urls = urls,
+    username = username,
+    password = password,
+)
+
+internal fun GoLiveResponse.toCallInfo(): CallInfo = call.toCallInfo()
+
+internal fun ListRecordingsResponse.toRecordings(): List<CallRecordingData> =
+    this.recordings.map { it.toRecording() }
+
+internal fun ListTranscriptionsResponse.toTranscriptions(): List<CallTranscription> =
+    this.transcriptions.map {
+        CallTranscription(
+            endTime = it.endTime,
+            filename = it.filename,
+            startTime = it.startTime,
+            url = it.url,
+        )
+    }
 
 @JvmSynthetic
 internal fun MemberResponse.toCallUser(): CallUser {
@@ -161,6 +247,7 @@ internal fun CallStateResponseFields.toCallData(): CallData {
         call = call.toCallInfo(),
         members = members.map { it.toCallUser() },
         ownMembership = membership?.toCallUser(),
+        credentials = null,
     )
 }
 
@@ -173,6 +260,8 @@ internal fun CallRecording.toRecording(): CallRecordingData {
         end = endTime.toEpochSecond() * 1000,
     )
 }
+
+internal fun SendReactionResponse.toReaction(): ReactionData = reaction.toReaction()
 
 @JvmSynthetic
 internal fun ReactionResponse.toReaction(): ReactionData {

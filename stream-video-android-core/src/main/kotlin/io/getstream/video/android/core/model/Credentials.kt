@@ -16,12 +16,10 @@
 
 package io.getstream.video.android.core.model
 
-import androidx.compose.runtime.Stable
-import java.io.Serializable
+import io.getstream.video.android.model.SfuToken
 
-@Stable
-public data class IceServer(
-    val urls: List<String>,
-    val username: String,
-    val password: String,
-) : Serializable
+public data class Credentials(
+    val token: SfuToken,
+    val server: Server,
+    val iceServers: List<IceServer>,
+)

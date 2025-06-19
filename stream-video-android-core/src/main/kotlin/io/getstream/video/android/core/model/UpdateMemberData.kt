@@ -16,12 +16,7 @@
 
 package io.getstream.video.android.core.model
 
-import androidx.compose.runtime.Stable
-import java.io.Serializable
-
-@Stable
-public data class IceServer(
-    val urls: List<String>,
-    val username: String,
-    val password: String,
-) : Serializable
+public data class UpdateMemberData(
+    val userId: String,
+    val custom: Map<String, Any>? = null,
+)

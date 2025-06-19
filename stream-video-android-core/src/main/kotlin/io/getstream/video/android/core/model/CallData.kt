@@ -24,4 +24,5 @@ public data class CallData(
     public val call: CallInfo,
     public val members: List<CallUser>,
     public val ownMembership: CallUser?,
+    public val credentials: Credentials?,
 )

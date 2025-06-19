@@ -16,12 +16,11 @@
 
 package io.getstream.video.android.core.model
 
-import androidx.compose.runtime.Stable
-import java.io.Serializable
+import org.threeten.bp.OffsetDateTime
 
-@Stable
-public data class IceServer(
-    val urls: List<String>,
-    val username: String,
-    val password: String,
-) : Serializable
+public data class CallTranscription(
+    val endTime: OffsetDateTime,
+    val filename: String,
+    val startTime: OffsetDateTime,
+    val url: String,
+)

@@ -35,7 +35,7 @@ import okhttp3.WebSocket
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
-open class SocketTestBase : TestBase() {
+internal open class SocketTestBase : TestBase() {
     val coordinatorUrl =
         "https://video.stream-io-api.com/video/connect?api_key=${authData?.apiKey!!}&stream-auth-type=jwt&X-Stream-Client=stream-video-android"
     val sfuUrl = "wss://sfu-f079b1a.dpk-den1.stream-io-video.com/ws"

@@ -221,6 +221,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
+            enableStatsCollection = enableStatsReporting,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -230,7 +231,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
-            api = coordinatorConnectionModule.api,
+            videoApi = coordinatorConnectionModule.videoApi,
             deviceTokenStorage = deviceTokenStorage,
         )
 
@@ -247,13 +248,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user,
             apiKey = apiKey,
             token = token,
-            tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
+            videoApi = coordinatorConnectionModule.videoApi,
             streamNotificationManager = streamNotificationManager,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
-            testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
@@ -261,14 +261,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             audioProcessing = audioProcessing,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
-            enableStatsCollection = enableStatsReporting,
+            rtcSessionFactory = coordinatorConnectionModule.rtcSessionFactory,
         )
 
         if (user.type == UserType.Guest) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
             client.setupGuestUser(user)
-        } else if (user.type == UserType.Anonymous) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
         }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)

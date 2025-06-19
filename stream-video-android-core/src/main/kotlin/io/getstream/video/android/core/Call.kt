@@ -16,10 +16,8 @@
 
 package io.getstream.video.android.core
 
-import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.PowerManager
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
@@ -36,14 +34,12 @@ import io.getstream.android.video.generated.models.ListTranscriptionsResponse
 import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.android.video.generated.models.PinResponse
 import io.getstream.android.video.generated.models.RejectCallResponse
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionResponse
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
 import io.getstream.android.video.generated.models.StopLiveResponse
 import io.getstream.android.video.generated.models.StopTranscriptionResponse
-import io.getstream.android.video.generated.models.UnpinResponse
 import io.getstream.android.video.generated.models.UpdateCallMembersRequest
 import io.getstream.android.video.generated.models.UpdateCallMembersResponse
 import io.getstream.android.video.generated.models.UpdateCallRequest
@@ -69,6 +65,8 @@ import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.internal.RtcSessionFactory
+import io.getstream.video.android.core.internal.VideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -77,12 +75,11 @@ import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCallWithDefault
+import io.getstream.video.android.core.utils.toDomain
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -128,17 +125,37 @@ const val sfuReconnectTimeoutMillis = 30_000
  *
  */
 @Stable
-public class Call(
-    internal val client: StreamVideo,
+public class Call internal constructor(
+    internal val clientImpl: StreamVideoClient,
+    internal val videoApi: VideoApi,
+    private val rtcSessionFactory: RtcSessionFactory,
     val type: String,
     val id: String,
     val user: User,
 ) {
+
+    @Deprecated(
+        message = "Use the constructor with VideoApi instead",
+        replaceWith = ReplaceWith("Call(videoApi, type, id, user)"),
+    )
+    constructor(
+        client: StreamVideo,
+        type: String,
+        id: String,
+        user: User,
+    ) : this(
+        clientImpl = client as StreamVideoClient,
+        videoApi = client.videoApi,
+        rtcSessionFactory = client.rtcSessionFactory,
+        type = type,
+        id = id,
+        user = user,
+    )
+
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     internal var reconnectAttepmts = 0
-    internal val clientImpl = client as StreamVideoClient
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
@@ -146,12 +163,11 @@ public class Call(
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
-    private var powerManager: PowerManager? = null
 
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    val state = CallState(clientImpl, this, user, scope)
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
@@ -292,18 +308,15 @@ public class Call(
                 audioLevelOutputHelper.rampToValue(it)
             }
         }
-        powerManager = safeCallWithDefault(null) {
-            clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
-        }
     }
 
     /** Basic crud operations */
     suspend fun get(): Result<GetCallResponse> {
-        val response = clientImpl.getCall(type, id)
-        response.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return response
+        return videoApi.oldGetCall(type, id)
+            .await()
+            .onSuccess {
+                state.updateFromResponse(it)
+            }
     }
 
     /** Create a call. You can create a call client side, many apps prefer to do this server side though */
@@ -317,36 +330,36 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<GetOrCreateCallResponse> {
-        val response = if (members != null) {
-            clientImpl.getOrCreateCallFullMembers(
-                type = type,
-                id = id,
-                members = members,
-                custom = custom,
-                settingsOverride = settings,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-            )
-        } else {
-            clientImpl.getOrCreateCall(
-                type = type,
-                id = id,
-                memberIds = memberIds,
-                custom = custom,
-                settingsOverride = settings,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-            )
-        }
+        val response = (
+            if (members != null) {
+                videoApi.oldGetOrCreateCall(
+                    type = type,
+                    id = id,
+                    members = members,
+                    custom = custom,
+                    startsAt = startsAt,
+                    team = team,
+                    ring = ring,
+                    notify = notify,
+                )
+            } else {
+                videoApi.oldGetOrCreateCall(
+                    type = type,
+                    id = id,
+                    members = memberIds?.map { MemberRequest(it) },
+                    custom = custom,
+                    startsAt = startsAt,
+                    team = team,
+                    ring = ring,
+                    notify = notify,
+                )
+            }
+            ).await()
 
         response.onSuccess {
             state.updateFromResponse(it)
             if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
+                clientImpl.state.addRingingCall(this, RingingState.Outgoing())
             }
         }
         return response
@@ -363,7 +376,7 @@ public class Call(
             settingsOverride = settingsOverride,
             startsAt = startsAt,
         )
-        val response = clientImpl.updateCall(type, id, request)
+        val response = videoApi.oldUpdateCall(type, id, custom, startsAt).await()
         response.onSuccess {
             state.updateFromResponse(it)
         }
@@ -478,25 +491,15 @@ public class Call(
         if (result !is Success) {
             return result as Failure
         }
-        val sfuToken = result.value.credentials.token
-        val sfuUrl = result.value.credentials.server.url
-        val sfuWsUrl = result.value.credentials.server.wsEndpoint
-        val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
 
         session = if (testInstanceProvider.rtcSessionCreator != null) {
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
-            RtcSession(
-                sessionId = this.sessionId,
-                apiKey = clientImpl.apiKey,
-                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                client = client,
+            rtcSessionFactory.create(
+                credentials = result.value.credentials.toDomain(),
+                streamVideo = clientImpl,
                 call = this,
-                sfuUrl = sfuUrl,
-                sfuWsUrl = sfuWsUrl,
-                sfuToken = sfuToken,
-                remoteIceServers = iceServers,
-                powerManager = powerManager,
+                sessionId = sessionId,
             )
         }
 
@@ -509,7 +512,7 @@ public class Call(
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
-        client.state.setActiveCall(this)
+        clientImpl.state.setActiveCall(this)
         monitorSession(result.value)
         return Success(value = session!!)
     }
@@ -655,20 +658,11 @@ public class Call(
                 )
                 this.state.removeParticipant(prevSessionId)
                 session.prepareRejoin()
-                this.session = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
+                this.session = rtcSessionFactory.create(
+                    credentials = cred.toDomain(),
+                    streamVideo = clientImpl,
+                    call = this,
+                    sessionId = sessionId,
                 )
                 this.session?.connect(reconnectDetails, currentOptions)
                 session.cleanup()
@@ -711,20 +705,11 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
-                val newSession = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
+                val newSession = rtcSessionFactory.create(
+                    credentials = cred.toDomain(),
+                    streamVideo = clientImpl,
+                    call = this,
+                    sessionId = sessionId,
                 )
                 val oldSession = this.session
                 this.session = newSession
@@ -776,27 +761,32 @@ public class Call(
         stopScreenSharing()
         camera.disable()
         microphone.disable()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
-        (client as StreamVideoClient).onCallCleanUp(this)
+        clientImpl.state.removeActiveCall() // Will also stop CallService
+        clientImpl.state.removeRingingCall()
+        clientImpl.onCallCleanUp(this)
         cleanup()
     }
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> {
         // end the call for everyone
-        val result = clientImpl.endCall(type, id)
+        val result = videoApi.endCall(type, id).await()
         // cleanup
         leave()
         return result
     }
 
-    suspend fun pinForEveryone(sessionId: String, userId: String): Result<PinResponse> {
-        return clientImpl.pinForEveryone(type, id, sessionId, userId)
+    suspend fun pinForEveryone(sessionId: String, userId: String): Result<Unit> {
+        return videoApi.videoPin(
+            type = type,
+            callId = id,
+            sessionId = sessionId,
+            userId = userId,
+        ).await()
     }
 
-    suspend fun unpinForEveryone(sessionId: String, userId: String): Result<UnpinResponse> {
-        return clientImpl.unpinForEveryone(type, id, sessionId, userId)
+    suspend fun unpinForEveryone(sessionId: String, userId: String): Result<Unit> {
+        return videoApi.videoUnpin(type, id, sessionId, userId).await()
     }
 
     suspend fun sendReaction(
@@ -804,7 +794,7 @@ public class Call(
         emoji: String? = null,
         custom: Map<String, Any>? = null,
     ): Result<SendReactionResponse> {
-        return clientImpl.sendReaction(this.type, id, type, emoji, custom)
+        return videoApi.oldSendVideoReaction(this.type, id, type, emoji, custom).await()
     }
 
     suspend fun queryMembers(
@@ -814,7 +804,7 @@ public class Call(
         prev: String? = null,
         next: String? = null,
     ): Result<QueriedMembers> {
-        return clientImpl.queryMembersInternal(
+        return videoApi.oldQueryCallMembers(
             type = type,
             id = id,
             filter = filter,
@@ -822,7 +812,9 @@ public class Call(
             prev = prev,
             next = next,
             limit = limit,
-        ).onSuccess { state.updateFromResponse(it) }.map { it.toQueriedMembers() }
+        )
+            .await()
+            .onSuccess { state.updateFromResponse(it) }.map { it.toQueriedMembers() }
     }
 
     suspend fun muteAllUsers(
@@ -836,7 +828,7 @@ public class Call(
             video = video,
             screenShare = screenShare,
         )
-        return clientImpl.muteUsers(type, id, request)
+        return videoApi.oldMuteUsers(type, id, request).await()
     }
     fun setVisibility(
         sessionId: String,
@@ -942,39 +934,39 @@ public class Call(
         startRecording: Boolean = false,
         startTranscription: Boolean = false,
     ): Result<GoLiveResponse> {
-        val result = clientImpl.goLive(
+        val result = videoApi.oldGoLive(
             type = type,
             id = id,
             startHls = startHls,
             startRecording = startRecording,
             startTranscription = startTranscription,
-        )
+        ).await()
         result.onSuccess { state.updateFromResponse(it) }
 
         return result
     }
 
     suspend fun stopLive(): Result<StopLiveResponse> {
-        val result = clientImpl.stopLive(type, id)
-        result.onSuccess { state.updateFromResponse(it) }
-        return result
+        return videoApi.oldStopLive(type, id)
+            .await()
+            .onSuccess { state.updateFromResponse(it) }
     }
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> {
-        return clientImpl.sendCustomEvent(this.type, this.id, data)
+        return videoApi.oldSendCallEvent(this.type, this.id, data).await()
     }
 
     /** Permissions */
     suspend fun requestPermissions(vararg permission: String): Result<Unit> {
-        return clientImpl.requestPermissions(type, id, permission.toList())
+        return videoApi.requestPermission(type, id, permission.toList()).await()
     }
 
     suspend fun startRecording(): Result<Any> {
-        return clientImpl.startRecording(type, id)
+        return videoApi.startRecording(type, id).await()
     }
 
     suspend fun stopRecording(): Result<Any> {
-        return clientImpl.stopRecording(type, id)
+        return videoApi.stopRecording(type, id).await()
     }
 
     /**
@@ -1000,14 +992,15 @@ public class Call(
     }
 
     suspend fun startHLS(): Result<Any> {
-        return clientImpl.startBroadcasting(type, id)
+        return videoApi.oldStartHLSBroadcasting(type, id)
+            .await()
             .onSuccess {
                 state.updateFromResponse(it)
             }
     }
 
     suspend fun stopHLS(): Result<Any> {
-        return clientImpl.stopBroadcasting(type, id)
+        return videoApi.stopHLSBroadcasting(type, id).await()
     }
 
     public fun subscribeFor(
@@ -1045,14 +1038,14 @@ public class Call(
     }
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
-        return clientImpl.blockUser(type, id, userId)
+        return videoApi.oldBlockUser(type, id, userId).await()
     }
 
     // TODO: add removeMember (single)
 
     public suspend fun removeMembers(userIds: List<String>): Result<UpdateCallMembersResponse> {
         val request = UpdateCallMembersRequest(removeMembers = userIds)
-        return clientImpl.updateMembers(type, id, request)
+        return videoApi.oldUpdateCallMembers(type, id, request).await()
     }
 
     public suspend fun grantPermissions(
@@ -1063,7 +1056,7 @@ public class Call(
             userId = userId,
             grantedPermissions = permissions,
         )
-        return clientImpl.updateUserPermissions(type, id, request)
+        return videoApi.oldUpdateUserPermissions(type, id, request).await()
     }
 
     public suspend fun revokePermissions(
@@ -1074,12 +1067,12 @@ public class Call(
             userId = userId,
             revokedPermissions = permissions,
         )
-        return clientImpl.updateUserPermissions(type, id, request)
+        return videoApi.oldUpdateUserPermissions(type, id, request).await()
     }
 
     public suspend fun updateMembers(memberRequests: List<MemberRequest>): Result<UpdateCallMembersResponse> {
         val request = UpdateCallMembersRequest(updateMembers = memberRequests)
-        return clientImpl.updateMembers(type, id, request)
+        return videoApi.oldUpdateCallMembers(type, id, request).await()
     }
 
     val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
@@ -1176,7 +1169,7 @@ public class Call(
      * @param sessionId - if session ID is supplied, only recordings for that session will be loaded.
      */
     suspend fun listRecordings(sessionId: String? = null): Result<ListRecordingsResponse> {
-        return clientImpl.listRecordings(type, id, sessionId)
+        return videoApi.oldListRecordings(type, id).await()
     }
 
     suspend fun muteUser(
@@ -1192,7 +1185,7 @@ public class Call(
             video = video,
             screenShare = screenShare,
         )
-        return clientImpl.muteUsers(type, id, request)
+        return videoApi.oldMuteUsers(type, id, request).await()
     }
 
     suspend fun muteUsers(
@@ -1208,7 +1201,7 @@ public class Call(
             video = video,
             screenShare = screenShare,
         )
-        return clientImpl.muteUsers(type, id, request)
+        return videoApi.oldMuteUsers(type, id, request).await()
     }
 
     @VisibleForTesting
@@ -1219,19 +1212,21 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<JoinCallResponse> {
-        val result = clientImpl.joinCall(
+        val result = videoApi.oldJoinCall(
             type, id,
             create = create != null,
-            members = create?.memberRequestsFromIds(),
+            membersId = (
+                create?.memberIds.orEmpty() +
+                    create?.members.orEmpty().map { it.userId }
+                ).takeUnless { it.isEmpty() },
             custom = create?.custom,
-            settingsOverride = create?.settings,
             startsAt = create?.startsAt,
             team = create?.team,
             ring = ring,
             notify = notify,
             location = location,
             migratingFrom = migratingFrom,
-        )
+        ).await()
         result.onSuccess {
             state.updateFromResponse(it)
         }
@@ -1257,12 +1252,14 @@ public class Call(
 
     suspend fun ring(): Result<GetCallResponse> {
         logger.d { "[ring] #ringing; no args" }
-        return clientImpl.ring(type, id)
+        return videoApi.oldGetCall(type, id, ring = true)
+            .await()
     }
 
     suspend fun notify(): Result<GetCallResponse> {
         logger.d { "[notify] #ringing; no args" }
-        return clientImpl.notify(type, id)
+        return videoApi.oldGetCall(type, id, notify = true)
+            .await()
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
@@ -1271,12 +1268,12 @@ public class Call(
 
         clientImpl.state.removeRingingCall()
         clientImpl.state.maybeStopForegroundService(call = this)
-        return clientImpl.accept(type, id)
+        return videoApi.oldAcceptCall(type, id).await()
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason" }
-        return clientImpl.reject(type, id, reason)
+        return videoApi.oldRejectCall(type, id, reason).await()
     }
 
     fun processAudioSample(audioSample: AudioSamples) {
@@ -1289,14 +1286,14 @@ public class Call(
         custom: Map<String, Any>? = null,
     ) {
         scope.launch {
-            clientImpl.collectFeedback(
+            videoApi.collectUserFeedback(
                 callType = type,
                 id = id,
                 sessionId = sessionId,
                 rating = rating,
                 reason = reason,
                 custom = custom,
-            )
+            ).await()
         }
     }
 
@@ -1356,23 +1353,23 @@ public class Call(
     }
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> {
-        return clientImpl.startTranscription(type, id)
+        return videoApi.oldStartTranscription(type, id).await()
     }
 
     suspend fun stopTranscription(): Result<StopTranscriptionResponse> {
-        return clientImpl.stopTranscription(type, id)
+        return videoApi.oldStopTranscription(type, id).await()
     }
 
     suspend fun listTranscription(): Result<ListTranscriptionsResponse> {
-        return clientImpl.listTranscription(type, id)
+        return videoApi.oldListTranscriptions(type, id).await()
     }
 
     suspend fun startClosedCaptions(): Result<io.getstream.android.video.generated.models.StartClosedCaptionsResponse> {
-        return clientImpl.startClosedCaptions(type, id)
+        return videoApi.oldStartClosedCaptions(type, id).await()
     }
 
     suspend fun stopClosedCaptions(): Result<io.getstream.android.video.generated.models.StopClosedCaptionsResponse> {
-        return clientImpl.stopClosedCaptions(type, id)
+        return videoApi.oldStopClosedCaptions(type, id).await()
     }
 
     fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
