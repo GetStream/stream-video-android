@@ -262,7 +262,7 @@ open class StreamNotificationBuilderInterceptors {
      * @param builder The media metadata builder.
      * @param callId An instance of [StreamCallId] representing the call identifier
      */
-    fun onBuildMediaNotificationMetadata(
+    open fun onBuildMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
         callId: StreamCallId,
     ): MediaMetadataCompat.Builder {
@@ -275,7 +275,7 @@ open class StreamNotificationBuilderInterceptors {
      * @param builder The media playback state builder.
      * @param callId An instance of [StreamCallId] representing the call identifier
      */
-    fun onBuildMediaNotificationPlaybackState(
+    open fun onBuildMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,
         callId: StreamCallId,
     ): PlaybackStateCompat.Builder {
@@ -288,7 +288,7 @@ open class StreamNotificationBuilderInterceptors {
      * @param application The application context.
      * @param channelId The channel id.
      */
-    fun onCreateMediaSessionCompat(
+    open fun onCreateMediaSessionCompat(
         application: Application,
         channelId: String,
     ): MediaSessionCompat? {
@@ -397,7 +397,7 @@ open class StreamNotificationUpdateInterceptors {
      * @param application The application context.
      * @param channelId The channel id.
      */
-    fun onUpdateMediaSessionCompat(
+    open fun onUpdateMediaSessionCompat(
         application: Application,
         channelId: String,
     ): MediaSessionCompat? {
