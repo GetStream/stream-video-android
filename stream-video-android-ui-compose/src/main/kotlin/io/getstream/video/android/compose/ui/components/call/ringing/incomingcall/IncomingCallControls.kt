@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -57,6 +58,7 @@ public fun IncomingCallControls(
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         DeclineCallAction(
+            modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
 
@@ -64,6 +66,7 @@ public fun IncomingCallControls(
 
         if (isMicrophoneEnabled != null) {
             ToggleMicrophoneAction(
+                modifier = Modifier.testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
                 onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
                 offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
                     1.5f,
@@ -75,6 +78,7 @@ public fun IncomingCallControls(
 
         if (isVideoCall) {
             ToggleCameraAction(
+                modifier = Modifier.testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
                 onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
                 offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
                     1.5f,
@@ -85,6 +89,7 @@ public fun IncomingCallControls(
         }
 
         AcceptCallAction(
+            modifier = Modifier.testTag("Stream_AcceptCallButton"),
             onCallAction = onCallAction,
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )
