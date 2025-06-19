@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.lobby
 
+import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -110,7 +112,9 @@ public fun CallLobby(
     onDisabledContent: @Composable () -> Unit = {
         OnDisabledContent(user = user)
     },
-    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    onCallAction: (CallAction) -> Unit = {
+        DefaultOnCallActionHandler.onCallAction(call, it)
+    },
     lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
         ControlActions(
             modifier = modifier,
@@ -127,13 +131,18 @@ public fun CallLobby(
     DefaultPermissionHandler(videoPermission = permissions)
 
     MediaPiPLifecycle(call = call)
+    val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+    val screenHeightDp = configuration.screenHeightDp
+
+    val boxModifier = Modifier
+        .responsiveHeight(isPortrait, screenHeightDp)
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(12.dp))
 
     Column(modifier = modifier) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp)
-                .clip(RoundedCornerShape(12.dp)),
+            modifier = boxModifier,
         ) {
             if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
@@ -230,4 +239,16 @@ private fun CallLobbyPreview() {
             ),
         )
     }
+}
+
+private fun Modifier.responsiveHeight(isPortrait: Boolean, screenHeightDp: Int): Modifier {
+    val isSmallDevice = screenHeightDp <= 640
+    val height = if (isPortrait && isSmallDevice) {
+        180.dp
+    } else if (isPortrait) {
+        280.dp
+    } else {
+        200.dp
+    }
+    return this.then(Modifier.height(height))
 }

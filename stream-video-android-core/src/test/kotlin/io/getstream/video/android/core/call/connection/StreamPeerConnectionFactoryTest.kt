@@ -117,6 +117,7 @@ class StreamPeerConnectionFactoryTest {
             maxPublishingBitrate = 1_200_000,
             sfuClient = mockSignalServerService,
             sessionId = "fake-session-id",
+            tracer = mockk(relaxed = true),
             rejoin = {},
         )
 

@@ -272,7 +272,7 @@ private fun RTCStats.toRtcStats(type: RtcReportType): RtcStats? {
     }
 }
 
-private fun RTCStats.toRtcCodecStats() = RtcCodecStats(
+internal fun RTCStats.toRtcCodecStats() = RtcCodecStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -283,7 +283,7 @@ private fun RTCStats.toRtcCodecStats() = RtcCodecStats(
     clockRate = getOrNull(RtcCodecStats.CLOCL_RATE),
 )
 
-private fun RTCStats.toRtcIceCandidatePairStats() = RtcIceCandidatePairStats(
+internal fun RTCStats.toRtcIceCandidatePairStats() = RtcIceCandidatePairStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -308,7 +308,7 @@ private fun RTCStats.toRtcIceCandidatePairStats() = RtcIceCandidatePairStats(
     consentRequestsSent = getOrNull(RtcIceCandidatePairStats.CONSENT_REQUESTS_SENT),
 )
 
-private fun RTCStats.toRtcIceCandidateStats() = RtcIceCandidateStats(
+internal fun RTCStats.toRtcIceCandidateStats() = RtcIceCandidateStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -327,7 +327,7 @@ private fun RTCStats.toRtcIceCandidateStats() = RtcIceCandidateStats(
     relayProtocol = getOrNull(RtcIceCandidateStats.RELAY_PROTOCOL),
 )
 
-private fun RTCStats.toRtcAudioSourceStats() = RtcAudioSourceStats(
+internal fun RTCStats.toRtcAudioSourceStats() = RtcAudioSourceStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -344,7 +344,7 @@ private fun RTCStats.toRtcAudioSourceStats() = RtcAudioSourceStats(
     totalSamplesCaptured = getOrNull(RtcAudioSourceStats.TOTAL_SAMPLES_CAPTURED),
 )
 
-private fun RTCStats.toRtcVideoSourceStats() = RtcVideoSourceStats(
+internal fun RTCStats.toRtcVideoSourceStats() = RtcVideoSourceStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -356,7 +356,7 @@ private fun RTCStats.toRtcVideoSourceStats() = RtcVideoSourceStats(
     frames = getOrNull(RtcVideoSourceStats.FRAMES),
 )
 
-private fun RTCStats.toRtcInboundRtpVideoStreamStats() = RtcInboundRtpVideoStreamStats(
+internal fun RTCStats.toRtcInboundRtpVideoStreamStats() = RtcInboundRtpVideoStreamStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -421,7 +421,7 @@ private fun RTCStats.toRtcInboundRtpVideoStreamStats() = RtcInboundRtpVideoStrea
     totalAssemblyTime = getOrNull(RtcInboundRtpVideoStreamStats.TOTAL_ASSEMBLY_TIME),
 )
 
-private fun RTCStats.toRtcInboundRtpAudioStreamStats() = RtcInboundRtpAudioStreamStats(
+internal fun RTCStats.toRtcInboundRtpAudioStreamStats() = RtcInboundRtpAudioStreamStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -475,7 +475,7 @@ private fun RTCStats.toRtcInboundRtpAudioStreamStats() = RtcInboundRtpAudioStrea
     ),
 )
 
-private fun RTCStats.toRtcOutboundRtpVideoStreamStats() = RtcOutboundRtpVideoStreamStats(
+internal fun RTCStats.toRtcOutboundRtpVideoStreamStats() = RtcOutboundRtpVideoStreamStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -527,7 +527,7 @@ private fun RTCStats.toRtcOutboundRtpVideoStreamStats() = RtcOutboundRtpVideoStr
     scalabilityMode = getOrNull(RtcOutboundRtpVideoStreamStats.SCALABILITY_MODE),
 )
 
-private fun RTCStats.toRtcOutboundRtpAudioStreamStats() = RtcOutboundRtpAudioStreamStats(
+internal fun RTCStats.toRtcOutboundRtpAudioStreamStats() = RtcOutboundRtpAudioStreamStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -551,7 +551,7 @@ private fun RTCStats.toRtcOutboundRtpAudioStreamStats() = RtcOutboundRtpAudioStr
     active = getOrNull(RtcOutboundRtpAudioStreamStats.ACTIVE),
 )
 
-private fun RTCStats.toRtcRemoteInboundRtpAudioStreamStats() = RtcRemoteInboundRtpAudioStreamStats(
+internal fun RTCStats.toRtcRemoteInboundRtpAudioStreamStats() = RtcRemoteInboundRtpAudioStreamStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -571,7 +571,7 @@ private fun RTCStats.toRtcRemoteInboundRtpAudioStreamStats() = RtcRemoteInboundR
     ),
 )
 
-private fun RTCStats.toRtcRemoteInboundRtpVideoStreamStats() = RtcRemoteInboundRtpVideoStreamStats(
+internal fun RTCStats.toRtcRemoteInboundRtpVideoStreamStats() = RtcRemoteInboundRtpVideoStreamStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -591,7 +591,7 @@ private fun RTCStats.toRtcRemoteInboundRtpVideoStreamStats() = RtcRemoteInboundR
     ),
 )
 
-private fun RTCStats.toRtcRemoteOutboundRtpAudioStreamStats() =
+internal fun RTCStats.toRtcRemoteOutboundRtpAudioStreamStats() =
     RtcRemoteOutboundRtpAudioStreamStats(
         id = id,
         type = type,
@@ -612,7 +612,7 @@ private fun RTCStats.toRtcRemoteOutboundRtpAudioStreamStats() =
         ),
     )
 
-private fun RTCStats.toRtcRemoteOutboundRtpVideoStreamStats() =
+internal fun RTCStats.toRtcRemoteOutboundRtpVideoStreamStats() =
     RtcRemoteOutboundRtpVideoStreamStats(
         id = id,
         type = type,
@@ -633,7 +633,7 @@ private fun RTCStats.toRtcRemoteOutboundRtpVideoStreamStats() =
         ),
     )
 
-private fun RTCStats.toRtcMediaStreamAudioTrackSenderStats() = RtcMediaStreamAudioTrackSenderStats(
+internal fun RTCStats.toRtcMediaStreamAudioTrackSenderStats() = RtcMediaStreamAudioTrackSenderStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -649,7 +649,7 @@ private fun RTCStats.toRtcMediaStreamAudioTrackSenderStats() = RtcMediaStreamAud
     totalSamplesDuration = getOrNull(RtcMediaStreamAudioTrackSenderStats.TOTAL_SAMPLES_DURATION),
 )
 
-private fun RTCStats.toRtcMediaStreamAudioTrackReceiverStats() =
+internal fun RTCStats.toRtcMediaStreamAudioTrackReceiverStats() =
     RtcMediaStreamAudioTrackReceiverStats(
         id = id,
         type = type,
@@ -704,7 +704,7 @@ private fun RTCStats.toRtcMediaStreamAudioTrackReceiverStats() =
         ),
     )
 
-private fun RTCStats.toRtcMediaStreamVideoTrackReceiverStats() =
+internal fun RTCStats.toRtcMediaStreamVideoTrackReceiverStats() =
     RtcMediaStreamVideoTrackReceiverStats(
         id = id,
         type = type,
@@ -744,7 +744,7 @@ private fun RTCStats.toRtcMediaStreamVideoTrackReceiverStats() =
         ),
     )
 
-private fun RTCStats.toRtcMediaStreamVideoTrackSenderStats() = RtcMediaStreamVideoTrackSenderStats(
+internal fun RTCStats.toRtcMediaStreamVideoTrackSenderStats() = RtcMediaStreamVideoTrackSenderStats(
     id = id,
     type = type,
     timestampUs = timestampUs,
@@ -764,7 +764,7 @@ private fun RTCStats.toRtcMediaStreamVideoTrackSenderStats() = RtcMediaStreamVid
     hugeFramesSent = getOrNull(RtcMediaStreamVideoTrackSenderStats.HUGE_FRAMES_SENT),
 )
 
-private inline fun <reified T> RTCStats.getOrNull(key: String): T? {
+internal inline fun <reified T> RTCStats.getOrNull(key: String): T? {
     val found = members[key] ?: return null
     if (found !is T) {
         StreamLog.w(TAG) {

@@ -657,6 +657,7 @@ public class Call(
                 session.prepareRejoin()
                 this.session = RtcSession(
                     clientImpl,
+                    reconnectAttepmts,
                     powerManager,
                     this,
                     sessionId,
@@ -712,6 +713,7 @@ public class Call(
                 session.prepareRejoin()
                 val newSession = RtcSession(
                     clientImpl,
+                    reconnectAttepmts,
                     powerManager,
                     this,
                     sessionId,

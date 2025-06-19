@@ -23,6 +23,8 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
+import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.trace.tracedWith
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.SfuToken
 import okhttp3.OkHttpClient
@@ -39,6 +41,7 @@ internal class SfuConnectionModule(
     override val connectionTimeoutInMs: Long,
     override val userToken: SfuToken,
     override val lifecycle: Lifecycle,
+    override val tracer: Tracer,
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
@@ -64,8 +67,11 @@ internal class SfuConnectionModule(
     }
 
     // API
-    override val api: SignalServerService = signalRetrofitClient.create(
-        SignalServerService::class.java,
+    override val api: SignalServerService = tracedWith(
+        signalRetrofitClient.create(
+            SignalServerService::class.java,
+        ),
+        tracer,
     )
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(

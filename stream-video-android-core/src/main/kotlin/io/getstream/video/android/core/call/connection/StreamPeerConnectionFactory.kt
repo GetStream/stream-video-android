@@ -28,6 +28,9 @@ import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
+import io.getstream.video.android.core.trace.Tracer
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -293,6 +296,7 @@ public class StreamPeerConnectionFactory(
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidateRequest,
             maxBitRate = maxPublishingBitrate,
+            tracer = Tracer(type.toPeerType().name),
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
@@ -309,12 +313,14 @@ public class StreamPeerConnectionFactory(
         sessionId: String,
         sfuClient: SignalServerService,
         configuration: PeerConnection.RTCConfiguration,
+        tracer: Tracer,
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
             sfuClient = sfuClient,
             coroutineScope = coroutineScope,
+            tracer = tracer,
             onIceCandidateRequest = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(
@@ -324,6 +330,8 @@ public class StreamPeerConnectionFactory(
         webRtcLogger.d { "type $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
         peerConnection.addTransceivers()
+
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
         return peerConnection
     }
 
@@ -340,6 +348,7 @@ public class StreamPeerConnectionFactory(
         maxPublishingBitrate: Int = 1_200_000,
         sfuClient: SignalServerService,
         sessionId: String,
+        tracer: Tracer,
         rejoin: () -> Unit = {},
     ): Publisher {
         val peerConnection = Publisher(
@@ -356,6 +365,7 @@ public class StreamPeerConnectionFactory(
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidate,
             maxBitRate = maxPublishingBitrate,
+            tracer = tracer,
             rejoin = rejoin,
         )
         val connection = makePeerConnectionInternal(
@@ -364,6 +374,7 @@ public class StreamPeerConnectionFactory(
         )
         webRtcLogger.d { "type ${StreamPeerType.PUBLISHER} $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
 
         return peerConnection
     }

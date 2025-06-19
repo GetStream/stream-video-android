@@ -21,6 +21,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.model.ApiKey
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
@@ -29,6 +30,12 @@ import okhttp3.OkHttpClient
  * Api definition for any connection module.
  */
 internal interface ConnectionModuleDeclaration<Api, SocketConnection, Http : OkHttpClient, Token> {
+
+    /**
+     * The tracer for this connection module.
+     */
+    val tracer: Tracer
+
     /**
      * The application  key.
      */
