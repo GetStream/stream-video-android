@@ -10302,7 +10302,6 @@ public abstract interface class io/getstream/video/android/core/socket/common/So
 	public abstract fun sendData (Ljava/lang/String;)V
 	public abstract fun sendEvent (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun state ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun updateToken (Ljava/lang/Object;)V
 	public abstract fun whenConnected (JLkotlin/jvm/functions/Function2;)V
 	public static synthetic fun whenConnected$default (Lio/getstream/video/android/core/socket/common/SocketActions;JLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
@@ -10447,34 +10446,6 @@ public final class io/getstream/video/android/core/socket/common/parser2/adapter
 
 public abstract interface class io/getstream/video/android/core/socket/common/token/TokenProvider {
 	public abstract fun loadToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public class io/getstream/video/android/core/socket/coordinator/CoordinatorSocketConnection : io/getstream/video/android/core/socket/common/SocketListener, io/getstream/video/android/core/socket/common/SocketActions {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun connect (Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun connect (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun connectionId ()Lkotlinx/coroutines/flow/StateFlow;
-	public fun disconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun errors ()Lkotlinx/coroutines/flow/Flow;
-	public fun events ()Lkotlinx/coroutines/flow/Flow;
-	public fun onConnected (Lio/getstream/android/video/generated/models/ConnectedEvent;)V
-	public synthetic fun onConnected (Ljava/lang/Object;)V
-	public fun onConnecting ()V
-	public fun onCreated ()V
-	public fun onDisconnected (Lio/getstream/video/android/core/errors/DisconnectCause;)V
-	public fun onError (Lio/getstream/video/android/core/socket/common/StreamWebSocketEvent$Error;)V
-	public fun onEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
-	public synthetic fun onEvent (Ljava/lang/Object;)V
-	public fun reconnect (Lio/getstream/video/android/model/User;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun reconnect (Ljava/lang/Object;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun sendData (Ljava/lang/String;)V
-	public fun sendEvent (Lio/getstream/android/video/generated/models/VideoEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun sendEvent (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun state ()Lkotlinx/coroutines/flow/StateFlow;
-	public synthetic fun updateToken (Ljava/lang/Object;)V
-	public fun updateToken (Ljava/lang/String;)V
-	public fun whenConnected (JLkotlin/jvm/functions/Function2;)V
 }
 
 public final class io/getstream/video/android/core/socket/coordinator/state/RestartReason : java/lang/Enum {
@@ -10654,40 +10625,6 @@ public final class io/getstream/video/android/core/socket/coordinator/state/Vide
 public final class io/getstream/video/android/core/socket/coordinator/state/VideoSocketStateEvent$WebSocketEventLost : io/getstream/video/android/core/socket/coordinator/state/VideoSocketStateEvent {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/coordinator/state/VideoSocketStateEvent$WebSocketEventLost;
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnection : io/getstream/video/android/core/socket/common/SocketListener, io/getstream/video/android/core/socket/common/SocketActions {
-	public static final field Companion Lio/getstream/video/android/core/socket/sfu/SfuSocketConnection$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun connect (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun connect (Lstream/video/sfu/event/JoinRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun connectionId ()Lkotlinx/coroutines/flow/StateFlow;
-	public fun disconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun errors ()Lkotlinx/coroutines/flow/Flow;
-	public fun errors ()Lkotlinx/coroutines/flow/MutableSharedFlow;
-	public synthetic fun events ()Lkotlinx/coroutines/flow/Flow;
-	public fun events ()Lkotlinx/coroutines/flow/MutableSharedFlow;
-	public fun onConnected (Lio/getstream/video/android/core/events/JoinCallResponseEvent;)V
-	public synthetic fun onConnected (Ljava/lang/Object;)V
-	public fun onConnecting ()V
-	public fun onCreated ()V
-	public fun onDisconnected (Lio/getstream/video/android/core/errors/DisconnectCause;)V
-	public fun onError (Lio/getstream/video/android/core/socket/common/StreamWebSocketEvent$Error;)V
-	public fun onEvent (Lio/getstream/video/android/core/events/SfuDataEvent;)V
-	public synthetic fun onEvent (Ljava/lang/Object;)V
-	public synthetic fun reconnect (Ljava/lang/Object;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun reconnect (Lstream/video/sfu/event/JoinRequest;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun sendData (Ljava/lang/String;)V
-	public fun sendEvent (Lio/getstream/video/android/core/events/SfuDataRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun sendEvent (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun state ()Lkotlinx/coroutines/flow/StateFlow;
-	public synthetic fun updateToken (Ljava/lang/Object;)V
-	public fun updateToken (Ljava/lang/String;)V
-	public fun whenConnected (JLkotlin/jvm/functions/Function2;)V
-}
-
-public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnection$Companion {
 }
 
 public final class io/getstream/video/android/core/socket/sfu/state/RestartReason : java/lang/Enum {

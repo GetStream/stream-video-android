@@ -23,30 +23,22 @@ internal class FakeTokenManager(
     private val token: String,
     private val loadSyncToken: String = token,
 ) : TokenManager {
-    override suspend fun loadSync(): String = loadSyncToken
+    override fun loadSync(): String = loadSyncToken
     override fun getToken(): String = token
 
-    override suspend fun ensureTokenLoaded() {
+    override fun ensureTokenLoaded() {
         // empty
-    }
-
-    override fun setTokenProvider(provider: CacheableTokenProvider) {
-        // empty
-    }
-
-    override fun hasTokenProvider(): Boolean {
-        return true
     }
 
     override fun hasToken(): Boolean {
         return true
     }
 
-    override fun updateToken(token: String) {
-        TODO("Not yet implemented")
+    override fun expireToken() {
+        // empty
     }
 
-    override fun expireToken() {
+    override fun updateTokenProvider(provider: CacheableTokenProvider) {
         // empty
     }
 }

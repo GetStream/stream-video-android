@@ -244,9 +244,7 @@ internal class StreamVideoClient internal constructor(
         } catch (e: HttpException) {
             // Retry once with a new token if the token is expired
             if (e.isAuthError()) {
-                val newToken = tokenProvider.loadToken()
-                token = newToken
-                coordinatorConnectionModule.updateToken(newToken)
+                coordinatorConnectionModule.updateToken(null)
                 apiCall()
             } else {
                 throw e
@@ -426,23 +424,11 @@ internal class StreamVideoClient internal constructor(
                 Success(duration)
             } catch (e: ErrorResponse) {
                 if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
-                    refreshToken(e)
                     Failure(Error.GenericError("Initialize error. Token expired."))
                 } else {
-                    throw e
+                    Failure(Error.ThrowableError(e.message, e))
                 }
             }
-        }
-    }
-
-    private suspend fun refreshToken(error: Throwable) {
-        tokenProvider?.let {
-            val newToken = tokenProvider.loadToken()
-            coordinatorConnectionModule.updateToken(newToken)
-
-            logger.d { "[refreshToken] Token has been refreshed with: $newToken" }
-
-            socketImpl.reconnect(user, true)
         }
     }
 
