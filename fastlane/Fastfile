@@ -44,7 +44,7 @@ lane :build_and_run_e2e_test do |options|
 end
 
 lane :build_e2e_test do
-  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+  # next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
   gradle(
     tasks: [":#{test_flavor}:assembleE2etestingDebugAndroidTest", ":#{test_flavor}:assembleE2etestingDebug"],
@@ -53,7 +53,7 @@ lane :build_e2e_test do
 end
 
 lane :run_e2e_test do |options|
-  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
+  # next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
   allure_results_path = 'allure-results'
   adb_test_results_path = '/sdcard/googletest/test_outputfiles'
