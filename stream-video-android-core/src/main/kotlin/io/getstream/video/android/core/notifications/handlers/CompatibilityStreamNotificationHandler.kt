@@ -20,6 +20,7 @@ import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
@@ -41,6 +42,9 @@ open class CompatibilityStreamNotificationHandler(
     private val application: Application,
     notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
+    ),
+    notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(
+        application.applicationContext
     ),
     intentResolver: StreamIntentResolver = DefaultStreamIntentResolver(application),
     hideRingingNotificationInForeground: Boolean = false,
@@ -80,6 +84,7 @@ open class CompatibilityStreamNotificationHandler(
     ),
 ) : NotificationHandler, StreamDefaultNotificationHandler(
     application,
+    notificationManager,
     notificationPermissionHandler,
     intentResolver,
     hideRingingNotificationInForeground,
@@ -93,7 +98,7 @@ open class CompatibilityStreamNotificationHandler(
         message = "Deprecated method. Use the onCallNotificationUpdate method instead.",
         level = DeprecationLevel.ERROR,
         replaceWith =
-        ReplaceWith("onCallNotificationUpdate(call)"),
+            ReplaceWith("onCallNotificationUpdate(call)"),
     )
     override fun getNotificationUpdates(
         coroutineScope: CoroutineScope,
