@@ -54,6 +54,9 @@ import io.getstream.video.android.model.StreamCallId
  */
 public open class StreamDefaultNotificationHandler(
     private val application: Application,
+    private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(
+        application.applicationContext
+    ),
     private val notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
     ),
@@ -99,9 +102,6 @@ public open class StreamDefaultNotificationHandler(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Call:StreamNotificationHandler")
-
-    val notificationManager: NotificationManagerCompat =
-        NotificationManagerCompat.from(application.applicationContext)
 
     // START REGION : On push arrived
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
@@ -621,19 +621,20 @@ public open class StreamDefaultNotificationHandler(
                 val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
                 val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
                 val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
-                val initial = if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
-                    initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
-                        this,
-                        fullScreenPendingIntent,
-                        acceptCallPendingIntent,
-                        rejectCallPendingIntent,
-                        callDisplayName,
-                        true,
-                    )
-                } else {
-                    logger.e { "Ringing call notification not shown, one of the intents is null." }
-                    this
-                }
+                val initial =
+                    if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
+                        initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
+                            this,
+                            fullScreenPendingIntent,
+                            acceptCallPendingIntent,
+                            rejectCallPendingIntent,
+                            callDisplayName,
+                            true,
+                        )
+                    } else {
+                        logger.e { "Ringing call notification not shown, one of the intents is null." }
+                        this
+                    }
                 updateNotificationBuilderInterceptor.onUpdateIncomingCallNotification(
                     initial,
                     callDisplayName,
@@ -669,22 +670,25 @@ public open class StreamDefaultNotificationHandler(
                 )
             },
             mediaSessionIntercept = {
-                val initialInterceptor = initialNotificationBuilderInterceptor.onCreateMediaSessionCompat(
-                    application,
-                    notificationChannels.ongoingCallChannel.id,
-                )
-                val updateInterceptor = updateNotificationBuilderInterceptor.onUpdateMediaSessionCompat(
-                    application,
-                    notificationChannels.ongoingCallChannel.id,
-                )
+                val initialInterceptor =
+                    initialNotificationBuilderInterceptor.onCreateMediaSessionCompat(
+                        application,
+                        notificationChannels.ongoingCallChannel.id,
+                    )
+                val updateInterceptor =
+                    updateNotificationBuilderInterceptor.onUpdateMediaSessionCompat(
+                        application,
+                        notificationChannels.ongoingCallChannel.id,
+                    )
 
                 updateInterceptor ?: initialInterceptor
             },
             metadataIntercept = {
-                val initialInterceptor = initialNotificationBuilderInterceptor.onBuildMediaNotificationMetadata(
-                    this,
-                    callId,
-                )
+                val initialInterceptor =
+                    initialNotificationBuilderInterceptor.onBuildMediaNotificationMetadata(
+                        this,
+                        callId,
+                    )
                 updateNotificationBuilderInterceptor.onUpdateMediaNotificationMetadata(
                     initialInterceptor,
                     call,
@@ -692,10 +696,11 @@ public open class StreamDefaultNotificationHandler(
                 )
             },
             mediaNotificationIntercept = {
-                val initialInterceptor = initialNotificationBuilderInterceptor.onBuildOngoingCallMediaNotification(
-                    this,
-                    callId,
-                )
+                val initialInterceptor =
+                    initialNotificationBuilderInterceptor.onBuildOngoingCallMediaNotification(
+                        this,
+                        callId,
+                    )
                 updateNotificationBuilderInterceptor.onUpdateOngoingCallMediaNotification(
                     initialInterceptor,
                     callDisplayName,
