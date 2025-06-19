@@ -20,7 +20,6 @@ import android.app.Application
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -28,11 +27,8 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RingingState
-import io.getstream.video.android.core.StreamVideoBuilderTest
 import io.getstream.video.android.core.base.IntegrationTestBase
-import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.notifications.StreamIntentResolver
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -49,7 +45,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -104,22 +99,40 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         val mockNotification = mockk<Notification>(relaxed = true)
 
         every { anyConstructed<NotificationCompat.Builder>().build() } returns mockNotification
-        every { anyConstructed<NotificationCompat.Builder>().setContentTitle(any()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setContentText(any()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setSmallIcon(any<Int>()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setContentIntent(any()) } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setContentTitle(any())
+        } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setContentText(any())
+        } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setSmallIcon(any<Int>())
+        } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setContentIntent(any())
+        } returns mockNotificationBuilder
         every {
             anyConstructed<NotificationCompat.Builder>().addAction(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setCategory(any()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setPriority(any()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setAutoCancel(any()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setOngoing(any()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().setChannelId(any()) } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setCategory(any())
+        } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setPriority(any())
+        } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setAutoCancel(any())
+        } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setOngoing(any())
+        } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().setChannelId(any())
+        } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().build() } returns mockk(relaxed = true)
 
         // Basic mocks
@@ -155,11 +168,10 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         every { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) } returns mockPendingIntent
         every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
 
-
         // Mock interceptor call
         every {
             mockInitialInterceptor.onBuildIncomingCallNotification(
-                any(), any(), any(), any(), any(), any()
+                any(), any(), any(), any(), any(), any(),
             )
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
@@ -189,12 +201,16 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 mockPendingIntent, // accept intent
                 mockPendingIntent, // reject intent
                 callDisplayName, // caller name
-                true // with actions
+                true, // with actions
             )
         }
 
         // Verify notification manager is called to show notification
-        verify { mockNotificationManager.createNotificationChannel(any<NotificationChannelCompat>()) }
+        verify {
+            mockNotificationManager.createNotificationChannel(
+                any<NotificationChannelCompat>(),
+            )
+        }
     }
 
     @Test
@@ -208,7 +224,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         every {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
-                any()
+                any(),
             )
         } returns mockPendingIntent
 
@@ -225,7 +241,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -235,7 +251,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         verify {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
-                testCallId.hashCode()
+                testCallId.hashCode(),
             )
         }
 
@@ -243,7 +259,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         verify {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
-                callDisplayName // caller name
+                callDisplayName, // caller name
             )
         }
 
@@ -278,7 +294,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -288,7 +304,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         verify {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
-                testCallId.hashCode()
+                testCallId.hashCode(),
             )
         }
         verify { mockIntentResolver.getDefaultPendingIntent() }
@@ -297,7 +313,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         verify {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
-                callDisplayName // caller name
+                callDisplayName, // caller name
             )
         }
 
@@ -315,7 +331,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         every {
             mockIntentResolver.searchNotificationCallPendingIntent(
                 testCallId,
-                any()
+                any(),
             )
         } returns mockPendingIntent
 
@@ -327,7 +343,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -337,7 +353,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         verify {
             mockIntentResolver.searchNotificationCallPendingIntent(
                 testCallId,
-                testCallId.hashCode()
+                testCallId.hashCode(),
             )
         }
 
@@ -355,7 +371,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         every {
             mockIntentResolver.searchLiveCallPendingIntent(
                 testCallId,
-                any()
+                any(),
             )
         } returns mockPendingIntent
 
@@ -367,7 +383,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -397,14 +413,14 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
         coEvery {
             mockUpdateInterceptor.onUpdateIncomingCallNotification(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
 
@@ -416,7 +432,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -434,15 +450,15 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         every { mockCallState.remoteParticipants } returns MutableStateFlow(
             listOf(
                 mockk(),
-                mockk()
-            )
+                mockk(),
+            ),
         ) // 2 participants
         every { mockIntentResolver.searchOutgoingCallPendingIntent(any()) } returns mockPendingIntent
         every { mockIntentResolver.searchEndCallPendingIntent(any()) } returns mockPendingIntent
         every {
             mockIntentResolver.searchOngoingCallPendingIntent(
                 any(),
-                any()
+                any(),
             )
         } returns mockPendingIntent
         every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
@@ -452,17 +468,16 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
         coEvery {
             mockUpdateInterceptor.onUpdateOngoingCallNotification(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
-
 
         testHandler = StreamDefaultNotificationHandler(
             application = mockkApp,
@@ -472,7 +487,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -498,7 +513,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -520,7 +535,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             mockUpdateInterceptor.onUpdateIncomingCallNotification(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
         every {
@@ -530,7 +545,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
 
@@ -542,7 +557,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -553,7 +568,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             mockUpdateInterceptor.onUpdateIncomingCallNotification(
                 any(),
                 callDisplayName,
-                mockCall
+                mockCall,
             )
         }
     }
@@ -568,20 +583,20 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         every {
             mockIntentResolver.searchOngoingCallPendingIntent(
                 any(),
-                any()
+                any(),
             )
         } returns mockPendingIntent
         coEvery {
             mockUpdateInterceptor.onUpdateOngoingCallNotification(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk()
         every {
             mockIntentResolver.searchOngoingCallPendingIntent(
                 any(),
-                any()
+                any(),
             )
         } returns mockPendingIntent
         every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
@@ -591,14 +606,14 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
         coEvery {
             mockUpdateInterceptor.onUpdateOngoingCallNotification(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk(relaxed = true)
 
@@ -610,7 +625,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -621,7 +636,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             mockUpdateInterceptor.onUpdateOngoingCallNotification(
                 any(),
                 callDisplayName,
-                mockCall
+                mockCall,
             )
         }
     }
@@ -636,7 +651,9 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         val mockMissedChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
 
         // Mock intent resolver calls
-        every { mockIntentResolver.searchMissedCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchMissedCallPendingIntent(testCallId, any())
+        } returns mockPendingIntent
 
         // Mock interceptor call
         every {
@@ -651,7 +668,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -662,7 +679,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         verify {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
-                callDisplayName // caller name
+                callDisplayName, // caller name
             )
         }
     }
@@ -674,7 +691,9 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         val mockMissedChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
 
         // Mock intent resolver calls
-        every { mockIntentResolver.searchMissedCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchMissedCallPendingIntent(testCallId, any())
+        } returns mockPendingIntent
 
         // Mock interceptor call
         every {
@@ -689,7 +708,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -700,7 +719,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         verify {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
-                null // null caller name
+                null, // null caller name
             )
         }
     }
@@ -730,11 +749,16 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
-        val result = testHandler.getRingingCallNotification(ringingState, testCallId, callDisplayName, true)
+        val result = testHandler.getRingingCallNotification(
+            ringingState,
+            testCallId,
+            callDisplayName,
+            true,
+        )
 
         // Then
         assertNotNull(result)
@@ -748,7 +772,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 mockPendingIntent, // accept intent
                 mockPendingIntent, // reject intent
                 callDisplayName, // caller name
-                true // with actions
+                true, // with actions
             )
         }
     }
@@ -772,11 +796,16 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
-        val result = testHandler.getRingingCallNotification(ringingState, testCallId, callDisplayName, true)
+        val result = testHandler.getRingingCallNotification(
+            ringingState,
+            testCallId,
+            callDisplayName,
+            true,
+        )
 
         // Then
         assertNull(result)
@@ -790,7 +819,9 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         val mockkApp = mockk<Application>(relaxed = true)
 
         every { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId) } returns mockPendingIntent
-        every { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchOutgoingCallPendingIntent(testCallId, any())
+        } returns mockPendingIntent
         every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
         every { mockIntentResolver.searchEndCallPendingIntent(testCallId) } returns mockPendingIntent
 
@@ -804,7 +835,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
@@ -816,11 +847,16 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
-        val result = testHandler.getRingingCallNotification(ringingState, testCallId, callDisplayName, true)
+        val result = testHandler.getRingingCallNotification(
+            ringingState,
+            testCallId,
+            callDisplayName,
+            true,
+        )
 
         // Then
         assertNotNull(result)
@@ -832,7 +868,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 any(), // ringing state
                 any(), // call id
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -856,7 +892,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -865,7 +901,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             mockPendingIntent,
             mockPendingIntent,
             callerName,
-            true
+            true,
         )
 
         // Then
@@ -877,7 +913,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 mockPendingIntent, // accept intent
                 mockPendingIntent, // reject intent
                 callerName, // caller name
-                true // with actions
+                true, // with actions
             )
         }
     }
@@ -901,7 +937,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
-            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
         // When
@@ -910,7 +946,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             mockPendingIntent,
             mockPendingIntent,
             callerName,
-            false // withActions = false
+            false, // withActions = false
         )
 
         // Then
@@ -922,7 +958,7 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
                 mockPendingIntent, // accept intent
                 mockPendingIntent, // reject intent
                 callerName, // caller name
-                false // with actions = false
+                false, // with actions = false
             )
         }
     }

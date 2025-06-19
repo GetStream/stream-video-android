@@ -34,7 +34,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
-import androidx.core.content.PermissionChecker
 import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
@@ -51,7 +50,6 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.model.StreamCallId
 
 /**
@@ -102,7 +100,10 @@ public open class StreamDefaultNotificationHandler(
         ),
     ),
     @ExperimentalStreamVideoApi
-    private val permissionChecker: (context: Context, permission: String) -> Int = { context, permission ->
+    private val permissionChecker: (
+        context: Context,
+        permission: String,
+    ) -> Int = { context, permission ->
         ActivityCompat.checkSelfPermission(context, permission)
     },
 ) : StreamNotificationHandler,
