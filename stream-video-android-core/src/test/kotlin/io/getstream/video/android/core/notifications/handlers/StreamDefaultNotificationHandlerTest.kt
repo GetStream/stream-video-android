@@ -625,4 +625,305 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
             )
         }
     }
+
+    // ========== getXYZNotification Tests ==========
+
+    @Test
+    fun `getMissedCallNotification returns notification with correct properties`() {
+        // Given
+        val callDisplayName = "Carol Davis"
+        val mockkApp = mockk<Application>(relaxed = true)
+        val mockMissedChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
+
+        // Mock intent resolver calls
+        every { mockIntentResolver.searchMissedCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+
+        // Mock interceptor call
+        every {
+            mockInitialInterceptor.onBuildMissedCallNotification(any(), any())
+        } returns mockk<NotificationCompat.Builder>(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.getMissedCallNotification(testCallId, callDisplayName)
+
+        // Then
+        assertNotNull(result)
+        verify {
+            mockInitialInterceptor.onBuildMissedCallNotification(
+                any(), // context
+                callDisplayName // caller name
+            )
+        }
+    }
+
+    @Test
+    fun `getMissedCallNotification handles null callDisplayName`() {
+        // Given
+        val mockkApp = mockk<Application>(relaxed = true)
+        val mockMissedChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
+
+        // Mock intent resolver calls
+        every { mockIntentResolver.searchMissedCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+
+        // Mock interceptor call
+        every {
+            mockInitialInterceptor.onBuildMissedCallNotification(any(), any())
+        } returns mockk<NotificationCompat.Builder>(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.getMissedCallNotification(testCallId, null)
+
+        // Then
+        assertNotNull(result)
+        verify {
+            mockInitialInterceptor.onBuildMissedCallNotification(
+                any(), // context
+                null // null caller name
+            )
+        }
+    }
+
+    @Test
+    fun `getRingingCallNotification returns incoming call notification for incoming state`() {
+        // Given
+        val callDisplayName = "David Brown"
+        val ringingState = RingingState.Incoming()
+        val mockkApp = mockk<Application>(relaxed = true)
+        val mockIncomingChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
+
+        every { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) } returns mockPendingIntent
+        every { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
+
+        // Mock interceptor call
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any())
+        } returns mockk<NotificationCompat.Builder>(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.getRingingCallNotification(ringingState, testCallId, callDisplayName, true)
+
+        // Then
+        assertNotNull(result)
+        verify { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) }
+        verify { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) }
+        verify { mockIntentResolver.searchRejectCallPendingIntent(testCallId) }
+        verify {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(), // context
+                mockPendingIntent, // content intent
+                mockPendingIntent, // accept intent
+                mockPendingIntent, // reject intent
+                callDisplayName, // caller name
+                true // with actions
+            )
+        }
+    }
+
+    @Test
+    fun `getRingingCallNotification returns null when intents are missing for incoming call`() {
+        // Given
+        val callDisplayName = "Eva Green"
+        val ringingState = RingingState.Incoming()
+        val mockkApp = mockk<Application>(relaxed = true)
+
+        every { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) } returns null
+        every { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.getRingingCallNotification(ringingState, testCallId, callDisplayName, true)
+
+        // Then
+        assertNull(result)
+    }
+
+    @Test
+    fun `getRingingCallNotification handles outgoing call state`() {
+        // Given
+        val callDisplayName = "Frank Miller"
+        val ringingState = RingingState.Outgoing()
+        val mockkApp = mockk<Application>(relaxed = true)
+
+        every { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId) } returns mockPendingIntent
+        every { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
+        every { mockIntentResolver.searchEndCallPendingIntent(testCallId) } returns mockPendingIntent
+
+        // Mock interceptor call
+        every {
+            mockInitialInterceptor.onBuildOutgoingCallNotification(any(), any(), any(), any())
+        } returns mockk<NotificationCompat.Builder>(relaxed = true)
+        every {
+            mockInitialInterceptor.onBuildOngoingCallNotification(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk<NotificationCompat.Builder>(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.getRingingCallNotification(ringingState, testCallId, callDisplayName, true)
+
+        // Then
+        assertNotNull(result)
+        verify { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId) }
+        verify { mockIntentResolver.searchEndCallPendingIntent(testCallId) }
+        verify {
+            mockInitialInterceptor.onBuildOngoingCallNotification(
+                any(), // builder
+                any(), // ringing state
+                any(), // call id
+                any(),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `getIncomingCallNotification calls interceptor with correct parameters`() {
+        // Given
+        val callerName = "Grace Lee"
+        val mockkApp = mockk<Application>(relaxed = true)
+
+        // Mock interceptor call
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any())
+        } returns mockk<NotificationCompat.Builder>(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.getIncomingCallNotification(
+            mockPendingIntent,
+            mockPendingIntent,
+            mockPendingIntent,
+            callerName,
+            true
+        )
+
+        // Then
+        assertNotNull(result)
+        verify {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(), // context
+                mockPendingIntent, // content intent
+                mockPendingIntent, // accept intent
+                mockPendingIntent, // reject intent
+                callerName, // caller name
+                true // with actions
+            )
+        }
+    }
+
+    @Test
+    fun `getIncomingCallNotification handles withActions false`() {
+        // Given
+        val callerName = "Helen Smith"
+        val mockkApp = mockk<Application>(relaxed = true)
+
+        // Mock interceptor call
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any())
+        } returns mockk<NotificationCompat.Builder>(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.getIncomingCallNotification(
+            mockPendingIntent,
+            mockPendingIntent,
+            mockPendingIntent,
+            callerName,
+            false // withActions = false
+        )
+
+        // Then
+        assertNotNull(result)
+        verify {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(), // context
+                mockPendingIntent, // content intent
+                mockPendingIntent, // accept intent
+                mockPendingIntent, // reject intent
+                callerName, // caller name
+                false // with actions = false
+            )
+        }
+    }
 }
