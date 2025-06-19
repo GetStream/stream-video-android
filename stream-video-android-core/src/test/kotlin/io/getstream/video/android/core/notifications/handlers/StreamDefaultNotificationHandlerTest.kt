@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -107,19 +108,26 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         every { anyConstructed<NotificationCompat.Builder>().setContentText(any()) } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().setSmallIcon(any<Int>()) } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().setContentIntent(any()) } returns mockNotificationBuilder
-        every { anyConstructed<NotificationCompat.Builder>().addAction(any(), any(), any()) } returns mockNotificationBuilder
+        every {
+            anyConstructed<NotificationCompat.Builder>().addAction(
+                any(),
+                any(),
+                any()
+            )
+        } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().setCategory(any()) } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().setPriority(any()) } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().setAutoCancel(any()) } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().setOngoing(any()) } returns mockNotificationBuilder
         every { anyConstructed<NotificationCompat.Builder>().setChannelId(any()) } returns mockNotificationBuilder
+        every { anyConstructed<NotificationCompat.Builder>().build() } returns mockk(relaxed = true)
 
         // Basic mocks
         every { mockApplication.applicationContext } returns mockApplication
         every { mockApplication.getString(any()) } returns "Test String"
         every { mockApplication.getString(any(), any()) } returns "Test String with param"
         every { mockApplication.applicationInfo } returns mockk(relaxed = true)
-        
+
         // Mock call state
         every { mockCall.cid } returns "default:test-call-123"
         every { mockCall.state } returns mockCallState
@@ -197,7 +205,12 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         val mockMissedChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
 
         // Mock intent resolver calls
-        every { mockIntentResolver.searchMissedCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchMissedCallPendingIntent(
+                testCallId,
+                any()
+            )
+        } returns mockPendingIntent
 
         // Mock interceptor call
         every {
@@ -219,7 +232,12 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         testHandler.onMissedCall(testCallId, callDisplayName)
 
         // Then - Verify intent resolver call with correct notification ID
-        verify { mockIntentResolver.searchMissedCallPendingIntent(testCallId, testCallId.hashCode()) }
+        verify {
+            mockIntentResolver.searchMissedCallPendingIntent(
+                testCallId,
+                testCallId.hashCode()
+            )
+        }
 
         // Verify interceptor is called with correct parameters
         verify {
@@ -267,7 +285,12 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         testHandler.onMissedCall(testCallId, callDisplayName)
 
         // Then - Verify fallback to default intent
-        verify { mockIntentResolver.searchMissedCallPendingIntent(testCallId, testCallId.hashCode()) }
+        verify {
+            mockIntentResolver.searchMissedCallPendingIntent(
+                testCallId,
+                testCallId.hashCode()
+            )
+        }
         verify { mockIntentResolver.getDefaultPendingIntent() }
 
         // Verify interceptor is called with default intent
@@ -289,7 +312,12 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         val mockkApp = mockk<Application>(relaxed = true)
 
         // Mock intent resolver calls
-        every { mockIntentResolver.searchNotificationCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchNotificationCallPendingIntent(
+                testCallId,
+                any()
+            )
+        } returns mockPendingIntent
 
         testHandler = StreamDefaultNotificationHandler(
             application = mockkApp,
@@ -306,7 +334,12 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         testHandler.onNotification(testCallId, callDisplayName)
 
         // Then - Verify intent resolver call with correct notification ID
-        verify { mockIntentResolver.searchNotificationCallPendingIntent(testCallId, testCallId.hashCode()) }
+        verify {
+            mockIntentResolver.searchNotificationCallPendingIntent(
+                testCallId,
+                testCallId.hashCode()
+            )
+        }
 
         // Verify notification manager is called to show notification
         verify { mockNotificationManager.notify(testCallId.hashCode(), any()) }
@@ -319,7 +352,12 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
         val mockkApp = mockk<Application>(relaxed = true)
 
         // Mock intent resolver calls
-        every { mockIntentResolver.searchLiveCallPendingIntent(testCallId, any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchLiveCallPendingIntent(
+                testCallId,
+                any()
+            )
+        } returns mockPendingIntent
 
         testHandler = StreamDefaultNotificationHandler(
             application = mockkApp,
@@ -340,5 +378,251 @@ class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
 
         // Verify notification manager is called to show notification
         verify { mockNotificationManager.notify(testCallId.hashCode(), any()) }
+    }
+
+    // ========== onUpdate Tests (Suspending Methods) ==========
+
+    @Test
+    fun `onCallNotificationUpdate handles incoming ringing state`() = runTest {
+        // Given
+        val mockkApp = mockk<Application>(relaxed = true)
+        every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Incoming())
+        every { mockIntentResolver.searchIncomingCallPendingIntent(any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchAcceptCallPendingIntent(any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+        coEvery {
+            mockUpdateInterceptor.onUpdateIncomingCallNotification(
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.onCallNotificationUpdate(mockCall)
+
+        // Then
+        coVerify { mockUpdateInterceptor.onUpdateIncomingCallNotification(any(), any(), mockCall) }
+    }
+
+    @Test
+    fun `onCallNotificationUpdate handles Active state with participants`() = runTest {
+        // Given
+        val mockkApp = mockk<Application>(relaxed = true)
+        every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Active)
+        every { mockCallState.remoteParticipants } returns MutableStateFlow(
+            listOf(
+                mockk(),
+                mockk()
+            )
+        ) // 2 participants
+        every { mockIntentResolver.searchOutgoingCallPendingIntent(any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchEndCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchOngoingCallPendingIntent(
+                any(),
+                any()
+            )
+        } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockInitialInterceptor.onBuildOngoingCallNotification(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+        coEvery {
+            mockUpdateInterceptor.onUpdateOngoingCallNotification(
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.onCallNotificationUpdate(mockCall)
+
+        // Then
+        coVerify { mockUpdateInterceptor.onUpdateOngoingCallNotification(any(), any(), any()) }
+    }
+
+    @Test
+    fun `onCallNotificationUpdate returns null for idle state with no participants`() = runTest {
+        // Given
+        val mockkApp = mockk<Application>(relaxed = true)
+        every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Idle)
+        every { mockCallState.remoteParticipants } returns MutableStateFlow(emptyList()) // No participants
+        every { mockCallState.members } returns MutableStateFlow(emptyList())
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.onCallNotificationUpdate(mockCall)
+
+        // Then
+        assertNull(result)
+    }
+
+    @Test
+    fun `updateIncomingCallNotification calls interceptor with correct parameters`() = runTest {
+        // Given
+        val callDisplayName = "Henry Wilson"
+        val mockkApp = mockk<Application>(relaxed = true)
+        every { mockIntentResolver.searchIncomingCallPendingIntent(any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchAcceptCallPendingIntent(any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        coEvery {
+            mockUpdateInterceptor.onUpdateIncomingCallNotification(
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.updateIncomingCallNotification(mockCall, callDisplayName)
+
+        // Then
+        coVerify {
+            mockUpdateInterceptor.onUpdateIncomingCallNotification(
+                any(),
+                callDisplayName,
+                mockCall
+            )
+        }
+    }
+
+    @Test
+    fun `updateOngoingCallNotification calls interceptor with correct parameters`() = runTest {
+        // Given
+        val callDisplayName = "Ivy Chen"
+        val mockkApp = mockk<Application>(relaxed = true)
+        every { mockIntentResolver.searchOutgoingCallPendingIntent(any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchEndCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchOngoingCallPendingIntent(
+                any(),
+                any()
+            )
+        } returns mockPendingIntent
+        coEvery {
+            mockUpdateInterceptor.onUpdateOngoingCallNotification(
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk()
+        every {
+            mockIntentResolver.searchOngoingCallPendingIntent(
+                any(),
+                any()
+            )
+        } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockInitialInterceptor.onBuildOngoingCallNotification(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+        coEvery {
+            mockUpdateInterceptor.onUpdateOngoingCallNotification(
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk(relaxed = true)
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED }
+        )
+
+        // When
+        val result = testHandler.updateOngoingCallNotification(mockCall, callDisplayName)
+
+        // Then
+        coVerify {
+            mockUpdateInterceptor.onUpdateOngoingCallNotification(
+                any(),
+                callDisplayName,
+                mockCall
+            )
+        }
     }
 }
