@@ -36,8 +36,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 class StreamNotificationBuilderInterceptorsTest {
 
@@ -80,7 +78,7 @@ class StreamNotificationBuilderInterceptorsTest {
             acceptCallPendingIntent = mockPendingIntent,
             rejectCallPendingIntent = mockPendingIntent,
             callerName = callerName,
-            shouldHaveContentIntent = shouldHaveContentIntent
+            shouldHaveContentIntent = shouldHaveContentIntent,
         )
 
         // Then
@@ -99,7 +97,7 @@ class StreamNotificationBuilderInterceptorsTest {
             ringingState = ringingState,
             callId = mockStreamCallId,
             callDisplayName = callDisplayName,
-            shouldHaveContentIntent = true
+            shouldHaveContentIntent = true,
         )
 
         // Then
@@ -117,7 +115,7 @@ class StreamNotificationBuilderInterceptorsTest {
             callId = mockStreamCallId,
             callDisplayName = callDisplayName,
             isOutgoingCall = false,
-            remoteParticipantCount = 1
+            remoteParticipantCount = 1,
         )
 
         // Then
@@ -132,7 +130,7 @@ class StreamNotificationBuilderInterceptorsTest {
         // When
         val result = interceptors.onBuildMissedCallNotification(
             builder = mockNotificationBuilder,
-            callDisplayName = callDisplayName
+            callDisplayName = callDisplayName,
         )
 
         // Then
@@ -147,7 +145,7 @@ class StreamNotificationBuilderInterceptorsTest {
         // When
         val result = interceptors.onCreateMediaSessionCompat(
             application = mockApplication,
-            channelId = channelId
+            channelId = channelId,
         )
 
         // Then
@@ -159,7 +157,7 @@ class StreamNotificationBuilderInterceptorsTest {
         // When
         val result = interceptors.onBuildMediaNotificationMetadata(
             builder = mockMediaMetadataBuilder,
-            callId = mockStreamCallId
+            callId = mockStreamCallId,
         )
 
         // Then
@@ -171,7 +169,7 @@ class StreamNotificationBuilderInterceptorsTest {
         // When
         val result = interceptors.onBuildMediaNotificationPlaybackState(
             builder = mockPlaybackStateBuilder,
-            callId = mockStreamCallId
+            callId = mockStreamCallId,
         )
 
         // Then
@@ -188,7 +186,7 @@ class StreamNotificationBuilderInterceptorsTest {
                 acceptCallPendingIntent: PendingIntent,
                 rejectCallPendingIntent: PendingIntent,
                 callerName: String?,
-                shouldHaveContentIntent: Boolean
+                shouldHaveContentIntent: Boolean,
             ): NotificationCompat.Builder {
                 return builder.setContentTitle("Custom Title: $callerName")
             }
@@ -204,7 +202,7 @@ class StreamNotificationBuilderInterceptorsTest {
             acceptCallPendingIntent = mockPendingIntent,
             rejectCallPendingIntent = mockPendingIntent,
             callerName = "John Doe",
-            shouldHaveContentIntent = true
+            shouldHaveContentIntent = true,
         )
 
         // Then
@@ -218,9 +216,12 @@ class StreamNotificationBuilderInterceptorsTest {
         val customInterceptors = object : StreamNotificationBuilderInterceptors() {
             override fun onBuildMediaNotificationMetadata(
                 builder: MediaMetadataCompat.Builder,
-                callId: StreamCallId
+                callId: StreamCallId,
             ): MediaMetadataCompat.Builder {
-                return builder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, "Custom Media Title")
+                return builder.putString(
+                    MediaMetadataCompat.METADATA_KEY_TITLE,
+                    "Custom Media Title",
+                )
             }
         }
 
@@ -230,11 +231,16 @@ class StreamNotificationBuilderInterceptorsTest {
         // When
         val result = customInterceptors.onBuildMediaNotificationMetadata(
             builder = spyBuilder,
-            callId = mockStreamCallId
+            callId = mockStreamCallId,
         )
 
         // Then
-        verify { spyBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, "Custom Media Title") }
+        verify {
+            spyBuilder.putString(
+                MediaMetadataCompat.METADATA_KEY_TITLE,
+                "Custom Media Title",
+            )
+        }
         assertEquals(spyBuilder, result)
     }
 
@@ -245,7 +251,7 @@ class StreamNotificationBuilderInterceptorsTest {
         val customInterceptors = object : StreamNotificationBuilderInterceptors() {
             override fun onCreateMediaSessionCompat(
                 application: Application,
-                channelId: String
+                channelId: String,
             ): MediaSessionCompat? {
                 return mockMediaSession
             }
@@ -254,7 +260,7 @@ class StreamNotificationBuilderInterceptorsTest {
         // When
         val result = customInterceptors.onCreateMediaSessionCompat(
             application = mockApplication,
-            channelId = "test-channel"
+            channelId = "test-channel",
         )
 
         // Then
@@ -268,7 +274,7 @@ class StreamNotificationBuilderInterceptorsTest {
         val customInterceptors = object : StreamNotificationBuilderInterceptors() {
             override fun onBuildMediaNotificationPlaybackState(
                 builder: PlaybackStateCompat.Builder,
-                callId: StreamCallId
+                callId: StreamCallId,
             ): PlaybackStateCompat.Builder {
                 return builder.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
             }
@@ -280,7 +286,7 @@ class StreamNotificationBuilderInterceptorsTest {
         // When
         val result = customInterceptors.onBuildMediaNotificationPlaybackState(
             builder = spyBuilder,
-            callId = mockStreamCallId
+            callId = mockStreamCallId,
         )
 
         // Then

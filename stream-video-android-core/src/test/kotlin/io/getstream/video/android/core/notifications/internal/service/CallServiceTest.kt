@@ -79,7 +79,7 @@ class CallServiceTest {
         assertEquals("remove_call", TRIGGER_REMOVE_INCOMING_CALL)
         assertEquals(
             "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger",
-            TRIGGER_KEY
+            TRIGGER_KEY,
         )
     }
 
@@ -96,7 +96,7 @@ class CallServiceTest {
             context = context,
             callId = testCallId,
             trigger = TRIGGER_INCOMING_CALL,
-            callDisplayName = "John Doe"
+            callDisplayName = "John Doe",
         )
 
         // Then
@@ -112,7 +112,7 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
-            trigger = TRIGGER_OUTGOING_CALL
+            trigger = TRIGGER_OUTGOING_CALL,
         )
 
         // Then
@@ -128,7 +128,7 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
-            trigger = TRIGGER_ONGOING_CALL
+            trigger = TRIGGER_ONGOING_CALL,
         )
 
         // Then
@@ -143,7 +143,7 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
-            trigger = TRIGGER_REMOVE_INCOMING_CALL
+            trigger = TRIGGER_REMOVE_INCOMING_CALL,
         )
 
         // Then
@@ -159,7 +159,7 @@ class CallServiceTest {
             CallService.buildStartIntent(
                 context = context,
                 callId = testCallId,
-                trigger = "invalid_trigger"
+                trigger = "invalid_trigger",
             )
         }
     }
@@ -168,7 +168,7 @@ class CallServiceTest {
     fun `buildStartIntent uses custom service class from configuration`() {
         // Given
         val customConfig = CallServiceConfig(
-            serviceClass = LivestreamCallService::class.java
+            serviceClass = LivestreamCallService::class.java,
         )
 
         // When
@@ -176,7 +176,7 @@ class CallServiceTest {
             context = context,
             callId = testCallId,
             trigger = TRIGGER_INCOMING_CALL,
-            callServiceConfiguration = customConfig
+            callServiceConfiguration = customConfig,
         )
 
         // Then
@@ -197,13 +197,13 @@ class CallServiceTest {
     fun `buildStopIntent uses custom service class from configuration`() {
         // Given
         val customConfig = CallServiceConfig(
-            serviceClass = LivestreamCallService::class.java
+            serviceClass = LivestreamCallService::class.java,
         )
 
         // When
         val intent = CallService.buildStopIntent(
             context = context,
-            callServiceConfiguration = customConfig
+            callServiceConfiguration = customConfig,
         )
 
         // Then
@@ -223,7 +223,7 @@ class CallServiceTest {
             trigger = TRIGGER_ONGOING_CALL,
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
-            intentCallDisplayName = "John Doe"
+            intentCallDisplayName = "John Doe",
         )
 
         // Then
@@ -239,14 +239,16 @@ class CallServiceTest {
         every { mockState.activeCall } returns mockk {
             every { value } returns null
         }
-        every { mockStreamVideoClient.getRingingCallNotification(any(), any(), any(), any()) } returns mockNotification
+        every {
+            mockStreamVideoClient.getRingingCallNotification(any(), any(), any(), any())
+        } returns mockNotification
 
         // When
         val result = callService.getNotificationPair(
             trigger = TRIGGER_INCOMING_CALL,
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
-            intentCallDisplayName = "John Doe"
+            intentCallDisplayName = "John Doe",
         )
 
         // Then
@@ -261,7 +263,7 @@ class CallServiceTest {
             trigger = TRIGGER_REMOVE_INCOMING_CALL,
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
-            intentCallDisplayName = null
+            intentCallDisplayName = null,
         )
 
         // Then
@@ -276,7 +278,7 @@ class CallServiceTest {
             trigger = "unknown_trigger",
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
-            intentCallDisplayName = null
+            intentCallDisplayName = null,
         )
 
         // Then
@@ -348,7 +350,7 @@ class CallServiceTest {
         // Given
         val livestreamConfig = CallServiceConfig(
             serviceClass = LivestreamCallService::class.java,
-            runCallServiceInForeground = true
+            runCallServiceInForeground = true,
         )
 
         // When
@@ -356,7 +358,7 @@ class CallServiceTest {
             context = context,
             callId = StreamCallId(type = "livestream", id = "test-123"),
             trigger = TRIGGER_INCOMING_CALL,
-            callServiceConfiguration = livestreamConfig
+            callServiceConfiguration = livestreamConfig,
         )
 
         // Then
@@ -374,7 +376,7 @@ class CallServiceTest {
             trigger = TRIGGER_REMOVE_INCOMING_CALL, // This trigger doesn't need StreamVideo methods
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
-            intentCallDisplayName = null
+            intentCallDisplayName = null,
         )
 
         // Then - Should handle gracefully and return expected result
@@ -393,6 +395,9 @@ class CallServiceTest {
     fun `intent extra keys are consistent`() {
         // These keys should remain stable as they affect intent parsing
         assertEquals("io.getstream.video.android.intent-extra.call_cid", INTENT_EXTRA_CALL_CID)
-        assertEquals("io.getstream.video.android.intent-extra.call_displayname", INTENT_EXTRA_CALL_DISPLAY_NAME)
+        assertEquals(
+            "io.getstream.video.android.intent-extra.call_displayname",
+            INTENT_EXTRA_CALL_DISPLAY_NAME,
+        )
     }
 }

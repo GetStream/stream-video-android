@@ -25,8 +25,6 @@ import io.mockk.impl.annotations.MockK
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Tests to ensure default notification channel configurations remain consistent.
@@ -43,21 +41,45 @@ class DefaultNotificationChannelConfigurationTest {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
         // Mock all the getString calls with expected values
-        every { mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_id) } returns "incoming_calls"
-        every { mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_title) } returns "Incoming Calls"
-        every { mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_description) } returns "Incoming audio and video call alerts"
+        every {
+            mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_id)
+        } returns "incoming_calls"
+        every {
+            mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_title)
+        } returns "Incoming Calls"
+        every {
+            mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_description)
+        } returns "Incoming audio and video call alerts"
 
-        every { mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_id) } returns "ongoing_calls"
-        every { mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_title) } returns "Ongoing Calls"
-        every { mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_description) } returns "Ongoing call notifications"
+        every {
+            mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_id)
+        } returns "ongoing_calls"
+        every {
+            mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_title)
+        } returns "Ongoing Calls"
+        every {
+            mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_description)
+        } returns "Ongoing call notifications"
 
-        every { mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_id) } returns "outgoing_calls"
-        every { mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_title) } returns "Outgoing Calls"
-        every { mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_description) } returns "Outgoing call notifications"
+        every {
+            mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_id)
+        } returns "outgoing_calls"
+        every {
+            mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_title)
+        } returns "Outgoing Calls"
+        every {
+            mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_description)
+        } returns "Outgoing call notifications"
 
-        every { mockApplication.getString(R.string.stream_video_missed_call_notification_channel_id) } returns "stream_missed_call_channel"
-        every { mockApplication.getString(R.string.stream_video_missed_call_notification_channel_title) } returns "Missed Calls"
-        every { mockApplication.getString(R.string.stream_video_missed_call_notification_channel_description) } returns "Missed call notifications"
+        every {
+            mockApplication.getString(R.string.stream_video_missed_call_notification_channel_id)
+        } returns "stream_missed_call_channel"
+        every {
+            mockApplication.getString(R.string.stream_video_missed_call_notification_channel_title)
+        } returns "Missed Calls"
+        every {
+            mockApplication.getString(R.string.stream_video_missed_call_notification_channel_description)
+        } returns "Missed call notifications"
     }
 
     @Test
@@ -68,7 +90,7 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_incoming_call_notification_channel_id,
             nameRes = R.string.stream_video_incoming_call_notification_channel_title,
             descriptionRes = R.string.stream_video_incoming_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_HIGH
+            importance = NotificationManager.IMPORTANCE_HIGH,
         )
 
         // Then - Verify the exact values that should be used
@@ -86,7 +108,7 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_ongoing_call_notification_channel_id,
             nameRes = R.string.stream_video_ongoing_call_notification_channel_title,
             descriptionRes = R.string.stream_video_ongoing_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_DEFAULT
+            importance = NotificationManager.IMPORTANCE_DEFAULT,
         )
 
         // Then - Verify the exact values that should be used
@@ -104,7 +126,7 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_outgoing_call_notification_channel_id,
             nameRes = R.string.stream_video_outgoing_call_notification_channel_title,
             descriptionRes = R.string.stream_video_outgoing_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_DEFAULT
+            importance = NotificationManager.IMPORTANCE_DEFAULT,
         )
 
         // Then - Verify the exact values that should be used
@@ -122,7 +144,7 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_missed_call_notification_channel_id,
             nameRes = R.string.stream_video_missed_call_notification_channel_title,
             descriptionRes = R.string.stream_video_missed_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_HIGH
+            importance = NotificationManager.IMPORTANCE_HIGH,
         )
 
         // Then - Verify the exact values that should be used
@@ -140,7 +162,7 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_incoming_call_notification_channel_id,
             nameRes = R.string.stream_video_incoming_call_notification_channel_title,
             descriptionRes = R.string.stream_video_incoming_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_HIGH
+            importance = NotificationManager.IMPORTANCE_HIGH,
         )
 
         val ongoingChannel = createChannelInfoFromResIds(
@@ -148,7 +170,7 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_ongoing_call_notification_channel_id,
             nameRes = R.string.stream_video_ongoing_call_notification_channel_title,
             descriptionRes = R.string.stream_video_ongoing_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_DEFAULT
+            importance = NotificationManager.IMPORTANCE_DEFAULT,
         )
 
         val outgoingChannel = createChannelInfoFromResIds(
@@ -156,7 +178,7 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_outgoing_call_notification_channel_id,
             nameRes = R.string.stream_video_outgoing_call_notification_channel_title,
             descriptionRes = R.string.stream_video_outgoing_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_DEFAULT
+            importance = NotificationManager.IMPORTANCE_DEFAULT,
         )
 
         val missedChannel = createChannelInfoFromResIds(
@@ -164,14 +186,14 @@ class DefaultNotificationChannelConfigurationTest {
             idRes = R.string.stream_video_missed_call_notification_channel_id,
             nameRes = R.string.stream_video_missed_call_notification_channel_title,
             descriptionRes = R.string.stream_video_missed_call_notification_channel_description,
-            importance = NotificationManager.IMPORTANCE_HIGH
+            importance = NotificationManager.IMPORTANCE_HIGH,
         )
 
         // Then - Verify importance levels follow the expected pattern
         // High importance: Incoming and missed calls (should interrupt user)
         assertEquals(NotificationManager.IMPORTANCE_HIGH, incomingChannel.importance)
         assertEquals(NotificationManager.IMPORTANCE_HIGH, missedChannel.importance)
-        
+
         // Default importance: Ongoing and outgoing calls (less intrusive)
         assertEquals(NotificationManager.IMPORTANCE_DEFAULT, ongoingChannel.importance)
         assertEquals(NotificationManager.IMPORTANCE_DEFAULT, outgoingChannel.importance)
@@ -181,24 +203,74 @@ class DefaultNotificationChannelConfigurationTest {
     fun `string resource values are consistent and not accidentally changed`() {
         // This test ensures that if someone changes the string resources,
         // the test will fail and alert them to the breaking change
-        
+
         // Channel IDs (these should never change as they affect existing installations)
-        assertEquals("incoming_calls", mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_id))
-        assertEquals("ongoing_calls", mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_id))
-        assertEquals("outgoing_calls", mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_id))
-        assertEquals("stream_missed_call_channel", mockApplication.getString(R.string.stream_video_missed_call_notification_channel_id))
+        assertEquals(
+            "incoming_calls",
+            mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_id),
+        )
+        assertEquals(
+            "ongoing_calls",
+            mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_id),
+        )
+        assertEquals(
+            "outgoing_calls",
+            mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_id),
+        )
+        assertEquals(
+            "stream_missed_call_channel",
+            mockApplication.getString(R.string.stream_video_missed_call_notification_channel_id),
+        )
 
         // Channel names (user-visible, but changes could confuse users)
-        assertEquals("Incoming Calls", mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_title))
-        assertEquals("Ongoing Calls", mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_title))
-        assertEquals("Outgoing Calls", mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_title))
-        assertEquals("Missed Calls", mockApplication.getString(R.string.stream_video_missed_call_notification_channel_title))
+        assertEquals(
+            "Incoming Calls",
+            mockApplication.getString(
+                R.string.stream_video_incoming_call_notification_channel_title,
+            ),
+        )
+        assertEquals(
+            "Ongoing Calls",
+            mockApplication.getString(
+                R.string.stream_video_ongoing_call_notification_channel_title,
+            ),
+        )
+        assertEquals(
+            "Outgoing Calls",
+            mockApplication.getString(
+                R.string.stream_video_outgoing_call_notification_channel_title,
+            ),
+        )
+        assertEquals(
+            "Missed Calls",
+            mockApplication.getString(R.string.stream_video_missed_call_notification_channel_title),
+        )
 
         // Channel descriptions (user-visible in settings)
-        assertEquals("Incoming audio and video call alerts", mockApplication.getString(R.string.stream_video_incoming_call_notification_channel_description))
-        assertEquals("Ongoing call notifications", mockApplication.getString(R.string.stream_video_ongoing_call_notification_channel_description))
-        assertEquals("Outgoing call notifications", mockApplication.getString(R.string.stream_video_outgoing_call_notification_channel_description))
-        assertEquals("Missed call notifications", mockApplication.getString(R.string.stream_video_missed_call_notification_channel_description))
+        assertEquals(
+            "Incoming audio and video call alerts",
+            mockApplication.getString(
+                R.string.stream_video_incoming_call_notification_channel_description,
+            ),
+        )
+        assertEquals(
+            "Ongoing call notifications",
+            mockApplication.getString(
+                R.string.stream_video_ongoing_call_notification_channel_description,
+            ),
+        )
+        assertEquals(
+            "Outgoing call notifications",
+            mockApplication.getString(
+                R.string.stream_video_outgoing_call_notification_channel_description,
+            ),
+        )
+        assertEquals(
+            "Missed call notifications",
+            mockApplication.getString(
+                R.string.stream_video_missed_call_notification_channel_description,
+            ),
+        )
     }
 
     @Test
@@ -210,29 +282,29 @@ class DefaultNotificationChannelConfigurationTest {
                 R.string.stream_video_incoming_call_notification_channel_id,
                 R.string.stream_video_incoming_call_notification_channel_title,
                 R.string.stream_video_incoming_call_notification_channel_description,
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH,
             ),
             ongoingCallChannel = createChannelInfoFromResIds(
                 mockApplication,
                 R.string.stream_video_ongoing_call_notification_channel_id,
                 R.string.stream_video_ongoing_call_notification_channel_title,
                 R.string.stream_video_ongoing_call_notification_channel_description,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             ),
             outgoingCallChannel = createChannelInfoFromResIds(
                 mockApplication,
                 R.string.stream_video_outgoing_call_notification_channel_id,
                 R.string.stream_video_outgoing_call_notification_channel_title,
                 R.string.stream_video_outgoing_call_notification_channel_description,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             ),
             missedCallChannel = createChannelInfoFromResIds(
                 mockApplication,
                 R.string.stream_video_missed_call_notification_channel_id,
                 R.string.stream_video_missed_call_notification_channel_title,
                 R.string.stream_video_missed_call_notification_channel_description,
-                NotificationManager.IMPORTANCE_HIGH
-            )
+                NotificationManager.IMPORTANCE_HIGH,
+            ),
         )
 
         // Then - Verify all channels are properly configured
@@ -249,7 +321,7 @@ class DefaultNotificationChannelConfigurationTest {
             context = mockApplication,
             idRes = R.string.stream_video_incoming_call_notification_channel_id,
             nameRes = R.string.stream_video_incoming_call_notification_channel_title,
-            descriptionRes = R.string.stream_video_incoming_call_notification_channel_description
+            descriptionRes = R.string.stream_video_incoming_call_notification_channel_description,
             // importance parameter omitted - should default to IMPORTANCE_HIGH
         )
 

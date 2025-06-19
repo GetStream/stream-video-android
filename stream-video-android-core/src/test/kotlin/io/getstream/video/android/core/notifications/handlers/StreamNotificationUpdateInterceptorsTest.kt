@@ -34,8 +34,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 class StreamNotificationUpdateInterceptorsTest {
 
@@ -71,7 +69,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = interceptors.onUpdateOngoingCallNotification(
             builder = mockNotificationBuilder,
             callDisplayName = callDisplayName,
-            call = mockCall
+            call = mockCall,
         )
 
         // Then
@@ -87,7 +85,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = interceptors.onUpdateOutgoingCallNotification(
             builder = mockNotificationBuilder,
             callDisplayName = callDisplayName,
-            call = mockCall
+            call = mockCall,
         )
 
         // Then
@@ -103,7 +101,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = interceptors.onUpdateIncomingCallNotification(
             builder = mockNotificationBuilder,
             callDisplayName = callDisplayName,
-            call = mockCall
+            call = mockCall,
         )
 
         // Then
@@ -119,7 +117,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = interceptors.onUpdateMediaNotificationMetadata(
             builder = mockMediaMetadataBuilder,
             call = mockCall,
-            callDisplayName = callDisplayName
+            callDisplayName = callDisplayName,
         )
 
         // Then
@@ -135,7 +133,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = interceptors.onUpdateMediaNotificationPlaybackState(
             builder = mockPlaybackStateBuilder,
             call = mockCall,
-            callDisplayName = callDisplayName
+            callDisplayName = callDisplayName,
         )
 
         // Then
@@ -150,7 +148,7 @@ class StreamNotificationUpdateInterceptorsTest {
         // When
         val result = interceptors.onUpdateMediaSessionCompat(
             application = mockApplication,
-            channelId = channelId
+            channelId = channelId,
         )
 
         // Then
@@ -164,7 +162,7 @@ class StreamNotificationUpdateInterceptorsTest {
             override suspend fun onUpdateOngoingCallNotification(
                 builder: NotificationCompat.Builder,
                 callDisplayName: String?,
-                call: Call
+                call: Call,
             ): NotificationCompat.Builder {
                 return builder.setContentTitle("Updated: $callDisplayName")
             }
@@ -177,7 +175,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = customInterceptors.onUpdateOngoingCallNotification(
             builder = spyBuilder,
             callDisplayName = "John Doe",
-            call = mockCall
+            call = mockCall,
         )
 
         // Then
@@ -192,7 +190,7 @@ class StreamNotificationUpdateInterceptorsTest {
             override suspend fun onUpdateOutgoingCallNotification(
                 builder: NotificationCompat.Builder,
                 callDisplayName: String?,
-                call: Call
+                call: Call,
             ): NotificationCompat.Builder {
                 return builder.setContentText("Calling $callDisplayName...")
             }
@@ -205,7 +203,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = customInterceptors.onUpdateOutgoingCallNotification(
             builder = spyBuilder,
             callDisplayName = "Jane Smith",
-            call = mockCall
+            call = mockCall,
         )
 
         // Then
@@ -220,7 +218,7 @@ class StreamNotificationUpdateInterceptorsTest {
             override suspend fun onUpdateIncomingCallNotification(
                 builder: NotificationCompat.Builder,
                 callDisplayName: String?,
-                call: Call
+                call: Call,
             ): NotificationCompat.Builder {
                 return builder.setSubText("Incoming from $callDisplayName")
             }
@@ -233,7 +231,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = customInterceptors.onUpdateIncomingCallNotification(
             builder = spyBuilder,
             callDisplayName = "Alice Johnson",
-            call = mockCall
+            call = mockCall,
         )
 
         // Then
@@ -248,9 +246,12 @@ class StreamNotificationUpdateInterceptorsTest {
             override fun onUpdateMediaNotificationMetadata(
                 builder: MediaMetadataCompat.Builder,
                 call: Call,
-                callDisplayName: String?
+                callDisplayName: String?,
             ): MediaMetadataCompat.Builder {
-                return builder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "Updated Artist: $callDisplayName")
+                return builder.putString(
+                    MediaMetadataCompat.METADATA_KEY_ARTIST,
+                    "Updated Artist: $callDisplayName",
+                )
             }
         }
 
@@ -261,11 +262,16 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = customInterceptors.onUpdateMediaNotificationMetadata(
             builder = spyBuilder,
             call = mockCall,
-            callDisplayName = "Bob Wilson"
+            callDisplayName = "Bob Wilson",
         )
 
         // Then
-        verify { spyBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "Updated Artist: Bob Wilson") }
+        verify {
+            spyBuilder.putString(
+                MediaMetadataCompat.METADATA_KEY_ARTIST,
+                "Updated Artist: Bob Wilson",
+            )
+        }
         assertEquals(spyBuilder, result)
     }
 
@@ -276,7 +282,7 @@ class StreamNotificationUpdateInterceptorsTest {
             override fun onUpdateMediaNotificationPlaybackState(
                 builder: PlaybackStateCompat.Builder,
                 call: Call,
-                callDisplayName: String?
+                callDisplayName: String?,
             ): PlaybackStateCompat.Builder {
                 return builder.setState(PlaybackStateCompat.STATE_PAUSED, 100, 0.5f)
             }
@@ -289,7 +295,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = customInterceptors.onUpdateMediaNotificationPlaybackState(
             builder = spyBuilder,
             call = mockCall,
-            callDisplayName = "Carol Davis"
+            callDisplayName = "Carol Davis",
         )
 
         // Then
@@ -304,7 +310,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val customInterceptors = object : StreamNotificationUpdateInterceptors() {
             override fun onUpdateMediaSessionCompat(
                 application: Application,
-                channelId: String
+                channelId: String,
             ): MediaSessionCompat? {
                 return mockMediaSession
             }
@@ -313,7 +319,7 @@ class StreamNotificationUpdateInterceptorsTest {
         // When
         val result = customInterceptors.onUpdateMediaSessionCompat(
             application = mockApplication,
-            channelId = "updated-channel"
+            channelId = "updated-channel",
         )
 
         // Then
@@ -328,7 +334,7 @@ class StreamNotificationUpdateInterceptorsTest {
             override suspend fun onUpdateOngoingCallNotification(
                 builder: NotificationCompat.Builder,
                 callDisplayName: String?,
-                call: Call
+                call: Call,
             ): NotificationCompat.Builder {
                 val displayName = callDisplayName ?: "Unknown"
                 return builder.setContentTitle("Call with $displayName")
@@ -342,7 +348,7 @@ class StreamNotificationUpdateInterceptorsTest {
         val result = customInterceptors.onUpdateOngoingCallNotification(
             builder = spyBuilder,
             callDisplayName = null,
-            call = mockCall
+            call = mockCall,
         )
 
         // Then
