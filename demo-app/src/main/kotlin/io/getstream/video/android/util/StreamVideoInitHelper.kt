@@ -18,10 +18,7 @@ package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
@@ -30,14 +27,10 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.app
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdateInterceptors
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
@@ -47,12 +40,9 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.util.config.AppConfig
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.withContext
-import java.net.URL
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
@@ -193,11 +183,6 @@ object StreamVideoInitHelper {
         ).enqueue()
     }
 
-    suspend fun loadBitmap(url: String): Bitmap =
-        withContext(Dispatchers.IO) {
-            BitmapFactory.decodeStream(URL(url).openStream())
-        }
-
     /** Sets up and returns the [StreamVideo] required to connect to the API. */
     private fun initializeStreamVideo(
         context: Context,
@@ -221,24 +206,6 @@ object StreamVideoInitHelper {
                     ),
                 ),
                 hideRingingNotificationInForeground = true,
-                notificationHandler = DefaultNotificationHandler(
-                    application = context.app,
-                    hideRingingNotificationInForeground = true,
-                    updateNotificationBuilderInterceptor = object : StreamNotificationUpdateInterceptors() {
-                        override suspend fun onUpdateOngoingCallMediaNotification(
-                            builder: NotificationCompat.Builder,
-                            callDisplayName: String?,
-                            call: Call,
-                        ): NotificationCompat.Builder {
-                            val imageAddress = "https://miro.medium.com/v2/resize:fit:4800/format:webp/1*sAn1-7o_pxmxsbdzzDDA4g.png"
-                            val bitmap = withContext(Dispatchers.IO) {
-                                URL(imageAddress).openStream().use { BitmapFactory.decodeStream(it) }
-                            }
-                            builder.setLargeIcon(bitmap)
-                            return builder
-                        }
-                    },
-                ),
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {

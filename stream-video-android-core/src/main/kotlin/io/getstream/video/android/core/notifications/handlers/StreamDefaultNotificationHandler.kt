@@ -45,14 +45,19 @@ import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 
+/**
+ * Default implementation of the [StreamNotificationHandler] interface.
+ */
 public open class StreamDefaultNotificationHandler(
     private val application: Application,
     private val notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
     ),
+    private val intentResolver: StreamIntentResolver = DefaultStreamIntentResolver(application),
     private val hideRingingNotificationInForeground: Boolean,
     private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
         StreamNotificationBuilderInterceptors(),
@@ -93,8 +98,7 @@ public open class StreamDefaultNotificationHandler(
     StreamNotificationUpdatesProvider,
     NotificationPermissionHandler by notificationPermissionHandler {
 
-    private val logger by taggedLogger("Call:NotificationHandler")
-    val intentResolver = DefaultStreamIntentResolver(application)
+    private val logger by taggedLogger("Call:StreamNotificationHandler")
 
     val notificationManager: NotificationManagerCompat =
         NotificationManagerCompat.from(application.applicationContext)

@@ -716,7 +716,7 @@ internal open class CallService : Service() {
                     }
                 } else {
                     logger.w {
-                        "[observeNotificationUpdates] No notification generated for ringing state: $ringingState"
+                        "[observeNotificationUpdates] No notification generated for updating."
                     }
                 }
             }
