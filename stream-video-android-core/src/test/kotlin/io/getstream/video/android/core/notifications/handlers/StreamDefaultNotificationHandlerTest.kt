@@ -26,8 +26,14 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
+import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.notifications.StreamIntentResolver
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -36,6 +42,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -53,7 +60,6 @@ import org.robolectric.RobolectricTestRunner
  * Skeleton test for StreamDefaultNotificationHandler.
  * Mocks all constructor dependencies to make it testable.
  */
-@RunWith(RobolectricTestRunner::class)
 class StreamDefaultNotificationHandlerTest {
 
     @MockK
@@ -91,6 +97,19 @@ class StreamDefaultNotificationHandlerTest {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
 
         testCallId = StreamCallId(type = "default", id = "test-call-123")
+
+        // StreamVideo
+        mockkObject(StreamVideo)
+        val mockStreamVideo = mockk<StreamVideoClient>(relaxed = true)
+        val mockState = mockk<ClientState>(relaxed = true)
+        val mockCallConfigRegistry = mockk<CallServiceConfigRegistry>(relaxed = true)
+        val mockCallServiceConfig = mockk<CallServiceConfig>(relaxed = true)
+
+        every { StreamVideo.instance() } returns mockStreamVideo
+        every { mockStreamVideo.state } returns mockState
+        every { mockState.callConfigRegistry } returns mockCallConfigRegistry
+        every { mockCallConfigRegistry.get(any()) } returns mockCallServiceConfig
+
 
         // Mock NotificationCompat.Builder to avoid Android framework issues
         mockkConstructor(NotificationCompat.Builder::class)
