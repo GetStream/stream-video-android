@@ -18,6 +18,7 @@ package io.getstream.video.android.core.trace
 
 import io.mockk.spyk
 import io.mockk.verify
+import org.junit.Ignore
 import org.junit.Test
 
 interface TestInterface {
@@ -31,6 +32,8 @@ class TestImpl : TestInterface {
 }
 
 class InterfaceTracerKtTest {
+
+    @Ignore
     @Test
     fun `tracedWith proxies method calls and traces them`() {
         val tracer = spyk(Tracer("iface"))

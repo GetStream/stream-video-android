@@ -31,6 +31,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
@@ -331,7 +332,14 @@ public class StreamPeerConnectionFactory(
         peerConnection.initialize(connection)
         peerConnection.addTransceivers()
 
-        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
+        val traceData = safeCallWithDefault(null) {
+            "iceServers=${
+                configuration.iceServers.joinToString {
+                    it.toString()
+                }
+            } , budlePolicy=${configuration.bundlePolicy}, sdpSemantics=${configuration.sdpSemantics}"
+        }
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, traceData)
         return peerConnection
     }
 
@@ -374,7 +382,7 @@ public class StreamPeerConnectionFactory(
         )
         webRtcLogger.d { "type ${StreamPeerType.PUBLISHER} $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
-        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration)
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration.toString())
 
         return peerConnection
     }
