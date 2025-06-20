@@ -317,7 +317,7 @@ public open class StreamDefaultNotificationHandler(
         }
         return ensureChannelAndBuildNotification(notificationChannels.incomingCallChannel) {
             priority = if (hideRingingNotificationInForeground) {
-                NotificationCompat.PRIORITY_DEFAULT
+                NotificationCompat.PRIORITY_LOW
             } else {
                 NotificationCompat.PRIORITY_MAX
             }
