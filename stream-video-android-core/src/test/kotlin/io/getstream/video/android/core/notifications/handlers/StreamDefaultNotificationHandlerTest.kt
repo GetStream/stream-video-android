@@ -27,7 +27,6 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RingingState
-import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
@@ -55,7 +54,7 @@ import org.robolectric.RobolectricTestRunner
  * Mocks all constructor dependencies to make it testable.
  */
 @RunWith(RobolectricTestRunner::class)
-class StreamDefaultNotificationHandlerTest : IntegrationTestBase() {
+class StreamDefaultNotificationHandlerTest {
 
     @MockK
     lateinit var mockApplication: Application
