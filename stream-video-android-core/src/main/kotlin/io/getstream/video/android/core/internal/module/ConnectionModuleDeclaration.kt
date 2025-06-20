@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.internal.module
 
 import androidx.lifecycle.Lifecycle
+import io.getstream.video.android.core.internal.network.AuthTypeProvider
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.scope.ClientScope
@@ -99,10 +100,10 @@ internal interface ConnectionModuleDeclaration<Api, SocketConnection, Http : OkH
     /**
      * API to update the token.
      */
-    fun updateToken(token: Token)
+    fun updateToken(token: Token?)
 
     /**
      * API to update the authentication type.
      */
-    fun updateAuthType(authType: String)
+    fun updateAuthType(authType: AuthTypeProvider.AuthType)
 }
