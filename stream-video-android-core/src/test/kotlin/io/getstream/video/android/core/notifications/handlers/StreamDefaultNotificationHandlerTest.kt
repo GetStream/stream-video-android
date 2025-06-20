@@ -30,7 +30,6 @@ import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
@@ -53,8 +52,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Skeleton test for StreamDefaultNotificationHandler.
@@ -109,7 +106,6 @@ class StreamDefaultNotificationHandlerTest {
         every { mockStreamVideo.state } returns mockState
         every { mockState.callConfigRegistry } returns mockCallConfigRegistry
         every { mockCallConfigRegistry.get(any()) } returns mockCallServiceConfig
-
 
         // Mock NotificationCompat.Builder to avoid Android framework issues
         mockkConstructor(NotificationCompat.Builder::class)
