@@ -30,6 +30,7 @@ io.getstream.video.android.core.logging
 io.getstream.video.android.core.mapper
 io.getstream.video.android.core.model
 io.getstream.video.android.core.notifications
+io.getstream.video.android.core.notifications.handlers
 io.getstream.video.android.core.notifications.internal.receivers
 io.getstream.video.android.core.notifications.internal.service
 io.getstream.video.android.core.notifications.medianotifications
