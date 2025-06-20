@@ -700,15 +700,30 @@ internal open class CallService : Service() {
                     when (ringingState) {
                         is RingingState.Active -> {
                             logger.d { "[observeNotificationUpdates] Showing active call notification" }
-                            justNotify(callId.hashCode(), notification)
+                            startForegroundWithServiceType(
+                                callId.hashCode(),
+                                notification,
+                                TRIGGER_ONGOING_CALL,
+                                serviceType,
+                            )
                         }
                         is RingingState.Outgoing -> {
                             logger.d { "[observeNotificationUpdates] Showing outgoing call notification" }
-                            justNotify(INCOMING_CALL_NOTIFICATION_ID, notification)
+                            startForegroundWithServiceType(
+                                INCOMING_CALL_NOTIFICATION_ID,
+                                notification,
+                                TRIGGER_OUTGOING_CALL,
+                                serviceType,
+                            )
                         }
                         is RingingState.Incoming -> {
                             logger.d { "[observeNotificationUpdates] Showing incoming call notification" }
-                            justNotify(INCOMING_CALL_NOTIFICATION_ID, notification)
+                            startForegroundWithServiceType(
+                                INCOMING_CALL_NOTIFICATION_ID,
+                                notification,
+                                TRIGGER_INCOMING_CALL,
+                                serviceType,
+                            )
                         }
                         else -> {
                             logger.d { "[observeNotificationUpdates] Unhandled ringing state: $ringingState" }
