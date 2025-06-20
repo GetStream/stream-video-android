@@ -35,9 +35,9 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.flatMapSuspend
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.DefaultNotificationHandler
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
@@ -198,7 +198,7 @@ internal class StreamNotificationManager private constructor(
             return application?.let {
                 val notificationHandler = notificationHandler
                     .takeUnless { it == NoOpNotificationHandler }
-                    ?: DefaultNotificationHandler(
+                    ?: CompatibilityStreamNotificationHandler(
                         application = application,
                         hideRingingNotificationInForeground = hideRingingNotificationInForeground,
                     )
