@@ -122,11 +122,6 @@ public open class DefaultNotificationHandler(
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
         val notificationId = callId.hashCode()
-        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
-            ?: run {
-                logger.e { "Couldn't find any activity for $ACTION_MISSED_CALL" }
-                intentResolver.getDefaultPendingIntent()
-            }
         val notification = getMissedCallNotification(callId, callDisplayName)
         if (notification != null && ActivityCompat.checkSelfPermission(
                 application,

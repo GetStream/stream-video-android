@@ -45,7 +45,7 @@ public interface NotificationHandler :
     @Deprecated(
         level = DeprecationLevel.ERROR,
         message = "This method is deprecated. Use the getNotificationUpdates method in the NotificationHandler interface instead.",
-        replaceWith = ReplaceWith("onNotificationUpdateSuspend(coroutineScope, call, localUser)"),
+        replaceWith = ReplaceWith("onCallNotificationUpdate(coroutineScope, call, localUser)"),
     )
     fun getNotificationUpdates(
         coroutineScope: CoroutineScope,

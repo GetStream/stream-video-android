@@ -23,7 +23,7 @@ import io.getstream.video.android.model.StreamCallId
 interface MediaNotificationHandler {
 
     @Deprecated(
-        message = "This interface is deprecated. Use the notification interceptors instead.",
+        message = "This interface is deprecated. Use the notification interceptors instead. (StreamNotificationBuilderInterceptors and StreamNotificationUpdateInterceptors)",
     )
     fun createMinimalMediaStyleNotification(
         callId: StreamCallId,
@@ -32,7 +32,7 @@ interface MediaNotificationHandler {
     ): NotificationCompat.Builder?
 
     @Deprecated(
-        message = "This interface is deprecated. Use the notification interceptors instead.",
+        message = "This interface is deprecated. Use the notification interceptors instead. (StreamNotificationBuilderInterceptors and StreamNotificationUpdateInterceptors)",
     )
     fun getMediaNotificationConfig(): MediaNotificationConfig
 }
