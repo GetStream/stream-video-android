@@ -118,7 +118,7 @@ internal fun BoxScope.PortraitVideoRenderer(
             )
         }
 
-        3, 4 -> {
+        3 -> {
             ParticipantColumn(
                 modifier,
                 remoteParticipants,
@@ -129,6 +129,32 @@ internal fun BoxScope.PortraitVideoRenderer(
                 dominantSpeaker,
                 0,
             )
+        }
+
+        4 -> {
+            val columnSize = Pair(2, 2)
+            Row(modifier) {
+                ParticipantColumn(
+                    modifier = modifier.weight(1f),
+                    remoteParticipants = callParticipants.take(columnSize.first),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                )
+
+                ParticipantColumn(
+                    modifier = modifier.weight(1f),
+                    remoteParticipants = callParticipants.takeLast(columnSize.second),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                    expectedColumnSize = columnSize.first,
+                )
+            }
         }
 
         5, 6 -> {
@@ -194,7 +220,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         }
     }
 
-    if (callParticipants.size in 2..4) {
+    if (callParticipants.size < 4) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null) {

@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -52,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -70,10 +72,13 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
+import io.getstream.video.android.compose.ui.components.call.lobby.buildDefaultLobbyControlActions
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.events.ParticipantCount
@@ -82,7 +87,6 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.StreamCallActivity
-import io.getstream.video.android.util.LockScreenOrientation
 import kotlinx.coroutines.delay
 
 @Composable
@@ -90,7 +94,6 @@ fun CallLobbyScreen(
     callLobbyViewModel: CallLobbyViewModel = hiltViewModel(),
     onBack: () -> Unit,
 ) {
-    LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
     val isLoading by callLobbyViewModel.isLoading.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by callLobbyViewModel.microphoneEnabled.collectAsStateWithLifecycle()
     val isCameraEnabled by callLobbyViewModel.cameraEnabled.collectAsStateWithLifecycle()
@@ -114,7 +117,7 @@ fun CallLobbyScreen(
                 callLobbyViewModel = callLobbyViewModel,
             )
 
-            CallLobbyBody(
+            CallLobbyBodyResponsive(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
@@ -172,7 +175,10 @@ private fun CallLobbyHeaderContent(
 ) {
     Row(
         modifier = Modifier
-            .padding(VideoTheme.dimens.spacingM)
+            .padding(
+                horizontal = VideoTheme.dimens.spacingM,
+                vertical = VideoTheme.dimens.spacingXs,
+            )
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -215,7 +221,43 @@ private fun CallLobbyHeaderContent(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun CallLobbyBody(
+private fun CallLobbyBodyResponsive(
+    modifier: Modifier = Modifier,
+    call: Call,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+    onToggleCamera: (Boolean) -> Unit,
+    onToggleMicrophone: (Boolean) -> Unit,
+    description: @Composable () -> Unit,
+) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    if (isLandscape) {
+        CallLobbyBodyLandscape(
+            modifier,
+            call,
+            isCameraEnabled,
+            isMicrophoneEnabled,
+            onToggleCamera,
+            onToggleMicrophone,
+            description,
+        )
+    } else {
+        CallLobbyBodyPortrait(
+            modifier,
+            call,
+            isCameraEnabled,
+            isMicrophoneEnabled,
+            onToggleCamera,
+            onToggleMicrophone,
+            description,
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun CallLobbyBodyPortrait(
     modifier: Modifier = Modifier,
     call: Call,
     isCameraEnabled: Boolean,
@@ -291,6 +333,119 @@ private fun CallLobbyBody(
             }
         }
         description()
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun CallLobbyBodyLandscape(
+    modifier: Modifier = Modifier,
+    call: Call,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+    onToggleCamera: (Boolean) -> Unit,
+    onToggleMicrophone: (Boolean) -> Unit,
+    description: @Composable () -> Unit,
+) {
+    Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+        Row() {
+            Column(
+                modifier = modifier
+                    .weight(1f)
+                    .semantics { testTagsAsResourceId = true },
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                val onCallAction: (CallAction) -> Unit = { action ->
+                    when (action) {
+                        is ToggleCamera -> onToggleCamera(action.isEnabled)
+                        is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
+                        else -> Unit
+                    }
+                }
+
+                CallLobby(
+                    call = call,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = VideoTheme.dimens.spacingM,
+                            end = VideoTheme.dimens.spacingM,
+                        ),
+                    isCameraEnabled = isCameraEnabled,
+                    isMicrophoneEnabled = isMicrophoneEnabled,
+                    onRenderedContent = {
+                        Box(
+                            modifier = Modifier.fillMaxHeight(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val videoRendererConfig = remember {
+                                videoRenderConfig {
+                                    this.fallbackContent = {
+                                        val userName = it.user.userNameOrId
+                                        val userImage = it.user.image
+                                        UserAvatarBackground(userImage = userImage, userName = userName)
+                                    }
+                                }
+                            }
+                            VideoRenderer(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(VideoTheme.colors.baseSheetTertiary)
+                                    .testTag("on_rendered_content"),
+                                call = call,
+                                video = it,
+                                videoRendererConfig = videoRendererConfig,
+                            )
+                        }
+                    },
+                    onCallAction = onCallAction,
+                    lobbyControlsContent = { _, _ ->
+                        ControlActions(
+                            modifier = Modifier.padding(),
+                            call = call,
+                            actions = buildDefaultLobbyControlActions(
+                                call = call,
+                                onCallAction = onCallAction,
+                                isCameraEnabled = isCameraEnabled,
+                                isMicrophoneEnabled = isMicrophoneEnabled,
+                            ),
+                        )
+                    },
+                )
+                if (BuildConfig.BUILD_TYPE == "benchmark") {
+                    LaunchedEffect(key1 = Unit) {
+                        delay(300)
+                        onToggleCamera(true)
+                        onToggleMicrophone(true)
+                    }
+                }
+            }
+
+            Column(
+                modifier = modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // Text and Spacer elements remain unchanged
+
+                // LaunchedEffect to handle initial setup might need adjustments
+                // based on how you handle benchmarks or initial setup externally
+                Icon(
+                    modifier = Modifier.size(36.dp),
+                    imageVector = Icons.Default.Language,
+                    tint = VideoTheme.colors.brandGreen,
+                    contentDescription = "",
+                )
+                Text(
+                    modifier = Modifier.padding(VideoTheme.dimens.spacingM),
+                    text = "Set up your test call",
+                    style = VideoTheme.typography.titleS,
+                )
+                description()
+            }
+        }
     }
 }
 
@@ -405,12 +560,39 @@ private fun CallLobbyHeaderPreview() {
     }
 }
 
-@Preview
+@Preview(
+    name = "Portrait Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=411dp,height=891dp,dpi=420",
+)
 @Composable
-private fun CallLobbyBodyPreview() {
+private fun CallLobbyBodyPortraitPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallLobbyBody(
+        CallLobbyBodyPortrait(
+            isCameraEnabled = false,
+            isMicrophoneEnabled = false,
+            call = previewCall,
+            onToggleMicrophone = {},
+            onToggleCamera = {},
+        ) {
+            LobbyDescriptionContent(participantCounts = ParticipantCount(1, 1)) {}
+        }
+    }
+}
+
+@Preview(
+    name = "Landscape Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=891dp,height=411dp,dpi=420",
+)
+@Composable
+private fun CallLobbyBodyLandscapePreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallLobbyBodyLandscape(
             isCameraEnabled = false,
             isMicrophoneEnabled = false,
             call = previewCall,

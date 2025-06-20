@@ -30,6 +30,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ServiceCompat
@@ -192,6 +193,10 @@ internal fun Service.startForegroundWithServiceType(
 ) = safeCallWithResult {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
         startForeground(notificationId, notification)
+        Log.d(
+            "AndroidUtils",
+            "[startForegroundWithServiceType] 1 startForeground notificationId: $notificationId",
+        )
     } else {
         val beforeOrAfterAndroid14Type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
@@ -209,6 +214,10 @@ internal fun Service.startForegroundWithServiceType(
                 TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
                 else -> beforeOrAfterAndroid14Type
             },
+        )
+        Log.d(
+            "AndroidUtils",
+            "[startForegroundWithServiceType] 2 startForeground notificationId: $notificationId",
         )
     }
 }

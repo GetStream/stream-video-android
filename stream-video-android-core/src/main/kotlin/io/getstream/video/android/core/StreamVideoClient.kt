@@ -166,6 +166,7 @@ internal class StreamVideoClient internal constructor(
     internal val leaveAfterDisconnectSeconds: Long = 30,
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,
+    internal val enableStatsCollection: Boolean = true,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null

@@ -39,7 +39,6 @@ jobs:
       fail-fast: false
     env:
       ANDROID_API_LEVEL: ${{ matrix.android_api_level }}
-      STREAM_SDK_TEST_APP: ${{ vars.STREAM_SDK_TEST_APP }}
     steps:
       - uses: actions/checkout@v4.2.2
       - uses: actions/download-artifact@v4.1.8
@@ -61,7 +60,7 @@ jobs:
           disable-animations: true
           profile: pixel
           arch : x86_64
-          emulator-options: ${{ vars.EMULATOR_OPTIONS }}
+          emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
           script: bundle exec fastlane run_e2e_test
       - name: Allure TestOps Upload
         run: bundle exec fastlane allure_upload

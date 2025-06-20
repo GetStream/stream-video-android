@@ -63,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -101,7 +102,6 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamFlavors
-import io.getstream.video.android.util.LockScreenOrientation
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
@@ -114,7 +114,6 @@ fun CallJoinScreen(
     navigateToDirectCallJoin: () -> Unit,
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
-    LockScreenOrientation(orientation = Configuration.ORIENTATION_PORTRAIT)
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val user by callJoinViewModel.user.collectAsState(initial = null)
 
@@ -145,9 +144,10 @@ fun CallJoinScreen(
                 callJoinViewModel.logOut()
             },
         )
-        Spacer(modifier = Modifier.size(VideoTheme.dimens.genericMax))
+
         CallJoinBody(
             modifier = Modifier
+                .fillMaxHeight()
                 .align(Alignment.CenterHorizontally)
                 .verticalScroll(rememberScrollState())
                 .weight(1f),
@@ -234,7 +234,9 @@ private fun CallJoinHeader(
         }
 
         Text(
-            modifier = Modifier.weight(1f).testTag("Stream_UserName"),
+            modifier = Modifier
+                .weight(1f)
+                .testTag("Stream_UserName"),
             color = Color.White,
             text = user?.userNameOrId.orEmpty(),
             maxLines = 1,
@@ -249,14 +251,16 @@ private fun CallJoinHeader(
             var buttonSize by remember { mutableStateOf(IntSize(0, 0)) }
 
             StreamIconToggleButton(
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    val buttonBounds = coordinates.boundsInParent()
-                    popupPosition = IntOffset(
-                        x = buttonBounds.right.toInt() - buttonSize.width,
-                        y = buttonBounds.bottom.toInt(),
-                    )
-                    buttonSize = coordinates.size
-                }.testTag("Stream_SettingsIcon"),
+                modifier = Modifier
+                    .onGloballyPositioned { coordinates ->
+                        val buttonBounds = coordinates.boundsInParent()
+                        popupPosition = IntOffset(
+                            x = buttonBounds.right.toInt() - buttonSize.width,
+                            y = buttonBounds.bottom.toInt(),
+                        )
+                        buttonSize = coordinates.size
+                    }
+                    .testTag("Stream_SettingsIcon"),
                 toggleState = rememberUpdatedState(newValue = ToggleableState(showMenu)),
                 onIcon = Icons.Default.Settings,
                 onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
@@ -329,7 +333,6 @@ private fun CallJoinBody(
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
     isNetworkAvailable: Boolean,
 ) {
-    val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
     val user by if (LocalInspectionMode.current) {
         remember { mutableStateOf(previewUsers[0]) }
     } else {
@@ -337,20 +340,10 @@ private fun CallJoinBody(
     }
 
     if (!isNetworkAvailable) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            StreamLogo()
-            Spacer(modifier = Modifier.height(25.dp))
-            AppName(selectedEnv)
-            Spacer(modifier = Modifier.height(25.dp))
-            Description(text = stringResource(id = R.string.you_are_offline))
-        }
+        NoInternetUiResponsive()
     } else {
         if (user != null) {
-            CallActualContent(
+            CallActualContentResponsive(
                 modifier = modifier.fillMaxSize(),
                 onJoinCall = {
                     callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = it))
@@ -368,7 +361,24 @@ private fun CallJoinBody(
 }
 
 @Composable
-private fun CallActualContent(
+private fun CallActualContentResponsive(
+    modifier: Modifier = Modifier,
+    onJoinCall: (String) -> Unit,
+    onNewCall: () -> Unit,
+    gotoQR: () -> Unit,
+    prefilledCallId: String? = null,
+) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    if (isLandscape) {
+        CallActualContentLandscape(modifier, onJoinCall, onNewCall, gotoQR, prefilledCallId)
+    } else {
+        CallActualContentPortrait(modifier, onJoinCall, onNewCall, gotoQR, prefilledCallId)
+    }
+}
+
+@Composable
+private fun CallActualContentPortrait(
     modifier: Modifier = Modifier,
     onJoinCall: (String) -> Unit,
     onNewCall: () -> Unit,
@@ -382,7 +392,7 @@ private fun CallActualContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        StreamLogo()
+        StreamLogo(Modifier.size(102.dp))
         Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingL))
         AppName()
         Spacer(modifier = Modifier.height(20.dp))
@@ -414,9 +424,65 @@ private fun CallActualContent(
 }
 
 @Composable
-private fun StreamLogo() {
+private fun CallActualContentLandscape(
+    modifier: Modifier = Modifier,
+    onJoinCall: (String) -> Unit,
+    onNewCall: () -> Unit,
+    gotoQR: () -> Unit,
+    prefilledCallId: String? = null,
+) = Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+    Row {
+        Column(
+            modifier = modifier
+                .padding(horizontal = VideoTheme.dimens.spacingM)
+                .weight(1f)
+                .semantics { testTagsAsResourceId = true },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            StreamLogo(Modifier.size(72.dp))
+            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+            AppName()
+            Description(text = stringResource(id = R.string.join_description))
+            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = VideoTheme.dimens.spacingM)
+                .align(Alignment.CenterVertically),
+        ) {
+            JoinCallForm(prefilledCallId) {
+                onJoinCall(it)
+            }
+            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+            StreamButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("Stream_StartNewCallButton"),
+                text = stringResource(id = R.string.start_a_new_call),
+                icon = Icons.Default.VideoCall,
+                onClick = { onNewCall() },
+            )
+            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+            StreamButton(
+                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("Stream_ScanQrCodeButton"),
+                text = stringResource(id = R.string.scan_qr_code),
+                icon = Icons.Default.QrCodeScanner,
+                onClick = { gotoQR() },
+            )
+        }
+    }
+}
+
+@Composable
+private fun StreamLogo(modifier: Modifier) {
     Image(
-        modifier = Modifier.size(102.dp),
+        modifier = modifier,
         painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
         contentDescription = null,
     )
@@ -567,12 +633,73 @@ class BelowElementPositionProvider(
     }
 }
 
-@Preview
 @Composable
-private fun CallJoinScreenPreview() {
+private fun NoInternetUiResponsive() {
+    val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    if (isLandscape) {
+        NoInternetUiLandscape(selectedEnv)
+    } else {
+        NoInternetUiPortrait(selectedEnv)
+    }
+}
+
+@Composable
+private fun NoInternetUiPortrait(selectedEnv: StreamEnvironment) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        StreamLogo(Modifier.size(102.dp))
+        Spacer(modifier = Modifier.height(25.dp))
+        AppName(selectedEnv)
+        Spacer(modifier = Modifier.height(25.dp))
+        Description(text = stringResource(id = R.string.you_are_offline))
+    }
+}
+
+@Composable
+private fun NoInternetUiLandscape(selectedEnv: StreamEnvironment) {
+    Column(
+        modifier = Modifier.fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        StreamLogo(Modifier.size(72.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        AppName(selectedEnv)
+        Spacer(modifier = Modifier.height(12.dp))
+        Description(text = stringResource(id = R.string.you_are_offline))
+    }
+}
+
+@Preview(
+    name = "Portrait Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=411dp,height=891dp,dpi=420",
+)
+@Composable
+private fun CallJoinScreenPortraitPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallActualContent(onJoinCall = {}, onNewCall = {}, gotoQR = {})
+        CallActualContentPortrait(onJoinCall = {}, onNewCall = {}, gotoQR = {})
+    }
+}
+
+@Preview(
+    name = "Landscape Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=891dp,height=411dp,dpi=420",
+)
+@Composable
+private fun CallJoinScreenLandscapePreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallActualContentLandscape(onJoinCall = {}, onNewCall = {}, gotoQR = {})
     }
 }
 

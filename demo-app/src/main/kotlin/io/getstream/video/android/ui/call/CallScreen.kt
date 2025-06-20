@@ -59,6 +59,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -146,7 +147,7 @@ fun CallScreen(
     var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
-    var showShareDialog by remember { mutableStateOf(true) }
+    var showShareDialog by rememberSaveable { mutableStateOf(true) }
     var showParticipants by remember { mutableStateOf(false) }
     val chatState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -390,6 +391,15 @@ fun CallScreen(
                                             ),
                                         )
                                     }
+                                    ToggleCameraAction(
+                                        modifier = Modifier
+                                            .testTag(
+                                                "Stream_CameraToggle_Enabled_$isCameraEnabled",
+                                            ),
+                                        isCameraEnabled = isCameraEnabled,
+                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
+                                    )
+                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                     ToggleMicrophoneAction(
                                         modifier = Modifier
                                             .testTag(
@@ -401,15 +411,6 @@ fun CallScreen(
                                                 it.isEnabled,
                                             )
                                         },
-                                    )
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                                    ToggleCameraAction(
-                                        modifier = Modifier
-                                            .testTag(
-                                                "Stream_CameraToggle_Enabled_$isCameraEnabled",
-                                            ),
-                                        isCameraEnabled = isCameraEnabled,
-                                        onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
                                     Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                                 }
@@ -555,18 +556,27 @@ fun CallScreen(
         if (!isPictureInPictureMode) {
             if (showShareDialog &&
                 participantsSize.size == 1 &&
-                !chatState.isVisible &&
-                orientation == Configuration.ORIENTATION_PORTRAIT
+                !chatState.isVisible
             ) {
                 val clipboardManager = remember(context) {
                     context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                 }
                 val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+
+                val configuration = LocalConfiguration.current
+                val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+                val popupYOffset = if (isPortrait) {
+                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt()
+                } else {
+                    0
+                }
+
                 Popup(
                     alignment = Alignment.BottomCenter,
                     offset = IntOffset(
                         0,
-                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
+                        popupYOffset,
                     ),
                 ) {
                     Box {
@@ -581,7 +591,8 @@ fun CallScreen(
                         IconButton(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(top = 10.dp, end = 10.dp),
+                                .padding(top = 10.dp, end = 10.dp)
+                                .testTag("Stream_InviteCloseButton"),
                             onClick = { showShareDialog = false },
                         ) {
                             Icon(
