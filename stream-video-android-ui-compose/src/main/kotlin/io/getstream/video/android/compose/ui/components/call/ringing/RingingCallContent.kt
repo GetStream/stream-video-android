@@ -175,7 +175,7 @@ public fun RingingCallContent(
             onAcceptedContent.invoke()
         }
 
-        else -> {
+        RingingState.Idle -> {
             // Includes Idle
             onIdle.invoke()
         }
