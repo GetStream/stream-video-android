@@ -22,6 +22,7 @@ import io.github.crow_misia.libyuv.AbgrBuffer
 import io.github.crow_misia.libyuv.I420Buffer
 import io.github.crow_misia.libyuv.PlanePrimitive
 import io.github.crow_misia.libyuv.RotateMode
+import io.github.crow_misia.libyuv.RowStride
 import org.webrtc.VideoFrame
 
 object YuvFrame {
@@ -59,9 +60,9 @@ object YuvFrame {
         val height = webRtcI420Buffer.height
 
         libYuvI420Buffer = I420Buffer.wrap(
-            planeY = PlanePrimitive(webRtcI420Buffer.strideY, webRtcI420Buffer.dataY),
-            planeU = PlanePrimitive(webRtcI420Buffer.strideU, webRtcI420Buffer.dataU),
-            planeV = PlanePrimitive(webRtcI420Buffer.strideV, webRtcI420Buffer.dataV),
+            planeY = PlanePrimitive(RowStride(webRtcI420Buffer.strideY), webRtcI420Buffer.dataY),
+            planeU = PlanePrimitive(RowStride(webRtcI420Buffer.strideU), webRtcI420Buffer.dataU),
+            planeV = PlanePrimitive(RowStride(webRtcI420Buffer.strideV), webRtcI420Buffer.dataV),
             width = width,
             height = height,
         )
