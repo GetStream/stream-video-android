@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.trace
 
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -25,7 +26,7 @@ internal inline fun <reified T> tracedWith(
     tracer: Tracer,
 ): T {
     val clazz = target!!::class.java
-    val handler = InterfaceMethodInvocationCounter(tracer, target)
+    val handler = InterfaceMethodInvocationTracer(tracer, target)
     return Proxy.newProxyInstance(clazz.classLoader, arrayOf(T::class.java), handler) as T
 }
 
@@ -36,13 +37,36 @@ internal inline fun <reified T> tracedWith(
  * @param target The target object to count the invocations of.
  * @param config The configuration for the counter.
  */
-internal class InterfaceMethodInvocationCounter<T>(
+internal class InterfaceMethodInvocationTracer<T>(
     private val tracer: Tracer,
     private val target: T,
 ) : InvocationHandler {
-
     override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any? {
-        tracer.trace(method.name, args)
+        val extracted = safeCallWithDefault(null) {
+            args?.mapNotNull { arg ->
+                val argString = arg?.toString() ?: "null"
+                when {
+                    // Skip continuation traces
+                    argString.startsWith("Continuation at") -> null
+                    // Extract content from class{content} pattern
+                    argString.contains("{") && argString.contains("}") -> {
+                        val startIndex = argString.indexOf('{')
+                        val endIndex = argString.lastIndexOf('}')
+                        if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                            argString.substring(startIndex + 1, endIndex)
+                        } else {
+                            argString
+                        }
+                    }
+
+                    else -> argString
+                }
+            }
+        }
+        val cleaned = extracted?.map {
+            safeCallWithDefault(it) { it.replace("\\\\+".toRegex(), "") }
+        }
+        tracer.trace(method.name, cleaned)
         return method.invoke(target, *(args ?: emptyArray()))
     }
 }

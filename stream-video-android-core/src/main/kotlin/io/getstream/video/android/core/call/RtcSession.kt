@@ -79,6 +79,7 @@ import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trace.TracerManager
 import io.getstream.video.android.core.trace.serialize
 import io.getstream.video.android.core.utils.AtomicUnitCall
@@ -210,6 +211,14 @@ public class RtcSession internal constructor(
     private val coroutineScope: CoroutineScope =
         CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
     private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
+    private val sfuTracer: Tracer = tracerManager.tracer(
+        "${sessionCounter + 1}-${
+            sfuUrl.replace(
+                "https://",
+                "",
+            ).replace("/twirp", "")
+        }",
+    ),
     private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
         SfuConnectionModule(
             context = clientImpl.context,
@@ -219,12 +228,13 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 2000L,
             userToken = sfuToken,
             lifecycle = lifecycle,
-            tracer = tracerManager.tracer("$sessionCounter-sfu"),
+            tracer = sfuTracer,
         )
     },
 ) {
     private var muteStateSyncJob: Job? = null
     private var subscriberListenJob: Job? = null
+    private val oneBasedSessionCounter = sessionCounter + 1
 
     private var stateJob: Job? = null
     private var errorJob: Job? = null
@@ -232,9 +242,8 @@ public class RtcSession internal constructor(
     internal val socket
         get() = sfuConnectionModule.socketConnection
 
-    private val publisherTracer = tracerManager.tracer("$sessionCounter-pub")
-    private val subscriberTracer = tracerManager.tracer("$sessionCounter-sub")
-    private val sfuTracer = tracerManager.tracer("$sessionCounter-sfu")
+    private val publisherTracer = tracerManager.tracer("$oneBasedSessionCounter-pub")
+    private val subscriberTracer = tracerManager.tracer("$oneBasedSessionCounter-sub")
 
     private val logger by taggedLogger("Video:RtcSession")
     private val parser: VideoParser = MoshiVideoParser()
@@ -537,7 +546,12 @@ public class RtcSession internal constructor(
             preferred_publish_options = options ?: emptyList(),
             reconnect_details = reconnectDetails,
         )
-        logger.d { "Connecting RTC, $request" }
+        sfuTracer.trace(
+            PeerConnectionTraceKey.JOIN_REQUEST.value,
+            safeCallWithDefault(null) {
+                request.adapter.toString(request)
+            },
+        )
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
         sfuConnectionModule.socketConnection.whenConnected {
@@ -561,6 +575,7 @@ public class RtcSession internal constructor(
             )
         }
     }
+
     private fun setSfuConnectionModule(sfuConnectionModule: SfuConnectionModule) {
         // This is used to switch from a current SFU connection to a new migrated SFU connection
         this@RtcSession.sfuConnectionModule = sfuConnectionModule
@@ -1061,6 +1076,7 @@ public class RtcSession internal constructor(
             }
             publisherPendingEvents.clear()
         }
+
     private suspend fun RtcSession.processPendingSubscriberEvents() =
         subscriberPendingEventsMutex.withLock {
             logger.v {
@@ -1339,12 +1355,13 @@ public class RtcSession internal constructor(
     }
 
     // share what size and which participants we're looking at
-    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> = subscriber?.restartIce() ?: Failure(
-        io.getstream.result.Error.ThrowableError(
-            "Subscriber is null",
-            Exception("Subscriber is null"),
-        ),
-    )
+    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
+        subscriber?.restartIce() ?: Failure(
+            io.getstream.result.Error.ThrowableError(
+                "Subscriber is null",
+                Exception("Subscriber is null"),
+            ),
+        )
 
     suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = wrapAPICall {
         val request = ICERestartRequest(
