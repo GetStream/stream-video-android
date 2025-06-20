@@ -26,6 +26,7 @@ import io.getstream.video.android.pages.DirectCallPage.Companion.audioCallButton
 import io.getstream.video.android.pages.DirectCallPage.Companion.videoCallButton
 import io.getstream.video.android.pages.LobbyPage
 import io.getstream.video.android.pages.LoginPage
+import io.getstream.video.android.pages.RingPage
 import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
@@ -108,6 +109,10 @@ class UserRobot {
         return this
     }
 
+    fun getUsername(): String {
+        return CallDetailsPage.userName.waitToAppear().text
+    }
+
     // LobbyPage actions
 
     fun joinCallFromLobby(): UserRobot {
@@ -118,6 +123,23 @@ class UserRobot {
 
     private fun waitForLobbyToOpen(): UserRobot {
         LobbyPage.closeButton.waitToAppear()
+        return this
+    }
+
+    // RingPage actions
+
+    fun acceptIncomingCall(): UserRobot {
+        RingPage.acceptCallButton.waitToAppear().click()
+        return this
+    }
+
+    fun declineIncomingCall(): UserRobot {
+        RingPage.declineCallButton.waitToAppear().click()
+        return this
+    }
+
+    fun waitForIncomingCall(): UserRobot {
+        RingPage.acceptCallButton.waitToAppear(timeOutMillis = 15.seconds)
         return this
     }
 

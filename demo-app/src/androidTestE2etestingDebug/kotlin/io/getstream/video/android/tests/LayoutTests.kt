@@ -71,7 +71,6 @@ class LayoutTests : StreamTestCase() {
 
     @AllureId("7502")
     @Test
-    @Ignore
     fun testSixParticipantsOnTheCall() {
         assertParticipantsOnTheCall(participants = 6, callDuration = 120)
     }
