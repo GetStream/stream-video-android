@@ -47,7 +47,7 @@ data class CallSessionParticipantCountsUpdatedEvent(
     val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap(),
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.session_participant_count_updated",
 ) :
     io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
 

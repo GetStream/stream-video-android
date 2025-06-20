@@ -39,20 +39,19 @@ data class CallSessionResponse(
     val id: kotlin.String,
 
     @Json(name = "participants")
-    val participants:
-    kotlin.collections.List<io.getstream.android.video.generated.models.CallParticipantResponse>,
+    val participants: kotlin.collections.List<io.getstream.android.video.generated.models.CallParticipantResponse> = emptyList(),
 
     @Json(name = "accepted_by")
-    val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
+    val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "missed_by")
-    val missedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
+    val missedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "participants_count_by_role")
-    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int>,
+    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap(),
 
     @Json(name = "rejected_by")
-    val rejectedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime>,
+    val rejectedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,

@@ -36,7 +36,7 @@ data class UserStats(
 
     @Json(name = "session_stats")
     val sessionStats:
-    kotlin.collections.List<io.getstream.android.video.generated.models.UserSessionStats>,
+    kotlin.collections.List<io.getstream.android.video.generated.models.UserSessionStats> = emptyList(),
 
     @Json(name = "info")
     val info: io.getstream.android.video.generated.models.UserInfoResponse,

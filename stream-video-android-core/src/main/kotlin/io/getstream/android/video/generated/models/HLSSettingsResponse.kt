@@ -38,5 +38,5 @@ data class HLSSettingsResponse(
     val enabled: kotlin.Boolean,
 
     @Json(name = "quality_tracks")
-    val qualityTracks: kotlin.collections.List<kotlin.String>,
+    val qualityTracks: kotlin.collections.List<kotlin.String> = emptyList()
 )

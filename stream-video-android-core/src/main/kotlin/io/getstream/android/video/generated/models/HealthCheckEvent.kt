@@ -37,20 +37,21 @@ data class HealthCheckEvent(
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
+    @Json(name = "type")
+    val type: kotlin.String = "health.check",
+
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
-
-    @Json(name = "type")
-    val type: kotlin.String,
 
     @Json(name = "cid")
     val cid: kotlin.String? = null,
 
     @Json(name = "received_at")
-    val receivedAt: org.threeten.bp.OffsetDateTime? = null,
-) :
-    io.getstream.android.video.generated.models.VideoEvent() {
-
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null
+)
+: io.getstream.android.video.generated.models.VideoEvent()
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }
