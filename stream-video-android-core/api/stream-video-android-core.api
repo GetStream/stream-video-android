@@ -10039,6 +10039,7 @@ public class io/getstream/video/android/core/notifications/handlers/StreamDefaul
 	public fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updatePlaybackState (Z)V
 }
 
 public class io/getstream/video/android/core/notifications/handlers/StreamNotificationBuilderInterceptors {

@@ -270,7 +270,6 @@ internal open class CallService : Service() {
 
         val notHandler = streamVideo?.streamNotificationManager?.notificationConfig?.notificationHandler as StreamDefaultNotificationHandler
 
-
         notHandler.mediaSession?.let {
             logger.d { "[onStartCommand] Media session: ${it.hashCode()}" }
             MediaButtonReceiver.handleIntent(it, intent)

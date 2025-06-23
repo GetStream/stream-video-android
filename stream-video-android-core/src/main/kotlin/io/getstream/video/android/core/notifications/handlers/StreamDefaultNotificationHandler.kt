@@ -27,7 +27,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Handler
-import android.os.HandlerThread
 import android.os.Looper
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -55,13 +54,6 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.time.Duration
 
 /**
  * Default implementation of the [StreamNotificationHandler] interface.
@@ -895,7 +887,6 @@ public open class StreamDefaultNotificationHandler(
             notificationId,
         )
 
-
         // Channel
         val channelId = notificationChannels.ongoingCallChannel.id
         notificationChannels.ongoingCallChannel.create(notificationManager)
@@ -915,7 +906,7 @@ public open class StreamDefaultNotificationHandler(
             PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
             1f,
         ).setActions(
-            PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE
+            PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE,
         )
 
         val interceptedPlaybackStateBuilder = playbackStateIntercept(playbackStateBuilder)
@@ -927,7 +918,7 @@ public open class StreamDefaultNotificationHandler(
 
             override fun onPause() {
                 logger.d { "[onPause] no args" }
-                val client  = StreamVideo.instanceOrNull() as StreamVideoClient
+                val client = StreamVideo.instanceOrNull() as StreamVideoClient
                 val activeCall = client.state.activeCall
                 logger.d { "[onPause] activeCall: $activeCall" }
                 activeCall.value?.session?.subscriber?.disable()
@@ -937,7 +928,7 @@ public open class StreamDefaultNotificationHandler(
 
             override fun onPlay() {
                 logger.d { "[onPlay] no args" }
-                val client  = StreamVideo.instanceOrNull() as StreamVideoClient
+                val client = StreamVideo.instanceOrNull() as StreamVideoClient
                 val activeCall = client.state.activeCall
                 logger.d { "[onPlay] activeCall: $activeCall" }
                 activeCall.value?.session?.subscriber?.enable()
@@ -947,7 +938,6 @@ public open class StreamDefaultNotificationHandler(
         }
 
         mediaSession.setCallback(callback, Handler(Looper.getMainLooper()))
-
 
         // 3. Build the notification as usual -----------------------------------
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
@@ -962,17 +952,26 @@ public open class StreamDefaultNotificationHandler(
         val playAction = NotificationCompat.Action(
             R.drawable.stream_video_ic_live,
             "Play",
-            MediaButtonReceiver.buildMediaButtonPendingIntent(application, PlaybackStateCompat.ACTION_PLAY)
+            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                application,
+                PlaybackStateCompat.ACTION_PLAY,
+            ),
         )
 
         val pauseAction = NotificationCompat.Action(
             R.drawable.stream_video_ic_user,
             "Pause",
-            MediaButtonReceiver.buildMediaButtonPendingIntent(application, PlaybackStateCompat.ACTION_PAUSE)
+            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                application,
+                PlaybackStateCompat.ACTION_PAUSE,
+            ),
         )
 
         mediaSession.setMediaButtonReceiver(
-            MediaButtonReceiver.buildMediaButtonPendingIntent(application, PlaybackStateCompat.ACTION_PLAY_PAUSE)
+            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                application,
+                PlaybackStateCompat.ACTION_PLAY_PAUSE,
+            ),
         )
 
         // Build notification
@@ -1007,10 +1006,9 @@ public open class StreamDefaultNotificationHandler(
             PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE)
                 .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1f)
-                .build()
+                .build(),
         )
     }
-
 
     private inline fun ensureChannelAndBuildNotification(
         channelInfo: StreamNotificationChannelInfo,
