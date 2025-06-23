@@ -187,10 +187,15 @@ internal class Subscriber(
         subscriptions.clear()
     }
 
+    private var enabled = true
+
+    fun isEnabled() = enabled
+
     /**
      * Disables all tracks.
      */
     fun disable() = safeCall {
+        enabled = false
         logger.d { "Disable all transceivers" }
         connection.transceivers?.forEach {
             it.receiver.track()?.trySetEnabled(false)
@@ -201,6 +206,7 @@ internal class Subscriber(
      * Enables all tracks.
      */
     fun enable() = safeCall {
+        enabled = true
         logger.d { "Enable all transceivers" }
         connection.transceivers?.forEach {
             it.receiver.track()?.trySetEnabled(true)

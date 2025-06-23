@@ -31,6 +31,7 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.media.session.MediaButtonReceiver
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallRejectedEvent
@@ -45,6 +46,7 @@ import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
+import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.sounds.CallSoundPlayer
@@ -265,6 +267,14 @@ internal open class CallService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val trigger = intent?.getStringExtra(TRIGGER_KEY)
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+
+        val notHandler = streamVideo?.streamNotificationManager?.notificationConfig?.notificationHandler as StreamDefaultNotificationHandler
+
+
+        notHandler.mediaSession?.let {
+            logger.d { "[onStartCommand] Media session: ${it.hashCode()}" }
+            MediaButtonReceiver.handleIntent(it, intent)
+        }
 
         val intentCallId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         val intentCallDisplayName = intent?.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)

@@ -26,6 +26,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Looper
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -35,6 +38,7 @@ import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
+import androidx.media.session.MediaButtonReceiver
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
@@ -51,6 +55,13 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.time.Duration
 
 /**
  * Default implementation of the [StreamNotificationHandler] interface.
@@ -112,6 +123,8 @@ public open class StreamDefaultNotificationHandler(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Call:StreamNotificationHandler")
+
+    internal var mediaSession: MediaSessionCompat? = null
 
     // START REGION : On push arrived
     override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
@@ -882,12 +895,13 @@ public open class StreamDefaultNotificationHandler(
             notificationId,
         )
 
+
         // Channel
         val channelId = notificationChannels.ongoingCallChannel.id
         notificationChannels.ongoingCallChannel.create(notificationManager)
 
         // Media session
-        val mediaSession = mediaSessionIntercept() ?: MediaSessionCompat(application, channelId)
+        val mediaSession = this.mediaSession ?: mediaSessionIntercept() ?: MediaSessionCompat(application, channelId)
 
         val mediaMetadataBuilder = MediaMetadataCompat.Builder()
         mediaMetadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1L)
@@ -895,10 +909,13 @@ public open class StreamDefaultNotificationHandler(
         val liveMetadata = interceptedMetaDataBuilder.build()
         mediaSession.setMetadata(liveMetadata)
 
+        val subscriber = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.state?.activeCall?.value?.session?.subscriber
         val playbackStateBuilder = PlaybackStateCompat.Builder().setState(
-            PlaybackStateCompat.STATE_PLAYING,
+            if (subscriber?.isEnabled() == true) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
             PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
             1f,
+        ).setActions(
+            PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE
         )
 
         val interceptedPlaybackStateBuilder = playbackStateIntercept(playbackStateBuilder)
@@ -906,9 +923,57 @@ public open class StreamDefaultNotificationHandler(
         val liveState = interceptedPlaybackStateBuilder.build()
         mediaSession.setPlaybackState(liveState)
 
+        val callback = object : MediaSessionCompat.Callback() {
+
+            override fun onPause() {
+                logger.d { "[onPause] no args" }
+                val client  = StreamVideo.instanceOrNull() as StreamVideoClient
+                val activeCall = client.state.activeCall
+                logger.d { "[onPause] activeCall: $activeCall" }
+                activeCall.value?.session?.subscriber?.disable()
+                updatePlaybackState(activeCall.value?.session?.subscriber?.isEnabled() == true)
+                super.onPause()
+            }
+
+            override fun onPlay() {
+                logger.d { "[onPlay] no args" }
+                val client  = StreamVideo.instanceOrNull() as StreamVideoClient
+                val activeCall = client.state.activeCall
+                logger.d { "[onPlay] activeCall: $activeCall" }
+                activeCall.value?.session?.subscriber?.enable()
+                updatePlaybackState(activeCall.value?.session?.subscriber?.isEnabled() == true)
+                super.onPlay()
+            }
+        }
+
+        mediaSession.setCallback(callback, Handler(Looper.getMainLooper()))
+
+
         // 3. Build the notification as usual -----------------------------------
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
             .setMediaSession(mediaSession.sessionToken)
+            .setShowActionsInCompactView(0, 1)
+
+        mediaSession.isActive = true
+
+        this.mediaSession = mediaSession
+
+        // Playback actions
+        val playAction = NotificationCompat.Action(
+            R.drawable.stream_video_ic_live,
+            "Play",
+            MediaButtonReceiver.buildMediaButtonPendingIntent(application, PlaybackStateCompat.ACTION_PLAY)
+        )
+
+        val pauseAction = NotificationCompat.Action(
+            R.drawable.stream_video_ic_user,
+            "Pause",
+            MediaButtonReceiver.buildMediaButtonPendingIntent(application, PlaybackStateCompat.ACTION_PAUSE)
+        )
+
+        mediaSession.setMediaButtonReceiver(
+            MediaButtonReceiver.buildMediaButtonPendingIntent(application, PlaybackStateCompat.ACTION_PLAY_PAUSE)
+        )
 
         // Build notification
         return ensureChannelAndBuildNotification(notificationChannels.ongoingCallChannel) {
@@ -923,6 +988,10 @@ public open class StreamDefaultNotificationHandler(
             setContentText(
                 application.getString(R.string.stream_video_livestream_notification_title),
             )
+
+            addAction(playAction)
+            addAction(pauseAction)
+
             setAutoCancel(false)
             setShowWhen(false)
             setOngoing(true)
@@ -930,6 +999,18 @@ public open class StreamDefaultNotificationHandler(
             notificationBuildIntercept(this)
         }
     }
+
+    fun updatePlaybackState(isPlaying: Boolean) {
+        val state = if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
+        logger.d { "Setting playback state to: $state" }
+        mediaSession?.setPlaybackState(
+            PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE)
+                .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1f)
+                .build()
+        )
+    }
+
 
     private inline fun ensureChannelAndBuildNotification(
         channelInfo: StreamNotificationChannelInfo,
