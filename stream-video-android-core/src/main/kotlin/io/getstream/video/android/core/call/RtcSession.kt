@@ -762,7 +762,7 @@ public class RtcSession internal constructor(
         supervisorJob.cancel()
     }
 
-    internal val muteState = MutableStateFlow(
+    internal var muteState = MutableStateFlow(
         mapOf(
             TrackType.TRACK_TYPE_AUDIO to false,
             TrackType.TRACK_TYPE_VIDEO to false,
@@ -829,6 +829,7 @@ public class RtcSession internal constructor(
             configuration = connectionConfiguration,
             sfuClient = sfuConnectionModule.api,
             sessionId = sessionId,
+            enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
             onIceCandidateRequest = ::sendIceCandidate,
         )
