@@ -21,17 +21,20 @@ import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 
 // 1. Content Configuration (Title and Subtitle)
+@Deprecated(message = "This class is deprecated. Use the notification interceptors instead.")
 data class MediaNotificationContent(
     val contentTitle: String,
     val contentText: String? = null,
 )
 
+@Deprecated(message = "This class is deprecated. Use the notification interceptors instead.")
 // 2. Visual Configuration (Icons and Banner)
 data class MediaNotificationVisuals(
     @DrawableRes val smallIcon: Int? = android.R.drawable.ic_media_play,
     val bannerBitmap: Bitmap? = null,
 )
 
+@Deprecated(message = "This class is deprecated. Use the notification interceptors instead.")
 data class MediaNotificationConfig(
     val mediaNotificationContent: MediaNotificationContent,
     val mediaNotificationVisuals: MediaNotificationVisuals,
