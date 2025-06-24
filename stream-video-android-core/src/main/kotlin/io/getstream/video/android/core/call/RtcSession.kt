@@ -762,7 +762,7 @@ public class RtcSession internal constructor(
         supervisorJob.cancel()
     }
 
-    internal var muteState = MutableStateFlow(
+    internal val muteState = MutableStateFlow(
         mapOf(
             TrackType.TRACK_TYPE_AUDIO to false,
             TrackType.TRACK_TYPE_VIDEO to false,
