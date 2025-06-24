@@ -11,12 +11,16 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.model.StreamCallId
-import io.mockk.*
+import io.mockk.every
+import io.mockk.verify
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.time.Duration
 
 @OptIn(ExperimentalStreamVideoApi::class)
