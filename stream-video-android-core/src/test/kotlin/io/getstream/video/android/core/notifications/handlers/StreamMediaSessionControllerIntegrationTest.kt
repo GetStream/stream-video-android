@@ -81,24 +81,24 @@ class StreamMediaSessionControllerIntegrationTest {
 
     @Test
     fun `provideMediaSession returns same instance for same callId and does not create duplicate`() {
-        val session1 = controller.provideMediaSession(application, callId, channelId)
-        val session2 = controller.provideMediaSession(application, callId, channelId)
+        val session1 = controller.provideMediaSession(application, callId, channelId, null)
+        val session2 = controller.provideMediaSession(application, callId, channelId, null)
         assertSame(session1, session2)
         verify(exactly = 1) { interceptors.onCreateMediaSessionCompat(application, channelId) }
     }
 
     @Test
     fun `provideMediaSession creates new instance after clear`() {
-        val session1 = controller.provideMediaSession(application, callId, channelId)
+        val session1 = controller.provideMediaSession(application, callId, channelId, null)
         controller.clear(callId)
-        val session2 = controller.provideMediaSession(application, callId, channelId)
+        val session2 = controller.provideMediaSession(application, callId, channelId, null)
         assertNotSame(session1, session2)
         verify(exactly = 2) { interceptors.onCreateMediaSessionCompat(application, channelId) }
     }
 
     @Test
     fun `updateMetadata calls setMetadata and interceptors`() = runTest {
-        val session = controller.provideMediaSession(application, callId, channelId)
+        val session = controller.provideMediaSession(application, callId, channelId, null)
         val builder = MediaMetadataCompat.Builder()
         controller.updateMetadata(context, session, call, callDisplayName, builder)
         verify { session.setMetadata(any()) }
@@ -114,7 +114,7 @@ class StreamMediaSessionControllerIntegrationTest {
 
     @Test
     fun `updatePlaybackState calls setPlaybackState and interceptors`() = runTest {
-        val session = controller.provideMediaSession(application, callId, channelId)
+        val session = controller.provideMediaSession(application, callId, channelId, null)
         val builder = PlaybackStateCompat.Builder()
         controller.updatePlaybackState(context, session, call, callDisplayName, builder)
         verify { session.setPlaybackState(any()) }
@@ -130,7 +130,7 @@ class StreamMediaSessionControllerIntegrationTest {
 
     @Test
     fun `initialMetadata calls setMetadata and builder interceptor`() {
-        val session = controller.provideMediaSession(application, callId, channelId)
+        val session = controller.provideMediaSession(application, callId, channelId, null)
         val builder = MediaMetadataCompat.Builder()
         controller.initialMetadata(context, session, callId, builder)
         verify { session.setMetadata(any()) }
@@ -139,7 +139,7 @@ class StreamMediaSessionControllerIntegrationTest {
 
     @Test
     fun `initialPlaybackState calls setPlaybackState and builder interceptor`() {
-        val session = controller.provideMediaSession(application, callId, channelId)
+        val session = controller.provideMediaSession(application, callId, channelId, null)
         val builder = PlaybackStateCompat.Builder()
         controller.initialPlaybackState(context, session, callId, builder)
         verify { session.setPlaybackState(any()) }

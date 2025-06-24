@@ -56,7 +56,9 @@ import io.getstream.video.android.model.StreamCallId
 /**
  * Default implementation of the [StreamNotificationHandler] interface.
  */
-public open class StreamDefaultNotificationHandler(
+public open class StreamDefaultNotificationHandler
+@OptIn(ExperimentalStreamVideoApi::class)
+constructor(
     private val application: Application,
     private val notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(
         application.applicationContext,
@@ -100,6 +102,7 @@ public open class StreamDefaultNotificationHandler(
             NotificationManager.IMPORTANCE_HIGH,
         ),
     ),
+    private val mediaSessionCallback: MediaSessionCompat.Callback? = null,
     private val mediaSessionController: StreamMediaSessionController =
         DefaultStreamMediaSessionController(
             initialNotificationBuilderInterceptor,
@@ -412,6 +415,7 @@ public open class StreamDefaultNotificationHandler(
                 application,
                 callId,
                 notificationChannels.ongoingCallChannel.id,
+                mediaSessionCallback,
             )
         },
     ): Notification? {
@@ -465,6 +469,7 @@ public open class StreamDefaultNotificationHandler(
                     application,
                     callId,
                     notificationChannels.ongoingCallChannel.id,
+                    mediaSessionCallback,
                 )
 
                 mediaSessionController.initialPlaybackState(
@@ -479,6 +484,7 @@ public open class StreamDefaultNotificationHandler(
                     application,
                     callId,
                     notificationChannels.ongoingCallChannel.id,
+                    mediaSessionCallback,
                 )
                 mediaSessionController.initialMetadata(
                     application.applicationContext,
@@ -695,6 +701,7 @@ public open class StreamDefaultNotificationHandler(
                     application,
                     callId,
                     notificationChannels.ongoingCallChannel.id,
+                    mediaSessionCallback,
                 )
                 mediaSessionController.updatePlaybackState(
                     application.applicationContext,
@@ -709,6 +716,7 @@ public open class StreamDefaultNotificationHandler(
                     application,
                     callId,
                     notificationChannels.ongoingCallChannel.id,
+                    mediaSessionCallback,
                 )
                 mediaSessionController.updateMetadata(
                     application.applicationContext,
@@ -894,6 +902,7 @@ public open class StreamDefaultNotificationHandler(
                 application,
                 callId,
                 notificationChannels.ongoingCallChannel.id,
+                mediaSessionCallback,
             )
         },
     ): Notification {
@@ -955,6 +964,7 @@ public open class StreamDefaultNotificationHandler(
         application,
         callId,
         notificationChannels.ongoingCallChannel.id,
+        mediaSessionCallback,
     )
 
     @OptIn(ExperimentalStreamVideoApi::class)

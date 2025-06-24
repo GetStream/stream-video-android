@@ -19,6 +19,7 @@ package io.getstream.video.android.core.notifications.handlers
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
@@ -39,6 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * This class is for compatibility with the old notification handler.
  */
+@OptIn(ExperimentalStreamVideoApi::class)
 open class CompatibilityStreamNotificationHandler
 @OptIn(ExperimentalStreamVideoApi::class)
 constructor(
@@ -55,10 +57,12 @@ constructor(
         StreamNotificationBuilderInterceptors(),
     updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors =
         StreamNotificationUpdateInterceptors(),
-    mediaSessionController: StreamMediaSessionController = DefaultStreamMediaSessionController(
-        initialNotificationBuilderInterceptor,
-        updateNotificationBuilderInterceptor,
-    ),
+    internal val mediaSessionController: StreamMediaSessionController =
+        DefaultStreamMediaSessionController(
+            initialNotificationBuilderInterceptor,
+            updateNotificationBuilderInterceptor,
+        ),
+    mediaSessionCallback: MediaSessionCompat.Callback? = null,
     notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
@@ -98,6 +102,7 @@ constructor(
     initialNotificationBuilderInterceptor,
     updateNotificationBuilderInterceptor,
     notificationChannels,
+    mediaSessionCallback,
     mediaSessionController,
 ) {
 

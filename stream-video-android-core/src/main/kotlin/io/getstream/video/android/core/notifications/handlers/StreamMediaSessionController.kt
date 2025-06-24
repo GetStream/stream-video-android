@@ -18,13 +18,20 @@ package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.MediaSessionCompat.Callback
 import android.support.v4.media.session.PlaybackStateCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -44,6 +51,7 @@ interface StreamMediaSessionController {
         application: Application,
         callId: StreamCallId,
         channelId: String,
+        callback: MediaSessionCompat.Callback?,
     ): MediaSessionCompat
 
     /**
@@ -129,7 +137,14 @@ open class DefaultStreamMediaSessionController(
         application: Application,
         callId: StreamCallId,
         channelId: String,
+        callback: Callback?,
     ): MediaSessionCompat {
+        val resolvedMediaSession = mediaSessions[callId.cid]
+
+        if (resolvedMediaSession != null) {
+            return resolvedMediaSession
+        }
+
         val mediaSession = mediaSessions[callId.cid] ?: interceptors.onCreateMediaSessionCompat(
             application,
             channelId,
@@ -146,6 +161,53 @@ open class DefaultStreamMediaSessionController(
             callId,
         ).build()
         mediaSession.setPlaybackState(playbackState)
+
+        if (callback != null) {
+            mediaSession.setCallback(
+                object : Callback() {
+                    override fun onPlay() {
+                        callback.onPlay()
+                        super.onPlay()
+                        val client = StreamVideo.instanceOrNull() as? StreamVideoClient
+                        client?.scope?.launch {
+                            runBlocking {
+                                val call = StreamVideo.instanceOrNull()?.state?.activeCall?.value
+                                if (call != null) {
+                                    updatePlaybackState(
+                                        application,
+                                        mediaSession,
+                                        call,
+                                        null,
+                                        PlaybackStateCompat.Builder(),
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    override fun onPause() {
+                        callback.onPause()
+                        super.onPause()
+                        val client = StreamVideo.instanceOrNull() as? StreamVideoClient
+                        client?.scope?.launch {
+                            runBlocking {
+                                val call = StreamVideo.instanceOrNull()?.state?.activeCall?.value
+                                if (call != null) {
+                                    updatePlaybackState(
+                                        application,
+                                        mediaSession,
+                                        call,
+                                        null,
+                                        PlaybackStateCompat.Builder(),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                Handler(Looper.getMainLooper()),
+            )
+        }
 
         mediaSessions[callId.cid] = mediaSession
 
@@ -232,13 +294,9 @@ open class DefaultStreamMediaSessionController(
             durationInMs ?: PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
             1f,
         )
-        val interceptedInitial = interceptors.onBuildMediaNotificationPlaybackState(
-            playbackStateBuilder,
-            StreamCallId.fromCallCid(call.cid),
-        )
 
         val intercepted = updateInterceptors.onUpdateMediaNotificationPlaybackState(
-            interceptedInitial,
+            playbackStateBuilder,
             call,
             callDisplayName,
         )
