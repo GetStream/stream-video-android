@@ -49,4 +49,10 @@
     <string name="stream_video_call_setup_notification_channel_description">Temporary notifications used while setting up calls</string>
     <string name="stream_video_call_setup_notification_title">Setting up call</string>
     <string name="stream_video_call_setup_notification_description">Please wait while we set up your call</string>
+    <string name="stream_video_missed_call_notification_channel_id">stream_missed_call_channel</string>
+    <string name="stream_video_missed_call_notification_channel_title">Missed Calls</string>
+    <string name="stream_video_missed_call_notification_channel_description">Missed call notifications</string>
+    <string name="stream_video_missed_call_notification_title">Missed call</string>
+    <string name="stream_video_missed_call_notification_description">Missed call from: %s</string>
+    <string name="stream_video_missed_call_notification_description_unknown">Unknown caller</string>
 </resources>

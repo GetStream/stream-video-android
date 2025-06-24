@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Application
@@ -25,8 +26,10 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.DrawableRes
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CallStyle
@@ -42,7 +45,6 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
@@ -51,12 +53,16 @@ import io.getstream.video.android.core.notifications.medianotifications.MediaNot
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
+@Deprecated(
+    message = "This class is deprecated. Use the notification interceptors instead.",
+)
 public open class DefaultNotificationHandler(
     private val application: Application,
     private val notificationPermissionHandler: NotificationPermissionHandler =
@@ -115,17 +121,15 @@ public open class DefaultNotificationHandler(
     override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
         val notificationId = callId.hashCode()
-        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
-            ?: run {
-                logger.e { "Couldn't find any activity for $ACTION_MISSED_CALL" }
-                intentResolver.getDefaultPendingIntent()
-            }
-        StreamVideo.instance().state.ringingCall
-        showMissedCallNotification(
-            intent,
-            callDisplayName,
-            notificationId,
-        )
+        val notification = getMissedCallNotification(callId, callDisplayName)
+        if (notification != null && ActivityCompat.checkSelfPermission(
+                application,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationManager.notify(notificationId, notification)
+            return
+        }
     }
 
     override fun getRingingCallNotification(
@@ -170,6 +174,44 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    override fun getMissedCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String?,
+    ): Notification? {
+        logger.d { "[getMissedCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName" }
+        val notificationId = callId.hashCode()
+        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
+            ?: intentResolver.getDefaultPendingIntent()
+
+        val showAsHighPriority = !hideRingingNotificationInForeground || !isInForeground()
+        val channelId = application.getString(
+            if (showAsHighPriority) {
+                R.string.stream_video_incoming_call_notification_channel_id
+            } else {
+                R.string.stream_video_incoming_call_low_priority_notification_channel_id
+            },
+        )
+
+        createIncomingCallChannel(channelId, showAsHighPriority)
+
+        // Build notification
+        val notificationContent = callDisplayName?.let {
+            application.getString(
+                R.string.stream_video_missed_call_notification_description,
+                it,
+            )
+        }
+        return NotificationCompat.Builder(application, channelId)
+            .setSmallIcon(R.drawable.stream_video_ic_call)
+            .setChannelId(channelId)
+            .setContentTitle(
+                application.getString(R.string.stream_video_missed_call_notification_title),
+            )
+            .setContentText(notificationContent)
+            .setContentIntent(intent).setAutoCancel(true)
+            .build()
+    }
+
     override fun getSettingUpCallNotification(): Notification? {
         val channelId = application.getString(
             R.string.stream_video_call_setup_notification_channel_id,
@@ -202,6 +244,48 @@ public open class DefaultNotificationHandler(
             setOngoing(true)
         }
     }
+
+    override suspend fun onCallNotificationUpdate(call: Call): Notification? {
+        coroutineScope {
+            val localUser = StreamVideo.instance().state.user.value
+            if (localUser != null) {
+                getNotificationUpdates(
+                    coroutineScope = this,
+                    call = call,
+                    localUser = localUser,
+                    onUpdate = { notification ->
+                        logger.d { "[onCallNotificationUpdate] Updating notification: $notification" }
+                        if (ActivityCompat.checkSelfPermission(
+                                application,
+                                Manifest.permission.POST_NOTIFICATIONS,
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationManager.notify(
+                                StreamCallId.fromCallCid(call.cid).hashCode(),
+                                notification,
+                            )
+                        }
+                    },
+                )
+            }
+        }
+        return null
+    }
+
+    override suspend fun updateOngoingCallNotification(
+        call: Call,
+        callDisplayName: String,
+    ): Notification? = null
+
+    override suspend fun updateOutgoingCallNotification(
+        call: Call,
+        callDisplayName: String?,
+    ): Notification? = null
+
+    override suspend fun updateIncomingCallNotification(
+        call: Call,
+        callDisplayName: String,
+    ): Notification? = null
 
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
@@ -313,7 +397,8 @@ public open class DefaultNotificationHandler(
         remoteParticipantCount: Int,
     ): Notification? {
         val client = (StreamVideo.instance() as StreamVideoClient)
-        val mediaNotificationCallTypes = client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
+        val mediaNotificationCallTypes =
+            client.streamNotificationManager.notificationConfig.mediaNotificationCallTypes
         return if (mediaNotificationCallTypes.contains(callId.type)) {
             createMinimalMediaStyleNotification(
                 callId,
@@ -470,7 +555,8 @@ public open class DefaultNotificationHandler(
                         val currentRemoteParticipantCount = remoteParticipants.size
                         // If number of remote participants increased or decreased
                         if (currentRemoteParticipantCount != latestRemoteParticipantCount) {
-                            val isSameCase = currentRemoteParticipantCount > 1 && latestRemoteParticipantCount > 1
+                            val isSameCase =
+                                currentRemoteParticipantCount > 1 && latestRemoteParticipantCount > 1
                             latestRemoteParticipantCount = currentRemoteParticipantCount
 
                             if (!isSameCase) {

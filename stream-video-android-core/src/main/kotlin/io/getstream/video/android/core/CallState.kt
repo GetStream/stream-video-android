@@ -1077,7 +1077,11 @@ public class CallState(
                 RingingState.Active
             }
         } else {
-            RingingState.Idle
+            if (_ringingState.value is RingingState.Incoming && !acceptedOnThisDevice) {
+                RingingState.TimeoutNoAnswer
+            } else {
+                RingingState.Idle
+            }
         }
 
         if (_ringingState.value != state) {

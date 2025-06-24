@@ -30,10 +30,21 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 
 internal object NoOpNotificationHandler : NotificationHandler {
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) { /* NoOp */ }
+    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
+    }
+
+    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
+    }
+
+    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
+    }
+
+    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+        /* NoOp */
+    }
 
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
@@ -49,24 +60,65 @@ internal object NoOpNotificationHandler : NotificationHandler {
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
     ): Notification? = null
+
+    override suspend fun onCallNotificationUpdate(call: Call): Notification? = null
+    override suspend fun updateOngoingCallNotification(
+        call: Call,
+        callDisplayName: String,
+    ): Notification? = null
+
+    override suspend fun updateOutgoingCallNotification(
+        call: Call,
+        callDisplayName: String?,
+    ): Notification? = null
+
+    override suspend fun updateIncomingCallNotification(
+        call: Call,
+        callDisplayName: String,
+    ): Notification? = null
+
     override fun getRingingCallNotification(
         ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
     ): Notification? = null
+
+    override fun getMissedCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String?,
+    ): Notification? = null
+
     override fun getSettingUpCallNotification(): Notification? = null
+
+    @Deprecated(
+        level = DeprecationLevel.ERROR,
+        message = "This method is deprecated. Use the getNotificationUpdates method in the NotificationHandler interface instead.",
+    )
     override fun getNotificationUpdates(
         coroutineScope: CoroutineScope,
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
-    ) { /* NoOp */ }
+    ) {
+        /* NoOp */
+    }
 
-    override fun onPermissionDenied() { /* NoOp */ }
-    override fun onPermissionGranted() { /* NoOp */ }
-    override fun onPermissionRationale() { /* NoOp */ }
-    override fun onPermissionRequested() { /* NoOp */ }
+    override fun onPermissionDenied() {
+        /* NoOp */
+    }
+
+    override fun onPermissionGranted() {
+        /* NoOp */
+    }
+
+    override fun onPermissionRationale() {
+        /* NoOp */
+    }
+
+    override fun onPermissionRequested() {
+        /* NoOp */
+    }
 
     override fun createMinimalMediaStyleNotification(
         callId: StreamCallId,
