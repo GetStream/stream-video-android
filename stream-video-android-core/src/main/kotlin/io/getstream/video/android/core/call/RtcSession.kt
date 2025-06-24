@@ -829,6 +829,7 @@ public class RtcSession internal constructor(
             configuration = connectionConfiguration,
             sfuClient = sfuConnectionModule.api,
             sessionId = sessionId,
+            enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
             onIceCandidateRequest = ::sendIceCandidate,
         )

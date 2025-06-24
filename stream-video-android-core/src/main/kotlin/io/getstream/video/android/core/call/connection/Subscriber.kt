@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.connection
 import androidx.annotation.VisibleForTesting
 import io.getstream.result.Result
 import io.getstream.result.flatMap
+import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
@@ -31,8 +32,10 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
+import io.getstream.video.android.core.utils.enableStereo
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
@@ -63,6 +66,7 @@ internal class Subscriber(
     private val sessionId: String,
     private val sfuClient: SignalServerService,
     private val coroutineScope: CoroutineScope,
+    private val enableStereo: Boolean = true,
     private val tracer: Tracer,
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : StreamPeerConnection(
@@ -77,6 +81,7 @@ internal class Subscriber(
             StreamPeerType.SUBSCRIBER,
         )
     },
+    traceCreateAnswer = false,
     tracer = tracer,
     maxBitRate = 0, // Set as needed
 ) {
@@ -219,20 +224,45 @@ internal class Subscriber(
      */
     suspend fun negotiate(offerSdp: String): Result<SendAnswerResponse> {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
-        val result = setRemoteDescription(offerDescription).flatMap {
-            createAnswer()
-        }.flatMap { answerSdp ->
-            setLocalDescription(answerSdp).map { answerSdp }
-        }.flatMap { answerSdp ->
-            val request = SendAnswerRequest(
-                PeerType.PEER_TYPE_SUBSCRIBER,
-                answerSdp.description,
-                sessionId,
-            )
-            safeCallWithResult {
-                sfuClient.sendAnswer(request)
+        val result = setRemoteDescription(offerDescription)
+            .onErrorSuspend {
+                tracer.trace("negotiate-error-setremotedescription", it.message ?: "unknown")
             }
-        }
+            .flatMap {
+                createAnswer()
+            }.map { answerSdp ->
+                if (enableStereo) {
+                    val stereoEnabled =
+                        SessionDescription(
+                            SessionDescription.Type.ANSWER,
+                            enableStereo(offerSdp, answerSdp.description),
+                        )
+                    tracer.trace(
+                        PeerConnectionTraceKey.CREATE_ANSWER.value,
+                        stereoEnabled.description,
+                    )
+                    stereoEnabled
+                } else {
+                    answerSdp
+                }
+            }.flatMap { answerSdp ->
+                setLocalDescription(answerSdp)
+                    .onErrorSuspend {
+                        tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
+                    }
+                    .map { answerSdp }
+            }.flatMap { answerSdp ->
+                val request = SendAnswerRequest(
+                    PeerType.PEER_TYPE_SUBSCRIBER,
+                    answerSdp.description,
+                    sessionId,
+                )
+                safeCallWithResult {
+                    sfuClient.sendAnswer(request)
+                }.onErrorSuspend {
+                    tracer.trace("negotiate-error-sendanswer", it.message ?: "unknown")
+                }
+            }
         logger.d { "Subscriber negotiate: $result" }
         return result
     }

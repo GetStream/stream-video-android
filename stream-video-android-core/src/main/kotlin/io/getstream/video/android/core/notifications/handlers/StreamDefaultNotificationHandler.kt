@@ -923,10 +923,11 @@ constructor(
         metadataIntercept.invoke(MediaMetadataCompat.Builder())
         playbackStateIntercept.invoke(PlaybackStateCompat.Builder())
 
-        // 3. Build the notification as usual -----------------------------------
-        val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
-            .setMediaSession(mediaSession.sessionToken)
-            .setShowActionsInCompactView(0, 1, 2)
+        val mediaStyle = initialNotificationBuilderInterceptor.onBuildMediaNotificationStyle(
+            androidx.media.app.NotificationCompat.MediaStyle(),
+            callId,
+        )
+        mediaStyle.setMediaSession(mediaSession.sessionToken)
 
         // Build notification
         return ensureChannelAndBuildNotification(notificationChannels.ongoingCallChannel) {

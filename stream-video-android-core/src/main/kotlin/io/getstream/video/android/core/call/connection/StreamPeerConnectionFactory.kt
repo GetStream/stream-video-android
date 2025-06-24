@@ -314,6 +314,7 @@ public class StreamPeerConnectionFactory(
         sessionId: String,
         sfuClient: SignalServerService,
         configuration: PeerConnection.RTCConfiguration,
+        enableStereo: Boolean = true,
         tracer: Tracer,
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
     ): Subscriber {
@@ -382,7 +383,14 @@ public class StreamPeerConnectionFactory(
         )
         webRtcLogger.d { "type ${StreamPeerType.PUBLISHER} $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
-        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, configuration.toString())
+        val traceData = safeCallWithDefault(null) {
+            "iceServers=${
+                configuration.iceServers.joinToString {
+                    it.toString()
+                }
+            } , budlePolicy=${configuration.bundlePolicy}, sdpSemantics=${configuration.sdpSemantics}"
+        }
+        peerConnection.tracer().trace(PeerConnectionTraceKey.CREATE.value, traceData)
 
         return peerConnection
     }
