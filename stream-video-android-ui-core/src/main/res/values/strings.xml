@@ -49,7 +49,11 @@
     <string name="stream_video_call_recording">Recording</string>
     <string name="stream_video_audio_leave">Leave Quietly</string>
     <string name="stream_video_audio_room_title">Audio Room</string>
-    <string name="stream_video_livestreaming_on_backstage">Waiting for live host</string>
+    <string name="stream_video_livestreaming_on_backstage">Livestream will start in:</string>
+    <string name="stream_video_livestreaming_ended">The livestream has ended</string>
+    <string name="stream_video_livestreaming_error_joining">Error joining the livestream. Please try again later.</string>
+    <string name="stream_video_livestreaming_watch_recording">Watch the recording:</string>
+    <string name="stream_video_livestreaming_host_video_not_available">The host\'s video is not available</string>
     <string name="stream_video_live">Live</string>
 
     <string name="stream_video_call_status_incoming">Incoming %s call…</string>

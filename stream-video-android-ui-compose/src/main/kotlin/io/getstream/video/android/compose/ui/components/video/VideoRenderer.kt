@@ -164,8 +164,12 @@ public fun VideoRenderer(
                                 .testTag("video_renderer"),
                         )
                     }
+                } else {
+                    // Do something when there is no media track
                 }
             }
+        } else {
+            // Do something when the video is not enabled
         }
     }
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,7 +58,7 @@ public fun LivestreamPlayer(
     enablePausing: Boolean = true,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
     backstageContent: @Composable BoxScope.(Call) -> Unit = {
-        LivestreamBackStage()
+        LivestreamBackStage(call)
     },
     videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     livestreamFlow: Flow<ParticipantState.Video?> =
@@ -88,19 +89,144 @@ public fun LivestreamPlayer(
     overlayContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamPlayerOverlay(call = call)
     },
+    liveStreamEndedContent: @Composable BoxScope.(Call) -> Unit = {
+        LivestreamEndedUi(call)
+    },
+    liveStreamHostVideoNotAvailableContent: @Composable BoxScope.(Call) -> Unit = {
+        HostVideoNotAvailableUi(call)
+    },
+    onRetryJoin: () -> Unit = {},
+    liveStreamErrorContent: @Composable BoxScope.(Call, () -> Unit) -> Unit = { _, _ ->
+        LivestreamErrorUi(call, onRetryJoin)
+    },
+    livestreamState: LivestreamState = LivestreamState.INITIAL,
 ) {
-    val backstage by call.state.backstage.collectAsStateWithLifecycle()
+    val livestream by livestreamFlow.collectAsStateWithLifecycle(initialValue = null)
+    val hostVideoAvailable = livestream?.enabled == true
+
+    Log.d("Noob", "hostVideoAvailable = $hostVideoAvailable")
 
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
-        if (backstage) {
-            backstageContent.invoke(this, call)
-        } else {
-            rendererContent.invoke(this, call)
+        when (livestreamState) {
+            LivestreamState.INITIAL -> {
+                LivestreamPlayerCompatibilityContent(
+                    call,
+                    backstageContent = backstageContent,
+                    rendererContent = rendererContent,
+                    overlayContent = overlayContent,
+                )
+            }
 
-            overlayContent.invoke(this, call)
+            LivestreamState.JOINING -> {}
+
+            LivestreamState.BACKSTAGE -> {
+                backstageContent.invoke(this, call)
+            }
+
+            LivestreamState.LIVE -> {
+                if (hostVideoAvailable) {
+                    rendererContent.invoke(this, call)
+                } else {
+                    liveStreamHostVideoNotAvailableContent.invoke(this, call)
+                }
+                overlayContent.invoke(this, call)
+            }
+
+            LivestreamState.ERROR -> {
+                liveStreamErrorContent.invoke(this, call, onRetryJoin)
+            }
+
+            LivestreamState.ENDED -> {
+                liveStreamEndedContent.invoke(this, call)
+            }
         }
+    }
+}
+
+@Deprecated("")
+@Composable
+public fun LivestreamPlayer(
+    modifier: Modifier = Modifier,
+    call: Call,
+    enablePausing: Boolean = true,
+    onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
+    backstageContent: @Composable BoxScope.(Call) -> Unit = {
+        LivestreamBackStage(call)
+    },
+    videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
+    livestreamFlow: Flow<ParticipantState.Video?> =
+        call.state.participants.flatMapLatest { participants: List<ParticipantState> ->
+            // For each participant, create a small Flow that watches videoEnabled.
+            val participantVideoFlows = participants.map { participant ->
+                participant.videoEnabled.map { enabled -> participant to enabled }
+            }
+            // Combine these Flows: whenever a participant’s videoEnabled changes,
+            // we re-calculate which participants have video.
+            combine(participantVideoFlows) { participantEnabledPairs ->
+                participantEnabledPairs
+                    .filter { (_, isEnabled) -> isEnabled }
+                    .map { (participant, _) -> participant }
+            }
+        }.flatMapLatest { participantWithVideo ->
+            participantWithVideo.firstOrNull()?.video ?: flow { emit(null) }
+        },
+    rendererContent: @Composable BoxScope.(Call) -> Unit = {
+        LivestreamRenderer(
+            call = call,
+            enablePausing = enablePausing,
+            onPausedPlayer = onPausedPlayer,
+            configuration = videoRendererConfig,
+            livestreamFlow = livestreamFlow,
+        )
+    },
+    overlayContent: @Composable BoxScope.(Call) -> Unit = {
+        LivestreamPlayerOverlay(call = call)
+    },
+    liveStreamEndedContent: @Composable BoxScope.(Call) -> Unit = {
+        LivestreamEndedUi(call)
+    },
+    liveStreamHostVideoNotAvailableContent: @Composable BoxScope.(Call) -> Unit = {
+        HostVideoNotAvailableUi(call)
+    },
+    liveStreamErrorContent: @Composable BoxScope.(Call, () -> Unit) -> Unit = { _, onRetry ->
+        LivestreamErrorUi(call, onRetry)
+    },
+) {
+    LivestreamPlayer(
+        modifier = modifier,
+        call = call,
+        enablePausing = enablePausing,
+        onPausedPlayer = onPausedPlayer,
+        backstageContent = backstageContent,
+        videoRendererConfig = videoRendererConfig,
+        livestreamFlow = livestreamFlow,
+        rendererContent = rendererContent,
+        overlayContent = overlayContent,
+        liveStreamEndedContent = liveStreamEndedContent,
+        liveStreamHostVideoNotAvailableContent = liveStreamHostVideoNotAvailableContent,
+        onRetryJoin = {},
+        liveStreamErrorContent = liveStreamErrorContent,
+        livestreamState = LivestreamState.INITIAL,
+    )
+}
+
+@Composable
+private fun BoxScope.LivestreamPlayerCompatibilityContent(
+    call: Call,
+    backstageContent: @Composable BoxScope.(Call) -> Unit,
+    rendererContent: @Composable BoxScope.(Call) -> Unit,
+    overlayContent: @Composable BoxScope.(Call) -> Unit,
+) {
+    val backstage by call.state.backstage.collectAsStateWithLifecycle()
+
+    if (backstage) {
+        backstageContent.invoke(this, call)
+    } else {
+        rendererContent.invoke(this, call)
+
+        overlayContent.invoke(this, call)
     }
 }
 
@@ -111,4 +237,13 @@ private fun LivestreamPlayerPreview() {
     VideoTheme {
         LivestreamPlayer(call = previewCall)
     }
+}
+
+public enum class LivestreamState {
+    INITIAL,
+    BACKSTAGE,
+    LIVE,
+    ENDED,
+    ERROR,
+    JOINING,
 }
