@@ -66,6 +66,9 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param onStreamAdded Handler when a new [MediaStream] gets added.
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
+ * @param maxBitRate The maximum bitrate for the connection.
+ * @param traceCreateAnswer Whether to trace the create answer event or not.
+ * @param tracer The tracer used to trace the connection.
  */
 open class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
@@ -75,6 +78,7 @@ open class StreamPeerConnection(
     private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
     private val maxBitRate: Int,
+    private val traceCreateAnswer: Boolean = true,
     private val tracer: Tracer,
 ) : PeerConnection.Observer {
 
@@ -189,10 +193,12 @@ open class StreamPeerConnection(
             when (result) {
                 is Result.Success -> {
                     logger.d { "[createAnswer] #sfu; #$typeTag; sdp: ${result.value.description}" }
-                    tracer.trace(
-                        PeerConnectionTraceKey.CREATE_ANSWER.value,
-                        result.value.description,
-                    )
+                    if (traceCreateAnswer) {
+                        tracer.trace(
+                            PeerConnectionTraceKey.CREATE_ANSWER.value,
+                            result.value.description,
+                        )
+                    }
                 }
 
                 is Result.Failure -> {
