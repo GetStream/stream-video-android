@@ -214,8 +214,8 @@ object StreamVideoInitHelper {
                 hideRingingNotificationInForeground = true,
                 notificationHandler = CompatibilityStreamNotificationHandler(
                     application = context.app,
-                    /*mediaSessionCallback = PausePlayMediaSessionCallback(),
-                    updateNotificationBuilderInterceptor = LiveStreamMediaNotificationInterceptor(context),*/
+                    mediaSessionCallback = PausePlayMediaSessionCallback(),
+                    updateNotificationBuilderInterceptor = LiveStreamMediaNotificationInterceptor(context),
                     hideRingingNotificationInForeground = true,
                 ),
             ),
