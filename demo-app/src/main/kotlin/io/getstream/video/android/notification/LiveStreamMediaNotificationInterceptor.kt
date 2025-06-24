@@ -37,7 +37,6 @@ class LiveStreamMediaNotificationInterceptor(private val context: Context) : Str
         call: Call,
         callDisplayName: String?,
     ): PlaybackStateCompat.Builder {
-        kotlinx.coroutines.delay(6000)
         builder.setActions(
             PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE,
         )
