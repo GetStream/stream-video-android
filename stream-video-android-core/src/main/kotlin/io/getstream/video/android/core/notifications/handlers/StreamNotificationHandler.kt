@@ -283,6 +283,19 @@ open class StreamNotificationBuilderInterceptors {
     }
 
     /**
+     * Intercept the notification builder and modify the media style before it is posted.
+     *
+     * @param style The media style.
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     */
+    open fun onBuildMediaNotificationStyle(
+        style: androidx.media.app.NotificationCompat.MediaStyle,
+        callId: StreamCallId,
+    ): androidx.media.app.NotificationCompat.MediaStyle {
+        return style
+    }
+
+    /**
      * Intercept the media session creation and modify it before it is posted.
      *
      * @param application The application context.
@@ -368,7 +381,7 @@ open class StreamNotificationUpdateInterceptors {
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
-    open fun onUpdateMediaNotificationMetadata(
+    open suspend fun onUpdateMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
         call: Call,
         callDisplayName: String? = null,
@@ -383,7 +396,7 @@ open class StreamNotificationUpdateInterceptors {
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
-    open fun onUpdateMediaNotificationPlaybackState(
+    open suspend fun onUpdateMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,
         call: Call,
         callDisplayName: String? = null,
@@ -397,7 +410,7 @@ open class StreamNotificationUpdateInterceptors {
      * @param application The application context.
      * @param channelId The channel id.
      */
-    open fun onUpdateMediaSessionCompat(
+    open suspend fun onUpdateMediaSessionCompat(
         application: Application,
         channelId: String,
     ): MediaSessionCompat? {

@@ -109,7 +109,7 @@ class StreamNotificationUpdateInterceptorsTest {
     }
 
     @Test
-    fun `onUpdateMediaNotificationMetadata returns builder unchanged by default`() {
+    fun `onUpdateMediaNotificationMetadata returns builder unchanged by default`() = runTest {
         // Given
         val callDisplayName = "John Doe"
 
@@ -125,7 +125,7 @@ class StreamNotificationUpdateInterceptorsTest {
     }
 
     @Test
-    fun `onUpdateMediaNotificationPlaybackState returns builder unchanged by default`() {
+    fun `onUpdateMediaNotificationPlaybackState returns builder unchanged by default`() = runTest {
         // Given
         val callDisplayName = "John Doe"
 
@@ -141,7 +141,7 @@ class StreamNotificationUpdateInterceptorsTest {
     }
 
     @Test
-    fun `onUpdateMediaSessionCompat returns null by default`() {
+    fun `onUpdateMediaSessionCompat returns null by default`() = runTest {
         // Given
         val channelId = "test-channel"
 
@@ -240,10 +240,10 @@ class StreamNotificationUpdateInterceptorsTest {
     }
 
     @Test
-    fun `custom interceptor can modify media metadata during update`() {
+    fun `custom interceptor can modify media metadata during update`() = runTest {
         // Given
         val customInterceptors = object : StreamNotificationUpdateInterceptors() {
-            override fun onUpdateMediaNotificationMetadata(
+            override suspend fun onUpdateMediaNotificationMetadata(
                 builder: MediaMetadataCompat.Builder,
                 call: Call,
                 callDisplayName: String?,
@@ -276,10 +276,10 @@ class StreamNotificationUpdateInterceptorsTest {
     }
 
     @Test
-    fun `custom interceptor can modify playback state during update`() {
+    fun `custom interceptor can modify playback state during update`() = runTest {
         // Given
         val customInterceptors = object : StreamNotificationUpdateInterceptors() {
-            override fun onUpdateMediaNotificationPlaybackState(
+            override suspend fun onUpdateMediaNotificationPlaybackState(
                 builder: PlaybackStateCompat.Builder,
                 call: Call,
                 callDisplayName: String?,
@@ -304,11 +304,11 @@ class StreamNotificationUpdateInterceptorsTest {
     }
 
     @Test
-    fun `custom interceptor can provide updated media session`() {
+    fun `custom interceptor can provide updated media session`() = runTest {
         // Given
         val mockMediaSession = mockk<MediaSessionCompat>()
         val customInterceptors = object : StreamNotificationUpdateInterceptors() {
-            override fun onUpdateMediaSessionCompat(
+            override suspend fun onUpdateMediaSessionCompat(
                 application: Application,
                 channelId: String,
             ): MediaSessionCompat? {

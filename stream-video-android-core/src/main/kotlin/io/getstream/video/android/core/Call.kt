@@ -1413,6 +1413,14 @@ public class Call(
     @InternalStreamVideoApi
     public class Debug(val call: Call) {
 
+        public fun pause() {
+            call.session?.subscriber?.disable()
+        }
+
+        public fun resume() {
+            call.session?.subscriber?.enable()
+        }
+
         public fun rejoin() {
             call.scope.launch {
                 call.rejoin()
