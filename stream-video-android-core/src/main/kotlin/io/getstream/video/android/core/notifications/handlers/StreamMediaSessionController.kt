@@ -255,10 +255,9 @@ open class DefaultStreamMediaSessionController(
         metadataBuilder: MediaMetadataCompat.Builder,
     ) {
         logger.d { "[updateMetadata] Updating media metadata for session: $mediaSession" }
-        val durationInMs = call.state.duration.value?.inWholeMilliseconds
         metadataBuilder.putLong(
             MediaMetadataCompat.METADATA_KEY_DURATION,
-            durationInMs ?: PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+            PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
         )
         val interceptedInitial = interceptors.onBuildMediaNotificationMetadata(
             metadataBuilder,
