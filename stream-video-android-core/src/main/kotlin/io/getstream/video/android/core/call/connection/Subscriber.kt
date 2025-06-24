@@ -44,6 +44,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -110,6 +111,8 @@ internal class Subscriber(
          */
         val defaultVideoDimension = VideoDimension(720, 1280)
     }
+
+    private var enabled = MutableStateFlow(true)
 
     // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
@@ -197,6 +200,7 @@ internal class Subscriber(
      */
     fun disable() = safeCall {
         logger.d { "Disable all transceivers" }
+        enabled.value = false
         connection.transceivers?.forEach {
             it.receiver.track()?.trySetEnabled(false)
         }
@@ -207,6 +211,7 @@ internal class Subscriber(
      */
     fun enable() = safeCall {
         logger.d { "Enable all transceivers" }
+        enabled.value = true
         connection.transceivers?.forEach {
             it.receiver.track()?.trySetEnabled(true)
         }
@@ -477,4 +482,6 @@ internal class Subscriber(
     }
 
     fun trackIdToParticipant(): Map<String, String> = trackIdToParticipant.toMap()
+
+    fun isEnabled() = enabled
 }
