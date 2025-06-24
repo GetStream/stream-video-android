@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -73,9 +74,11 @@ internal fun LivestreamRecordingsUi(call: Call) {
             .onError { recordings = emptyList<CallRecording>() }
     }
 
-    if (recordings.isNotEmpty()) {
+    val recordingListItems =  recordings.map { RecordingListItem(it.url, it.filename) }
+
+    if (recordingListItems.isNotEmpty()) {
         // Do nothing
-        Column {
+        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
             Text(
                 stringResource(
                     id = R.string.stream_video_livestreaming_watch_recording,
@@ -83,18 +86,17 @@ internal fun LivestreamRecordingsUi(call: Call) {
                 fontSize = 16.sp,
                 color = VideoTheme.colors.basePrimary,
             )
-
-            recordings.forEach {
+            recordingListItems.forEach {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    modifier = Modifier.clickable {
-                        try {
-                            context.downloadFile(it.url, it.filename)
-                        } catch (e: Exception) {
-                            // Do nothing
+                    modifier = Modifier
+                        .clickable {
+                            try {
+                                context.downloadFile(it.url, it.filename)
+                            } catch (e: Exception) { }
                         }
-                    },
-                    text = it.filename,
+                        .align(Alignment.CenterHorizontally),
+                    text = it.url,
                     fontSize = 14.sp,
                     color = VideoTheme.colors.baseSecondary,
                 )
@@ -117,3 +119,5 @@ private fun Context.downloadFile(url: String, title: String) {
     val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
     downloadManager.enqueue(request) // enqueue puts the download request in the queue.
 }
+
+internal data class RecordingListItem(val url: String, val filename: String)
