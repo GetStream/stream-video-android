@@ -74,7 +74,7 @@ internal fun LivestreamRecordingsUi(call: Call) {
             .onError { recordings = emptyList<CallRecording>() }
     }
 
-    val recordingListItems =  recordings.map { RecordingListItem(it.url, it.filename) }
+    val recordingListItems = recordings.map { RecordingListItem(it.url, it.filename) }
 
     if (recordingListItems.isNotEmpty()) {
         // Do nothing
