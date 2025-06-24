@@ -28,7 +28,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
-import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -388,7 +387,9 @@ internal open class CallService : Service() {
     private fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
         val handler = streamDefaultNotificationHandler()
         if (handler != null && callId != null) {
-            val isMediaNotification = notificationConfig().mediaNotificationCallTypes.contains(callId.type)
+            val isMediaNotification = notificationConfig().mediaNotificationCallTypes.contains(
+                callId.type,
+            )
             if (isMediaNotification) {
                 logger.d { "[maybeHandleMediaIntent] Handling media intent" }
                 MediaButtonReceiver.handleIntent(
@@ -703,7 +704,7 @@ internal open class CallService : Service() {
             logger.d { "Observing notification updates for call: ${call.cid}" }
             val notificationUpdateTriggers =
                 streamVideo.streamNotificationManager.notificationConfig.notificationUpdateTriggers(
-                    call
+                    call,
                 ) ?: combine(
                     call.state.ringingState,
                     call.state.members,
@@ -859,7 +860,6 @@ internal open class CallService : Service() {
         }
 
         safeCall {
-
             val handler = streamDefaultNotificationHandler()
             handler?.clearMediaSession(callId)
         }
@@ -892,7 +892,7 @@ internal open class CallService : Service() {
         return handler
     }
 
-    private fun notificationConfig() : NotificationConfig {
+    private fun notificationConfig(): NotificationConfig {
         val client = StreamVideo.instanceOrNull() as StreamVideoClient
         return client.streamNotificationManager.notificationConfig
     }

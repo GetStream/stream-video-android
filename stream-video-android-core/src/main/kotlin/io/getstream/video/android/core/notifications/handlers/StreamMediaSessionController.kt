@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
@@ -5,7 +21,6 @@ import android.content.Context
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import androidx.media.session.MediaButtonReceiver
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
@@ -28,7 +43,7 @@ interface StreamMediaSessionController {
     fun provideMediaSession(
         application: Application,
         callId: StreamCallId,
-        channelId: String
+        channelId: String,
     ): MediaSessionCompat
 
     /**
@@ -41,7 +56,7 @@ interface StreamMediaSessionController {
         context: Context,
         mediaSession: MediaSessionCompat,
         callId: StreamCallId,
-        metadataBuilder: MediaMetadataCompat.Builder
+        metadataBuilder: MediaMetadataCompat.Builder,
     )
 
     /**
@@ -54,7 +69,7 @@ interface StreamMediaSessionController {
         context: Context,
         mediaSession: MediaSessionCompat,
         callId: StreamCallId,
-        playbackStateBuilder: PlaybackStateCompat.Builder
+        playbackStateBuilder: PlaybackStateCompat.Builder,
     )
 
     /**
@@ -70,7 +85,7 @@ interface StreamMediaSessionController {
         mediaSession: MediaSessionCompat,
         call: Call,
         callDisplayName: String?,
-        metadataBuilder: MediaMetadataCompat.Builder
+        metadataBuilder: MediaMetadataCompat.Builder,
     )
 
     /**
@@ -86,7 +101,7 @@ interface StreamMediaSessionController {
         mediaSession: MediaSessionCompat,
         call: Call,
         callDisplayName: String?,
-        playbackStateBuilder: PlaybackStateCompat.Builder
+        playbackStateBuilder: PlaybackStateCompat.Builder,
     )
 
     /**
@@ -113,7 +128,7 @@ open class DefaultStreamMediaSessionController(
     override fun provideMediaSession(
         application: Application,
         callId: StreamCallId,
-        channelId: String
+        channelId: String,
     ): MediaSessionCompat {
         val mediaSession = mediaSessions[callId.cid] ?: interceptors.onCreateMediaSessionCompat(
             application,
@@ -141,7 +156,7 @@ open class DefaultStreamMediaSessionController(
         context: Context,
         mediaSession: MediaSessionCompat,
         callId: StreamCallId,
-        metadataBuilder: MediaMetadataCompat.Builder
+        metadataBuilder: MediaMetadataCompat.Builder,
     ) {
         logger.d { "[initialMetadata] Updating media metadata for session: $mediaSession" }
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1L)
@@ -154,7 +169,7 @@ open class DefaultStreamMediaSessionController(
         context: Context,
         mediaSession: MediaSessionCompat,
         callId: StreamCallId,
-        playbackStateBuilder: PlaybackStateCompat.Builder
+        playbackStateBuilder: PlaybackStateCompat.Builder,
     ) {
         logger.d { "[initialPlaybackState] Updating media metadata for session: $mediaSession" }
         playbackStateBuilder.setState(
@@ -175,13 +190,13 @@ open class DefaultStreamMediaSessionController(
         mediaSession: MediaSessionCompat,
         call: Call,
         callDisplayName: String?,
-        metadataBuilder: MediaMetadataCompat.Builder
+        metadataBuilder: MediaMetadataCompat.Builder,
     ) {
         logger.d { "[updateMetadata] Updating media metadata for session: $mediaSession" }
         val durationInMs = call.state.duration.value?.inWholeMilliseconds
         metadataBuilder.putLong(
             MediaMetadataCompat.METADATA_KEY_DURATION,
-            durationInMs ?: PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN
+            durationInMs ?: PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
         )
         val interceptedInitial = interceptors.onBuildMediaNotificationMetadata(
             metadataBuilder,
@@ -190,7 +205,7 @@ open class DefaultStreamMediaSessionController(
         val intercepted = updateInterceptors.onUpdateMediaNotificationMetadata(
             interceptedInitial,
             call,
-            callDisplayName
+            callDisplayName,
         )
         mediaSession.setMetadata(intercepted.build())
     }
@@ -200,7 +215,7 @@ open class DefaultStreamMediaSessionController(
         mediaSession: MediaSessionCompat,
         call: Call,
         callDisplayName: String?,
-        playbackStateBuilder: PlaybackStateCompat.Builder
+        playbackStateBuilder: PlaybackStateCompat.Builder,
     ) {
         logger.d { "[updatePlaybackState] Updating media metadata for session: $mediaSession" }
         val isPlaying = call.session?.subscriber?.isEnabled()?.value
@@ -225,7 +240,7 @@ open class DefaultStreamMediaSessionController(
         val intercepted = updateInterceptors.onUpdateMediaNotificationPlaybackState(
             interceptedInitial,
             call,
-            callDisplayName
+            callDisplayName,
         )
         mediaSession.setPlaybackState(intercepted.build())
     }
@@ -235,4 +250,3 @@ open class DefaultStreamMediaSessionController(
         mediaSessions.remove(callId.cid)
     }
 }
-

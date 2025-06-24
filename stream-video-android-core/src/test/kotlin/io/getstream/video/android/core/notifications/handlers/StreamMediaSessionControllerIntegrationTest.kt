@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
@@ -11,10 +27,10 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.model.StreamCallId
-import io.mockk.every
-import io.mockk.verify
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -87,7 +103,13 @@ class StreamMediaSessionControllerIntegrationTest {
         controller.updateMetadata(context, session, call, callDisplayName, builder)
         verify { session.setMetadata(any()) }
         verify { interceptors.onBuildMediaNotificationMetadata(any(), callId) }
-        coVerify { updateInterceptors.onUpdateMediaNotificationMetadata(any(), call, callDisplayName) }
+        coVerify {
+            updateInterceptors.onUpdateMediaNotificationMetadata(
+                any(),
+                call,
+                callDisplayName,
+            )
+        }
     }
 
     @Test
@@ -97,7 +119,13 @@ class StreamMediaSessionControllerIntegrationTest {
         controller.updatePlaybackState(context, session, call, callDisplayName, builder)
         verify { session.setPlaybackState(any()) }
         verify { interceptors.onBuildMediaNotificationPlaybackState(any(), callId) }
-        coVerify { updateInterceptors.onUpdateMediaNotificationPlaybackState(any(), call, callDisplayName) }
+        coVerify {
+            updateInterceptors.onUpdateMediaNotificationPlaybackState(
+                any(),
+                call,
+                callDisplayName,
+            )
+        }
     }
 
     @Test

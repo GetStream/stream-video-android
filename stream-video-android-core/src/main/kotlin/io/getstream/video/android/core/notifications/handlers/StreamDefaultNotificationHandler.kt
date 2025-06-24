@@ -100,10 +100,11 @@ public open class StreamDefaultNotificationHandler(
             NotificationManager.IMPORTANCE_HIGH,
         ),
     ),
-    private val mediaSessionController: StreamMediaSessionController = DefaultStreamMediaSessionController(
-        initialNotificationBuilderInterceptor,
-        updateNotificationBuilderInterceptor
-    ),
+    private val mediaSessionController: StreamMediaSessionController =
+        DefaultStreamMediaSessionController(
+            initialNotificationBuilderInterceptor,
+            updateNotificationBuilderInterceptor,
+        ),
     @ExperimentalStreamVideoApi
     private val permissionChecker: (
         context: Context,
@@ -408,7 +409,8 @@ public open class StreamDefaultNotificationHandler(
         metadataIntercept: MediaMetadataCompat.Builder.() -> Unit = { },
         mediaSessionIntercept: () -> MediaSessionCompat = {
             mediaSessionController.provideMediaSession(
-                application, callId,
+                application,
+                callId,
                 notificationChannels.ongoingCallChannel.id,
             )
         },
@@ -460,7 +462,8 @@ public open class StreamDefaultNotificationHandler(
             },
             playbackStateIntercept = {
                 val mediaSession = mediaSessionController.provideMediaSession(
-                    application, callId,
+                    application,
+                    callId,
                     notificationChannels.ongoingCallChannel.id,
                 )
 
@@ -468,19 +471,20 @@ public open class StreamDefaultNotificationHandler(
                     application.applicationContext,
                     mediaSession,
                     callId,
-                    this
+                    this,
                 )
             },
             metadataIntercept = {
                 val mediaSession = mediaSessionController.provideMediaSession(
-                    application, callId,
+                    application,
+                    callId,
                     notificationChannels.ongoingCallChannel.id,
                 )
                 mediaSessionController.initialMetadata(
                     application.applicationContext,
                     mediaSession,
                     callId,
-                    this
+                    this,
                 )
             },
             notificationBuildIntercept = {
@@ -688,7 +692,8 @@ public open class StreamDefaultNotificationHandler(
             isOutgoingCall = false,
             playbackStateIntercept = {
                 val mediaSession = mediaSessionController.provideMediaSession(
-                    application, callId,
+                    application,
+                    callId,
                     notificationChannels.ongoingCallChannel.id,
                 )
                 mediaSessionController.updatePlaybackState(
@@ -696,12 +701,13 @@ public open class StreamDefaultNotificationHandler(
                     mediaSession,
                     call,
                     callDisplayName,
-                    this
+                    this,
                 )
             },
             metadataIntercept = {
                 val mediaSession = mediaSessionController.provideMediaSession(
-                    application, callId,
+                    application,
+                    callId,
                     notificationChannels.ongoingCallChannel.id,
                 )
                 mediaSessionController.updateMetadata(
@@ -709,7 +715,7 @@ public open class StreamDefaultNotificationHandler(
                     mediaSession,
                     call,
                     callDisplayName,
-                    this
+                    this,
                 )
             },
             mediaNotificationIntercept = {
@@ -772,7 +778,7 @@ public open class StreamDefaultNotificationHandler(
         this?.let { notification ->
             if (permissionChecker(
                     application,
-                    Manifest.permission.POST_NOTIFICATIONS
+                    Manifest.permission.POST_NOTIFICATIONS,
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
                 notificationManager.notify(notificationId, notification)
@@ -887,7 +893,7 @@ public open class StreamDefaultNotificationHandler(
             mediaSessionController.provideMediaSession(
                 application,
                 callId,
-                notificationChannels.ongoingCallChannel.id
+                notificationChannels.ongoingCallChannel.id,
             )
         },
     ): Notification {
@@ -904,7 +910,6 @@ public open class StreamDefaultNotificationHandler(
 
         // Media session
         val mediaSession = mediaSessionIntercept()
-
 
         metadataIntercept.invoke(MediaMetadataCompat.Builder())
         playbackStateIntercept.invoke(PlaybackStateCompat.Builder())
@@ -931,7 +936,7 @@ public open class StreamDefaultNotificationHandler(
             setShowWhen(false)
             setOngoing(true)
             setSmallIcon(R.drawable.stream_video_ic_live_notification)
-            .setStyle(mediaStyle)
+                .setStyle(mediaStyle)
             notificationBuildIntercept(this)
         }
     }
@@ -947,7 +952,8 @@ public open class StreamDefaultNotificationHandler(
 
     @OptIn(ExperimentalStreamVideoApi::class)
     internal fun mediaSession(callId: StreamCallId) = mediaSessionController.provideMediaSession(
-        application, callId,
+        application,
+        callId,
         notificationChannels.ongoingCallChannel.id,
     )
 
@@ -956,4 +962,3 @@ public open class StreamDefaultNotificationHandler(
         callId?.let { mediaSessionController.clear(it) }
     }
 }
-

@@ -39,7 +39,9 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * This class is for compatibility with the old notification handler.
  */
-open class CompatibilityStreamNotificationHandler @OptIn(ExperimentalStreamVideoApi::class) constructor(
+open class CompatibilityStreamNotificationHandler
+@OptIn(ExperimentalStreamVideoApi::class)
+constructor(
     private val application: Application,
     notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
@@ -55,7 +57,7 @@ open class CompatibilityStreamNotificationHandler @OptIn(ExperimentalStreamVideo
         StreamNotificationUpdateInterceptors(),
     mediaSessionController: StreamMediaSessionController = DefaultStreamMediaSessionController(
         initialNotificationBuilderInterceptor,
-        updateNotificationBuilderInterceptor
+        updateNotificationBuilderInterceptor,
     ),
     notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
