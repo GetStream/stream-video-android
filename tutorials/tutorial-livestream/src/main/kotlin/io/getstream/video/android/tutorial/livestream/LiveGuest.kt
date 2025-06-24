@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.tutorial.livestream
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -79,7 +78,6 @@ fun LiveAudience(
             hasJoinedSuccessFully = true
 
             livestreamState = computeLivestreamState()
-            Log.d("LiveAudience", "onSuccess, LivestreamState = $livestreamState")
         }.onError {
             livestreamState = LivestreamState.ERROR
         }
@@ -98,7 +96,6 @@ fun LiveAudience(
             performJoin()
         }
     }
-    Log.d("LiveAudience", "livestreamState=$livestreamState")
     Box {
         LivestreamPlayer(
             call = call,
