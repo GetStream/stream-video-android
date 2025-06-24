@@ -46,7 +46,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun BoxScope.LivestreamBackStage(call: Call) {
@@ -63,13 +62,11 @@ internal fun BoxScope.LivestreamBackStage(call: Call) {
         )
         Spacer(Modifier.height(16.dp))
 
-        val startsAt = call.state.startsAt.collectAsStateWithLifecycle()
+        val startsAt by call.state.startsAt.collectAsStateWithLifecycle()
 
-        val targetUtcTime = Clock.System.now()
-            .plus(10.seconds)
-            .toString()
-
-        CountDownTimerUi(targetUtcTime)
+        if (startsAt != null) {
+            CountDownTimerUi(startsAt.toString())
+        }
         ParticipantCountUi(call)
     }
 }
