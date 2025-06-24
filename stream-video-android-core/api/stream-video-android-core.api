@@ -10067,6 +10067,7 @@ public class io/getstream/video/android/core/notifications/handlers/StreamNotifi
 	public fun onBuildIncomingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;Z)Landroidx/core/app/NotificationCompat$Builder;
 	public fun onBuildMediaNotificationMetadata (Landroid/support/v4/media/MediaMetadataCompat$Builder;Lio/getstream/video/android/model/StreamCallId;)Landroid/support/v4/media/MediaMetadataCompat$Builder;
 	public fun onBuildMediaNotificationPlaybackState (Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lio/getstream/video/android/model/StreamCallId;)Landroid/support/v4/media/session/PlaybackStateCompat$Builder;
+	public fun onBuildMediaNotificationStyle (Landroidx/media/app/NotificationCompat$MediaStyle;Lio/getstream/video/android/model/StreamCallId;)Landroidx/media/app/NotificationCompat$MediaStyle;
 	public fun onBuildMissedCallNotification (Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;)Landroidx/core/app/NotificationCompat$Builder;
 	public fun onBuildOngoingCallMediaNotification (Landroidx/core/app/NotificationCompat$Builder;Lio/getstream/video/android/model/StreamCallId;)Landroidx/core/app/NotificationCompat$Builder;
 	public fun onBuildOngoingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZI)Landroidx/core/app/NotificationCompat$Builder;
