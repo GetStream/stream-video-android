@@ -126,20 +126,22 @@ public fun LivestreamPlayer(
     var livestreamState by rememberSaveable { mutableStateOf(LivestreamState.INITIAL) }
 
     LaunchedEffect(connection, endedAt, backstage) {
-        livestreamState = when (connection) {
+        when (connection) {
             is RealtimeConnection.Connected -> {
                 hasJoinedSuccessfully = true
-                when {
+                livestreamState = when {
                     endedAt != null -> LivestreamState.ENDED
                     backstage -> LivestreamState.BACKSTAGE
                     else -> LivestreamState.LIVE
                 }
             }
-            is RealtimeConnection.Failed -> LivestreamState.ERROR
-            is RealtimeConnection.InProgress -> LivestreamState.JOINING
-            else -> LivestreamState.INITIAL
+
+            is RealtimeConnection.Failed -> livestreamState = LivestreamState.ERROR
+            is RealtimeConnection.InProgress -> livestreamState = LivestreamState.JOINING
+            else -> { }
         }
     }
+
     LivestreamPlayerImpl(
         modifier = modifier,
         call = call,
@@ -195,7 +197,8 @@ internal fun LivestreamPlayerImpl(
                 )
             }
 
-            LivestreamState.JOINING -> {}
+            LivestreamState.JOINING -> {
+            }
 
             LivestreamState.BACKSTAGE -> {
                 backstageContent.invoke(this, call)
