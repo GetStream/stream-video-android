@@ -33,7 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
-import io.getstream.video.android.compose.ui.components.livestream.LivestreamState
+import io.getstream.video.android.compose.ui.components.livestream.state.LivestreamState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import kotlinx.coroutines.launch

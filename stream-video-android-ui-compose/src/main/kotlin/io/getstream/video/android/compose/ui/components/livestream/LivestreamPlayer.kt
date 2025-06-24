@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.livestream.state.LivestreamState
 import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
@@ -268,13 +269,4 @@ private fun LivestreamPlayerPreview() {
     VideoTheme {
         LivestreamPlayer(call = previewCall)
     }
-}
-
-public enum class LivestreamState {
-    INITIAL,
-    BACKSTAGE,
-    LIVE,
-    ENDED,
-    ERROR,
-    JOINING,
 }
