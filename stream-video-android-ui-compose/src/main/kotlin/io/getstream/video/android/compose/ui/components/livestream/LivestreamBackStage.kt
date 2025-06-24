@@ -55,7 +55,7 @@ internal fun BoxScope.LivestreamBackStage(call: Call) {
     ) {
         Text(
             text = stringResource(
-                id = R.string.stream_video_livestreaming_on_backstage,
+                id = R.string.stream_video_livestreaming_on_backstage_v2,
             ),
             fontSize = 18.sp,
             color = VideoTheme.colors.basePrimary,
@@ -69,6 +69,22 @@ internal fun BoxScope.LivestreamBackStage(call: Call) {
         }
         ParticipantCountUi(call)
     }
+}
+
+@Deprecated(
+    message = "Use LivestreamBackStage(call: Call) instead. The new API provides access to call-specific data for rendering backstage UI more effectively.",
+    replaceWith = ReplaceWith("LivestreamBackStage(call)"),
+)
+@Composable
+internal fun BoxScope.LivestreamBackStage() {
+    Text(
+        modifier = Modifier.align(Alignment.Center),
+        text = stringResource(
+            id = R.string.stream_video_livestreaming_on_backstage,
+        ),
+        fontSize = 14.sp,
+        color = VideoTheme.colors.basePrimary,
+    )
 }
 
 @Composable
