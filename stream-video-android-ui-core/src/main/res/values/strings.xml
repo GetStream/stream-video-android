@@ -50,6 +50,7 @@
     <string name="stream_video_audio_leave">Leave Quietly</string>
     <string name="stream_video_audio_room_title">Audio Room</string>
     <string name="stream_video_livestreaming_on_backstage">Livestream will start in:</string>
+    <string name="stream_video_livestreaming_countdown_finished">00:00</string>
     <string name="stream_video_livestreaming_ended">The livestream has ended</string>
     <string name="stream_video_livestreaming_error_joining">Error joining the livestream. Please try again later.</string>
     <string name="stream_video_livestreaming_watch_recording">Watch the recording:</string>

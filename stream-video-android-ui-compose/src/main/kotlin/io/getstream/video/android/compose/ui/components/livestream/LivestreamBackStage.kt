@@ -110,7 +110,7 @@ internal fun CountDownTimerUi(targetUtcTime: String) {
 
     var countDownText = ""
     if (timeLeft.isNegative()) {
-        countDownText = "Countdown finished!"
+        countDownText = stringResource(R.string.stream_video_livestreaming_countdown_finished)
     } else {
         val hours = timeLeft.inWholeHours
         val minutes = (timeLeft.inWholeMinutes % 60)
