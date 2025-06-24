@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.connection
 
 import androidx.annotation.VisibleForTesting
+import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
@@ -86,6 +87,7 @@ internal class Publisher(
     onNegotiationNeeded,
     onIceCandidate,
     maxBitRate,
+    true,
     tracer,
 ) {
     private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
@@ -144,7 +146,10 @@ internal class Publisher(
             },
         ).getOrThrow()
         val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
-
+        tracer.trace(
+            "negotiate-with-tracks",
+            trackInfos.joinToString(separator = ";") { it.toString() },
+        )
         if (trackInfos.isEmpty()) {
             logger.e { ("Can't negotiate without announcing any tracks") }
             rejoin.invoke()
@@ -154,7 +159,9 @@ internal class Publisher(
 
         safeCall {
             isIceRestarting = iceRestart
-            setLocalDescription(offer)
+            setLocalDescription(offer).onErrorSuspend {
+                tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
+            }
             val request = SetPublisherRequest(
                 sdp = offer.description,
                 tracks = trackInfos,
@@ -164,10 +171,17 @@ internal class Publisher(
             logger.i { "Received answer: ${response.sdp}" }
             logger.e { "Received error: ${response.error}" }
             if (response.error != null) {
+                tracer.trace("negotiate-error-setpublisher", response.error.message ?: "unknown")
                 logger.e { response.error.message }
                 rejoin()
             }
             setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, response.sdp))
+                .onErrorSuspend {
+                    tracer.trace(
+                        "negotiate-error-setremotedescription",
+                        it.message ?: "unknown",
+                    )
+                }
             // Set ice trickle
         }
         isIceRestarting = false
@@ -231,6 +245,7 @@ internal class Publisher(
                 }
                 // This is the first time we are adding the transceiver.
                 val newTrack = newTrackFromSource(publishOption.track_type)
+                traceTrack(trackType, newTrack.id())
                 addTransceiver(captureFormat, newTrack, publishOption)
                 return newTrack
             }
