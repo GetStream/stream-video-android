@@ -87,6 +87,7 @@ io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
 io.getstream.video.android.compose.ui.components.indicator
 io.getstream.video.android.compose.ui.components.livestream
+io.getstream.video.android.compose.ui.components.livestream.state
 io.getstream.video.android.compose.ui.components.participants
 io.getstream.video.android.compose.ui.components.participants.internal
 io.getstream.video.android.compose.ui.components.video

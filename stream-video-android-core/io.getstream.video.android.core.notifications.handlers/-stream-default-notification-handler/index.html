@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.8.0
+            <div class="library-version">1.9.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.core.notifications.handlers</a><span class="delimiter">/</span><span class="current">StreamDefaultNotificationHandler</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Stream</span><wbr><span>Default</span><wbr><span>Notification</span><wbr><span><span>Handler</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">StreamDefaultNotificationHandler</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">application<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Application.html">Application</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/core/app/NotificationManagerCompat.html">NotificationManagerCompat</a><span class="token operator"> = </span>NotificationManagerCompat.from(
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">StreamDefaultNotificationHandler</a>&nbsp;<span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">application<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Application.html">Application</a><span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/core/app/NotificationManagerCompat.html">NotificationManagerCompat</a><span class="token operator"> = </span>NotificationManagerCompat.from(
         application.applicationContext,
     )<span class="token punctuation">, </span></span><span class="parameter ">notificationPermissionHandler<span class="token operator">: </span><span data-unresolved-link="io.getstream.android.push.permissions/NotificationPermissionHandler///PointingToDeclaration/">NotificationPermissionHandler</span><span class="token operator"> = </span>DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
@@ -95,7 +95,10 @@
             R.string.stream_video_missed_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
         ),
-    )<span class="token punctuation">, </span></span><span class="parameter ">permissionChecker<span class="token operator">: </span><span class="token punctuation">(</span>context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span>permission<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>{ context, permission -&gt;
+    )<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionCallback<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/support/v4/media/session/MediaSessionCompat.Callback.html">MediaSessionCompat.Callback</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionController<span class="token operator">: </span><a href="../-stream-media-session-controller/index.html">StreamMediaSessionController</a><span class="token operator"> = </span>DefaultStreamMediaSessionController(
+            initialNotificationBuilderInterceptor,
+            updateNotificationBuilderInterceptor,
+        )<span class="token punctuation">, </span></span><span class="parameter ">permissionChecker<span class="token operator">: </span><span class="token punctuation">(</span>context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span>permission<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>{ context, permission -&gt;
         ActivityCompat.checkSelfPermission(context, permission)
     }</span></span><span class="token punctuation">)</span> : <a href="../-stream-notification-handler/index.html">StreamNotificationHandler</a>, <a href="../-stream-notification-provider/index.html">StreamNotificationProvider</a>, <a href="../-stream-notification-updates-provider/index.html">StreamNotificationUpdatesProvider</a>, <span data-unresolved-link="io.getstream.android.push.permissions/NotificationPermissionHandler///PointingToDeclaration/">NotificationPermissionHandler</span></div><p class="paragraph">Default implementation of the <a href="../-stream-notification-handler/index.html">StreamNotificationHandler</a> interface.</p><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-compatibility-stream-notification-handler/index.html">CompatibilityStreamNotificationHandler</a></div></span></div><div></div></div></div></div></div></div>
   </div>
@@ -104,12 +107,12 @@
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="1852746728%2FConstructors%2F-1625990423" anchor-label="StreamDefaultNotificationHandler" id="1852746728%2FConstructors%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+        <div class="table"><a data-name="701448614%2FConstructors%2F-1625990423" anchor-label="StreamDefaultNotificationHandler" id="701448614%2FConstructors%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-stream-default-notification-handler.html"><span>Stream</span><wbr><span>Default</span><wbr><span>Notification</span><wbr><span><span>Handler</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1852746728%2FConstructors%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="701448614%2FConstructors%2F-1625990423"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
@@ -147,7 +150,10 @@
             R.string.stream_video_missed_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
         ),
-    )<span class="token punctuation">, </span></span><span class="parameter ">permissionChecker<span class="token operator">: </span><span class="token punctuation">(</span>context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span>permission<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>{ context, permission -&gt;
+    )<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionCallback<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/support/v4/media/session/MediaSessionCompat.Callback.html">MediaSessionCompat.Callback</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionController<span class="token operator">: </span><a href="../-stream-media-session-controller/index.html">StreamMediaSessionController</a><span class="token operator"> = </span>DefaultStreamMediaSessionController(
+            initialNotificationBuilderInterceptor,
+            updateNotificationBuilderInterceptor,
+        )<span class="token punctuation">, </span></span><span class="parameter ">permissionChecker<span class="token operator">: </span><span class="token punctuation">(</span>context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span>permission<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>{ context, permission -&gt;
         ActivityCompat.checkSelfPermission(context, permission)
     }</span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
