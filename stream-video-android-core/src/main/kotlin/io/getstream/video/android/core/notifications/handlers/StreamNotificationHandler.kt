@@ -368,7 +368,7 @@ open class StreamNotificationUpdateInterceptors {
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
-    open fun onUpdateMediaNotificationMetadata(
+    open suspend fun onUpdateMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
         call: Call,
         callDisplayName: String? = null,
@@ -383,7 +383,7 @@ open class StreamNotificationUpdateInterceptors {
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
-    open fun onUpdateMediaNotificationPlaybackState(
+    open suspend fun onUpdateMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,
         call: Call,
         callDisplayName: String? = null,
@@ -397,7 +397,7 @@ open class StreamNotificationUpdateInterceptors {
      * @param application The application context.
      * @param channelId The channel id.
      */
-    open fun onUpdateMediaSessionCompat(
+    open suspend fun onUpdateMediaSessionCompat(
         application: Application,
         channelId: String,
     ): MediaSessionCompat? {

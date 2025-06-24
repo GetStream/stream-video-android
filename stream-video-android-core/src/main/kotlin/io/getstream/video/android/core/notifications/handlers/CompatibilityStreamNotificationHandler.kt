@@ -25,6 +25,7 @@ import io.getstream.android.push.permissions.DefaultNotificationPermissionHandle
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.StreamIntentResolver
@@ -38,7 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * This class is for compatibility with the old notification handler.
  */
-open class CompatibilityStreamNotificationHandler(
+open class CompatibilityStreamNotificationHandler @OptIn(ExperimentalStreamVideoApi::class) constructor(
     private val application: Application,
     notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
@@ -52,6 +53,10 @@ open class CompatibilityStreamNotificationHandler(
         StreamNotificationBuilderInterceptors(),
     updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors =
         StreamNotificationUpdateInterceptors(),
+    mediaSessionController: StreamMediaSessionController = DefaultStreamMediaSessionController(
+        initialNotificationBuilderInterceptor,
+        updateNotificationBuilderInterceptor
+    ),
     notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
@@ -91,6 +96,7 @@ open class CompatibilityStreamNotificationHandler(
     initialNotificationBuilderInterceptor,
     updateNotificationBuilderInterceptor,
     notificationChannels,
+    mediaSessionController,
 ) {
 
     // Deprecated methods for compatibility

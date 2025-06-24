@@ -28,9 +28,11 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.media.session.MediaButtonReceiver
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallRejectedEvent
@@ -42,12 +44,15 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
+import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.sounds.CallSoundPlayer
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
@@ -276,6 +281,8 @@ internal open class CallService : Service() {
             "[onStartCommand] streamVideo: ${streamVideo != null}, intentCallId: ${intentCallId != null}, trigger: $trigger"
         }
 
+        maybeHandleMediaIntent(intent, intentCallId)
+
         val started = if (intentCallId != null && streamVideo != null && trigger != null) {
             logger.d { "[onStartCommand] All required parameters available, proceeding with service start" }
             // Promote early to foreground service
@@ -375,6 +382,20 @@ internal open class CallService : Service() {
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
+        }
+    }
+
+    private fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
+        val handler = streamDefaultNotificationHandler()
+        if (handler != null && callId != null) {
+            val isMediaNotification = notificationConfig().mediaNotificationCallTypes.contains(callId.type)
+            if (isMediaNotification) {
+                logger.d { "[maybeHandleMediaIntent] Handling media intent" }
+                MediaButtonReceiver.handleIntent(
+                    handler.mediaSession(callId),
+                    intent,
+                )
+            }
         }
     }
 
@@ -680,14 +701,17 @@ internal open class CallService : Service() {
         serviceScope.launch {
             val call = streamVideo.call(callId.type, callId.id)
             logger.d { "Observing notification updates for call: ${call.cid}" }
-            val notificationUpdateTriggers = streamVideo.streamNotificationManager.notificationConfig.notificationUpdateTriggers(call) ?: combine(
-                call.state.ringingState,
-                call.state.members,
-                call.state.remoteParticipants,
-                call.state.backstage,
-            ) { ringingState, members, remoteParticipants, backstage ->
-                listOf(ringingState, members, remoteParticipants, backstage)
-            }.distinctUntilChanged()
+            val notificationUpdateTriggers =
+                streamVideo.streamNotificationManager.notificationConfig.notificationUpdateTriggers(
+                    call
+                ) ?: combine(
+                    call.state.ringingState,
+                    call.state.members,
+                    call.state.remoteParticipants,
+                    call.state.backstage,
+                ) { ringingState, members, remoteParticipants, backstage ->
+                    listOf(ringingState, members, remoteParticipants, backstage)
+                }.distinctUntilChanged()
 
             notificationUpdateTriggers.collectLatest { state ->
                 val ringingState = call.state.ringingState.value
@@ -707,6 +731,7 @@ internal open class CallService : Service() {
                                 serviceType,
                             )
                         }
+
                         is RingingState.Outgoing -> {
                             logger.d { "[observeNotificationUpdates] Showing outgoing call notification" }
                             startForegroundWithServiceType(
@@ -716,6 +741,7 @@ internal open class CallService : Service() {
                                 serviceType,
                             )
                         }
+
                         is RingingState.Incoming -> {
                             logger.d { "[observeNotificationUpdates] Showing incoming call notification" }
                             startForegroundWithServiceType(
@@ -725,6 +751,7 @@ internal open class CallService : Service() {
                                 serviceType,
                             )
                         }
+
                         else -> {
                             logger.d { "[observeNotificationUpdates] Unhandled ringing state: $ringingState" }
                         }
@@ -831,6 +858,12 @@ internal open class CallService : Service() {
             logger.i { "[stopService]. Cancelled notificationId: $notificationId" }
         }
 
+        safeCall {
+
+            val handler = streamDefaultNotificationHandler()
+            handler?.clearMediaSession(callId)
+        }
+
         // Optionally cancel any incoming call notification
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
         logger.i { "[stopService]. Cancelled incoming call notificationId: $INCOMING_CALL_NOTIFICATION_ID" }
@@ -850,6 +883,18 @@ internal open class CallService : Service() {
 
         // Optionally (no-op if already stopping)
         stopSelf()
+    }
+
+    private fun streamDefaultNotificationHandler(): StreamDefaultNotificationHandler? {
+        val client = StreamVideo.instanceOrNull() as StreamVideoClient
+        val handler =
+            client.streamNotificationManager.notificationConfig.notificationHandler as? StreamDefaultNotificationHandler
+        return handler
+    }
+
+    private fun notificationConfig() : NotificationConfig {
+        val client = StreamVideo.instanceOrNull() as StreamVideoClient
+        return client.streamNotificationManager.notificationConfig
     }
 
     private fun unregisterToggleCameraBroadcastReceiver() {
