@@ -20,7 +20,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +35,7 @@ import io.getstream.video.android.compose.ui.components.video.config.VideoRender
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import kotlinx.coroutines.flow.Flow
@@ -57,9 +62,9 @@ import kotlinx.coroutines.flow.map
  * @param overlayContent UI layered on top of the video for participant counts, controls, etc.
  * @param liveStreamEndedContent UI shown when the livestream has ended.
  * @param liveStreamHostVideoNotAvailableContent UI shown when the host has no video available.
- * @param onRetryJoin Callback triggered when retrying to join the livestream after a failure.
  * @param liveStreamErrorContent UI shown in case of an error joining or rendering the livestream.
- * @param livestreamState The current state of the livestream (e.g. BACKSTAGE, LIVE, ENDED).
+ * @param onRetryJoin Callback triggered when retrying to join the livestream after a failure.
+ *
  */
 
 @Composable
@@ -106,15 +111,79 @@ public fun LivestreamPlayer(
     liveStreamHostVideoNotAvailableContent: @Composable BoxScope.(Call) -> Unit = {
         HostVideoNotAvailableUi(call)
     },
-    onRetryJoin: () -> Unit = {},
-    liveStreamErrorContent: @Composable BoxScope.(Call, () -> Unit) -> Unit = { _, _ ->
-        LivestreamErrorUi(call, onRetryJoin)
+    liveStreamErrorContent: @Composable BoxScope.(Call, () -> Unit) -> Unit = { _, retryJoin ->
+        LivestreamErrorUi(call, retryJoin)
     },
-    livestreamState: LivestreamState = LivestreamState.INITIAL,
+    onRetryJoin: () -> Unit = {},
 ) {
     val livestream by livestreamFlow.collectAsStateWithLifecycle(initialValue = null)
     val hostVideoAvailable = livestream?.enabled == true
 
+    val connection by call.state.connection.collectAsStateWithLifecycle()
+    val endedAt by call.state.endedAt.collectAsStateWithLifecycle()
+    val backstage by call.state.backstage.collectAsStateWithLifecycle()
+    var hasJoinedSuccessfully by rememberSaveable { mutableStateOf(false) }
+    var livestreamState by rememberSaveable { mutableStateOf(LivestreamState.INITIAL) }
+
+    LaunchedEffect(connection, endedAt, backstage) {
+        when (connection) {
+            is RealtimeConnection.Connected -> {
+                hasJoinedSuccessfully = true
+                livestreamState = when {
+                    endedAt != null -> LivestreamState.ENDED
+                    backstage -> LivestreamState.BACKSTAGE
+                    else -> LivestreamState.LIVE
+                }
+            }
+
+            is RealtimeConnection.Failed -> livestreamState = LivestreamState.ERROR
+            is RealtimeConnection.InProgress -> livestreamState = LivestreamState.JOINING
+            else -> { }
+        }
+    }
+
+    LivestreamPlayerImpl(
+        modifier = modifier,
+        call = call,
+        enablePausing = enablePausing,
+        onPausedPlayer = onPausedPlayer,
+        backstageContent = backstageContent,
+        videoRendererConfig = videoRendererConfig,
+        livestreamFlow = livestreamFlow,
+        hostVideoAvailable = hostVideoAvailable,
+        livestreamState = livestreamState,
+        rendererContent = rendererContent,
+        overlayContent = overlayContent,
+        liveStreamEndedContent = liveStreamEndedContent,
+        liveStreamHostVideoNotAvailableContent = liveStreamHostVideoNotAvailableContent,
+        liveStreamErrorContent = liveStreamErrorContent,
+        onRetryJoin = onRetryJoin,
+    )
+}
+
+@Composable
+internal fun LivestreamPlayerImpl(
+    modifier: Modifier = Modifier,
+    call: Call,
+    enablePausing: Boolean,
+    onPausedPlayer: ((isPaused: Boolean) -> Unit)?,
+    backstageContent: @Composable BoxScope.(Call) -> Unit,
+    videoRendererConfig: VideoRendererConfig,
+    livestreamFlow: Flow<ParticipantState.Video?>,
+    hostVideoAvailable: Boolean,
+    livestreamState: LivestreamState,
+    rendererContent: @Composable BoxScope.(Call) -> Unit,
+    overlayContent: @Composable BoxScope.(Call) -> Unit,
+    liveStreamEndedContent: @Composable BoxScope.(Call) -> Unit,
+    liveStreamHostVideoNotAvailableContent: @Composable BoxScope.(
+        Call,
+    ) -> Unit,
+    liveStreamErrorContent: @Composable BoxScope.(
+        Call,
+        () -> Unit,
+    ) -> Unit,
+    onRetryJoin: () -> Unit,
+) {
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -128,7 +197,8 @@ public fun LivestreamPlayer(
                 )
             }
 
-            LivestreamState.JOINING -> {}
+            LivestreamState.JOINING -> {
+            }
 
             LivestreamState.BACKSTAGE -> {
                 backstageContent.invoke(this, call)
@@ -152,96 +222,6 @@ public fun LivestreamPlayer(
             }
         }
     }
-}
-
-/**
- * Renders a livestream video player UI based on the current state of the provided [call].
- *
- * @param modifier Modifier used to style the livestream container.
- * @param call The call instance providing state and media tracks for rendering.
- * @param enablePausing Whether the livestream video can be paused and resumed by the viewer.
- * @param onPausedPlayer Callback to observe pause/resume interactions.
- * @param backstageContent UI shown when the host hasn't started the livestream.
- * @param videoRendererConfig Configuration for how the video is rendered internally.
- * @param livestreamFlow A Flow emitting the video track of the host or primary speaker.
- * @param rendererContent UI responsible for rendering the host’s video stream.
- * @param overlayContent UI layered on top of the video for participant counts, controls, etc.
- * @param liveStreamEndedContent UI shown when the livestream has ended.
- * @param liveStreamHostVideoNotAvailableContent UI shown when the host has no video available.
- * @param liveStreamErrorContent UI shown in case of an error joining or rendering the livestream.
- */
-
-@Deprecated(
-    message = "This LivestreamPlayer overload is deprecated. Please use the newer API that includes 'livestreamState' and 'onRetryJoin' parameters for better state handling and retry support.",
-    replaceWith = ReplaceWith(
-        expression = "LivestreamPlayer(call = call, livestreamState = LivestreamState.INITIAL, onRetryJoin = { /* retry logic */ })",
-    ),
-    level = DeprecationLevel.WARNING,
-)
-@Composable
-public fun LivestreamPlayer(
-    modifier: Modifier = Modifier,
-    call: Call,
-    enablePausing: Boolean = true,
-    onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
-    backstageContent: @Composable BoxScope.(Call) -> Unit = {
-        LivestreamBackStage()
-    },
-    videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
-    livestreamFlow: Flow<ParticipantState.Video?> =
-        call.state.participants.flatMapLatest { participants: List<ParticipantState> ->
-            // For each participant, create a small Flow that watches videoEnabled.
-            val participantVideoFlows = participants.map { participant ->
-                participant.videoEnabled.map { enabled -> participant to enabled }
-            }
-            // Combine these Flows: whenever a participant’s videoEnabled changes,
-            // we re-calculate which participants have video.
-            combine(participantVideoFlows) { participantEnabledPairs ->
-                participantEnabledPairs
-                    .filter { (_, isEnabled) -> isEnabled }
-                    .map { (participant, _) -> participant }
-            }
-        }.flatMapLatest { participantWithVideo ->
-            participantWithVideo.firstOrNull()?.video ?: flow { emit(null) }
-        },
-    rendererContent: @Composable BoxScope.(Call) -> Unit = {
-        LivestreamRenderer(
-            call = call,
-            enablePausing = enablePausing,
-            onPausedPlayer = onPausedPlayer,
-            configuration = videoRendererConfig,
-            livestreamFlow = livestreamFlow,
-        )
-    },
-    overlayContent: @Composable BoxScope.(Call) -> Unit = {
-        LivestreamPlayerOverlay(call = call)
-    },
-    liveStreamEndedContent: @Composable BoxScope.(Call) -> Unit = {
-        LivestreamEndedUi(call)
-    },
-    liveStreamHostVideoNotAvailableContent: @Composable BoxScope.(Call) -> Unit = {
-        HostVideoNotAvailableUi(call)
-    },
-    liveStreamErrorContent: @Composable BoxScope.(Call, () -> Unit) -> Unit = { _, onRetry ->
-        LivestreamErrorUi(call, onRetry)
-    },
-) {
-    LivestreamPlayer(
-        modifier = modifier,
-        call = call,
-        enablePausing = enablePausing,
-        onPausedPlayer = onPausedPlayer,
-        backstageContent = backstageContent,
-        videoRendererConfig = videoRendererConfig,
-        livestreamFlow = livestreamFlow,
-        rendererContent = rendererContent,
-        overlayContent = overlayContent,
-        liveStreamEndedContent = liveStreamEndedContent,
-        liveStreamHostVideoNotAvailableContent = liveStreamHostVideoNotAvailableContent,
-        onRetryJoin = {},
-        liveStreamErrorContent = liveStreamErrorContent,
-        livestreamState = LivestreamState.INITIAL,
-    )
 }
 
 @Composable
