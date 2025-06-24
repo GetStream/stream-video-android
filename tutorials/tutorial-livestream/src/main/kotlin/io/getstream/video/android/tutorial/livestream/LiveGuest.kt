@@ -64,8 +64,8 @@ fun LiveAudience(
     fun computeLivestreamState(): LivestreamState {
         return when {
             endedAt != null -> LivestreamState.ENDED
-            backstage       -> LivestreamState.BACKSTAGE
-            else            -> LivestreamState.LIVE
+            backstage -> LivestreamState.BACKSTAGE
+            else -> LivestreamState.LIVE
         }
     }
 
