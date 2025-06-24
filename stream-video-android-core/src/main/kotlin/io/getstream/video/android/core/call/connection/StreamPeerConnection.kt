@@ -66,6 +66,9 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param onStreamAdded Handler when a new [MediaStream] gets added.
  * @param onNegotiationNeeded Handler when there's a new negotiation.
  * @param onIceCandidate Handler whenever we receive [IceCandidate]s.
+ * @param maxBitRate The maximum bitrate for the connection.
+ * @param traceCreateAnswer Whether to trace the create answer event or not.
+ * @param tracer The tracer used to trace the connection.
  */
 open class StreamPeerConnection(
     private val coroutineScope: CoroutineScope,
