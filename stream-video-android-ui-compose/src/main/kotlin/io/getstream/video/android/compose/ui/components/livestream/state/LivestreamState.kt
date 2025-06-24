@@ -17,40 +17,20 @@
 package io.getstream.video.android.compose.ui.components.livestream.state
 
 /**
- * Represents the different states a livestream can be in, based on the current call state.
+ * Defines the various states of a livestream.
  *
- * This enum helps drive the UI and behavior of the livestream experience.
+ * @property INITIAL    Before attempting to join.
+ * @property BACKSTAGE  Joined but the livestream hasn't officially started, they are in the backstage.
+ * @property LIVE       Livestream is active.
+ * @property ENDED      Livestream has finished.
+ * @property ERROR      Error joining or displaying the livestream.
+ * @property JOINING    In the process of joining the livestream.
  */
 public enum class LivestreamState {
-
-    /**
-     * The initial state before any attempt to join the livestream has been made.
-     */
     INITIAL,
-
-    /**
-     * The state when the user has joined but the livestream hasn't officially started,
-     * and they are in the backstage.
-     */
     BACKSTAGE,
-
-    /**
-     * The livestream is actively live and visible to the audience.
-     */
     LIVE,
-
-    /**
-     * The livestream has ended.
-     */
     ENDED,
-
-    /**
-     * An error occurred while attempting to join or display the livestream.
-     */
     ERROR,
-
-    /**
-     * Indicates that the user is in the process of joining the livestream.
-     */
     JOINING,
 }
