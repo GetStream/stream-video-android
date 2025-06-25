@@ -1,11 +1,25 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.banchmark
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,12 +27,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -26,42 +36,29 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.OnlinePrediction
-import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.util.UserHelper
-import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.mapLatest
 
 public class BenchmarkActivity : ComponentActivity() {
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,13 +70,12 @@ public class BenchmarkActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun StartBenchmark() {
     Column(
         Modifier
             .background(Color.White)
-            .fillMaxSize()
+            .fillMaxSize(),
     ) {
         var started by remember { mutableStateOf(false) }
         var benchmark by remember { mutableStateOf<Benchmark?>(null) }
@@ -107,7 +103,8 @@ fun StartBenchmark() {
 
 @Composable
 fun BenchmarkConfigForm(
-    config: BenchmarkConfig, onConfigChange: (BenchmarkConfig) -> Unit
+    config: BenchmarkConfig,
+    onConfigChange: (BenchmarkConfig) -> Unit,
 ) {
     var joinIntervalMin by remember { mutableStateOf(config.joinIntervalMin.toString()) }
     var joinInterval by remember { mutableStateOf(config.joinInterval.toString()) }
@@ -122,42 +119,42 @@ fun BenchmarkConfigForm(
         OutlinedTextField(value = joinIntervalMin, onValueChange = {
             joinIntervalMin = it
             onConfigChange(
-                config.copy(joinIntervalMin = it.toLongOrNull() ?: config.joinIntervalMin)
+                config.copy(joinIntervalMin = it.toLongOrNull() ?: config.joinIntervalMin),
             )
         }, label = { Text("Join Interval Min (ms)") })
 
         OutlinedTextField(value = joinInterval, onValueChange = {
             joinInterval = it
             onConfigChange(
-                config.copy(joinInterval = it.toLongOrNull() ?: config.joinInterval)
+                config.copy(joinInterval = it.toLongOrNull() ?: config.joinInterval),
             )
         }, label = { Text("Join Interval (ms)") })
 
         OutlinedTextField(value = leaveIntervalMin, onValueChange = {
             leaveIntervalMin = it
             onConfigChange(
-                config.copy(leaveIntervalMin = it.toLongOrNull() ?: config.leaveIntervalMin)
+                config.copy(leaveIntervalMin = it.toLongOrNull() ?: config.leaveIntervalMin),
             )
         }, label = { Text("Leave Interval Min (ms)") })
 
         OutlinedTextField(value = leaveInterval, onValueChange = {
             leaveInterval = it
             onConfigChange(
-                config.copy(leaveInterval = it.toLongOrNull() ?: config.leaveInterval)
+                config.copy(leaveInterval = it.toLongOrNull() ?: config.leaveInterval),
             )
         }, label = { Text("Leave Interval (ms)") })
 
         OutlinedTextField(value = minUsers, onValueChange = {
             minUsers = it
             onConfigChange(
-                config.copy(minUsers = it.toIntOrNull() ?: config.minUsers)
+                config.copy(minUsers = it.toIntOrNull() ?: config.minUsers),
             )
         }, label = { Text("Min Users") })
 
         OutlinedTextField(value = maxUsers, onValueChange = {
             maxUsers = it
             onConfigChange(
-                config.copy(maxUsers = it.toIntOrNull() ?: config.maxUsers)
+                config.copy(maxUsers = it.toIntOrNull() ?: config.maxUsers),
             )
         }, label = { Text("Max Users") })
     }
@@ -190,7 +187,6 @@ fun ParticipantList(
         }
     }
 }
-
 
 @Composable
 fun ParticipantListItem(
@@ -230,7 +226,6 @@ fun ParticipantListItem(
     }
 }
 
-
 @Preview
 @Composable
 fun BenchmarkScreenPreview() {
@@ -238,4 +233,3 @@ fun BenchmarkScreenPreview() {
         BenchmarkScreen { _, _ -> }
     }
 }
-

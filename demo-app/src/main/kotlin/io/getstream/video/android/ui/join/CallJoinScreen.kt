@@ -18,7 +18,6 @@
 
 package io.getstream.video.android.ui.join
 
-import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -89,7 +88,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
-import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
