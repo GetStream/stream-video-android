@@ -30,6 +30,7 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
@@ -228,6 +229,9 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 2000L,
             userToken = sfuToken,
             lifecycle = lifecycle,
+            onSignalingLost = { error ->
+                call.debug.fastReconnect()
+            },
             tracer = sfuTracer,
         )
     },
@@ -831,6 +835,11 @@ public class RtcSession internal constructor(
             sessionId = sessionId,
             enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
+            rejoin = {
+                coroutineScope.launch {
+                    call.rejoin()
+                }
+            },
             onIceCandidateRequest = ::sendIceCandidate,
         )
         return peerConnection
@@ -1325,6 +1334,7 @@ public class RtcSession internal constructor(
     }
 
     private suspend fun parseError(e: Throwable): Failure {
+        Error.NetworkError
         return Failure(
             io.getstream.result.Error.ThrowableError(
                 "CallClientImpl error needs to be handled",

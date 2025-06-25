@@ -23,6 +23,7 @@ import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
+import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
@@ -48,6 +49,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
+import org.webrtc.PeerConnection
 import org.webrtc.RtpTransceiver
 import org.webrtc.SessionDescription
 import stream.video.sfu.models.Participant
@@ -68,6 +70,9 @@ internal class Subscriber(
     private val coroutineScope: CoroutineScope,
     private val enableStereo: Boolean = true,
     private val tracer: Tracer,
+    private val rejoin: () -> Unit,
+    private val restartIceJobDelegate: RestartIceJobDelegate =
+        RestartIceJobDelegate(coroutineScope),
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : StreamPeerConnection(
     coroutineScope = coroutineScope,
@@ -81,6 +86,7 @@ internal class Subscriber(
             StreamPeerType.SUBSCRIBER,
         )
     },
+    onRejoinNeeded = rejoin,
     traceCreateAnswer = false,
     tracer = tracer,
     maxBitRate = 0, // Set as needed
@@ -126,6 +132,31 @@ internal class Subscriber(
 
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
         return statsTracer?.get(trackIdToTrackType)
+    }
+
+    override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
+        super.onIceConnectionChange(newState)
+        when (newState) {
+            PeerConnection.IceConnectionState.CONNECTED -> {
+                restartIceJobDelegate.cancelScheduledRestartIce()
+            }
+
+            PeerConnection.IceConnectionState.FAILED -> {
+                restartIceJobDelegate.scheduleRestartIce {
+                    restartIce()
+                }
+            }
+
+            PeerConnection.IceConnectionState.DISCONNECTED -> {
+                restartIceJobDelegate.scheduleRestartIce(3000) {
+                    restartIce()
+                }
+            }
+
+            else -> {
+                // no-op
+            }
+        }
     }
 
     /**
