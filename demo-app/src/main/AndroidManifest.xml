@@ -52,6 +52,11 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".banchmark.BenchmarkActivity"
+            android:exported="true"
+            android:theme="@style/Dogfooding"
+            android:windowSoftInputMode="adjustPan"/>
+
         <activity
             android:name=".DeeplinkingActivity"
             android:exported="true"

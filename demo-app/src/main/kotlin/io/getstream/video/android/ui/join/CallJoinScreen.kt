@@ -18,6 +18,8 @@
 
 package io.getstream.video.android.ui.join
 
+import android.app.Activity
+import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -87,10 +89,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
+import io.getstream.video.android.banchmark.BenchmarkActivity
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
@@ -305,6 +309,21 @@ private fun CallJoinHeader(
                         }
                         Spacer(modifier = Modifier.width(5.dp))
                         if (!isProduction) {
+                            val context = LocalContext.current
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_SignOutButton"),
+                                icon = Icons.AutoMirrored.Filled.Logout,
+                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                text = "Livestream Benchmark",
+                                onClick = {
+                                    showMenu = false
+                                    val intent = Intent(context, BenchmarkActivity::class.java)
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    context.startActivity(intent)
+                                },
+                            )
                             StreamButton(
                                 modifier = Modifier
                                     .fillMaxWidth()

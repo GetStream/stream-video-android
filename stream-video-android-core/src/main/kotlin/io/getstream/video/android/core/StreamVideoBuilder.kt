@@ -108,7 +108,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
     private val connectionTimeoutInMs: Long = 10000,
-    private var ensureSingleInstance: Boolean = true,
+    private var ensureSingleInstance: Boolean = false,
     private val videoDomain: String = "video.stream-io-api.com",
     @Deprecated(
         "This property is ignored. Set runCallServiceInForeground in the callServiceConfigRegistry parameter instead.",
