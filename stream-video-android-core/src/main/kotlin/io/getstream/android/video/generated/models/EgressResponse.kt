@@ -35,8 +35,7 @@ data class EgressResponse(
     val broadcasting: kotlin.Boolean,
 
     @Json(name = "rtmps")
-    val rtmps:
-    kotlin.collections.List<io.getstream.android.video.generated.models.EgressRTMPResponse>,
+    val rtmps: kotlin.collections.List<io.getstream.android.video.generated.models.EgressRTMPResponse> = emptyList(),
 
     @Json(name = "hls")
     val hls: io.getstream.android.video.generated.models.EgressHLSResponse? = null,

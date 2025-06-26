@@ -4,22 +4,22 @@ tasks.register<Exec>("generateOpenApiClient") {
 
     val repoUrl = project.findProperty("repoUrl") as? String ?: "git@github.com:GetStream/chat.git"
     val refType = project.findProperty("refType") as? String ?: "branch"
-    val refValue = project.findProperty("refValue") as? String ?: "feature/rahullohra/kotlin_open_api_generator"
+    val refValue = project.findProperty("refValue") as? String ?: "feature/rahullohra/add_default_values"
 
-    val modelPackageName = project.findProperty("modelPackage") as? String ?: "org.openapitools.client.models"
+    val modelPackageName = project.findProperty("modelPackage") as? String ?: "io.getstream.android.video.generated.models"
     val modelsDir = project.findProperty("modelsDir") as? String ?: "models"
 
-    val apiServicePackageName = project.findProperty("apiServicePackage") as? String ?: "org.openapitools.client.apis"
+    val apiServicePackageName = project.findProperty("apiServicePackage") as? String ?: "io.getstream.android.video.generated.apis"
     val apiServiceClassName = project.findProperty("apiServiceClassName") as? String ?: "ProductvideoApi"
     val apiServiceDir = project.findProperty("apiServiceDir") as? String ?: "apis"
 
     val moshiAdaptersDir = project.findProperty("moshiAdaptersDir") as? String ?: "infrastructure"
-    val moshiAdapterPackage = project.findProperty("moshiAdapterPackageName") as? String ?: "org.openapitools.client.infrastructure"
+    val moshiAdapterPackage = project.findProperty("moshiAdapterPackageName") as? String ?: "io.getstream.android.video.generated.infrastructure"
 
     val classesToSkip = project.findProperty("classesToSkip") as? String ?: "PrivacySettingsResponse,PrivacySettings,StopRTMPBroadcastsRequest"
 
 //    val outputSpec = project.findProperty("outputSpec") as? String ?: "./releases/video-openapi-clientside"
-    val outputClient = project.findProperty("outputClient") as? String ?: "stream-video-android-core/src/main/kotlin/org/openapitools/client/v3"
+    val outputClient = project.findProperty("outputClient") as? String ?: "stream-video-android-core/src/main/kotlin/io/getstream/android/video/generated"
     val keepClasses = project.findProperty("keepClasses") as? String ?: "WSAuthMessageRequest.kt"
     val buildDir = project.layout.buildDirectory.asFile.get()
 

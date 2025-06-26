@@ -40,7 +40,7 @@ data class CallEndedEvent(
     val call: io.getstream.android.video.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: kotlin.String = "call.ended",
 
     @Json(name = "user")
     val user: io.getstream.android.video.generated.models.UserResponse? = null,

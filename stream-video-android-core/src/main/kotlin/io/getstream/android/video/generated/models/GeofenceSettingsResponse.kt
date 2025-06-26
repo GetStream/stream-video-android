@@ -32,5 +32,5 @@ import kotlin.collections.List
 
 data class GeofenceSettingsResponse(
     @Json(name = "names")
-    val names: kotlin.collections.List<kotlin.String>,
+    val names: kotlin.collections.List<kotlin.String> = emptyList()
 )

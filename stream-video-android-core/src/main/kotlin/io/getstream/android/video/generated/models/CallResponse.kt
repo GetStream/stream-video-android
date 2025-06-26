@@ -63,7 +63,7 @@ data class CallResponse(
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "blocked_user_ids")
-    val blockedUserIds: kotlin.collections.List<kotlin.String>,
+    val blockedUserIds: kotlin.collections.List<kotlin.String> = emptyList(),
 
     @Json(name = "created_by")
     val createdBy: io.getstream.android.video.generated.models.UserResponse,

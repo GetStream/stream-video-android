@@ -40,10 +40,11 @@ data class ConnectedEvent(
     val me: io.getstream.android.video.generated.models.OwnUserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent() {
-
+    val type: kotlin.String = "connection.ok"
+)
+: io.getstream.android.video.generated.models.VideoEvent()
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }

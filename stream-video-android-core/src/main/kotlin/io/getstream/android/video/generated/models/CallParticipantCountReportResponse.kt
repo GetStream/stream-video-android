@@ -32,6 +32,5 @@ import kotlin.collections.List
 
 data class CallParticipantCountReportResponse(
     @Json(name = "daily")
-    val daily:
-    kotlin.collections.List<io.getstream.android.video.generated.models.DailyAggregateCallParticipantCountReportResponse>,
+    val daily: kotlin.collections.List<io.getstream.android.video.generated.models.DailyAggregateCallParticipantCountReportResponse> = emptyList()
 )
