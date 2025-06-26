@@ -1250,6 +1250,7 @@ public class RtcSession internal constructor(
             val sendStatsRequest = SendStatsRequest(
                 session_id = sessionId,
                 sdk = "stream-android",
+                unified_session_id = call.unifiedSessionId,
                 sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
                 webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
                 publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
