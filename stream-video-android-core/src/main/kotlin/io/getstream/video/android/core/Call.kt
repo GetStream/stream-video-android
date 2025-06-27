@@ -856,6 +856,25 @@ public class Call(
             viewportId,
         )
     }
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+        width: Int,
+        height: Int,
+    ) {
+        logger.i {
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            VideoDimension(width, height),
+            viewportId,
+        )
+    }
 
     fun handleEvent(event: VideoEvent) {
         logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }

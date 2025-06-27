@@ -260,10 +260,16 @@ public class RtcSession internal constructor(
         logger = logger,
     )
 
-    private fun getTrack(sessionId: String, type: TrackType): MediaTrack? = subscriber?.getTrack(
-        sessionId,
-        type,
-    )
+    private fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
+        val track = subscriber?.getTrack(
+            sessionId,
+            type,
+        )
+        if (track == null) {
+            logger.w { "[getTrack] #sfu; #track; track is null for sessionId: $sessionId, type: $type" }
+        }
+        return track
+    }
 
     private fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
         when (type) {
@@ -1396,11 +1402,14 @@ public class RtcSession internal constructor(
         }
         subscriber?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
         coroutineScope.launch {
-            subscriber?.setVideoSubscriptions(
-                trackOverridesHandler,
-                call.state.participants.value,
-                call.state.remoteParticipants.value,
-            )
+            if (sessionId != call.sessionId) {
+                // dimension updated for another participant
+                subscriber?.setVideoSubscriptions(
+                    trackOverridesHandler,
+                    call.state.participants.value,
+                    call.state.remoteParticipants.value,
+                )
+            }
         }
     }
 

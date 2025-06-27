@@ -101,7 +101,6 @@ public fun VideoRenderer(
                     Math.random().toString()
                 }
             }
-
             val sessionId = video.sessionId
             val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
