@@ -289,7 +289,7 @@ public class CallState(
                 in 26..30 -> 500
                 else -> 1000
             }
-        }
+        },
     )
 
     private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
@@ -872,12 +872,16 @@ public class CallState(
                     } else {
                         pendingParticipantsJoined[event.participant.session_id] = event.participant
                         participantsUpdate.schedule(scope, participantsUpdateConfig) {
-                            logger.d { "[ParticipantJoinedEvent] #participants; #debounce; participants: ${participants.value.size}" }
+                            logger.d {
+                                "[ParticipantJoinedEvent] #participants; #debounce; participants: ${participants.value.size}"
+                            }
                             getOrCreateParticipants(pendingParticipantsJoined.values.toList())
                         }
                     }
                 } catch (e: Exception) {
-                    logger.e(e) { "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual." }
+                    logger.e(e) {
+                        "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual."
+                    }
                     getOrCreateParticipant(event.participant)
                 }
             }
@@ -1036,7 +1040,7 @@ public class CallState(
             is CallClosedCaptionsStartedEvent,
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
-                -> closedCaptionManager.handleEvent(event)
+            -> closedCaptionManager.handleEvent(event)
         }
     }
 
