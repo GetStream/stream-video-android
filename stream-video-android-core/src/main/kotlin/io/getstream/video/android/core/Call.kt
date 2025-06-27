@@ -219,6 +219,7 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
+    internal val unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
