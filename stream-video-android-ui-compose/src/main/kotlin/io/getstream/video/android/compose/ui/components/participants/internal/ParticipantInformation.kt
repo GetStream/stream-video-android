@@ -165,7 +165,7 @@ public fun ParticipantInformation(
         }
 
         Text(
-            modifier = Modifier.testTag("Stream_CallActionLabel"),
+            modifier = Modifier.testTag("Stream_CallTypeLabel"),
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,

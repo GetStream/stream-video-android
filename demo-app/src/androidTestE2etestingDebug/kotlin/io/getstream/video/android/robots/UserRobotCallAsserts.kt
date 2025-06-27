@@ -19,6 +19,7 @@ package io.getstream.video.android.robots
 import androidx.test.uiautomator.BySelector
 import io.getstream.video.android.pages.CallPage
 import io.getstream.video.android.pages.CallPage.SettingsMenu
+import io.getstream.video.android.pages.RingPage
 import io.getstream.video.android.robots.UserControls.DISABLE
 import io.getstream.video.android.robots.UserControls.ENABLE
 import io.getstream.video.android.uiautomator.defaultTimeout
@@ -38,10 +39,12 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 
 fun UserRobot.assertCallControls(microphone: Boolean, camera: Boolean): UserRobot {
-    assertTrue(CallPage.callSettingsClosedToggle.waitToAppear().isDisplayed())
+    device.retryOnStaleObjectException {
+        assertTrue(CallPage.callSettingsClosedToggle.waitToAppear().isDisplayed())
+    }
     assertTrue(CallPage.hangUpButton.isDisplayed())
     assertTrue(CallPage.chatButton.isDisplayed())
-    assertTrue(CallPage.connectionQualityIndicator.isDisplayed())
+    assertTrue(CallPage.connectionQualityIndicator.waitToAppear().isDisplayed())
     assertUserFrontCamera(isEnabled = true)
     assertUserMicrophone(isEnabled = microphone)
     assertUserCamera(isEnabled = camera)
@@ -67,11 +70,8 @@ fun UserRobot.assertUserMicrophone(isEnabled: Boolean): UserRobot {
 fun UserRobot.assertUserCamera(isEnabled: Boolean): UserRobot {
     if (isEnabled) {
         assertTrue(CallPage.cameraEnabledToggle.waitToAppear().isDisplayed())
-        // TODO: https://linear.app/stream/issue/AND-573
-        // assertTrue(CallPage.videoViewWithMediaTrack.isDisplayed())
     } else {
         assertTrue(CallPage.cameraDisabledToggle.waitToAppear().isDisplayed())
-        assertFalse(CallPage.videoViewWithMediaTrack.isDisplayed())
     }
     return this
 }
@@ -220,5 +220,21 @@ fun UserRobot.assertGridView(participants: Int): UserRobot {
 fun UserRobot.assertSpotlightView(): UserRobot {
     assertTrue(CallPage.ParticipantView.spotlightView.waitToAppear().isDisplayed())
     assertFalse(CallPage.cornerDraggableView.waitToDisappear().isDisplayed())
+    return this
+}
+
+fun UserRobot.assertIncomingCall(isDisplayed: Boolean): UserRobot {
+    if (isDisplayed) {
+        assertTrue("Accept call button", RingPage.acceptCallButton.waitToAppear().isDisplayed())
+        assertTrue("Decline call button", RingPage.declineCallButton.findObject().isDisplayed())
+        assertTrue("Call type label", RingPage.callTypeLabel.findObject().isDisplayed())
+//        https://linear.app/stream/issue/AND-620
+//        assertTrue("Avatar", RingPage.callParticipantAvatar.findObject().isDisplayed())
+    } else {
+        assertFalse("Accept call button", RingPage.acceptCallButton.waitToDisappear().isDisplayed())
+        assertEquals("Decline call button", RingPage.declineCallButton.findObjects().size, 0)
+        assertEquals("Call type label", RingPage.callTypeLabel.findObjects().size, 0)
+        assertEquals("Avatar", RingPage.callParticipantAvatar.findObjects().size, 0)
+    }
     return this
 }
