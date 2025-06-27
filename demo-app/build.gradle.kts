@@ -225,6 +225,9 @@ dependencies {
 
     implementation(libs.androidx.media.media)
 
+
+    implementation(libs.androidx.media.media)
+
     // Noise Cancellation
     implementation(libs.stream.video.android.noise.cancellation)
 
