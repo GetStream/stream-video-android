@@ -107,7 +107,10 @@ import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.sorting.SortedParticipantsState
+import io.getstream.video.android.core.utils.ScheduleConfig
+import io.getstream.video.android.core.utils.TaskSchedulerWithDebounce
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -139,6 +142,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -274,6 +278,19 @@ public class CallState(
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
     val stats = CallStats(call, scope)
+
+    private val participantsUpdate = TaskSchedulerWithDebounce()
+    private val participantsUpdateConfig = ScheduleConfig(
+        debounce = {
+            val participantCount = participants.value.size
+            when (participantCount) {
+                in 0..8 -> 100
+                in 9..25 -> 250
+                in 26..30 -> 500
+                else -> 1000
+            }
+        }
+    )
 
     private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
         fun emitLivestreamVideo() {
@@ -625,6 +642,8 @@ public class CallState(
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
 
+    private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -847,10 +866,24 @@ public class CallState(
             }
 
             is ParticipantJoinedEvent -> {
-                getOrCreateParticipant(event.participant)
+                try {
+                    if (participants.value.size < 8) {
+                        getOrCreateParticipant(event.participant)
+                    } else {
+                        pendingParticipantsJoined[event.participant.session_id] = event.participant
+                        participantsUpdate.schedule(scope, participantsUpdateConfig) {
+                            logger.d { "[ParticipantJoinedEvent] #participants; #debounce; participants: ${participants.value.size}" }
+                            getOrCreateParticipants(pendingParticipantsJoined.values.toList())
+                        }
+                    }
+                } catch (e: Exception) {
+                    logger.e(e) { "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual." }
+                    getOrCreateParticipant(event.participant)
+                }
             }
 
             is ParticipantLeftEvent -> {
+                safeCall { pendingParticipantsJoined.remove(event.participant.session_id) }
                 val sessionId = event.participant.session_id
                 removeParticipant(sessionId)
 
@@ -1003,7 +1036,7 @@ public class CallState(
             is CallClosedCaptionsStartedEvent,
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
-            -> closedCaptionManager.handleEvent(event)
+                -> closedCaptionManager.handleEvent(event)
         }
     }
 
@@ -1483,18 +1516,6 @@ private fun MemberResponse.toMemberState(): MemberState {
         updatedAt = updatedAt,
         deletedAt = deletedAt,
     )
-}
-
-private fun getCallingMethod(): String {
-    val stackTrace = Thread.currentThread().stackTrace
-
-    return if (stackTrace.isEmpty()) {
-        ""
-    } else {
-        stackTrace[6].let { callingMethod ->
-            callingMethod.className + "." + callingMethod.methodName
-        }
-    }
 }
 
 private const val REJECT_REASON_TIMEOUT = "timeout"
