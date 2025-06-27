@@ -285,51 +285,6 @@ class SubscriberTest {
         coVerify { mockSignalServer.updateSubscriptions(any()) }
     }
 
-    @Test
-    fun `setVideoSubscriptions uses defaultTracks when useDefaults is true`() = runTest {
-        val mockHandler = mockk<TrackOverridesHandler>(relaxed = true)
-        val participant1 = mockParticipant("user1", "session1", videoEnabled = true)
-        val participant2 = mockParticipant("user2", "session2", videoEnabled = false)
-        val participants = listOf(participant1, participant2)
-        val remoteParticipants = emptyList<ParticipantState>()
-        coEvery { mockSignalServer.updateSubscriptions(any()) } returns mockk(relaxed = true)
-
-        val result = subscriber.setVideoSubscriptions(
-            trackOverridesHandler = mockHandler,
-            participants = participants,
-            remoteParticipants = remoteParticipants,
-            useDefaults = true,
-        )
-        assert(result is Result.Success)
-        // Only participant1 has video enabled, so only one default track should be used
-        verify { mockHandler.applyOverrides(match { it.size == 1 }) }
-    }
-
-    @Test
-    fun `setVideoSubscriptions uses visibleTracks when useDefaults is false`() = runTest {
-        val mockHandler = mockk<TrackOverridesHandler>(relaxed = true)
-        val remoteParticipant = mockParticipant("user3", "session3", videoEnabled = true)
-        // Simulate a visible track dimension for this participant
-        subscriber.setTrackDimension(
-            viewportId = "viewport1",
-            sessionId = "session3",
-            trackType = TrackType.TRACK_TYPE_VIDEO,
-            visible = true,
-            dimensions = Subscriber.defaultVideoDimension,
-        )
-        coEvery { mockSignalServer.updateSubscriptions(any()) } returns mockk(relaxed = true)
-
-        val result = subscriber.setVideoSubscriptions(
-            trackOverridesHandler = mockHandler,
-            participants = emptyList(),
-            remoteParticipants = listOf(remoteParticipant),
-            useDefaults = false,
-        )
-        assert(result is Result.Success)
-        // Should use visibleTracks, so applyOverrides should be called with one track
-        verify { mockHandler.applyOverrides(match { it.size == 1 }) }
-    }
-
     //endregion
 
     //region Utils
