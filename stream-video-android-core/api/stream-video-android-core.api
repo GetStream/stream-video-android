@@ -5512,6 +5512,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun setSessionId (Ljava/lang/String;)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLjava/lang/String;)V
+	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLjava/lang/String;II)V
+	public static synthetic fun setVisibility$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLjava/lang/String;IIILjava/lang/Object;)V
 	public static synthetic fun setVisibility$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLjava/lang/String;ILjava/lang/Object;)V
 	public final fun startClosedCaptions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
