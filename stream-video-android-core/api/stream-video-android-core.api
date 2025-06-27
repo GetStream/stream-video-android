@@ -1,6 +1,7 @@
 public abstract interface class io/getstream/android/video/generated/apis/ProductvideoApi {
 	public abstract fun acceptCall (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun blockUser (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/BlockUserRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun collectUserFeedback (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/CollectUserFeedbackRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun collectUserFeedback (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/CollectUserFeedbackRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createDevice (Lio/getstream/android/video/generated/models/CreateDeviceRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun createGuest (Lio/getstream/android/video/generated/models/CreateGuestRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
