@@ -143,6 +143,7 @@ import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.log
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -283,11 +284,14 @@ public class CallState(
     private val participantsUpdateConfig = ScheduleConfig(
         debounce = {
             val participantCount = participants.value.size
-            when (participantCount) {
-                in 0..8 -> 100
-                in 9..25 -> 250
-                in 26..30 -> 500
-                else -> 1000
+            if (participantCount < 8) {
+                0
+            } else if (participantCount < 25) {
+                250
+            } else if (participantCount < 50) {
+                500
+            } else {
+                1000
             }
         },
     )
