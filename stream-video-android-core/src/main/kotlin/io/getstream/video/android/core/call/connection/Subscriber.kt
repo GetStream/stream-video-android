@@ -112,7 +112,7 @@ internal class Subscriber(
          * Default video dimension.
          */
         val defaultVideoDimension = VideoDimension(720, 1280)
-        val throthledVideoDimension = VideoDimension(180, 320)
+        val throttledVideoDimension = VideoDimension(180, 320)
         val unknownVideoDimension = VideoDimension(0, 0)
     }
 
@@ -419,8 +419,8 @@ internal class Subscriber(
         width == unknownVideoDimension.width && height == unknownVideoDimension.height
 
     private fun adjustForSubscriptionsSize(dimension: VideoDimension = defaultVideoDimension): VideoDimension {
-        return if (subscriptions.size > 2 && dimension.height > throthledVideoDimension.height && dimension.width > throthledVideoDimension.width) {
-            throthledVideoDimension
+        return if (subscriptions.size > 2 && dimension.height > throttledVideoDimension.height && dimension.width > throttledVideoDimension.width) {
+            throttledVideoDimension
         } else {
             dimension
         }
@@ -448,8 +448,8 @@ internal class Subscriber(
     }
 
     private fun VideoDimension.orThrottled(): VideoDimension {
-        return if (subscriptions.size > 2 && width > throthledVideoDimension.width && height > throthledVideoDimension.height) {
-            throthledVideoDimension
+        return if (subscriptions.size > 2 && width > throttledVideoDimension.width && height > throttledVideoDimension.height) {
+            throttledVideoDimension
         } else {
             this
         }
