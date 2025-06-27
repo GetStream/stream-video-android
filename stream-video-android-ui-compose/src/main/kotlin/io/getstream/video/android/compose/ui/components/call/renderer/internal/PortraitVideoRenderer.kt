@@ -220,7 +220,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         }
     }
 
-    if (callParticipants.size < 4) {
+    if (callParticipants.size in 2..3) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null) {
