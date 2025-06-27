@@ -102,8 +102,6 @@ public fun VideoRenderer(
                     Math.random().toString()
                 }
             }
-            var size by remember { mutableStateOf(IntSize.Zero) }
-
             val sessionId = video.sessionId
             val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
