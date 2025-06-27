@@ -16,20 +16,10 @@
 
 package io.getstream.video.android.core.utils
 
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
-import java.util.concurrent.atomic.AtomicInteger
 
 class TaskSchedulerWithDebounceTest {
     private var scheduler: TaskSchedulerWithDebounce = TaskSchedulerWithDebounce()
