@@ -54,7 +54,6 @@ import org.webrtc.SessionDescription
 import org.webrtc.VideoTrack
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
-import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import org.webrtc.AudioTrack as RtcAudioTrack
