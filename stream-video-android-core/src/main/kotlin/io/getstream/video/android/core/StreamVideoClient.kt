@@ -1032,7 +1032,6 @@ internal class StreamVideoClient internal constructor(
         coordinatorConnectionModule.api.collectUserFeedback(
             type = callType,
             id = id,
-            session = sessionId,
             collectUserFeedbackRequest = CollectUserFeedbackRequest(
                 rating = rating,
                 sdk = "stream-video-android",
