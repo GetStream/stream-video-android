@@ -101,6 +101,7 @@ import io.getstream.video.android.defaultCallId
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
+import io.getstream.video.android.tooling.util.StreamBuildFlavorsUtil
 import io.getstream.video.android.tooling.util.StreamFlavors
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
@@ -136,7 +137,7 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             user = user,
-            showDirectCall = BuildConfig.FLAVOR == StreamFlavors.development,
+            showDirectCall = StreamBuildFlavorsUtil.isDevelopment() || StreamBuildFlavorsUtil.isE2eTesting(),
             onAvatarLongClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {
