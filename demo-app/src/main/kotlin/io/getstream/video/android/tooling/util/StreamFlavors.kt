@@ -17,36 +17,45 @@
 package io.getstream.video.android.tooling.util
 
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.tooling.util.StreamBuildFlavor.Development
+import io.getstream.video.android.tooling.util.StreamBuildFlavor.E2eTesting
+import io.getstream.video.android.tooling.util.StreamBuildFlavor.Production
 
 /**
  * Defined flavors. Used in code logic.
  */
-internal object StreamFlavors {
-    const val development = "development"
-    const val production = "production"
-    const val e2etesting = "e2etesting"
+
+object StreamBuildFlavorUtil {
+
+    val current: StreamBuildFlavor
+        get() = StreamBuildFlavor.from(BuildConfig.FLAVOR)
+
+    val isDevelopment: Boolean
+        get() = current is Development
+
+    val isProduction: Boolean
+        get() = current is Production
+
+    val isE2eTesting: Boolean
+        get() = current is E2eTesting
 }
 
-object StreamBuildFlavorsUtil {
-    fun getCurrentBuildFlavor(): StreamBuildFlavors {
-        if (isProduction()) {
-            return StreamBuildFlavors.Production
-        }
-        if (isE2eTesting()) {
-            return StreamBuildFlavors.E2eTesting
-        }
-        return StreamBuildFlavors.Development
+
+sealed class StreamBuildFlavor(val type: String) {
+    data object Development : StreamBuildFlavor("development")
+    data object Production : StreamBuildFlavor("production")
+    data object E2eTesting : StreamBuildFlavor("e2etesting")
+
+    companion object {
+        private val values = listOf(
+            Development,
+            Production,
+            E2eTesting
+        )
+
+        fun from(type: String): StreamBuildFlavor =
+            values.find { it.type == type } ?: Development
     }
-
-    fun isDevelopment() = BuildConfig.FLAVOR == StreamBuildFlavors.Development.type
-    fun isProduction() = BuildConfig.FLAVOR == StreamBuildFlavors.Production.type
-    fun isE2eTesting() = BuildConfig.FLAVOR == StreamBuildFlavors.E2eTesting.type
-}
-
-sealed class StreamBuildFlavors(val type: String) {
-    data object Development : StreamBuildFlavors("development")
-    data object Production : StreamBuildFlavors("production")
-    data object E2eTesting : StreamBuildFlavors("e2etesting")
 }
 
 public object StreamEnvironments {

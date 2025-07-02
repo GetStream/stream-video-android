@@ -30,7 +30,7 @@ import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallCid
 import io.getstream.video.android.model.mapper.toTypeAndId
-import io.getstream.video.android.tooling.util.StreamBuildFlavorsUtil
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.NetworkMonitor
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.fcmToken
@@ -93,7 +93,7 @@ class CallJoinViewModel @Inject constructor(
         /**
          * For E2E Testing Only
          */
-        if (StreamBuildFlavorsUtil.isE2eTesting()) {
+        if (StreamBuildFlavorUtil.isE2eTesting) {
             viewModelScope.launch {
                 user
                     .filterNotNull()

@@ -114,7 +114,7 @@ import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState.Available.toClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsContainer
@@ -287,7 +287,7 @@ fun CallScreen(
                         call = call,
                         layout = layout,
                         enableInPictureInPicture = true,
-                        enableDiagnostics = BuildConfig.DEBUG || BuildConfig.FLAVOR == StreamFlavors.development,
+                        enableDiagnostics = BuildConfig.DEBUG || StreamBuildFlavorUtil.isDevelopment,
                         onCallAction = {
                             when (it) {
                                 ChooseLayout -> isShowingLayoutChooseMenu = true

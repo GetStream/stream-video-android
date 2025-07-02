@@ -27,7 +27,8 @@ import com.squareup.moshi.adapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.BuildConfig
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavor
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.config.types.StreamEnvironment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -136,7 +137,7 @@ object AppConfig {
     }
 
     private fun List<StreamEnvironment>.default(currentFlavor: String): StreamEnvironment {
-        return if (currentFlavor == StreamFlavors.development) {
+        return if (currentFlavor == StreamBuildFlavor.Development.type) {
             first { it.env == "pronto" }
         } else {
             first { it.env == "demo" }

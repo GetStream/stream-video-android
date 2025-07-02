@@ -25,8 +25,8 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.models.builtInUsers
 import io.getstream.video.android.models.toUsers
-import io.getstream.video.android.tooling.util.StreamBuildFlavors
-import io.getstream.video.android.tooling.util.StreamBuildFlavorsUtil
+import io.getstream.video.android.tooling.util.StreamBuildFlavor
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -52,12 +52,12 @@ class DirectCallJoinViewModel @Inject constructor(
     private suspend fun getCombinedUsers(): List<User> {
         val currentUser = userDataStore.user.firstOrNull()
         val googleUsers = suspend { googleAccountRepository.getAllAccounts().orEmpty().toUsers() }
-        val buildFlavour = StreamBuildFlavorsUtil.getCurrentBuildFlavor()
+        val buildFlavour = StreamBuildFlavorUtil.current
         return when (buildFlavour) {
-            is StreamBuildFlavors.Development -> User.builtInUsers()
+            is StreamBuildFlavor.Development -> User.builtInUsers()
                 .filterNot { it.id == currentUser?.id } + googleUsers()
 
-            is StreamBuildFlavors.E2eTesting -> {
+            is StreamBuildFlavor.E2eTesting -> {
                 inMemoryStore.getUser()?.let { arrayListOf(it) } ?: emptyList<User>()
             }
 
