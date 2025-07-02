@@ -54,10 +54,10 @@ class DirectCallJoinViewModel @Inject constructor(
         val googleUsers = suspend { googleAccountRepository.getAllAccounts().orEmpty().toUsers() }
         val buildFlavour = StreamBuildFlavorUtil.current
         return when (buildFlavour) {
-            is StreamBuildFlavor.Development -> User.builtInUsers()
+            StreamBuildFlavor.Development -> User.builtInUsers()
                 .filterNot { it.id == currentUser?.id } + googleUsers()
 
-            is StreamBuildFlavor.E2eTesting -> {
+            StreamBuildFlavor.E2eTesting -> {
                 inMemoryStore.getUser()?.let { arrayListOf(it) } ?: emptyList<User>()
             }
 

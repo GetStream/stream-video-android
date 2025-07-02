@@ -26,34 +26,24 @@ import io.getstream.video.android.tooling.util.StreamBuildFlavor.Production
  */
 
 object StreamBuildFlavorUtil {
-
     val current: StreamBuildFlavor
         get() = StreamBuildFlavor.from(BuildConfig.FLAVOR)
 
-    val isDevelopment: Boolean
-        get() = current is Development
-
-    val isProduction: Boolean
-        get() = current is Production
-
-    val isE2eTesting: Boolean
-        get() = current is E2eTesting
+    val isDevelopment: Boolean get() = current == Development
+    val isProduction: Boolean get() = current == Production
+    val isE2eTesting: Boolean get() = current == E2eTesting
 }
 
-sealed class StreamBuildFlavor(val type: String) {
-    data object Development : StreamBuildFlavor("development")
-    data object Production : StreamBuildFlavor("production")
-    data object E2eTesting : StreamBuildFlavor("e2etesting")
+enum class StreamBuildFlavor(val type: String) {
+    Development("development"),
+    Production("production"),
+    E2eTesting("e2etesting"),
+    ;
 
     companion object {
-        private val values = listOf(
-            Development,
-            Production,
-            E2eTesting,
-        )
-
-        fun from(type: String): StreamBuildFlavor =
-            values.find { it.type == type } ?: Development
+        fun from(type: String?): StreamBuildFlavor {
+            return entries.find { it.type == type } ?: Development
+        }
     }
 }
 

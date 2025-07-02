@@ -73,7 +73,7 @@ object AppModule {
     fun provideInMemoryStore(): InMemoryStore {
         val buildFlavour = StreamBuildFlavorUtil.current
         return when (buildFlavour) {
-            is StreamBuildFlavor.E2eTesting -> InMemoryStoreImpl()
+            StreamBuildFlavor.E2eTesting -> InMemoryStoreImpl()
             else -> NoopMemoryStoreImpl()
         }
     }
