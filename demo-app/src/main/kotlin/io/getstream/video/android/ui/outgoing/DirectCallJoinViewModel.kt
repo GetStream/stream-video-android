@@ -19,7 +19,7 @@ package io.getstream.video.android.ui.outgoing
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.getstream.video.android.data.InMemoryStore
+import io.getstream.video.android.data.datasource.local.InMemoryStore
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User

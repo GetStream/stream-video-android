@@ -26,9 +26,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.getstream.video.android.R
-import io.getstream.video.android.data.InMemoryStore
-import io.getstream.video.android.data.InMemoryStoreImpl
-import io.getstream.video.android.data.NoopMemoryStoreImpl
+import io.getstream.video.android.data.datasource.local.InMemoryStore
+import io.getstream.video.android.data.datasource.local.InMemoryStoreImpl
+import io.getstream.video.android.data.datasource.local.NoopMemoryStoreImpl
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamBuildFlavors

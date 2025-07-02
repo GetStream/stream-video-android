@@ -24,11 +24,13 @@ import io.getstream.android.push.PushProvider
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.data.datasource.local.InMemoryStore
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallCid
 import io.getstream.video.android.model.mapper.toTypeAndId
+import io.getstream.video.android.tooling.util.StreamBuildFlavorsUtil
 import io.getstream.video.android.util.NetworkMonitor
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.fcmToken
@@ -37,6 +39,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
@@ -48,6 +52,7 @@ import javax.inject.Inject
 class CallJoinViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
     private val googleSignInClient: GoogleSignInClient,
+    private val inMemoryStore: InMemoryStore,
     networkMonitor: NetworkMonitor,
 ) : ViewModel() {
     val user: Flow<User?> = dataStore.user
@@ -82,6 +87,21 @@ class CallJoinViewModel @Inject constructor(
                         dataStore = dataStore,
                     )
                 }
+            }
+        }
+
+        /**
+         * For E2E Testing Only
+         */
+        if (StreamBuildFlavorsUtil.isE2eTesting()) {
+            viewModelScope.launch {
+                user
+                    .filterNotNull()
+                    .collectLatest { newUser ->
+                        if (inMemoryStore.getUser() == null) {
+                            inMemoryStore.saveUser(newUser)
+                        }
+                    }
             }
         }
     }
