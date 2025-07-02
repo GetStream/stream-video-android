@@ -89,7 +89,6 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -101,7 +100,7 @@ import io.getstream.video.android.defaultCallId
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
@@ -136,7 +135,7 @@ fun CallJoinScreen(
     ) {
         CallJoinHeader(
             user = user,
-            showDirectCall = BuildConfig.FLAVOR == StreamFlavors.development,
+            showDirectCall = StreamBuildFlavorUtil.isDevelopment || StreamBuildFlavorUtil.isE2eTesting,
             onAvatarLongClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
             onDirectCallClick = navigateToDirectCallJoin,
             onSignOutClick = {
@@ -197,7 +196,7 @@ private fun HandleCallJoinUiState(
 @Composable
 private fun CallJoinHeader(
     user: User?,
-    isProduction: Boolean = BuildConfig.FLAVOR == StreamFlavors.production,
+    isProduction: Boolean = StreamBuildFlavorUtil.isProduction,
     showDirectCall: Boolean = user?.custom?.get("email")?.contains("getstreamio") == true,
     onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
