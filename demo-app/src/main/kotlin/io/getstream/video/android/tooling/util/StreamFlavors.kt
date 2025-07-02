@@ -40,7 +40,6 @@ object StreamBuildFlavorUtil {
         get() = current is E2eTesting
 }
 
-
 sealed class StreamBuildFlavor(val type: String) {
     data object Development : StreamBuildFlavor("development")
     data object Production : StreamBuildFlavor("production")
@@ -50,7 +49,7 @@ sealed class StreamBuildFlavor(val type: String) {
         private val values = listOf(
             Development,
             Production,
-            E2eTesting
+            E2eTesting,
         )
 
         fun from(type: String): StreamBuildFlavor =

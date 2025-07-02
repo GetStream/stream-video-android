@@ -28,7 +28,6 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.tooling.util.StreamBuildFlavor
-import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.config.types.StreamEnvironment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
