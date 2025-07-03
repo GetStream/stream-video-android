@@ -524,11 +524,7 @@ internal class StreamVideoClient internal constructor(
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.fireEvent(event)
-            safeCall {
-                destroyedCalls.snapshot().forEach { (_, call) ->
-                    call.fireEvent(event)
-                }
-            }
+            notifyDestroyedCalls(event)
         }
 
         if (selectedCid.isNotEmpty()) {
@@ -552,13 +548,35 @@ internal class StreamVideoClient internal constructor(
                 it.session?.handleEvent(event)
                 it.handleEvent(event)
             }
-            safeCall {
-                destroyedCalls.snapshot().forEach { (_, call) ->
-                    call.let {
-                        // No session here
+            deliverIntentToDestroyedCalls(event)
+        }
+    }
+
+    private fun shouldProcessDestroyedCall(event: VideoEvent, callCid: String): Boolean {
+        return when (event) {
+            is WSCallEvent -> event.getCallCID() == callCid
+            else -> true
+        }
+    }
+
+    private fun deliverIntentToDestroyedCalls(event: VideoEvent) {
+        safeCall {
+            destroyedCalls.snapshot().forEach { (_, call) ->
+                call.let {
+                    if (shouldProcessDestroyedCall(event, call.cid)) {
                         it.state.handleEvent(event)
                         it.handleEvent(event)
                     }
+                }
+            }
+        }
+    }
+
+    private fun notifyDestroyedCalls(event: VideoEvent) {
+        safeCall {
+            destroyedCalls.snapshot().forEach { (_, call) ->
+                if (shouldProcessDestroyedCall(event, call.cid)) {
+                    call.fireEvent(event)
                 }
             }
         }
@@ -1018,7 +1036,6 @@ internal class StreamVideoClient internal constructor(
         coordinatorConnectionModule.api.collectUserFeedback(
             type = callType,
             id = id,
-            session = sessionId,
             collectUserFeedbackRequest = CollectUserFeedbackRequest(
                 rating = rating,
                 sdk = "stream-video-android",
