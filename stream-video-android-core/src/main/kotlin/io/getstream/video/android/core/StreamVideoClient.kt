@@ -585,6 +585,7 @@ internal class StreamVideoClient internal constructor(
         team: String? = null,
         ring: Boolean,
         notify: Boolean,
+        video: Boolean?,
     ): Result<GetOrCreateCallResponse> {
         val members = memberIds?.map {
             MemberRequest(
@@ -602,6 +603,7 @@ internal class StreamVideoClient internal constructor(
             team = team,
             ring = ring,
             notify = notify,
+            video = video,
         )
     }
 
@@ -615,6 +617,7 @@ internal class StreamVideoClient internal constructor(
         team: String? = null,
         ring: Boolean,
         notify: Boolean,
+        video: Boolean?,
     ): Result<GetOrCreateCallResponse> {
         logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
 
@@ -632,6 +635,7 @@ internal class StreamVideoClient internal constructor(
                     ),
                     ring = ring,
                     notify = notify,
+                    video = video,
                 ),
                 connectionId = waitForConnectionId(),
             )

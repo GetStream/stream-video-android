@@ -316,6 +316,7 @@ public class Call(
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
@@ -328,6 +329,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -340,6 +342,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         }
 
