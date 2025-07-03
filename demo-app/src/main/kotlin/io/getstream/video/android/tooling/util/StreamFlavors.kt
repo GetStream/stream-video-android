@@ -34,19 +34,28 @@ object StreamBuildFlavorUtil {
     val isE2eTesting: Boolean get() = current == E2eTesting
 }
 
+private const val TYPE_DEVELOPMENT = "development"
+private const val TYPE_PRODUCTION = "production"
+private const val TYPE_E2E_TESTING = "e2etesting"
+
 enum class StreamBuildFlavor(val type: String) {
-    Development("development"),
-    Production("production"),
-    E2eTesting("e2etesting"),
+    Development(TYPE_DEVELOPMENT),
+    Production(TYPE_PRODUCTION),
+    E2eTesting(TYPE_E2E_TESTING),
     ;
 
     companion object {
         fun from(type: String?): StreamBuildFlavor {
-            return entries.find { it.type == type } ?: Development
+            return when (type) {
+                null -> Development
+                TYPE_DEVELOPMENT -> Development
+                TYPE_PRODUCTION -> Production
+                TYPE_E2E_TESTING -> E2eTesting
+                else -> Development
+            }
         }
     }
 }
-
 public object StreamEnvironments {
     const val demo = "demo"
     const val pronto = "pronto"
