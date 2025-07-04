@@ -739,6 +739,19 @@ public class CallState(
             is CallRingEvent -> {
                 getOrCreateMembers(event.members)
                 updateFromResponse(event.call)
+
+                // Fill caller in members if not present
+                val memberMap = _members.value.toSortedMap()
+                if (!memberMap.contains(event.call.createdBy.id)) {
+                    memberMap[event.call.createdBy.id] = MemberState(
+                        user = event.call.createdBy.toUser(),
+                        role = event.call.createdBy.role,
+                        custom = emptyMap(),
+                        createdAt = event.call.createdAt,
+                        updatedAt = event.call.updatedAt,
+                    )
+                    _members.value = memberMap
+                }
             }
 
             is CallUpdatedEvent -> {
