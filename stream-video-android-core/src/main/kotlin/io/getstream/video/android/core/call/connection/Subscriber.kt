@@ -64,7 +64,7 @@ import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import java.util.concurrent.ConcurrentHashMap
 
-internal class Subscriber(
+class Subscriber(
     private val sessionId: String,
     private val sfuClient: SignalServerService,
     private val coroutineScope: CoroutineScope,
@@ -128,7 +128,7 @@ internal class Subscriber(
     private val trackIdToTrackType = ConcurrentHashMap<String, TrackType>()
 
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
-    private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
+    val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
         ConcurrentHashMap()
 
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {

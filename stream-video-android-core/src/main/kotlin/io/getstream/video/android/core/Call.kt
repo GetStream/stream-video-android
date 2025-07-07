@@ -217,7 +217,7 @@ public class Call(
     private var isDestroyed = false
 
     /** Session handles all real time communication for video and audio */
-    internal var session: RtcSession? = null
+    var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 

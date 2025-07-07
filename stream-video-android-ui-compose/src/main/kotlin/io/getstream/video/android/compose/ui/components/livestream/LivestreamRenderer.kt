@@ -47,6 +47,7 @@ import io.getstream.video.android.compose.ui.components.video.config.VideoRender
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
@@ -54,6 +55,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
+import stream.video.sfu.models.TrackType
 
 @Composable
 internal fun LivestreamRenderer(
@@ -78,7 +80,16 @@ internal fun LivestreamRenderer(
     }
 
     LaunchedEffect(isPaused) {
-        call.speaker.setEnabled(!isPaused)
+//        call.speaker.setEnabled(!isPaused)
+//        call.microphone.mediaManager.audioTrack.setEnabled(call.speaker.isEnabled.value)
+        val subscriberTracks = call.session?.subscriber?.tracks?.values
+        val audioTracks = subscriberTracks?.mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as AudioTrack}
+        if (!audioTracks.isNullOrEmpty()) {
+            audioTracks.forEach { it.enableAudio(!isPaused) }
+        }
+
+        Log.d("Noob", "Subscriber Tracks: ${subscriberTracks}")
+        Log.d("Noob", "Pausing speaker: ${call.speaker.isEnabled.value}")
     }
     Box(modifier = Modifier.fillMaxSize()) {
         VideoRenderer(
