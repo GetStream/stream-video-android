@@ -59,6 +59,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -113,7 +114,7 @@ import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState.Available.toClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsContainer
@@ -146,7 +147,7 @@ fun CallScreen(
     var isShowingStats by remember { mutableStateOf(false) }
     var layout by remember { mutableStateOf(LayoutType.DYNAMIC) }
     var unreadCount by remember { mutableIntStateOf(0) }
-    var showShareDialog by remember { mutableStateOf(true) }
+    var showShareDialog by rememberSaveable { mutableStateOf(true) }
     var showParticipants by remember { mutableStateOf(false) }
     val chatState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -286,7 +287,7 @@ fun CallScreen(
                         call = call,
                         layout = layout,
                         enableInPictureInPicture = true,
-                        enableDiagnostics = BuildConfig.DEBUG || BuildConfig.FLAVOR == StreamFlavors.development,
+                        enableDiagnostics = BuildConfig.DEBUG || StreamBuildFlavorUtil.isDevelopment,
                         onCallAction = {
                             when (it) {
                                 ChooseLayout -> isShowingLayoutChooseMenu = true
@@ -555,18 +556,27 @@ fun CallScreen(
         if (!isPictureInPictureMode) {
             if (showShareDialog &&
                 participantsSize.size == 1 &&
-                !chatState.isVisible &&
-                orientation == Configuration.ORIENTATION_PORTRAIT
+                !chatState.isVisible
             ) {
                 val clipboardManager = remember(context) {
                     context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                 }
                 val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
+
+                val configuration = LocalConfiguration.current
+                val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
+                val popupYOffset = if (isPortrait) {
+                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt()
+                } else {
+                    0
+                }
+
                 Popup(
                     alignment = Alignment.BottomCenter,
                     offset = IntOffset(
                         0,
-                        -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
+                        popupYOffset,
                     ),
                 ) {
                     Box {

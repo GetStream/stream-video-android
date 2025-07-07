@@ -222,6 +222,9 @@ dependencies {
     implementation(project(":stream-video-android-filters-video"))
     compileOnly(project(":stream-video-android-previewdata"))
 
+
+    implementation(libs.androidx.media.media)
+
     // Noise Cancellation
     implementation(libs.stream.video.android.noise.cancellation)
 

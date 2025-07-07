@@ -60,6 +60,7 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -218,6 +219,7 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
+    internal val unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -315,6 +317,7 @@ public class Call(
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
@@ -327,6 +330,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -339,6 +343,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         }
 
@@ -656,6 +661,7 @@ public class Call(
                 session.prepareRejoin()
                 this.session = RtcSession(
                     clientImpl,
+                    reconnectAttepmts,
                     powerManager,
                     this,
                     sessionId,
@@ -711,6 +717,7 @@ public class Call(
                 session.prepareRejoin()
                 val newSession = RtcSession(
                     clientImpl,
+                    reconnectAttepmts,
                     powerManager,
                     this,
                     sessionId,
@@ -835,12 +842,41 @@ public class Call(
         )
         return clientImpl.muteUsers(type, id, request)
     }
-
-    fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+    ) {
         logger.i {
-            "[setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible"
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(sessionId, trackType, visible)
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            Subscriber.defaultVideoDimension,
+            viewportId,
+        )
+    }
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+        width: Int,
+        height: Int,
+    ) {
+        logger.i {
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            VideoDimension(width, height),
+            viewportId,
+        )
     }
 
     fun handleEvent(event: VideoEvent) {
@@ -867,6 +903,7 @@ public class Call(
         sessionId: String,
         trackType: TrackType,
         onRendered: (VideoTextureViewRenderer) -> Unit = {},
+        viewportId: String = sessionId,
     ) {
         logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
 
@@ -888,6 +925,7 @@ public class Call(
                             trackType,
                             true,
                             VideoDimension(width, height),
+                            viewportId,
                         )
                     }
                     onRendered(videoRenderer)
@@ -914,6 +952,7 @@ public class Call(
                             trackType,
                             true,
                             VideoDimension(videoWidth, videoHeight),
+                            viewportId,
                         )
                     }
                 }
@@ -1096,7 +1135,8 @@ public class Call(
                 "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
             }
 
-            val bluetoothHeadset = availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
+            val bluetoothHeadset =
+                availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
             val wiredHeadset = availableDevices.find { it is StreamAudioDevice.WiredHeadset }
 
             if (bluetoothHeadset != null) {
@@ -1395,6 +1435,14 @@ public class Call(
 
     @InternalStreamVideoApi
     public class Debug(val call: Call) {
+
+        public fun pause() {
+            call.session?.subscriber?.disable()
+        }
+
+        public fun resume() {
+            call.session?.subscriber?.enable()
+        }
 
         public fun rejoin() {
             call.scope.launch {

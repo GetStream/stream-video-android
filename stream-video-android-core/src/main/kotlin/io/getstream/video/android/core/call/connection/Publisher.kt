@@ -17,9 +17,11 @@
 package io.getstream.video.android.core.call.connection
 
 import androidx.annotation.VisibleForTesting
+import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
 import io.getstream.video.android.core.call.connection.utils.computeTransceiverEncodings
@@ -31,6 +33,7 @@ import io.getstream.video.android.core.call.connection.utils.toVideoDimension
 import io.getstream.video.android.core.call.connection.utils.toVideoLayers
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.defaultConstraints
@@ -75,6 +78,7 @@ internal class Publisher(
     private val sessionId: String,
     private val rejoin: () -> Unit,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
+    private val tracer: Tracer,
 ) : StreamPeerConnection(
     coroutineScope,
     type,
@@ -83,6 +87,8 @@ internal class Publisher(
     onNegotiationNeeded,
     onIceCandidate,
     maxBitRate,
+    true,
+    tracer,
 ) {
     private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
@@ -106,7 +112,7 @@ internal class Publisher(
             stopPublishing()
         }
         dispose()
-        connection.close()
+        close()
     }
 
     private fun dispose() {
@@ -127,6 +133,11 @@ internal class Publisher(
 
     @VisibleForTesting
     public suspend fun negotiate(iceRestart: Boolean = false) {
+        if (isIceRestarting) {
+            logger.i { "ICE restart in progress, skipping negotiation" }
+            return
+        }
+
         val offer = super.createOffer(
             if (iceRestart) {
                 iceRestartConstraints
@@ -135,12 +146,10 @@ internal class Publisher(
             },
         ).getOrThrow()
         val trackInfos = getAnnouncedTracks(defaultFormat, offer.description)
-
-        if (isIceRestarting) {
-            logger.i { "ICE restart in progress, skipping negotiation" }
-            return
-        }
-
+        tracer.trace(
+            "negotiate-with-tracks",
+            trackInfos.joinToString(separator = ";") { it.toString() },
+        )
         if (trackInfos.isEmpty()) {
             logger.e { ("Can't negotiate without announcing any tracks") }
             rejoin.invoke()
@@ -150,7 +159,9 @@ internal class Publisher(
 
         safeCall {
             isIceRestarting = iceRestart
-            setLocalDescription(offer)
+            setLocalDescription(offer).onErrorSuspend {
+                tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
+            }
             val request = SetPublisherRequest(
                 sdp = offer.description,
                 tracks = trackInfos,
@@ -160,13 +171,28 @@ internal class Publisher(
             logger.i { "Received answer: ${response.sdp}" }
             logger.e { "Received error: ${response.error}" }
             if (response.error != null) {
+                tracer.trace("negotiate-error-setpublisher", response.error.message ?: "unknown")
                 logger.e { response.error.message }
                 rejoin()
             }
             setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, response.sdp))
+                .onErrorSuspend {
+                    tracer.trace(
+                        "negotiate-error-setremotedescription",
+                        it.message ?: "unknown",
+                    )
+                }
             // Set ice trickle
         }
         isIceRestarting = false
+    }
+
+    override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
+        return statsTracer?.get(
+            transceiverCache.items().associate {
+                it.transceiver.sender.track()?.id() to it.publishOption.track_type
+            }.filterKeys { it != null }.mapKeys { it.key!! },
+        )
     }
 
     /**
@@ -195,10 +221,12 @@ internal class Publisher(
                         logger.d { "[trackPublishing] Track already exists." }
                         senderTrack.trySetEnabled(true)
                         logTrack(senderTrack)
+                        traceTrack(trackType, senderTrack.id())
                         return senderTrack
                     } else {
                         logger.d { "[trackPublishing] Track is disposed, creating new one." }
                         val newTrack = newTrackFromSource(publishOption.track_type)
+                        traceTrack(trackType, newTrack.id())
                         sender.setTrack(newTrack, true)
                         return newTrack
                     }
@@ -207,6 +235,7 @@ internal class Publisher(
                     logger.w { "Failed to set track for ${publishOption.track_type}, creating new transceiver" }
                     transceiverCache.remove(publishOption)
                     val fallbackTrack = newTrackFromSource(publishOption.track_type)
+                    traceTrack(trackType, fallbackTrack.id())
                     addTransceiver(captureFormat, fallbackTrack, publishOption)
                     return fallbackTrack
                 }
@@ -216,6 +245,7 @@ internal class Publisher(
                 }
                 // This is the first time we are adding the transceiver.
                 val newTrack = newTrackFromSource(publishOption.track_type)
+                traceTrack(trackType, newTrack.id())
                 addTransceiver(captureFormat, newTrack, publishOption)
                 return newTrack
             }
@@ -310,7 +340,8 @@ internal class Publisher(
             val sender = transceiver.sender
             val senderTrack = sender.track()
             senderTrack?.let { track ->
-                track.trySetEnabled(false)
+                val result = track.trySetEnabled(false)
+                tracer().trace("unpublishtrack", "$trackType:${track.id()}:$result")
                 logTrack(track)
             }
         }
