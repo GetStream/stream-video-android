@@ -83,12 +83,12 @@ internal fun LivestreamRenderer(
 //        call.speaker.setEnabled(!isPaused)
 //        call.microphone.mediaManager.audioTrack.setEnabled(call.speaker.isEnabled.value)
         val subscriberTracks = call.session?.subscriber?.tracks?.values
-        val audioTracks = subscriberTracks?.mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as AudioTrack}
+        val audioTracks = subscriberTracks?.mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as AudioTrack }
         if (!audioTracks.isNullOrEmpty()) {
             audioTracks.forEach { it.enableAudio(!isPaused) }
         }
 
-        Log.d("Noob", "Subscriber Tracks: ${subscriberTracks}")
+        Log.d("Noob", "Subscriber Tracks: $subscriberTracks")
         Log.d("Noob", "Pausing speaker: ${call.speaker.isEnabled.value}")
     }
     Box(modifier = Modifier.fillMaxSize()) {
