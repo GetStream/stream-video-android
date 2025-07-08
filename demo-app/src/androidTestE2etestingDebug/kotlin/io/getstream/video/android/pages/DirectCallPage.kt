@@ -21,7 +21,7 @@ import androidx.test.uiautomator.By
 class DirectCallPage {
 
     companion object {
-        val sampleUser = By.text("Willard Hesser")
+        val participantName = By.res("Stream_DirectCallUserName")
         val audioCallButton = By.res("Stream_AudioCallButton")
         val videoCallButton = By.res("Stream_VideoCallButton")
     }
