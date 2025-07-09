@@ -1,0 +1,244 @@
+public abstract interface class io/getstream/video/android/client/api/StreamCall {
+	public abstract fun create-tZkwj4A (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun create-tZkwj4A$default (Lio/getstream/video/android/client/api/StreamCall;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun end-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun get-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun join-yxL6bBk (ZLio/getstream/video/android/client/model/StreamCallCreateOptions;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun join-yxL6bBk$default (Lio/getstream/video/android/client/api/StreamCall;ZLio/getstream/video/android/client/model/StreamCallCreateOptions;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun leave-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun muteAllUsers-BWLJW6A (ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun muteAllUsers-BWLJW6A$default (Lio/getstream/video/android/client/api/StreamCall;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun muteUsers-yxL6bBk (Ljava/util/List;ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun muteUsers-yxL6bBk$default (Lio/getstream/video/android/client/api/StreamCall;Ljava/util/List;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun pinForEveryone-0E7RQCE (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun queryMembers-hUnOzRk (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun queryMembers-hUnOzRk$default (Lio/getstream/video/android/client/api/StreamCall;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun sendReaction-BWLJW6A (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun sendReaction-BWLJW6A$default (Lio/getstream/video/android/client/api/StreamCall;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun subscribe-IoAF18A (Lio/getstream/video/android/client/api/listeners/StreamVideoEventListener;)Ljava/lang/Object;
+	public abstract fun unmuteAllUsers-BWLJW6A (ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun unmuteAllUsers-BWLJW6A$default (Lio/getstream/video/android/client/api/StreamCall;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun unmuteUsers-yxL6bBk (Ljava/util/List;ZZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun unmuteUsers-yxL6bBk$default (Lio/getstream/video/android/client/api/StreamCall;Ljava/util/List;ZZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun unpinForEveryone-0E7RQCE (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun update-BWLJW6A (Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun update-BWLJW6A$default (Lio/getstream/video/android/client/api/StreamCall;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class io/getstream/video/android/client/api/StreamVideoClient {
+	public abstract fun call-gIAlu-s (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;
+	public abstract fun connect (Lio/getstream/video/android/client/model/ConnectUserData;Lio/getstream/video/android/client/api/state/connection/StreamConnectionRetryConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun connect$default (Lio/getstream/video/android/client/api/StreamVideoClient;Lio/getstream/video/android/client/model/ConnectUserData;Lio/getstream/video/android/client/api/state/connection/StreamConnectionRetryConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun disconnect-IoAF18A (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getState-d1pmJ48 ()Ljava/lang/Object;
+	public abstract fun registerDevice-gIAlu-s (Lio/getstream/android/push/PushDevice;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun subscribe-IoAF18A (Lio/getstream/video/android/client/api/listeners/StreamVideoClientListener;)Ljava/lang/Object;
+	public abstract fun unregisterDevice-gIAlu-s (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/client/api/builder/StreamVideoClientBaseScope {
+	public fun <init> ()V
+	public final fun getApiKey ()Ljava/lang/String;
+	public final fun getAppName ()Ljava/lang/String;
+	public final fun getAppVersion ()Ljava/lang/String;
+	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getToken ()Ljava/lang/String;
+	public final fun getUserId ()Ljava/lang/String;
+	public final fun getWssUrl ()Ljava/lang/String;
+	public final fun setApiKey (Ljava/lang/String;)V
+	public final fun setAppName (Ljava/lang/String;)V
+	public final fun setAppVersion (Ljava/lang/String;)V
+	public final fun setBaseUrl (Ljava/lang/String;)V
+	public final fun setToken (Ljava/lang/String;)V
+	public final fun setUserId (Ljava/lang/String;)V
+	public final fun setWssUrl (Ljava/lang/String;)V
+}
+
+public final class io/getstream/video/android/client/api/builder/StreamVideoClientBuilderKt {
+	public static final fun streamVideoClient (Ljava/lang/String;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static synthetic fun streamVideoClient$default (Ljava/lang/String;Landroid/content/Context;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface class io/getstream/video/android/client/api/listeners/StreamCallListener : io/getstream/video/android/client/api/listeners/StreamVideoEventListener {
+	public abstract fun onState (Lio/getstream/video/android/client/api/state/state/StreamCallState;)V
+}
+
+public abstract interface class io/getstream/video/android/client/api/listeners/StreamErrorListener : io/getstream/video/android/client/api/subscribe/StreamSubscriber {
+	public abstract fun onError (Ljava/lang/Throwable;)V
+}
+
+public abstract interface class io/getstream/video/android/client/api/listeners/StreamVideoClientListener : io/getstream/video/android/client/api/listeners/StreamErrorListener, io/getstream/video/android/client/api/listeners/StreamVideoEventListener {
+	public fun onError (Ljava/lang/Throwable;)V
+	public fun onEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
+	public fun onState (Lio/getstream/video/android/client/api/state/StreamVideoClientState;)V
+}
+
+public abstract interface class io/getstream/video/android/client/api/listeners/StreamVideoEventListener : io/getstream/video/android/client/api/subscribe/StreamSubscriber {
+	public abstract fun onEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
+}
+
+public abstract interface class io/getstream/video/android/client/api/state/StreamVideoClientState {
+	public abstract fun getConnectionState ()Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState;
+}
+
+public final class io/getstream/video/android/client/api/state/connection/StreamConnectionRetryConfig {
+	public fun <init> ()V
+	public fun <init> (IJ)V
+	public synthetic fun <init> (IJILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()J
+	public final fun copy (IJ)Lio/getstream/video/android/client/api/state/connection/StreamConnectionRetryConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/client/api/state/connection/StreamConnectionRetryConfig;IJILjava/lang/Object;)Lio/getstream/video/android/client/api/state/connection/StreamConnectionRetryConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMaxRetries ()I
+	public final fun getRetryInterval ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState {
+	public final fun foldCatching-gIAlu-s (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public final fun onConnected (Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState;
+	public final fun onDisconnected (Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState;
+}
+
+public final class io/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Connected : io/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState {
+	public fun <init> (Lio/getstream/video/android/client/model/StreamConnectedUser;Ljava/lang/String;)V
+	public final fun component1 ()Lio/getstream/video/android/client/model/StreamConnectedUser;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lio/getstream/video/android/client/model/StreamConnectedUser;Ljava/lang/String;)Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Connected;
+	public static synthetic fun copy$default (Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Connected;Lio/getstream/video/android/client/model/StreamConnectedUser;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Connected;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConnectionId ()Ljava/lang/String;
+	public final fun getUser ()Lio/getstream/video/android/client/model/StreamConnectedUser;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Disconnected : io/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Throwable;Lio/getstream/android/video/generated/models/APIError;)V
+	public synthetic fun <init> (Ljava/lang/Throwable;Lio/getstream/android/video/generated/models/APIError;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun component2 ()Lio/getstream/android/video/generated/models/APIError;
+	public final fun copy (Ljava/lang/Throwable;Lio/getstream/android/video/generated/models/APIError;)Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Disconnected;
+	public static synthetic fun copy$default (Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Disconnected;Ljava/lang/Throwable;Lio/getstream/android/video/generated/models/APIError;ILjava/lang/Object;)Lio/getstream/video/android/client/api/state/connection/StreamVideoClientConnectionState$Disconnected;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApiError ()Lio/getstream/android/video/generated/models/APIError;
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/client/api/state/state/StreamCallState {
+	public abstract fun getParticipants ()Ljava/util/List;
+}
+
+public abstract interface class io/getstream/video/android/client/api/subscribe/StreamSubscriber {
+}
+
+public abstract interface class io/getstream/video/android/client/api/subscribe/StreamSubscription {
+	public abstract fun cancel-d1pmJ48 ()Ljava/lang/Object;
+	public abstract fun getId ()I
+}
+
+public final class io/getstream/video/android/client/internal/generated/IntegrationAppConfig {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAppName ()Ljava/lang/String;
+	public final fun getAppPackageName ()Ljava/lang/String;
+	public final fun getAppVersion ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/client/internal/generated/apis/SignalServerService {
+	public abstract fun iceRestart (Lstream/video/sfu/signal/ICERestartRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun iceTrickle (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun sendStats (Lstream/video/sfu/signal/SendStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun startNoiseCancellation (Lstream/video/sfu/signal/StartNoiseCancellationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun stopNoiseCancellation (Lstream/video/sfu/signal/StopNoiseCancellationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateMuteStates (Lstream/video/sfu/signal/UpdateMuteStatesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/client/model/ConnectUserData {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Z
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/util/Map;)Lio/getstream/video/android/client/model/ConnectUserData;
+	public static synthetic fun copy$default (Lio/getstream/video/android/client/model/ConnectUserData;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/video/android/client/model/ConnectUserData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getImage ()Ljava/lang/String;
+	public final fun getInvisible ()Z
+	public final fun getLanguage ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getToken ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/client/model/StreamCallCreateOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Ljava/time/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Ljava/time/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Lio/getstream/android/video/generated/models/CallSettingsRequest;
+	public final fun component3 ()Ljava/time/OffsetDateTime;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Ljava/time/OffsetDateTime;Ljava/lang/String;)Lio/getstream/video/android/client/model/StreamCallCreateOptions;
+	public static synthetic fun copy$default (Lio/getstream/video/android/client/model/StreamCallCreateOptions;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Ljava/time/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/client/model/StreamCallCreateOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getSettings ()Lio/getstream/android/video/generated/models/CallSettingsRequest;
+	public final fun getStartsAt ()Ljava/time/OffsetDateTime;
+	public final fun getTeam ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/client/model/StreamConnectedUser {
+	public fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component10 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component11 ()Ljava/lang/String;
+	public final fun component12 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component13 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Ljava/util/Map;
+	public final fun component9 ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun copy (Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)Lio/getstream/video/android/client/model/StreamConnectedUser;
+	public static synthetic fun copy$default (Lio/getstream/video/android/client/model/StreamConnectedUser;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/client/model/StreamConnectedUser;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlockedUserIds ()Ljava/util/List;
+	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getDeactivatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getDeletedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getImage ()Ljava/lang/String;
+	public final fun getLanguage ()Ljava/lang/String;
+	public final fun getLastActive ()Lorg/threeten/bp/OffsetDateTime;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getRole ()Ljava/lang/String;
+	public final fun getTeams ()Ljava/util/List;
+	public final fun getUpdatedAt ()Lorg/threeten/bp/OffsetDateTime;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

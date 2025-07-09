@@ -18,7 +18,6 @@ package io.getstream.video.android
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamFlavors

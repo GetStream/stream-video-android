@@ -198,8 +198,6 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
-
-
         streamVideoClient(user.id, context) {
             this.apiKey = apiKey
             this.token = token
