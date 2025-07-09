@@ -124,7 +124,7 @@ lane :install_video_buddy do
   sh("npm install -g playwright@#{playwright_version}")
   sh('npx playwright install chromium')
 
-  stream_video_buddy_version = '1.6.27'
+  stream_video_buddy_version = '1.6.32'
   sh("npm list -g stream-video-buddy | grep -q '#{stream_video_buddy_version}' || " \
      "npm install -g 'https://github.com/GetStream/stream-video-buddy##{stream_video_buddy_version}'")
 end
