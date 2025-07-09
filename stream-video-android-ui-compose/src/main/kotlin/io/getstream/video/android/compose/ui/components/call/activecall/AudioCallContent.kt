@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -264,6 +265,7 @@ public fun AudioOnlyCallControls(
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         ToggleMicrophoneAction(
+            modifier = Modifier.testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
@@ -271,6 +273,7 @@ public fun AudioOnlyCallControls(
         )
 
         LeaveCallAction(
+            modifier = Modifier.testTag("Stream_HangUpButton"),
             onCallAction = onCallAction,
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )

@@ -101,7 +101,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamDialo
 import io.getstream.video.android.model.User
 import io.getstream.video.android.models.builtInUsers
 import io.getstream.video.android.tooling.extensions.toPx
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
@@ -127,7 +127,7 @@ fun LoginScreen(
         }
         val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
         val availableEnvs by remember { mutableStateOf(AppConfig.availableEnvironments) }
-        val availableLogins = when (BuildConfig.FLAVOR == StreamFlavors.development) {
+        val availableLogins = when (StreamBuildFlavorUtil.isDevelopment) {
             true -> listOf("built-in", "google", "email", "guest")
             else -> listOf("google", "email", "guest")
         }

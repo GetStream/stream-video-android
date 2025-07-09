@@ -76,7 +76,7 @@ public fun OutgoingCallControls(
         }
 
         CancelCallAction(
-            modifier = Modifier.testTag("Stream_HangUpButton"),
+            modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )

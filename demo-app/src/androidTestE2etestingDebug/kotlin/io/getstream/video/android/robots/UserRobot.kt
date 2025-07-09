@@ -26,6 +26,7 @@ import io.getstream.video.android.pages.DirectCallPage.Companion.audioCallButton
 import io.getstream.video.android.pages.DirectCallPage.Companion.videoCallButton
 import io.getstream.video.android.pages.LobbyPage
 import io.getstream.video.android.pages.LoginPage
+import io.getstream.video.android.pages.RingPage
 import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
@@ -68,16 +69,16 @@ class UserRobot {
     // CallDetailsPage actions
 
     fun logout(): UserRobot {
-        CallDetailsPage.wheelIcon.waitToAppear().click()
+        CallDetailsPage.wheelIcon.waitToAppear(timeOutMillis = 20.seconds).click()
         CallDetailsPage.signOutButton.waitToAppear().click()
         return this
     }
 
-    fun directCall(video: Boolean): UserRobot {
+    fun directCall(audioOnly: Boolean): UserRobot {
         CallDetailsPage.wheelIcon.waitToAppear().click()
-        CallDetailsPage.directCallButton.findObject().click()
-        DirectCallPage.sampleUser.waitToAppear().click()
-        val callButton = if (video) videoCallButton else audioCallButton
+        CallDetailsPage.directCallButton.waitToAppear().click()
+        DirectCallPage.participantName.waitToAppear().click()
+        val callButton = if (audioOnly) audioCallButton else videoCallButton
         callButton.findObject().click()
         return this
     }
@@ -108,6 +109,11 @@ class UserRobot {
         return this
     }
 
+    fun getUsername(): String {
+        CallDetailsPage.callIdInputField.waitToAppear()
+        return CallDetailsPage.userName.findObject().text
+    }
+
     // LobbyPage actions
 
     fun joinCallFromLobby(): UserRobot {
@@ -118,6 +124,34 @@ class UserRobot {
 
     private fun waitForLobbyToOpen(): UserRobot {
         LobbyPage.closeButton.waitToAppear()
+        return this
+    }
+
+    // RingPage actions
+
+    fun acceptIncomingCall(): UserRobot {
+        RingPage.acceptCallButton.waitToAppear().click()
+        return this
+    }
+
+    fun declineIncomingCall(): UserRobot {
+        RingPage.declineCallButton.waitToAppear().click()
+        return this
+    }
+
+    fun declineIncomingCallIfExists(): UserRobot {
+        if (RingPage.declineCallButton.isDisplayed()) {
+            RingPage.declineCallButton.findObject().click()
+        }
+        return this
+    }
+
+    fun declineOutgoingCall(): UserRobot {
+        return declineIncomingCall()
+    }
+
+    fun waitForIncomingCall(): UserRobot {
+        RingPage.acceptCallButton.waitToAppear(timeOutMillis = 15.seconds)
         return this
     }
 
