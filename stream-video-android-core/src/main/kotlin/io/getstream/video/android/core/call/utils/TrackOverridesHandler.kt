@@ -26,7 +26,7 @@ import stream.video.sfu.signal.TrackSubscriptionDetails
  * @param onOverridesUpdate Lambda used to notify the caller when the overrides are updated.
  * @param logger Logger to be used.
  */
-class TrackOverridesHandler(
+internal class TrackOverridesHandler(
     private val onOverridesUpdate: (overrides: Map<String, TrackOverride>) -> Unit,
     private val logger: TaggedLogger? = null,
 ) {

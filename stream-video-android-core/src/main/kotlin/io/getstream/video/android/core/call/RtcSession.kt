@@ -311,7 +311,7 @@ public class RtcSession internal constructor(
     private val connectionConfiguration: PeerConnection.RTCConfiguration
         get() = buildConnectionConfiguration(iceServers)
 
-    var subscriber: Subscriber? = null
+    internal var subscriber: Subscriber? = null
     internal var publisher: Publisher? = null
 
     internal lateinit var sfuConnectionModule: SfuConnectionModule

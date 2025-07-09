@@ -70,6 +70,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
@@ -217,7 +218,7 @@ public class Call(
     private var isDestroyed = false
 
     /** Session handles all real time communication for video and audio */
-    var session: RtcSession? = null
+    internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
@@ -1428,6 +1429,30 @@ public class Call(
      */
     fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
         session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
+    }
+
+    /**
+     * Enables or disables the reception of incoming audio tracks for all or specified participants.
+     *
+     * This method allows selective control over whether the local client receives audio from remote participants.
+     * It's particularly useful in scenarios such as livestreams or group calls where the user may want to mute
+     * specific participants' audio without affecting the overall session.
+     *
+     * @param enabled `true` to enable (subscribe to) incoming audio, `false` to disable (unsubscribe from) it.
+     * @param sessionIds Optional list of participant session IDs for which to toggle incoming audio.
+     * If `null`, the audio setting is applied to all participants currently in the session.
+     */
+    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
+        val participantTrackMap = session?.subscriber?.tracks ?: return
+
+        val targetTracks = when {
+            sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
+            else -> participantTrackMap.values.toList()
+        }
+
+        targetTracks
+            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
+            .forEach { it.enableAudio(enabled) }
     }
 
     @InternalStreamVideoApi
