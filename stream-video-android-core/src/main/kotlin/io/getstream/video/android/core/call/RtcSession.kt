@@ -418,7 +418,7 @@ public class RtcSession internal constructor(
 
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
                         _peerConnectionStates.value.let {
-                            if(publisher?.isHealthy() == true && subscriber?.isHealthy() == true) {
+                            if (publisher?.isHealthy() == true && subscriber?.isHealthy() == true) {
                                 call.fastReconnect()
                             } else {
                                 call.rejoin()
