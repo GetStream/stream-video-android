@@ -467,7 +467,7 @@ class MicrophoneManager(
         setupCompleted = false
     }
 
-    fun canHandleDeviceSwitch() = true
+    fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
 
     // Internal logic
     internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
