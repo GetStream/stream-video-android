@@ -95,6 +95,7 @@ internal interface SfuParser : GenericParser<SfuDataRequest> {
 internal interface VideoParser : GenericParser<VideoEvent> {
 
     private val tag: String get() = "Video:VideoParser"
+
     override fun encode(event: VideoEvent): ByteString {
         val json = toJson(event)
         return json.encodeToByteArray().toByteString()

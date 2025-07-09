@@ -18,6 +18,7 @@ package io.getstream.video.android
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamFlavors
@@ -39,7 +40,6 @@ class App : Application() {
         // Demo helper for initialising the Video and Chat SDK instances from one place.
         // For simpler code we "inject" the Context manually instead of using DI.
         StreamVideoInitHelper.init(this)
-
         // Prepare the Video SDK if we already have a user logged in the demo app.
         // If you need to receive push messages (incoming call) then the SDK must be initialised
         // in Application.onCreate. Otherwise it doesn't know how to init itself when push arrives

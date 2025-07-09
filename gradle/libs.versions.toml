@@ -85,7 +85,18 @@ playPublisher = "3.12.1"
 
 googleMlKitSelfieSegmentation = "16.0.0-beta6"
 
+autoService = "1.0.1"
+symbolProcessingApi = "1.9.25-1.0.20"
+kotlinReflect = "1.9.25"
+kotlinpoet = "1.15.0"
+
 [libraries]
+autoservice = { module = "com.google.auto.service:auto-service", version.ref = "autoService" }
+autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoService" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlinReflect" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+kotlinpoet-ksp = { group = "com.squareup", name = "kotlinpoet-ksp", version.ref = "kotlinpoet" }
+google-symbolprocessingapi = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "symbolProcessingApi" }
 allure-kotlin-model = { module = "io.qameta.allure:allure-kotlin-model", version.ref = "allureKotlin"}
 allure-kotlin-commons = { module = "io.qameta.allure:allure-kotlin-commons", version.ref = "allureKotlin"}
 allure-kotlin-junit4 = { module = "io.qameta.allure:allure-kotlin-junit4", version.ref = "allureKotlin"}
@@ -228,7 +239,6 @@ zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
-android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 android-test = { id = "com.android.test", version.ref = "androidGradlePlugin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -248,3 +258,4 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 play-publisher = { id = "com.github.triplet.play", version.ref = "playPublisher" }
 baseline-profile = { id = "androidx.baselineprofile", version.ref = "androidxMacroBenchmark" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "kotlin" }

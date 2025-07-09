@@ -20,6 +20,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
@@ -27,6 +28,10 @@ import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
 import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.client.api.builder.streamVideoClient
+import io.getstream.video.android.client.api.listeners.StreamVideoClientListener
+import io.getstream.video.android.client.api.state.StreamVideoClientState
+import io.getstream.video.android.client.model.ConnectUserData
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -40,9 +45,11 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.util.config.AppConfig
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
@@ -191,6 +198,32 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
+
+
+        streamVideoClient(user.id, context) {
+            this.apiKey = apiKey
+            this.token = token
+            this.userId = user.id
+        }.map { client ->
+
+            client.subscribe(object : StreamVideoClientListener {
+                override fun onState(state: StreamVideoClientState) {
+                    Log.d("StreamClientV2#Connect", "Client state: $state")
+                }
+                override fun onEvent(event: VideoEvent) {
+                    Log.d("StreamClientV2#Connect", "Client event: $event")
+                }
+            }).map {
+                GlobalScope.launch {
+                    val data = ConnectUserData(token, user.id)
+                    client.connect(data)
+                }
+                client
+            }.getOrThrow()
+        }.onFailure {
+            Log.e("StreamClientV2#Connect", "Failed to create client", it)
+        }
+
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,

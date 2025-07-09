@@ -30,6 +30,8 @@ include(":demo-app")
 
 // SDK
 include(":benchmark")
+include(":stream-annotations")
+include(":stream-video-android-client")
 include(":stream-video-android-core")
 include(":stream-video-android-ui-core")
 include(":stream-video-android-ui-xml")

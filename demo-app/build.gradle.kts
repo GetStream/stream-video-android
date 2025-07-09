@@ -222,6 +222,8 @@ dependencies {
     implementation(project(":stream-video-android-filters-video"))
     compileOnly(project(":stream-video-android-previewdata"))
 
+    implementation(project(":stream-video-android-client"))
+
 
     implementation(libs.androidx.media.media)
 
