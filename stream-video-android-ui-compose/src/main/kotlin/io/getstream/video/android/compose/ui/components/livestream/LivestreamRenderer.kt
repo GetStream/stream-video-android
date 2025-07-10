@@ -74,6 +74,7 @@ internal fun LivestreamRenderer(
                 .clickable(enabled = enablePausing) {
                     if (onPausedPlayer != null) {
                         isPaused = !isPaused
+                        livestream?.track?.video?.setEnabled(!isPaused)
                         onPausedPlayer.invoke(isPaused)
 
                         if (isPaused) {
