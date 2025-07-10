@@ -37,6 +37,9 @@ public object TimeProvider {
 }
 
 internal class HealthMonitor(
+    private val healthCheckInterval: Long = HEALTH_CHECK_INTERVAL,
+    private val monitorInterval: Long = MONITOR_INTERVAL,
+    private val noEventIntervalThreshold: Long = NO_EVENT_INTERVAL_THRESHOLD,
     private val timeProvider: TimeProvider = TimeProvider,
     private val retryInterval: RetryInterval = ExponentialRetryInterval,
     private val userScope: UserScope,
@@ -92,7 +95,7 @@ internal class HealthMonitor(
      */
     private fun postponeHealthMonitor() {
         healthMonitorJob?.cancel()
-        healthMonitorJob = userScope.launchDelayed(MONITOR_INTERVAL) {
+        healthMonitorJob = userScope.launchDelayed(monitorInterval) {
             if (needToReconnect()) {
                 postponeReconnect()
             } else {
@@ -107,7 +110,7 @@ internal class HealthMonitor(
      */
     private fun postponeHealthCheck() {
         healthCheckJob?.cancel()
-        healthCheckJob = userScope.launchDelayed(HEALTH_CHECK_INTERVAL) {
+        healthCheckJob = userScope.launchDelayed(healthCheckInterval) {
             checkCallback()
             postponeHealthMonitor()
         }
@@ -142,7 +145,7 @@ internal class HealthMonitor(
      * @return True if time elapsed is bigger and we need to start reconnection process.
      */
     private fun needToReconnect(): Boolean =
-        (TimeProvider.provideCurrentTimeInMilliseconds() - lastAck) >= NO_EVENT_INTERVAL_THRESHOLD
+        (TimeProvider.provideCurrentTimeInMilliseconds() - lastAck) >= noEventIntervalThreshold
 
     private fun CoroutineScope.launchDelayed(
         delayMilliseconds: Long,

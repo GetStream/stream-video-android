@@ -20,6 +20,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.call.utils.SignalLostSignalingServiceDecorator
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
@@ -31,6 +32,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
+import stream.video.sfu.models.Error
 import java.util.concurrent.TimeUnit
 
 internal class SfuConnectionModule(
@@ -42,6 +44,7 @@ internal class SfuConnectionModule(
     override val userToken: SfuToken,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer,
+    val onSignalingLost: (Error) -> Unit,
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
@@ -67,12 +70,16 @@ internal class SfuConnectionModule(
     }
 
     // API
-    override val api: SignalServerService = tracedWith(
-        signalRetrofitClient.create(
-            SignalServerService::class.java,
+    override val api: SignalServerService = SignalLostSignalingServiceDecorator(
+        tracedWith(
+            signalRetrofitClient.create(
+                SignalServerService::class.java,
+            ),
+            tracer,
         ),
-        tracer,
-    )
+    ) {
+        onSignalingLost(it)
+    }
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,

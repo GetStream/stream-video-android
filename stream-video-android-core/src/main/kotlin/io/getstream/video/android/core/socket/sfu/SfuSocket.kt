@@ -76,6 +76,8 @@ internal open class SfuSocket(
     private val sfuSocketStateService = SfuSocketStateService()
     private var socketStateObserverJob: Job? = null
     private val healthMonitor = HealthMonitor(
+        monitorInterval = 5000L,
+        noEventIntervalThreshold = 15000L,
         userScope = userScope,
         checkCallback = {
             sendEvent(

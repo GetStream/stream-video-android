@@ -68,6 +68,7 @@ class StreamPeerConnectionTest {
                 onNegotiationNeeded = null,
                 onIceCandidate = null,
                 maxBitRate = 2_000_000,
+                onRejoinNeeded = {},
                 tracer = mockk(relaxed = true),
             ) {},
         ) {
@@ -164,6 +165,7 @@ class StreamPeerConnectionTest {
             onNegotiationNeeded = null,
             onIceCandidate = null,
             maxBitRate = 2_000_000,
+            onRejoinNeeded = {},
             tracer = mockk(relaxed = true),
         ) {}
 
@@ -217,6 +219,7 @@ class StreamPeerConnectionTest {
             onNegotiationNeeded = null,
             onIceCandidate = null,
             maxBitRate = 2_000_000,
+            onRejoinNeeded = {},
             tracer = mockk(relaxed = true),
         ) {}
 

@@ -21,6 +21,7 @@ import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
@@ -79,6 +80,8 @@ internal class Publisher(
     private val rejoin: () -> Unit,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
     private val tracer: Tracer,
+    private val restartIceJobDelegate: RestartIceJobDelegate =
+        RestartIceJobDelegate(coroutineScope),
 ) : StreamPeerConnection(
     coroutineScope,
     type,
@@ -86,6 +89,7 @@ internal class Publisher(
     onStreamAdded,
     onNegotiationNeeded,
     onIceCandidate,
+    rejoin,
     maxBitRate,
     true,
     tracer,
@@ -127,6 +131,29 @@ internal class Publisher(
                 it.transceiver.dispose()
             } catch (e: Exception) {
                 logger.w { "Transceiver already disposed: ${e.message}" }
+            }
+        }
+    }
+
+    override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
+        super.onIceConnectionChange(newState)
+        when (newState) {
+            PeerConnection.IceConnectionState.CONNECTED -> {
+                restartIceJobDelegate.cancelScheduledRestartIce()
+            }
+
+            PeerConnection.IceConnectionState.FAILED -> {
+                restartIceJobDelegate.scheduleRestartIce {
+                    negotiate(true)
+                }
+            }
+            PeerConnection.IceConnectionState.DISCONNECTED -> {
+                restartIceJobDelegate.scheduleRestartIce(3000) {
+                    negotiate(true)
+                }
+            }
+            else -> {
+                // no-op
             }
         }
     }

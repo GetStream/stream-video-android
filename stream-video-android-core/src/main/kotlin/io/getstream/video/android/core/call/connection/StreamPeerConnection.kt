@@ -77,6 +77,7 @@ open class StreamPeerConnection(
     private val onStreamAdded: ((MediaStream) -> Unit)?,
     private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
+    private val onRejoinNeeded: () -> Unit,
     private val maxBitRate: Int,
     private val traceCreateAnswer: Boolean = true,
     private val tracer: Tracer,
@@ -525,6 +526,9 @@ open class StreamPeerConnection(
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState
         tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState.name)
+        if (newState == PeerConnection.PeerConnectionState.FAILED) {
+            onRejoinNeeded()
+        }
     }
 
     // better to monitor onConnectionChange for the state
@@ -532,15 +536,6 @@ open class StreamPeerConnection(
         logger.i { "[onIceConnectionChange] #ice; #sfu; #$typeTag; newState: $newState" }
         iceState.value = newState
         tracer.trace(PeerConnectionTraceKey.ON_ICE_CONNECTION_STATE_CHANGE.value, newState?.name)
-        when (newState) {
-            PeerConnection.IceConnectionState.CLOSED, PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-            }
-
-            PeerConnection.IceConnectionState.CONNECTED -> {
-            }
-
-            else -> Unit
-        }
     }
 
     fun close() {
