@@ -116,6 +116,7 @@ class SubscriberTest {
                 sfuClient = mockSignalServer,
                 coroutineScope = testScope,
                 onIceCandidateRequest = null,
+                rejoin = {},
                 tracer = Tracer("subscriber").also { setEnabled(false) },
             ),
             recordPrivateCalls = true,
