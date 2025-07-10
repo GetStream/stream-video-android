@@ -17,20 +17,16 @@
 package io.getstream.video.android.core.socket.common.token
 
 internal interface TokenManager {
-    /**
-     * Update the current token.
-     */
-    fun updateToken(token: String)
 
     /**
      * Ensure a token has been loaded.
      */
-    suspend fun ensureTokenLoaded()
+    fun ensureTokenLoaded()
 
     /**
      * Load a new token.
      */
-    suspend fun loadSync(): String
+    fun loadSync(): String
 
     /**
      * Expire the current token.
@@ -38,18 +34,11 @@ internal interface TokenManager {
     fun expireToken()
 
     /**
-     * Check if a [TokenProvider] has been provided.
-     *
-     * @return true if a token provider has been provided, false on another case.
-     */
-    fun hasTokenProvider(): Boolean
-
-    /**
      * Inject a new [CacheableTokenProvider]
      *
      * @param provider A [CacheableTokenProvider]
      */
-    fun setTokenProvider(provider: CacheableTokenProvider)
+    fun updateTokenProvider(provider: CacheableTokenProvider)
 
     /**
      * Obtain last token loaded.
