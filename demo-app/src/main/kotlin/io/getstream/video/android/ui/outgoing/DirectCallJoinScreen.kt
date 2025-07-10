@@ -257,6 +257,7 @@ private fun UserRow(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
+                modifier = Modifier.testTag("Stream_DirectCallUserName"),
                 text = name,
                 color = Color.White,
                 fontSize = 16.sp,

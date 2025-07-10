@@ -219,6 +219,7 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
+    internal val unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -316,6 +317,7 @@ public class Call(
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
@@ -328,6 +330,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -340,6 +343,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         }
 
@@ -852,6 +856,25 @@ public class Call(
             trackType,
             visible,
             Subscriber.defaultVideoDimension,
+            viewportId,
+        )
+    }
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+        width: Int,
+        height: Int,
+    ) {
+        logger.i {
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            VideoDimension(width, height),
             viewportId,
         )
     }

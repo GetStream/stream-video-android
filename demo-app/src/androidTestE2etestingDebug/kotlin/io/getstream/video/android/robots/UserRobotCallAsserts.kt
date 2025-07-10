@@ -19,6 +19,7 @@ package io.getstream.video.android.robots
 import androidx.test.uiautomator.BySelector
 import io.getstream.video.android.pages.CallPage
 import io.getstream.video.android.pages.CallPage.SettingsMenu
+import io.getstream.video.android.pages.RingPage
 import io.getstream.video.android.robots.UserControls.DISABLE
 import io.getstream.video.android.robots.UserControls.ENABLE
 import io.getstream.video.android.uiautomator.defaultTimeout
@@ -37,14 +38,29 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 
-fun UserRobot.assertCallControls(microphone: Boolean, camera: Boolean): UserRobot {
-    assertTrue(CallPage.callSettingsClosedToggle.waitToAppear().isDisplayed())
+fun UserRobot.assertVideoCallControls(microphone: Boolean, camera: Boolean): UserRobot {
+    device.retryOnStaleObjectException {
+        assertTrue(CallPage.callSettingsClosedToggle.waitToAppear().isDisplayed())
+    }
     assertTrue(CallPage.hangUpButton.isDisplayed())
     assertTrue(CallPage.chatButton.isDisplayed())
-    assertTrue(CallPage.connectionQualityIndicator.isDisplayed())
+    assertTrue(CallPage.connectionQualityIndicator.waitToAppear().isDisplayed())
     assertUserFrontCamera(isEnabled = true)
     assertUserMicrophone(isEnabled = microphone)
     assertUserCamera(isEnabled = camera)
+    return this
+}
+
+fun UserRobot.assertAudioCallControls(microphone: Boolean): UserRobot {
+    assertTrue(CallPage.hangUpButton.waitToAppear().isDisplayed())
+    assertTrue(CallPage.AudioCall.durationLabel.waitToAppear().isDisplayed())
+    assertTrue(CallPage.AudioCall.participantName.isDisplayed())
+    assertTrue(CallPage.AudioCall.participantAvatar.isDisplayed())
+    assertUserMicrophone(isEnabled = microphone, videoCall = false)
+    assertFalse(CallPage.chatButton.isDisplayed())
+    assertFalse(CallPage.connectionQualityIndicator.isDisplayed())
+    assertFalse(CallPage.cameraEnabledToggle.isDisplayed())
+    assertFalse(CallPage.cameraDisabledToggle.isDisplayed())
     return this
 }
 
@@ -53,13 +69,17 @@ fun UserRobot.assertThatCallIsEnded(): UserRobot {
     return this
 }
 
-fun UserRobot.assertUserMicrophone(isEnabled: Boolean): UserRobot {
+fun UserRobot.assertUserMicrophone(isEnabled: Boolean, videoCall: Boolean = true): UserRobot {
     if (isEnabled) {
         assertTrue(CallPage.microphoneEnabledToggle.waitToAppear().isDisplayed())
-        assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.isDisplayed())
+        if (videoCall) {
+            assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.isDisplayed())
+        }
     } else {
         assertTrue(CallPage.microphoneDisabledToggle.waitToAppear().isDisplayed())
-        assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.isDisplayed())
+        if (videoCall) {
+            assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.isDisplayed())
+        }
     }
     return this
 }
@@ -67,11 +87,8 @@ fun UserRobot.assertUserMicrophone(isEnabled: Boolean): UserRobot {
 fun UserRobot.assertUserCamera(isEnabled: Boolean): UserRobot {
     if (isEnabled) {
         assertTrue(CallPage.cameraEnabledToggle.waitToAppear().isDisplayed())
-        // TODO: https://linear.app/stream/issue/AND-573
-        // assertTrue(CallPage.videoViewWithMediaTrack.isDisplayed())
     } else {
         assertTrue(CallPage.cameraDisabledToggle.waitToAppear().isDisplayed())
-        assertFalse(CallPage.videoViewWithMediaTrack.isDisplayed())
     }
     return this
 }
@@ -220,5 +237,40 @@ fun UserRobot.assertGridView(participants: Int): UserRobot {
 fun UserRobot.assertSpotlightView(): UserRobot {
     assertTrue(CallPage.ParticipantView.spotlightView.waitToAppear().isDisplayed())
     assertFalse(CallPage.cornerDraggableView.waitToDisappear().isDisplayed())
+    return this
+}
+
+fun UserRobot.assertIncomingCall(isDisplayed: Boolean): UserRobot {
+    if (isDisplayed) {
+        assertTrue("Accept call button", RingPage.acceptCallButton.waitToAppear().isDisplayed())
+        assertTrue("Decline call button", RingPage.declineCallButton.isDisplayed())
+        assertTrue("Call label", RingPage.incomingCallLabel.isDisplayed())
+        assertTrue("Avatar", RingPage.callParticipantAvatar.isDisplayed())
+    } else {
+        assertFalse("Accept call button", RingPage.acceptCallButton.waitToDisappear().isDisplayed())
+    }
+    return this
+}
+
+fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean): UserRobot {
+    if (isDisplayed) {
+        assertTrue(
+            "Decline call button",
+            RingPage.declineCallButton.waitToAppear(timeOutMillis = 10.seconds).isDisplayed(),
+        )
+        assertTrue("Call label", RingPage.outgoingCallLabel.isDisplayed())
+        assertTrue("Avatar", RingPage.callParticipantAvatar.isDisplayed())
+        assertTrue("Microphone", RingPage.microphoneEnabledToggle.isDisplayed())
+        assertEquals(
+            "Camera should be displayed: ${!audioOnly}",
+            !audioOnly,
+            RingPage.cameraEnabledToggle.isDisplayed(),
+        )
+    } else {
+        assertFalse(
+            "Decline call button",
+            RingPage.declineCallButton.waitToDisappear().isDisplayed(),
+        )
+    }
     return this
 }

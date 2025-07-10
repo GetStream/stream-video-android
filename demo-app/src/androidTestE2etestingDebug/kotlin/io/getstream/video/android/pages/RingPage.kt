@@ -21,12 +21,14 @@ import androidx.test.uiautomator.By
 class RingPage {
 
     companion object {
-        val hangUpButton = By.res("Stream_HangUpButton")
-        val cameraEnabledToggle = LobbyPage.cameraEnabledToggle
-        val cameraDisabledToggle = LobbyPage.cameraDisabledToggle
-        val microphoneEnabledToggle = LobbyPage.microphoneEnabledToggle
-        val microphoneDisabledToggle = LobbyPage.microphoneDisabledToggle
-        val callActionLabel = By.res("Stream_CallActionLabel")
+        val declineCallButton = By.res("Stream_DeclineCallButton")
+        val acceptCallButton = By.res("Stream_AcceptCallButton")
+        val cameraEnabledToggle = CallPage.cameraEnabledToggle
+        val microphoneEnabledToggle = CallPage.microphoneEnabledToggle
+        val cameraDisabledToggle = CallPage.cameraDisabledToggle
+        val microphoneDisabledToggle = CallPage.microphoneDisabledToggle
         val callParticipantAvatar = By.res("Stream_ParticipantAvatar")
+        val incomingCallLabel = By.res("Stream_IncomingCallLabel")
+        val outgoingCallLabel = By.res("Stream_OutgoingCallLabel")
     }
 }

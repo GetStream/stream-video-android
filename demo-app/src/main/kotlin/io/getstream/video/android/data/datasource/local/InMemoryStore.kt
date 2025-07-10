@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.pages
+package io.getstream.video.android.data.datasource.local
 
-import androidx.test.uiautomator.By
+import io.getstream.video.android.model.User
 
-class DirectCallPage {
+interface InMemoryStore {
 
-    companion object {
-        val participantName = By.res("Stream_DirectCallUserName")
-        val audioCallButton = By.res("Stream_AudioCallButton")
-        val videoCallButton = By.res("Stream_VideoCallButton")
-    }
+    fun saveUser(user: User)
+
+    fun getUser(): User?
 }

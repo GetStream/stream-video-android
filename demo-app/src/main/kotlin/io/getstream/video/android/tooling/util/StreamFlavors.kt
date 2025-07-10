@@ -16,14 +16,46 @@
 
 package io.getstream.video.android.tooling.util
 
+import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.tooling.util.StreamBuildFlavor.Development
+import io.getstream.video.android.tooling.util.StreamBuildFlavor.E2eTesting
+import io.getstream.video.android.tooling.util.StreamBuildFlavor.Production
+
 /**
  * Defined flavors. Used in code logic.
  */
-internal object StreamFlavors {
-    const val development = "development"
-    const val production = "production"
+
+object StreamBuildFlavorUtil {
+    val current: StreamBuildFlavor
+        get() = StreamBuildFlavor.from(BuildConfig.FLAVOR)
+
+    val isDevelopment: Boolean get() = current == Development
+    val isProduction: Boolean get() = current == Production
+    val isE2eTesting: Boolean get() = current == E2eTesting
 }
 
+private const val TYPE_DEVELOPMENT = "development"
+private const val TYPE_PRODUCTION = "production"
+private const val TYPE_E2E_TESTING = "e2etesting"
+
+enum class StreamBuildFlavor(val type: String) {
+    Development(TYPE_DEVELOPMENT),
+    Production(TYPE_PRODUCTION),
+    E2eTesting(TYPE_E2E_TESTING),
+    ;
+
+    companion object {
+        fun from(type: String?): StreamBuildFlavor {
+            return when (type) {
+                null -> Development
+                TYPE_DEVELOPMENT -> Development
+                TYPE_PRODUCTION -> Production
+                TYPE_E2E_TESTING -> E2eTesting
+                else -> Development
+            }
+        }
+    }
+}
 public object StreamEnvironments {
     const val demo = "demo"
     const val pronto = "pronto"
