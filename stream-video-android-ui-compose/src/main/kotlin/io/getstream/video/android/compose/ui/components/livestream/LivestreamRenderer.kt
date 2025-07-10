@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -48,7 +47,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.ui.common.R
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -78,9 +76,6 @@ internal fun LivestreamRenderer(
                         isPaused = !isPaused
                         onPausedPlayer.invoke(isPaused)
 
-                        val hostVideoTrack = livestream?.track?.video
-                        Log.d("Noob", "isPaused=$isPaused, hostVideoTrack=${hostVideoTrack?.id()}")
-
                         if (isPaused) {
                             videoTextureView?.pauseVideo()
                         } else {
@@ -105,7 +100,7 @@ internal fun LivestreamRenderer(
             Image(
                 modifier = Modifier.alpha(0.75f),
                 painter = painterResource(
-                    id = R.drawable.stream_video_ic_play,
+                    id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_play,
                 ),
                 contentDescription = null,
             )
