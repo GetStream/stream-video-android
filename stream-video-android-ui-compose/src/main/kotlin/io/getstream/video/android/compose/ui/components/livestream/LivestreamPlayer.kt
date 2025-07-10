@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -93,15 +94,7 @@ public fun LivestreamPlayer(
         }.flatMapLatest { participantWithVideo ->
             participantWithVideo.firstOrNull()?.video ?: flow { emit(null) }
         },
-    rendererContent: @Composable BoxScope.(Call) -> Unit = {
-        LivestreamRenderer(
-            call = call,
-            enablePausing = enablePausing,
-            onPausedPlayer = onPausedPlayer,
-            configuration = videoRendererConfig,
-            livestreamFlow = livestreamFlow,
-        )
-    },
+    rendererContent: @Composable BoxScope.(Call) -> Unit = defaultRenderer,
     overlayContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamPlayerOverlay(call = call)
     },
@@ -116,6 +109,25 @@ public fun LivestreamPlayer(
     },
     onRetryJoin: () -> Unit = {},
 ) {
+    val (isAudioEnabled, onAudioToggle) = rememberAudioToggleState(call)
+
+    val wrappedRenderer = wrapRendererContent(
+        call = call,
+        enablePausing = enablePausing,
+        onPausedPlayer = onPausedPlayer,
+        videoRendererConfig = videoRendererConfig,
+        livestreamFlow = livestreamFlow,
+        onAudioToggle = onAudioToggle,
+        rendererContent = rendererContent,
+    )
+
+    val wrappedOverlay = wrapOverlayContent(
+        call = call,
+        isAudioEnabled = isAudioEnabled,
+        onAudioToggle = onAudioToggle,
+        overlayContent = overlayContent,
+    )
+
     val livestream by livestreamFlow.collectAsStateWithLifecycle(initialValue = null)
     val hostVideoAvailable = livestream?.enabled == true
 
@@ -152,8 +164,8 @@ public fun LivestreamPlayer(
         livestreamFlow = livestreamFlow,
         hostVideoAvailable = hostVideoAvailable,
         livestreamState = livestreamState,
-        rendererContent = rendererContent,
-        overlayContent = overlayContent,
+        rendererContent = wrappedRenderer,
+        overlayContent = wrappedOverlay,
         liveStreamEndedContent = liveStreamEndedContent,
         liveStreamHostVideoNotAvailableContent = liveStreamHostVideoNotAvailableContent,
         liveStreamErrorContent = liveStreamErrorContent,
@@ -242,6 +254,67 @@ private fun BoxScope.LivestreamPlayerCompatibilityContent(
     }
 }
 
+@Composable
+private fun rememberAudioToggleState(call: Call): Pair<Boolean, (Boolean) -> Unit> {
+    var isAudioEnabled by rememberSaveable { mutableStateOf(true) }
+
+    val onAudioToggle: (Boolean) -> Unit = remember(call) {
+        {
+                enabled ->
+            call.setIncomingAudioEnabled(enabled)
+            isAudioEnabled = enabled
+        }
+    }
+
+    return isAudioEnabled to onAudioToggle
+}
+
+@Composable
+private fun wrapRendererContent(
+    call: Call,
+    enablePausing: Boolean,
+    onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
+    videoRendererConfig: VideoRendererConfig,
+    livestreamFlow: Flow<ParticipantState.Video?>,
+    onAudioToggle: (Boolean) -> Unit,
+    rendererContent: @Composable BoxScope.(Call) -> Unit,
+): @Composable BoxScope.(Call) -> Unit {
+    return if (rendererContent === defaultRenderer) {
+        {
+            LivestreamRenderer(
+                call = call,
+                enablePausing = enablePausing,
+                onPausedPlayer = onPausedPlayer,
+                configuration = videoRendererConfig,
+                livestreamFlow = livestreamFlow,
+                onAudioToggle = onAudioToggle,
+            )
+        }
+    } else {
+        rendererContent
+    }
+}
+
+@Composable
+private fun wrapOverlayContent(
+    call: Call,
+    isAudioEnabled: Boolean,
+    onAudioToggle: (Boolean) -> Unit,
+    overlayContent: @Composable BoxScope.(Call) -> Unit,
+): @Composable BoxScope.(Call) -> Unit {
+    return if (overlayContent === defaultLivestreamPlayerOverlay) {
+        {
+            LivestreamPlayerOverlay(
+                call = call,
+                isAudioEnabled = isAudioEnabled,
+                onAudioToggle = onAudioToggle,
+            )
+        }
+    } else {
+        overlayContent
+    }
+}
+
 @Preview
 @Composable
 private fun LivestreamPlayerPreview() {
@@ -249,4 +322,14 @@ private fun LivestreamPlayerPreview() {
     VideoTheme {
         LivestreamPlayer(call = previewCall)
     }
+}
+
+private val defaultRenderer: @Composable BoxScope.(Call) -> Unit = { call ->
+    LivestreamRenderer(
+        call = call,
+        enablePausing = true,
+    )
+}
+private val defaultLivestreamPlayerOverlay: @Composable BoxScope.(Call) -> Unit = { call ->
+    LivestreamPlayerOverlay(call = call)
 }

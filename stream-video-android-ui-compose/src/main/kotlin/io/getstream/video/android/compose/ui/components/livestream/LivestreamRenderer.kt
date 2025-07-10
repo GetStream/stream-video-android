@@ -28,7 +28,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +51,6 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 
 @Composable
@@ -62,24 +60,13 @@ internal fun LivestreamRenderer(
     enablePausing: Boolean,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
     livestreamFlow: Flow<ParticipantState.Video?> = call.state.livestream,
+    onAudioToggle: (Boolean) -> Unit = {},
 ) {
     var isPaused by rememberSaveable { mutableStateOf(false) }
     val livestream by livestreamFlow
         .filter { !isPaused }
         .collectAsStateWithLifecycle(null)
     var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
-
-    LaunchedEffect(Unit) {
-        call.state.livestream.collectLatest {
-            val video = it?.track?.video
-            val isHostVideoEnabled = video?.enabled()
-            Log.d("Noob", "is host video enabled: $isHostVideoEnabled")
-        }
-    }
-
-    LaunchedEffect(isPaused) {
-        call.setIncomingAudioEnabled(!isPaused)
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         VideoRenderer(
@@ -99,6 +86,7 @@ internal fun LivestreamRenderer(
                         } else {
                             videoTextureView?.resumeVideo()
                         }
+                        onAudioToggle(!isPaused)
                     }
                 },
             call = call,
