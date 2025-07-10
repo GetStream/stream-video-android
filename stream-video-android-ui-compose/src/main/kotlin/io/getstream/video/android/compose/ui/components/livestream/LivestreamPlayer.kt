@@ -95,9 +95,7 @@ public fun LivestreamPlayer(
             participantWithVideo.firstOrNull()?.video ?: flow { emit(null) }
         },
     rendererContent: @Composable BoxScope.(Call) -> Unit = defaultRenderer,
-    overlayContent: @Composable BoxScope.(Call) -> Unit = {
-        LivestreamPlayerOverlay(call = call)
-    },
+    overlayContent: @Composable BoxScope.(Call) -> Unit = defaultLivestreamPlayerOverlay,
     liveStreamEndedContent: @Composable BoxScope.(Call) -> Unit = {
         LivestreamEndedUi(call)
     },
