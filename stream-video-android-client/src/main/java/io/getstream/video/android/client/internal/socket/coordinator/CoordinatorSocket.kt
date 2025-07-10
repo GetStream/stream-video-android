@@ -134,13 +134,22 @@ internal class CoordinatorSocket(
 
     private var connectionState: ConnectionState = ConnectionState.Disconnected()
 
+    private val pendingEvents = mutableListOf<String>()
     private var messageSubscription: StreamSubscription? = null
     private var connectedEvent: ConnectedEvent? = null
     private val eventListener = object : StreamWebSocketListener {
 
         override fun onMessage(text: String) {
             logger.v { "[onMessage] Coordinator socket message: $text" }
-            debounceProcessor.onMessage(text)
+            if (connectionState is ConnectionState.Connected) {
+                if (pendingEvents.isNotEmpty()) {
+                    pendingEvents.forEach { debounceProcessor.onMessage(it) }
+                    pendingEvents.clear()
+                }
+                debounceProcessor.onMessage(text)
+            } else {
+                pendingEvents.add(text)
+            }
         }
 
         override fun onFailure(t: Throwable, response: Response?) {
