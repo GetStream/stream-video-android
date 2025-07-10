@@ -32,6 +32,5 @@ import kotlin.collections.List
 
 data class QualityScoreReport(
     @Json(name = "histogram")
-    val histogram:
-    kotlin.collections.List<io.getstream.android.video.generated.models.ReportByHistogramBucket>,
+    val histogram: kotlin.collections.List<io.getstream.android.video.generated.models.ReportByHistogramBucket> = emptyList()
 )

@@ -35,6 +35,5 @@ data class ListRecordingsResponse(
     val duration: kotlin.String,
 
     @Json(name = "recordings")
-    val recordings:
-    kotlin.collections.List<io.getstream.android.video.generated.models.CallRecording>,
+    val recordings: kotlin.collections.List<io.getstream.android.video.generated.models.CallRecording> = emptyList()
 )

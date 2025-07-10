@@ -35,5 +35,5 @@ data class GetEdgesResponse(
     val duration: kotlin.String,
 
     @Json(name = "edges")
-    val edges: kotlin.collections.List<io.getstream.android.video.generated.models.EdgeResponse>,
+    val edges: kotlin.collections.List<io.getstream.android.video.generated.models.EdgeResponse> = emptyList()
 )
