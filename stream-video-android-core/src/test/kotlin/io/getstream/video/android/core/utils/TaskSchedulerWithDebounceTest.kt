@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.pages
+package io.getstream.video.android.core.utils
 
-import androidx.test.uiautomator.By
+import kotlinx.coroutines.plus
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
-class DirectCallPage {
+class TaskSchedulerWithDebounceTest {
+    private var scheduler: TaskSchedulerWithDebounce = TaskSchedulerWithDebounce()
 
-    companion object {
-        val participantName = By.res("Stream_DirectCallUserName")
-        val audioCallButton = By.res("Stream_AudioCallButton")
-        val videoCallButton = By.res("Stream_VideoCallButton")
+    @Test
+    fun `task is executed immediately if debounce is zero`() = runTest {
+        var executed = false
+        scheduler.schedule(this.backgroundScope, ScheduleConfig(debounce = { 0 })) {
+            executed = true
+        }
+        assertEquals(true, executed)
     }
 }

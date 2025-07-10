@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.pages
+package io.getstream.video.android.data.datasource.local
 
-import androidx.test.uiautomator.By
+import io.getstream.video.android.model.User
 
-class DirectCallPage {
+/**
+ * Only used in E2E Testing builds
+ */
+class InMemoryStoreImpl : InMemoryStore {
+    private var temporaryUser: User? = null
 
-    companion object {
-        val participantName = By.res("Stream_DirectCallUserName")
-        val audioCallButton = By.res("Stream_AudioCallButton")
-        val videoCallButton = By.res("Stream_VideoCallButton")
+    override fun saveUser(user: User) {
+        temporaryUser = user
+    }
+
+    override fun getUser(): User? {
+        return temporaryUser
     }
 }
