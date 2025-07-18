@@ -236,6 +236,40 @@ public abstract class StreamCallActivity : ComponentActivity() {
         )
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        /**
+         * Necessary because the intent is read during the activity's lifecycle methods.
+         */
+        setIntent(intent)
+        when (intent.action) {
+            NotificationHandler.ACTION_ACCEPT_CALL -> {
+                // Exit case
+                // TODO Later
+                // If already in call, then should we do nothing or allow to connect with new call
+                val activeCall = StreamVideo.instance().state.activeCall.value
+                if (activeCall != null) return
+
+                initializeCallOrFail(
+                    null,
+                    null,
+                    intent,
+                    onSuccess = { _, _, call, action ->
+                        logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
+                        onIntentAction(call, action, onError = onErrorFinish) { successCall -> }
+                    },
+                    onError = {
+                        // We are not calling onErrorFinish here on purpose
+                        // we want to crash if we cannot initialize the call
+                        logger.e(it) { "Failed to initialize call." }
+                        throw it
+                    },
+                )
+            }
+            else -> {}
+        }
+    }
+
     public override fun onResume() {
         super.onResume()
         withCachedCall {
