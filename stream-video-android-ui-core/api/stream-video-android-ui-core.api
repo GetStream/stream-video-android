@@ -62,6 +62,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onIntentAction (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun onIntentAction$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun onLastParticipant (Lio/getstream/video/android/core/Call;)V
+	protected fun onNewIntent (Landroid/content/Intent;)V
 	public fun onPause ()V
 	public fun onPause (Lio/getstream/video/android/core/Call;)V
 	public fun onPictureInPicture (Lio/getstream/video/android/core/Call;)V
