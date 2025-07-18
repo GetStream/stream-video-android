@@ -62,6 +62,7 @@ import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -128,6 +129,9 @@ public abstract class StreamCallActivity : ComponentActivity() {
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
+    private var cachedCallEventJob: Job? = null
+    private val supervisorJob = SupervisorJob()
+
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.w { "The call was successfully finished! Closing activity" }
         onEnded(call)
@@ -188,6 +192,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         initializeCallOrFail(
             savedInstanceState,
             null,
+            intent,
             onSuccess = { instanceState, persistentState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
                 onIntentAction(call, action, onError = onErrorFinish) { successCall ->
@@ -214,6 +219,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         initializeCallOrFail(
             savedInstanceState,
             persistentState,
+            intent,
             onSuccess = { instanceState, persistedState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
                 onIntentAction(call, action, onError = onErrorFinish) { successCall ->
@@ -816,6 +822,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     private fun initializeCallOrFail(
         savedInstanceState: Bundle?,
         persistentState: PersistableBundle?,
+        intent: Intent,
         onSuccess: ((Bundle?, PersistableBundle?, Call, action: String?) -> Unit)? = null,
         onError: ((Exception) -> Unit)? = null,
     ) {
@@ -839,16 +846,20 @@ public abstract class StreamCallActivity : ComponentActivity() {
             cid,
             onSuccess = { call ->
                 cachedCall = call
-                lifecycleScope.launch {
+                cachedCallEventJob?.cancel()
+                cachedCallEventJob = lifecycleScope.launch(supervisorJob) {
                     cachedCall.events.collect { event ->
                         onCallEvent(cachedCall, event)
                     }
                 }
-                callSocketConnectionMonitor = lifecycleScope.launch(Dispatchers.IO) {
-                    cachedCall.state.connection.collectLatest {
-                        onConnectionEvent(call, it)
+
+                callSocketConnectionMonitor?.cancel()
+                callSocketConnectionMonitor =
+                    lifecycleScope.launch(Dispatchers.IO + supervisorJob) {
+                        cachedCall.state.connection.collectLatest {
+                            onConnectionEvent(call, it)
+                        }
                     }
-                }
                 onSuccess?.invoke(
                     savedInstanceState,
                     persistentState,
@@ -862,7 +873,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
     private fun withCachedCall(action: (Call) -> Unit) {
         if (!::cachedCall.isInitialized) {
-            initializeCallOrFail(null, null, onSuccess = { _, _, call, _ ->
+            initializeCallOrFail(null, null, intent, onSuccess = { _, _, call, _ ->
                 action(call)
             }, onError = {
                 // Call is missing, we need to crash, no other way
