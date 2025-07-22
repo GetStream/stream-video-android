@@ -5645,6 +5645,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateParticipantSortingOrder (Ljava/util/Comparator;)V
 	public final fun updateParticipantVisibility (Ljava/lang/String;Lio/getstream/video/android/core/model/VisibilityOnScreenState;)V
 	public final fun updateParticipantVisibilityFlow (Lkotlinx/coroutines/flow/Flow;)V
+	public final fun updateRejectedBy (Ljava/util/Set;)V
 	public final fun upsertParticipants (Ljava/util/List;)V
 }
 
