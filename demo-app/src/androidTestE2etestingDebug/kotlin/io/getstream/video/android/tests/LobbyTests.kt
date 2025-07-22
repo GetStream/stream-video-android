@@ -17,10 +17,10 @@
 package io.getstream.video.android.tests
 
 import io.getstream.video.android.robots.UserControls
-import io.getstream.video.android.robots.assertCallControls
 import io.getstream.video.android.robots.assertLobby
 import io.getstream.video.android.robots.assertParticipantsCountInLobby
 import io.getstream.video.android.robots.assertParticipantsCountOnCall
+import io.getstream.video.android.robots.assertVideoCallControls
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
 import org.junit.Test
@@ -102,7 +102,7 @@ class LobbyTests : StreamTestCase() {
             userRobot.joinCallFromLobby()
         }
         step("THEN camera and mic are disabled on call") {
-            userRobot.assertCallControls(microphone = false, camera = false)
+            userRobot.assertVideoCallControls(microphone = false, camera = false)
         }
         step("WHEN user enters lobby with camera and mic") {
             userRobot
@@ -118,7 +118,7 @@ class LobbyTests : StreamTestCase() {
             userRobot.joinCallFromLobby()
         }
         step("THEN camera and mic are enabled on call") {
-            userRobot.assertCallControls(microphone = true, camera = true)
+            userRobot.assertVideoCallControls(microphone = true, camera = true)
         }
     }
 }

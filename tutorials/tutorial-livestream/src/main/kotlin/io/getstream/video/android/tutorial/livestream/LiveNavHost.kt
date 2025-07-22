@@ -19,6 +19,7 @@ package io.getstream.video.android.tutorial.livestream
 import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -80,7 +81,8 @@ fun LiveNavHost(
     NavHost(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.baseSheetPrimary)
+            .systemBarsPadding(),
         navController = navController,
         startDestination = startDestination,
     ) {

@@ -30,14 +30,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +49,11 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
 @Composable
-public fun BoxScope.LivestreamPlayerOverlay(call: Call) {
+public fun BoxScope.LivestreamPlayerOverlay(
+    call: Call,
+    isAudioEnabled: Boolean = true,
+    onAudioToggle: (Boolean) -> Unit = {},
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,7 +64,7 @@ public fun BoxScope.LivestreamPlayerOverlay(call: Call) {
 
         LiveDuration(call = call)
 
-        LiveControls(call = call)
+        LiveControls(call = call, isAudioEnabled, onAudioToggle)
     }
 }
 
@@ -138,19 +139,19 @@ private fun BoxScope.LiveDuration(call: Call) {
 }
 
 @Composable
-private fun BoxScope.LiveControls(call: Call) {
-    val speakerphoneEnabled by if (LocalInspectionMode.current) {
-        remember { mutableStateOf(true) }
-    } else {
-        call.speaker.isEnabled.collectAsStateWithLifecycle()
-    }
-
+private fun BoxScope.LiveControls(
+    call: Call,
+    isAudioEnabled: Boolean = true,
+    onAudioToggle: (Boolean) -> Unit = {},
+) {
     ToggleSpeakerphoneAction(
         modifier = Modifier
             .align(Alignment.CenterEnd)
             .size(45.dp),
-        isSpeakerphoneEnabled = speakerphoneEnabled,
-        onCallAction = { callAction -> call.speaker.setEnabled(callAction.isEnabled) },
+        isSpeakerphoneEnabled = isAudioEnabled,
+        onCallAction = { callAction ->
+            onAudioToggle(callAction.isEnabled)
+        },
     )
 }
 

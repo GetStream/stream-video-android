@@ -260,10 +260,16 @@ public class RtcSession internal constructor(
         logger = logger,
     )
 
-    private fun getTrack(sessionId: String, type: TrackType): MediaTrack? = subscriber?.getTrack(
-        sessionId,
-        type,
-    )
+    private fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
+        val track = subscriber?.getTrack(
+            sessionId,
+            type,
+        )
+        if (track == null) {
+            logger.w { "[getTrack] #sfu; #track; track is null for sessionId: $sessionId, type: $type" }
+        }
+        return track
+    }
 
     private fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
         when (type) {
@@ -829,6 +835,7 @@ public class RtcSession internal constructor(
             configuration = connectionConfiguration,
             sfuClient = sfuConnectionModule.api,
             sessionId = sessionId,
+            enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
             onIceCandidateRequest = ::sendIceCandidate,
         )
@@ -1249,6 +1256,7 @@ public class RtcSession internal constructor(
             val sendStatsRequest = SendStatsRequest(
                 session_id = sessionId,
                 sdk = "stream-android",
+                unified_session_id = call.unifiedSessionId,
                 sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
                 webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
                 publisher_stats = report.toJson(StreamPeerType.PUBLISHER),
@@ -1394,11 +1402,14 @@ public class RtcSession internal constructor(
         }
         subscriber?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
         coroutineScope.launch {
-            subscriber?.setVideoSubscriptions(
-                trackOverridesHandler,
-                call.state.participants.value,
-                call.state.remoteParticipants.value,
-            )
+            if (sessionId != call.sessionId) {
+                // dimension updated for another participant
+                subscriber?.setVideoSubscriptions(
+                    trackOverridesHandler,
+                    call.state.participants.value,
+                    call.state.remoteParticipants.value,
+                )
+            }
         }
     }
 

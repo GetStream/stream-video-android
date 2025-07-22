@@ -167,6 +167,7 @@ internal class StreamVideoClient internal constructor(
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
+    internal val enableStereoForSubscriber: Boolean = true,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -523,11 +524,7 @@ internal class StreamVideoClient internal constructor(
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.fireEvent(event)
-            safeCall {
-                destroyedCalls.snapshot().forEach { (_, call) ->
-                    call.fireEvent(event)
-                }
-            }
+            notifyDestroyedCalls(event)
         }
 
         if (selectedCid.isNotEmpty()) {
@@ -551,13 +548,35 @@ internal class StreamVideoClient internal constructor(
                 it.session?.handleEvent(event)
                 it.handleEvent(event)
             }
-            safeCall {
-                destroyedCalls.snapshot().forEach { (_, call) ->
-                    call.let {
-                        // No session here
+            deliverIntentToDestroyedCalls(event)
+        }
+    }
+
+    private fun shouldProcessDestroyedCall(event: VideoEvent, callCid: String): Boolean {
+        return when (event) {
+            is WSCallEvent -> event.getCallCID() == callCid
+            else -> true
+        }
+    }
+
+    private fun deliverIntentToDestroyedCalls(event: VideoEvent) {
+        safeCall {
+            destroyedCalls.snapshot().forEach { (_, call) ->
+                call.let {
+                    if (shouldProcessDestroyedCall(event, call.cid)) {
                         it.state.handleEvent(event)
                         it.handleEvent(event)
                     }
+                }
+            }
+        }
+    }
+
+    private fun notifyDestroyedCalls(event: VideoEvent) {
+        safeCall {
+            destroyedCalls.snapshot().forEach { (_, call) ->
+                if (shouldProcessDestroyedCall(event, call.cid)) {
+                    call.fireEvent(event)
                 }
             }
         }
@@ -584,6 +603,7 @@ internal class StreamVideoClient internal constructor(
         team: String? = null,
         ring: Boolean,
         notify: Boolean,
+        video: Boolean?,
     ): Result<GetOrCreateCallResponse> {
         val members = memberIds?.map {
             MemberRequest(
@@ -601,6 +621,7 @@ internal class StreamVideoClient internal constructor(
             team = team,
             ring = ring,
             notify = notify,
+            video = video,
         )
     }
 
@@ -614,6 +635,7 @@ internal class StreamVideoClient internal constructor(
         team: String? = null,
         ring: Boolean,
         notify: Boolean,
+        video: Boolean?,
     ): Result<GetOrCreateCallResponse> {
         logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
 
@@ -631,6 +653,7 @@ internal class StreamVideoClient internal constructor(
                     ),
                     ring = ring,
                     notify = notify,
+                    video = video,
                 ),
                 connectionId = waitForConnectionId(),
             )
@@ -1013,7 +1036,6 @@ internal class StreamVideoClient internal constructor(
         coordinatorConnectionModule.api.collectUserFeedback(
             type = callType,
             id = id,
-            session = sessionId,
             collectUserFeedbackRequest = CollectUserFeedbackRequest(
                 rating = rating,
                 sdk = "stream-video-android",

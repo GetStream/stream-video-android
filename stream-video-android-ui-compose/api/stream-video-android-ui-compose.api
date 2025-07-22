@@ -1787,13 +1787,22 @@ public final class io/getstream/video/android/compose/ui/components/indicator/So
 	public static final fun SoundIndicator (Landroidx/compose/ui/Modifier;ZZFLandroidx/compose/runtime/Composer;II)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamBackStageKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamBackStageKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamPlayerKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamPlayerKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function4;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function4;
+	public static field lambda-3 Lkotlin/jvm/functions/Function4;
 	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function4;
-	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class io/getstream/video/android/compose/ui/components/livestream/ComposableSingletons$LivestreamPlayerOverlayKt {
@@ -1813,11 +1822,23 @@ public final class io/getstream/video/android/compose/ui/components/livestream/C
 }
 
 public final class io/getstream/video/android/compose/ui/components/livestream/LivestreamPlayerKt {
-	public static final fun LivestreamPlayer (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function4;Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Landroidx/compose/runtime/Composer;II)V
+	public static final fun LivestreamPlayer (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function4;Lio/getstream/video/android/compose/ui/components/video/config/VideoRendererConfig;Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/livestream/LivestreamPlayerOverlayKt {
-	public static final fun LivestreamPlayerOverlay (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public static final fun LivestreamPlayerOverlay (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/core/Call;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/livestream/state/LivestreamState : java/lang/Enum {
+	public static final field BACKSTAGE Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
+	public static final field ENDED Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
+	public static final field ERROR Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
+	public static final field INITIAL Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
+	public static final field JOINING Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
+	public static final field LIVE Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
+	public static fun values ()[Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {

@@ -137,6 +137,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val leaveAfterDisconnectSeconds: Long = 30,
     private val callUpdatesAfterLeave: Boolean = false,
     private val enableStatsReporting: Boolean = true,
+    @InternalStreamVideoApi
+    private val enableStereoForSubscriber: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -247,9 +249,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             user = user,
             apiKey = apiKey,
             token = token,
-            tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
+            tokenProvider = tokenProvider,
             streamNotificationManager = streamNotificationManager,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
@@ -262,6 +264,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
+            enableStereoForSubscriber = enableStereoForSubscriber,
         )
 
         if (user.type == UserType.Guest) {

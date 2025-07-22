@@ -16,16 +16,65 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlin.time.Duration
 
+@Composable
+internal fun BoxScope.LivestreamBackStage(call: Call) {
+    Column(
+        modifier = Modifier.align(Alignment.Center),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(
+                id = R.string.stream_video_livestreaming_on_backstage_v2,
+            ),
+            fontSize = 18.sp,
+            color = VideoTheme.colors.basePrimary,
+        )
+        Spacer(Modifier.height(16.dp))
+
+        val startsAt by call.state.startsAt.collectAsStateWithLifecycle()
+
+        if (startsAt != null) {
+            CountDownTimerUi(startsAt.toString())
+        }
+        ParticipantCountUi(call)
+    }
+}
+
+@Deprecated(
+    message = "Use LivestreamBackStage(call: Call) instead. The new API provides access to call-specific data for rendering backstage UI more effectively.",
+    replaceWith = ReplaceWith("LivestreamBackStage(call)"),
+)
 @Composable
 internal fun BoxScope.LivestreamBackStage() {
     Text(
@@ -36,4 +85,96 @@ internal fun BoxScope.LivestreamBackStage() {
         fontSize = 14.sp,
         color = VideoTheme.colors.basePrimary,
     )
+}
+
+@Composable
+internal fun ParticipantCountUi(call: Call) {
+    val waitingCount by call.state.session.map {
+        it?.participants?.count { it.role != "host" }
+    }.collectAsStateWithLifecycle(null)
+
+    waitingCount?.let {
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "$it participants have joined early",
+            fontSize = 16.sp,
+            color = VideoTheme.colors.baseSecondary,
+        )
+    }
+}
+
+@SuppressLint("DefaultLocale")
+@Composable
+internal fun CountDownTimerUi(targetUtcTime: String) {
+    val targetTime = remember(targetUtcTime) {
+        // Parse the target UTC time string (e.g., "2025-06-20T10:00:00Z")
+        Instant.parse(targetUtcTime)
+    }
+
+    var timeLeft by remember { mutableStateOf(Duration.ZERO) }
+
+    LaunchedEffect(targetTime) {
+        while (true) {
+            val now = Clock.System.now()
+            timeLeft = targetTime - now
+            delay(1000L)
+        }
+    }
+
+    var countDownText = ""
+    if (timeLeft.isNegative()) {
+        countDownText = stringResource(R.string.stream_video_livestreaming_countdown_finished)
+    } else {
+        val hours = timeLeft.inWholeHours
+        val minutes = (timeLeft.inWholeMinutes % 60)
+        val seconds = (timeLeft.inWholeSeconds % 60)
+
+        countDownText = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+    Text(
+        modifier = Modifier,
+        text = countDownText,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        color = VideoTheme.colors.basePrimary,
+    )
+}
+
+@Preview(
+    name = "Portrait Preview",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
+    device = "spec:width=411dp,height=891dp,dpi=420",
+)
+@Composable
+private fun LivestreamBackstagePortraitPreview() {
+    VideoTheme {
+        Box {
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = stringResource(
+                        id = R.string.stream_video_livestreaming_on_backstage,
+                    ),
+                    fontSize = 14.sp,
+                    color = VideoTheme.colors.basePrimary,
+                )
+                Text(
+                    modifier = Modifier,
+                    text = "2:00",
+                    fontSize = 16.sp,
+                    color = VideoTheme.colors.basePrimary,
+                )
+                Text(
+                    modifier = Modifier,
+                    text = "2 participants have joined the call",
+                    fontSize = 12.sp,
+                    color = VideoTheme.colors.baseSecondary,
+                )
+            }
+        }
+    }
 }

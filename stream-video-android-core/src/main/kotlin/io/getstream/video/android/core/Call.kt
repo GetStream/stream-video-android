@@ -70,6 +70,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
@@ -219,6 +220,7 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
+    internal val unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -316,6 +318,7 @@ public class Call(
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
@@ -328,6 +331,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -340,6 +344,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         }
 
@@ -852,6 +857,25 @@ public class Call(
             trackType,
             visible,
             Subscriber.defaultVideoDimension,
+            viewportId,
+        )
+    }
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+        width: Int,
+        height: Int,
+    ) {
+        logger.i {
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            VideoDimension(width, height),
             viewportId,
         )
     }
@@ -1407,11 +1431,43 @@ public class Call(
         session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
     }
 
+    /**
+     * Enables or disables the reception of incoming audio tracks for all or specified participants.
+     *
+     * This method allows selective control over whether the local client receives audio from remote participants.
+     * It's particularly useful in scenarios such as livestreams or group calls where the user may want to mute
+     * specific participants' audio without affecting the overall session.
+     *
+     * @param enabled `true` to enable (subscribe to) incoming audio, `false` to disable (unsubscribe from) it.
+     * @param sessionIds Optional list of participant session IDs for which to toggle incoming audio.
+     * If `null`, the audio setting is applied to all participants currently in the session.
+     */
+    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
+        val participantTrackMap = session?.subscriber?.tracks ?: return
+
+        val targetTracks = when {
+            sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
+            else -> participantTrackMap.values.toList()
+        }
+
+        targetTracks
+            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
+            .forEach { it.enableAudio(enabled) }
+    }
+
     @InternalStreamVideoApi
     public val debug = Debug(this)
 
     @InternalStreamVideoApi
     public class Debug(val call: Call) {
+
+        public fun pause() {
+            call.session?.subscriber?.disable()
+        }
+
+        public fun resume() {
+            call.session?.subscriber?.enable()
+        }
 
         public fun rejoin() {
             call.scope.launch {

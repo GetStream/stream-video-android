@@ -28,7 +28,7 @@ class CallDetailsPage {
         val scanQrCodeButton = By.res("Stream_ScanQrCodeButton")
         val callIdInputField = By.res("Stream_CallIdInputField")
         val wheelIcon = By.res("Stream_SettingsIcon")
-        val directCallButton = By.res("Stream_DirectCallButton")
+        val directCallButton = By.text("Direct Call")
         val signOutButton = By.text("Sign out")
     }
 }

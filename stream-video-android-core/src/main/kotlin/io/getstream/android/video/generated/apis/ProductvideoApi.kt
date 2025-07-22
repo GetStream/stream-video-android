@@ -133,11 +133,29 @@ interface ProductvideoApi {
      * Collect user feedback
      *
      */
+    @Deprecated(
+        "This method is deprecated. Please use the version without the sessionId in the path: collectUserFeedback(type, id, body).",
+        replaceWith = ReplaceWith(
+            expression = "collectUserFeedback(type, id, collectUserFeedbackRequest)",
+        ),
+    )
     @POST("/video/call/{type}/{id}/feedback/{session}")
     suspend fun collectUserFeedback(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
         @Path("session") session: kotlin.String,
+        @Body collectUserFeedbackRequest:
+        io.getstream.android.video.generated.models.CollectUserFeedbackRequest,
+    ): io.getstream.android.video.generated.models.CollectUserFeedbackResponse
+
+    /**
+     * Collect user feedback
+     *
+     */
+    @POST("/video/call/{type}/{id}/feedback")
+    suspend fun collectUserFeedback(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
         @Body collectUserFeedbackRequest:
         io.getstream.android.video.generated.models.CollectUserFeedbackRequest,
     ): io.getstream.android.video.generated.models.CollectUserFeedbackResponse

@@ -101,7 +101,6 @@ public fun VideoRenderer(
                     Math.random().toString()
                 }
             }
-
             val sessionId = video.sessionId
             val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
@@ -164,8 +163,12 @@ public fun VideoRenderer(
                                 .testTag("video_renderer"),
                         )
                     }
+                } else {
+                    // Do something when there is no media track
                 }
             }
+        } else {
+            // Do something when the video is not enabled
         }
     }
 }
