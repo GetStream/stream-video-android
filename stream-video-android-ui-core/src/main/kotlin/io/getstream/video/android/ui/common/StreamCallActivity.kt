@@ -60,10 +60,13 @@ import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -128,7 +131,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
-    public lateinit var config: StreamCallActivityConfiguration
+    protected lateinit var config: StreamCallActivityConfiguration
+        private set
     private var cachedCallEventJob: Job? = null
     private val supervisorJob = SupervisorJob()
 
@@ -167,7 +171,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * the configuration passed in [callIntent] is ignored.
      */
     @Deprecated(
-        "Use config which is initialized in onCreate instead",
+        "Accessing configuration before onCreate may lead to unintended behavior. Use config instead.",
         level = DeprecationLevel.WARNING,
     )
     @StreamCallActivityDelicateApi
