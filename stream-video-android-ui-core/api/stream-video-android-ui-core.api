@@ -41,7 +41,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public final fun enterPictureInPicture ()V
 	public fun get (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun get$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public final fun getConfig ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	protected final fun getConfig ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun getConfiguration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
 	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;
