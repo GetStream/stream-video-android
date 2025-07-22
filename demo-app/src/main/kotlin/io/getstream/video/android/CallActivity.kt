@@ -48,6 +48,11 @@ import kotlinx.coroutines.runBlocking
 class CallActivity : ComposeStreamCallActivity() {
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
+
+    @Deprecated(
+        "Override loadConfigFromIntent instead ",
+        level = DeprecationLevel.WARNING,
+    )
     override val configuration: StreamCallActivityConfiguration =
         StreamCallActivityConfiguration(
             closeScreenOnCallEnded = false,

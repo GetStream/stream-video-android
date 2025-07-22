@@ -128,14 +128,14 @@ public abstract class StreamCallActivity : ComponentActivity() {
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
-    private lateinit var config: StreamCallActivityConfiguration
+    public lateinit var config: StreamCallActivityConfiguration
     private var cachedCallEventJob: Job? = null
     private val supervisorJob = SupervisorJob()
 
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.w { "The call was successfully finished! Closing activity" }
         onEnded(call)
-        if (configuration.closeScreenOnCallEnded) {
+        if (config.closeScreenOnCallEnded) {
             finish()
         }
     }
@@ -143,7 +143,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong" }
         onFailed(error)
-        if (configuration.closeScreenOnError) {
+        if (config.closeScreenOnError) {
             logger.e(error) { "Finishing the activity" }
             finish()
         }
@@ -166,23 +166,33 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * You can override it and return a custom configuration all the time, in which case
      * the configuration passed in [callIntent] is ignored.
      */
+    @Deprecated(
+        "Use config which is initialized in onCreate instead",
+        level = DeprecationLevel.WARNING,
+    )
     @StreamCallActivityDelicateApi
     public open val configuration: StreamCallActivityConfiguration
         get() {
             if (!::config.isInitialized) {
-                try {
-                    val bundledConfig =
-                        intent.getBundleExtra(StreamCallActivityConfigStrings.EXTRA_STREAM_CONFIG)
-                    config =
-                        bundledConfig?.extractStreamActivityConfig()
-                            ?: StreamCallActivityConfiguration()
-                } catch (e: Exception) {
-                    config = StreamCallActivityConfiguration()
-                    logger.e(e) { "Failed to load config using default!" }
+                logger.w {
+                    "Deprecated configuration getter accessed before onCreate. Use onCreate-initialized config instead."
                 }
+                config = loadConfigFromIntent(intent) // safe fallback
             }
             return config
         }
+
+    protected fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
+        val bundledConfig = intent?.getBundleExtra(
+            StreamCallActivityConfigStrings.EXTRA_STREAM_CONFIG,
+        )
+        return runCatching {
+            bundledConfig?.extractStreamActivityConfig() ?: StreamCallActivityConfiguration()
+        }.getOrElse { e ->
+            logger.e(e) { "Failed to load config. Using default." }
+            StreamCallActivityConfiguration()
+        }
+    }
 
     // Platform restriction
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -242,6 +252,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
          * Necessary because the intent is read during the activity's lifecycle methods.
          */
         setIntent(intent)
+        initializeConfig(intent)
         when (intent.action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 // Exit case
@@ -374,9 +385,19 @@ public abstract class StreamCallActivity : ComponentActivity() {
     @StreamCallActivityDelicateApi
     public open fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         logger.d { "Pre-create" }
-        val config = configuration // Called before the delegate
+        initializeConfig(intent)
         logger.d { "Activity pre-created with configuration [$config]" }
         uiDelegate.loadingContent(this)
+    }
+
+    private fun initializeConfig(intent: Intent?) {
+        val configurationFromIntent = loadConfigFromIntent(intent)
+        config = configuration.copy(
+            closeScreenOnCallEnded = configurationFromIntent.closeScreenOnCallEnded,
+            closeScreenOnError = configurationFromIntent.closeScreenOnError,
+            canSkipPermissionRationale = configurationFromIntent.canSkipPermissionRationale,
+            canKeepScreenOn = configurationFromIntent.canKeepScreenOn,
+        )
     }
 
     /**
@@ -400,7 +421,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param call
      */
     public open fun onResume(call: Call) {
-        if (configuration.canKeepScreenOn) {
+        if (config.canKeepScreenOn) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         logger.d { "DefaultCallActivity - Resumed (call -> $call)" }
@@ -639,6 +660,8 @@ public abstract class StreamCallActivity : ComponentActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             call.state.cancelTimeout()
             val result = call.reject(reason)
+            call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
+
             result.onOutcome(call, onSuccess, onError)
             // Leave regardless of outcome
             call.leave()
