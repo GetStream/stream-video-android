@@ -653,6 +653,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * @param onSuccess optionally get notified if the operation was success.
      * @param onError optionally get notified if the operation failed.
      */
+    @Suppress("DeferredResultUnused")
     @StreamCallActivityDelicateApi
     public open fun reject(
         call: Call,
@@ -661,12 +662,17 @@ public abstract class StreamCallActivity : ComponentActivity() {
         onError: (suspend (Exception) -> Unit)? = null,
     ) {
         logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
-        lifecycleScope.launch(Dispatchers.IO) {
-            call.state.cancelTimeout()
+        val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        call.state.cancelTimeout()
+        call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
+        appScope.async {
             val result = call.reject(reason)
-            call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
+            if (lifecycleScope.isActive) {
+                lifecycleScope.launch {
+                    result.onOutcome(call, onSuccess, onError)
+                }
+            }
 
-            result.onOutcome(call, onSuccess, onError)
             // Leave regardless of outcome
             call.leave()
         }
