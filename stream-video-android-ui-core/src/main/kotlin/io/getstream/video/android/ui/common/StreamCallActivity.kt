@@ -135,12 +135,13 @@ public abstract class StreamCallActivity : ComponentActivity() {
         private set
     private var cachedCallEventJob: Job? = null
     private val supervisorJob = SupervisorJob()
+    private var isFinishingSafely = false
 
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.w { "The call was successfully finished! Closing activity" }
         onEnded(call)
         if (config.closeScreenOnCallEnded) {
-            finish()
+            safeFinish()
         }
     }
 
@@ -149,7 +150,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         onFailed(error)
         if (config.closeScreenOnError) {
             logger.e(error) { "Finishing the activity" }
-            finish()
+            safeFinish()
         }
     }
 
@@ -186,7 +187,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             return config
         }
 
-    protected fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
+    protected open fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
         val bundledConfig = intent?.getBundleExtra(
             StreamCallActivityConfigStrings.EXTRA_STREAM_CONFIG,
         )
@@ -1016,4 +1017,11 @@ public abstract class StreamCallActivity : ComponentActivity() {
 
     private suspend fun Call.acceptThenJoin() =
         withContext(Dispatchers.IO) { accept().flatMap { join() } }
+
+    public fun safeFinish() {
+        if (!this.isFinishing && !isFinishingSafely) {
+            isFinishingSafely = true
+            finish()
+        }
+    }
 }

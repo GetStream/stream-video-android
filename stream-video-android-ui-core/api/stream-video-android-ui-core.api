@@ -51,7 +51,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public static synthetic fun join$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun leave (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun leave$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	protected final fun loadConfigFromIntent (Landroid/content/Intent;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	protected fun loadConfigFromIntent (Landroid/content/Intent;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun onBackPressed (Lio/getstream/video/android/core/Call;)V
 	public fun onCallAction (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/call/state/CallAction;)V
 	public fun onCallEvent (Lio/getstream/video/android/core/Call;Lio/getstream/android/video/generated/models/VideoEvent;)V
@@ -77,6 +77,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onUserLeaveHint (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public final fun safeFinish ()V
 }
 
 public final class io/getstream/video/android/ui/common/StreamCallActivity$Companion {

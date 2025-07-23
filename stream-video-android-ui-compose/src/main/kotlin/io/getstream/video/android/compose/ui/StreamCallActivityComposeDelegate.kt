@@ -150,7 +150,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             centerContent = { },
                             onCallAction = {
                                 call.leave()
-                                finish()
+                                safeFinish()
                             },
                         )
                     }
@@ -292,7 +292,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     ) {
         if (!showRationale && configuration.canSkipPermissionRationale) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
-            finish()
+            safeFinish()
         } else {
             PermissionsRationaleContent(call, granted, notGranted)
         }
@@ -315,7 +315,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     CallDisconnectedContent(call)
                 } else {
                     // This is just for safety, will be called from other place as well.
-                    finish()
+                    safeFinish()
                 }
             }
 
@@ -325,7 +325,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     CallFailedContent(call, err)
                 } else {
                     // This is just for safety, will be called from other place as well.
-                    finish()
+                    safeFinish()
                 }
             }
 
@@ -432,14 +432,14 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun StreamCallActivity.CallFailedContent(call: Call, exception: java.lang.Exception) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call failed content.
-        finish()
+        safeFinish()
     }
 
     @Composable
     override fun StreamCallActivity.CallDisconnectedContent(call: Call) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call ended content.
-        finish()
+        safeFinish()
     }
 
     @Composable
