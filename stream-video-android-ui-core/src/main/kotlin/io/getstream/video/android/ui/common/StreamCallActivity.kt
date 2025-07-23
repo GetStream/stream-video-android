@@ -730,7 +730,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
                 val total = call.state.participantCounts.value?.total
                 logger.d { "Participant left, remaining: $total" }
-                if (total != null && total <= 2) {
+                if (total != null && total <= 1) {
                     onLastParticipant(call)
                 }
             }
