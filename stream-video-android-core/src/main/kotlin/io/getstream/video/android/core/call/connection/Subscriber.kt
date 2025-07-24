@@ -35,6 +35,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.enableStereo
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -43,6 +44,7 @@ import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -130,6 +132,8 @@ internal class Subscriber(
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
     internal val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
         ConcurrentHashMap()
+
+    private val sdpProcessor = SerialProcessor(coroutineScope)
 
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
         return statsTracer?.get(trackIdToTrackType)
@@ -229,7 +233,7 @@ internal class Subscriber(
      *
      * @param offerSdp The offer SDP from the SFU.
      */
-    suspend fun negotiate(offerSdp: String): Result<SendAnswerResponse> {
+    suspend fun negotiate(offerSdp: String) = sdpProcessor.submit {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
         val result = setRemoteDescription(offerDescription)
             .onErrorSuspend {
@@ -255,7 +259,10 @@ internal class Subscriber(
             }.flatMap { answerSdp ->
                 setLocalDescription(answerSdp)
                     .onErrorSuspend {
-                        tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
+                        tracer.trace(
+                            "negotiate-error-setlocaldescription",
+                            it.message ?: "unknown"
+                        )
                     }
                     .map { answerSdp }
             }.flatMap { answerSdp ->
@@ -271,7 +278,9 @@ internal class Subscriber(
                 }
             }
         logger.d { "Subscriber negotiate: $result" }
-        return result
+        result.getOrThrow()
+    }.onFailure {
+        tracer.trace("negotiate-error-submit", it.message ?: "unknown")
     }
 
     /**
@@ -283,6 +292,8 @@ internal class Subscriber(
             peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
         )
         sfuClient.iceRestart(request)
+    }.onError {
+        tracer.trace("iceRestart-error", it.message ?: "unknown")
     }
 
     /**
@@ -314,10 +325,10 @@ internal class Subscriber(
             subscriptions.putAll(newTracks)
 
             val subscriptionsChanged = newTracks.size != previousSubscriptions.size ||
-                newTracks.any { (key, value) ->
-                    val previous = previousSubscriptions[key]
-                    previous == null || value != previous
-                }
+                    newTracks.any { (key, value) ->
+                        val previous = previousSubscriptions[key]
+                        previous == null || value != previous
+                    }
 
             if (!subscriptionsChanged) {
                 logger.w { "[setVideoSubscriptions] Skipped — subscriptions unchanged." }
@@ -510,7 +521,7 @@ internal class Subscriber(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->
