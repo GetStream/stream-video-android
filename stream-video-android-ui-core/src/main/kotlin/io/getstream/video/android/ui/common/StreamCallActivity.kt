@@ -135,9 +135,11 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
 
-    @Deprecated("Use configurationMap instead",
+    @Deprecated(
+        "Use configurationMap instead",
         replaceWith = ReplaceWith("configurationMap"),
-        level = DeprecationLevel.WARNING)
+        level = DeprecationLevel.WARNING,
+    )
     protected lateinit var config: StreamCallActivityConfiguration
         private set
 
