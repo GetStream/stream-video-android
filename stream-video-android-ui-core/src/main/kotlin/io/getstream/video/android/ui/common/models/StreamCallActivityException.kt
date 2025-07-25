@@ -19,6 +19,10 @@ package io.getstream.video.android.ui.common.models
 import io.getstream.video.android.core.Call
 import kotlin.Exception
 
+/**
+ * We will propagate this to StreamCallActivity.onErrorFinish instead
+ * of Exception
+ */
 public class StreamCallActivityException(
     public val call: Call,
     override val message: String?,

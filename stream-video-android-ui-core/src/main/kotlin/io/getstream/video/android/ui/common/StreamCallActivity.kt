@@ -135,12 +135,16 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
 
-    @Deprecated("Use configurationMap instead")
+    @Deprecated("Use configurationMap instead",
+        replaceWith = ReplaceWith("configurationMap"),
+        level = DeprecationLevel.WARNING)
     protected lateinit var config: StreamCallActivityConfiguration
         private set
 
     /**
      * Map of a call id with StreamCallActivityConfiguration
+     * You can get Call id via
+     * `intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)?.id`
      */
     private val configurationMap: HashMap<String, StreamCallActivityConfiguration> =
         HashMap()
@@ -206,7 +210,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * the configuration passed in [callIntent] is ignored.
      */
     @Deprecated(
-        "Accessing configuration before onCreate may lead to unintended behavior. Use config instead.",
+        "Accessing configuration before onCreate may lead to unintended behavior. Use configurationMap instead.",
         level = DeprecationLevel.WARNING,
     )
     @StreamCallActivityDelicateApi
@@ -214,7 +218,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         get() {
             if (!::config.isInitialized) {
                 logger.w {
-                    "Deprecated configuration getter accessed before onCreate. Use onCreate-initialized config instead."
+                    "Deprecated configuration getter accessed before onCreate. Use onCreate-initialized configurationMap instead."
                 }
                 config = loadConfigFromIntent(intent) // safe fallback
             }
