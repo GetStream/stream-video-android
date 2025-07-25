@@ -45,8 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,7 +58,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
@@ -138,52 +135,52 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                         LivestreamPlayer(
                             call = call,
                             videoRendererConfig =
-                                videoRenderConfig {
-                                    this.fallbackContent = {
-                                        Box(
+                            videoRenderConfig {
+                                this.fallbackContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                color = VideoTheme.colors.baseSheetPrimary,
+                                            ),
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier
+                                                .size(48.dp)
+                                                .align(Alignment.Center),
+                                            color = VideoTheme.colors.basePrimary,
+                                        )
+                                    }
+                                }
+                                this.badNetworkContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize(),
+                                    ) {
+                                        Column(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .background(
                                                     color = VideoTheme.colors.baseSheetPrimary,
                                                 )
+                                                .align(Alignment.Center),
+                                            horizontalAlignment = CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center,
                                         ) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier
-                                                    .size(48.dp)
-                                                    .align(Alignment.Center),
-                                                color = VideoTheme.colors.basePrimary
+                                            Icon(
+                                                tint = VideoTheme.colors.basePrimary,
+                                                imageVector = Icons.Default.SignalWifiBad,
+                                                contentDescription = null,
+                                            )
+                                            Text(
+                                                color = VideoTheme.colors.basePrimary,
+                                                modifier = Modifier.padding(top = 16.dp),
+                                                text = getString(io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network_single_video),
                                             )
                                         }
                                     }
-                                    this.badNetworkContent = {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                        ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .background(
-                                                        color = VideoTheme.colors.baseSheetPrimary,
-                                                    )
-                                                    .align(Alignment.Center),
-                                                horizontalAlignment = CenterHorizontally,
-                                                verticalArrangement = Arrangement.Center,
-                                            ) {
-                                                Icon(
-                                                    tint = VideoTheme.colors.basePrimary,
-                                                    imageVector = Icons.Default.SignalWifiBad,
-                                                    contentDescription = null,
-                                                )
-                                                Text(
-                                                    color = VideoTheme.colors.basePrimary,
-                                                    modifier = Modifier.padding(top = 16.dp),
-                                                    text = getString(io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network_single_video)
-                                                )
-                                            }
-                                        }
-                                    }
-                                },
+                                }
+                            },
                         )
                         CallAppBar(
                             modifier = Modifier
@@ -229,10 +226,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                         isShowingHeader: Boolean,
                                         headerContent: @Composable (ColumnScope.() -> Unit)?,
                                         detailsContent: @Composable (
-                                        ColumnScope.(
-                                            participants: List<MemberState>,
-                                            topPadding: Dp,
-                                        ) -> Unit
+                                            ColumnScope.(
+                                                participants: List<MemberState>,
+                                                topPadding: Dp,
+                                            ) -> Unit
                                         )?,
                                         controlsContent: @Composable (BoxScope.() -> Unit)?,
                                         onBackPressed: () -> Unit,
@@ -256,10 +253,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                         isVideoType: Boolean, isShowingHeader: Boolean,
                                         headerContent: @Composable (ColumnScope.() -> Unit)?,
                                         detailsContent: @Composable (
-                                        ColumnScope.(
-                                            participants: List<MemberState>,
-                                            topPadding: Dp,
-                                        ) -> Unit
+                                            ColumnScope.(
+                                                participants: List<MemberState>,
+                                                topPadding: Dp,
+                                            ) -> Unit
                                         )?,
                                         controlsContent: @Composable (BoxScope.() -> Unit)?,
                                         onBackPressed: () -> Unit,
@@ -407,10 +404,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-        @Composable ColumnScope.(
-            participants: List<MemberState>,
-            topPadding: Dp,
-        ) -> Unit
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,
@@ -437,10 +434,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         isShowingHeader: Boolean,
         headerContent: (@Composable ColumnScope.() -> Unit)?,
         detailsContent: (
-        @Composable ColumnScope.(
-            participants: List<MemberState>,
-            topPadding: Dp,
-        ) -> Unit
+            @Composable ColumnScope.(
+                participants: List<MemberState>,
+                topPadding: Dp,
+            ) -> Unit
         )?,
         controlsContent: (@Composable BoxScope.() -> Unit)?,
         onBackPressed: () -> Unit,
