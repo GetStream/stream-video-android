@@ -167,6 +167,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 
+    /**
+     * The Exception is `StreamCallActivityException`. We will update the args in next major release
+     */
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong" }
         onFailed(error)
