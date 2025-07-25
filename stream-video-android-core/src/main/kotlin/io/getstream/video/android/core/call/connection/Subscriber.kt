@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.call.connection
 
 import androidx.annotation.VisibleForTesting
-import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.ParticipantState
@@ -44,7 +43,6 @@ import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -61,7 +59,6 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.SendAnswerRequest
-import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import java.util.concurrent.ConcurrentHashMap
@@ -201,6 +198,7 @@ internal class Subscriber(
      * Removes all tracks.
      */
     fun clear() {
+        sdpProcessor.stop()
         tracks.clear()
         trackDimensions.clear()
         subscriptions.clear()
@@ -261,7 +259,7 @@ internal class Subscriber(
                     .onErrorSuspend {
                         tracer.trace(
                             "negotiate-error-setlocaldescription",
-                            it.message ?: "unknown"
+                            it.message ?: "unknown",
                         )
                     }
                     .map { answerSdp }
@@ -325,10 +323,10 @@ internal class Subscriber(
             subscriptions.putAll(newTracks)
 
             val subscriptionsChanged = newTracks.size != previousSubscriptions.size ||
-                    newTracks.any { (key, value) ->
-                        val previous = previousSubscriptions[key]
-                        previous == null || value != previous
-                    }
+                newTracks.any { (key, value) ->
+                    val previous = previousSubscriptions[key]
+                    previous == null || value != previous
+                }
 
             if (!subscriptionsChanged) {
                 logger.w { "[setVideoSubscriptions] Skipped — subscriptions unchanged." }
@@ -521,7 +519,7 @@ internal class Subscriber(
         )
         val trackType =
             trackTypeMap[trackTypeString] ?: TrackType.fromValue(trackTypeString.toInt())
-            ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
+                ?: throw IllegalStateException("trackType not recognized: $trackTypeString")
 
         logger.i { "[addStream] #sfu; mediaStream: $mediaStream" }
         mediaStream.audioTracks.forEach { track ->

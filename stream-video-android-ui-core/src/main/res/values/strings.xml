@@ -45,6 +45,7 @@
     <string name="stream_video_call_participants_conjunction">and</string>
     <string name="stream_video_call_participants_trailing">more</string>
     <string name="stream_video_call_rendering_failed">This track failed to be loaded in the session (%s)</string>
+    <string name="stream_video_call_bad_network">Some videos are paused until the network connection improves!</string>
     <string name="stream_video_call_reconnecting">Reconnecting..</string>
     <string name="stream_video_call_recording">Recording</string>
     <string name="stream_video_audio_leave">Leave Quietly</string>
