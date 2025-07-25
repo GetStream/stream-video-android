@@ -60,7 +60,7 @@ class CallActivity : ComposeStreamCallActivity() {
         if (intent.action == NotificationHandler.ACTION_ACCEPT_CALL) {
             val activeCall = StreamVideo.instance().state.activeCall.value
             if (activeCall != null) {
-                leaveCall(activeCall)
+                leave(activeCall)
                 finish()
                 startActivity(intent)
             }
@@ -96,11 +96,11 @@ class CallActivity : ComposeStreamCallActivity() {
                 call = call,
                 showDebugOptions = BuildConfig.DEBUG,
                 onCallDisconnected = {
-                    leaveCall(call)
+                    leave(call)
                     goBackToMainScreen()
                 },
                 onUserLeaveCall = {
-                    leaveCall(call)
+                    leave(call)
                     goBackToMainScreen()
                 },
             )
