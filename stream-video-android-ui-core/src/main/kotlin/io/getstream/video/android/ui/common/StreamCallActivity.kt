@@ -169,24 +169,26 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 
+    protected val onCallErrorFinish: suspend (StreamCallActivityError) -> Unit = { streamCallActivityError ->
+        logger.e(streamCallActivityError.exception) { "Something went wrong" }
+        onFailed(streamCallActivityError.exception)
+
+        if (isCurrentAcceptedCall(streamCallActivityError.call)) {
+            val configuration = configurationMap[streamCallActivityError.call.id]
+            if (configuration?.closeScreenOnError == true) {
+                logger.e(streamCallActivityError.exception) { "Finishing the activity" }
+                safeFinish()
+            }
+        }
+    }
+
     /**
      * The call which is accepted
      */
     protected fun isCurrentAcceptedCall(call: Call): Boolean =
         (::cachedCall.isInitialized) && (cachedCall.id == call.id)
 
-    protected val onCallErrorFinish: suspend (Call, Exception) -> Unit = { call, error ->
-        logger.e(error) { "Something went wrong" }
-        onFailed(error)
 
-        if (isCurrentAcceptedCall(call)) {
-            val configuration = configurationMap[call.id]
-            if (configuration?.closeScreenOnError == true) {
-                logger.e(error) { "Finishing the activity" }
-                safeFinish()
-            }
-        }
-    }
 
     // Public values
     /**
@@ -475,7 +477,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     public open fun onIntentAction(
         call: Call,
         action: String?,
-        onError: (suspend (Call, Exception) -> Unit)? = onCallErrorFinish,
+        onError: (suspend (StreamCallActivityError) -> Unit)? = onCallErrorFinish,
         onSuccess: (suspend (Call) -> Unit)? = null,
     ) {
         logger.d { "[onIntentAction] #ringing; action: $action, call.cid: ${call.cid}" }
@@ -741,12 +743,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     @StreamCallActivityDelicateApi
-    public open fun createCall(
+    override fun createCall(
         call: Call,
         ring: Boolean,
         members: List<String>,
-        onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (Call, Exception) -> Unit)? = null,
+        onSuccess: (suspend (Call) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             val instance = StreamVideo.instance()
@@ -784,7 +786,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     override fun getCall(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             val result = call.get()
@@ -816,7 +818,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     override fun joinCall(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         acceptOrJoinNewCall(call, onSuccess, onError) {
             logger.d { "Join call, ${call.cid}" }
@@ -848,7 +850,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     override fun acceptCall(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
@@ -894,7 +896,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         call: Call,
         reason: RejectReason?,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -936,7 +938,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     override fun cancelCall(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         logger.d { "[cancel] #ringing; call.cid: ${call.cid}" }
         rejectCall(call, RejectReason.Cancel, onSuccess, onError)
@@ -972,7 +974,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     override fun leaveCall(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         logger.d { "Leave call, ${call.cid}" }
         lifecycleScope.launch(Dispatchers.IO) {
@@ -981,7 +983,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 call.leave()
                 onSuccess?.invoke(call)
             } catch (e: Exception) {
-                onError?.invoke(call, e)
+                onError?.invoke(StreamCallActivityError(call, e))
             }
         }
     }
@@ -1010,7 +1012,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     override fun endCall(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             val result = call.end()
@@ -1136,7 +1138,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     val conn = state as? RealtimeConnection.Failed
                     val throwable = Exception("${conn?.error}")
                     logger.e(throwable) { "Call connection failed." }
-                    onCallErrorFinish.invoke(call, throwable)
+                    onCallErrorFinish.invoke(StreamCallActivityError(call, throwable))
                 }
             }
 
@@ -1271,7 +1273,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private fun acceptOrJoinNewCall(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)?,
-        onError: (suspend (Call, Exception) -> Unit)?,
+        onError: (suspend (StreamCallActivityError) -> Unit)?,
         what: suspend (Call) -> Result<RtcSession>,
     ) {
         logger.d { "Accept or join, ${call.cid}" }
@@ -1333,7 +1335,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private suspend fun <A : Any> Result<A>.onOutcome(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (Call, Exception) -> Unit)? = null,
+        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
     ) = withContext(Dispatchers.Main) {
         onSuccess?.let {
             onSuccessSuspend {
@@ -1342,7 +1344,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
         onError?.let {
             onErrorSuspend {
-                onError(call, Exception(it.message))
+                onError(StreamCallActivityError(call, Exception(it.message)))
             }
         }
     }
