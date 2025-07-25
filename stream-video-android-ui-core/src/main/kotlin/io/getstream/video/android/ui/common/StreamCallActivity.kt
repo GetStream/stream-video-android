@@ -183,7 +183,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 }
             }
         } else {
-            // older version
+            // older version ~ this flow might never going to be execute (Need to check)
             if (config.closeScreenOnError) {
                 logger.e(error) { "Finishing the activity" }
                 safeFinish()
