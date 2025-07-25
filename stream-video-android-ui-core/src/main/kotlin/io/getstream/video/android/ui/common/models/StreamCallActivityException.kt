@@ -20,6 +20,7 @@ import io.getstream.video.android.core.Call
 import kotlin.Exception
 
 public class StreamCallActivityException(
-    public val call: Call, override val message: String?,
-    public override val cause: Throwable?
+    public val call: Call,
+    override val message: String?,
+    public override val cause: Throwable?,
 ) : Exception()

@@ -165,7 +165,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         logger.e(error) { "Something went wrong" }
         onFailed(error)
 
-        if (error is StreamCallActivityException){
+        if (error is StreamCallActivityException) {
             if (isCurrentAcceptedCall(error.call)) {
                 val configuration = configurationMap[error.call.id]
                 if (configuration?.closeScreenOnError == true) {
@@ -174,13 +174,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 }
             }
         } else {
-            //older version
+            // older version
             if (config.closeScreenOnError) {
                 logger.e(error) { "Finishing the activity" }
                 safeFinish()
             }
         }
-
     }
 
     /**
@@ -683,7 +682,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 
-
     /**
      * Get a call. Used in cases like "incoming call" where you are sure that the call is already created.
      *
@@ -739,7 +737,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             call.acceptThenJoin()
         }
     }
-
 
     /**
      * Reject the call in the parameter.
@@ -817,7 +814,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
         }
     }
-
 
     /**
      * End the call.
@@ -960,8 +956,8 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                         StreamCallActivityException(
                             call,
                             throwable.message,
-                            throwable
-                        )
+                            throwable,
+                        ),
                     )
                 }
             }
