@@ -26,25 +26,30 @@ public interface IncomingCallHandlerDelegate {
     /**
      * Called when a new call comes in while there's an ongoing call
      * @param activeCall The current ongoing call
-     * @param intent New intent which has new call information
+     * @param intent New [Intent] which has new call information
      * @return true to accept the new call, false to ignore it
      */
     public fun shouldAcceptNewCall(activeCall: Call, intent: Intent): Boolean
 
     /**
      * Called when accepting a new call
-     * @param intent The intent for the call
+     * @param intent The [Intent] for the call
      */
     public fun onAcceptCall(intent: Intent)
 
     /**
      * Called when ignoring a call (same call or based on delegate decision)
-     * @param intent New intent which has new call information
-     * @param reason The reason for ignoring (SAME_CALL, DELEGATE_DECLINED)
+     * @param intent New [Intent] which has new call information
+     * @param reason The reason for ignoring [IgnoreReason.SameCall], [IgnoreReason.DelegateDeclined],
+     * [IgnoreReason.Custom]
      */
     public fun onIgnoreCall(intent: Intent, reason: IgnoreReason)
 }
 
+/**
+ * Use [IgnoreReason] when we want to ignore the incoming call while we are
+ * already on a active call
+ */
 public sealed class IgnoreReason {
     public data object SameCall : IgnoreReason()
     public data object DelegateDeclined : IgnoreReason()
