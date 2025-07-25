@@ -20,20 +20,24 @@ public final class io/getstream/video/android/ui/common/AbstractCallActivity$Com
 }
 
 public abstract interface class io/getstream/video/android/ui/common/ActivityCallOperations {
-	public abstract fun acceptCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun acceptCall$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
-	public abstract fun cancelCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun cancelCall$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
-	public abstract fun endCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun endCall$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
-	public abstract fun getCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun getCall$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
-	public abstract fun joinCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun joinCall$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
-	public abstract fun leaveCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun leaveCall$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
-	public abstract fun rejectCall (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun rejectCall$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
+	public abstract fun accept (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun accept$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun call (Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun call$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public abstract fun cancel (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun cancel$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun create (Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun create$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun end (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun end$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun get (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun get$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun join$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun leave (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun leave$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/ActivityCallOperations;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
 
 public abstract class io/getstream/video/android/ui/common/IgnoreReason {
@@ -79,30 +83,17 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public static final field Companion Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;
 	public fun <init> ()V
 	public fun accept (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun accept$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun acceptCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
 	public fun applyDashboardSettings (Lio/getstream/video/android/core/Call;)V
 	public fun call (Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public static synthetic fun call$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public fun cancel (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun cancel$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun cancelCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
 	public fun create (Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun create$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun createCall (Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
-	public static synthetic fun createCall$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;ZLjava/util/List;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
 	public fun end (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun end$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun endCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
 	public final fun enterPictureInPicture ()V
 	public fun get (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun get$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun getCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
 	protected final fun getCallHandlerDelegate ()Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;
 	protected final fun getCallTransitionTime ()J
 	protected final fun getConfig ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun getConfiguration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
-	protected final fun getOnCallErrorFinish ()Lkotlin/jvm/functions/Function3;
 	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
 	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;
 	public abstract fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
@@ -110,11 +101,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	protected final fun isCurrentAcceptedCall (Lio/getstream/video/android/core/Call;)Z
 	public fun isVideoCall (Lio/getstream/video/android/core/Call;)Z
 	public fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun join$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun joinCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
 	public fun leave (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun leave$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun leaveCall (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
 	protected fun loadConfigFromIntent (Landroid/content/Intent;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun onBackPressed (Lio/getstream/video/android/core/Call;)V
 	public fun onCallAction (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/call/state/CallAction;)V
@@ -126,9 +113,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onEnded (Lio/getstream/video/android/core/Call;)V
 	public fun onFailed (Ljava/lang/Exception;)V
 	public fun onIntentAction (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public fun onIntentAction (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun onIntentAction$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public static synthetic fun onIntentAction$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun onLastParticipant (Lio/getstream/video/android/core/Call;)V
 	protected fun onNewIntent (Landroid/content/Intent;)V
 	public fun onPause ()V
@@ -142,8 +127,6 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onUserLeaveHint ()V
 	public fun onUserLeaveHint (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
-	public fun rejectCall (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)V
 	public final fun safeFinish ()V
 	protected final fun setCallHandlerDelegate (Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;)V
 }
@@ -193,6 +176,13 @@ public final class io/getstream/video/android/ui/common/databinding/StreamVideoC
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/ui/common/databinding/StreamVideoContentParticipantBinding;
+}
+
+public final class io/getstream/video/android/ui/common/models/StreamCallActivityException : java/lang/Exception {
+	public fun <init> (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun getCause ()Ljava/lang/Throwable;
+	public fun getMessage ()Ljava/lang/String;
 }
 
 public abstract class io/getstream/video/android/ui/common/notification/AbstractNotificationActivity : androidx/activity/ComponentActivity {
