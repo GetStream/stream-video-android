@@ -97,7 +97,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
 	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;
 	public abstract fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
-	protected final fun handleIncomingCallAcceptAction ()V
+	protected final fun handleOnNewIncomingCallAcceptAction ()V
+	protected final fun handleOnNewIntentAction (Landroid/content/Intent;)V
 	protected final fun isCurrentAcceptedCall (Lio/getstream/video/android/core/Call;)Z
 	public fun isVideoCall (Lio/getstream/video/android/core/Call;)Z
 	public fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V

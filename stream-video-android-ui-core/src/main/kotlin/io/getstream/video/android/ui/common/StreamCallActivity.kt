@@ -342,16 +342,19 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
          */
         setIntent(intent)
         initializeConfig(intent)
+        handleOnNewIntentAction(intent)
+    }
+
+    protected fun handleOnNewIntentAction(intent: Intent) {
         when (intent.action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
-                handleIncomingCallAcceptAction()
+                handleOnNewIncomingCallAcceptAction()
             }
-
             else -> {}
         }
     }
 
-    protected fun handleIncomingCallAcceptAction() {
+    protected fun handleOnNewIncomingCallAcceptAction() {
         val handler = callHandlerDelegate ?: defaultCallHandler
         val newCallCid = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)?.cid
         val activeCall = StreamVideo.instance().state.activeCall.value
