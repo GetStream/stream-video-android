@@ -18,65 +18,73 @@ package io.getstream.video.android.ui.common
 
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 public interface ActivityCallOperations {
 
     @StreamCallActivityDelicateApi
-    public fun createCall(
+    public fun create(
         call: Call,
         ring: Boolean,
         members: List<String>,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
     )
 
     @StreamCallActivityDelicateApi
-    public fun leaveCall(
-        call: Call,
-        onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+    public fun call(
+        cid: StreamCallId,
+        onSuccess: ((Call) -> Unit)? = null,
+        onError: ((Exception) -> Unit)? = null,
     )
 
     @StreamCallActivityDelicateApi
-    public fun endCall(
+    public fun leave(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
     )
 
     @StreamCallActivityDelicateApi
-    public fun cancelCall(
+    public fun end(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
     )
 
-    public fun rejectCall(
+    @StreamCallActivityDelicateApi
+    public fun cancel(
+        call: Call,
+        onSuccess: (suspend (Call) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
+    )
+
+    public fun reject(
         call: Call,
         reason: RejectReason? = null,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
     )
 
     @StreamCallActivityDelicateApi
-    public fun acceptCall(
+    public fun accept(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
     )
 
     @StreamCallActivityDelicateApi
-    public fun joinCall(
+    public fun join(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
     )
 
     @StreamCallActivityDelicateApi
-    public fun getCall(
+    public fun get(
         call: Call,
         onSuccess: (suspend (Call) -> Unit)? = null,
-        onError: (suspend (StreamCallActivityError) -> Unit)? = null,
+        onError: (suspend (Exception) -> Unit)? = null,
     )
 }
