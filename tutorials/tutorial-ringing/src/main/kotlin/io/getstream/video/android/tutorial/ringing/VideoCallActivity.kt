@@ -111,6 +111,7 @@ class VideoCallActivity : ComposeStreamCallActivity() {
                                     video = call.camera.mediaManager.videoTrack,
                                 ),
                                 enabled = true,
+                                paused = false,
                             ),
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -176,6 +177,7 @@ class VideoCallActivity : ComposeStreamCallActivity() {
                                     video = call.camera.mediaManager.videoTrack,
                                 ),
                                 enabled = true,
+                                paused = false,
                             ),
                             modifier = Modifier.fillMaxWidth(),
                         )
