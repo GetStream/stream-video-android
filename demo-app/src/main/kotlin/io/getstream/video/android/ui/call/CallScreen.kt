@@ -23,7 +23,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Configuration
 import android.media.projection.MediaProjectionManager
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -129,11 +128,15 @@ import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 @Composable
 fun CallScreen(
     call: Call,
@@ -183,15 +186,19 @@ fun CallScreen(
     var anyPausedVideos by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = call) {
+
         while (true) {
             delay(2000)
-            val pausedVideos = call.state.participants.value.filter { it.videoPaused.value == true }
-            Log.d("CallScreen", "Paused videos: $pausedVideos")
-            if (pausedVideos.isNotEmpty()) {
-                anyPausedVideos = true
-            } else {
-                anyPausedVideos = false
-            }
+            call.state.participants
+                .sample(2000L)
+                .map { participants ->
+                    // Compute only paused videos
+                    participants.filter { it.videoPaused.value }
+                }
+                .distinctUntilChanged() // Only emit if the filtered list actually changes
+                .collect { pausedVideos ->
+                    anyPausedVideos = pausedVideos.isNotEmpty()
+                }
         }
     }
 
