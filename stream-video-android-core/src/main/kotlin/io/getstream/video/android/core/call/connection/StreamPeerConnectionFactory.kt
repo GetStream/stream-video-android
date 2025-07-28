@@ -297,6 +297,7 @@ public class StreamPeerConnectionFactory(
             onNegotiationNeeded = onNegotiationNeeded,
             onIceCandidate = onIceCandidateRequest,
             maxBitRate = maxPublishingBitrate,
+            onRejoinNeeded = { },
             tracer = Tracer(type.toPeerType().name),
         )
         val connection = makePeerConnectionInternal(
@@ -317,12 +318,15 @@ public class StreamPeerConnectionFactory(
         enableStereo: Boolean = true,
         tracer: Tracer,
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
+        rejoin: () -> Unit,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
             sfuClient = sfuClient,
             coroutineScope = coroutineScope,
             tracer = tracer,
+            enableStereo = enableStereo,
+            rejoin = rejoin,
             onIceCandidateRequest = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(
