@@ -30,6 +30,7 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
@@ -229,6 +230,9 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 2000L,
             userToken = sfuToken,
             lifecycle = lifecycle,
+            onSignalingLost = { error ->
+                call.debug.fastReconnect()
+            },
             tracer = sfuTracer,
         )
     },
@@ -418,6 +422,16 @@ public class RtcSession internal constructor(
                     is SfuSocketState.Connecting ->
                         call.state._connection.value =
                             RealtimeConnection.InProgress
+
+                    is SfuSocketState.Disconnected.WebSocketEventLost -> {
+                        _peerConnectionStates.value.let {
+                            if (publisher?.isHealthy() == true && subscriber?.isHealthy() == true) {
+                                call.fastReconnect()
+                            } else {
+                                call.rejoin()
+                            }
+                        }
+                    }
 
                     else -> {
                         // Ignore it
@@ -844,6 +858,11 @@ public class RtcSession internal constructor(
             sessionId = sessionId,
             enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
+            rejoin = {
+                coroutineScope.launch {
+                    call.rejoin()
+                }
+            },
             onIceCandidateRequest = ::sendIceCandidate,
         )
         return peerConnection
