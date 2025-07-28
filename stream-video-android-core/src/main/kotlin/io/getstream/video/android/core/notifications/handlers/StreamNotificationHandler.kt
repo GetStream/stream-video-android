@@ -27,38 +27,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 
-interface StreamNotificationHandlerWithPayload {
-    /**
-     * Customize the notification when you receive a push notification for ringing call,
-     * which has further two types [RingingState.Incoming] and [RingingState.Outgoing]
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-
-    fun onRingingCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
-
-    /**
-     * Customize the notification when you receive a push notification for Missed Call
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-    fun onMissedCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
-
-    /**
-     * Customize the notification when you receive a push notification for general usage
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-    fun onNotification(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
-
-    /**
-     * Customize the notification when you receive a push notification for Live Call
-     * @param callId An instance of [StreamCallId] representing the call identifier
-     * @param callDisplayName The name of the caller to display in the notification
-     */
-    fun onLiveCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
-}
-
 interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
     /**
      * Customize the notification when you receive a push notification for ringing call,
@@ -116,6 +84,38 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
     fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
         onLiveCall(callId, callDisplayName, emptyMap())
     }
+}
+
+interface StreamNotificationHandlerWithPayload {
+    /**
+     * Customize the notification when you receive a push notification for ringing call,
+     * which has further two types [RingingState.Incoming] and [RingingState.Outgoing]
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+
+    fun onRingingCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
+
+    /**
+     * Customize the notification when you receive a push notification for Missed Call
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+    fun onMissedCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
+
+    /**
+     * Customize the notification when you receive a push notification for general usage
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+    fun onNotification(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
+
+    /**
+     * Customize the notification when you receive a push notification for Live Call
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+    fun onLiveCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
 }
 
 interface StreamNotificationProviderWithPayload {
@@ -180,6 +180,51 @@ interface StreamNotificationProviderWithPayload {
         callId: StreamCallId,
         callDisplayName: String? = null,
         payload: Map<String, Any?>,
+    ): Notification?
+}
+
+interface StreamNotificationUpdatesProvider {
+
+    /**
+     * Get subsequent updates to notifications.
+     * Initially, notifications are posted by one of the other methods, and then this method can be used to re-post them with updated content.
+     *
+     * @param call The Stream call object.
+     * @return A [Notification] object customized for the ongoing call.
+     */
+    suspend fun onCallNotificationUpdate(call: Call): Notification?
+
+    /**
+     * Update the ongoing call notification.
+     *
+     * @param call The Stream call object.
+     * @return A [Notification] object customized for the ongoing call.
+     */
+    suspend fun updateOngoingCallNotification(
+        call: Call,
+        callDisplayName: String,
+    ): Notification?
+
+    /**
+     * Update the ringing call notification.
+     *
+     * @param call The Stream call object.
+     * @return A [Notification] object customized for the ringing call.
+     */
+    suspend fun updateOutgoingCallNotification(
+        call: Call,
+        callDisplayName: String?,
+    ): Notification?
+
+    /**
+     * Update the ringing call notification.
+     *
+     * @param call The Stream call object.
+     * @return A [Notification] object customized for the ringing call.
+     */
+    suspend fun updateIncomingCallNotification(
+        call: Call,
+        callDisplayName: String,
     ): Notification?
 }
 
@@ -304,51 +349,6 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
      * @return A [Notification] object.
      */
     fun getSettingUpCallNotification(): Notification?
-}
-
-interface StreamNotificationUpdatesProvider {
-
-    /**
-     * Get subsequent updates to notifications.
-     * Initially, notifications are posted by one of the other methods, and then this method can be used to re-post them with updated content.
-     *
-     * @param call The Stream call object.
-     * @return A [Notification] object customized for the ongoing call.
-     */
-    suspend fun onCallNotificationUpdate(call: Call): Notification?
-
-    /**
-     * Update the ongoing call notification.
-     *
-     * @param call The Stream call object.
-     * @return A [Notification] object customized for the ongoing call.
-     */
-    suspend fun updateOngoingCallNotification(
-        call: Call,
-        callDisplayName: String,
-    ): Notification?
-
-    /**
-     * Update the ringing call notification.
-     *
-     * @param call The Stream call object.
-     * @return A [Notification] object customized for the ringing call.
-     */
-    suspend fun updateOutgoingCallNotification(
-        call: Call,
-        callDisplayName: String?,
-    ): Notification?
-
-    /**
-     * Update the ringing call notification.
-     *
-     * @param call The Stream call object.
-     * @return A [Notification] object customized for the ringing call.
-     */
-    suspend fun updateIncomingCallNotification(
-        call: Call,
-        callDisplayName: String,
-    ): Notification?
 }
 
 /**
