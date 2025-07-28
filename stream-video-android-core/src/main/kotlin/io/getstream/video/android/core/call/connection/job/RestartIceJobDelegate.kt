@@ -22,7 +22,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-open class RestartIceJobDelegate(private val scope: CoroutineScope, private val scheduledJobTimeoutMs: Long = 3000) {
+internal class RestartIceJobDelegate(private val scope: CoroutineScope, private val scheduledJobTimeoutMs: Long = 3000) {
 
     private var scheduledJob: Job? = null
 
