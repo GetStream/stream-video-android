@@ -69,7 +69,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
         onRingingCall(callId, callDisplayName, emptyMap())
@@ -83,7 +83,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
         onMissedCall(callId, callDisplayName, emptyMap())
@@ -97,7 +97,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun onNotification(callId: StreamCallId, callDisplayName: String) {
         onNotification(callId, callDisplayName, emptyMap())
@@ -111,7 +111,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
         onLiveCall(callId, callDisplayName, emptyMap())
@@ -197,7 +197,7 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
@@ -227,7 +227,7 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun getOngoingCallNotification(
         callId: StreamCallId,
@@ -255,7 +255,7 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun getRingingCallNotification(
         ringingState: RingingState,
@@ -282,7 +282,7 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     fun getMissedCallNotification(
         callId: StreamCallId,
@@ -320,7 +320,7 @@ interface StreamNotificationUpdatesProvider : StreamNotificationUpdatesProviderW
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     suspend fun updateOngoingCallNotification(
         call: Call,
@@ -338,7 +338,7 @@ interface StreamNotificationUpdatesProvider : StreamNotificationUpdatesProviderW
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     suspend fun updateOutgoingCallNotification(
         call: Call,
@@ -356,7 +356,7 @@ interface StreamNotificationUpdatesProvider : StreamNotificationUpdatesProviderW
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     suspend fun updateIncomingCallNotification(
         call: Call,
@@ -424,7 +424,7 @@ open class StreamNotificationBuilderInterceptors :
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open fun onBuildIncomingCallNotification(
         builder: NotificationCompat.Builder,
@@ -448,7 +448,7 @@ open class StreamNotificationBuilderInterceptors :
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open fun onBuildOngoingCallNotification(
         builder: NotificationCompat.Builder,
@@ -476,7 +476,7 @@ open class StreamNotificationBuilderInterceptors :
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open fun onBuildMissedCallNotification(
         builder: NotificationCompat.Builder,
@@ -497,7 +497,7 @@ open class StreamNotificationBuilderInterceptors :
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open fun onBuildOutgoingCallNotification(
         builder: NotificationCompat.Builder,
@@ -655,7 +655,7 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open suspend fun onUpdateOngoingCallNotification(
         builder: NotificationCompat.Builder,
@@ -675,7 +675,7 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open suspend fun onUpdateOngoingCallMediaNotification(
         builder: NotificationCompat.Builder,
@@ -695,7 +695,7 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open suspend fun onUpdateOutgoingCallNotification(
         builder: NotificationCompat.Builder,
@@ -715,7 +715,7 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open suspend fun onUpdateIncomingCallNotification(
         builder: NotificationCompat.Builder,
@@ -735,7 +735,7 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open suspend fun onUpdateMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
@@ -755,7 +755,7 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open suspend fun onUpdateMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,

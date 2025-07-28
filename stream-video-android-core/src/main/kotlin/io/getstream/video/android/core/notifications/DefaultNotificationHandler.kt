@@ -640,7 +640,7 @@ public open class DefaultNotificationHandler(
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open fun showNotificationCallNotification(
         notificationPendingIntent: PendingIntent,
@@ -671,7 +671,7 @@ public open class DefaultNotificationHandler(
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open fun showMissedCallNotification(
         notificationPendingIntent: PendingIntent,
@@ -701,7 +701,7 @@ public open class DefaultNotificationHandler(
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     open fun showLiveCallNotification(
         liveCallPendingIntent: PendingIntent,

@@ -91,7 +91,7 @@ interface StreamMediaSessionController : StreamMediaSessionControllerWithPayload
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     suspend fun updateMetadata(
         context: Context,
@@ -114,7 +114,7 @@ interface StreamMediaSessionController : StreamMediaSessionControllerWithPayload
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.ERROR,
+        level = DeprecationLevel.WARNING,
     )
     suspend fun updatePlaybackState(
         context: Context,
