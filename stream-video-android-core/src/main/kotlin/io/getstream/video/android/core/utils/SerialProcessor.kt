@@ -18,6 +18,7 @@ package io.getstream.video.android.core.utils
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -44,6 +45,7 @@ internal class SerialProcessor(
      * @param handler The job to be executed.
      * @return The result of the job.
      */
+    @OptIn(DelicateCoroutinesApi::class)
     suspend fun <T : Any> submit(
         handler: suspend () -> T,
     ): Result<T> {
@@ -59,12 +61,16 @@ internal class SerialProcessor(
         }
 
         val reply = CompletableDeferred<Result<Any?>>()
-        channel.send(
-            JobItem(
-                block = handler,
-                reply = reply,
-            ),
-        )
+        if (!channel.isClosedForSend) {
+            channel.send(
+                JobItem(
+                    block = handler,
+                    reply = reply,
+                ),
+            )
+        } else {
+            return Result.failure(Exception("[SerialProcessor] Channel is closed"))
+        }
         return reply.await().fold(
             onSuccess = { Result.success(it as T) },
             onFailure = { Result.failure(it) },
@@ -74,8 +80,9 @@ internal class SerialProcessor(
     /**
      * Stop the processor.
      */
-    fun stop() {
+    fun stop() = safeCall {
         workerJob?.cancel()
         workerJob = null
+        channel.close()
     }
 }
