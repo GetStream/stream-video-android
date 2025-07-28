@@ -32,6 +32,7 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
@@ -191,6 +192,10 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
     ): StreamVideo {
+        val callServiceConfigRegistry = CallServiceConfigRegistry()
+        callServiceConfigRegistry.register(
+            DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
+        )
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -198,6 +203,7 @@ object StreamVideoInitHelper {
             token = token,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
+            callServiceConfigRegistry = callServiceConfigRegistry,
             notificationConfig = testNotificationConfig ?: NotificationConfig(
                 pushDeviceGenerators = listOf(
                     FirebasePushDeviceGenerator(
@@ -220,7 +226,6 @@ object StreamVideoInitHelper {
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-            callServiceConfigRegistry = CallServiceConfigRegistry(),
         ).build()
     }
 }

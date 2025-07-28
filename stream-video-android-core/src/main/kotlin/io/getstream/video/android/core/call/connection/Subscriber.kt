@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.call.connection
 
 import androidx.annotation.VisibleForTesting
-import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.ParticipantState
@@ -36,6 +35,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.enableStereo
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -61,7 +61,6 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.SendAnswerRequest
-import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import java.util.concurrent.ConcurrentHashMap
@@ -136,6 +135,8 @@ internal class Subscriber(
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
     internal val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
         ConcurrentHashMap()
+
+    private val sdpProcessor = SerialProcessor(coroutineScope)
 
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
         return statsTracer?.get(trackIdToTrackType)
@@ -228,6 +229,7 @@ internal class Subscriber(
      * Removes all tracks.
      */
     fun clear() {
+        sdpProcessor.stop()
         tracks.clear()
         trackDimensions.clear()
         subscriptions.clear()
@@ -260,7 +262,7 @@ internal class Subscriber(
      *
      * @param offerSdp The offer SDP from the SFU.
      */
-    suspend fun negotiate(offerSdp: String): Result<SendAnswerResponse> {
+    suspend fun negotiate(offerSdp: String) = sdpProcessor.submit {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
         val result = setRemoteDescription(offerDescription)
             .onErrorSuspend {
@@ -286,7 +288,10 @@ internal class Subscriber(
             }.flatMap { answerSdp ->
                 setLocalDescription(answerSdp)
                     .onErrorSuspend {
-                        tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
+                        tracer.trace(
+                            "negotiate-error-setlocaldescription",
+                            it.message ?: "unknown",
+                        )
                     }
                     .map { answerSdp }
             }.flatMap { answerSdp ->
@@ -302,7 +307,9 @@ internal class Subscriber(
                 }
             }
         logger.d { "Subscriber negotiate: $result" }
-        return result
+        result.getOrThrow()
+    }.onFailure {
+        tracer.trace("negotiate-error-submit", it.message ?: "unknown")
     }
 
     /**
@@ -314,6 +321,8 @@ internal class Subscriber(
             peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
         )
         sfuClient.iceRestart(request)
+    }.onError {
+        tracer.trace("iceRestart-error", it.message ?: "unknown")
     }
 
     /**

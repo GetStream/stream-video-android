@@ -422,3 +422,10 @@ message PerformanceStats {
   // the target bitrate for the track, only for published tracks
   int32 target_bitrate = 6;
 }
+
+// ClientCapability defines a feature that client supports
+enum ClientCapability {
+  CLIENT_CAPABILITY_UNSPECIFIED = 0;
+  // Enables SFU pausing inbound video
+  CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE = 1;
+};

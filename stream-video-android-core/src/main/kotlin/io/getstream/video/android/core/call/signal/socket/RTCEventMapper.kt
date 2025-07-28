@@ -28,6 +28,8 @@ import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
+import io.getstream.video.android.core.events.InboundStateNotificationEvent
+import io.getstream.video.android.core.events.InboundStateNotificationEventState
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -150,6 +152,22 @@ public object RTCEventMapper {
 
             event.call_ended != null -> {
                 CallEndedSfuEvent(event.call_ended.reason.value)
+            }
+
+            event.inbound_state_notification != null -> {
+                logger.d {
+                    "[inbound_state_notification] #sfu; #track; inbound_video_states: ${event.inbound_state_notification.inbound_video_states}"
+                }
+                InboundStateNotificationEvent(
+                    event.inbound_state_notification.inbound_video_states.map {
+                        InboundStateNotificationEventState(
+                            it.user_id,
+                            it.session_id,
+                            it.track_type,
+                            it.paused,
+                        )
+                    },
+                )
             }
 
             else -> {
