@@ -186,7 +186,6 @@ fun CallScreen(
     var anyPausedVideos by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = call) {
-
         while (true) {
             delay(2000)
             call.state.participants
