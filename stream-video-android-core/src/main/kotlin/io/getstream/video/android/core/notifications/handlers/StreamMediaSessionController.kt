@@ -294,11 +294,6 @@ open class DefaultStreamMediaSessionController(
             1f,
         )
 
-        updateInterceptors.onUpdateMediaNotificationPlaybackState(
-            playbackStateBuilder,
-            call,
-            callDisplayName,
-        )
         val intercepted = updateInterceptors.onUpdateMediaNotificationPlaybackState(
             playbackStateBuilder,
             call,
