@@ -90,6 +90,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,11 +106,13 @@ import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.event.ReconnectDetails
+import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 
 /**
@@ -231,6 +234,13 @@ public class Call(
         audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
     )
 
+    internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
+        put(
+            ClientCapability.CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE.name,
+            ClientCapability.CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE,
+        )
+    }
+
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
             testInstanceProvider.mediaManagerCreator!!.invoke()
@@ -283,8 +293,6 @@ public class Call(
 
     private var monitorPublisherPCStateJob: Job? = null
     private var monitorSubscriberPCStateJob: Job? = null
-    private var monitorPublisherStateJob: Job? = null
-    private var monitorSubscriberStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
 
@@ -843,6 +851,7 @@ public class Call(
         )
         return clientImpl.muteUsers(type, id, request)
     }
+
     fun setVisibility(
         sessionId: String,
         trackType: TrackType,
@@ -860,6 +869,7 @@ public class Call(
             viewportId,
         )
     }
+
     fun setVisibility(
         sessionId: String,
         trackType: TrackType,
@@ -942,8 +952,8 @@ public class Call(
                     logger.v {
                         "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
                             "trackType: $trackType, " +
-                            "dimension1: ($width - $height), " +
-                            "dimension2: ($videoWidth - $videoHeight), " +
+                            "viewport size: ($width - $height), " +
+                            "video size: ($videoWidth - $videoHeight), " +
                             "sessionId: $sessionId"
                     }
 
@@ -952,13 +962,31 @@ public class Call(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(videoWidth, videoHeight),
+                            VideoDimension(width, height),
                             viewportId,
                         )
                     }
                 }
             },
         )
+    }
+
+    /**
+     * Enables the provided client capabilities.
+     */
+    fun enableClientCapabilities(capabilities: List<ClientCapability>) {
+        capabilities.forEach {
+            this.clientCapabilities[it.name] = it
+        }
+    }
+
+    /**
+     * Disables the provided client capabilities.
+     */
+    fun disableClientCapabilities(capabilities: List<ClientCapability>) {
+        capabilities.forEach {
+            this.clientCapabilities.remove(it.name)
+        }
     }
 
     suspend fun goLive(

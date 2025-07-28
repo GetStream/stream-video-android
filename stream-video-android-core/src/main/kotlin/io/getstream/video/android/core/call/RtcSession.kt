@@ -58,6 +58,7 @@ import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.ICERestartEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
+import io.getstream.video.android.core.events.InboundStateNotificationEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
@@ -551,6 +552,7 @@ public class RtcSession internal constructor(
             client_details = clientDetails,
             preferred_publish_options = options ?: emptyList(),
             reconnect_details = reconnectDetails,
+            capabilities = call.clientCapabilities.values.toList(),
         )
         sfuTracer.trace(
             PeerConnectionTraceKey.JOIN_REQUEST.value,
@@ -734,11 +736,16 @@ public class RtcSession internal constructor(
         trackType: TrackType,
         videoEnabled: Boolean,
         audioEnabled: Boolean,
+        paused: Boolean,
     ) {
         logger.d {
             "[updateMuteState] #sfu; userId: $userId, sessionId: $sessionId, videoEnabled: $videoEnabled, audioEnabled: $audioEnabled"
         }
         val track = getTrack(sessionId, trackType)
+        val participant = call.state.getParticipantBySessionId(sessionId)
+        if (participant != null && participant.videoPaused.value != paused) {
+            participant._videoPaused.value = paused
+        }
         track?.enableVideo(videoEnabled)
         track?.enableAudio(audioEnabled)
     }
@@ -999,7 +1006,21 @@ public class RtcSession internal constructor(
                             trackType = event.trackType,
                             videoEnabled = true,
                             audioEnabled = true,
+                            paused = false,
                         )
+                    }
+
+                    is InboundStateNotificationEvent -> {
+                        event.inboundVideoStates.forEach { publishState ->
+                            updatePublishState(
+                                userId = publishState.userId,
+                                sessionId = publishState.sessionId,
+                                trackType = publishState.trackType,
+                                videoEnabled = true,
+                                audioEnabled = true,
+                                paused = publishState.paused,
+                            )
+                        }
                     }
 
                     is TrackUnpublishedEvent -> {
@@ -1009,6 +1030,7 @@ public class RtcSession internal constructor(
                             trackType = event.trackType,
                             videoEnabled = false,
                             audioEnabled = false,
+                            paused = false,
                         )
                     }
 
@@ -1223,7 +1245,11 @@ public class RtcSession internal constructor(
         val result = wrapAPICall {
             val androidThermalState =
                 safeCallWithDefault(AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED) {
-                    val thermalState = powerManager?.currentThermalStatus
+                    val thermalState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        powerManager?.currentThermalStatus
+                    } else {
+                        AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED
+                    }
                     logger.d { "[sendCallStats] #thermals state: $thermalState" }
                     when (thermalState) {
                         THERMAL_STATUS_NONE -> AndroidThermalState.ANDROID_THERMAL_STATE_NONE
@@ -1398,7 +1424,7 @@ public class RtcSession internal constructor(
         viewportId: String = sessionId,
     ) {
         logger.v {
-            "[updateTrackDimensions] #track; #sfu; #manual-quality-selection; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
+            "[updateTrackDimensions] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
         }
         subscriber?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
         coroutineScope.launch {
@@ -1438,6 +1464,7 @@ public class RtcSession internal constructor(
         logger.d { "[fastReconnect] Starting fast reconnect." }
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
+
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
             publisher_sdp = throwawayPublisherSdpAndOptions(),
@@ -1446,6 +1473,7 @@ public class RtcSession internal constructor(
             client_details = clientDetails,
             preferred_publish_options = publisher?.currentOptions() ?: emptyList(),
             reconnect_details = reconnectDetails,
+            capabilities = call.clientCapabilities.values.toList(),
         )
         publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request)
 

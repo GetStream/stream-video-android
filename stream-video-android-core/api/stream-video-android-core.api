@@ -5445,6 +5445,8 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun collectUserFeedback$default (Lio/getstream/video/android/core/Call;ILjava/lang/String;Ljava/util/Map;ILjava/lang/Object;)V
 	public final fun create (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLjava/lang/Boolean;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun create$default (Lio/getstream/video/android/core/Call;Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLjava/lang/Boolean;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun disableClientCapabilities (Ljava/util/List;)V
+	public final fun enableClientCapabilities (Ljava/util/List;)V
 	public final fun end (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun fastReconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun fireEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
@@ -6006,6 +6008,7 @@ public final class io/getstream/video/android/core/ParticipantState {
 	public final fun getUserNameOrId ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideo ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoEnabled ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getVideoPaused ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVideoTrack ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getVisibleOnScreen ()Lkotlinx/coroutines/flow/StateFlow;
 	public fun hashCode ()I
@@ -6039,9 +6042,10 @@ public final class io/getstream/video/android/core/ParticipantState$Audio : io/g
 }
 
 public abstract class io/getstream/video/android/core/ParticipantState$Media {
-	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZLstream/video/sfu/models/TrackType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZLstream/video/sfu/models/TrackType;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZZLstream/video/sfu/models/TrackType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/MediaTrack;ZZLstream/video/sfu/models/TrackType;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getEnabled ()Z
+	public fun getPaused ()Z
 	public fun getSessionId ()Ljava/lang/String;
 	public fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 	public final fun getType ()Lstream/video/sfu/models/TrackType;
@@ -6064,14 +6068,16 @@ public final class io/getstream/video/android/core/ParticipantState$ScreenSharin
 }
 
 public final class io/getstream/video/android/core/ParticipantState$Video : io/getstream/video/android/core/ParticipantState$Media {
-	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;Z)V
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;ZZ)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lio/getstream/video/android/core/model/VideoTrack;
 	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;Z)Lio/getstream/video/android/core/ParticipantState$Video;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/ParticipantState$Video;Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;ZILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState$Video;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;ZZ)Lio/getstream/video/android/core/ParticipantState$Video;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/ParticipantState$Video;Ljava/lang/String;Lio/getstream/video/android/core/model/VideoTrack;ZZILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState$Video;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getEnabled ()Z
+	public fun getPaused ()Z
 	public fun getSessionId ()Ljava/lang/String;
 	public synthetic fun getTrack ()Lio/getstream/video/android/core/model/MediaTrack;
 	public fun getTrack ()Lio/getstream/video/android/core/model/VideoTrack;
@@ -8670,6 +8676,34 @@ public final class io/getstream/video/android/core/events/ICETrickleEvent : io/g
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCandidate ()Ljava/lang/String;
 	public final fun getPeerType ()Lstream/video/sfu/models/PeerType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/InboundStateNotificationEvent : io/getstream/video/android/core/events/SfuDataEvent {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lio/getstream/video/android/core/events/InboundStateNotificationEvent;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/InboundStateNotificationEvent;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/core/events/InboundStateNotificationEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInboundVideoStates ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/InboundStateNotificationEventState {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lstream/video/sfu/models/TrackType;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Z)Lio/getstream/video/android/core/events/InboundStateNotificationEventState;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/events/InboundStateNotificationEventState;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZILjava/lang/Object;)Lio/getstream/video/android/core/events/InboundStateNotificationEventState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaused ()Z
+	public final fun getSessionId ()Ljava/lang/String;
+	public final fun getTrackType ()Lstream/video/sfu/models/TrackType;
+	public final fun getUserId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -13003,15 +13037,57 @@ public final class stream/video/sfu/event/ICETrickle : com/squareup/wire/Message
 public final class stream/video/sfu/event/ICETrickle$Companion {
 }
 
+public final class stream/video/sfu/event/InboundStateNotification : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/sfu/event/InboundStateNotification$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/util/List;Lokio/ByteString;)Lstream/video/sfu/event/InboundStateNotification;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/InboundStateNotification;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/InboundStateNotification;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInbound_video_states ()Ljava/util/List;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/sfu/event/InboundStateNotification$Companion {
+}
+
+public final class stream/video/sfu/event/InboundVideoState : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/sfu/event/InboundVideoState$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLokio/ByteString;)Lstream/video/sfu/event/InboundVideoState;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/InboundVideoState;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/InboundVideoState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaused ()Z
+	public final fun getSession_id ()Ljava/lang/String;
+	public final fun getTrack_type ()Lstream/video/sfu/models/TrackType;
+	public final fun getUser_id ()Ljava/lang/String;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class stream/video/sfu/event/InboundVideoState$Companion {
+}
+
 public final class stream/video/sfu/event/JoinRequest : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/event/JoinRequest$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;)Lstream/video/sfu/event/JoinRequest;
-	public static synthetic fun copy$default (Lstream/video/sfu/event/JoinRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/JoinRequest;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lokio/ByteString;)Lstream/video/sfu/event/JoinRequest;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/JoinRequest;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lstream/video/sfu/models/ClientDetails;Lstream/video/sfu/event/Migration;ZLstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/JoinRequest;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCapabilities ()Ljava/util/List;
 	public final fun getClient_details ()Lstream/video/sfu/models/ClientDetails;
 	public final fun getFast_reconnect ()Z
 	public final fun getMigration ()Lstream/video/sfu/event/Migration;
@@ -13239,10 +13315,10 @@ public final class stream/video/sfu/event/SfuEvent : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/event/SfuEvent$Companion;
 	public fun <init> ()V
-	public fun <init> (Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lokio/ByteString;)V
-	public synthetic fun <init> (Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lokio/ByteString;)Lstream/video/sfu/event/SfuEvent;
-	public static synthetic fun copy$default (Lstream/video/sfu/event/SfuEvent;Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/SfuEvent;
+	public fun <init> (Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lstream/video/sfu/event/InboundStateNotification;Lokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lstream/video/sfu/event/InboundStateNotification;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lstream/video/sfu/event/InboundStateNotification;Lokio/ByteString;)Lstream/video/sfu/event/SfuEvent;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/SfuEvent;Lstream/video/sfu/event/SubscriberOffer;Lstream/video/sfu/event/PublisherAnswer;Lstream/video/sfu/event/ConnectionQualityChanged;Lstream/video/sfu/event/AudioLevelChanged;Lstream/video/sfu/models/ICETrickle;Lstream/video/sfu/event/ChangePublishQuality;Lstream/video/sfu/event/ParticipantJoined;Lstream/video/sfu/event/ParticipantLeft;Lstream/video/sfu/event/DominantSpeakerChanged;Lstream/video/sfu/event/JoinResponse;Lstream/video/sfu/event/HealthCheckResponse;Lstream/video/sfu/event/TrackPublished;Lstream/video/sfu/event/TrackUnpublished;Lstream/video/sfu/event/Error;Lstream/video/sfu/event/CallGrantsUpdated;Lstream/video/sfu/event/GoAway;Lstream/video/sfu/event/ICERestart;Lstream/video/sfu/event/PinsChanged;Lstream/video/sfu/event/CallEnded;Lstream/video/sfu/event/ParticipantUpdated;Lstream/video/sfu/event/ParticipantMigrationComplete;Lstream/video/sfu/event/ChangePublishOptions;Lstream/video/sfu/event/InboundStateNotification;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/SfuEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudio_level_changed ()Lstream/video/sfu/event/AudioLevelChanged;
 	public final fun getCall_ended ()Lstream/video/sfu/event/CallEnded;
@@ -13256,6 +13332,7 @@ public final class stream/video/sfu/event/SfuEvent : com/squareup/wire/Message {
 	public final fun getHealth_check_response ()Lstream/video/sfu/event/HealthCheckResponse;
 	public final fun getIce_restart ()Lstream/video/sfu/event/ICERestart;
 	public final fun getIce_trickle ()Lstream/video/sfu/models/ICETrickle;
+	public final fun getInbound_state_notification ()Lstream/video/sfu/event/InboundStateNotification;
 	public final fun getJoin_response ()Lstream/video/sfu/event/JoinResponse;
 	public final fun getParticipant_joined ()Lstream/video/sfu/event/ParticipantJoined;
 	public final fun getParticipant_left ()Lstream/video/sfu/event/ParticipantLeft;
@@ -13596,6 +13673,22 @@ public final class stream/video/sfu/models/CallState : com/squareup/wire/Message
 public final class stream/video/sfu/models/CallState$Companion {
 }
 
+public final class stream/video/sfu/models/ClientCapability : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE Lstream/video/sfu/models/ClientCapability;
+	public static final field CLIENT_CAPABILITY_UNSPECIFIED Lstream/video/sfu/models/ClientCapability;
+	public static final field Companion Lstream/video/sfu/models/ClientCapability$Companion;
+	public static final fun fromValue (I)Lstream/video/sfu/models/ClientCapability;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/ClientCapability;
+	public static fun values ()[Lstream/video/sfu/models/ClientCapability;
+}
+
+public final class stream/video/sfu/models/ClientCapability$Companion {
+	public final fun fromValue (I)Lstream/video/sfu/models/ClientCapability;
+}
+
 public final class stream/video/sfu/models/ClientDetails : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/models/ClientDetails$Companion;
@@ -13704,6 +13797,7 @@ public final class stream/video/sfu/models/ErrorCode : java/lang/Enum, com/squar
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/models/ErrorCode$Companion;
 	public static final field ERROR_CODE_CALL_NOT_FOUND Lstream/video/sfu/models/ErrorCode;
+	public static final field ERROR_CODE_CALL_PARTICIPANT_LIMIT_REACHED Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_INTERNAL_SERVER_ERROR Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_LIVE_ENDED Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE Lstream/video/sfu/models/ErrorCode;
@@ -13712,6 +13806,7 @@ public final class stream/video/sfu/models/ErrorCode : java/lang/Enum, com/squar
 	public static final field ERROR_CODE_PARTICIPANT_MIGRATION_FAILED Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_PARTICIPANT_NOT_FOUND Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_PARTICIPANT_RECONNECT_FAILED Lstream/video/sfu/models/ErrorCode;
+	public static final field ERROR_CODE_PARTICIPANT_SIGNAL_LOST Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_PERMISSION_DENIED Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_PUBLISH_TRACKS_MISMATCH Lstream/video/sfu/models/ErrorCode;
 	public static final field ERROR_CODE_PUBLISH_TRACK_NOT_FOUND Lstream/video/sfu/models/ErrorCode;
@@ -13929,10 +14024,10 @@ public final class stream/video/sfu/models/PublishOption : com/squareup/wire/Mes
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/models/PublishOption$Companion;
 	public fun <init> ()V
-	public fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;ILokio/ByteString;)V
-	public synthetic fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;ILokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;ILokio/ByteString;)Lstream/video/sfu/models/PublishOption;
-	public static synthetic fun copy$default (Lstream/video/sfu/models/PublishOption;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;ILokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/PublishOption;
+	public fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLokio/ByteString;)Lstream/video/sfu/models/PublishOption;
+	public static synthetic fun copy$default (Lstream/video/sfu/models/PublishOption;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/PublishOption;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBitrate ()I
 	public final fun getCodec ()Lstream/video/sfu/models/Codec;
@@ -13941,6 +14036,7 @@ public final class stream/video/sfu/models/PublishOption : com/squareup/wire/Mes
 	public final fun getMax_spatial_layers ()I
 	public final fun getMax_temporal_layers ()I
 	public final fun getTrack_type ()Lstream/video/sfu/models/TrackType;
+	public final fun getUse_single_layer ()Z
 	public final fun getVideo_dimension ()Lstream/video/sfu/models/VideoDimension;
 	public fun hashCode ()I
 	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;

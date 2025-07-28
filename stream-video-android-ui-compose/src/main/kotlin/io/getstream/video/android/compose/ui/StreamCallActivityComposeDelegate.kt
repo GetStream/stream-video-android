@@ -22,21 +22,28 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -51,7 +58,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
@@ -131,13 +137,47 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             videoRendererConfig =
                             videoRenderConfig {
                                 this.fallbackContent = {
-                                    val userName = it.user.userNameOrId
-                                    val userImage = it.user.image
-                                    Box {
-                                        UserAvatarBackground(
-                                            userImage = userImage,
-                                            userName = userName,
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                color = VideoTheme.colors.baseSheetPrimary,
+                                            ),
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier
+                                                .size(48.dp)
+                                                .align(Alignment.Center),
+                                            color = VideoTheme.colors.basePrimary,
                                         )
+                                    }
+                                }
+                                this.badNetworkContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize(),
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(
+                                                    color = VideoTheme.colors.baseSheetPrimary,
+                                                )
+                                                .align(Alignment.Center),
+                                            horizontalAlignment = CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center,
+                                        ) {
+                                            Icon(
+                                                tint = VideoTheme.colors.basePrimary,
+                                                imageVector = Icons.Default.SignalWifiBad,
+                                                contentDescription = null,
+                                            )
+                                            Text(
+                                                color = VideoTheme.colors.basePrimary,
+                                                modifier = Modifier.padding(top = 16.dp),
+                                                text = getString(io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network_single_video),
+                                            )
+                                        }
                                     }
                                 }
                             },
