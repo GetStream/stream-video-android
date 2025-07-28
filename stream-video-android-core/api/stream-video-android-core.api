@@ -6560,14 +6560,6 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun toggleAudioProcessing ()Z
 }
 
-public class io/getstream/video/android/core/call/connection/job/RestartIceJobDelegate {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;J)V
-	public synthetic fun <init> (Lkotlinx/coroutines/CoroutineScope;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun cancelScheduledRestartIce ()V
-	public final fun scheduleRestartIce (JLkotlin/jvm/functions/Function1;)V
-	public static synthetic fun scheduleRestartIce$default (Lio/getstream/video/android/core/call/connection/job/RestartIceJobDelegate;JLkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
-}
-
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/signal/socket/RTCEventMapper;
 	public final fun mapEvent (Lstream/video/sfu/event/SfuEvent;)Lio/getstream/video/android/core/events/SfuDataEvent;
@@ -8368,19 +8360,6 @@ public final class io/getstream/video/android/core/call/stats/model/discriminato
 
 public final class io/getstream/video/android/core/call/stats/model/discriminator/RtcReportType$Companion {
 	public final fun fromAlias (Ljava/lang/String;)Lio/getstream/video/android/core/call/stats/model/discriminator/RtcReportType;
-}
-
-public final class io/getstream/video/android/core/call/utils/SignalLostSignalingServiceDecorator : io/getstream/video/android/core/api/SignalServerService {
-	public fun <init> (Lio/getstream/video/android/core/api/SignalServerService;Lkotlin/jvm/functions/Function1;)V
-	public fun iceRestart (Lstream/video/sfu/signal/ICERestartRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun iceTrickle (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun sendAnswer (Lstream/video/sfu/signal/SendAnswerRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun sendStats (Lstream/video/sfu/signal/SendStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun setPublisher (Lstream/video/sfu/signal/SetPublisherRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun startNoiseCancellation (Lstream/video/sfu/signal/StartNoiseCancellationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun stopNoiseCancellation (Lstream/video/sfu/signal/StopNoiseCancellationRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateMuteStates (Lstream/video/sfu/signal/UpdateMuteStatesRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateSubscriptions (Lstream/video/sfu/signal/UpdateSubscriptionsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/call/utils/TrackOverridesHandlerKt {
