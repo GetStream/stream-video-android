@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Controller for managing media sessions.
  */
 @ExperimentalStreamVideoApi
-interface StreamMediaSessionController {
+interface StreamMediaSessionController : StreamMediaSessionControllerWithPayload {
 
     /**
      * Create or get already created media session for the call.
@@ -88,11 +88,77 @@ interface StreamMediaSessionController {
      * @param callDisplayName The call display name.
      * @param metadataBuilder The metadata builder.
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     suspend fun updateMetadata(
         context: Context,
         mediaSession: MediaSessionCompat,
         call: Call,
         callDisplayName: String?,
+        metadataBuilder: MediaMetadataCompat.Builder,
+    ) {
+        updateMetadata(context, mediaSession, call, callDisplayName, emptyMap(), metadataBuilder)
+    }
+
+    /**
+     * Update the media session playback state.
+     *
+     * @param mediaSession The media session.
+     * @param call The call.
+     * @param callDisplayName The call display name.
+     * @param playbackStateBuilder The playback state builder.
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    suspend fun updatePlaybackState(
+        context: Context,
+        mediaSession: MediaSessionCompat,
+        call: Call,
+        callDisplayName: String?,
+        playbackStateBuilder: PlaybackStateCompat.Builder,
+    ) {
+        updatePlaybackState(
+            context,
+            mediaSession,
+            call,
+            callDisplayName,
+            emptyMap(),
+            playbackStateBuilder,
+        )
+    }
+
+    /**
+     * Clear the media session for the call.
+     *
+     * @param callId The call id.
+     */
+    fun clear(callId: StreamCallId)
+}
+
+/**
+ * Controller for managing media sessions.
+ */
+@ExperimentalStreamVideoApi
+interface StreamMediaSessionControllerWithPayload {
+
+    /**
+     * Update the media session metadata.
+     *
+     * @param mediaSession The media session.
+     * @param call The call.
+     * @param callDisplayName The call display name.
+     * @param metadataBuilder The metadata builder.
+     */
+    suspend fun updateMetadata(
+        context: Context,
+        mediaSession: MediaSessionCompat,
+        call: Call,
+        callDisplayName: String?,
+        payload: Map<String, Any?>,
         metadataBuilder: MediaMetadataCompat.Builder,
     )
 
@@ -109,15 +175,9 @@ interface StreamMediaSessionController {
         mediaSession: MediaSessionCompat,
         call: Call,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
         playbackStateBuilder: PlaybackStateCompat.Builder,
     )
-
-    /**
-     * Clear the media session for the call.
-     *
-     * @param callId The call id.
-     */
-    fun clear(callId: StreamCallId)
 }
 
 /**
@@ -254,6 +314,16 @@ open class DefaultStreamMediaSessionController(
         callDisplayName: String?,
         metadataBuilder: MediaMetadataCompat.Builder,
     ) {
+    }
+
+    override suspend fun updateMetadata(
+        context: Context,
+        mediaSession: MediaSessionCompat,
+        call: Call,
+        callDisplayName: String?,
+        payload: Map<String, Any?>,
+        metadataBuilder: MediaMetadataCompat.Builder,
+    ) {
         logger.d { "[updateMetadata] Updating media metadata for session: $mediaSession" }
         metadataBuilder.putLong(
             MediaMetadataCompat.METADATA_KEY_DURATION,
@@ -267,6 +337,7 @@ open class DefaultStreamMediaSessionController(
             interceptedInitial,
             call,
             callDisplayName,
+            payload,
         )
         mediaSession.setMetadata(intercepted.build())
     }
@@ -276,6 +347,7 @@ open class DefaultStreamMediaSessionController(
         mediaSession: MediaSessionCompat,
         call: Call,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
         playbackStateBuilder: PlaybackStateCompat.Builder,
     ) {
         logger.d { "[updatePlaybackState] Updating media metadata for session: $mediaSession" }
@@ -294,10 +366,16 @@ open class DefaultStreamMediaSessionController(
             1f,
         )
 
+        updateInterceptors.onUpdateMediaNotificationPlaybackState(
+            playbackStateBuilder,
+            call,
+            callDisplayName,
+        )
         val intercepted = updateInterceptors.onUpdateMediaNotificationPlaybackState(
             playbackStateBuilder,
             call,
             callDisplayName,
+            payload,
         )
         mediaSession.setPlaybackState(intercepted.build())
     }

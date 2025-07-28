@@ -102,7 +102,11 @@ public open class DefaultNotificationHandler(
         }
     }
 
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onRingingCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         CallService.showIncomingCall(
             application,
@@ -114,14 +118,19 @@ public open class DefaultNotificationHandler(
                 callId,
                 callDisplayName,
                 shouldHaveContentIntent = true,
+                payload,
             ),
         )
     }
 
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onMissedCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
         val notificationId = callId.hashCode()
-        val notification = getMissedCallNotification(callId, callDisplayName)
+        val notification = getMissedCallNotification(callId, callDisplayName, payload)
         if (notification != null && ActivityCompat.checkSelfPermission(
                 application,
                 Manifest.permission.POST_NOTIFICATIONS,
@@ -137,6 +146,7 @@ public open class DefaultNotificationHandler(
         callId: StreamCallId,
         callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
     ): Notification? {
         return if (ringingState is RingingState.Incoming) {
             val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
@@ -150,6 +160,7 @@ public open class DefaultNotificationHandler(
                     rejectCallPendingIntent,
                     callDisplayName,
                     shouldHaveContentIntent,
+                    payload,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -164,6 +175,8 @@ public open class DefaultNotificationHandler(
                     callId,
                     callDisplayName,
                     isOutgoingCall = true,
+                    0,
+                    payload,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -177,6 +190,7 @@ public open class DefaultNotificationHandler(
     override fun getMissedCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
     ): Notification? {
         logger.d { "[getMissedCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName" }
         val notificationId = callId.hashCode()
@@ -275,16 +289,19 @@ public open class DefaultNotificationHandler(
     override suspend fun updateOngoingCallNotification(
         call: Call,
         callDisplayName: String,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override suspend fun updateOutgoingCallNotification(
         call: Call,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override suspend fun updateIncomingCallNotification(
         call: Call,
         callDisplayName: String,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override fun getIncomingCallNotification(
@@ -293,6 +310,7 @@ public open class DefaultNotificationHandler(
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
         shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
     ): Notification {
         // if the app is in foreground then don't interrupt the user with a high priority
         // notification (popup). The application will display an incoming ringing call
@@ -366,7 +384,7 @@ public open class DefaultNotificationHandler(
         )
     }
 
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+    override fun onNotification(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>) {
         val notificationId = callId.hashCode()
         intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
             ?.let { notificationPendingIntent ->
@@ -378,7 +396,7 @@ public open class DefaultNotificationHandler(
             } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
     }
 
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onLiveCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>) {
         val notificationId = callId.hashCode()
         intentResolver.searchLiveCallPendingIntent(callId, notificationId)
             ?.let { liveCallPendingIntent ->
@@ -395,6 +413,7 @@ public open class DefaultNotificationHandler(
         callDisplayName: String?,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
+        payload: Map<String, Any?>,
     ): Notification? {
         val client = (StreamVideo.instance() as StreamVideoClient)
         val mediaNotificationCallTypes =
@@ -613,10 +632,28 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open fun showNotificationCallNotification(
         notificationPendingIntent: PendingIntent,
         callDisplayName: String,
         notificationId: Int,
+    ) {
+        showNotificationCallNotification(
+            notificationPendingIntent,
+            callDisplayName,
+            notificationId,
+            emptyMap(),
+        )
+    }
+
+    open fun showNotificationCallNotification(
+        notificationPendingIntent: PendingIntent,
+        callDisplayName: String,
+        notificationId: Int,
+        payload: Map<String, Any?>,
     ) {
         showNotification(notificationId) {
             setContentTitle("Incoming call")
@@ -625,10 +662,28 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open fun showMissedCallNotification(
         notificationPendingIntent: PendingIntent,
         callDisplayName: String,
         notificationId: Int,
+    ) {
+        showMissedCallNotification(
+            notificationPendingIntent,
+            callDisplayName,
+            notificationId,
+            emptyMap(),
+        )
+    }
+
+    open fun showMissedCallNotification(
+        notificationPendingIntent: PendingIntent,
+        callDisplayName: String,
+        notificationId: Int,
+        payload: Map<String, Any?>,
     ) {
         showNotification(notificationId) {
             setContentTitle("Missed call from $callDisplayName")
@@ -636,10 +691,23 @@ public open class DefaultNotificationHandler(
         }
     }
 
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open fun showLiveCallNotification(
         liveCallPendingIntent: PendingIntent,
         callDisplayName: String,
         notificationId: Int,
+    ) {
+        showLiveCallNotification(liveCallPendingIntent, callDisplayName, notificationId, emptyMap())
+    }
+
+    open fun showLiveCallNotification(
+        liveCallPendingIntent: PendingIntent,
+        callDisplayName: String,
+        notificationId: Int,
+        payload: Map<String, Any?>,
     ) {
         showNotification(notificationId) {
             setContentTitle("Live Call")

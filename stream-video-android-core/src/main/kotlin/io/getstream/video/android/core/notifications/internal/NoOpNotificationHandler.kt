@@ -30,19 +30,36 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 
 internal object NoOpNotificationHandler : NotificationHandler {
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+
+    override fun onRingingCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         /* NoOp */
     }
 
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onMissedCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         /* NoOp */
     }
 
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+    override fun onNotification(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         /* NoOp */
     }
 
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onLiveCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         /* NoOp */
     }
 
@@ -52,6 +69,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
         shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override fun getOngoingCallNotification(
@@ -59,22 +77,26 @@ internal object NoOpNotificationHandler : NotificationHandler {
         callDisplayName: String?,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
+        payload: Map<String, Any?>,
     ): Notification? = null
-
     override suspend fun onCallNotificationUpdate(call: Call): Notification? = null
+
     override suspend fun updateOngoingCallNotification(
         call: Call,
         callDisplayName: String,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override suspend fun updateOutgoingCallNotification(
         call: Call,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override suspend fun updateIncomingCallNotification(
         call: Call,
         callDisplayName: String,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override fun getRingingCallNotification(
@@ -82,11 +104,13 @@ internal object NoOpNotificationHandler : NotificationHandler {
         callId: StreamCallId,
         callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override fun getMissedCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
     ): Notification? = null
 
     override fun getSettingUpCallNotification(): Notification? = null
@@ -124,6 +148,7 @@ internal object NoOpNotificationHandler : NotificationHandler {
         callId: StreamCallId,
         mediaNotificationConfig: MediaNotificationConfig,
         remoteParticipantCount: Int,
+
     ): NotificationCompat.Builder? {
         return null
     }

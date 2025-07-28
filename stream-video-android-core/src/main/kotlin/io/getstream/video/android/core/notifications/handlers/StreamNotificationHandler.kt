@@ -27,39 +27,94 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 
-interface StreamNotificationHandler {
+interface StreamNotificationHandlerWithPayload {
     /**
      * Customize the notification when you receive a push notification for ringing call,
      * which has further two types [RingingState.Incoming] and [RingingState.Outgoing]
      * @param callId An instance of [StreamCallId] representing the call identifier
      * @param callDisplayName The name of the caller to display in the notification
      */
-    fun onRingingCall(callId: StreamCallId, callDisplayName: String)
+
+    fun onRingingCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
 
     /**
      * Customize the notification when you receive a push notification for Missed Call
      * @param callId An instance of [StreamCallId] representing the call identifier
      * @param callDisplayName The name of the caller to display in the notification
      */
-    fun onMissedCall(callId: StreamCallId, callDisplayName: String)
+    fun onMissedCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
 
     /**
      * Customize the notification when you receive a push notification for general usage
      * @param callId An instance of [StreamCallId] representing the call identifier
      * @param callDisplayName The name of the caller to display in the notification
      */
-    fun onNotification(callId: StreamCallId, callDisplayName: String)
+    fun onNotification(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
 
     /**
      * Customize the notification when you receive a push notification for Live Call
      * @param callId An instance of [StreamCallId] representing the call identifier
      * @param callDisplayName The name of the caller to display in the notification
      */
-    fun onLiveCall(callId: StreamCallId, callDisplayName: String)
+    fun onLiveCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
 }
 
-interface StreamNotificationProvider {
+interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
+    /**
+     * Customize the notification when you receive a push notification for ringing call,
+     * which has further two types [RingingState.Incoming] and [RingingState.Outgoing]
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+        onRingingCall(callId, callDisplayName, emptyMap())
+    }
 
+    /**
+     * Customize the notification when you receive a push notification for Missed Call
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+        onMissedCall(callId, callDisplayName, emptyMap())
+    }
+
+    /**
+     * Customize the notification when you receive a push notification for general usage
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun onNotification(callId: StreamCallId, callDisplayName: String) {
+        onNotification(callId, callDisplayName, emptyMap())
+    }
+
+    /**
+     * Customize the notification when you receive a push notification for Live Call
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+        onLiveCall(callId, callDisplayName, emptyMap())
+    }
+}
+
+interface StreamNotificationProviderWithPayload {
     /**
      * Customize the notification when you receive a push notification for ringing call with type [RingingState.Incoming]
      * @param fullScreenPendingIntent A high-priority intent that launches an activity in full-screen mode, bypassing the lock screen.
@@ -75,6 +130,7 @@ interface StreamNotificationProvider {
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
         shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
     ): Notification?
 
     /**
@@ -90,6 +146,7 @@ interface StreamNotificationProvider {
         callDisplayName: String? = null,
         isOutgoingCall: Boolean = false,
         remoteParticipantCount: Int = 0,
+        payload: Map<String, Any?>,
     ): Notification?
 
     /**
@@ -105,6 +162,7 @@ interface StreamNotificationProvider {
         callId: StreamCallId,
         callDisplayName: String? = null,
         shouldHaveContentIntent: Boolean = true,
+        payload: Map<String, Any?>,
     ): Notification?
 
     /**
@@ -117,7 +175,113 @@ interface StreamNotificationProvider {
     fun getMissedCallNotification(
         callId: StreamCallId,
         callDisplayName: String? = null,
+        payload: Map<String, Any?>,
     ): Notification?
+}
+
+interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
+
+    /**
+     * Customize the notification when you receive a push notification for ringing call with type [RingingState.Incoming]
+     * @param fullScreenPendingIntent A high-priority intent that launches an activity in full-screen mode, bypassing the lock screen.
+     * @param acceptCallPendingIntent The intent triggered when accepting the call from the notification.
+     * @param rejectCallPendingIntent The intent triggered when rejecting the call from the notification.
+     * @param callerName The name of the caller to display in the notification
+     * @param shouldHaveContentIntent If true, clicking the notification triggers [fullScreenPendingIntent].
+     * @return A [Notification] object customized for the incoming call.
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun getIncomingCallNotification(
+        fullScreenPendingIntent: PendingIntent,
+        acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
+        callerName: String?,
+        shouldHaveContentIntent: Boolean,
+    ): Notification? {
+        return getIncomingCallNotification(
+            fullScreenPendingIntent,
+            acceptCallPendingIntent,
+            rejectCallPendingIntent,
+            callerName,
+            shouldHaveContentIntent,
+            emptyMap(),
+        )
+    }
+
+    /**
+     * Customize the notification when you receive a push notification for ringing call with type [RingingState.Outgoing] and [RingingState.Active]
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     * @param isOutgoingCall True if the call is outgoing [RingingState.Outgoing], false if it is an active call [RingingState.Active].
+     * @param remoteParticipantCount Count of remote participant
+     * @return A [Notification] object customized for the ongoing call.
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun getOngoingCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String? = null,
+        isOutgoingCall: Boolean = false,
+        remoteParticipantCount: Int = 0,
+    ): Notification? {
+        return getOngoingCallNotification(
+            callId,
+            callDisplayName,
+            isOutgoingCall,
+            remoteParticipantCount,
+            emptyMap(),
+        )
+    }
+
+    /**
+     * Customize the notification when you receive a push notification for ringing call
+     * @param ringingState The current state of ringing call, represented by [RingingState]
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     * @param shouldHaveContentIntent If set to true then it will launch a screen when the user will click on the notification
+     * @return A [Notification] object customized for the ongoing call.
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun getRingingCallNotification(
+        ringingState: RingingState,
+        callId: StreamCallId,
+        callDisplayName: String? = null,
+        shouldHaveContentIntent: Boolean = true,
+    ): Notification? {
+        return getRingingCallNotification(
+            ringingState,
+            callId,
+            callDisplayName,
+            shouldHaveContentIntent,
+            emptyMap(),
+        )
+    }
+
+    /**
+     * Customize the notification when you receive a push notification for Missed Call
+     *
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     * @return A [Notification] object customized for the missed call.
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    fun getMissedCallNotification(
+        callId: StreamCallId,
+        callDisplayName: String? = null,
+    ): Notification? {
+        return getMissedCallNotification(callId, callDisplayName, emptyMap())
+    }
 
     /**
      * Temporary notification. Sometimes the system needs to show a notification while the call is not ready.
@@ -128,7 +292,7 @@ interface StreamNotificationProvider {
     fun getSettingUpCallNotification(): Notification?
 }
 
-interface StreamNotificationUpdatesProvider {
+interface StreamNotificationUpdatesProvider : StreamNotificationUpdatesProviderWithPayload {
 
     /**
      * Get subsequent updates to notifications.
@@ -145,9 +309,64 @@ interface StreamNotificationUpdatesProvider {
      * @param call The Stream call object.
      * @return A [Notification] object customized for the ongoing call.
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     suspend fun updateOngoingCallNotification(
         call: Call,
         callDisplayName: String,
+    ): Notification? {
+        return updateOngoingCallNotification(call, callDisplayName, emptyMap())
+    }
+
+    /**
+     * Update the ringing call notification.
+     *
+     * @param call The Stream call object.
+     * @return A [Notification] object customized for the ringing call.
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    suspend fun updateOutgoingCallNotification(
+        call: Call,
+        callDisplayName: String?,
+    ): Notification? {
+        return updateOutgoingCallNotification(call, callDisplayName, emptyMap())
+    }
+
+    /**
+     * Update the ringing call notification.
+     *
+     * @param call The Stream call object.
+     * @return A [Notification] object customized for the ringing call.
+     */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
+    suspend fun updateIncomingCallNotification(
+        call: Call,
+        callDisplayName: String,
+    ): Notification? {
+        return updateIncomingCallNotification(call, callDisplayName, emptyMap())
+    }
+}
+
+interface StreamNotificationUpdatesProviderWithPayload {
+
+    /**
+     * Update the ongoing call notification.
+     *
+     * @param call The Stream call object.
+     * @return A [Notification] object customized for the ongoing call.
+     */
+    suspend fun updateOngoingCallNotification(
+        call: Call,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
     ): Notification?
 
     /**
@@ -159,6 +378,7 @@ interface StreamNotificationUpdatesProvider {
     suspend fun updateOutgoingCallNotification(
         call: Call,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
     ): Notification?
 
     /**
@@ -170,13 +390,15 @@ interface StreamNotificationUpdatesProvider {
     suspend fun updateIncomingCallNotification(
         call: Call,
         callDisplayName: String,
+        payload: Map<String, Any?>,
     ): Notification?
 }
 
 /**
  * Interceptor for notification builders.
  */
-open class StreamNotificationBuilderInterceptors {
+open class StreamNotificationBuilderInterceptors :
+    StreamNotificationBuilderInterceptorsWithPayload() {
 
     /**
      * Intercept the notification builder and modify it before it is posted.
@@ -188,6 +410,10 @@ open class StreamNotificationBuilderInterceptors {
      * @param callerName The name of the caller to display in the notification.
      * @param shouldHaveContentIntent If true, clicking the notification triggers [fullScreenPendingIntent].
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open fun onBuildIncomingCallNotification(
         builder: NotificationCompat.Builder,
         fullScreenPendingIntent: PendingIntent,
@@ -207,6 +433,10 @@ open class StreamNotificationBuilderInterceptors {
      * @param isOutgoingCall True if the call is outgoing, false if it is an active call.
      * @param remoteParticipantCount Count of remote participant.
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open fun onBuildOngoingCallNotification(
         builder: NotificationCompat.Builder,
         callId: StreamCallId,
@@ -230,6 +460,10 @@ open class StreamNotificationBuilderInterceptors {
      * @param builder The notification builder.
      * @param callDisplayName The name of the caller to display in the notification.
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open fun onBuildMissedCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String?,
@@ -246,6 +480,10 @@ open class StreamNotificationBuilderInterceptors {
      * @param callDisplayName The name of the caller to display in the notification
      * @param shouldHaveContentIntent If set to true then it will launch a screen when the user will click on the notification
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open fun onBuildOutgoingCallNotification(
         builder: NotificationCompat.Builder,
         ringingState: RingingState,
@@ -309,10 +547,88 @@ open class StreamNotificationBuilderInterceptors {
     }
 }
 
+open class StreamNotificationBuilderInterceptorsWithPayload {
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param fullScreenPendingIntent A high-priority intent that launches an activity in full-screen mode, bypassing the lock screen.
+     * @param acceptCallPendingIntent The intent triggered when accepting the call from the notification.
+     * @param rejectCallPendingIntent The intent triggered when rejecting the call from the notification.
+     * @param callerName The name of the caller to display in the notification.
+     * @param shouldHaveContentIntent If true, clicking the notification triggers [fullScreenPendingIntent].
+     */
+    open fun onBuildIncomingCallNotification(
+        builder: NotificationCompat.Builder,
+        fullScreenPendingIntent: PendingIntent,
+        acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
+        callerName: String?,
+        shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param callDisplayName The name of the caller to display in the notification.
+     * @param isOutgoingCall True if the call is outgoing, false if it is an active call.
+     * @param remoteParticipantCount Count of remote participant.
+     */
+    open fun onBuildOngoingCallNotification(
+        builder: NotificationCompat.Builder,
+        callId: StreamCallId,
+        callDisplayName: String? = null,
+        isOutgoingCall: Boolean = false,
+        remoteParticipantCount: Int = 0,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param callDisplayName The name of the caller to display in the notification.
+     */
+    open fun onBuildMissedCallNotification(
+        builder: NotificationCompat.Builder,
+        callDisplayName: String?,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param ringingState The current state of ringing call, represented by [RingingState]
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     * @param callDisplayName The name of the caller to display in the notification
+     * @param shouldHaveContentIntent If set to true then it will launch a screen when the user will click on the notification
+     */
+    open fun onBuildOutgoingCallNotification(
+        builder: NotificationCompat.Builder,
+        ringingState: RingingState,
+        callId: StreamCallId,
+        callDisplayName: String? = null,
+        shouldHaveContentIntent: Boolean = true,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+}
+
 /**
  * Interceptor for notification updates.
  */
-open class StreamNotificationUpdateInterceptors {
+open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterceptorsWithPayload() {
 
     /**
      * Intercept the notification builder and modify it before it is posted.
@@ -321,6 +637,10 @@ open class StreamNotificationUpdateInterceptors {
      * @param callDisplayName The name of the caller to display in the notification.
      * @param call the stream call
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open suspend fun onUpdateOngoingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -336,6 +656,10 @@ open class StreamNotificationUpdateInterceptors {
      * @param callDisplayName The name of the caller to display in the notification.
      * @param call the stream call
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open suspend fun onUpdateOngoingCallMediaNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -351,6 +675,10 @@ open class StreamNotificationUpdateInterceptors {
      * @param callDisplayName The name of the caller to display in the notification
      * @param call the stream call
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open suspend fun onUpdateOutgoingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -366,6 +694,10 @@ open class StreamNotificationUpdateInterceptors {
      * @param callDisplayName The name of the caller to display in the notification
      * @param call the stream call
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open suspend fun onUpdateIncomingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -381,6 +713,10 @@ open class StreamNotificationUpdateInterceptors {
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open suspend fun onUpdateMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
         call: Call,
@@ -396,6 +732,10 @@ open class StreamNotificationUpdateInterceptors {
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+    )
     open suspend fun onUpdateMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,
         call: Call,
@@ -415,5 +755,104 @@ open class StreamNotificationUpdateInterceptors {
         channelId: String,
     ): MediaSessionCompat? {
         return null
+    }
+}
+
+open class StreamNotificationUpdateInterceptorsWithPayload {
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param callDisplayName The name of the caller to display in the notification.
+     * @param call the stream call
+     */
+    open suspend fun onUpdateOngoingCallNotification(
+        builder: NotificationCompat.Builder,
+        callDisplayName: String? = null,
+        call: Call,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param callDisplayName The name of the caller to display in the notification.
+     * @param call the stream call
+     */
+    open suspend fun onUpdateOngoingCallMediaNotification(
+        builder: NotificationCompat.Builder,
+        callDisplayName: String? = null,
+        call: Call,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param callDisplayName The name of the caller to display in the notification
+     * @param call the stream call
+     */
+    open suspend fun onUpdateOutgoingCallNotification(
+        builder: NotificationCompat.Builder,
+        callDisplayName: String? = null,
+        call: Call,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the notification builder and modify it before it is posted.
+     *
+     * @param builder The notification builder.
+     * @param callDisplayName The name of the caller to display in the notification
+     * @param call the stream call
+     */
+    open suspend fun onUpdateIncomingCallNotification(
+        builder: NotificationCompat.Builder,
+        callDisplayName: String? = null,
+        call: Call,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the media notification metadata builder and modify it before it is posted for updating.
+     *
+     * @param builder The media metadata builder.
+     * @param call The Stream call object.
+     * @param callDisplayName The name of the caller to display in the notification.
+     */
+    open suspend fun onUpdateMediaNotificationMetadata(
+        builder: MediaMetadataCompat.Builder,
+        call: Call,
+        callDisplayName: String? = null,
+        payload: Map<String, Any?>,
+    ): MediaMetadataCompat.Builder {
+        return builder
+    }
+
+    /**
+     * Intercept the media notification playback state builder and modify it before it is posted for updating.
+     *
+     * @param builder The media playback state builder.
+     * @param call The Stream call object.
+     * @param callDisplayName The name of the caller to display in the notification.
+     */
+    open suspend fun onUpdateMediaNotificationPlaybackState(
+        builder: PlaybackStateCompat.Builder,
+        call: Call,
+        callDisplayName: String? = null,
+        payload: Map<String, Any?>,
+    ): PlaybackStateCompat.Builder {
+        return builder
     }
 }
