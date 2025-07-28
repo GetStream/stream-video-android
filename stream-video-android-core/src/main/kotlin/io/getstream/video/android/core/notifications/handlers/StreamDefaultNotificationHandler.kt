@@ -181,6 +181,7 @@ constructor(
         getMissedCallNotification(
             callId,
             callDisplayName,
+            payload,
         ).showNotification(notificationId = callId.hashCode())
     }
 
@@ -236,6 +237,7 @@ constructor(
             initialNotificationBuilderInterceptor.onBuildMissedCallNotification(
                 this,
                 callDisplayName,
+                payload,
             )
         }
     }
@@ -277,6 +279,7 @@ constructor(
                     callId,
                     callDisplayName,
                     isOutgoingCall = true,
+                    payload = payload,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -634,6 +637,7 @@ constructor(
             updateOutgoingCallNotification(
                 call = call,
                 callDisplayName = callDisplayName,
+                payload = emptyMap(), // TODO Rahul check 1
             )
         } else if (ringingState is RingingState.Incoming) {
             logger.d { "[onCallNotificationUpdate] Handling incoming call" }
@@ -645,6 +649,7 @@ constructor(
             updateIncomingCallNotification(
                 call = call,
                 callDisplayName = callDisplayName,
+                payload = emptyMap(), // TODO Rahul check 2
             )
         } else if (ringingState is RingingState.Active) {
             logger.d { "[onCallNotificationUpdate] Handling active call" }
@@ -668,6 +673,7 @@ constructor(
             updateOngoingCallNotification(
                 call = call,
                 callDisplayName = callDisplayName,
+                payload = emptyMap(), // TODO Rahul check 3
             )
         } else {
             logger.d { "[onCallNotificationUpdate] Unhandled ringing state: $ringingState" }
@@ -747,6 +753,7 @@ constructor(
                     mediaSession,
                     call,
                     callDisplayName,
+                    payload,
                     this,
                 )
             },
@@ -762,6 +769,7 @@ constructor(
                     mediaSession,
                     call,
                     callDisplayName,
+                    payload,
                     this,
                 )
             },
@@ -775,6 +783,7 @@ constructor(
                     initialInterceptor,
                     callDisplayName,
                     call,
+                    payload,
                 )
             },
             notificationBuildIntercept = {

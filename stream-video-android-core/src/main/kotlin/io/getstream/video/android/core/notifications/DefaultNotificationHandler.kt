@@ -392,6 +392,7 @@ public open class DefaultNotificationHandler(
                     notificationPendingIntent,
                     callDisplayName,
                     notificationId,
+                    payload,
                 )
             } ?: logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
     }
@@ -404,6 +405,7 @@ public open class DefaultNotificationHandler(
                     liveCallPendingIntent,
                     callDisplayName,
                     notificationId,
+                    payload,
                 )
             } ?: logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
     }
@@ -526,6 +528,7 @@ public open class DefaultNotificationHandler(
         call: Call,
         localUser: User,
         onUpdate: (Notification) -> Unit,
+
     ) {
         val streamVideoClient = StreamVideo.instanceOrNull() as? StreamVideoClient
 
@@ -567,6 +570,7 @@ public open class DefaultNotificationHandler(
                             callDisplayName = callDisplayName,
                             isOutgoingCall = true,
                             remoteParticipantCount = remoteMembersCount,
+                            payload = emptyMap(),
                         )?.let {
                             onUpdate(it)
                         }
@@ -601,6 +605,7 @@ public open class DefaultNotificationHandler(
                                     callId = StreamCallId.fromCallCid(call.cid),
                                     callDisplayName = callDisplayName,
                                     remoteParticipantCount = currentRemoteParticipantCount,
+                                    payload = emptyMap(),
                                 )?.let {
                                     onUpdate(it)
                                 }
@@ -635,6 +640,7 @@ public open class DefaultNotificationHandler(
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        level = DeprecationLevel.ERROR,
     )
     open fun showNotificationCallNotification(
         notificationPendingIntent: PendingIntent,
@@ -665,6 +671,7 @@ public open class DefaultNotificationHandler(
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        level = DeprecationLevel.ERROR,
     )
     open fun showMissedCallNotification(
         notificationPendingIntent: PendingIntent,
@@ -694,6 +701,7 @@ public open class DefaultNotificationHandler(
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        level = DeprecationLevel.ERROR,
     )
     open fun showLiveCallNotification(
         liveCallPendingIntent: PendingIntent,

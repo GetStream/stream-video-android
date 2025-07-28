@@ -91,6 +91,7 @@ interface StreamMediaSessionController : StreamMediaSessionControllerWithPayload
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        level = DeprecationLevel.ERROR,
     )
     suspend fun updateMetadata(
         context: Context,
@@ -113,6 +114,7 @@ interface StreamMediaSessionController : StreamMediaSessionControllerWithPayload
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        level = DeprecationLevel.ERROR,
     )
     suspend fun updatePlaybackState(
         context: Context,
@@ -238,6 +240,7 @@ open class DefaultStreamMediaSessionController(
                                         mediaSession,
                                         call,
                                         null,
+                                        emptyMap(), // TODO Rahul check 4
                                         PlaybackStateCompat.Builder(),
                                     )
                                 }
@@ -258,6 +261,7 @@ open class DefaultStreamMediaSessionController(
                                         mediaSession,
                                         call,
                                         null,
+                                        emptyMap(), // TODO Rahul check 5
                                         PlaybackStateCompat.Builder(),
                                     )
                                 }
@@ -370,6 +374,7 @@ open class DefaultStreamMediaSessionController(
             playbackStateBuilder,
             call,
             callDisplayName,
+            payload,
         )
         val intercepted = updateInterceptors.onUpdateMediaNotificationPlaybackState(
             playbackStateBuilder,
