@@ -38,7 +38,7 @@ import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
-class SignalLostSignalingServiceDecorator(private val decorated: SignalServerService, private val onPropagateError: (Error) -> Unit) : SignalServerService {
+internal class SignalLostSignalingServiceDecorator(private val decorated: SignalServerService, private val onPropagateError: (Error) -> Unit) : SignalServerService {
 
     override suspend fun setPublisher(setPublisherRequest: SetPublisherRequest): SetPublisherResponse {
         return decorated.setPublisher(setPublisherRequest).onError {
