@@ -9954,9 +9954,9 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun showMissedCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;ILjava/util/Map;)V
 	public fun showNotificationCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;I)V
 	public fun showNotificationCallNotification (Landroid/app/PendingIntent;Ljava/lang/String;ILjava/util/Map;)V
-	public fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/notifications/DefaultNotificationHandler$Companion {
@@ -10071,8 +10071,7 @@ public class io/getstream/video/android/core/notifications/handlers/DefaultStrea
 	public fun initialPlaybackState (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/model/StreamCallId;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;)V
 	public fun provideMediaSession (Landroid/app/Application;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Landroid/support/v4/media/session/MediaSessionCompat$Callback;)Landroid/support/v4/media/session/MediaSessionCompat;
 	public fun updateMetadata (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/MediaMetadataCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateMetadata (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Landroid/support/v4/media/MediaMetadataCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updatePlaybackState (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updatePlaybackState (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public class io/getstream/video/android/core/notifications/handlers/StreamDefaultNotificationHandler : io/getstream/android/push/permissions/NotificationPermissionHandler, io/getstream/video/android/core/notifications/handlers/StreamNotificationHandler, io/getstream/video/android/core/notifications/handlers/StreamNotificationProvider, io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProvider {
@@ -10092,25 +10091,18 @@ public class io/getstream/video/android/core/notifications/handlers/StreamDefaul
 	public fun onPermissionRationale ()V
 	public fun onPermissionRequested ()V
 	public fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)V
-	public fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamMediaSessionController : io/getstream/video/android/core/notifications/handlers/StreamMediaSessionControllerWithPayload {
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamMediaSessionController {
 	public abstract fun clear (Lio/getstream/video/android/model/StreamCallId;)V
 	public abstract fun initialMetadata (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/model/StreamCallId;Landroid/support/v4/media/MediaMetadataCompat$Builder;)V
 	public abstract fun initialPlaybackState (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/model/StreamCallId;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;)V
 	public abstract fun provideMediaSession (Landroid/app/Application;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Landroid/support/v4/media/session/MediaSessionCompat$Callback;)Landroid/support/v4/media/session/MediaSessionCompat;
-	public fun updateMetadata (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/MediaMetadataCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun updateMetadata$suspendImpl (Lio/getstream/video/android/core/notifications/handlers/StreamMediaSessionController;Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/MediaMetadataCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updatePlaybackState (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun updatePlaybackState$suspendImpl (Lio/getstream/video/android/core/notifications/handlers/StreamMediaSessionController;Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamMediaSessionControllerWithPayload {
-	public abstract fun updateMetadata (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Landroid/support/v4/media/MediaMetadataCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun updatePlaybackState (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateMetadata (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/MediaMetadataCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updatePlaybackState (Landroid/content/Context;Landroid/support/v4/media/session/MediaSessionCompat;Lio/getstream/video/android/core/Call;Ljava/lang/String;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public class io/getstream/video/android/core/notifications/handlers/StreamNotificationBuilderInterceptors : io/getstream/video/android/core/notifications/handlers/StreamNotificationBuilderInterceptorsWithPayload {
@@ -10208,7 +10200,7 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZLjava/util/Map;ILjava/lang/Object;)Landroid/app/Notification;
 }
 
-public class io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptors : io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload {
+public class io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptors {
 	public fun <init> ()V
 	public fun onUpdateIncomingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun onUpdateIncomingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptors;Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -10225,36 +10217,11 @@ public class io/getstream/video/android/core/notifications/handlers/StreamNotifi
 	public static synthetic fun onUpdateOutgoingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptors;Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public class io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload {
-	public fun <init> ()V
-	public fun onUpdateIncomingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun onUpdateIncomingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload;Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public fun onUpdateMediaNotificationMetadata (Landroid/support/v4/media/MediaMetadataCompat$Builder;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun onUpdateMediaNotificationMetadata$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload;Landroid/support/v4/media/MediaMetadataCompat$Builder;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public fun onUpdateMediaNotificationPlaybackState (Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun onUpdateMediaNotificationPlaybackState$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload;Landroid/support/v4/media/session/PlaybackStateCompat$Builder;Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public fun onUpdateOngoingCallMediaNotification (Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun onUpdateOngoingCallMediaNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload;Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public fun onUpdateOngoingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun onUpdateOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload;Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public fun onUpdateOutgoingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun onUpdateOutgoingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptorsWithPayload;Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Lio/getstream/video/android/core/Call;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
-public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProvider : io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProviderWithPayload {
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProvider {
 	public abstract fun onCallNotificationUpdate (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun updateIncomingCallNotification$suspendImpl (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProvider;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun updateOngoingCallNotification$suspendImpl (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProvider;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun updateOutgoingCallNotification$suspendImpl (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProvider;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationUpdatesProviderWithPayload {
-	public abstract fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/notifications/internal/receivers/ToggleCameraBroadcastReceiver : android/content/BroadcastReceiver {

@@ -289,19 +289,16 @@ public open class DefaultNotificationHandler(
     override suspend fun updateOngoingCallNotification(
         call: Call,
         callDisplayName: String,
-        payload: Map<String, Any?>,
     ): Notification? = null
 
     override suspend fun updateOutgoingCallNotification(
         call: Call,
         callDisplayName: String?,
-        payload: Map<String, Any?>,
     ): Notification? = null
 
     override suspend fun updateIncomingCallNotification(
         call: Call,
         callDisplayName: String,
-        payload: Map<String, Any?>,
     ): Notification? = null
 
     override fun getIncomingCallNotification(

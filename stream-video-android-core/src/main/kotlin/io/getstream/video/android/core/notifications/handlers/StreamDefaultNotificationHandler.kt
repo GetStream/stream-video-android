@@ -637,7 +637,6 @@ constructor(
             updateOutgoingCallNotification(
                 call = call,
                 callDisplayName = callDisplayName,
-                payload = emptyMap(), // TODO Rahul check 1
             )
         } else if (ringingState is RingingState.Incoming) {
             logger.d { "[onCallNotificationUpdate] Handling incoming call" }
@@ -649,7 +648,6 @@ constructor(
             updateIncomingCallNotification(
                 call = call,
                 callDisplayName = callDisplayName,
-                payload = emptyMap(), // TODO Rahul check 2
             )
         } else if (ringingState is RingingState.Active) {
             logger.d { "[onCallNotificationUpdate] Handling active call" }
@@ -673,7 +671,6 @@ constructor(
             updateOngoingCallNotification(
                 call = call,
                 callDisplayName = callDisplayName,
-                payload = emptyMap(), // TODO Rahul check 3
             )
         } else {
             logger.d { "[onCallNotificationUpdate] Unhandled ringing state: $ringingState" }
@@ -686,12 +683,12 @@ constructor(
     override suspend fun updateIncomingCallNotification(
         call: Call,
         callDisplayName: String,
-        payload: Map<String, Any?>,
     ): Notification? {
         logger.d {
             "[onUpdateIncomingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
         val callId = StreamCallId.fromCallCid(call.cid)
+        val payload = emptyMap<String, Any?>()
         return getRingingCallNotificationInternal(
             ringingState = call.state.ringingState.value,
             callId = callId,
@@ -720,7 +717,6 @@ constructor(
                     initial,
                     callDisplayName,
                     call,
-                    payload,
                 )
             },
             payload = payload,
@@ -730,8 +726,8 @@ constructor(
     override suspend fun updateOngoingCallNotification(
         call: Call,
         callDisplayName: String,
-        payload: Map<String, Any?>,
     ): Notification? {
+        val payload = emptyMap<String, Any?>()
         logger.d {
             "[updateOngoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
@@ -753,7 +749,6 @@ constructor(
                     mediaSession,
                     call,
                     callDisplayName,
-                    payload,
                     this,
                 )
             },
@@ -769,7 +764,6 @@ constructor(
                     mediaSession,
                     call,
                     callDisplayName,
-                    payload,
                     this,
                 )
             },
@@ -783,7 +777,6 @@ constructor(
                     initialInterceptor,
                     callDisplayName,
                     call,
-                    payload,
                 )
             },
             notificationBuildIntercept = {
@@ -797,7 +790,6 @@ constructor(
                     initial,
                     callDisplayName,
                     call,
-                    payload,
                 )
             },
             payload = payload,
@@ -807,11 +799,11 @@ constructor(
     override suspend fun updateOutgoingCallNotification(
         call: Call,
         callDisplayName: String?,
-        payload: Map<String, Any?>,
     ): Notification? {
         logger.d {
             "[updateOutgoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
+        val payload = emptyMap<String, Any?>()
         return getRingingCallNotificationInternal(
             ringingState = call.state.ringingState.value,
             callId = StreamCallId.fromCallCid(call.cid),
@@ -829,7 +821,6 @@ constructor(
                     initial,
                     callDisplayName,
                     call,
-                    payload,
                 )
             },
             payload = payload,

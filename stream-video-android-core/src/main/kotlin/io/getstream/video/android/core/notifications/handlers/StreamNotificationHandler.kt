@@ -300,7 +300,7 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
     fun getSettingUpCallNotification(): Notification?
 }
 
-interface StreamNotificationUpdatesProvider : StreamNotificationUpdatesProviderWithPayload {
+interface StreamNotificationUpdatesProvider {
 
     /**
      * Get subsequent updates to notifications.
@@ -317,67 +317,9 @@ interface StreamNotificationUpdatesProvider : StreamNotificationUpdatesProviderW
      * @param call The Stream call object.
      * @return A [Notification] object customized for the ongoing call.
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
     suspend fun updateOngoingCallNotification(
         call: Call,
         callDisplayName: String,
-    ): Notification? {
-        return updateOngoingCallNotification(call, callDisplayName, emptyMap())
-    }
-
-    /**
-     * Update the ringing call notification.
-     *
-     * @param call The Stream call object.
-     * @return A [Notification] object customized for the ringing call.
-     */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
-    suspend fun updateOutgoingCallNotification(
-        call: Call,
-        callDisplayName: String?,
-    ): Notification? {
-        return updateOutgoingCallNotification(call, callDisplayName, emptyMap())
-    }
-
-    /**
-     * Update the ringing call notification.
-     *
-     * @param call The Stream call object.
-     * @return A [Notification] object customized for the ringing call.
-     */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
-    suspend fun updateIncomingCallNotification(
-        call: Call,
-        callDisplayName: String,
-    ): Notification? {
-        return updateIncomingCallNotification(call, callDisplayName, emptyMap())
-    }
-}
-
-interface StreamNotificationUpdatesProviderWithPayload {
-
-    /**
-     * Update the ongoing call notification.
-     *
-     * @param call The Stream call object.
-     * @return A [Notification] object customized for the ongoing call.
-     */
-    suspend fun updateOngoingCallNotification(
-        call: Call,
-        callDisplayName: String,
-        payload: Map<String, Any?>,
     ): Notification?
 
     /**
@@ -389,7 +331,6 @@ interface StreamNotificationUpdatesProviderWithPayload {
     suspend fun updateOutgoingCallNotification(
         call: Call,
         callDisplayName: String?,
-        payload: Map<String, Any?>,
     ): Notification?
 
     /**
@@ -401,7 +342,6 @@ interface StreamNotificationUpdatesProviderWithPayload {
     suspend fun updateIncomingCallNotification(
         call: Call,
         callDisplayName: String,
-        payload: Map<String, Any?>,
     ): Notification?
 }
 
@@ -643,7 +583,7 @@ open class StreamNotificationBuilderInterceptorsWithPayload {
 /**
  * Interceptor for notification updates.
  */
-open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterceptorsWithPayload() {
+open class StreamNotificationUpdateInterceptors {
 
     /**
      * Intercept the notification builder and modify it before it is posted.
@@ -652,11 +592,6 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
      * @param callDisplayName The name of the caller to display in the notification.
      * @param call the stream call
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
     open suspend fun onUpdateOngoingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -672,11 +607,6 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
      * @param callDisplayName The name of the caller to display in the notification.
      * @param call the stream call
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
     open suspend fun onUpdateOngoingCallMediaNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -692,11 +622,6 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
      * @param callDisplayName The name of the caller to display in the notification
      * @param call the stream call
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
     open suspend fun onUpdateOutgoingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -712,11 +637,6 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
      * @param callDisplayName The name of the caller to display in the notification
      * @param call the stream call
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
     open suspend fun onUpdateIncomingCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String? = null,
@@ -732,11 +652,6 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
     open suspend fun onUpdateMediaNotificationMetadata(
         builder: MediaMetadataCompat.Builder,
         call: Call,
@@ -752,11 +667,6 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
      * @param call The Stream call object.
      * @param callDisplayName The name of the caller to display in the notification.
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
-        level = DeprecationLevel.WARNING,
-    )
     open suspend fun onUpdateMediaNotificationPlaybackState(
         builder: PlaybackStateCompat.Builder,
         call: Call,
@@ -776,104 +686,5 @@ open class StreamNotificationUpdateInterceptors : StreamNotificationUpdateInterc
         channelId: String,
     ): MediaSessionCompat? {
         return null
-    }
-}
-
-open class StreamNotificationUpdateInterceptorsWithPayload {
-
-    /**
-     * Intercept the notification builder and modify it before it is posted.
-     *
-     * @param builder The notification builder.
-     * @param callDisplayName The name of the caller to display in the notification.
-     * @param call the stream call
-     */
-    open suspend fun onUpdateOngoingCallNotification(
-        builder: NotificationCompat.Builder,
-        callDisplayName: String? = null,
-        call: Call,
-        payload: Map<String, Any?>,
-    ): NotificationCompat.Builder {
-        return builder
-    }
-
-    /**
-     * Intercept the notification builder and modify it before it is posted.
-     *
-     * @param builder The notification builder.
-     * @param callDisplayName The name of the caller to display in the notification.
-     * @param call the stream call
-     */
-    open suspend fun onUpdateOngoingCallMediaNotification(
-        builder: NotificationCompat.Builder,
-        callDisplayName: String? = null,
-        call: Call,
-        payload: Map<String, Any?>,
-    ): NotificationCompat.Builder {
-        return builder
-    }
-
-    /**
-     * Intercept the notification builder and modify it before it is posted.
-     *
-     * @param builder The notification builder.
-     * @param callDisplayName The name of the caller to display in the notification
-     * @param call the stream call
-     */
-    open suspend fun onUpdateOutgoingCallNotification(
-        builder: NotificationCompat.Builder,
-        callDisplayName: String? = null,
-        call: Call,
-        payload: Map<String, Any?>,
-    ): NotificationCompat.Builder {
-        return builder
-    }
-
-    /**
-     * Intercept the notification builder and modify it before it is posted.
-     *
-     * @param builder The notification builder.
-     * @param callDisplayName The name of the caller to display in the notification
-     * @param call the stream call
-     */
-    open suspend fun onUpdateIncomingCallNotification(
-        builder: NotificationCompat.Builder,
-        callDisplayName: String? = null,
-        call: Call,
-        payload: Map<String, Any?>,
-    ): NotificationCompat.Builder {
-        return builder
-    }
-
-    /**
-     * Intercept the media notification metadata builder and modify it before it is posted for updating.
-     *
-     * @param builder The media metadata builder.
-     * @param call The Stream call object.
-     * @param callDisplayName The name of the caller to display in the notification.
-     */
-    open suspend fun onUpdateMediaNotificationMetadata(
-        builder: MediaMetadataCompat.Builder,
-        call: Call,
-        callDisplayName: String? = null,
-        payload: Map<String, Any?>,
-    ): MediaMetadataCompat.Builder {
-        return builder
-    }
-
-    /**
-     * Intercept the media notification playback state builder and modify it before it is posted for updating.
-     *
-     * @param builder The media playback state builder.
-     * @param call The Stream call object.
-     * @param callDisplayName The name of the caller to display in the notification.
-     */
-    open suspend fun onUpdateMediaNotificationPlaybackState(
-        builder: PlaybackStateCompat.Builder,
-        call: Call,
-        callDisplayName: String? = null,
-        payload: Map<String, Any?>,
-    ): PlaybackStateCompat.Builder {
-        return builder
     }
 }
