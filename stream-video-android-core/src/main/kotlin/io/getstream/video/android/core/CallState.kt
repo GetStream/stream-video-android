@@ -93,6 +93,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.RTMP
@@ -103,8 +104,13 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.sorting.SortedParticipantsState
+import io.getstream.video.android.core.utils.ScheduleConfig
+import io.getstream.video.android.core.utils.TaskSchedulerWithDebounce
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -136,6 +142,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -272,6 +279,22 @@ public class CallState(
 
     val stats = CallStats(call, scope)
 
+    private val participantsUpdate = TaskSchedulerWithDebounce()
+    private val participantsUpdateConfig = ScheduleConfig(
+        debounce = {
+            val participantCount = participants.value.size
+            if (participantCount < 8) {
+                0
+            } else if (participantCount < 25) {
+                250
+            } else if (participantCount < 50) {
+                500
+            } else {
+                1000
+            }
+        },
+    )
+
     private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
         fun emitLivestreamVideo() {
             val participants = participants.value
@@ -290,14 +313,13 @@ public class CallState(
         scope.launch {
             _participants.collect {
                 logger.v {
-                    "[livestreamFlow] #track; participants: ${it.size} =>" +
-                        "${it.map { "${it.value.userId.value} - ${it.value.video.value?.enabled}" }}"
+                    "[livestreamFlow] #track; participants: ${it.size} =>" + "${it.map { "${it.value.userId.value} - ${it.value.video.value?.enabled}" }}"
                 }
                 emitLivestreamVideo()
             }
         }
 
-        // TODO: could optimize performance by subscribing only to relevant events
+        // The caller i.e. `livestream` is deprecated as well
         call.subscribe {
             logger.v { "[livestreamFlow] #track; event.type: ${it.getEventType()}" }
             if (it is TrackPublishedEvent) {
@@ -330,8 +352,21 @@ public class CallState(
         awaitClose { }
     }
 
-    val livestream: StateFlow<ParticipantState.Video?> = livestreamFlow.debounce(1000)
-        .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    @Deprecated(
+        message = "The correct approach is to find the participant with video from the participants list or if the id of the user who is host is known query that one directly.",
+        level = DeprecationLevel.WARNING,
+        replaceWith = ReplaceWith(
+            """
+                            call.state.participants.flatMapLatest { participants ->
+                                combine(participants.map { p -> p.videoEnabled.map { enabled -> p to enabled } }) { pairs ->
+                                    pairs.filter { (_, e) -> e }.map { (p, _) -> p }
+                                }
+                            }
+                         """,
+        ),
+    )
+    val livestream: StateFlow<ParticipantState.Video?> =
+        livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
@@ -368,8 +403,7 @@ public class CallState(
      */
     private val _members: MutableStateFlow<SortedMap<String, MemberState>> =
         MutableStateFlow(emptyMap<String, MemberState>().toSortedMap())
-    public val members: StateFlow<List<MemberState>> =
-        _members.mapState { it.values.toList() }
+    public val members: StateFlow<List<MemberState>> = _members.mapState { it.values.toList() }
 
     /** if someone is sharing their screen */
     private val _screenSharingSession: MutableStateFlow<ScreenSharingSession?> =
@@ -611,6 +645,8 @@ public class CallState(
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
 
+    private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
         when (event) {
@@ -639,11 +675,9 @@ public class CallState(
                 // auto-join the call if it's an outgoing call and someone has accepted
                 // do not auto-join if it's already accepted by us
                 val callRingState = _ringingState.value
-                if (callRingState is RingingState.Outgoing &&
-                    callRingState.acceptedByCallee &&
-                    _acceptedBy.value.findLast { it == client.userId } == null &&
-                    client.state.activeCall.value == null &&
-                    autoJoiningCall == null
+                if (callRingState is RingingState.Outgoing && callRingState.acceptedByCallee && _acceptedBy.value.findLast {
+                        it == client.userId
+                    } == null && client.state.activeCall.value == null && autoJoiningCall == null
                 ) {
                     autoJoiningCall = scope.launch {
                         // errors are handled inside the join function
@@ -698,13 +732,26 @@ public class CallState(
             }
 
             is CallCreatedEvent -> {
-                updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
+                updateFromResponse(event.call)
             }
 
             is CallRingEvent -> {
-                updateFromResponse(event.call)
                 getOrCreateMembers(event.members)
+                updateFromResponse(event.call)
+
+                // Fill caller in members if not present
+                val memberMap = _members.value.toSortedMap()
+                if (!memberMap.contains(event.call.createdBy.id)) {
+                    memberMap[event.call.createdBy.id] = MemberState(
+                        user = event.call.createdBy.toUser(),
+                        role = event.call.createdBy.role,
+                        custom = emptyMap(),
+                        createdAt = event.call.createdAt,
+                        updatedAt = event.call.updatedAt,
+                    )
+                    _members.value = memberMap
+                }
             }
 
             is CallUpdatedEvent -> {
@@ -784,8 +831,7 @@ public class CallState(
                     participant.updateAudioLevel(entry.value.audioLevel)
                 }
 
-                _activeSpeakers.value = participants.value
-                    .filter { it.speaking.value }
+                _activeSpeakers.value = participants.value.filter { it.speaking.value }
                     .sortedByDescending { it.audioLevel.value }
             }
 
@@ -836,10 +882,28 @@ public class CallState(
             }
 
             is ParticipantJoinedEvent -> {
-                getOrCreateParticipant(event.participant)
+                try {
+                    if (participants.value.size < 8) {
+                        getOrCreateParticipant(event.participant)
+                    } else {
+                        pendingParticipantsJoined[event.participant.session_id] = event.participant
+                        participantsUpdate.schedule(scope, participantsUpdateConfig) {
+                            logger.d {
+                                "[ParticipantJoinedEvent] #participants; #debounce; participants: ${participants.value.size}"
+                            }
+                            getOrCreateParticipants(pendingParticipantsJoined.values.toList())
+                        }
+                    }
+                } catch (e: Exception) {
+                    logger.e(e) {
+                        "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual."
+                    }
+                    getOrCreateParticipant(event.participant)
+                }
             }
 
             is ParticipantLeftEvent -> {
+                safeCall { pendingParticipantsJoined.remove(event.participant.session_id) }
                 val sessionId = event.participant.session_id
                 removeParticipant(sessionId)
 
@@ -932,8 +996,7 @@ public class CallState(
                     newList.removeIf { it.userSessionId == event.participant.userSessionId }
 
                     val newMap = callSessionResponse.participantsCountByRole.toMutableMap()
-                    newMap
-                        .computeIfPresent(event.participant.role) { _, v -> maxOf(v - 1, 0) }
+                    newMap.computeIfPresent(event.participant.role) { _, v -> maxOf(v - 1, 0) }
                         .also { if (it == 0) newMap.remove(event.participant.role) }
 
                     _session.value = callSessionResponse.copy(
@@ -993,8 +1056,7 @@ public class CallState(
             is CallClosedCaptionsStartedEvent,
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
-            ->
-                closedCaptionManager.handleEvent(event)
+            -> closedCaptionManager.handleEvent(event)
         }
     }
 
@@ -1027,21 +1089,16 @@ public class CallState(
         Log.d("RingingState", "Current: ${_ringingState.value}")
         Log.d(
             "RingingState",
-            "Flags: [\n" +
-                "acceptedByMe: $isAcceptedByMe,\n" +
-                "rejectedByMe: $isRejectedByMe,\n" +
-                "rejectReason: $rejectReason,\n" +
-                "hasActiveCall: $hasActiveCall\n" +
-                "hasRingingCall: $hasRingingCall\n" +
-                "userIsParticipant: $userIsParticipant,\n" +
-                "]",
+            "Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
         )
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall) {
             cancelTimeout()
             RingingState.Active
-        } else if (rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) {
+        } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
+            (rejectedBy.contains(createdBy?.id) && hasRingingCall)
+        ) {
             call.leave()
             cancelTimeout()
 
@@ -1073,7 +1130,11 @@ public class CallState(
                 RingingState.Active
             }
         } else {
-            RingingState.Idle
+            if (_ringingState.value is RingingState.Incoming && !acceptedOnThisDevice) {
+                RingingState.TimeoutNoAnswer
+            } else {
+                RingingState.Idle
+            }
         }
 
         if (_ringingState.value != state) {
@@ -1095,7 +1156,8 @@ public class CallState(
         _ringingState.value = state
     }
 
-    private fun cancelTimeout() {
+    @InternalStreamVideoApi
+    fun cancelTimeout() {
         ringingTimerJob?.cancel()
         ringingTimerJob = null
     }
@@ -1137,7 +1199,7 @@ public class CallState(
 
     private fun startRingingTimer() {
         ringingTimerJob?.cancel()
-        ringingTimerJob = scope.launch {
+        ringingTimerJob = UserScope(ClientScope()).launch {
             val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
 
             if (autoCancelTimeout != null && autoCancelTimeout > 0) {
@@ -1146,6 +1208,7 @@ public class CallState(
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
+                    call.leave()
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
@@ -1326,9 +1389,9 @@ public class CallState(
     }
 
     fun updateFromResponse(response: JoinCallResponse) {
-        updateFromResponse(response.call)
         _ownCapabilities.value = response.ownCapabilities
         updateFromResponse(response.members)
+        updateFromResponse(response.call)
     }
 
     fun getMember(userId: String): MemberState? {
@@ -1473,18 +1536,6 @@ private fun MemberResponse.toMemberState(): MemberState {
         updatedAt = updatedAt,
         deletedAt = deletedAt,
     )
-}
-
-private fun getCallingMethod(): String {
-    val stackTrace = Thread.currentThread().stackTrace
-
-    return if (stackTrace.isEmpty()) {
-        ""
-    } else {
-        stackTrace[6].let { callingMethod ->
-            callingMethod.className + "." + callingMethod.methodName
-        }
-    }
 }
 
 private const val REJECT_REASON_TIMEOUT = "timeout"

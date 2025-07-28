@@ -31,12 +31,10 @@ import android.annotation.SuppressLint
 import io.getstream.chat.android.e2e.test.rules.RetryRule
 import io.getstream.video.android.robots.ParticipantRobot
 import io.getstream.video.android.robots.UserRobot
+import io.getstream.video.android.robots.VideoView
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.grantPermission
 import io.getstream.video.android.uiautomator.startApp
-import io.qameta.allure.android.rules.LogcatRule
-import io.qameta.allure.android.rules.ScreenshotRule
-import io.qameta.allure.android.rules.WindowHierarchyRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestName
@@ -45,30 +43,26 @@ import java.util.UUID
 abstract class StreamTestCase {
 
     val userRobot = UserRobot()
-    var participantRobot = ParticipantRobot(debug = false, record = false)
-    val callId: String by lazy {
-        val uuid = UUID.randomUUID().toString().split("-")
-        if (uuid.isNotEmpty()) uuid.first() else "Test"
-    }
+    lateinit var participantRobot: ParticipantRobot
+    val allViews: Array<VideoView> = arrayOf(VideoView.GRID, VideoView.DYNAMIC, VideoView.SPOTLIGHT)
+    lateinit var callId: String
+    private val headlessBrowser = true
+    private val recordBrowser = true
 
     @get:Rule
     var testName: TestName = TestName()
 
     @get:Rule
-    val screenshotRule =
-        ScreenshotRule(mode = ScreenshotRule.Mode.FAILURE, screenshotName = "screenshot")
-
-    @get:Rule
-    val logcatRule = LogcatRule()
-
-    @get:Rule
-    val windowHierarchyRule = WindowHierarchyRule()
-
-    @get:Rule
-    val retryRule = RetryRule(count = 1)
+    val retryRule = RetryRule(count = 3)
 
     @Before
     fun setUp() {
+        participantRobot = ParticipantRobot(
+            testName = testName.methodName,
+            headless = headlessBrowser,
+            record = recordBrowser,
+        )
+        generateCallId()
         device.startApp(callId)
         grantAppPermissions()
     }
@@ -91,5 +85,9 @@ abstract class StreamTestCase {
         for (permission in permissions) {
             device.grantPermission(permission)
         }
+    }
+
+    private fun generateCallId() {
+        callId = UUID.randomUUID().toString().split("-").first()
     }
 }

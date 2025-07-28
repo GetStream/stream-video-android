@@ -31,6 +31,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -87,6 +89,11 @@ internal fun BoxScope.LandscapeVideoRenderer(
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
     val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     when (callParticipants.size) {
@@ -102,12 +109,12 @@ internal fun BoxScope.LandscapeVideoRenderer(
                 call,
                 participant,
                 style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                    isFocused = isDomSpeakerSpeaking && dominantSpeaker?.sessionId == participant.sessionId,
                 ),
             )
         }
 
-        3, 4 -> {
+        3 -> {
             val rowItemWeight = 1f / callParticipants.size
             Row(modifier = modifier) {
                 remoteParticipants.take(callParticipants.size - 1).forEach { participant ->
@@ -118,10 +125,35 @@ internal fun BoxScope.LandscapeVideoRenderer(
                         call,
                         participant,
                         style.copy(
-                            isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                            isFocused = isDomSpeakerSpeaking && dominantSpeaker?.sessionId == participant.sessionId,
                         ),
                     )
                 }
+            }
+        }
+
+        4 -> {
+            val rowSize = Pair(2, 2)
+            Column(modifier) {
+                ParticipantRow(
+                    modifier = Modifier.weight(1f),
+                    participants = callParticipants.take(rowSize.first),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                )
+                ParticipantRow(
+                    modifier = Modifier.weight(1f),
+                    participants = callParticipants.takeLast(rowSize.second),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                    expectedRowSize = rowSize.first,
+                )
             }
         }
 
@@ -176,7 +208,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
                                 call,
                                 participant,
                                 style.copy(
-                                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                                    isFocused = isDomSpeakerSpeaking && dominantSpeaker?.sessionId == participant.sessionId,
                                 ),
                             )
                         }
@@ -186,7 +218,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
         }
     }
 
-    if (callParticipants.size in 2..4) {
+    if (callParticipants.size in 2..3) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null || LocalInspectionMode.current) {
@@ -218,6 +250,11 @@ private fun ParticipantRow(
     dominantSpeaker: ParticipantState?,
     expectedRowSize: Int = participants.size,
 ) {
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     Row(modifier) {
         repeat(participants.size) {
             val participant = participants[it]
@@ -226,7 +263,7 @@ private fun ParticipantRow(
                 call,
                 participant,
                 style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                    isFocused = isDomSpeakerSpeaking && dominantSpeaker?.sessionId == participant.sessionId,
                 ),
             )
         }

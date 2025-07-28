@@ -25,22 +25,18 @@ import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Balance
-import androidx.compose.material.icons.filled.BluetoothAudio
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.ClosedCaptionDisabled
 import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
-import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.HeadsetMic
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.SettingsVoice
 import androidx.compose.material.icons.filled.SpatialAudioOff
-import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.material.icons.filled.SwitchLeft
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.filled.VideoLibrary
@@ -60,6 +56,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Defines the default Stream menu for the demo app.
+ * @param availableDevices ❗️Deprecated: This parameter is deprecated and will removed in future version, it is replaced with audioDeviceUiStateList
  */
 fun defaultStreamMenu(
     showDebugOptions: Boolean = false,
@@ -89,6 +86,7 @@ fun defaultStreamMenu(
     loadTranscriptions: suspend () -> List<MenuItem>,
     onToggleClosedCaptions: () -> Unit = {},
     closedCaptionUiState: ClosedCaptionUiState,
+    audioDeviceUiStateList: List<AudioDeviceUiState> = emptyList(),
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -123,17 +121,12 @@ fun defaultStreamMenu(
         SubMenuItem(
             title = "Choose audio device",
             icon = Icons.Default.SettingsVoice,
-            items = availableDevices.map {
-                val icon = when (it) {
-                    is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
-                    is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
-                    is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
-                    is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
-                }
+            items = audioDeviceUiStateList.map {
                 ActionMenuItem(
-                    title = it.name,
-                    icon = icon,
-                    action = { onDeviceSelected(it) },
+                    title = it.text,
+                    icon = it.icon,
+                    action = { onDeviceSelected(it.streamAudioDevice) },
+                    highlight = it.highlight,
                 )
             },
         ),

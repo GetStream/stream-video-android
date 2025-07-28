@@ -39,7 +39,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,7 +64,7 @@ import io.getstream.video.android.ui.menu.reconnectMenu
  *
  *  The transition and history between the items is automatic.
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: List<MenuItem>) {
     val history = remember { mutableStateListOf<Pair<String, SubMenuItem>>() }
@@ -73,7 +76,8 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
             .background(
                 color = VideoTheme.colors.baseSheetPrimary,
                 shape = VideoTheme.shapes.dialog,
-            ),
+            )
+            .semantics { testTagsAsResourceId = true },
     ) {
         LazyColumn(
             modifier = Modifier

@@ -45,10 +45,10 @@ jobs:
         continue-on-error: true
         with:
           name: apks
-      - uses: ./.github/actions/setup-java
-      - uses: ./.github/actions/enable-kvm
-      - uses: ./.github/actions/setup-ruby
-      - uses: ./.github/actions/allure-launch
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
+      - uses: GetStream/android-ci-actions/actions/enable-kvm@main
+      - uses: GetStream/android-ci-actions/actions/setup-ruby@main
+      - uses: GetStream/android-ci-actions/actions/allure-launch@main
         with:
           allure-token: ${{ secrets.ALLURE_TOKEN }}
           cron: true
@@ -60,7 +60,7 @@ jobs:
           disable-animations: true
           profile: pixel
           arch : x86_64
-          emulator-options: ${{ vars.EMULATOR_OPTIONS }}
+          emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
           script: bundle exec fastlane run_e2e_test
       - name: Allure TestOps Upload
         run: bundle exec fastlane allure_upload
@@ -79,7 +79,7 @@ jobs:
         uses: actions/upload-artifact@v4.4.3
         if: failure()
         with:
-          name: logs_${{ env.ANDROID_API_LEVEL }}
+          name: test_artifacts_${{ env.ANDROID_API_LEVEL }}
           path: |
             fastlane/recordings/*
             fastlane/video-buddy-server.log

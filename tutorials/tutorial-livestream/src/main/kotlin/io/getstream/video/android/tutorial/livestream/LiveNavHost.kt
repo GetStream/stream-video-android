@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.tutorial.livestream
 
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +36,7 @@ import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.model.User
@@ -68,12 +71,18 @@ fun LiveNavHost(
         ensureSingleInstance = false,
         callServiceConfigRegistry = callServiceConfigRegistry,
         loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+        notificationConfig = NotificationConfig(
+            notificationHandler = LiveStreamNotificationHandler(
+                context.applicationContext as Application,
+            ),
+        ),
     ).build()
 
     NavHost(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.baseSheetPrimary)
+            .systemBarsPadding(),
         navController = navController,
         startDestination = startDestination,
     ) {

@@ -19,13 +19,14 @@ package io.getstream.video.android.ui.outgoing
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.getstream.video.android.BuildConfig
+import io.getstream.video.android.data.datasource.local.InMemoryStore
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
 import io.getstream.video.android.models.builtInUsers
 import io.getstream.video.android.models.toUsers
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavor
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -37,6 +38,7 @@ import javax.inject.Inject
 class DirectCallJoinViewModel @Inject constructor(
     private val userDataStore: StreamUserDataStore,
     private val googleAccountRepository: GoogleAccountRepository,
+    private val inMemoryStore: InMemoryStore,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(DirectCallUiState())
     val uiState = _uiState.asStateFlow()
@@ -50,8 +52,15 @@ class DirectCallJoinViewModel @Inject constructor(
     private suspend fun getCombinedUsers(): List<User> {
         val currentUser = userDataStore.user.firstOrNull()
         val googleUsers = suspend { googleAccountRepository.getAllAccounts().orEmpty().toUsers() }
-        return when (BuildConfig.FLAVOR == StreamFlavors.development) {
-            true -> User.builtInUsers().filterNot { it.id == currentUser?.id } + googleUsers()
+        val buildFlavour = StreamBuildFlavorUtil.current
+        return when (buildFlavour) {
+            StreamBuildFlavor.Development -> User.builtInUsers()
+                .filterNot { it.id == currentUser?.id } + googleUsers()
+
+            StreamBuildFlavor.E2eTesting -> {
+                inMemoryStore.getUser()?.let { arrayListOf(it) } ?: emptyList<User>()
+            }
+
             else -> googleUsers()
         }
     }

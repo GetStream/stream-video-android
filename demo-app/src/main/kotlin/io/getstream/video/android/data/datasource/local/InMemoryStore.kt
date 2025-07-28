@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.tests
+package io.getstream.video.android.data.datasource.local
 
-import io.getstream.video.android.robots.ParticipantRobot.Options.WITH_CAMERA
-import io.qameta.allure.kotlin.Allure.step
-import io.qameta.allure.kotlin.AllureId
-import org.junit.Test
+import io.getstream.video.android.model.User
 
-class SampleTests : StreamTestCase() {
+interface InMemoryStore {
 
-    @AllureId("")
-    @Test
-    fun test_sample() {
-        step("GIVEN user joins the call") {
-            userRobot.joinCall(callId)
-        }
-        step("AND participant joins the call") {
-            participantRobot.joinCall(callId, options = arrayOf(WITH_CAMERA))
-        }
-    }
+    fun saveUser(user: User)
+
+    fun getUser(): User?
 }

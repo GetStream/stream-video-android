@@ -153,7 +153,7 @@ android {
             register("productionRelease") {
                 enabled.set(true)
                 serviceAccountCredentials.set(serviceAccountCredentialsFile)
-                track.set("internal")
+                track.set(providers.environmentVariable("PLAY_PUBLISH_TRACK").orElse("internal"))
                 defaultToAppBundles.set(true)
                 resolutionStrategy.set(ResolutionStrategy.AUTO)
             }
@@ -221,6 +221,9 @@ dependencies {
     implementation(project(":stream-video-android-ui-xml"))
     implementation(project(":stream-video-android-filters-video"))
     compileOnly(project(":stream-video-android-previewdata"))
+
+
+    implementation(libs.androidx.media.media)
 
     // Noise Cancellation
     implementation(libs.stream.video.android.noise.cancellation)
@@ -290,6 +293,8 @@ dependencies {
 
     // Http
     implementation(libs.okhttp)
+
+    implementation(libs.audioswitch)
 
     // Also Leak Canary added in the previous block
 

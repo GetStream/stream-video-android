@@ -156,7 +156,8 @@ private fun CalLCenterContent(
                             color = VideoTheme.colors.alertWarning,
                             shape = VideoTheme.shapes.circle,
                         )
-                        .border(2.dp, VideoTheme.colors.basePrimary, VideoTheme.shapes.circle),
+                        .border(2.dp, VideoTheme.colors.basePrimary, VideoTheme.shapes.circle)
+                        .testTag("Stream_RecordingIcon"),
                 )
             }
             Text(

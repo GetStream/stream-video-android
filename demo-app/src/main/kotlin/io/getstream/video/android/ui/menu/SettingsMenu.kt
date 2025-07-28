@@ -25,9 +25,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.HeadsetMic
+import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,9 +43,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +57,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -183,6 +194,22 @@ internal fun SettingsMenu(
         }
     }
 
+    val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
+    val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
+        val icon = when (it) {
+            is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+            is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+            is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+            is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+        }
+        AudioDeviceUiState(
+            it,
+            it.name,
+            icon,
+            it.audio.name == selectedMicroPhoneDevice?.audio?.name,
+        )
+    }
+
     val onLoadTranscriptions: suspend () -> List<MenuItem> = storagePermissionAndroidBellow10 {
         when (it) {
             is PermissionStatus.Granted -> {
@@ -218,6 +245,14 @@ internal fun SettingsMenu(
     ) {
         DynamicMenu(
             header = {
+                Icon(
+                    tint = Color.White,
+                    imageVector = Icons.Default.Close,
+                    contentDescription = Icons.Default.Close.name,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp).clickable {
+                        onDismissed()
+                    },
+                )
                 ReactionsMenu(
                     call = call,
                     reactionMapper = ReactionMapper.defaultReactionMapper(),
@@ -267,6 +302,7 @@ internal fun SettingsMenu(
                 transcriptionUiState = transcriptionUiState,
                 onToggleTranscription = onToggleTranscription,
                 loadTranscriptions = onLoadTranscriptions,
+                audioDeviceUiStateList = audioDeviceUiStateList,
             ),
         )
     }
@@ -337,6 +373,7 @@ private fun SettingsMenuPreview() {
                 transcriptionUiState = TranscriptionAvailableUiState,
                 onToggleTranscription = {},
                 loadTranscriptions = { emptyList() },
+                audioDeviceUiStateList = emptyList(),
             ),
         )
     }

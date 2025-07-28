@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
       - name: Prepare environment
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
@@ -28,7 +28,7 @@ jobs:
           name: demo-app-release
           path: demo-app/build/outputs/apk/demo-app/release/
       - name: Upload artifact to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.5.0
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
         with:
           appId: ${{secrets.FIREBASE_DOGFOODING_SAMPLE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}

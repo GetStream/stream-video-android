@@ -56,9 +56,11 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -68,6 +70,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
@@ -76,8 +79,10 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -86,8 +91,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -132,6 +140,9 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
+
+    // Atomic controls
+    private var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
@@ -209,6 +220,7 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
+    internal val unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -306,6 +318,7 @@ public class Call(
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
@@ -318,6 +331,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -330,6 +344,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         }
 
@@ -392,6 +407,7 @@ public class Call(
 
         var result: Result<RtcSession>
 
+        atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
@@ -646,6 +662,7 @@ public class Call(
                 session.prepareRejoin()
                 this.session = RtcSession(
                     clientImpl,
+                    reconnectAttepmts,
                     powerManager,
                     this,
                     sessionId,
@@ -701,6 +718,7 @@ public class Call(
                 session.prepareRejoin()
                 val newSession = RtcSession(
                     clientImpl,
+                    reconnectAttepmts,
                     powerManager,
                     this,
                     sessionId,
@@ -745,9 +763,8 @@ public class Call(
         leave(disconnectionReason = null)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = safeCall {
+    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
-        session?.cleanup()
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -756,17 +773,17 @@ public class Call(
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return
+            return@atomicLeave
         }
         isDestroyed = true
 
         sfuSocketReconnectionTime = null
         stopScreenSharing()
-        (client as StreamVideoClient).onCallCleanUp(this)
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
+        (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
 
@@ -826,12 +843,41 @@ public class Call(
         )
         return clientImpl.muteUsers(type, id, request)
     }
-
-    fun setVisibility(sessionId: String, trackType: TrackType, visible: Boolean) {
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+    ) {
         logger.i {
-            "[setVisibility] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible"
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(sessionId, trackType, visible)
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            Subscriber.defaultVideoDimension,
+            viewportId,
+        )
+    }
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+        width: Int,
+        height: Int,
+    ) {
+        logger.i {
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            VideoDimension(width, height),
+            viewportId,
+        )
     }
 
     fun handleEvent(event: VideoEvent) {
@@ -858,6 +904,7 @@ public class Call(
         sessionId: String,
         trackType: TrackType,
         onRendered: (VideoTextureViewRenderer) -> Unit = {},
+        viewportId: String = sessionId,
     ) {
         logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
 
@@ -879,6 +926,7 @@ public class Call(
                             trackType,
                             true,
                             VideoDimension(width, height),
+                            viewportId,
                         )
                     }
                     onRendered(videoRenderer)
@@ -905,6 +953,7 @@ public class Call(
                             trackType,
                             true,
                             VideoDimension(videoWidth, videoHeight),
+                            viewportId,
                         )
                     }
                 }
@@ -997,12 +1046,26 @@ public class Call(
         return sub
     }
 
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
     public fun subscribe(
         listener: VideoEventListener<VideoEvent>,
     ): EventSubscription = synchronized(subscriptions) {
         val sub = EventSubscription(listener)
         subscriptions.add(sub)
         return sub
+    }
+
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "Deprecated in favor of the `events` flow.",
+        replaceWith = ReplaceWith("events.collect { }"),
+    )
+    public fun unsubscribe(eventSubscription: EventSubscription) = synchronized(subscriptions) {
+        subscriptions.remove(eventSubscription)
     }
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> {
@@ -1043,6 +1106,8 @@ public class Call(
         return clientImpl.updateMembers(type, id, request)
     }
 
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -1059,6 +1124,37 @@ public class Call(
                 }
             }
         }
+
+        if (!events.tryEmit(event)) {
+            logger.e { "Failed to emit event to observers: [event: $event]" }
+        }
+    }
+
+    private fun monitorHeadset() {
+        microphone.devices.onEach { availableDevices ->
+            logger.d {
+                "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
+            }
+
+            val bluetoothHeadset =
+                availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
+            val wiredHeadset = availableDevices.find { it is StreamAudioDevice.WiredHeadset }
+
+            if (bluetoothHeadset != null) {
+                logger.d { "[monitorHeadset] BT headset selected" }
+                microphone.select(bluetoothHeadset)
+            } else if (wiredHeadset != null) {
+                logger.d { "[monitorHeadset] wired headset found" }
+                microphone.select(wiredHeadset)
+            } else {
+                logger.d { "[monitorHeadset] no headset found" }
+
+                microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
+                    logger.d { "[monitorHeadset] before device selected" }
+                    microphone.select(deviceBeforeHeadset)
+                }
+            }
+        }.launchIn(scope)
     }
 
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
@@ -1074,10 +1170,10 @@ public class Call(
                         callSettings.audio.speakerDefaultOn
                 }
 
-            speaker.setEnabled(
-                enabled = enableSpeaker,
-            )
+            speaker.setEnabled(enabled = enableSpeaker)
         }
+
+        monitorHeadset()
 
         // Camera
         if (camera.status.value is DeviceStatus.NotSelected) {
@@ -1169,10 +1265,18 @@ public class Call(
     fun cleanup() {
         // monitor.stop()
         session?.cleanup()
-        supervisorJob.cancel()
+        shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup()
         session = null
+    }
+
+    // This will allow the Rest APIs to be executed which are in queue before leave
+    private fun shutDownJobsGracefully() {
+        UserScope(ClientScope()).launch {
+            supervisorJob.children.forEach { it.join() }
+            supervisorJob.cancel()
+        }
     }
 
     suspend fun ring(): Result<GetCallResponse> {
@@ -1327,11 +1431,43 @@ public class Call(
         session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
     }
 
+    /**
+     * Enables or disables the reception of incoming audio tracks for all or specified participants.
+     *
+     * This method allows selective control over whether the local client receives audio from remote participants.
+     * It's particularly useful in scenarios such as livestreams or group calls where the user may want to mute
+     * specific participants' audio without affecting the overall session.
+     *
+     * @param enabled `true` to enable (subscribe to) incoming audio, `false` to disable (unsubscribe from) it.
+     * @param sessionIds Optional list of participant session IDs for which to toggle incoming audio.
+     * If `null`, the audio setting is applied to all participants currently in the session.
+     */
+    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
+        val participantTrackMap = session?.subscriber?.tracks ?: return
+
+        val targetTracks = when {
+            sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
+            else -> participantTrackMap.values.toList()
+        }
+
+        targetTracks
+            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
+            .forEach { it.enableAudio(enabled) }
+    }
+
     @InternalStreamVideoApi
     public val debug = Debug(this)
 
     @InternalStreamVideoApi
     public class Debug(val call: Call) {
+
+        public fun pause() {
+            call.session?.subscriber?.disable()
+        }
+
+        public fun resume() {
+            call.session?.subscriber?.enable()
+        }
 
         public fun rejoin() {
             call.scope.launch {

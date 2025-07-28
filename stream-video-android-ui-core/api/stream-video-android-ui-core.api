@@ -29,6 +29,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun <init> ()V
 	public fun accept (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun accept$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public fun applyDashboardSettings (Lio/getstream/video/android/core/Call;)V
 	public fun call (Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun call$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/model/StreamCallId;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public fun cancel (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
@@ -53,23 +54,23 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onCallAction (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/call/state/CallAction;)V
 	public fun onCallEvent (Lio/getstream/video/android/core/Call;Lio/getstream/android/video/generated/models/VideoEvent;)V
 	public fun onConnectionEvent (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/RealtimeConnection;)V
-	public final fun onCreate (Landroid/os/Bundle;)V
-	public final fun onCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;)V
+	public fun onCreate (Landroid/os/Bundle;)V
+	public fun onCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;)V
 	public fun onCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;Lio/getstream/video/android/core/Call;)V
 	public fun onEnded (Lio/getstream/video/android/core/Call;)V
 	public fun onFailed (Ljava/lang/Exception;)V
 	public fun onIntentAction (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun onIntentAction$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public fun onLastParticipant (Lio/getstream/video/android/core/Call;)V
-	public final fun onPause ()V
+	public fun onPause ()V
 	public fun onPause (Lio/getstream/video/android/core/Call;)V
 	public fun onPictureInPicture (Lio/getstream/video/android/core/Call;)V
 	public fun onPreCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;)V
-	public final fun onResume ()V
+	public fun onResume ()V
 	public fun onResume (Lio/getstream/video/android/core/Call;)V
-	public final fun onStop ()V
+	public fun onStop ()V
 	public fun onStop (Lio/getstream/video/android/core/Call;)V
-	public final fun onUserLeaveHint ()V
+	public fun onUserLeaveHint ()V
 	public fun onUserLeaveHint (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun reject$default (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V

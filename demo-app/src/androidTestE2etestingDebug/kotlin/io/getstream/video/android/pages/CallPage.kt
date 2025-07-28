@@ -28,7 +28,7 @@ class CallPage {
         val callSettingsClosedToggle = By.res("Stream_CallSettingsToggle_Open_false")
         val cameraPositionToggleFront = By.res("Stream_FlipCameraIcon_Front")
         val cameraPositionToggleBack = By.res("Stream_FlipCameraIcon_Back")
-        val hangUpButton = RingPage.hangUpButton
+        val hangUpButton = By.res("Stream_HangUpButton")
         val participantsCountBadge = By.res("Stream_ParticipantsCountBadge")
         val participantMenu = By.res("Stream_ParticipantsMenuIcon")
         val cornerDraggableView = By.res("Stream_FloatingVideoView")
@@ -36,9 +36,21 @@ class CallPage {
         val chatButton = By.res("Stream_ChatButton")
         val connectionQualityIndicator = By.res("Stream_ParticipantNetworkQualityIndicator")
         val callInfoView = By.res("Stream_CallInfoView") // duration, recording, reconnecting
+        val recordingIcon = By.res("Stream_RecordingIcon")
+        val videoView = By.res("Stream_VideoView")
+        val videoViewWithMediaTrack = By.res("Stream_VideoViewWithMediaTrack")
+        val raisedHand = By.res("TODO") // https://linear.app/stream/issue/AND-562
 
 //        val participantEvent = By.res("") // not implemented in the demo app yet
 //        val minimizedCallView = By.res("") // not implemented in the demo app yet
+    }
+
+    class AudioCall {
+        companion object {
+            val durationLabel = By.res("Stream_OngoingCallDurationLabel")
+            val participantName = By.res("Stream_ParticipantInformation")
+            val participantAvatar = By.res("Stream_UserAvatar")
+        }
     }
 
     class ViewMenu {
@@ -51,10 +63,32 @@ class CallPage {
 
     class RecordingButtons {
         companion object {
-            val start = By.text("Continue")
+            val accept = By.text("Continue")
             val leave = By.text("Leave")
             val end = By.text("End")
             val cancel = By.text("Cancel")
+        }
+    }
+
+    class SettingsMenu {
+        companion object {
+            val raiseHandButton = By.text("✋ Raise hand")
+            val lowerHandButton = By.text("TODO") // https://linear.app/stream/issue/AND-562
+            val defaultBackgroundEnabledToggle = By.res(
+                "Stream_Background_Filled.AccountCircle_On",
+            )
+            val defaultBackgroundDisabledToggle = By.res(
+                "Stream_Background_Filled.AccountCircle_Off",
+            )
+            val blurBackgroundEnabledToggle = By.res("Stream_Background_Filled.BlurOn_On")
+            val blurBackgroundDisabledToggle = By.res("Stream_Background_Filled.BlurOn_Off")
+            val imageBackgroundEnabledToggle = By.res("Stream_Background_Image_On")
+            val imageBackgroundDisabledToggle = By.res("Stream_Background_Image_Off")
+            val noiseCancellationButton = By.text("Noise cancellation")
+            val startTranscriptionButton = By.text("Transcribe the call")
+            val stopTranscriptionButton = By.text("Stop transcription")
+            val startClosedCaptionButton = By.text("Start Closed Caption")
+            val stopClosedCaptionButton = By.text("Stop Closed Caption")
         }
     }
 
@@ -66,7 +100,7 @@ class CallPage {
             val cameraDisabled = By.res("Stream_ParticipantsListUserCamera_Enabled_false")
             val microphoneEnabled = By.res("Stream_ParticipantsListUserMicrophone_Enabled_true")
             val microphoneDisabled = By.res("Stream_ParticipantsListUserMicrophone_Enabled_false")
-            val closeButton = LobbyPage.closeButton
+            val closeButton = By.res("Stream_ParticipantsListCloseButton")
         }
     }
 
@@ -79,18 +113,12 @@ class CallPage {
             val networkQualityIndicator = By.res("Stream_ParticipantNetworkQualityIndicator")
             val microphoneEnabledIcon = By.res("Stream_ParticipantMicrophone_Enabled_true")
             val microphoneDisabledIcon = By.res("Stream_ParticipantMicrophone_Enabled_false")
-            val videoWindow = By.res("Stream_ParticipantVideoView")
-            val videoWindowWithCamera = By.res("Stream_ParticipantVideoWithCamera")
+            val videoView = CallPage.videoView
+            val videoViewWithMediaTrack = CallPage.videoViewWithMediaTrack
             val spotlightView = By.res("Stream_SpotlightView")
             val gridView = By.res("Stream_GridView")
             val screenSharingLabel = By.res("Stream_ParticipantScreenSharingLabel")
             val screenSharingView = By.res("Stream_ParticipantsScreenSharingView")
-        }
-    }
-
-    class Chat {
-        companion object {
-            val closeButton = By.res("Stream_CloseChatButton")
         }
     }
 }

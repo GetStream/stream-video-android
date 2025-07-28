@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3.1.0
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
       - name: spotless
         run: ./gradlew spotlessCheck --scan
 
@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3.1.0
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
       - name: API check
         run: ./gradlew apiCheck --scan
 
@@ -50,9 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
 
-      - uses: ./.github/actions/gradle-cache
+      - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
@@ -70,9 +70,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: ./.github/actions/setup-java
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
 
-      - uses: ./.github/actions/gradle-cache
+      - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
       - name: Run unit tests
         run: |
@@ -91,7 +91,7 @@ jobs:
           name: unit-tests-compose-results
           path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html
 
-      - uses: ./.github/actions/setup-ruby
+      - uses: GetStream/android-ci-actions/actions/setup-ruby@main
 
       - name: Sonar
         run: bundle exec fastlane run_sonar_analysis

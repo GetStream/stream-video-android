@@ -82,11 +82,7 @@ class CallActivity : ComposeStreamCallActivity() {
         @Composable
         override fun StreamCallActivity.LoadingContent(call: Call) {
             // Use as loading screen.. so the layout is shown.
-            if (call.type == "default") {
-                VideoCallContent(call = call)
-            } else {
-                FullScreenCircleProgressBar(text = "Connecting...")
-            }
+            FullScreenCircleProgressBar(text = "Connecting...")
         }
 
         @Composable

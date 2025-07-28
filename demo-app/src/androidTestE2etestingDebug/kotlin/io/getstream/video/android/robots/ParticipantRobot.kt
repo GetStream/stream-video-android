@@ -28,16 +28,16 @@ import org.json.JSONObject
 import org.junit.Assert.fail
 
 class ParticipantRobot(
-    val debug: Boolean = false,
+    val testName: String,
+    val headless: Boolean = true,
     val record: Boolean = false,
     val logs: Boolean = true,
 ) {
-    private val videoBuddyUrlString = "http://10.0.2.2:5678/stream-video-buddy"
+    private val videoBuddyUrlString = "http://10.0.2.2:5678"
     private var screenSharingDuration: Int? = null
     private var callRecordingDuration: Int? = null
-    private var messageCount: Int? = null
     private var userCount: Int = 1
-    private var callDuration: Double = 30.0
+    private var callDuration: Int = 30
 
     enum class Options(val value: String) {
         WITH_CAMERA("camera"),
@@ -48,7 +48,6 @@ class ParticipantRobot(
     enum class Actions(val value: String) {
         SHARE_SCREEN("screen-share"),
         RECORD_CALL("record"),
-        SEND_MESSAGE("message"),
     }
 
     enum class DebugActions(val value: String) {
@@ -58,9 +57,10 @@ class ParticipantRobot(
     }
 
     private enum class Config(val value: String) {
+        TEST_NAME("test-name"),
         CALL_ID("call-id"),
+        USER_ID("user-id"),
         USER_COUNT("user-count"),
-        MESSAGE_COUNT("message-count"),
         CALL_DURATION("duration"),
         SCREEN_SHARING_DURATION("screen-sharing-duration"),
         CALL_RECORDING_DURATION("recording-duration"),
@@ -76,18 +76,13 @@ class ParticipantRobot(
         return this
     }
 
-    fun setCallDuration(duration: Double): ParticipantRobot {
+    fun setCallDuration(duration: Int): ParticipantRobot {
         callDuration = duration
         return this
     }
 
     fun setUserCount(count: Int): ParticipantRobot {
         userCount = count
-        return this
-    }
-
-    fun setMessageCount(count: Int): ParticipantRobot {
-        messageCount = count
         return this
     }
 
@@ -98,11 +93,11 @@ class ParticipantRobot(
         async: Boolean = true,
     ) {
         val params = mutableMapOf<String, Any>()
+        params[Config.TEST_NAME.value] = testName
         params[Config.CALL_ID.value] = callId
         params[Config.USER_COUNT.value] = userCount
-        messageCount?.let { params[Config.MESSAGE_COUNT.value] = it }
         params[Config.CALL_DURATION.value] = callDuration
-        params[DebugActions.SHOW_WINDOW.value] = debug
+        params[DebugActions.SHOW_WINDOW.value] = !headless
         params[DebugActions.PRINT_CONSOLE_LOGS.value] = logs
         params[DebugActions.RECORD_SESSION.value] = record
 
@@ -122,11 +117,20 @@ class ParticipantRobot(
             params[Config.SCREEN_SHARING_DURATION.value] = it
         }
 
-        messageCount?.let {
-            params[Config.MESSAGE_COUNT.value] = it
-        }
+        postRequest("$videoBuddyUrlString/join?async=$async", params)
+    }
 
-        postRequest("$videoBuddyUrlString/?async=$async", params)
+    fun ringUser(userId: String, audioOnly: Boolean = false, async: Boolean = true) {
+        val params = mutableMapOf<String, Any>()
+        params["audio-call"] = audioOnly
+        params[Config.TEST_NAME.value] = testName
+        params[Config.USER_ID.value] = userId
+        params[Config.CALL_DURATION.value] = callDuration
+        params[DebugActions.SHOW_WINDOW.value] = !headless
+        params[DebugActions.PRINT_CONSOLE_LOGS.value] = logs
+        params[DebugActions.RECORD_SESSION.value] = record
+
+        postRequest("$videoBuddyUrlString/ring?async=$async", params)
     }
 
     private fun postRequest(url: String, params: Map<String, Any>): ResponseBody? {

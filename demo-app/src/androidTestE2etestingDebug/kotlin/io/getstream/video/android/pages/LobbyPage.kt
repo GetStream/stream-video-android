@@ -22,7 +22,7 @@ import androidx.test.uiautomator.BySelector
 class LobbyPage {
 
     companion object {
-        val closeButton = By.res("Stream_CloseButton")
+        val closeButton = By.res("Stream_LobbyCloseButton")
         val cameraEnabledToggle = By.res("Stream_CameraToggle_Enabled_true")
         val cameraDisabledToggle = By.res("Stream_CameraToggle_Enabled_false")
         val microphoneEnabledToggle = By.res("Stream_MicrophoneToggle_Enabled_true")

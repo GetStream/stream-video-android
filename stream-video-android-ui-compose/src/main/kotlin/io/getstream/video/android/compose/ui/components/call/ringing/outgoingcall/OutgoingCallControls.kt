@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -57,24 +58,27 @@ public fun OutgoingCallControls(
                 .testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
+            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
+            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
         )
 
         if (isVideoCall) {
             ToggleCameraAction(
                 modifier = Modifier
                     .testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
+                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
+                    1.5f,
+                ),
+                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
                 isCameraEnabled = isCameraEnabled,
                 onCallAction = onCallAction,
             )
         }
 
         CancelCallAction(
-            modifier = Modifier.testTag("Stream_HangUpButton"),
+            modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
+            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )
     }
 }

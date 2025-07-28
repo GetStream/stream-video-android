@@ -61,6 +61,7 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import java.util.UUID
 
 @Composable
 public fun VideoRenderer(
@@ -92,6 +93,14 @@ public fun VideoRenderer(
         videoRendererConfig.fallbackContent.invoke(call)
 
         if (video?.enabled == true) {
+            val viewportId = remember(call, video) {
+                try {
+                    UUID.randomUUID().toString()
+                } catch (e: Exception) {
+                    // In case the UUID generation fails, we fallback to a random double string.
+                    Math.random().toString()
+                }
+            }
             val sessionId = video.sessionId
             val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
@@ -101,27 +110,30 @@ public fun VideoRenderer(
 
                 var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-                DisposableEffect(call, video) {
-                    // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-                    call.setVisibility(sessionId, trackType, true)
+                if (videoRendererConfig.updateVisibility) {
+                    DisposableEffect(call, video) {
+                        // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+                        call.setVisibility(sessionId, trackType, true, viewportId)
 
-                    onDispose {
-                        cleanTrack(view, mediaTrack)
-                        // inform the call that we no longer want to render this video track
-                        call.setVisibility(sessionId, trackType, false)
+                        onDispose {
+                            cleanTrack(view, mediaTrack)
+                            // inform the call that we no longer want to render this video track
+                            call.setVisibility(sessionId, trackType, false, viewportId)
+                        }
                     }
                 }
 
                 if (mediaTrack != null) {
                     Box(
                         modifier = videoRendererConfig.modifiers.containerModifier.invoke(this)
-                            .testTag("Stream_ParticipantVideoWithCamera"),
+                            .testTag("Stream_VideoViewWithMediaTrack"),
                         contentAlignment = Alignment.Center,
                     ) {
                         AndroidView(
                             factory = { context ->
                                 StreamVideoTextureViewRenderer(context).apply {
                                     call.initRenderer(
+                                        viewportId = viewportId,
                                         videoRenderer = this,
                                         sessionId = sessionId,
                                         trackType = trackType,
@@ -151,8 +163,12 @@ public fun VideoRenderer(
                                 .testTag("video_renderer"),
                         )
                     }
+                } else {
+                    // Do something when there is no media track
                 }
             }
+        } else {
+            // Do something when the video is not enabled
         }
     }
 }

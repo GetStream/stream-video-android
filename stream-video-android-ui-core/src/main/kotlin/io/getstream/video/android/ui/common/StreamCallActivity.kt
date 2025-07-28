@@ -40,7 +40,7 @@ import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.EventSubscription
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
@@ -125,7 +125,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
     }
 
     // Internal state
-    private var callEventSubscription: EventSubscription? = null
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
     private lateinit var config: StreamCallActivityConfiguration
@@ -136,6 +135,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             finish()
         }
     }
+
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong" }
         onFailed(error)
@@ -181,7 +181,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         }
 
     // Platform restriction
-    public final override fun onCreate(savedInstanceState: Bundle?) {
+    public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onPreCreate(savedInstanceState, null)
         logger.d { "Entered [onCreate(Bundle?)" }
@@ -191,6 +191,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             onSuccess = { instanceState, persistentState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
                 onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                    applyDashboardSettings(successCall)
                     onCreate(instanceState, persistentState, successCall)
                 }
             },
@@ -203,7 +204,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
         )
     }
 
-    public final override fun onCreate(
+    public override fun onCreate(
         savedInstanceState: Bundle?,
         persistentState: PersistableBundle?,
     ) {
@@ -216,6 +217,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
             onSuccess = { instanceState, persistedState, call, action ->
                 logger.d { "Calling [onCreate(Call)], because call is initialized $call" }
                 onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                    applyDashboardSettings(successCall)
                     onCreate(instanceState, persistedState, successCall)
                 }
             },
@@ -228,28 +230,28 @@ public abstract class StreamCallActivity : ComponentActivity() {
         )
     }
 
-    public final override fun onResume() {
+    public override fun onResume() {
         super.onResume()
         withCachedCall {
             onResume(it)
         }
     }
 
-    public final override fun onUserLeaveHint() {
+    public override fun onUserLeaveHint() {
         withCachedCall {
             onUserLeaveHint(it)
             super.onUserLeaveHint()
         }
     }
 
-    public final override fun onPause() {
+    public override fun onPause() {
         withCachedCall {
             onPause(it)
             super.onPause()
         }
     }
 
-    public final override fun onStop() {
+    public override fun onStop() {
         withCachedCall {
             onStop(it)
             super.onStop()
@@ -476,7 +478,6 @@ public abstract class StreamCallActivity : ComponentActivity() {
      * Note: Callbacks are posted on [Dispatchers.Main] dispatcher.
      *
      * @param cid the call ID
-     * @param members the call members
      * @param onSuccess callback where the [Call] object is returned
      * @param onError callback when the [Call] was not returned.
      */
@@ -594,6 +595,7 @@ public abstract class StreamCallActivity : ComponentActivity() {
     ) {
         logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
         lifecycleScope.launch(Dispatchers.IO) {
+            call.state.cancelTimeout()
             val result = call.reject(reason)
             result.onOutcome(call, onSuccess, onError)
             // Leave regardless of outcome
@@ -726,13 +728,10 @@ public abstract class StreamCallActivity : ComponentActivity() {
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val connectionState = call.state.connection.value
-                if (connectionState == RealtimeConnection.Disconnected) {
-                    val total = call.state.participantCounts.value?.total
-                    logger.d { "Participant left, remaining: $total" }
-                    if (total != null && total <= 2) {
-                        onLastParticipant(call)
-                    }
+                val total = call.state.participantCounts.value?.total
+                logger.d { "Participant left, remaining: $total" }
+                if (total != null && total <= 2) {
+                    onLastParticipant(call)
                 }
             }
         }
@@ -794,6 +793,25 @@ public abstract class StreamCallActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Used to apply dashboard settings to the call.
+     * By default, it enables or disables the microphone and camera based on the settings.
+     *
+     * @param call the call
+     */
+    public open fun applyDashboardSettings(call: Call) {
+        val callSettings = call.state.settings.value
+        val microphoneStatus = call.microphone.status.value
+        val cameraStatus = call.camera.status.value
+
+        if (microphoneStatus == DeviceStatus.NotSelected) {
+            call.microphone.setEnabled(callSettings?.audio?.micDefaultOn == true)
+        }
+        if (cameraStatus == DeviceStatus.NotSelected) {
+            call.camera.setEnabled(callSettings?.video?.cameraDefaultOn == true)
+        }
+    }
+
     // Internal logic
     private fun initializeCallOrFail(
         savedInstanceState: Bundle?,
@@ -821,9 +839,10 @@ public abstract class StreamCallActivity : ComponentActivity() {
             cid,
             onSuccess = { call ->
                 cachedCall = call
-                callEventSubscription?.dispose()
-                callEventSubscription = cachedCall.subscribe { event ->
-                    onCallEvent(cachedCall, event)
+                lifecycleScope.launch {
+                    cachedCall.events.collect { event ->
+                        onCallEvent(cachedCall, event)
+                    }
                 }
                 callSocketConnectionMonitor = lifecycleScope.launch(Dispatchers.IO) {
                     cachedCall.state.connection.collectLatest {

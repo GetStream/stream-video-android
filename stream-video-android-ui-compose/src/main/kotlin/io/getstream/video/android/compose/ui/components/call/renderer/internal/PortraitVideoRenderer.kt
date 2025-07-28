@@ -30,6 +30,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -93,6 +95,11 @@ internal fun BoxScope.PortraitVideoRenderer(
         return
     }
 
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
     when (callParticipants.size) {
         1, 2 -> {
@@ -106,12 +113,12 @@ internal fun BoxScope.PortraitVideoRenderer(
                 call,
                 participant,
                 style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                    isFocused = isDomSpeakerSpeaking && (dominantSpeaker?.sessionId == participant.sessionId),
                 ),
             )
         }
 
-        3, 4 -> {
+        3 -> {
             ParticipantColumn(
                 modifier,
                 remoteParticipants,
@@ -122,6 +129,32 @@ internal fun BoxScope.PortraitVideoRenderer(
                 dominantSpeaker,
                 0,
             )
+        }
+
+        4 -> {
+            val columnSize = Pair(2, 2)
+            Row(modifier) {
+                ParticipantColumn(
+                    modifier = modifier.weight(1f),
+                    remoteParticipants = callParticipants.take(columnSize.first),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                )
+
+                ParticipantColumn(
+                    modifier = modifier.weight(1f),
+                    remoteParticipants = callParticipants.takeLast(columnSize.second),
+                    videoRenderer = videoRenderer,
+                    paddedModifier = paddedModifier,
+                    call = call,
+                    style = style,
+                    dominantSpeaker = dominantSpeaker,
+                    expectedColumnSize = columnSize.first,
+                )
+            }
         }
 
         5, 6 -> {
@@ -177,7 +210,7 @@ internal fun BoxScope.PortraitVideoRenderer(
                                 call,
                                 participant,
                                 style.copy(
-                                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                                    isFocused = isDomSpeakerSpeaking && (dominantSpeaker?.sessionId == participant.sessionId),
                                 ),
                             )
                         }
@@ -187,7 +220,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         }
     }
 
-    if (callParticipants.size in 2..4) {
+    if (callParticipants.size in 2..3) {
         val currentLocal by call.state.me.collectAsStateWithLifecycle()
 
         if (currentLocal != null) {
@@ -228,6 +261,11 @@ private fun ParticipantColumn(
     dominantSpeaker: ParticipantState?,
     expectedColumnSize: Int = remoteParticipants.size,
 ) {
+    val isDomSpeakerSpeaking by dominantSpeaker
+        ?.speaking
+        ?.collectAsStateWithLifecycle(initialValue = false)
+        ?: remember { mutableStateOf(false) }
+
     Column(modifier) {
         repeat(remoteParticipants.size) {
             val participant = remoteParticipants[it]
@@ -236,7 +274,7 @@ private fun ParticipantColumn(
                 call,
                 participant,
                 style.copy(
-                    isFocused = dominantSpeaker?.sessionId == participant.sessionId,
+                    isFocused = isDomSpeakerSpeaking && (dominantSpeaker?.sessionId == participant.sessionId),
                 ),
             )
         }
