@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.call.connection
 
 import androidx.annotation.VisibleForTesting
-import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.ParticipantState
@@ -35,16 +34,20 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.enableStereo
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
-import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
+import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -56,10 +59,8 @@ import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.SendAnswerRequest
-import stream.video.sfu.signal.SendAnswerResponse
 import stream.video.sfu.signal.TrackSubscriptionDetails
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
-import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.concurrent.ConcurrentHashMap
 
 internal class Subscriber(
@@ -110,19 +111,26 @@ internal class Subscriber(
          * Default video dimension.
          */
         val defaultVideoDimension = VideoDimension(720, 1280)
+        val throttledVideoDimension = VideoDimension(180, 320)
+        val unknownVideoDimension = VideoDimension(0, 0)
     }
 
     private var enabled = MutableStateFlow(true)
+    private var subscriptionsJob: Job? = null
 
     // Track dimensions and viewport visibility state for this subscriber
     private val trackDimensions = ConcurrentHashMap<ViewportCompositeKey, TrackDimensions>()
     private val subscriptions =
         ConcurrentHashMap<Pair<String, TrackType>, TrackSubscriptionDetails>()
+    private val previousSubscriptions =
+        ConcurrentHashMap<Pair<String, TrackType>, TrackSubscriptionDetails>()
     private val trackIdToTrackType = ConcurrentHashMap<String, TrackType>()
 
     // Tracks for all participants (sessionId -> (TrackType -> MediaTrack))
-    private val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
+    internal val tracks: ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>> =
         ConcurrentHashMap()
+
+    private val sdpProcessor = SerialProcessor(coroutineScope)
 
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
         return statsTracer?.get(trackIdToTrackType)
@@ -190,6 +198,7 @@ internal class Subscriber(
      * Removes all tracks.
      */
     fun clear() {
+        sdpProcessor.stop()
         tracks.clear()
         trackDimensions.clear()
         subscriptions.clear()
@@ -222,7 +231,7 @@ internal class Subscriber(
      *
      * @param offerSdp The offer SDP from the SFU.
      */
-    suspend fun negotiate(offerSdp: String): Result<SendAnswerResponse> {
+    suspend fun negotiate(offerSdp: String) = sdpProcessor.submit {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
         val result = setRemoteDescription(offerDescription)
             .onErrorSuspend {
@@ -248,7 +257,10 @@ internal class Subscriber(
             }.flatMap { answerSdp ->
                 setLocalDescription(answerSdp)
                     .onErrorSuspend {
-                        tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
+                        tracer.trace(
+                            "negotiate-error-setlocaldescription",
+                            it.message ?: "unknown",
+                        )
                     }
                     .map { answerSdp }
             }.flatMap { answerSdp ->
@@ -264,7 +276,9 @@ internal class Subscriber(
                 }
             }
         logger.d { "Subscriber negotiate: $result" }
-        return result
+        result.getOrThrow()
+    }.onFailure {
+        tracer.trace("negotiate-error-submit", it.message ?: "unknown")
     }
 
     /**
@@ -276,6 +290,8 @@ internal class Subscriber(
             peer_type = PeerType.PEER_TYPE_SUBSCRIBER,
         )
         sfuClient.iceRestart(request)
+    }.onError {
+        tracer.trace("iceRestart-error", it.message ?: "unknown")
     }
 
     /**
@@ -288,27 +304,51 @@ internal class Subscriber(
         participants: List<ParticipantState>,
         remoteParticipants: List<ParticipantState>,
         useDefaults: Boolean = false,
-    ): Result<UpdateSubscriptionsResponse> = safeSuspendingCallWithResult {
-        logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
-        val tracks = if (useDefaults) {
-            // default is to subscribe to the top 5 sorted participants
-            defaultTracks(participants)
-        } else {
-            // if we're not using the default, sub to visible tracks
-            visibleTracks(remoteParticipants)
-        }.let(trackOverridesHandler::applyOverrides)
+    ) = safeSuspendingCall {
+        subscriptionsJob?.cancel()
 
-        val newTracks = tracks.associateBy { it.session_id to it.track_type }
-        subscriptions.putAll(newTracks)
+        subscriptionsJob = coroutineScope.launch {
+            delay(300)
+            logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
+            val tracks = if (useDefaults) {
+                // default is to subscribe to the top 5 sorted participants
+                defaultTracks(participants)
+            } else {
+                // if we're not using the default, sub to visible tracks
+                visibleTracks(remoteParticipants)
+            }.let(trackOverridesHandler::applyOverrides)
 
-        val request = UpdateSubscriptionsRequest(
-            session_id = sessionId,
-            tracks = subscriptions.map { it.value },
-        )
+            val newTracks = tracks.associateBy { it.session_id to it.track_type }
+            subscriptions.clear()
+            subscriptions.putAll(newTracks)
 
-        logger.d { "[setVideoSubscriptions] #sfu; #track; subscriptions: $subscriptions" }
-        logger.d { "[setVideoSubscriptions] #sfu; #track; request: $request" }
-        sfuClient.updateSubscriptions(request)
+            val subscriptionsChanged = newTracks.size != previousSubscriptions.size ||
+                newTracks.any { (key, value) ->
+                    val previous = previousSubscriptions[key]
+                    previous == null || value != previous
+                }
+
+            if (!subscriptionsChanged) {
+                logger.w { "[setVideoSubscriptions] Skipped — subscriptions unchanged." }
+                return@launch
+            }
+
+            val request = UpdateSubscriptionsRequest(
+                session_id = sessionId,
+                tracks = subscriptions.map { it.value },
+            )
+
+            logger.d {
+                "[setVideoSubscriptions] #sfu; #track; subscriptions: ${subscriptions.size} -> $subscriptions"
+            }
+            logger.d { "[setVideoSubscriptions] #sfu; #track; request: $request" }
+            val response = sfuClient.updateSubscriptions(request)
+            if (response.error == null) {
+                logger.v { "[setVideoSubscriptions] #sfu; #track; no error, remembering subscriptions" }
+                previousSubscriptions.clear()
+                previousSubscriptions.putAll(subscriptions)
+            }
+        }
     }
 
     internal fun addTransceivers() {
@@ -352,7 +392,8 @@ internal class Subscriber(
     private fun visibleTracks(remoteParticipants: List<ParticipantState>): List<TrackSubscriptionDetails> {
         val trackDisplayResolution = trackDimensions
         val tracks = remoteParticipants.map { participant ->
-            val trackDisplay = trackDisplayResolution.filter { it.key.sessionId == participant.sessionId }
+            val trackDisplay =
+                trackDisplayResolution.filter { it.key.sessionId == participant.sessionId }
 
             trackDisplay.entries.filter { it.value.visible }.map { display ->
                 logger.i {
@@ -361,7 +402,7 @@ internal class Subscriber(
                 TrackSubscriptionDetails(
                     user_id = participant.userId.value,
                     track_type = display.key.trackType,
-                    dimension = display.value.dimensions,
+                    dimension = display.value.dimensions.orThrottled(),
                     session_id = participant.sessionId,
                 )
             }
@@ -370,6 +411,7 @@ internal class Subscriber(
     }
 
     override fun onAddStream(stream: MediaStream?) {
+        super.onAddStream(stream)
         if (stream == null) {
             logger.w { "[onAddStream] #sfu; #track; stream is null" }
             return
@@ -382,6 +424,21 @@ internal class Subscriber(
         trackDimensions.keys.removeAll { it.sessionId == participant.session_id }
     }
 
+    private fun VideoDimension.isUnknown() =
+        width == unknownVideoDimension.width && height == unknownVideoDimension.height
+
+    private fun adjustForSubscriptionsSize(dimension: VideoDimension = defaultVideoDimension): VideoDimension {
+        return if (subscriptions.size > 2 && dimension.height > throttledVideoDimension.height && dimension.width > throttledVideoDimension.width) {
+            throttledVideoDimension
+        } else {
+            dimension
+        }
+    }
+
+    private fun VideoDimension.normalized(): VideoDimension {
+        return if (width <= height) this else VideoDimension(height, width)
+    }
+
     fun setTrackDimension(
         viewportId: String,
         sessionId: String,
@@ -389,10 +446,22 @@ internal class Subscriber(
         visible: Boolean,
         dimensions: VideoDimension,
     ) {
-        trackDimensions.putIfAbsent(
-            ViewportCompositeKey(sessionId, viewportId, trackType),
-            TrackDimensions(dimensions, visible),
-        )
+        val key = ViewportCompositeKey(sessionId, viewportId, trackType)
+        val actual = if (dimensions.isUnknown()) {
+            val exists = trackDimensions.getOrDefault(key, TrackDimensions(defaultVideoDimension))
+            adjustForSubscriptionsSize(exists.dimensions)
+        } else {
+            adjustForSubscriptionsSize(dimensions)
+        }
+        trackDimensions[key] = TrackDimensions(actual.normalized(), visible)
+    }
+
+    private fun VideoDimension.orThrottled(): VideoDimension {
+        return if (subscriptions.size > 2 && width > throttledVideoDimension.width && height > throttledVideoDimension.height) {
+            throttledVideoDimension
+        } else {
+            this
+        }
     }
 
     private val trackPrefixToSessionIdMap = ConcurrentHashMap<String, String>()
@@ -402,6 +471,7 @@ internal class Subscriber(
     fun setTrackLookupPrefixes(lookupPrefixes: Map<String, String>) = synchronized(pendingStreams) {
         safeCall {
             logger.d { "[setTrackLookupPrefixes] #sfu; #track; lookupPrefixes: $lookupPrefixes" }
+            trackPrefixToSessionIdMap.clear()
             trackPrefixToSessionIdMap.putAll(lookupPrefixes)
             if (pendingStreams.isNotEmpty()) {
                 pendingStreams.forEach {

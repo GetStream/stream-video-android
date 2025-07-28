@@ -41,6 +41,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -317,6 +318,7 @@ public fun BoxScope.ParticipantLabel(
     } else {
         userNameOrId
     }
+    val paused = participant.videoPaused.collectAsStateWithLifecycle()
 
     ParticipantLabel(
         nameLabel = nameLabel,
@@ -327,6 +329,7 @@ public fun BoxScope.ParticipantLabel(
         // and for now don't draw the indicator for other participants due to the lag
         // (so we ingore participant.isSpeaking)
         isSpeaking = participant.isLocal,
+        isPaused = paused.value,
         soundIndicatorContent = soundIndicatorContent,
     )
 }
@@ -338,6 +341,7 @@ public fun BoxScope.ParticipantLabel(
     labelPosition: Alignment = BottomStart,
     hasAudio: Boolean = false,
     isSpeaking: Boolean = false,
+    isPaused: Boolean = false,
     audioLevel: Float = 0f,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         SoundIndicator(
@@ -390,9 +394,26 @@ public fun BoxScope.ParticipantLabel(
                 Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
                 GenericIndicator {
                     Icon(
-                        modifier = Modifier.padding(horizontal = 4.dp),
+
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(VideoTheme.dimens.genericM),
                         imageVector = Icons.Filled.PushPin,
                         contentDescription = "Pin",
+                        tint = Color.White,
+                    )
+                }
+            }
+
+            if (isPaused) {
+                Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                GenericIndicator {
+                    Icon(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(VideoTheme.dimens.genericM),
+                        imageVector = Icons.Filled.SignalWifiBad,
+                        contentDescription = "Pause",
                         tint = Color.White,
                     )
                 }
@@ -499,6 +520,35 @@ private fun ParticipantLabelPreview() {
                 labelPosition = BottomStart,
                 hasAudio = true,
                 isSpeaking = true,
+                audioLevel = 0f,
+                soundIndicatorContent = {
+                    SoundIndicator(
+                        isSpeaking = true,
+                        isAudioEnabled = true,
+                        audioLevel = 0.8f,
+                        modifier = Modifier
+                            .align(CenterVertically)
+                            .padding(horizontal = VideoTheme.dimens.spacingS),
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ParticipantLabelPausedPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        Box {
+            ParticipantLabel(
+                nameLabel = "The name",
+                isPinned = true,
+                labelPosition = BottomStart,
+                hasAudio = true,
+                isSpeaking = true,
+                isPaused = true,
                 audioLevel = 0f,
                 soundIndicatorContent = {
                     SoundIndicator(

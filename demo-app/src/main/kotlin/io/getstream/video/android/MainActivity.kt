@@ -37,14 +37,16 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.ui.AppNavHost
 import io.getstream.video.android.ui.AppScreens
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.util.InAppUpdateHelper
 import io.getstream.video.android.util.InstallReferrer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -66,7 +68,7 @@ class MainActivity : ComponentActivity() {
         // Try to read the Google Play install referrer value. We use it to deliver
         // the Call ID from the QR code link.
         @Suppress("KotlinConstantConditions")
-        if (BuildConfig.FLAVOR == StreamFlavors.production) {
+        if (StreamBuildFlavorUtil.isProduction) {
             InstallReferrer(this).extractInstallReferrer { callId: String ->
                 Log.d("MainActivity", "Call ID: $callId")
                 firebaseAnalytics.logEvent(FirebaseEvents.INSTALL_FROM_QR_CODE, null)
@@ -104,23 +106,34 @@ class MainActivity : ComponentActivity() {
         observeIncomingCall()
     }
 
+    /**
+     * Observes incoming calls in real-time.
+     *
+     * - First, it waits for the StreamVideo instance to be available.
+     * - Then it watches for a "ringing" call (i.e., someone is calling).
+     * - Once a ringing call is found, it listens for its ringing state updates.
+     * - If the ringing state changes to "Incoming", it means we are receiving a call.
+     * - At that point, it starts the incoming call screen using `startIncomingCallActivity()`.
+     *
+     * This flow automatically stops and restarts if the instance or call changes,
+     * ensuring we always react to the latest incoming call state.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeIncomingCall() {
         lifecycleScope.launch {
-            StreamVideo.instanceState.flatMapLatest { instance ->
-                instance?.state?.ringingCall ?: flowOf(null)
-            }.collectLatest { call ->
-                if (call != null) {
-                    lifecycleScope.launch {
-                        // Monitor the ringingState on a non-null call
-                        call.state.ringingState.collectLatest {
-                            if (it is RingingState.Incoming) {
-                                startIncomingCallActivity(call)
-                            }
-                        }
+            StreamVideo.instanceState
+                .flatMapLatest { instance ->
+                    instance?.state?.ringingCall ?: flowOf(null)
+                }
+                .flatMapLatest { call ->
+                    call?.state?.ringingState ?: emptyFlow()
+                }
+                .collectLatest { ringingState ->
+                    val currentCall = StreamVideo.instanceState.value?.state?.ringingCall?.value
+                    if (ringingState is RingingState.Incoming) {
+                        currentCall?.let { startIncomingCallActivity(it) }
                     }
                 }
-            }
         }
     }
 
@@ -128,6 +141,7 @@ class MainActivity : ComponentActivity() {
         val intent = StreamCallActivity.callIntent(
             context = this,
             cid = StreamCallId.fromCallCid(call.cid),
+            configuration = StreamCallActivityConfiguration(closeScreenOnCallEnded = true),
             members = emptyList(),
             leaveWhenLastInCall = true,
             action = NotificationHandler.ACTION_INCOMING_CALL,

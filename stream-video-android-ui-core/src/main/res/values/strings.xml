@@ -45,11 +45,19 @@
     <string name="stream_video_call_participants_conjunction">and</string>
     <string name="stream_video_call_participants_trailing">more</string>
     <string name="stream_video_call_rendering_failed">This track failed to be loaded in the session (%s)</string>
+    <string name="stream_video_call_bad_network">Some videos are paused until the network connection improves!</string>
+    <string name="stream_video_call_bad_network_single_video">Video is paused until the network connection improves!</string>
     <string name="stream_video_call_reconnecting">Reconnecting..</string>
     <string name="stream_video_call_recording">Recording</string>
     <string name="stream_video_audio_leave">Leave Quietly</string>
     <string name="stream_video_audio_room_title">Audio Room</string>
     <string name="stream_video_livestreaming_on_backstage">Waiting for live host</string>
+    <string name="stream_video_livestreaming_on_backstage_v2">Livestream will start in:</string>
+    <string name="stream_video_livestreaming_countdown_finished">00:00</string>
+    <string name="stream_video_livestreaming_ended">The livestream has ended</string>
+    <string name="stream_video_livestreaming_error_joining">Error joining the livestream. Please try again later.</string>
+    <string name="stream_video_livestreaming_watch_recording">Watch the recording:</string>
+    <string name="stream_video_livestreaming_host_video_not_available">The host\'s video is not available</string>
     <string name="stream_video_live">Live</string>
 
     <string name="stream_video_call_status_incoming">Incoming %s call…</string>

@@ -48,6 +48,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +63,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -69,12 +71,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
@@ -114,7 +119,7 @@ import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
-import io.getstream.video.android.tooling.util.StreamFlavors
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState.Available.toClosedCaptionUiState
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsContainer
@@ -123,11 +128,15 @@ import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
 import io.getstream.video.android.util.config.AppConfig
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 
+@OptIn(FlowPreview::class)
 @Composable
 fun CallScreen(
     call: Call,
@@ -174,6 +183,23 @@ fun CallScreen(
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsStateWithLifecycle()
+    var anyPausedVideos by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = call) {
+        while (true) {
+            delay(2000)
+            call.state.participants
+                .sample(2000L)
+                .map { participants ->
+                    // Compute only paused videos
+                    participants.filter { it.videoPaused.value }
+                }
+                .distinctUntilChanged() // Only emit if the filtered list actually changes
+                .collect { pausedVideos ->
+                    anyPausedVideos = pausedVideos.isNotEmpty()
+                }
+        }
+    }
 
     LaunchedEffect(key1 = connection) {
         if (connection == RealtimeConnection.Disconnected) {
@@ -287,7 +313,7 @@ fun CallScreen(
                         call = call,
                         layout = layout,
                         enableInPictureInPicture = true,
-                        enableDiagnostics = BuildConfig.DEBUG || BuildConfig.FLAVOR == StreamFlavors.development,
+                        enableDiagnostics = BuildConfig.DEBUG || StreamBuildFlavorUtil.isDevelopment,
                         onCallAction = {
                             when (it) {
                                 ChooseLayout -> isShowingLayoutChooseMenu = true
@@ -567,7 +593,8 @@ fun CallScreen(
                 val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
                 val popupYOffset = if (isPortrait) {
-                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt()
+                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
+                        .toInt()
                 } else {
                     0
                 }
@@ -608,6 +635,10 @@ fun CallScreen(
 
         if (speakingWhileMuted) {
             SpeakingWhileMuted()
+        }
+
+        if (anyPausedVideos) {
+            BadNetworkLabel()
         }
 
         if (showingLandscapeControls && orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -797,6 +828,44 @@ private suspend fun executeTranscriptionApis(
 private fun SpeakingWhileMuted() {
     Snackbar {
         Text(text = "You're talking while muting the microphone!")
+    }
+}
+
+@Composable
+private fun BadNetworkLabel(
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        Row(
+            modifier = modifier
+                .align(Alignment.BottomCenter)
+                .padding(vertical = 90.dp, horizontal = 16.dp)
+                .background(
+                    color = VideoTheme.colors.baseSheetQuarternary,
+                    shape = VideoTheme.shapes.sheet,
+                )
+                .testTag("video_renderer_fallback_bad_network"),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .align(CenterVertically),
+                imageVector = Icons.Default.SignalWifiBad,
+                contentDescription = null,
+                tint = VideoTheme.colors.basePrimary,
+            )
+            Text(
+                modifier = Modifier.padding(12.dp),
+                text = stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
+                ),
+                color = VideoTheme.colors.basePrimary,
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+            )
+        }
     }
 }
 

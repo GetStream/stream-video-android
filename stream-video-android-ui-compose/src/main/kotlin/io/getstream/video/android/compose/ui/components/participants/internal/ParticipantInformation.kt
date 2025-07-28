@@ -149,7 +149,9 @@ public fun ParticipantInformation(
         }
 
         Text(
-            modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
+            modifier = Modifier
+                .padding(horizontal = VideoTheme.dimens.spacingM)
+                .testTag("Stream_ParticipantInformation"),
             text = text,
             fontSize = fontSize,
             color = VideoTheme.colors.basePrimary,
@@ -165,7 +167,11 @@ public fun ParticipantInformation(
         }
 
         Text(
-            modifier = Modifier.testTag("Stream_CallActionLabel"),
+            modifier = when (callStatus) {
+                CallStatus.Incoming -> Modifier.testTag("Stream_IncomingCallLabel")
+                CallStatus.Outgoing -> Modifier.testTag("Stream_OutgoingCallLabel")
+                is CallStatus.Calling -> Modifier.testTag("Stream_OngoingCallDurationLabel")
+            },
             text = when (callStatus) {
                 CallStatus.Incoming -> stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_status_incoming,

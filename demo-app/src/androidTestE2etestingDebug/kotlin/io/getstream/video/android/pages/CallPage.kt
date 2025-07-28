@@ -28,7 +28,7 @@ class CallPage {
         val callSettingsClosedToggle = By.res("Stream_CallSettingsToggle_Open_false")
         val cameraPositionToggleFront = By.res("Stream_FlipCameraIcon_Front")
         val cameraPositionToggleBack = By.res("Stream_FlipCameraIcon_Back")
-        val hangUpButton = RingPage.hangUpButton
+        val hangUpButton = By.res("Stream_HangUpButton")
         val participantsCountBadge = By.res("Stream_ParticipantsCountBadge")
         val participantMenu = By.res("Stream_ParticipantsMenuIcon")
         val cornerDraggableView = By.res("Stream_FloatingVideoView")
@@ -43,6 +43,14 @@ class CallPage {
 
 //        val participantEvent = By.res("") // not implemented in the demo app yet
 //        val minimizedCallView = By.res("") // not implemented in the demo app yet
+    }
+
+    class AudioCall {
+        companion object {
+            val durationLabel = By.res("Stream_OngoingCallDurationLabel")
+            val participantName = By.res("Stream_ParticipantInformation")
+            val participantAvatar = By.res("Stream_UserAvatar")
+        }
     }
 
     class ViewMenu {

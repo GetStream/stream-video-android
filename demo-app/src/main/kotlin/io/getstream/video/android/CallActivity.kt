@@ -48,11 +48,11 @@ import kotlinx.coroutines.runBlocking
 class CallActivity : ComposeStreamCallActivity() {
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
-    override val configuration: StreamCallActivityConfiguration =
-        StreamCallActivityConfiguration(
-            closeScreenOnCallEnded = false,
-            canSkipPermissionRationale = false,
-        )
+
+    override fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
+        return super.loadConfigFromIntent(intent)
+            .copy(closeScreenOnCallEnded = false, canSkipPermissionRationale = false)
+    }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -144,7 +144,7 @@ class CallActivity : ComposeStreamCallActivity() {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
                 startActivity(intent)
-                finish()
+                safeFinish()
             }
         }
     }

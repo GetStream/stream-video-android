@@ -608,6 +608,16 @@ func (m *PublishOption) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.UseSingleLayer {
+		i--
+		if m.UseSingleLayer {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x48
+	}
 	if m.Id != 0 {
 		i = encodeVarint(dAtA, i, uint64(m.Id))
 		i--
@@ -2012,6 +2022,9 @@ func (m *PublishOption) SizeVT() (n int) {
 	}
 	if m.Id != 0 {
 		n += 1 + sov(uint64(m.Id))
+	}
+	if m.UseSingleLayer {
+		n += 2
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -4035,6 +4048,26 @@ func (m *PublishOption) UnmarshalVT(dAtA []byte) error {
 					break
 				}
 			}
+		case 9:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UseSingleLayer", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.UseSingleLayer = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])

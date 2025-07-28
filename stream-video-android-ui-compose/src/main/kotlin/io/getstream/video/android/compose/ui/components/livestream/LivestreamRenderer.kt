@@ -49,6 +49,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 
 @Composable
 internal fun LivestreamRenderer(
@@ -57,10 +58,13 @@ internal fun LivestreamRenderer(
     enablePausing: Boolean,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
     livestreamFlow: Flow<ParticipantState.Video?> = call.state.livestream,
+    onAudioToggle: (Boolean) -> Unit = {},
 ) {
-    val livestream by livestreamFlow.collectAsStateWithLifecycle(null)
-    var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
     var isPaused by rememberSaveable { mutableStateOf(false) }
+    val livestream by livestreamFlow
+        .filter { !isPaused }
+        .collectAsStateWithLifecycle(null)
+    var videoTextureView: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         VideoRenderer(
@@ -78,6 +82,7 @@ internal fun LivestreamRenderer(
                         } else {
                             videoTextureView?.resumeVideo()
                         }
+                        onAudioToggle(!isPaused)
                     }
                 },
             call = call,

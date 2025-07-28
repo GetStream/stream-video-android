@@ -79,6 +79,8 @@ message SfuEvent {
     ParticipantMigrationComplete participant_migration_complete = 25;
     // ChangePublishOptions is sent to signal the change in publish options such as a new codec or simulcast layers
     ChangePublishOptions change_publish_options = 27;
+    // InboundStateNotification
+    InboundStateNotification inbound_state_notification = 28;
   }
 }
 
@@ -185,6 +187,7 @@ message JoinRequest {
   ReconnectDetails reconnect_details = 7;
   repeated models.PublishOption preferred_publish_options = 9;
   repeated models.SubscribeOption preferred_subscribe_options = 10;
+  repeated models.ClientCapability capabilities = 11;
 }
 
 message ReconnectDetails {
@@ -334,4 +337,15 @@ message GoAway {
 // The reason may specify why the call has ended.
 message CallEnded {
   models.CallEndedReason reason = 1;
+}
+
+message InboundStateNotification {
+  repeated InboundVideoState inbound_video_states = 1;
+}
+
+message InboundVideoState {
+  string user_id = 1;
+  string session_id = 2;
+  models.TrackType track_type = 3;
+  bool paused = 4;
 }

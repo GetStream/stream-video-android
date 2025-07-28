@@ -23,11 +23,12 @@
 
 ## stream-video-android-ui-compose
 ### 🐞 Fixed
+On CallContent make sure to pass onBackPressed to CallAppBar in order to make the back button work.
 
 ### ⬆️ Improved
 
 ### ✅ Added
-Ï
+
 ### ⚠️ Changed
 
 ### ❌ Removed

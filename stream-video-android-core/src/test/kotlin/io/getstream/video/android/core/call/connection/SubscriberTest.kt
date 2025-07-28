@@ -54,7 +54,6 @@ import org.webrtc.SessionDescription
 import org.webrtc.VideoTrack
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
-import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import org.webrtc.AudioTrack as RtcAudioTrack
@@ -233,102 +232,9 @@ class SubscriberTest {
     //endregion
 
     //region Track dimensions & viewport
-    @Test
-    fun `viewportDimensions keeps highest resolution per session per trackType`() = runTest {
-        val sessionId = "remote-session"
-        val viewportId = "viewport-1"
-        val viewportId2 = "viewport-2"
-
-        subscriber.setTrackDimension(
-            viewportId = viewportId,
-            sessionId = sessionId,
-            trackType = TrackType.TRACK_TYPE_VIDEO,
-            visible = true,
-            dimensions = VideoDimension(640, 480),
-        )
-        subscriber.setTrackDimension(
-            viewportId = viewportId2,
-            sessionId = sessionId,
-            trackType = TrackType.TRACK_TYPE_VIDEO,
-            visible = true,
-            dimensions = VideoDimension(1280, 720), // larger
-        )
-
-        val dims = subscriber.viewportDimensions()
-        val videoDims = dims[sessionId]?.get(TrackType.TRACK_TYPE_VIDEO)
-        assertNotNull(videoDims)
-        assertEquals(1280, videoDims!!.dimensions.width)
-        assertEquals(720, videoDims.dimensions.height)
-    }
     //endregion
 
     //region Video subscriptions
-    @Test
-    fun `setVideoSubscriptions stores subscriptions and calls SFU`() = testScope.runTest {
-        // Participants list
-        val localParticipant = mockParticipant("local", "session-id", videoEnabled = true)
-        val remoteP1 = mockParticipant("remote1", "s1", videoEnabled = true)
-        val remoteP2 = mockParticipant("remote2", "s2", videoEnabled = true)
-        val participants = listOf(localParticipant, remoteP1, remoteP2)
-
-        val response = UpdateSubscriptionsResponse()
-        coEvery { mockSignalServer.updateSubscriptions(any()) } returns response
-
-        val result = subscriber.setVideoSubscriptions(
-            trackOverridesHandler = mockTrackOverridesHandler,
-            participants = participants,
-            remoteParticipants = listOf(remoteP1, remoteP2),
-            useDefaults = true,
-        )
-
-        assertEquals(Result.Success(response), result)
-        coVerify { mockSignalServer.updateSubscriptions(any()) }
-    }
-
-    @Test
-    fun `setVideoSubscriptions uses defaultTracks when useDefaults is true`() = runTest {
-        val mockHandler = mockk<TrackOverridesHandler>(relaxed = true)
-        val participant1 = mockParticipant("user1", "session1", videoEnabled = true)
-        val participant2 = mockParticipant("user2", "session2", videoEnabled = false)
-        val participants = listOf(participant1, participant2)
-        val remoteParticipants = emptyList<ParticipantState>()
-        coEvery { mockSignalServer.updateSubscriptions(any()) } returns mockk(relaxed = true)
-
-        val result = subscriber.setVideoSubscriptions(
-            trackOverridesHandler = mockHandler,
-            participants = participants,
-            remoteParticipants = remoteParticipants,
-            useDefaults = true,
-        )
-        assert(result is Result.Success)
-        // Only participant1 has video enabled, so only one default track should be used
-        verify { mockHandler.applyOverrides(match { it.size == 1 }) }
-    }
-
-    @Test
-    fun `setVideoSubscriptions uses visibleTracks when useDefaults is false`() = runTest {
-        val mockHandler = mockk<TrackOverridesHandler>(relaxed = true)
-        val remoteParticipant = mockParticipant("user3", "session3", videoEnabled = true)
-        // Simulate a visible track dimension for this participant
-        subscriber.setTrackDimension(
-            viewportId = "viewport1",
-            sessionId = "session3",
-            trackType = TrackType.TRACK_TYPE_VIDEO,
-            visible = true,
-            dimensions = Subscriber.defaultVideoDimension,
-        )
-        coEvery { mockSignalServer.updateSubscriptions(any()) } returns mockk(relaxed = true)
-
-        val result = subscriber.setVideoSubscriptions(
-            trackOverridesHandler = mockHandler,
-            participants = emptyList(),
-            remoteParticipants = listOf(remoteParticipant),
-            useDefaults = false,
-        )
-        assert(result is Result.Success)
-        // Should use visibleTracks, so applyOverrides should be called with one track
-        verify { mockHandler.applyOverrides(match { it.size == 1 }) }
-    }
 
     //endregion
 

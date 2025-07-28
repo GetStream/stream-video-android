@@ -26,8 +26,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.getstream.video.android.R
+import io.getstream.video.android.data.datasource.local.InMemoryStore
+import io.getstream.video.android.data.datasource.local.InMemoryStoreImpl
+import io.getstream.video.android.data.datasource.local.NoopMemoryStoreImpl
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.tooling.util.StreamBuildFlavor
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.NetworkMonitor
 import javax.inject.Singleton
 
@@ -62,4 +67,14 @@ object AppModule {
     @Singleton
     fun provideNetworkMonitor(@ApplicationContext context: Context) =
         NetworkMonitor(context)
+
+    @Provides
+    @Singleton
+    fun provideInMemoryStore(): InMemoryStore {
+        val buildFlavour = StreamBuildFlavorUtil.current
+        return when (buildFlavour) {
+            StreamBuildFlavor.E2eTesting -> InMemoryStoreImpl()
+            else -> NoopMemoryStoreImpl()
+        }
+    }
 }

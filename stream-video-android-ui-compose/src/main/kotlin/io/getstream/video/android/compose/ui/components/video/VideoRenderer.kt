@@ -23,9 +23,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -71,6 +76,7 @@ public fun VideoRenderer(
     videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     onRendered: (VideoTextureViewRenderer) -> Unit = {},
 ) {
+    StreamLog.d("VideoRenderer") { "Rendering video" }
     Box(
         modifier = modifier
             .testTag("video_renderer_container"),
@@ -92,7 +98,11 @@ public fun VideoRenderer(
         // Show avatar always behind the video.
         videoRendererConfig.fallbackContent.invoke(call)
 
-        if (video?.enabled == true) {
+        if (video?.paused == true) {
+            videoRendererConfig.badNetworkContent.invoke(call)
+        }
+
+        if (video?.enabled == true && !video.paused) {
             val viewportId = remember(call, video) {
                 try {
                     UUID.randomUUID().toString()
@@ -101,7 +111,6 @@ public fun VideoRenderer(
                     Math.random().toString()
                 }
             }
-
             val sessionId = video.sessionId
             val videoEnabledOverrides by call.state.participantVideoEnabledOverrides.collectAsStateWithLifecycle()
 
@@ -125,14 +134,19 @@ public fun VideoRenderer(
                 }
 
                 if (mediaTrack != null) {
+                    StreamLog.d("VideoRenderer") { "Rendering video track: $mediaTrack" }
                     Box(
                         modifier = videoRendererConfig.modifiers.containerModifier.invoke(this)
                             .testTag("Stream_VideoViewWithMediaTrack"),
                         contentAlignment = Alignment.Center,
                     ) {
+                        StreamLog.d("VideoRenderer") { "Rendering video viewportId: $viewportId" }
                         AndroidView(
                             factory = { context ->
                                 StreamVideoTextureViewRenderer(context).apply {
+                                    StreamLog.d(
+                                        "VideoRenderer",
+                                    ) { "Rendering video (init renderer)" }
                                     call.initRenderer(
                                         viewportId = viewportId,
                                         videoRenderer = this,
@@ -150,6 +164,7 @@ public fun VideoRenderer(
                                 }
                             },
                             update = { v ->
+                                StreamLog.d("VideoRenderer") { "Rendering video (update renderer)" }
                                 v.setMirror(videoRendererConfig.mirrorStream)
                                 v.setScalingType(
                                     videoRendererConfig.scalingType.toCommonScalingType(),
@@ -164,8 +179,12 @@ public fun VideoRenderer(
                                 .testTag("video_renderer"),
                         )
                     }
+                } else {
+                    // Do something when there is no media track
                 }
             }
+        } else {
+            // Do something when the video is not enabled
         }
     }
 }
@@ -268,6 +287,41 @@ internal fun DefaultMediaTrackFallbackContent(
     }
 }
 
+@Composable
+internal fun DefaultBadNetworkFallbackContent(
+    modifier: Modifier,
+    call: Call,
+) {
+    Row(
+        modifier = modifier
+            .padding(16.dp)
+            .background(
+                color = VideoTheme.colors.baseSheetQuarternary,
+                shape = VideoTheme.shapes.sheet,
+            )
+            .testTag("video_renderer_fallback_bad_network"),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            modifier = Modifier.padding(12.dp).align(CenterVertically),
+            imageVector = Icons.Default.SignalWifiBad,
+            contentDescription = null,
+            tint = VideoTheme.colors.basePrimary,
+        )
+        Text(
+            modifier = Modifier.padding(12.dp),
+            text = stringResource(
+                id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
+                call.sessionId,
+            ),
+            color = VideoTheme.colors.basePrimary,
+            textAlign = TextAlign.Center,
+            fontSize = 14.sp,
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun VideoRendererPreview() {
@@ -279,7 +333,37 @@ private fun VideoRendererPreview() {
                 track = VideoTrack("", org.webrtc.VideoTrack(123)),
                 enabled = true,
                 sessionId = "",
+                paused = false,
             ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun VideoRendererPausedPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        VideoRenderer(
+            call = previewCall,
+            video = ParticipantState.Video(
+                track = VideoTrack("", org.webrtc.VideoTrack(123)),
+                enabled = true,
+                sessionId = "",
+                paused = true,
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun VideoRendererPausedPreview2() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        DefaultBadNetworkFallbackContent(
+            call = previewCall,
+            modifier = Modifier,
         )
     }
 }

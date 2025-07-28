@@ -70,6 +70,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
@@ -89,6 +90,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,11 +106,13 @@ import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.event.ReconnectDetails
+import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 
 /**
@@ -219,6 +223,7 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
+    internal val unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -228,6 +233,13 @@ public class Call(
         audioProcessing = clientImpl.audioProcessing,
         audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
     )
+
+    internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
+        put(
+            ClientCapability.CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE.name,
+            ClientCapability.CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE,
+        )
+    }
 
     internal val mediaManager by lazy {
         if (testInstanceProvider.mediaManagerCreator != null) {
@@ -281,8 +293,6 @@ public class Call(
 
     private var monitorPublisherPCStateJob: Job? = null
     private var monitorSubscriberPCStateJob: Job? = null
-    private var monitorPublisherStateJob: Job? = null
-    private var monitorSubscriberStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
 
@@ -316,6 +326,7 @@ public class Call(
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
         val response = if (members != null) {
             clientImpl.getOrCreateCallFullMembers(
@@ -328,6 +339,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         } else {
             clientImpl.getOrCreateCall(
@@ -340,6 +352,7 @@ public class Call(
                 team = team,
                 ring = ring,
                 notify = notify,
+                video = video,
             )
         }
 
@@ -838,6 +851,7 @@ public class Call(
         )
         return clientImpl.muteUsers(type, id, request)
     }
+
     fun setVisibility(
         sessionId: String,
         trackType: TrackType,
@@ -852,6 +866,26 @@ public class Call(
             trackType,
             visible,
             Subscriber.defaultVideoDimension,
+            viewportId,
+        )
+    }
+
+    fun setVisibility(
+        sessionId: String,
+        trackType: TrackType,
+        visible: Boolean,
+        viewportId: String = sessionId,
+        width: Int,
+        height: Int,
+    ) {
+        logger.i {
+            "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
+        }
+        session?.updateTrackDimensions(
+            sessionId,
+            trackType,
+            visible,
+            VideoDimension(width, height),
             viewportId,
         )
     }
@@ -918,8 +952,8 @@ public class Call(
                     logger.v {
                         "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
                             "trackType: $trackType, " +
-                            "dimension1: ($width - $height), " +
-                            "dimension2: ($videoWidth - $videoHeight), " +
+                            "viewport size: ($width - $height), " +
+                            "video size: ($videoWidth - $videoHeight), " +
                             "sessionId: $sessionId"
                     }
 
@@ -928,13 +962,31 @@ public class Call(
                             sessionId,
                             trackType,
                             true,
-                            VideoDimension(videoWidth, videoHeight),
+                            VideoDimension(width, height),
                             viewportId,
                         )
                     }
                 }
             },
         )
+    }
+
+    /**
+     * Enables the provided client capabilities.
+     */
+    fun enableClientCapabilities(capabilities: List<ClientCapability>) {
+        capabilities.forEach {
+            this.clientCapabilities[it.name] = it
+        }
+    }
+
+    /**
+     * Disables the provided client capabilities.
+     */
+    fun disableClientCapabilities(capabilities: List<ClientCapability>) {
+        capabilities.forEach {
+            this.clientCapabilities.remove(it.name)
+        }
     }
 
     suspend fun goLive(
@@ -1405,6 +1457,30 @@ public class Call(
      */
     fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
         session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
+    }
+
+    /**
+     * Enables or disables the reception of incoming audio tracks for all or specified participants.
+     *
+     * This method allows selective control over whether the local client receives audio from remote participants.
+     * It's particularly useful in scenarios such as livestreams or group calls where the user may want to mute
+     * specific participants' audio without affecting the overall session.
+     *
+     * @param enabled `true` to enable (subscribe to) incoming audio, `false` to disable (unsubscribe from) it.
+     * @param sessionIds Optional list of participant session IDs for which to toggle incoming audio.
+     * If `null`, the audio setting is applied to all participants currently in the session.
+     */
+    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
+        val participantTrackMap = session?.subscriber?.tracks ?: return
+
+        val targetTracks = when {
+            sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
+            else -> participantTrackMap.values.toList()
+        }
+
+        targetTracks
+            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
+            .forEach { it.enableAudio(enabled) }
     }
 
     @InternalStreamVideoApi
