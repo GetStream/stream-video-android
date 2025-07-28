@@ -30,7 +30,10 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
@@ -75,6 +78,13 @@ public data class ParticipantState(
     // todo: videoAvailable might be more descriptive
     internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val videoEnabled: StateFlow<Boolean> = _videoEnabled
+
+    internal val _videoPaused: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /**
+     * State that indicates whether the video is paused or not.
+     */
+    val videoPaused: StateFlow<Boolean> = _videoPaused
 
     /**
      * State that indicates whether the mic is capturing and sending the audio or not.
@@ -141,13 +151,18 @@ public data class ParticipantState(
     internal val _reactions = MutableStateFlow<List<Reaction>>(emptyList())
     val reactions: StateFlow<List<Reaction>> = _reactions
 
-    val video: StateFlow<Video?> = combineStates(_videoTrack, _videoEnabled) { track, enabled ->
+    val video: StateFlow<Video?> = combine(
+        _videoTrack,
+        _videoEnabled,
+        _videoPaused,
+    ) { track, enabled, paused ->
         Video(
             sessionId = sessionId,
             track = track,
             enabled = enabled,
+            paused = paused,
         )
-    }
+    }.stateIn(call.scope, SharingStarted.Lazily, null)
 
     val audio: StateFlow<Audio?> = combineStates(_audioTrack, _audioEnabled) { track, enabled ->
         Audio(
@@ -241,6 +256,7 @@ public data class ParticipantState(
         public open val sessionId: String,
         public open val track: MediaTrack?,
         public open val enabled: Boolean,
+        public open val paused: Boolean,
         public val type: TrackType = TrackType.TRACK_TYPE_UNSPECIFIED,
     )
 
@@ -249,10 +265,12 @@ public data class ParticipantState(
         public override val sessionId: String,
         public override val track: VideoTrack?,
         public override val enabled: Boolean,
+        public override val paused: Boolean,
     ) : Media(
         sessionId = sessionId,
         track = track,
         enabled = enabled,
+        paused = paused,
         type = TrackType.TRACK_TYPE_VIDEO,
     )
 
@@ -265,6 +283,7 @@ public data class ParticipantState(
         sessionId = sessionId,
         track = track,
         enabled = enabled,
+        paused = false,
         type = TrackType.TRACK_TYPE_AUDIO,
     )
 
@@ -277,6 +296,7 @@ public data class ParticipantState(
         sessionId = sessionId,
         track = track,
         enabled = enabled,
+        paused = false,
         type = TrackType.TRACK_TYPE_SCREEN_SHARE,
     )
 }

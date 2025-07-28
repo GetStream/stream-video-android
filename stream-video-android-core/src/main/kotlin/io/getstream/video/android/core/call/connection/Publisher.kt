@@ -36,6 +36,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.iceRestartConstraints
 import io.getstream.video.android.core.utils.safeCall
@@ -93,6 +94,7 @@ internal class Publisher(
     private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
     private var isIceRestarting = false
+    private val sdpProcessor = SerialProcessor(coroutineScope)
 
     override fun onRenegotiationNeeded() {
         coroutineScope.launch {
@@ -132,10 +134,10 @@ internal class Publisher(
     }
 
     @VisibleForTesting
-    public suspend fun negotiate(iceRestart: Boolean = false) {
+    public suspend fun negotiate(iceRestart: Boolean = false) = sdpProcessor.submit {
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
-            return
+            return@submit
         }
 
         val offer = super.createOffer(

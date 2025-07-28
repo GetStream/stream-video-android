@@ -103,6 +103,7 @@ public fun CallLobby(
             },
         ),
         enabled = isCameraEnabled,
+        paused = false,
     ),
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onRendered: (View) -> Unit = {},
@@ -236,6 +237,7 @@ private fun CallLobbyPreview() {
                     video = org.webrtc.VideoTrack(1000L),
                 ),
                 enabled = true,
+                paused = false,
             ),
         )
     }

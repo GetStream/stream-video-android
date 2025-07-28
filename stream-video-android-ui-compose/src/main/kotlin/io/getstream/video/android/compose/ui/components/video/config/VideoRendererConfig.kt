@@ -94,6 +94,7 @@ public data class VideoRendererConfig(
     val scalingType: VideoScalingType = defaultScalingType,
     val updateVisibility: Boolean = defaultUpdateVisibility,
     val fallbackContent: @Composable (Call) -> Unit = {},
+    val badNetworkContent: @Composable (Call) -> Unit = {},
 )
 
 @OptIn(StreamVideoUiDelicateApi::class)
@@ -109,6 +110,7 @@ public data class VideoRendererConfigCreationScope(
             call = it,
         )
     },
+    public var badNetworkContent: @Composable (Call) -> Unit = {},
 )
 
 /**
@@ -126,5 +128,6 @@ public inline fun videoRenderConfig(
         scalingType = scope.videoScalingType,
         updateVisibility = scope.updateVisibility,
         fallbackContent = scope.fallbackContent,
+        badNetworkContent = scope.badNetworkContent,
     )
 }

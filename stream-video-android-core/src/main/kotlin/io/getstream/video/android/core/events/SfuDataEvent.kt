@@ -44,6 +44,17 @@ public data class SfuDataRequest(val sfuRequest: SfuRequest) : SfuDataEvent() {
     }
 }
 
+public data class InboundStateNotificationEventState(
+    val userId: String,
+    val sessionId: String,
+    val trackType: TrackType,
+    val paused: Boolean,
+)
+
+public data class InboundStateNotificationEvent(
+    val inboundVideoStates: List<InboundStateNotificationEventState>,
+) : SfuDataEvent()
+
 public data class PublisherAnswerEvent(
     val sdp: String,
 ) : SfuDataEvent()
