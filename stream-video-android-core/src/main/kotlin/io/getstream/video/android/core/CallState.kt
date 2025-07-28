@@ -1525,6 +1525,10 @@ public class CallState(
             null
         }
     }
+
+    fun updateRejectedBy(userId: Set<String>) {
+        _rejectedBy.value = userId
+    }
 }
 
 private fun MemberResponse.toMemberState(): MemberState {
