@@ -94,6 +94,7 @@ io.getstream.video.android.compose.ui.components.video
 io.getstream.video.android.compose.ui.components.video.config
 module:stream-video-android-ui-core
 io.getstream.video.android.ui.common
+io.getstream.video.android.ui.common.models
 io.getstream.video.android.ui.common.notification
 io.getstream.video.android.ui.common.permission
 io.getstream.video.android.ui.common.renderer

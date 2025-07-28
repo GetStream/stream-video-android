@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.9.2
+            <div class="library-version">1.10.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -82,6 +82,7 @@
             },
         ),
         enabled = isCameraEnabled,
+        paused = false,
     )<span class="token punctuation">, </span></span><span class="parameter ">permissions<span class="token operator">: </span><a href="../io.getstream.video.android.compose.permission/-video-permissions-state/index.html">VideoPermissionsState</a><span class="token operator"> = </span>rememberCallPermissionsState(call = call)<span class="token punctuation">, </span></span><span class="parameter ">onRendered<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://developer.android.com/reference/kotlin/android/view/View.html">View</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{}<span class="token punctuation">, </span></span><span class="parameter ">onRenderedContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span>video<span class="token operator">: </span><a href="../../stream-video-android-core/io.getstream.video.android.core/-participant-state/-video/index.html">ParticipantState.Video</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
         OnRenderedContent(call = call, video = it, onRendered = onRendered)
     }<span class="token punctuation">, </span></span><span class="parameter ">onDisabledContent<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{
