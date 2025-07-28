@@ -1377,7 +1377,6 @@ public class RtcSession internal constructor(
     }
 
     private suspend fun parseError(e: Throwable): Failure {
-        Error.NetworkError
         return Failure(
             io.getstream.result.Error.ThrowableError(
                 "CallClientImpl error needs to be handled",
