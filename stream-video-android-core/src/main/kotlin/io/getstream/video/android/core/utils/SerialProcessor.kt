@@ -83,6 +83,5 @@ internal class SerialProcessor(
     fun stop() = safeCall {
         workerJob?.cancel()
         workerJob = null
-        channel.close()
     }
 }
