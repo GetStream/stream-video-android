@@ -68,7 +68,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith("onRingingCall(callId, callDisplayName, emptyMap())"),
         level = DeprecationLevel.WARNING,
     )
     fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
@@ -82,7 +82,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith("onMissedCall(callId, callDisplayName, emptyMap())"),
         level = DeprecationLevel.WARNING,
     )
     fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
@@ -96,7 +96,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith("onNotification(callId, callDisplayName, emptyMap())"),
         level = DeprecationLevel.WARNING,
     )
     fun onNotification(callId: StreamCallId, callDisplayName: String) {
@@ -110,7 +110,7 @@ interface StreamNotificationHandler : StreamNotificationHandlerWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith("onLiveCall(callId, callDisplayName, emptyMap())"),
         level = DeprecationLevel.WARNING,
     )
     fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
@@ -196,7 +196,9 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith(
+            "getIncomingCallNotification(fullScreenPendingIntent,acceptCallPendingIntent,rejectCallPendingIntent,callerName,shouldHaveContentIntent,emptyMap()",
+        ),
         level = DeprecationLevel.WARNING,
     )
     fun getIncomingCallNotification(
@@ -226,7 +228,9 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith(
+            "getOngoingCallNotification(callId,callDisplayName,isOutgoingCall,remoteParticipantCount)",
+        ),
         level = DeprecationLevel.WARNING,
     )
     fun getOngoingCallNotification(
@@ -254,7 +258,9 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith(
+            "getRingingCallNotification(ringingState,callId,callDisplayName,shouldHaveContentIntent)",
+        ),
         level = DeprecationLevel.WARNING,
     )
     fun getRingingCallNotification(
@@ -281,7 +287,7 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith("getMissedCallNotification(callId,callDisplayName,emptyMap())"),
         level = DeprecationLevel.WARNING,
     )
     fun getMissedCallNotification(
@@ -363,7 +369,9 @@ open class StreamNotificationBuilderInterceptors :
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith(
+            "onBuildIncomingCallNotification(builder,fullScreenPendingIntent,acceptCallPendingIntent,rejectCallPendingIntent,callerName,shouldHaveContentIntent,emptyMap())",
+        ),
         level = DeprecationLevel.WARNING,
     )
     open fun onBuildIncomingCallNotification(
@@ -374,7 +382,15 @@ open class StreamNotificationBuilderInterceptors :
         callerName: String?,
         shouldHaveContentIntent: Boolean,
     ): NotificationCompat.Builder {
-        return builder
+        return onBuildIncomingCallNotification(
+            builder,
+            fullScreenPendingIntent,
+            acceptCallPendingIntent,
+            rejectCallPendingIntent,
+            callerName,
+            shouldHaveContentIntent,
+            emptyMap(),
+        )
     }
 
     /**
@@ -387,7 +403,9 @@ open class StreamNotificationBuilderInterceptors :
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith(
+            "onBuildOngoingCallNotification(builder,callId,callDisplayName,isOutgoingCall,remoteParticipantCount,emptyMap())",
+        ),
         level = DeprecationLevel.WARNING,
     )
     open fun onBuildOngoingCallNotification(
@@ -397,14 +415,26 @@ open class StreamNotificationBuilderInterceptors :
         isOutgoingCall: Boolean = false,
         remoteParticipantCount: Int = 0,
     ): NotificationCompat.Builder {
-        return builder
+        return onBuildOngoingCallNotification(
+            builder,
+            callId,
+            callDisplayName,
+            isOutgoingCall,
+            remoteParticipantCount,
+            emptyMap(),
+        )
     }
 
+    @Deprecated(
+        "Use the one with payload: Map<String, Any?>",
+        replaceWith = ReplaceWith("onBuildOngoingCallMediaNotification(builder,callId,emptyMap())"),
+        level = DeprecationLevel.WARNING,
+    )
     open fun onBuildOngoingCallMediaNotification(
         builder: NotificationCompat.Builder,
         callId: StreamCallId,
     ): NotificationCompat.Builder {
-        return builder
+        return onBuildOngoingCallMediaNotification(builder, callId, emptyMap())
     }
 
     /**
@@ -415,14 +445,16 @@ open class StreamNotificationBuilderInterceptors :
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith(
+            "onBuildMissedCallNotification(builder,callDisplayName,emptyMap())",
+        ),
         level = DeprecationLevel.WARNING,
     )
     open fun onBuildMissedCallNotification(
         builder: NotificationCompat.Builder,
         callDisplayName: String?,
     ): NotificationCompat.Builder {
-        return builder
+        return onBuildMissedCallNotification(builder, callDisplayName, emptyMap())
     }
 
     /**
@@ -436,7 +468,9 @@ open class StreamNotificationBuilderInterceptors :
      */
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("Use the one with payload: Map<String, Any?>"),
+        replaceWith = ReplaceWith(
+            "onBuildOutgoingCallNotification(builder,ringingState,callId,callDisplayName,shouldHaveContentIntent,emptyMap())",
+        ),
         level = DeprecationLevel.WARNING,
     )
     open fun onBuildOutgoingCallNotification(
@@ -446,7 +480,14 @@ open class StreamNotificationBuilderInterceptors :
         callDisplayName: String? = null,
         shouldHaveContentIntent: Boolean = true,
     ): NotificationCompat.Builder {
-        return builder
+        return onBuildOutgoingCallNotification(
+            builder,
+            ringingState,
+            callId,
+            callDisplayName,
+            shouldHaveContentIntent,
+            emptyMap(),
+        )
     }
 
     /**
@@ -485,7 +526,7 @@ open class StreamNotificationBuilderInterceptors :
         style: androidx.media.app.NotificationCompat.MediaStyle,
         callId: StreamCallId,
     ): androidx.media.app.NotificationCompat.MediaStyle {
-        return style
+        return onBuildMediaNotificationStyle(style, callId, emptyMap())
     }
 
     /**
@@ -545,6 +586,14 @@ open class StreamNotificationBuilderInterceptorsWithPayload {
         return builder
     }
 
+    open fun onBuildOngoingCallMediaNotification(
+        builder: NotificationCompat.Builder,
+        callId: StreamCallId,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+    }
+
     /**
      * Intercept the notification builder and modify it before it is posted.
      *
@@ -577,6 +626,20 @@ open class StreamNotificationBuilderInterceptorsWithPayload {
         payload: Map<String, Any?>,
     ): NotificationCompat.Builder {
         return builder
+    }
+
+    /**
+     * Intercept the notification builder and modify the media style before it is posted.
+     *
+     * @param style The media style.
+     * @param callId An instance of [StreamCallId] representing the call identifier
+     */
+    open fun onBuildMediaNotificationStyle(
+        style: androidx.media.app.NotificationCompat.MediaStyle,
+        callId: StreamCallId,
+        payload: Map<String, Any?>,
+    ): androidx.media.app.NotificationCompat.MediaStyle {
+        return style
     }
 }
 

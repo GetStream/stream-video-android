@@ -10123,7 +10123,9 @@ public class io/getstream/video/android/core/notifications/handlers/StreamNotifi
 public class io/getstream/video/android/core/notifications/handlers/StreamNotificationBuilderInterceptorsWithPayload {
 	public fun <init> ()V
 	public fun onBuildIncomingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;ZLjava/util/Map;)Landroidx/core/app/NotificationCompat$Builder;
+	public fun onBuildMediaNotificationStyle (Landroidx/media/app/NotificationCompat$MediaStyle;Lio/getstream/video/android/model/StreamCallId;Ljava/util/Map;)Landroidx/media/app/NotificationCompat$MediaStyle;
 	public fun onBuildMissedCallNotification (Landroidx/core/app/NotificationCompat$Builder;Ljava/lang/String;Ljava/util/Map;)Landroidx/core/app/NotificationCompat$Builder;
+	public fun onBuildOngoingCallMediaNotification (Landroidx/core/app/NotificationCompat$Builder;Lio/getstream/video/android/model/StreamCallId;Ljava/util/Map;)Landroidx/core/app/NotificationCompat$Builder;
 	public fun onBuildOngoingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/util/Map;)Landroidx/core/app/NotificationCompat$Builder;
 	public static synthetic fun onBuildOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationBuilderInterceptorsWithPayload;Landroidx/core/app/NotificationCompat$Builder;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/util/Map;ILjava/lang/Object;)Landroidx/core/app/NotificationCompat$Builder;
 	public fun onBuildOutgoingCallNotification (Landroidx/core/app/NotificationCompat$Builder;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZLjava/util/Map;)Landroidx/core/app/NotificationCompat$Builder;
