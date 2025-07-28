@@ -99,7 +99,7 @@ internal interface ConnectionModuleDeclaration<Api, SocketConnection, Http : OkH
     /**
      * API to update the token.
      */
-    fun updateToken(token: Token)
+    fun updateToken(token: Token?)
 
     /**
      * API to update the authentication type.
