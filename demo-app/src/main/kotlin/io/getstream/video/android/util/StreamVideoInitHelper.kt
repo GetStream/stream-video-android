@@ -26,6 +26,7 @@ import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFacto
 import io.getstream.chat.android.state.plugin.config.StatePluginConfig
 import io.getstream.chat.android.state.plugin.factory.StreamStatePluginFactory
 import io.getstream.log.Priority
+import io.getstream.result.Result
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
@@ -197,7 +198,7 @@ object StreamVideoInitHelper {
         user: User,
         token: String,
         loggingLevel: LoggingLevel,
-    ): StreamVideo {
+    ): Result<StreamVideo> {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
         callServiceConfigRegistry.register(
             DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
@@ -238,6 +239,6 @@ object StreamVideoInitHelper {
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-        ).build()
+        ).buildSafely()
     }
 }

@@ -23,6 +23,8 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
+import io.getstream.result.Error
+import io.getstream.result.Result
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
@@ -304,6 +306,21 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         StreamVideo.install(client)
 
         return client
+    }
+
+    public fun buildSafely(): Result<StreamVideo> {
+        return kotlin.runCatching { build() }
+            .fold(
+                onSuccess = { client -> Result.Success(client) },
+                onFailure = { throwable ->
+                    Result.Failure(
+                        Error.ThrowableError(
+                            throwable.message ?: "Something went wrong in init",
+                            throwable,
+                        ),
+                    )
+                },
+            )
     }
 
     private fun setupStreamLog() {

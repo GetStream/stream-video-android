@@ -855,7 +855,7 @@ public class CallState(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session!!.handleEvent(event)
+                call.session?.handleEvent(event)
             }
 
             is ErrorEvent -> {
