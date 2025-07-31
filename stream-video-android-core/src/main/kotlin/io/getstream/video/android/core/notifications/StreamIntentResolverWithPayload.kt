@@ -21,30 +21,19 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.model.StreamCallId
 
-/**
- * We'll deprecate this [StreamIntentResolver] soon
- * Use the [StreamIntentResolverWithPayload]
- */
-interface StreamIntentResolver : StreamIntentResolverWithPayload {
+interface StreamIntentResolverWithPayload {
     /**
      * Search for an activity that can receive incoming calls from Stream Server.
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith(
-            "searchIncomingCallPendingIntent(callId, notificationId, payload)",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchIncomingCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
-    ): PendingIntent? {
-        return searchIncomingCallPendingIntent(callId, notificationId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
     /**
      * Search for an activity that is used for outgoing calls.
@@ -52,155 +41,105 @@ interface StreamIntentResolver : StreamIntentResolverWithPayload {
      *
      * @param callId the call id
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith(
-            "searchOutgoingCallPendingIntent(callId, notificationId, payload)",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchOutgoingCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
-    ): PendingIntent? {
-        return searchIncomingCallPendingIntent(callId, notificationId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
     /**
      * Search for an activity that can receive live calls from Stream Server.
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith(
-            "searchNotificationCallPendingIntent(callId, notificationId, payload)",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchNotificationCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
-    ): PendingIntent? {
-        return searchNotificationCallPendingIntent(callId, notificationId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
     /**
      * Search for an activity that can receive missed calls from Stream Server.
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("searchMissedCallPendingIntent(callId, notificationId, payload)"),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchMissedCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
-    ): PendingIntent? {
-        return searchMissedCallPendingIntent(callId, notificationId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("getDefaultPendingIntent(payload)"),
-        level = DeprecationLevel.WARNING,
-    )
-    fun getDefaultPendingIntent(): PendingIntent {
-        return getDefaultPendingIntent(emptyMap())
-    }
+    fun getDefaultPendingIntent(payload: Map<String, Any?>): PendingIntent
 
     /**
      * Search for an activity that can receive live calls from Stream Server.
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("searchLiveCallPendingIntent(callId, notificationId, payload)"),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchLiveCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
-    ): PendingIntent? {
-        return searchLiveCallPendingIntent(callId, notificationId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
     /**
      * Search for an activity that can accept call from Stream Server.
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      * @return The [PendingIntent] which can trigger a component to consume accept call events.
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("searchAcceptCallPendingIntent(callId, notificationId, payload)"),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchAcceptCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
-    ): PendingIntent? {
-        return searchAcceptCallPendingIntent(callId, notificationId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
     /**
      * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
      * a call from the Stream Server.
      *
      * @param callId The ID of the call.
+     * @param payload The payload from Push Notification
      * @return The [PendingIntent] which can trigger a component to consume the call rejection event.
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("searchRejectCallPendingIntent(callId, payload)"),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchRejectCallPendingIntent(
         callId: StreamCallId,
-    ): PendingIntent? {
-        return searchRejectCallPendingIntent(callId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
     /**
      * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
      * a call from the Stream Server.
      *
      * @param callId The ID of the call.
+     * @param payload The payload from Push Notification
      * @return The [PendingIntent] which can trigger a component to consume the call rejection event.
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith("searchEndCallPendingIntent(callId, payload)"),
-        level = DeprecationLevel.WARNING,
-    )
     fun searchEndCallPendingIntent(
         callId: StreamCallId,
-    ): PendingIntent? {
-        return searchEndCallPendingIntent(callId, emptyMap())
-    }
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 
     /**
      * Searches an activity that will accept the [ACTION_ONGOING_CALL] intent and jump right back into the call.
      *
      * @param callId the call id
+     * @param payload The payload from Push Notification
      * @param notificationId the notification ID.
      */
-    @Deprecated(
-        "Use the one with payload: Map<String, Any?>",
-        replaceWith = ReplaceWith(
-            "searchOngoingCallPendingIntent(callId, notificationId, payload)",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
-    fun searchOngoingCallPendingIntent(callId: StreamCallId, notificationId: Int): PendingIntent? {
-        return searchOngoingCallPendingIntent(callId, notificationId, emptyMap())
-    }
+    fun searchOngoingCallPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int,
+        payload: Map<String, Any?>,
+    ): PendingIntent?
 }

@@ -84,7 +84,8 @@ public open class DefaultNotificationHandler(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Call:NotificationHandler")
-    val intentResolver = DefaultStreamIntentResolver(application)
+    val intentResolver =
+        DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver())
     protected val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -149,9 +150,18 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ): Notification? {
         return if (ringingState is RingingState.Incoming) {
-            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
-            val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
-            val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
+            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(
+                callId,
+                payload = payload,
+            )
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                 getIncomingCallNotification(
