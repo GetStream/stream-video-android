@@ -204,9 +204,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * The Exception is [StreamCallActivityException]. We will update the args in next major release
      */
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
-        logger.e(error) { "[onErrorFinish] Something went wrong" }
         onFailed(error)
         if (error is StreamCallActivityException) {
+            logger.e(error) { "[onErrorFinish] Something went wrong, call_id:${error.call.id}" }
             if (isCurrentAcceptedCall(error.call)) {
                 val configuration = configurationMap[error.call.id]
                 if (configuration?.closeScreenOnError == true) {

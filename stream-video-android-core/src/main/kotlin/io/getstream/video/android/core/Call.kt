@@ -1319,7 +1319,7 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "[accept] #ringing; no args" }
+        logger.d { "[accept] #ringing; no args, call_id:${id}" }
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
@@ -1328,7 +1328,7 @@ public class Call(
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "[reject] #ringing; rejectReason: $reason" }
+        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:${id}" }
         return clientImpl.reject(type, id, reason)
     }
 
