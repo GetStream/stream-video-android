@@ -354,7 +354,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         granted: List<String>,
         notGranted: List<String>,
     ) {
-        if (!showRationale && configuration.canSkipPermissionRationale) {
+        if (!showRationale && configurationMap[call.cid]?.canSkipPermissionRationale == true) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
             safeFinish()
         } else {
@@ -375,7 +375,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         val connection by call.state.connection.collectAsStateWithLifecycle()
         when (connection) {
             RealtimeConnection.Disconnected -> {
-                if (!configuration.closeScreenOnCallEnded) {
+                if (configurationMap[call.cid]?.closeScreenOnCallEnded == false) {
                     CallDisconnectedContent(call)
                 } else {
                     // This is just for safety, will be called from other place as well.
@@ -384,7 +384,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             }
 
             is RealtimeConnection.Failed -> {
-                if (!configuration.closeScreenOnError) {
+                if (configurationMap[call.cid]?.closeScreenOnError == false) {
                     val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
                     CallFailedContent(call, err)
                 } else {
