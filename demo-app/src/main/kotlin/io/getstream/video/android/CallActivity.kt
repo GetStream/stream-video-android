@@ -33,7 +33,6 @@ import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
@@ -52,19 +51,6 @@ class CallActivity : ComposeStreamCallActivity() {
     override fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
         return super.loadConfigFromIntent(intent)
             .copy(closeScreenOnCallEnded = false, canSkipPermissionRationale = false)
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-
-        if (intent.action == NotificationHandler.ACTION_ACCEPT_CALL) {
-            val activeCall = StreamVideo.instance().state.activeCall.value
-            if (activeCall != null) {
-                leave(activeCall)
-                finish()
-                startActivity(intent)
-            }
-        }
     }
 
     @StreamCallActivityDelicateApi

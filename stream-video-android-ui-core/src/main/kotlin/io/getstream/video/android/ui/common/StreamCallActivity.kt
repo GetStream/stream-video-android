@@ -129,6 +129,35 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 logger.d { "Created [${clazz.simpleName}] intent. -> $this" }
             }
         }
+
+        public fun callIntentBundle(
+            cid: StreamCallId,
+            members: List<String> = defaultExtraMembers,
+            leaveWhenLastInCall: Boolean = DEFAULT_LEAVE_WHEN_LAST,
+            configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
+            extraData: Bundle? = null,
+        ): Bundle {
+            return Bundle().apply {
+                // Setup the outgoing call action
+
+                val config = configuration.toBundle()
+                // Add the config
+
+                putBundle(StreamCallActivityConfigStrings.EXTRA_STREAM_CONFIG, config)
+                // Add the generated call ID and other params
+                putParcelable(NotificationHandler.INTENT_EXTRA_CALL_CID, cid)
+                putBoolean(EXTRA_LEAVE_WHEN_LAST, leaveWhenLastInCall)
+                // Setup the members to transfer to the new activity
+                val membersArrayList = ArrayList<String>()
+                members.forEach { membersArrayList.add(it) }
+                putStringArrayList(EXTRA_MEMBERS_ARRAY, membersArrayList)
+                extraData?.also {
+                    putAll(it)
+                }
+
+                logger.d { "Created Bundle. -> $this" }
+            }
+        }
     }
 
     // Internal state
@@ -194,7 +223,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     /**
      * The call which is accepted
      */
-    protected fun isCurrentAcceptedCall(call: Call): Boolean =
+    protected open fun isCurrentAcceptedCall(call: Call): Boolean =
         (::cachedCall.isInitialized) && (cachedCall.id == call.id)
 
     // Public values
@@ -242,7 +271,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 
-    protected var callHandlerDelegate: IncomingCallHandlerDelegate? = null
+    protected open var callHandlerDelegate: IncomingCallHandlerDelegate? = null
 
     // Default implementation that rejects new calls when there's an ongoing call
     private val defaultCallHandler = object : IncomingCallHandlerDelegate {
@@ -345,7 +374,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         handleOnNewIntentAction(intent)
     }
 
-    protected fun handleOnNewIntentAction(intent: Intent) {
+    protected open fun handleOnNewIntentAction(intent: Intent) {
         when (intent.action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 handleOnNewIncomingCallAcceptAction()
@@ -354,7 +383,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 
-    protected fun handleOnNewIncomingCallAcceptAction() {
+    protected open fun handleOnNewIncomingCallAcceptAction() {
         val handler = callHandlerDelegate ?: defaultCallHandler
         val newCallCid = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)?.cid
         val activeCall = StreamVideo.instance().state.activeCall.value
@@ -1131,7 +1160,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * switch to new call. After rejecting current call, the user
      * needs to wait for a transition time
      */
-    protected fun getCallTransitionTime(): Long = 3_000L
+    protected open fun getCallTransitionTime(): Long = 3_000L
 
     private suspend fun Call.acceptThenJoin() =
         withContext(Dispatchers.IO) { accept().flatMap { join() } }

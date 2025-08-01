@@ -58,6 +58,9 @@ class CallServiceTest {
     @MockK
     lateinit var mockNotification: Notification
 
+    @MockK
+    lateinit var payload: Map<String, Any?>
+
     private lateinit var context: Context
     private lateinit var callService: CallService
     private lateinit var testCallId: StreamCallId
@@ -216,7 +219,9 @@ class CallServiceTest {
     @Test
     fun `getNotificationPair returns correct data for ongoing call`() {
         // Given
-        every { mockStreamVideoClient.getOngoingCallNotification(any(), any()) } returns mockNotification
+        every {
+            mockStreamVideoClient.getOngoingCallNotification(any(), any(), payload = any())
+        } returns mockNotification
 
         // When
         val result = callService.getNotificationPair(
@@ -240,7 +245,7 @@ class CallServiceTest {
             every { value } returns null
         }
         every {
-            mockStreamVideoClient.getRingingCallNotification(any(), any(), any(), any())
+            mockStreamVideoClient.getRingingCallNotification(any(), any(), any(), any(), any())
         } returns mockNotification
 
         // When

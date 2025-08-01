@@ -27,6 +27,7 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.StreamIntentResolver
@@ -51,7 +52,8 @@ constructor(
     notificationManager: NotificationManagerCompat = NotificationManagerCompat.from(
         application.applicationContext,
     ),
-    intentResolver: StreamIntentResolver = DefaultStreamIntentResolver(application),
+    intentResolver: StreamIntentResolver =
+        DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver()),
     hideRingingNotificationInForeground: Boolean = false,
     initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
         StreamNotificationBuilderInterceptors(),

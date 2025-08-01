@@ -28,7 +28,11 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.internal.DismissNotificationActivity
 import io.getstream.video.android.model.StreamCallId
 
-public class DefaultStreamIntentResolver(val context: Context) : StreamIntentResolver {
+public class DefaultStreamIntentResolver(
+    val context: Context,
+    val notificationIntentBundleResolver:
+    NotificationIntentBundleResolver,
+) : StreamIntentResolver {
 
     private val logger by taggedLogger("IntentResolver")
 
@@ -37,16 +41,26 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
     override fun searchIncomingCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
-    ): PendingIntent? =
-        searchActivityPendingIntent(
-            Intent(NotificationHandler.ACTION_INCOMING_CALL),
+        payload: Map<String, Any?>,
+    ): PendingIntent? {
+        return searchActivityPendingIntent(
+            Intent(NotificationHandler.ACTION_INCOMING_CALL)
+                .putExtras(
+                    notificationIntentBundleResolver.getIncomingCallBundle(
+                        callId,
+                        notificationId,
+                        payload,
+                    ),
+                ),
             callId,
             notificationId,
         )
+    }
 
     /**
      * Search for an activity that is used for outgoing calls.
@@ -54,15 +68,23 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
      *
      * @param callId the call id
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
     override fun searchOutgoingCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
+        payload: Map<String, Any?>,
     ): PendingIntent? {
         return searchActivityPendingIntent(
-            Intent(
-                NotificationHandler.ACTION_OUTGOING_CALL,
-            ).addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
+            Intent(NotificationHandler.ACTION_OUTGOING_CALL)
+                .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                .putExtras(
+                    notificationIntentBundleResolver.getOutgoingCallBundle(
+                        callId,
+                        notificationId,
+                        payload,
+                    ),
+                ),
             callId,
             notificationId,
         )
@@ -73,13 +95,22 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
     override fun searchNotificationCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
+        payload: Map<String, Any?>,
     ): PendingIntent? =
         searchActivityPendingIntent(
-            Intent(NotificationHandler.ACTION_NOTIFICATION),
+            Intent(NotificationHandler.ACTION_NOTIFICATION)
+                .putExtras(
+                    notificationIntentBundleResolver.getNotificationCallBundle(
+                        callId,
+                        notificationId,
+                        payload,
+                    ),
+                ),
             callId,
             notificationId,
         )
@@ -89,24 +120,34 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
     override fun searchMissedCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
+        payload: Map<String, Any?>,
     ): PendingIntent? =
         searchActivityPendingIntent(
-            Intent(NotificationHandler.ACTION_MISSED_CALL),
+            Intent(NotificationHandler.ACTION_MISSED_CALL)
+                .putExtras(
+                    notificationIntentBundleResolver.getMissedCallBundle(
+                        callId,
+                        notificationId,
+                        payload,
+                    ),
+                ),
             callId,
             notificationId,
         )
 
-    override fun getDefaultPendingIntent(): PendingIntent {
+    override fun getDefaultPendingIntent(payload: Map<String, Any?>): PendingIntent {
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
             ?: Intent(Intent.ACTION_MAIN).apply {
                 setPackage(context.packageName)
                 addCategory(Intent.CATEGORY_LAUNCHER)
             }
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtras(notificationIntentBundleResolver.getDefaultBundle(payload))
         return PendingIntent.getActivity(
             context,
             0,
@@ -120,13 +161,22 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      */
     override fun searchLiveCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
+        payload: Map<String, Any?>,
     ): PendingIntent? =
         searchActivityPendingIntent(
-            Intent(NotificationHandler.ACTION_LIVE_CALL),
+            Intent(NotificationHandler.ACTION_LIVE_CALL)
+                .putExtras(
+                    notificationIntentBundleResolver.getLiveCallBundle(
+                        callId,
+                        notificationId,
+                        payload,
+                    ),
+                ),
             callId,
             notificationId,
         )
@@ -136,14 +186,23 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
      *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
+     * @param payload The payload from Push Notification
      * @return The [PendingIntent] which can trigger a component to consume accept call events.
      */
     override fun searchAcceptCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
+        payload: Map<String, Any?>,
     ): PendingIntent? =
         searchActivityPendingIntent(
-            Intent(NotificationHandler.ACTION_ACCEPT_CALL),
+            Intent(NotificationHandler.ACTION_ACCEPT_CALL)
+                .putExtras(
+                    notificationIntentBundleResolver.getAcceptCallBundle(
+                        callId,
+                        notificationId,
+                        payload,
+                    ),
+                ),
             callId,
             notificationId,
         )
@@ -153,23 +212,34 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
      * a call from the Stream Server.
      *
      * @param callId The ID of the call.
+     * @param payload The payload from Push Notification
      * @return The [PendingIntent] which can trigger a component to consume the call rejection event.
      */
     override fun searchRejectCallPendingIntent(
         callId: StreamCallId,
-    ): PendingIntent? = searchBroadcastPendingIntent(Intent(ACTION_REJECT_CALL), callId)
+        payload: Map<String, Any?>,
+    ): PendingIntent? =
+        searchBroadcastPendingIntent(
+            Intent(
+                ACTION_REJECT_CALL,
+            ).putExtras(notificationIntentBundleResolver.getRejectCallBundle(callId, payload)),
+            callId,
+        )
 
     /**
      * Searches for a broadcast receiver that can consume the [ACTION_REJECT_CALL] intent to reject
      * a call from the Stream Server.
      *
      * @param callId The ID of the call.
+     * @param payload The payload from Push Notification
      * @return The [PendingIntent] which can trigger a component to consume the call rejection event.
      */
     override fun searchEndCallPendingIntent(
         callId: StreamCallId,
+        payload: Map<String, Any?>,
     ): PendingIntent? = searchBroadcastPendingIntent(
-        Intent(NotificationHandler.ACTION_LEAVE_CALL),
+        Intent(NotificationHandler.ACTION_LEAVE_CALL)
+            .putExtras(notificationIntentBundleResolver.getEndCallPendingBundle(callId, payload)),
         callId,
     )
 
@@ -182,9 +252,17 @@ public class DefaultStreamIntentResolver(val context: Context) : StreamIntentRes
     override fun searchOngoingCallPendingIntent(
         callId: StreamCallId,
         notificationId: Int,
+        payload: Map<String, Any?>,
     ): PendingIntent? {
         val intent = Intent(ACTION_ONGOING_CALL)
-        intent.putExtra(INTENT_EXTRA_CALL_CID, callId.cid)
+            .putExtra(INTENT_EXTRA_CALL_CID, callId.cid)
+            .putExtras(
+                notificationIntentBundleResolver.getOngoingCallBundle(
+                    callId,
+                    notificationId,
+                    payload,
+                ),
+            )
         return searchActivityPendingIntent(
             intent,
             callId,
