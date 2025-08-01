@@ -113,7 +113,6 @@ public fun RingingCallContent(
     onIdle: @Composable () -> Unit = {},
 ) {
     val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
-
     when (ringingState) {
         is RingingState.Incoming -> {
             onIncomingContent?.invoke(

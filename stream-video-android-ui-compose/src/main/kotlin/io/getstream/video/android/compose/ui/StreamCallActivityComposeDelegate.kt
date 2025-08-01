@@ -38,6 +38,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +71,7 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
@@ -77,6 +79,7 @@ import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 /**
@@ -200,7 +203,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             var callAction: CallAction by remember {
                 mutableStateOf(CustomAction(tag = "initial"))
             }
-
             when (callAction) {
                 is LeaveCall, is DeclineCall, is CancelCall -> {
                     CallDisconnectedContent(call)
@@ -309,6 +311,38 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     }
                 }
             }
+
+            HandleCallRejectionFromNotification(call)
+        }
+    }
+
+    @Composable
+    public open fun StreamCallActivity.HandleCallRejectionFromNotification(call: Call) {
+        /**
+         * Call can be rejected by [RejectCallBroadcastReceiver] so the activity
+         * needs to observe [Call.state.rejectedBy]
+         */
+        val rejectedBy by call.state.rejectedBy.collectAsStateWithLifecycle()
+        val rejectActionBundle by call.state.rejectActionBundle.collectAsStateWithLifecycle()
+
+        LaunchedEffect(rejectedBy, rejectActionBundle) {
+            val currentUserId = StreamVideo.instanceOrNull()?.userId
+            if (rejectedBy.contains(currentUserId) && rejectActionBundle != null) {
+                logger.d { "[HandleCallRejectionFromNotification] Start" }
+                // check if there is no ongoing call then safely finish it else do nothing
+                val noActiveCall = (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
+                if (noActiveCall) {
+                    onEnded(call)
+                    val localConfiguration = rejectActionBundle?.extractStreamActivityConfig()
+                    localConfiguration?.let { configuration ->
+                        if (configuration.closeScreenOnCallEnded) {
+                            safeFinish()
+                        } else {
+                            logger.d { "Don't close activity as some other call is active" }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -330,7 +364,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         granted: List<String>,
         notGranted: List<String>,
     ) {
-        if (!showRationale && configuration.canSkipPermissionRationale) {
+        if (!showRationale && configurationMap[call.id]?.canSkipPermissionRationale == true) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
             safeFinish()
         } else {
@@ -341,6 +375,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.LoadingContent(call: Call) {
         // No loading screen by default...
+        logger.d { "[LoadingContent] call.id = ${call.id}" }
     }
 
     @Composable
@@ -349,23 +384,38 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         content: @Composable (call: Call) -> Unit,
     ) {
         val connection by call.state.connection.collectAsStateWithLifecycle()
+        logger.d {
+            "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=$this"
+        }
         when (connection) {
             RealtimeConnection.Disconnected -> {
-                if (!configuration.closeScreenOnCallEnded) {
-                    CallDisconnectedContent(call)
+                if (isCurrentAcceptedCall(call)) {
+                    val configuration = configurationMap[call.id]
+                    if (configuration?.closeScreenOnCallEnded == false) {
+                        CallDisconnectedContent(call)
+                    } else {
+                        logger.d { "[RealtimeConnection.Disconnected], call_id = ${call.id}" }
+                        safeFinish()
+                    }
                 } else {
-                    // This is just for safety, will be called from other place as well.
-                    safeFinish()
+                    logger.d { "[RealtimeConnection.Disconnected] for in-active call, call_id = ${call.id}" }
+                    // Do nothing, this block belongs to in-active call
                 }
             }
 
             is RealtimeConnection.Failed -> {
-                if (!configuration.closeScreenOnError) {
-                    val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
-                    CallFailedContent(call, err)
+                if (isCurrentAcceptedCall(call)) {
+                    val configuration = configurationMap[call.id]
+                    if (configuration?.closeScreenOnError == false) {
+                        val err =
+                            Exception("${(connection as? RealtimeConnection.Failed)?.error}")
+                        CallFailedContent(call, err)
+                    } else {
+                        safeFinish()
+                    }
                 } else {
-                    // This is just for safety, will be called from other place as well.
-                    safeFinish()
+                    // Do nothing, this block belongs to in-active call
+                    logger.d { "[RealtimeConnection.Failed] for in-active call, call_id = ${call.id}" }
                 }
             }
 
@@ -377,6 +427,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
 
     @Composable
     override fun StreamCallActivity.AudioCallContent(call: Call) {
+        logger.d { "[AudioCallContent], call_id = ${call.id}" }
         val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
 
         io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent(
@@ -389,6 +440,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
 
     @Composable
     override fun StreamCallActivity.VideoCallContent(call: Call) {
+        logger.d { "[VideoCallContent], call_id = ${call.id}" }
         CallContent(call = call, onCallAction = {
             onCallAction(call, it)
         }, onBackPressed = {
@@ -413,6 +465,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         onBackPressed: () -> Unit,
         onCallAction: (CallAction) -> Unit,
     ) {
+        logger.d { "[OutgoingCallContent], call_id = ${call.id}" }
         io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent(
             call = call,
             isVideoType = isVideoType,
@@ -443,6 +496,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         onBackPressed: () -> Unit,
         onCallAction: (CallAction) -> Unit,
     ) {
+        logger.d { "[IncomingCallContent], call_id = ${call.id}" }
         io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent(
             call = call,
             isVideoType = isVideoType,
@@ -459,12 +513,14 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.NoAnswerContent(call: Call) {
         // There is not default UI for no-answer content.
+        logger.d { "[NoAnswerContent], call_id = ${call.id}" }
         CallDisconnectedContent(call = call)
     }
 
     @Composable
     override fun StreamCallActivity.RejectedContent(call: Call) {
         // There is not default UI for rejected content.
+        logger.d { "[RejectedContent], call_id = ${call.id}" }
         CallDisconnectedContent(call = call)
     }
 
@@ -472,6 +528,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun StreamCallActivity.CallFailedContent(call: Call, exception: java.lang.Exception) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call failed content.
+        logger.d { "[CallFailedContent], call_id = ${call.id}" }
         safeFinish()
     }
 
@@ -479,6 +536,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun StreamCallActivity.CallDisconnectedContent(call: Call) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call ended content.
+        logger.d { "[CallDisconnectedContent], call_id = ${call.id}" }
         safeFinish()
     }
 

@@ -18,6 +18,7 @@ package io.getstream.video.android.core.notifications.internal.receivers
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
@@ -39,8 +40,18 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
 
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
         when (val rejectResult = call.reject(RejectReason.Decline)) {
-            is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
-            is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
+            is Result.Success -> {
+                val userId = StreamVideo.instanceOrNull()?.userId
+                userId?.let {
+                    val set = mutableSetOf(it)
+                    call.state.updateRejectedBy(set)
+                    call.state.updateRejectActionBundle(intent.extras ?: Bundle())
+                }
+                logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
+            }
+            is Result.Failure -> {
+                logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
+            }
         }
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
         CallService.removeIncomingCall(

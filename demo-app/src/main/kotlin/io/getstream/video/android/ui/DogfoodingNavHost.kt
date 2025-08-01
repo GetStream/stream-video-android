@@ -29,6 +29,7 @@ import androidx.navigation.navArgument
 import io.getstream.video.android.CallActivity
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.ui.join.CallJoinScreen
 import io.getstream.video.android.ui.join.barcode.BarcodeScanner
 import io.getstream.video.android.ui.lobby.CallLobbyScreen
@@ -94,6 +95,10 @@ fun AppNavHost(
                     context.startActivity(
                         StreamCallActivity.callIntent(
                             action = NotificationHandler.ACTION_OUTGOING_CALL,
+                            configuration = StreamCallActivityConfiguration(
+                                closeScreenOnCallEnded = true,
+                            ),
+                            leaveWhenLastInCall = true,
                             context = context,
                             cid = cid,
                             members = members.split(","),

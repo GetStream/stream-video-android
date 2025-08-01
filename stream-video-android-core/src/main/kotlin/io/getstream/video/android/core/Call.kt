@@ -634,7 +634,7 @@ public class Call(
             )
             session.fastReconnect(reconnectDetails)
         } else {
-            logger.e { "[reconnect] Disconnecting" }
+            logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
         }
     }
@@ -767,18 +767,19 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        logger.d { "[leave] #ringing; no args" }
+        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
         leave(disconnectionReason = null)
     }
 
     private fun leave(disconnectionReason: Throwable?) = atomicLeave {
+        val callId = id
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
+        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return@atomicLeave
@@ -1318,7 +1319,7 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "[accept] #ringing; no args" }
+        logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
@@ -1327,7 +1328,7 @@ public class Call(
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "[reject] #ringing; rejectReason: $reason" }
+        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
     }
 

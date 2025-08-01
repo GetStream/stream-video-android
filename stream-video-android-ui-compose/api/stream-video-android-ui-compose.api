@@ -389,6 +389,7 @@ public class io/getstream/video/android/compose/ui/StreamCallActivityComposeDele
 	public fun AudioCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun CallDisconnectedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun CallFailedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/Exception;Landroidx/compose/runtime/Composer;I)V
+	public fun HandleCallRejectionFromNotification (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun IncomingCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 	public fun LoadingContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun NoAnswerContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V

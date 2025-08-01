@@ -5610,6 +5610,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getPinnedParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getReactions ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRecording ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getRejectActionBundle ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRejectedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRemoteParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingState ()Lkotlinx/coroutines/flow/StateFlow;
@@ -5647,6 +5648,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateParticipantSortingOrder (Ljava/util/Comparator;)V
 	public final fun updateParticipantVisibility (Ljava/lang/String;Lio/getstream/video/android/core/model/VisibilityOnScreenState;)V
 	public final fun updateParticipantVisibilityFlow (Lkotlinx/coroutines/flow/Flow;)V
+	public final fun updateRejectActionBundle (Landroid/os/Bundle;)V
 	public final fun updateRejectedBy (Ljava/util/Set;)V
 	public final fun upsertParticipants (Ljava/util/List;)V
 }

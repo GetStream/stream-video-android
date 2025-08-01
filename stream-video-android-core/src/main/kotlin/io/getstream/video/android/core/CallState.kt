@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.BlockedUserEvent
@@ -547,6 +548,9 @@ public class CallState(
 
     private val _rejectedBy: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     val rejectedBy: StateFlow<Set<String>> = _rejectedBy
+
+    private val _rejectActionBundle: MutableStateFlow<Bundle?> = MutableStateFlow(null)
+    val rejectActionBundle: StateFlow<Bundle?> = _rejectActionBundle
 
     internal val _session = MutableStateFlow<CallSessionResponse?>(null)
     val session: StateFlow<CallSessionResponse?> = _session
@@ -1528,6 +1532,10 @@ public class CallState(
 
     fun updateRejectedBy(userId: Set<String>) {
         _rejectedBy.value = userId
+    }
+
+    fun updateRejectActionBundle(bundle: Bundle) {
+        _rejectActionBundle.value = bundle
     }
 }
 
