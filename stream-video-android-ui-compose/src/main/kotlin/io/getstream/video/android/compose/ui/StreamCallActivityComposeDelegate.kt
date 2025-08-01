@@ -383,8 +383,9 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         call: Call,
         content: @Composable (call: Call) -> Unit,
     ) {
-        logger.d { "[ConnectionAvailable], call_id = ${call.id}" }
+
         val connection by call.state.connection.collectAsStateWithLifecycle()
+        logger.d { "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=${this}" }
         when (connection) {
             RealtimeConnection.Disconnected -> {
                 if (isCurrentAcceptedCall(call)) {
@@ -392,11 +393,11 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     if (configuration?.closeScreenOnCallEnded == false) {
                         CallDisconnectedContent(call)
                     } else {
-                        logger.d { "[RealtimeConnection.Disconnected], call id = ${call.id}" }
+                        logger.d { "[RealtimeConnection.Disconnected], call_id = ${call.id}" }
                         safeFinish()
                     }
                 } else {
-                    logger.d { "[RealtimeConnection.Disconnected] for in-active call, call id = ${call.id}" }
+                    logger.d { "[RealtimeConnection.Disconnected] for in-active call, call_id = ${call.id}" }
                     // Do nothing, this block belongs to in-active call
                 }
             }
@@ -413,7 +414,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     }
                 } else {
                     // Do nothing, this block belongs to in-active call
-                    logger.d { "[RealtimeConnection.Failed] for in-active call, call id = ${call.id}" }
+                    logger.d { "[RealtimeConnection.Failed] for in-active call, call_id = ${call.id}" }
                 }
             }
 

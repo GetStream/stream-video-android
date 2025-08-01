@@ -393,8 +393,8 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             else -> {
                 if (handler.shouldAcceptNewCall(activeCall, intent)) {
-                    // We want to reject the ongoing active call
-                    reject(activeCall, RejectReason.Decline, onSuccessFinish, onErrorFinish)
+                    // We want to leave the ongoing active call
+                    leave(activeCall, onSuccessFinish, onErrorFinish)
                     lifecycleScope.launch(Dispatchers.Default) {
                         delay(
                             getCallTransitionTime(),
@@ -528,6 +528,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
         val streamCallId = intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
         streamCallId?.let {
+            logger.d { "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
             configurationMap[it.id] = config
         }
     }
@@ -788,7 +789,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
+        logger.d { "[reject] #ringing; rejectReason: $reason, call_id: ${call.id}" }
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         call.state.cancelTimeout()
         call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
@@ -1160,7 +1161,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * switch to new call. After rejecting current call, the user
      * needs to wait for a transition time
      */
-    protected open fun getCallTransitionTime(): Long = 3_000L
+    protected open fun getCallTransitionTime(): Long = 0L
 
     private suspend fun Call.acceptThenJoin() =
         withContext(Dispatchers.IO) { accept().flatMap { join() } }
