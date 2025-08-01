@@ -634,7 +634,7 @@ public class Call(
             )
             session.fastReconnect(reconnectDetails)
         } else {
-            logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:${id}" }
+            logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
         }
     }
@@ -779,7 +779,7 @@ public class Call(
         sfuListener?.cancel()
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = ${id}" }
+        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return@atomicLeave

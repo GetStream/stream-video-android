@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing
 
-import android.util.Log
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable

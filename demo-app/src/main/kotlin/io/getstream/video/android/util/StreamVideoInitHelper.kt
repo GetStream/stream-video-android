@@ -236,14 +236,14 @@ object StreamVideoInitHelper {
                             override fun getIncomingCallBundle(
                                 callId: StreamCallId,
                                 notificationId: Int,
-                                payload: Map<String, Any?>
+                                payload: Map<String, Any?>,
                             ): Bundle {
                                 return StreamCallActivity.callIntentBundle(
-                                        callId,
-                                configuration = StreamCallActivityConfiguration(
-                                    closeScreenOnCallEnded = true,
-                                ),
-                                leaveWhenLastInCall = true,
+                                    callId,
+                                    configuration = StreamCallActivityConfiguration(
+                                        closeScreenOnCallEnded = true,
+                                    ),
+                                    leaveWhenLastInCall = true,
                                 )
                             }
 

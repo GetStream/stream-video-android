@@ -20,7 +20,6 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -386,42 +385,42 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     ) {
         logger.d { "[ConnectionAvailable], call_id = ${call.id}" }
         val connection by call.state.connection.collectAsStateWithLifecycle()
-            when (connection) {
-                RealtimeConnection.Disconnected -> {
-                    if (isCurrentAcceptedCall(call)) {
-                        val configuration = configurationMap[call.id]
-                        if (configuration?.closeScreenOnCallEnded == false) {
-                            CallDisconnectedContent(call)
-                        } else {
-                            logger.d { "[RealtimeConnection.Disconnected], call id = ${call.id}" }
-                            safeFinish()
-                        }
+        when (connection) {
+            RealtimeConnection.Disconnected -> {
+                if (isCurrentAcceptedCall(call)) {
+                    val configuration = configurationMap[call.id]
+                    if (configuration?.closeScreenOnCallEnded == false) {
+                        CallDisconnectedContent(call)
                     } else {
-                        logger.d { "[RealtimeConnection.Disconnected] for in-active call, call id = ${call.id}" }
-                        // Do nothing, this block belongs to in-active call
+                        logger.d { "[RealtimeConnection.Disconnected], call id = ${call.id}" }
+                        safeFinish()
                     }
-                }
-
-                is RealtimeConnection.Failed -> {
-
-                    if (isCurrentAcceptedCall(call)) {
-                        val configuration = configurationMap[call.id]
-                        if (configuration?.closeScreenOnError == false) {
-                            val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
-                            CallFailedContent(call, err)
-                        } else {
-                            safeFinish()
-                        }
-                    } else {
-                        // Do nothing, this block belongs to in-active call
-                        logger.d { "[RealtimeConnection.Failed] for in-active call, call id = ${call.id}" }
-                    }
-                }
-
-                else -> {
-                    content.invoke(call)
+                } else {
+                    logger.d { "[RealtimeConnection.Disconnected] for in-active call, call id = ${call.id}" }
+                    // Do nothing, this block belongs to in-active call
                 }
             }
+
+            is RealtimeConnection.Failed -> {
+                if (isCurrentAcceptedCall(call)) {
+                    val configuration = configurationMap[call.id]
+                    if (configuration?.closeScreenOnError == false) {
+                        val err =
+                            Exception("${(connection as? RealtimeConnection.Failed)?.error}")
+                        CallFailedContent(call, err)
+                    } else {
+                        safeFinish()
+                    }
+                } else {
+                    // Do nothing, this block belongs to in-active call
+                    logger.d { "[RealtimeConnection.Failed] for in-active call, call id = ${call.id}" }
+                }
+            }
+
+            else -> {
+                content.invoke(call)
+            }
+        }
     }
 
     @Composable

@@ -95,7 +95,9 @@ fun AppNavHost(
                     context.startActivity(
                         StreamCallActivity.callIntent(
                             action = NotificationHandler.ACTION_OUTGOING_CALL,
-                            configuration = StreamCallActivityConfiguration(closeScreenOnCallEnded = true),
+                            configuration = StreamCallActivityConfiguration(
+                                closeScreenOnCallEnded = true,
+                            ),
                             leaveWhenLastInCall = true,
                             context = context,
                             cid = cid,

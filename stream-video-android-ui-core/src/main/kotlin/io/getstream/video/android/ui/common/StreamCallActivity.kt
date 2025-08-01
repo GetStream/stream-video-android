@@ -68,8 +68,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -188,16 +186,18 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.d { "[onSuccessFinish]" }
-            onEnded(call)
-            if (isCurrentAcceptedCall(call)) {
-                val configuration = configurationMap[call.id]
-                if (configuration?.closeScreenOnCallEnded == true) {
-                    logger.w { "[onSuccessFinish], The call was successfully finished! Closing activity, call_cid:${call.cid}" }
-                    safeFinish()
+        onEnded(call)
+        if (isCurrentAcceptedCall(call)) {
+            val configuration = configurationMap[call.id]
+            if (configuration?.closeScreenOnCallEnded == true) {
+                logger.w {
+                    "[onSuccessFinish], The call was successfully finished! Closing activity, call_cid:${call.cid}"
                 }
-            } else {
-                logger.d { "[onSuccessFinish] for non-active call" }
+                safeFinish()
             }
+        } else {
+            logger.d { "[onSuccessFinish] for non-active call" }
+        }
     }
 
     /**
@@ -205,27 +205,27 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      */
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "[onErrorFinish] Something went wrong" }
-            onFailed(error)
-            if (error is StreamCallActivityException) {
-                if (isCurrentAcceptedCall(error.call)) {
-                    val configuration = configurationMap[error.call.id]
-                    if (configuration?.closeScreenOnError == true) {
-                        logger.e(error) { "Finishing the activity" }
-                        safeFinish()
-                    }
-                } else {
-                    logger.e(error) { "[onErrorFinish] for non-active call" }
-                }
-            } else {
-                /**
-                 * This will execute when we got a error before creating the call object
-                 */
-                if (config.closeScreenOnError) {
+        onFailed(error)
+        if (error is StreamCallActivityException) {
+            if (isCurrentAcceptedCall(error.call)) {
+                val configuration = configurationMap[error.call.id]
+                if (configuration?.closeScreenOnError == true) {
                     logger.e(error) { "Finishing the activity" }
                     safeFinish()
                 }
+            } else {
+                logger.e(error) { "[onErrorFinish] for non-active call" }
+            }
+        } else {
+            /**
+             * This will execute when we got a error before creating the call object
+             */
+            if (config.closeScreenOnError) {
+                logger.e(error) { "Finishing the activity" }
+                safeFinish()
             }
         }
+    }
 
     /**
      * The call which is accepted
@@ -284,7 +284,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private val defaultCallHandler = object : IncomingCallHandlerDelegate {
         override fun shouldAcceptNewCall(activeCall: Call, intent: Intent) = true
 
-        override fun onAcceptCall(context:Context, intent: Intent) {
+        override fun onAcceptCall(context: Context, intent: Intent) {
             finish()
             startActivity(intent)
         }
