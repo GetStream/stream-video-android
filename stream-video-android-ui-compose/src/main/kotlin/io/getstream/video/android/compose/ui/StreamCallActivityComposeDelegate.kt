@@ -204,7 +204,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             var callAction: CallAction by remember {
                 mutableStateOf(CustomAction(tag = "initial"))
             }
-            Log.d("Noob", "Noob, [RootContent] callAction = $callAction, call_id = ${call.id}")
             when (callAction) {
                 is LeaveCall, is DeclineCall, is CancelCall -> {
                     CallDisconnectedContent(call)
@@ -330,7 +329,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         LaunchedEffect(rejectedBy, rejectActionBundle) {
             val currentUserId = StreamVideo.instanceOrNull()?.userId
             if (rejectedBy.contains(currentUserId) && rejectActionBundle != null) {
-                logger.d { "Noob, [HandleCallRejectionFromNotification] Start" }
+                logger.d { "[HandleCallRejectionFromNotification] Start" }
                 // check if there is no ongoing call then safely finish it else do nothing
                 val noActiveCall = (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
                 if (noActiveCall) {
@@ -340,7 +339,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                         if (configuration.closeScreenOnCallEnded) {
                             safeFinish()
                         } else {
-                            logger.d { "Noob, Don't close activity as some other call is active" }
+                            logger.d { "Don't close activity as some other call is active" }
                         }
                     }
                 }
@@ -377,7 +376,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.LoadingContent(call: Call) {
         // No loading screen by default...
-        logger.d { "Noob, [LoadingContent] call.id = ${call.id}" }
+        logger.d { "[LoadingContent] call.id = ${call.id}" }
     }
 
     @Composable
@@ -385,29 +384,20 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         call: Call,
         content: @Composable (call: Call) -> Unit,
     ) {
-        logger.d { "Noob, [ConnectionAvailable], call_id = ${call.id}" }
-        val connectionFlow = remember(call) { call.state.connection }
-
+        logger.d { "[ConnectionAvailable], call_id = ${call.id}" }
         val connection by call.state.connection.collectAsStateWithLifecycle()
-        val connection2 by connectionFlow.collectAsStateWithLifecycle()
-
-        Log.d("Noob", "Noob connection=$connection, connection2 = $connection2, call_id: ${call.id}, cached_call_id: ${cachedCall.id}")
-
-        val isReplacingCall by isInTransition.collectAsStateWithLifecycle()
-        if (!isReplacingCall) {
             when (connection) {
                 RealtimeConnection.Disconnected -> {
                     if (isCurrentAcceptedCall(call)) {
-                        val callId = call.id
                         val configuration = configurationMap[call.id]
                         if (configuration?.closeScreenOnCallEnded == false) {
                             CallDisconnectedContent(call)
                         } else {
-                            logger.d { "Noob, [RealtimeConnection.Disconnected], call id = ${call.id}" }
+                            logger.d { "[RealtimeConnection.Disconnected], call id = ${call.id}" }
                             safeFinish()
                         }
                     } else {
-                        logger.d { "Noob, [RealtimeConnection.Disconnected] for in-active call, call id = ${call.id}" }
+                        logger.d { "[RealtimeConnection.Disconnected] for in-active call, call id = ${call.id}" }
                         // Do nothing, this block belongs to in-active call
                     }
                 }
@@ -424,7 +414,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                         }
                     } else {
                         // Do nothing, this block belongs to in-active call
-                        logger.d { "Noob, [RealtimeConnection.Failed] for in-active call, call id = ${call.id}" }
+                        logger.d { "[RealtimeConnection.Failed] for in-active call, call id = ${call.id}" }
                     }
                 }
 
@@ -432,15 +422,11 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     content.invoke(call)
                 }
             }
-        } else {
-            logger.d { "Noob, In middle of Replacing calls, so cannot observe RealtimeConnection" }
-        }
-
     }
 
     @Composable
     override fun StreamCallActivity.AudioCallContent(call: Call) {
-        logger.d { "Noob, [AudioCallContent], call_id = ${call.id}" }
+        logger.d { "[AudioCallContent], call_id = ${call.id}" }
         val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
 
         io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent(
@@ -453,7 +439,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
 
     @Composable
     override fun StreamCallActivity.VideoCallContent(call: Call) {
-        logger.d { "Noob, [VideoCallContent], call_id = ${call.id}" }
+        logger.d { "[VideoCallContent], call_id = ${call.id}" }
         CallContent(call = call, onCallAction = {
             onCallAction(call, it)
         }, onBackPressed = {
@@ -478,7 +464,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         onBackPressed: () -> Unit,
         onCallAction: (CallAction) -> Unit,
     ) {
-        logger.d { "Noob, [OutgoingCallContent], call_id = ${call.id}" }
+        logger.d { "[OutgoingCallContent], call_id = ${call.id}" }
         io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent(
             call = call,
             isVideoType = isVideoType,
@@ -509,7 +495,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         onBackPressed: () -> Unit,
         onCallAction: (CallAction) -> Unit,
     ) {
-        logger.d { "Noob, [IncomingCallContent], call_id = ${call.id}" }
+        logger.d { "[IncomingCallContent], call_id = ${call.id}" }
         io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent(
             call = call,
             isVideoType = isVideoType,
@@ -526,14 +512,14 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.NoAnswerContent(call: Call) {
         // There is not default UI for no-answer content.
-        logger.d { "Noob, [NoAnswerContent], call_id = ${call.id}" }
+        logger.d { "[NoAnswerContent], call_id = ${call.id}" }
         CallDisconnectedContent(call = call)
     }
 
     @Composable
     override fun StreamCallActivity.RejectedContent(call: Call) {
         // There is not default UI for rejected content.
-        logger.d { "Noob, [RejectedContent], call_id = ${call.id}" }
+        logger.d { "[RejectedContent], call_id = ${call.id}" }
         CallDisconnectedContent(call = call)
     }
 
@@ -541,7 +527,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun StreamCallActivity.CallFailedContent(call: Call, exception: java.lang.Exception) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call failed content.
-        logger.d { "Noob, [CallFailedContent], call_id = ${call.id}" }
+        logger.d { "[CallFailedContent], call_id = ${call.id}" }
         safeFinish()
     }
 
@@ -549,7 +535,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun StreamCallActivity.CallDisconnectedContent(call: Call) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call ended content.
-        logger.d { "Noob, [CallDisconnectedContent], call_id = ${call.id}" }
+        logger.d { "[CallDisconnectedContent], call_id = ${call.id}" }
         safeFinish()
     }
 

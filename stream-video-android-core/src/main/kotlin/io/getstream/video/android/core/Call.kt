@@ -634,8 +634,7 @@ public class Call(
             )
             session.fastReconnect(reconnectDetails)
         } else {
-            logger.e { "Noob, [reconnect] Disconnecting" }
-            logger.d { "Noob, [reconnect] [RealtimeConnection.Disconnected], call_id:${id}" }
+            logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:${id}" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
         }
     }
@@ -768,7 +767,7 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        logger.d { "Noob, [leave] #ringing; no args, call_cid:$cid" }
+        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
         leave(disconnectionReason = null)
     }
 
@@ -780,8 +779,7 @@ public class Call(
         sfuListener?.cancel()
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
-        logger.d { "Noob, [leave] [RealtimeConnection.Disconnected], call_id = ${id}" }
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason" }
+        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = ${id}" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return@atomicLeave
@@ -1330,7 +1328,7 @@ public class Call(
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "Noob, [reject] #ringing; rejectReason: $reason" }
+        logger.d { "[reject] #ringing; rejectReason: $reason" }
         return clientImpl.reject(type, id, reason)
     }
 

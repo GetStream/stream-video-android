@@ -187,12 +187,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private var isFinishingSafely = false
 
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
-        logger.d { "Noob, [onSuccessFinish], is replacing call" }
+        logger.d { "[onSuccessFinish]" }
             onEnded(call)
             if (isCurrentAcceptedCall(call)) {
                 val configuration = configurationMap[call.id]
                 if (configuration?.closeScreenOnCallEnded == true) {
-                    logger.w { "Noob, [onSuccessFinish], The call was successfully finished! Closing activity, call_cid:${call.cid}" }
+                    logger.w { "[onSuccessFinish], The call was successfully finished! Closing activity, call_cid:${call.cid}" }
                     safeFinish()
                 }
             } else {
@@ -454,25 +454,25 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onError: (suspend (Exception) -> Unit)? = onErrorFinish,
         onSuccess: (suspend (Call) -> Unit)? = null,
     ) {
-        logger.d { "Noob, [onIntentAction] #ringing; action: $action, call.cid: ${call.cid}" }
+        logger.d { "[onIntentAction] #ringing; action: $action, call.cid: ${call.cid}" }
         when (action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
-                logger.v { "Noob, [onIntentAction] #ringing; Action ACCEPT_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action ACCEPT_CALL, ${call.cid}" }
                 accept(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_REJECT_CALL -> {
-                logger.v { "Noob, [onIntentAction] #ringing; Action REJECT_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action REJECT_CALL, ${call.cid}" }
                 reject(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_INCOMING_CALL -> {
-                logger.v { "Noob, [onIntentAction] #ringing; Action INCOMING_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action INCOMING_CALL, ${call.cid}" }
                 get(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_OUTGOING_CALL -> {
-                logger.v { "Noob, [onIntentAction] #ringing; Action OUTGOING_CALL, ${call.cid}" }
+                logger.v { "[onIntentAction] #ringing; Action OUTGOING_CALL, ${call.cid}" }
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 create(
@@ -486,7 +486,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             else -> {
                 logger.w {
-                    "Noob, [onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
+                    "[onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
                 }
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 // If the call does not exist it will be created.
@@ -788,7 +788,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        logger.d { "Noob, [reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
+        logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         call.state.cancelTimeout()
         call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
@@ -931,11 +931,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
                 val total = call.state.participants.value.size
-                logger.d { "Noob, Participant left, remaining: $total" }
-                // TODO Rahul remove this log below later
+                logger.d { "Participant left, remaining: $total" }
                 lifecycleScope.launch(Dispatchers.Default) {
                     call.state.participants.value.forEachIndexed { i, v ->
-                        logger.d { "Noob, Participant [$i]=${v.name.value}" }
+                        logger.d { "Participant [$i]=${v.name.value}" }
                     }
                 }
 
@@ -957,7 +956,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         logger.d { "You are the last participant." }
         val leaveWhenLastInCall =
             intent.getBooleanExtra(EXTRA_LEAVE_WHEN_LAST, DEFAULT_LEAVE_WHEN_LAST)
-        logger.d { "Noob, leaveWhenLastInCall = $leaveWhenLastInCall" }
+        logger.d { "leaveWhenLastInCall = $leaveWhenLastInCall" }
         if (leaveWhenLastInCall) {
             onCallAction(call, LeaveCall)
         }
@@ -1016,7 +1015,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * @param call the call
      */
     public open fun applyDashboardSettings(call: Call) {
-        logger.d { "Noob, [applyDashboardSettings] for call_cid: ${call.cid}" }
+        logger.d { "[applyDashboardSettings] for call_cid: ${call.cid}" }
         val callSettings = call.state.settings.value
         val microphoneStatus = call.microphone.status.value
         val cameraStatus = call.camera.status.value
@@ -1169,7 +1168,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     public fun safeFinish() {
         if (!this.isFinishing && !isFinishingSafely) {
             isFinishingSafely = true
-            logger.d { "Noob, [safeFinish] call_id:${cachedCall.cid}" }
+            logger.d { "[safeFinish] call_id:${cachedCall.cid}" }
             finish()
         }
     }
