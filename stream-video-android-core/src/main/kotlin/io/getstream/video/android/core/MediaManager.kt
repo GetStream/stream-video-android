@@ -43,19 +43,23 @@ import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
+import org.webrtc.CameraVideoCapturer
 import org.webrtc.EglBase
 import org.webrtc.MediaStreamTrack
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
 import stream.video.sfu.models.VideoDimension
 import java.util.UUID
+import kotlin.coroutines.resumeWithException
 
 sealed class DeviceStatus {
     data object NotSelected : DeviceStatus()
@@ -169,6 +173,7 @@ class SpeakerManager(
                     selectedBeforeSpeaker != null &&
                         selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
                         devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
+
                     else -> firstNonSpeaker
                 }
 
@@ -659,20 +664,76 @@ class CameraManager(
         }
     }
 
-    /**
-     * Flips the camera
-     */
-    fun flip() {
-        if (isCapturingVideo) {
-            setup()
-            val newDirection = when (_direction.value) {
-                CameraDirection.Front -> CameraDirection.Back
-                CameraDirection.Back -> CameraDirection.Front
-            }
-            val device = devices.firstOrNull { it.direction == newDirection }
-            device?.let { select(it.id, triggeredByFlip = true) }
+    private var job: Job? = null
 
-            videoCapturer.switchCamera(null)
+    private suspend fun flipInternal(): Boolean =
+        suspendCancellableCoroutine { cont ->
+            videoCapturer.switchCamera(object : CameraVideoCapturer.CameraSwitchHandler {
+                override fun onCameraSwitchDone(isFrontCamera: Boolean) {
+                    if (cont.isActive) cont.resumeWith(Result.success(isFrontCamera))
+                }
+
+                override fun onCameraSwitchError(error: String?) {
+                    if (cont.isActive) {
+                        cont.resumeWithException(
+                            RuntimeException(
+                                error ?: "Unknown",
+                            ),
+                        )
+                    }
+                }
+            })
+            cont.invokeOnCancellation {
+                // No direct cancel for switchCamera; nothing to do here.
+            }
+        }
+
+    /** Flips the camera */
+    fun flip() {
+        logger.v { "[flip] no args" }
+        if (!isCapturingVideo) {
+            return
+        }
+
+        if (job != null) {
+            logger.v { "[flip] job already running" }
+            return
+        }
+
+        job = mediaManager.scope.launch {
+            logger.v { "[flip] launched" }
+            try {
+                val isFront = flipInternal()
+                logger.v { "[flip] isFront: $isFront" }
+
+                // 3) Update state ONLY after success; no select()/restart.
+                val newDir = if (isFront) CameraDirection.Front else CameraDirection.Back
+                _direction.value = newDir
+
+                val dev = devices.firstOrNull { it.direction == newDir }
+                _selectedDevice.value = dev
+                _availableResolutions.value = dev?.supportedFormats?.toList().orEmpty()
+
+                _resolution.value = selectDesiredResolution(
+                    dev?.supportedFormats,
+                    mediaManager.call.state.settings.value?.video,
+                )
+                if (_resolution.value != null) {
+                    videoCapturer.changeCaptureFormat(
+                        _resolution.value!!.width,
+                        _resolution.value!!.height,
+                        _resolution.value!!.framerate.max,
+                    )
+                }
+
+                // preview.mirror = (newDir == CameraDirection.Front)
+            } catch (t: Throwable) {
+                logger.e(t) { "[flip] failed" }
+            } finally {
+                logger.v { "[flip] finally, wait to settle" }
+                delay(500)
+                job = null
+            }
         }
     }
 
@@ -752,9 +813,9 @@ class CameraManager(
      * Handle the setup of the camera manager and enumerator
      * You should only call this once the permissions have been granted
      */
-    internal fun setup(force: Boolean = false) {
+    internal fun setup(force: Boolean = false): Result<Unit> = runCatching {
         if (setupCompleted && !force) {
-            return
+            return@runCatching
         }
 
         initDeviceList()
