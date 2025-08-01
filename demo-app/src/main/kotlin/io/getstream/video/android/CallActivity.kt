@@ -37,7 +37,6 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
-import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import io.getstream.video.android.util.FullScreenCircleProgressBar
 import io.getstream.video.android.util.StreamVideoInitHelper
@@ -47,11 +46,6 @@ import kotlinx.coroutines.runBlocking
 class CallActivity : ComposeStreamCallActivity() {
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
-
-//    override fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
-//        return super.loadConfigFromIntent(intent)
-//            .copy(closeScreenOnCallEnded = false, canSkipPermissionRationale = false, closeScreenOnError = false)
-//    }
 
     @StreamCallActivityDelicateApi
     override fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {

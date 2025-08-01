@@ -383,9 +383,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         call: Call,
         content: @Composable (call: Call) -> Unit,
     ) {
-
         val connection by call.state.connection.collectAsStateWithLifecycle()
-        logger.d { "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=${this}" }
+        logger.d {
+            "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=$this"
+        }
         when (connection) {
             RealtimeConnection.Disconnected -> {
                 if (isCurrentAcceptedCall(call)) {
