@@ -18,6 +18,7 @@ package io.getstream.video.android.core.notifications.internal.receivers
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
@@ -44,6 +45,7 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
                 userId?.let {
                     val set = mutableSetOf(it)
                     call.state.updateRejectedBy(set)
+                    call.state.updateRejectActionBundle(intent.extras ?: Bundle())
                 }
                 logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
             }

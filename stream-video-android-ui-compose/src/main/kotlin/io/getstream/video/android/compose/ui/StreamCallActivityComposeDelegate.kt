@@ -79,6 +79,7 @@ import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 /**
@@ -312,23 +313,32 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 }
             }
 
-            /**
-             * Call can be rejected by [RejectCallBroadcastReceiver] so the activity
-             * needs to observe [Call.state.rejectedBy]
-             */
-            val rejectedBy by call.state.rejectedBy.collectAsStateWithLifecycle()
-            LaunchedEffect(rejectedBy) {
-                val currentUserId = StreamVideo.instanceOrNull()?.userId
-                if (rejectedBy.contains(currentUserId)) {
-                    // check if there is no ongoing call then safely finish it else do nothing
-                    val noActiveCall = (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
-                    if (noActiveCall) {
-                        onEnded(call)
-                        val configuration = configurationMap[call.id]
-                        if (configuration?.closeScreenOnCallEnded == true) {
+            HandleCallRejectionFromNotification(call)
+        }
+    }
+
+    @Composable
+    public open fun StreamCallActivity.HandleCallRejectionFromNotification(call: Call) {
+        /**
+         * Call can be rejected by [RejectCallBroadcastReceiver] so the activity
+         * needs to observe [Call.state.rejectedBy]
+         */
+        val rejectedBy by call.state.rejectedBy.collectAsStateWithLifecycle()
+        val rejectActionBundle by call.state.rejectActionBundle.collectAsStateWithLifecycle()
+
+        LaunchedEffect(rejectedBy, rejectActionBundle) {
+            val currentUserId = StreamVideo.instanceOrNull()?.userId
+            if (rejectedBy.contains(currentUserId) && rejectActionBundle != null) {
+                // check if there is no ongoing call then safely finish it else do nothing
+                val noActiveCall = (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
+                if (noActiveCall) {
+                    onEnded(call)
+                    val localConfiguration = rejectActionBundle?.extractStreamActivityConfig()
+                    localConfiguration?.let { configuration ->
+                        if (configuration.closeScreenOnCallEnded) {
                             safeFinish()
                         } else {
-                            logger.d { "Don't close activity as some other call is active" }
+                            logger.d { "Noob, Don't close activity as some other call is active" }
                         }
                     }
                 }
