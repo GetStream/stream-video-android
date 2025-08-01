@@ -44,6 +44,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
@@ -66,7 +67,8 @@ constructor(
     private val notificationPermissionHandler: NotificationPermissionHandler = DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
     ),
-    private val intentResolver: StreamIntentResolver = DefaultStreamIntentResolver(application),
+    private val intentResolver: StreamIntentResolver =
+        DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver()),
     private val hideRingingNotificationInForeground: Boolean,
     private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
         StreamNotificationBuilderInterceptors(),
@@ -123,7 +125,11 @@ constructor(
     private val logger by taggedLogger("Video:StreamNotificationHandler")
 
     // START REGION : On push arrived
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onRingingCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         CallService.showIncomingCall(
             application,
@@ -135,18 +141,23 @@ constructor(
                 callId,
                 callDisplayName,
                 shouldHaveContentIntent = true,
+                payload,
             ),
         )
     }
 
-    override fun onLiveCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onLiveCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         logger.d { "[onLiveCall] callId: ${callId.id}, callDisplayName: $callDisplayName" }
         val notificationId = callId.hashCode()
         val liveCallPendingIntent =
-            intentResolver.searchLiveCallPendingIntent(callId, notificationId)
+            intentResolver.searchLiveCallPendingIntent(callId, notificationId, payload)
                 ?: run {
                     logger.e { "Couldn't find any activity for $ACTION_LIVE_CALL" }
-                    intentResolver.getDefaultPendingIntent()
+                    intentResolver.getDefaultPendingIntent(payload)
                 }
 
         return ensureChannelAndBuildNotification(notificationChannels.incomingCallChannel) {
@@ -158,23 +169,36 @@ constructor(
         }.showNotification(notificationId)
     }
 
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
+    override fun onMissedCall(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
         val notificationId = callId.hashCode()
-        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId) ?: run {
+        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId, payload) ?: run {
             logger.e { "Couldn't find any activity for $ACTION_MISSED_CALL" }
-            intentResolver.getDefaultPendingIntent()
+            intentResolver.getDefaultPendingIntent(payload)
         }
         getMissedCallNotification(
             callId,
             callDisplayName,
+            payload,
         ).showNotification(notificationId = callId.hashCode())
     }
 
-    override fun onNotification(callId: StreamCallId, callDisplayName: String) {
+    override fun onNotification(
+        callId: StreamCallId,
+        callDisplayName: String,
+        payload: Map<String, Any?>,
+    ) {
         logger.d { "[onNotification] callId: ${callId.id}, callDisplayName: $callDisplayName" }
         val notificationId = callId.hashCode()
-        val intent = intentResolver.searchNotificationCallPendingIntent(callId, notificationId)
+        val intent = intentResolver.searchNotificationCallPendingIntent(
+            callId,
+            notificationId,
+            payload,
+        )
         if (intent == null) {
             logger.e { "Couldn't find any activity for $ACTION_NOTIFICATION" }
         }
@@ -192,11 +216,12 @@ constructor(
     override fun getMissedCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
     ): Notification? {
         logger.d { "[getMissedCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName" }
         val notificationId = callId.hashCode()
-        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId)
-            ?: intentResolver.getDefaultPendingIntent()
+        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId, payload)
+            ?: intentResolver.getDefaultPendingIntent(payload)
 
         notificationChannels.missedCallChannel.create(notificationManager)
 
@@ -218,6 +243,7 @@ constructor(
             initialNotificationBuilderInterceptor.onBuildMissedCallNotification(
                 this,
                 callDisplayName,
+                payload,
             )
         }
     }
@@ -227,14 +253,24 @@ constructor(
         callId: StreamCallId,
         callDisplayName: String?,
         shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
     ): Notification? {
         logger.d {
             "[getRingingCallNotification] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
-            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
-            val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
-            val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
+            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(
+                callId,
+                payload = payload,
+            )
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                 getIncomingCallNotification(
@@ -243,20 +279,28 @@ constructor(
                     rejectCallPendingIntent,
                     callDisplayName,
                     shouldHaveContentIntent,
+                    payload,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
             }
         } else if (ringingState is RingingState.Outgoing) {
-            val outgoingCallPendingIntent = intentResolver.searchOutgoingCallPendingIntent(callId)
-            val endCallPendingIntent = intentResolver.searchEndCallPendingIntent(callId)
+            val outgoingCallPendingIntent = intentResolver.searchOutgoingCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val endCallPendingIntent = intentResolver.searchEndCallPendingIntent(
+                callId,
+                payload = payload,
+            )
 
             if (outgoingCallPendingIntent != null && endCallPendingIntent != null) {
                 getOngoingCallNotification(
                     callId,
                     callDisplayName,
                     isOutgoingCall = true,
+                    payload = payload,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -271,6 +315,7 @@ constructor(
         ringingState: RingingState,
         callId: StreamCallId,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
         shouldHaveContentIntent: Boolean,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification? {
@@ -278,9 +323,18 @@ constructor(
             "[getRingingCallNotificationInternal] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
-            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
-            val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
-            val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
+            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(
+                callId,
+                payload = payload,
+            )
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                 getIncomingCallNotificationInternal(
@@ -288,6 +342,7 @@ constructor(
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
                     callDisplayName,
+                    payload,
                     shouldHaveContentIntent,
                     intercept,
                 )
@@ -296,14 +351,21 @@ constructor(
                 null
             }
         } else if (ringingState is RingingState.Outgoing) {
-            val outgoingCallPendingIntent = intentResolver.searchOutgoingCallPendingIntent(callId)
-            val endCallPendingIntent = intentResolver.searchEndCallPendingIntent(callId)
+            val outgoingCallPendingIntent = intentResolver.searchOutgoingCallPendingIntent(
+                callId,
+                payload = payload,
+            )
+            val endCallPendingIntent = intentResolver.searchEndCallPendingIntent(
+                callId,
+                payload = payload,
+            )
 
             if (outgoingCallPendingIntent != null && endCallPendingIntent != null) {
                 getOngoingCallNotification(
                     callId,
                     callDisplayName,
                     isOutgoingCall = true,
+                    payload = payload,
                 )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -319,6 +381,7 @@ constructor(
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
+        payload: Map<String, Any?>,
         shouldHaveContentIntent: Boolean,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
@@ -363,6 +426,7 @@ constructor(
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
         shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
     ): Notification? {
         logger.d {
             "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
@@ -372,6 +436,7 @@ constructor(
             acceptCallPendingIntent,
             rejectCallPendingIntent,
             callerName,
+            payload,
             shouldHaveContentIntent,
         ) {
             initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
@@ -381,6 +446,7 @@ constructor(
                 rejectCallPendingIntent,
                 callerName,
                 shouldHaveContentIntent,
+                payload,
             )
         }
     }
@@ -404,6 +470,7 @@ constructor(
     private inline fun getOngoingCallNotificationInternal(
         callId: StreamCallId,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
         mediaNotificationIntercept: NotificationCompat.Builder.() -> NotificationCompat.Builder = { this },
@@ -428,6 +495,7 @@ constructor(
         return if (mediaNotificationCallTypes.contains(callId.type)) {
             getMinimalMediaStyleNotification(
                 callId,
+                payload,
                 mediaNotificationIntercept,
                 playbackStateIntercept,
                 metadataIntercept,
@@ -437,6 +505,7 @@ constructor(
             getSimpleOngoingCallNotification(
                 callId,
                 callDisplayName,
+                payload,
                 isOutgoingCall,
                 remoteParticipantCount,
                 notificationBuildIntercept,
@@ -449,6 +518,7 @@ constructor(
         callDisplayName: String?,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
+        payload: Map<String, Any?>,
     ): Notification? {
         logger.d {
             "[getOngoingCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount"
@@ -456,12 +526,14 @@ constructor(
         return getOngoingCallNotificationInternal(
             callId,
             callDisplayName,
+            payload,
             isOutgoingCall,
             remoteParticipantCount,
             mediaNotificationIntercept = {
                 initialNotificationBuilderInterceptor.onBuildOngoingCallMediaNotification(
                     this,
                     callId,
+                    payload,
                 )
             },
             playbackStateIntercept = {
@@ -500,6 +572,7 @@ constructor(
                     callDisplayName,
                     isOutgoingCall,
                     remoteParticipantCount,
+                    payload,
                 )
             },
         )
@@ -510,6 +583,7 @@ constructor(
     private inline fun getSimpleOngoingCallNotification(
         callId: StreamCallId,
         callDisplayName: String?,
+        payload: Map<String, Any?>,
         isOutgoingCall: Boolean,
         remoteParticipantCount: Int,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
@@ -524,17 +598,19 @@ constructor(
             intentResolver.searchOutgoingCallPendingIntent(
                 callId,
                 notificationId,
+                payload,
             )
         } else {
             intentResolver.searchOngoingCallPendingIntent(
                 callId,
                 notificationId,
+                payload,
             )
         }
         val hangUpIntent = if (isOutgoingCall) {
-            intentResolver.searchRejectCallPendingIntent(callId)
+            intentResolver.searchRejectCallPendingIntent(callId, payload)
         } else {
-            intentResolver.searchEndCallPendingIntent(callId)
+            intentResolver.searchEndCallPendingIntent(callId, payload)
         }
 
         if (hangUpIntent == null) {
@@ -651,15 +727,25 @@ constructor(
             "[onUpdateIncomingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
         val callId = StreamCallId.fromCallCid(call.cid)
+        val payload = emptyMap<String, Any?>()
         return getRingingCallNotificationInternal(
             ringingState = call.state.ringingState.value,
             callId = callId,
             callDisplayName = callDisplayName,
             shouldHaveContentIntent = true,
             intercept = {
-                val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(callId)
-                val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(callId)
-                val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(callId)
+                val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                    callId,
+                    payload = payload,
+                )
+                val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
+                    callId,
+                    payload = payload,
+                )
+                val rejectCallPendingIntent = intentResolver.searchRejectCallPendingIntent(
+                    callId,
+                    payload = payload,
+                )
                 val initial =
                     if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                         initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
@@ -669,6 +755,7 @@ constructor(
                             rejectCallPendingIntent,
                             callDisplayName,
                             true,
+                            payload,
                         )
                     } else {
                         logger.e { "Ringing call notification not shown, one of the intents is null." }
@@ -680,6 +767,7 @@ constructor(
                     call,
                 )
             },
+            payload = payload,
         )
     }
 
@@ -687,6 +775,7 @@ constructor(
         call: Call,
         callDisplayName: String,
     ): Notification? {
+        val payload = emptyMap<String, Any?>()
         logger.d {
             "[updateOngoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
@@ -731,6 +820,7 @@ constructor(
                     initialNotificationBuilderInterceptor.onBuildOngoingCallMediaNotification(
                         this,
                         callId,
+                        payload,
                     )
                 updateNotificationBuilderInterceptor.onUpdateOngoingCallMediaNotification(
                     initialInterceptor,
@@ -743,6 +833,7 @@ constructor(
                     this,
                     callId,
                     callDisplayName,
+                    payload = payload,
                 )
                 updateNotificationBuilderInterceptor.onUpdateOngoingCallNotification(
                     initial,
@@ -750,6 +841,7 @@ constructor(
                     call,
                 )
             },
+            payload = payload,
         )
     }
 
@@ -760,6 +852,7 @@ constructor(
         logger.d {
             "[updateOutgoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
+        val payload = emptyMap<String, Any?>()
         return getRingingCallNotificationInternal(
             ringingState = call.state.ringingState.value,
             callId = StreamCallId.fromCallCid(call.cid),
@@ -771,6 +864,7 @@ constructor(
                     call.state.ringingState.value,
                     StreamCallId.fromCallCid(call.cid),
                     callDisplayName,
+                    payload = payload,
                 )
                 updateNotificationBuilderInterceptor.onUpdateOutgoingCallNotification(
                     initial,
@@ -778,6 +872,7 @@ constructor(
                     call,
                 )
             },
+            payload = payload,
         )
     }
 
@@ -894,6 +989,7 @@ constructor(
     @OptIn(ExperimentalStreamVideoApi::class)
     private inline fun getMinimalMediaStyleNotification(
         callId: StreamCallId,
+        payload: Map<String, Any?>,
         notificationBuildIntercept: NotificationCompat.Builder.() -> NotificationCompat.Builder = { this },
         playbackStateIntercept: PlaybackStateCompat.Builder.() -> Unit = { },
         metadataIntercept: MediaMetadataCompat.Builder.() -> Unit = { },
@@ -912,6 +1008,7 @@ constructor(
         val onClickIntent = intentResolver.searchOngoingCallPendingIntent(
             callId,
             notificationId,
+            payload,
         )
 
         // Channel

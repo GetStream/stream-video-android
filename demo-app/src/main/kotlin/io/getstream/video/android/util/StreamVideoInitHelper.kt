@@ -18,6 +18,7 @@ package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
@@ -32,6 +33,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
+import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
@@ -41,10 +44,13 @@ import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.notification.LiveStreamMediaNotificationInterceptor
 import io.getstream.video.android.notification.PausePlayMediaSessionCallback
+import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -223,6 +229,38 @@ object StreamVideoInitHelper {
                     mediaSessionCallback = PausePlayMediaSessionCallback(),
                     updateNotificationBuilderInterceptor = LiveStreamMediaNotificationInterceptor(context),
                     hideRingingNotificationInForeground = true,
+                    intentResolver = DefaultStreamIntentResolver(
+                        context,
+                        object : DefaultNotificationIntentBundleResolver() {
+
+                            override fun getAcceptCallBundle(
+                                callId: StreamCallId,
+                                notificationId: Int,
+                                payload: Map<String, Any?>,
+                            ): Bundle {
+                                return StreamCallActivity.callIntentBundle(
+                                    callId,
+                                    configuration = StreamCallActivityConfiguration(
+                                        closeScreenOnCallEnded = true,
+                                    ),
+                                    leaveWhenLastInCall = true,
+                                )
+                            }
+
+                            override fun getRejectCallBundle(
+                                callId: StreamCallId,
+                                payload: Map<String, Any?>,
+                            ): Bundle {
+                                return StreamCallActivity.callIntentBundle(
+                                    callId,
+                                    configuration = StreamCallActivityConfiguration(
+                                        closeScreenOnCallEnded = true,
+                                    ),
+                                    leaveWhenLastInCall = true,
+                                )
+                            }
+                        },
+                    ),
                 ),
             ),
             tokenProvider = object : TokenProvider {

@@ -417,6 +417,7 @@ internal open class CallService : Service() {
                     first = streamVideo.getOngoingCallNotification(
                         callId = streamCallId,
                         callDisplayName = intentCallDisplayName,
+                        payload = emptyMap(),
                     ),
                     second = streamCallId.hashCode(),
                 )
@@ -432,6 +433,7 @@ internal open class CallService : Service() {
                         callId = streamCallId,
                         callDisplayName = intentCallDisplayName,
                         shouldHaveContentIntent = shouldHaveContentIntent,
+                        payload = emptyMap(),
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID,
                 )
@@ -446,6 +448,7 @@ internal open class CallService : Service() {
                         callDisplayName = getString(
                             R.string.stream_video_outgoing_call_notification_title,
                         ),
+                        payload = emptyMap(),
                     ),
                     second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
                 )

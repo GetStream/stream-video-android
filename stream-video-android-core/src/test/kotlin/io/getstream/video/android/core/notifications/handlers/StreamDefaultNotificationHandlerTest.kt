@@ -86,6 +86,9 @@ class StreamDefaultNotificationHandlerTest {
     @MockK
     lateinit var mockPendingIntent: PendingIntent
 
+    @MockK
+    lateinit var payload: Map<String, Any?>
+
     private lateinit var testCallId: StreamCallId
     private lateinit var testHandler: StreamDefaultNotificationHandler
 
@@ -178,14 +181,20 @@ class StreamDefaultNotificationHandlerTest {
         val mockIncomingChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
 
         // Mock intent resolver calls
-        every { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) } returns mockPendingIntent
-        every { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
 
         // Mock interceptor call
         every {
             mockInitialInterceptor.onBuildIncomingCallNotification(
-                any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), payload,
             )
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
@@ -200,12 +209,12 @@ class StreamDefaultNotificationHandlerTest {
         )
 
         // When
-        testHandler.onRingingCall(testCallId, callDisplayName)
+        testHandler.onRingingCall(testCallId, callDisplayName, payload)
 
         // Then - Verify all intent resolver calls
-        verify { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) }
-        verify { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) }
-        verify { mockIntentResolver.searchRejectCallPendingIntent(testCallId) }
+        verify { mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload) }
+        verify { mockIntentResolver.searchAcceptCallPendingIntent(testCallId, payload = payload) }
+        verify { mockIntentResolver.searchRejectCallPendingIntent(testCallId, payload = payload) }
 
         // Verify interceptor is called with correct parameters
         verify {
@@ -216,6 +225,7 @@ class StreamDefaultNotificationHandlerTest {
                 mockPendingIntent, // reject intent
                 callDisplayName, // caller name
                 true, // with actions
+                payload = payload,
             )
         }
 
@@ -239,12 +249,13 @@ class StreamDefaultNotificationHandlerTest {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
                 any(),
+                payload,
             )
         } returns mockPendingIntent
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildMissedCallNotification(any(), any())
+            mockInitialInterceptor.onBuildMissedCallNotification(any(), any(), payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
@@ -259,13 +270,14 @@ class StreamDefaultNotificationHandlerTest {
         )
 
         // When
-        testHandler.onMissedCall(testCallId, callDisplayName)
+        testHandler.onMissedCall(testCallId, callDisplayName, payload)
 
         // Then - Verify intent resolver call with correct notification ID
         verify {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
                 testCallId.hashCode(),
+                payload,
             )
         }
 
@@ -274,6 +286,7 @@ class StreamDefaultNotificationHandlerTest {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
                 callDisplayName, // caller name
+                payload,
             )
         }
 
@@ -289,15 +302,15 @@ class StreamDefaultNotificationHandlerTest {
         val mockMissedChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
 
         // Mock intent resolver calls - return null for specific intent, then default
-        every { mockIntentResolver.searchMissedCallPendingIntent(testCallId, any()) } returns null
-        every { mockIntentResolver.getDefaultPendingIntent() } returns mockPendingIntent
+        every { mockIntentResolver.searchMissedCallPendingIntent(testCallId, any(), payload) } returns null
+        every { mockIntentResolver.getDefaultPendingIntent(payload) } returns mockPendingIntent
 
         // Mock notification channels
         every { mockMissedChannelInfo.id } returns "missed_call_channel"
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildMissedCallNotification(any(), any())
+            mockInitialInterceptor.onBuildMissedCallNotification(any(), any(), payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
@@ -312,22 +325,24 @@ class StreamDefaultNotificationHandlerTest {
         )
 
         // When
-        testHandler.onMissedCall(testCallId, callDisplayName)
+        testHandler.onMissedCall(testCallId, callDisplayName, payload)
 
         // Then - Verify fallback to default intent
         verify {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
                 testCallId.hashCode(),
+                payload,
             )
         }
-        verify { mockIntentResolver.getDefaultPendingIntent() }
+        verify { mockIntentResolver.getDefaultPendingIntent(payload) }
 
         // Verify interceptor is called with default intent
         verify {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
                 callDisplayName, // caller name
+                payload,
             )
         }
 
@@ -361,13 +376,14 @@ class StreamDefaultNotificationHandlerTest {
         )
 
         // When
-        testHandler.onNotification(testCallId, callDisplayName)
+        testHandler.onNotification(testCallId, callDisplayName, payload)
 
         // Then - Verify intent resolver call with correct notification ID
         verify {
             mockIntentResolver.searchNotificationCallPendingIntent(
                 testCallId,
                 testCallId.hashCode(),
+                payload,
             )
         }
 
@@ -401,10 +417,16 @@ class StreamDefaultNotificationHandlerTest {
         )
 
         // When
-        testHandler.onLiveCall(testCallId, callDisplayName)
+        testHandler.onLiveCall(testCallId, callDisplayName, payload)
 
         // Then - Verify intent resolver call with correct notification ID
-        verify { mockIntentResolver.searchLiveCallPendingIntent(testCallId, testCallId.hashCode()) }
+        verify {
+            mockIntentResolver.searchLiveCallPendingIntent(
+                testCallId,
+                testCallId.hashCode(),
+                payload,
+            )
+        }
 
         // Verify notification manager is called to show notification
         verify { mockNotificationManager.notify(testCallId.hashCode(), any()) }
@@ -542,9 +564,15 @@ class StreamDefaultNotificationHandlerTest {
         // Given
         val callDisplayName = "Henry Wilson"
         val mockkApp = mockk<Application>(relaxed = true)
-        every { mockIntentResolver.searchIncomingCallPendingIntent(any()) } returns mockPendingIntent
-        every { mockIntentResolver.searchAcceptCallPendingIntent(any()) } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
         coEvery {
             mockUpdateInterceptor.onUpdateIncomingCallNotification(
                 any(),
@@ -560,6 +588,7 @@ class StreamDefaultNotificationHandlerTest {
                 any(),
                 any(),
                 any(),
+                payload = payload,
             )
         } returns mockk(relaxed = true)
 
@@ -592,12 +621,17 @@ class StreamDefaultNotificationHandlerTest {
         // Given
         val callDisplayName = "Ivy Chen"
         val mockkApp = mockk<Application>(relaxed = true)
-        every { mockIntentResolver.searchOutgoingCallPendingIntent(any()) } returns mockPendingIntent
-        every { mockIntentResolver.searchEndCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchOutgoingCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchEndCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
         every {
             mockIntentResolver.searchOngoingCallPendingIntent(
                 any(),
                 any(),
+                payload = payload,
             )
         } returns mockPendingIntent
         coEvery {
@@ -611,9 +645,12 @@ class StreamDefaultNotificationHandlerTest {
             mockIntentResolver.searchOngoingCallPendingIntent(
                 any(),
                 any(),
+                payload = payload,
             )
         } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
         every {
             mockInitialInterceptor.onBuildOngoingCallNotification(
                 any(),
@@ -621,6 +658,7 @@ class StreamDefaultNotificationHandlerTest {
                 any(),
                 any(),
                 any(),
+                payload = payload,
             )
         } returns mockk(relaxed = true)
         coEvery {
@@ -666,12 +704,12 @@ class StreamDefaultNotificationHandlerTest {
 
         // Mock intent resolver calls
         every {
-            mockIntentResolver.searchMissedCallPendingIntent(testCallId, any())
+            mockIntentResolver.searchMissedCallPendingIntent(testCallId, any(), payload = payload)
         } returns mockPendingIntent
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildMissedCallNotification(any(), any())
+            mockInitialInterceptor.onBuildMissedCallNotification(any(), any(), payload = payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
@@ -686,7 +724,11 @@ class StreamDefaultNotificationHandlerTest {
         )
 
         // When
-        val result = testHandler.getMissedCallNotification(testCallId, callDisplayName)
+        val result = testHandler.getMissedCallNotification(
+            testCallId,
+            callDisplayName,
+            payload = payload,
+        )
 
         // Then
         assertNotNull(result)
@@ -694,6 +736,7 @@ class StreamDefaultNotificationHandlerTest {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
                 callDisplayName, // caller name
+                payload = payload,
             )
         }
     }
@@ -706,12 +749,12 @@ class StreamDefaultNotificationHandlerTest {
 
         // Mock intent resolver calls
         every {
-            mockIntentResolver.searchMissedCallPendingIntent(testCallId, any())
+            mockIntentResolver.searchMissedCallPendingIntent(testCallId, any(), payload = payload)
         } returns mockPendingIntent
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildMissedCallNotification(any(), any())
+            mockInitialInterceptor.onBuildMissedCallNotification(any(), any(), payload = payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
@@ -726,7 +769,7 @@ class StreamDefaultNotificationHandlerTest {
         )
 
         // When
-        val result = testHandler.getMissedCallNotification(testCallId, null)
+        val result = testHandler.getMissedCallNotification(testCallId, null, payload = payload)
 
         // Then
         assertNotNull(result)
@@ -734,6 +777,7 @@ class StreamDefaultNotificationHandlerTest {
             mockInitialInterceptor.onBuildMissedCallNotification(
                 any(), // context
                 null, // null caller name
+                payload = payload,
             )
         }
     }
@@ -746,13 +790,19 @@ class StreamDefaultNotificationHandlerTest {
         val mockkApp = mockk<Application>(relaxed = true)
         val mockIncomingChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
 
-        every { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) } returns mockPendingIntent
-        every { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any())
+            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any(), payload = payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
@@ -772,13 +822,14 @@ class StreamDefaultNotificationHandlerTest {
             testCallId,
             callDisplayName,
             true,
+            payload = payload,
         )
 
         // Then
         assertNotNull(result)
-        verify { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) }
-        verify { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) }
-        verify { mockIntentResolver.searchRejectCallPendingIntent(testCallId) }
+        verify { mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload) }
+        verify { mockIntentResolver.searchAcceptCallPendingIntent(testCallId, payload = payload) }
+        verify { mockIntentResolver.searchRejectCallPendingIntent(testCallId, payload = payload) }
         verify {
             mockInitialInterceptor.onBuildIncomingCallNotification(
                 any(), // context
@@ -787,6 +838,7 @@ class StreamDefaultNotificationHandlerTest {
                 mockPendingIntent, // reject intent
                 callDisplayName, // caller name
                 true, // with actions
+                payload = payload,
             )
         }
     }
@@ -798,9 +850,15 @@ class StreamDefaultNotificationHandlerTest {
         val ringingState = RingingState.Incoming()
         val mockkApp = mockk<Application>(relaxed = true)
 
-        every { mockIntentResolver.searchIncomingCallPendingIntent(testCallId) } returns null
-        every { mockIntentResolver.searchAcceptCallPendingIntent(testCallId) } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload)
+        } returns null
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
 
         testHandler = StreamDefaultNotificationHandler(
             application = mockkApp,
@@ -819,6 +877,7 @@ class StreamDefaultNotificationHandlerTest {
             testCallId,
             callDisplayName,
             true,
+            payload = payload,
         )
 
         // Then
@@ -832,16 +891,20 @@ class StreamDefaultNotificationHandlerTest {
         val ringingState = RingingState.Outgoing()
         val mockkApp = mockk<Application>(relaxed = true)
 
-        every { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId) } returns mockPendingIntent
         every {
-            mockIntentResolver.searchOutgoingCallPendingIntent(testCallId, any())
+            mockIntentResolver.searchOutgoingCallPendingIntent(testCallId, payload = payload)
         } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(testCallId) } returns mockPendingIntent
-        every { mockIntentResolver.searchEndCallPendingIntent(testCallId) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchOutgoingCallPendingIntent(testCallId, any(), any())
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(testCallId, any())
+        } returns mockPendingIntent
+        every { mockIntentResolver.searchEndCallPendingIntent(testCallId, any()) } returns mockPendingIntent
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildOutgoingCallNotification(any(), any(), any(), any())
+            mockInitialInterceptor.onBuildOutgoingCallNotification(any(), any(), any(), any(), any(), payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
         every {
             mockInitialInterceptor.onBuildOngoingCallNotification(
@@ -850,6 +913,7 @@ class StreamDefaultNotificationHandlerTest {
                 any(),
                 any(),
                 any(),
+                payload,
             )
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
@@ -870,12 +934,13 @@ class StreamDefaultNotificationHandlerTest {
             testCallId,
             callDisplayName,
             true,
+            payload = payload,
         )
 
         // Then
         assertNotNull(result)
-        verify { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId) }
-        verify { mockIntentResolver.searchEndCallPendingIntent(testCallId) }
+        verify { mockIntentResolver.searchOutgoingCallPendingIntent(testCallId, payload = payload) }
+        verify { mockIntentResolver.searchEndCallPendingIntent(testCallId, payload = payload) }
         verify {
             mockInitialInterceptor.onBuildOngoingCallNotification(
                 any(), // builder
@@ -883,6 +948,7 @@ class StreamDefaultNotificationHandlerTest {
                 any(), // call id
                 any(),
                 any(),
+                payload = payload,
             )
         }
     }
@@ -895,7 +961,7 @@ class StreamDefaultNotificationHandlerTest {
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any())
+            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any(), payload = payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
@@ -916,6 +982,7 @@ class StreamDefaultNotificationHandlerTest {
             mockPendingIntent,
             callerName,
             true,
+            payload = payload,
         )
 
         // Then
@@ -928,6 +995,7 @@ class StreamDefaultNotificationHandlerTest {
                 mockPendingIntent, // reject intent
                 callerName, // caller name
                 true, // with actions
+                payload = payload,
             )
         }
     }
@@ -940,7 +1008,7 @@ class StreamDefaultNotificationHandlerTest {
 
         // Mock interceptor call
         every {
-            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any())
+            mockInitialInterceptor.onBuildIncomingCallNotification(any(), any(), any(), any(), any(), any(), payload = payload)
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
@@ -961,6 +1029,7 @@ class StreamDefaultNotificationHandlerTest {
             mockPendingIntent,
             callerName,
             false, // withActions = false
+            payload = payload,
         )
 
         // Then
@@ -973,6 +1042,7 @@ class StreamDefaultNotificationHandlerTest {
                 mockPendingIntent, // reject intent
                 callerName, // caller name
                 false, // with actions = false
+                payload = payload,
             )
         }
     }

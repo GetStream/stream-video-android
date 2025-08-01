@@ -90,16 +90,16 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun end (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public final fun enterPictureInPicture ()V
 	public fun get (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
-	protected final fun getCallHandlerDelegate ()Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;
-	protected final fun getCallTransitionTime ()J
+	protected fun getCallHandlerDelegate ()Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;
+	protected fun getCallTransitionTime ()J
 	protected final fun getConfig ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun getConfiguration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
 	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;
 	public abstract fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
-	protected final fun handleOnNewIncomingCallAcceptAction ()V
-	protected final fun handleOnNewIntentAction (Landroid/content/Intent;)V
-	protected final fun isCurrentAcceptedCall (Lio/getstream/video/android/core/Call;)Z
+	protected fun handleOnNewIncomingCallAcceptAction ()V
+	protected fun handleOnNewIntentAction (Landroid/content/Intent;)V
+	protected fun isCurrentAcceptedCall (Lio/getstream/video/android/core/Call;)Z
 	public fun isVideoCall (Lio/getstream/video/android/core/Call;)Z
 	public fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public fun leave (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
@@ -129,12 +129,14 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun onUserLeaveHint (Lio/getstream/video/android/core/Call;)V
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public final fun safeFinish ()V
-	protected final fun setCallHandlerDelegate (Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;)V
+	protected fun setCallHandlerDelegate (Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;)V
 }
 
 public final class io/getstream/video/android/ui/common/StreamCallActivity$Companion {
 	public final fun callIntent (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;)Landroid/content/Intent;
 	public static synthetic fun callIntent$default (Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;ILjava/lang/Object;)Landroid/content/Intent;
+	public final fun callIntentBundle (Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;)Landroid/os/Bundle;
+	public static synthetic fun callIntentBundle$default (Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;ILjava/lang/Object;)Landroid/os/Bundle;
 }
 
 public final class io/getstream/video/android/ui/common/StreamCallActivityConfiguration {
