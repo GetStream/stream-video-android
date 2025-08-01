@@ -293,7 +293,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private val defaultCallHandler = object : IncomingCallHandlerDelegate {
         override fun shouldAcceptNewCall(activeCall: Call, intent: Intent) = true
 
-        override fun onAcceptCall(intent: Intent) {
+        override fun onAcceptCall(context:Context, intent: Intent) {
             initializeCallOrFail(
                 null,
                 null,
@@ -302,7 +302,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
                     onIntentAction(call, action, onError = onErrorFinish) { successCall ->
                         applyDashboardSettings(successCall)
-//                        onCreate(instanceState, persistentState, successCall)
+                        onCreate(instanceState, persistentState, successCall)
                     }
                     _isReplacingCall.value = false
                 },
@@ -410,7 +410,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         when {
             // No ongoing call, so we accept the new call
             activeCall == null -> {
-                handler.onAcceptCall(intent)
+                handler.onAcceptCall(this, intent)
             }
 
             // Incoming call is same as active call
@@ -428,7 +428,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                             getCallTransitionTime(),
                         ) // Grace time for call related things to be cleared safely
                         withContext(Dispatchers.Main) {
-                            handler.onAcceptCall(intent)
+                            handler.onAcceptCall(this@StreamCallActivity, intent)
                         }
                     }
                 } else {

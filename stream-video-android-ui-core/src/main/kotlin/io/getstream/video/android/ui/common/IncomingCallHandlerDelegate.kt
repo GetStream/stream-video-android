@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui.common
 
+import android.content.Context
 import android.content.Intent
 import io.getstream.video.android.core.Call
 
@@ -35,7 +36,7 @@ public interface IncomingCallHandlerDelegate {
      * Called when accepting a new call
      * @param intent The [Intent] for the call
      */
-    public fun onAcceptCall(intent: Intent)
+    public fun onAcceptCall(context: Context, intent: Intent)
 
     /**
      * Called when ignoring a call (same call or based on delegate decision)

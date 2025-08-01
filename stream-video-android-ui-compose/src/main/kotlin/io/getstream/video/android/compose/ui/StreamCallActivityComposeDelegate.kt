@@ -205,7 +205,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             var callAction: CallAction by remember {
                 mutableStateOf(CustomAction(tag = "initial"))
             }
-            Log.d("Noob", "Noob, [RootContent] callAction = $callAction")
+            Log.d("Noob", "Noob, [RootContent] callAction = $callAction, call_id = ${call.id}")
             when (callAction) {
                 is LeaveCall, is DeclineCall, is CancelCall -> {
                     CallDisconnectedContent(call)
@@ -378,6 +378,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.LoadingContent(call: Call) {
         // No loading screen by default...
+        logger.d { "Noob, [LoadingContent] call.id = ${call.id}" }
     }
 
     @Composable
@@ -385,6 +386,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         call: Call,
         content: @Composable (call: Call) -> Unit,
     ) {
+        logger.d { "Noob, [ConnectionAvailable], call_id = ${call.id}" }
         val connection by call.state.connection.collectAsStateWithLifecycle()
         val isReplacingCall by isReplacingCall.collectAsStateWithLifecycle()
         if (!isReplacingCall) {
@@ -433,6 +435,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
 
     @Composable
     override fun StreamCallActivity.AudioCallContent(call: Call) {
+        logger.d { "Noob, [AudioCallContent], call_id = ${call.id}" }
         val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
 
         io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent(
@@ -445,6 +448,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
 
     @Composable
     override fun StreamCallActivity.VideoCallContent(call: Call) {
+        logger.d { "Noob, [VideoCallContent], call_id = ${call.id}" }
         CallContent(call = call, onCallAction = {
             onCallAction(call, it)
         }, onBackPressed = {
@@ -469,6 +473,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         onBackPressed: () -> Unit,
         onCallAction: (CallAction) -> Unit,
     ) {
+        logger.d { "Noob, [OutgoingCallContent], call_id = ${call.id}" }
         io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent(
             call = call,
             isVideoType = isVideoType,
@@ -499,6 +504,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         onBackPressed: () -> Unit,
         onCallAction: (CallAction) -> Unit,
     ) {
+        logger.d { "Noob, [IncomingCallContent], call_id = ${call.id}" }
         io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent(
             call = call,
             isVideoType = isVideoType,
@@ -515,12 +521,14 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.NoAnswerContent(call: Call) {
         // There is not default UI for no-answer content.
+        logger.d { "Noob, [NoAnswerContent], call_id = ${call.id}" }
         CallDisconnectedContent(call = call)
     }
 
     @Composable
     override fun StreamCallActivity.RejectedContent(call: Call) {
         // There is not default UI for rejected content.
+        logger.d { "Noob, [RejectedContent], call_id = ${call.id}" }
         CallDisconnectedContent(call = call)
     }
 
@@ -528,6 +536,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun StreamCallActivity.CallFailedContent(call: Call, exception: java.lang.Exception) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call failed content.
+        logger.d { "Noob, [CallFailedContent], call_id = ${call.id}" }
         safeFinish()
     }
 
@@ -535,6 +544,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun StreamCallActivity.CallDisconnectedContent(call: Call) {
         // By default we finish the activity regardless of config.
         // There is not default UI for call ended content.
+        logger.d { "Noob, [CallDisconnectedContent], call_id = ${call.id}" }
         safeFinish()
     }
 
