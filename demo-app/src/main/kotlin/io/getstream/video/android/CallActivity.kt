@@ -48,11 +48,6 @@ class CallActivity : ComposeStreamCallActivity() {
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
 
-    override fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
-        return super.loadConfigFromIntent(intent)
-            .copy(closeScreenOnCallEnded = false, canSkipPermissionRationale = false)
-    }
-
     @StreamCallActivityDelicateApi
     override fun onPreCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         runBlocking {

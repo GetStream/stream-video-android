@@ -68,6 +68,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -177,51 +179,59 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * You can get Call id via
      * `intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)?.id`
      */
-    public val configurationMap: HashMap<String, StreamCallActivityConfiguration> =
+    public val configurationMap: HashMap<StreamCallIdString, StreamCallActivityConfiguration> =
         HashMap()
 
     private var cachedCallEventJob: Job? = null
     private val supervisorJob = SupervisorJob()
     private var isFinishingSafely = false
 
-    protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
-        logger.w { "The call was successfully finished! Closing activity" }
-        onEnded(call)
+    private val _isReplacingCall: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val isReplacingCall: StateFlow<Boolean> = _isReplacingCall
 
-        if (isCurrentAcceptedCall(call)) {
-            val configuration = configurationMap[call.id]
-            if (configuration?.closeScreenOnCallEnded == true) {
-                safeFinish()
+    protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
+        logger.d { "Noob, [onSuccessFinish], is replacing call: ${isReplacingCall.value}" }
+        if (!isReplacingCall.value) {
+            onEnded(call)
+            if (isCurrentAcceptedCall(call)) {
+                val configuration = configurationMap[call.id]
+                if (configuration?.closeScreenOnCallEnded == true) {
+                    logger.w { "Noob, [onSuccessFinish], The call was successfully finished! Closing activity, call_cid:${call.cid}" }
+                    safeFinish()
+                }
+            } else {
+                logger.d { "[onSuccessFinish] for non-active call" }
             }
-        } else {
-            logger.d { "[onSuccessFinish] for non-active call" }
         }
+
     }
 
     /**
      * The Exception is [StreamCallActivityException]. We will update the args in next major release
      */
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
-        logger.e(error) { "Something went wrong" }
-        onFailed(error)
-
-        if (error is StreamCallActivityException) {
-            if (isCurrentAcceptedCall(error.call)) {
-                val configuration = configurationMap[error.call.id]
-                if (configuration?.closeScreenOnError == true) {
+        logger.e(error) { "[onErrorFinish] Something went wrong" }
+        if (!isReplacingCall.value) {
+            onFailed(error)
+            logger.d { "Noob, [onErrorFinish], is replacing call: ${isReplacingCall.value}" }
+            if (error is StreamCallActivityException) {
+                if (isCurrentAcceptedCall(error.call)) {
+                    val configuration = configurationMap[error.call.id]
+                    if (configuration?.closeScreenOnError == true) {
+                        logger.e(error) { "Finishing the activity" }
+                        safeFinish()
+                    }
+                } else {
+                    logger.e(error) { "[onErrorFinish] for non-active call" }
+                }
+            } else {
+                /**
+                 * This will execute when we got a error before creating the call object
+                 */
+                if (config.closeScreenOnError) {
                     logger.e(error) { "Finishing the activity" }
                     safeFinish()
                 }
-            } else {
-                logger.e(error) { "[onErrorFinish] for non-active call" }
-            }
-        } else {
-            /**
-             * This will execute when we got a error before creating the call object
-             */
-            if (config.closeScreenOnError) {
-                logger.e(error) { "Finishing the activity" }
-                safeFinish()
             }
         }
     }
@@ -229,7 +239,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     /**
      * The call which is accepted
      */
-    protected open fun isCurrentAcceptedCall(call: Call): Boolean =
+    public open fun isCurrentAcceptedCall(call: Call): Boolean =
         (::cachedCall.isInitialized) && (cachedCall.id == call.id)
 
     // Public values
@@ -288,16 +298,19 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 null,
                 null,
                 intent,
-                onSuccess = { _, _, call, action ->
+                onSuccess = { instanceState, persistentState, call, action ->
                     logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
                     onIntentAction(call, action, onError = onErrorFinish) { successCall ->
                         applyDashboardSettings(successCall)
+//                        onCreate(instanceState, persistentState, successCall)
                     }
+                    _isReplacingCall.value = false
                 },
                 onError = {
                     // We are not calling onErrorFinish here on purpose
                     // we want to crash if we cannot initialize the call
                     logger.e(it) { "Failed to initialize call." }
+                    _isReplacingCall.value = false
                     throw it
                 },
             )
@@ -408,6 +421,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             else -> {
                 if (handler.shouldAcceptNewCall(activeCall, intent)) {
                     // We want to reject the ongoing active call
+                    _isReplacingCall.value = true
                     reject(activeCall, RejectReason.Decline, onSuccessFinish, onErrorFinish)
                     lifecycleScope.launch(Dispatchers.Default) {
                         delay(
@@ -468,25 +482,25 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onError: (suspend (Exception) -> Unit)? = onErrorFinish,
         onSuccess: (suspend (Call) -> Unit)? = null,
     ) {
-        logger.d { "[onIntentAction] #ringing; action: $action, call.cid: ${call.cid}" }
+        logger.d { "Noob, [onIntentAction] #ringing; action: $action, call.cid: ${call.cid}" }
         when (action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
-                logger.v { "[onIntentAction] #ringing; Action ACCEPT_CALL, ${call.cid}" }
+                logger.v { "Noob, [onIntentAction] #ringing; Action ACCEPT_CALL, ${call.cid}" }
                 accept(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_REJECT_CALL -> {
-                logger.v { "[onIntentAction] #ringing; Action REJECT_CALL, ${call.cid}" }
+                logger.v { "Noob, [onIntentAction] #ringing; Action REJECT_CALL, ${call.cid}" }
                 reject(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_INCOMING_CALL -> {
-                logger.v { "[onIntentAction] #ringing; Action INCOMING_CALL, ${call.cid}" }
+                logger.v { "Noob, [onIntentAction] #ringing; Action INCOMING_CALL, ${call.cid}" }
                 get(call, onError = onError, onSuccess = onSuccess)
             }
 
             NotificationHandler.ACTION_OUTGOING_CALL -> {
-                logger.v { "[onIntentAction] #ringing; Action OUTGOING_CALL, ${call.cid}" }
+                logger.v { "Noob, [onIntentAction] #ringing; Action OUTGOING_CALL, ${call.cid}" }
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 create(
@@ -500,7 +514,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             else -> {
                 logger.w {
-                    "[onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
+                    "Noob, [onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
                 }
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 // If the call does not exist it will be created.
@@ -802,7 +816,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
+        logger.d { "Noob, [reject] #ringing; rejectReason: $reason, call.cid: ${call.cid}" }
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         call.state.cancelTimeout()
         call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
@@ -945,7 +959,14 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
                 val total = call.state.participants.value.size
-                logger.d { "Participant left, remaining: $total" }
+                logger.d { "Noob, Participant left, remaining: $total" }
+                // TODO Rahul remove this log below later
+                lifecycleScope.launch(Dispatchers.Default) {
+                    call.state.participants.value.forEachIndexed { i, v ->
+                        logger.d { "Noob, Participant [$i]=${v.name.value}" }
+                    }
+                }
+
                 if (total <= 1) {
                     onLastParticipant(call)
                 }
@@ -964,6 +985,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         logger.d { "You are the last participant." }
         val leaveWhenLastInCall =
             intent.getBooleanExtra(EXTRA_LEAVE_WHEN_LAST, DEFAULT_LEAVE_WHEN_LAST)
+        logger.d { "Noob, leaveWhenLastInCall = $leaveWhenLastInCall" }
         if (leaveWhenLastInCall) {
             onCallAction(call, LeaveCall)
         }
@@ -1022,6 +1044,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * @param call the call
      */
     public open fun applyDashboardSettings(call: Call) {
+        logger.d { "Noob, [applyDashboardSettings] for call_cid: ${call.cid}" }
         val callSettings = call.state.settings.value
         val microphoneStatus = call.microphone.status.value
         val cameraStatus = call.camera.status.value
@@ -1178,3 +1201,5 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 }
+
+public typealias StreamCallIdString = String

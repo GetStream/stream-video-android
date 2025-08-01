@@ -20,6 +20,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -79,6 +80,7 @@ import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.ui.common.StreamCallActivity.Companion
 import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
@@ -203,7 +205,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             var callAction: CallAction by remember {
                 mutableStateOf(CustomAction(tag = "initial"))
             }
-
+            Log.d("Noob", "Noob, [RootContent] callAction = $callAction")
             when (callAction) {
                 is LeaveCall, is DeclineCall, is CancelCall -> {
                     CallDisconnectedContent(call)
@@ -329,6 +331,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         LaunchedEffect(rejectedBy, rejectActionBundle) {
             val currentUserId = StreamVideo.instanceOrNull()?.userId
             if (rejectedBy.contains(currentUserId) && rejectActionBundle != null) {
+                logger.d { "Noob, [HandleCallRejectionFromNotification] Start" }
                 // check if there is no ongoing call then safely finish it else do nothing
                 val noActiveCall = (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
                 if (noActiveCall) {
@@ -364,7 +367,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         granted: List<String>,
         notGranted: List<String>,
     ) {
-        if (!showRationale && configurationMap[call.cid]?.canSkipPermissionRationale == true) {
+        if (!showRationale && configurationMap[call.id]?.canSkipPermissionRationale == true) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
             safeFinish()
         } else {
@@ -383,30 +386,49 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         content: @Composable (call: Call) -> Unit,
     ) {
         val connection by call.state.connection.collectAsStateWithLifecycle()
-        when (connection) {
-            RealtimeConnection.Disconnected -> {
-                if (configurationMap[call.cid]?.closeScreenOnCallEnded == false) {
-                    CallDisconnectedContent(call)
-                } else {
-                    // This is just for safety, will be called from other place as well.
-                    safeFinish()
+        val isReplacingCall by isReplacingCall.collectAsStateWithLifecycle()
+        if (!isReplacingCall) {
+            when (connection) {
+                RealtimeConnection.Disconnected -> {
+                    if (isCurrentAcceptedCall(call)) {
+                        val callId = call.id
+                        val configuration = configurationMap[call.id]
+                        if (configuration?.closeScreenOnCallEnded == false) {
+                            CallDisconnectedContent(call)
+                        } else {
+                            logger.d { "Noob, [RealtimeConnection.Disconnected], call id = ${call.id}" }
+                            safeFinish()
+                        }
+                    } else {
+                        logger.d { "Noob, [RealtimeConnection.Disconnected] for in-active call, call id = ${call.id}" }
+                        // Do nothing, this block belongs to in-active call
+                    }
+                }
+
+                is RealtimeConnection.Failed -> {
+
+                    if (isCurrentAcceptedCall(call)) {
+                        val configuration = configurationMap[call.id]
+                        if (configuration?.closeScreenOnError == false) {
+                            val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
+                            CallFailedContent(call, err)
+                        } else {
+                            safeFinish()
+                        }
+                    } else {
+                        // Do nothing, this block belongs to in-active call
+                        logger.d { "Noob, [RealtimeConnection.Failed] for in-active call, call id = ${call.id}" }
+                    }
+                }
+
+                else -> {
+                    content.invoke(call)
                 }
             }
-
-            is RealtimeConnection.Failed -> {
-                if (configurationMap[call.cid]?.closeScreenOnError == false) {
-                    val err = Exception("${(connection as? RealtimeConnection.Failed)?.error}")
-                    CallFailedContent(call, err)
-                } else {
-                    // This is just for safety, will be called from other place as well.
-                    safeFinish()
-                }
-            }
-
-            else -> {
-                content.invoke(call)
-            }
+        } else {
+            logger.d { "Noob, In middle of Replacing calls, so cannot observe RealtimeConnection" }
         }
+
     }
 
     @Composable

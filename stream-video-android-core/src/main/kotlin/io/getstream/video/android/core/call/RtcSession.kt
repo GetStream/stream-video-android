@@ -469,6 +469,7 @@ public class RtcSession internal constructor(
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
                         // We are told to disconnect.
                         sfuConnectionModule.socketConnection.disconnect()
+                        logger.d { "Noob, [WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT], call_id = ${call.id}" }
                         call.state._connection.value = RealtimeConnection.Disconnected
                     }
 
