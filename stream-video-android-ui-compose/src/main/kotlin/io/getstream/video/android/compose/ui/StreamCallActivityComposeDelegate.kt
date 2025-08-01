@@ -80,7 +80,6 @@ import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
-import io.getstream.video.android.ui.common.StreamCallActivity.Companion
 import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
@@ -387,8 +386,14 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         content: @Composable (call: Call) -> Unit,
     ) {
         logger.d { "Noob, [ConnectionAvailable], call_id = ${call.id}" }
+        val connectionFlow = remember(call) { call.state.connection }
+
         val connection by call.state.connection.collectAsStateWithLifecycle()
-        val isReplacingCall by isReplacingCall.collectAsStateWithLifecycle()
+        val connection2 by connectionFlow.collectAsStateWithLifecycle()
+
+        Log.d("Noob", "Noob connection=$connection, connection2 = $connection2, call_id: ${call.id}, cached_call_id: ${cachedCall.id}")
+
+        val isReplacingCall by isInTransition.collectAsStateWithLifecycle()
         if (!isReplacingCall) {
             when (connection) {
                 RealtimeConnection.Disconnected -> {

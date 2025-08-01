@@ -164,7 +164,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
-    private lateinit var cachedCall: Call
+    public lateinit var cachedCall: Call
 
     @Deprecated(
         "Use configurationMap instead",
@@ -186,12 +186,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private val supervisorJob = SupervisorJob()
     private var isFinishingSafely = false
 
-    private val _isReplacingCall: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    public val isReplacingCall: StateFlow<Boolean> = _isReplacingCall
+    private val _isInTransition: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val isInTransition: StateFlow<Boolean> = _isInTransition
 
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
-        logger.d { "Noob, [onSuccessFinish], is replacing call: ${isReplacingCall.value}" }
-        if (!isReplacingCall.value) {
+        logger.d { "Noob, [onSuccessFinish], is replacing call: ${isInTransition.value}" }
+        if (!isInTransition.value) {
             onEnded(call)
             if (isCurrentAcceptedCall(call)) {
                 val configuration = configurationMap[call.id]
@@ -211,9 +211,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      */
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "[onErrorFinish] Something went wrong" }
-        if (!isReplacingCall.value) {
+        if (!isInTransition.value) {
             onFailed(error)
-            logger.d { "Noob, [onErrorFinish], is replacing call: ${isReplacingCall.value}" }
+            logger.d { "Noob, [onErrorFinish], is replacing call: ${isInTransition.value}" }
             if (error is StreamCallActivityException) {
                 if (isCurrentAcceptedCall(error.call)) {
                     val configuration = configurationMap[error.call.id]
@@ -294,26 +294,29 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         override fun shouldAcceptNewCall(activeCall: Call, intent: Intent) = true
 
         override fun onAcceptCall(context:Context, intent: Intent) {
-            initializeCallOrFail(
-                null,
-                null,
-                intent,
-                onSuccess = { instanceState, persistentState, call, action ->
-                    logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
-                    onIntentAction(call, action, onError = onErrorFinish) { successCall ->
-                        applyDashboardSettings(successCall)
-                        onCreate(instanceState, persistentState, successCall)
-                    }
-                    _isReplacingCall.value = false
-                },
-                onError = {
-                    // We are not calling onErrorFinish here on purpose
-                    // we want to crash if we cannot initialize the call
-                    logger.e(it) { "Failed to initialize call." }
-                    _isReplacingCall.value = false
-                    throw it
-                },
-            )
+            finish()
+            startActivity(intent)
+
+//            initializeCallOrFail(
+//                null,
+//                null,
+//                intent,
+//                onSuccess = { instanceState, persistentState, call, action ->
+//                    logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
+//                    onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+//                        applyDashboardSettings(successCall)
+//                        onCreate(instanceState, persistentState, successCall)
+//                    }
+//                    _isInTransition.value = false
+//                },
+//                onError = {
+//                    // We are not calling onErrorFinish here on purpose
+//                    // we want to crash if we cannot initialize the call
+//                    logger.e(it) { "Failed to initialize call." }
+//                    _isInTransition.value = false
+//                    throw it
+//                },
+//            )
         }
 
         override fun onIgnoreCall(intent: Intent, reason: IgnoreReason) {
@@ -421,7 +424,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             else -> {
                 if (handler.shouldAcceptNewCall(activeCall, intent)) {
                     // We want to reject the ongoing active call
-                    _isReplacingCall.value = true
+                    _isInTransition.value = true
                     reject(activeCall, RejectReason.Decline, onSuccessFinish, onErrorFinish)
                     lifecycleScope.launch(Dispatchers.Default) {
                         delay(
@@ -1197,6 +1200,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     public fun safeFinish() {
         if (!this.isFinishing && !isFinishingSafely) {
             isFinishingSafely = true
+            logger.d { "Noob, [safeFinish] call_id:${cachedCall.cid}" }
             finish()
         }
     }
