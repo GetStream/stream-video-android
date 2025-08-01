@@ -162,7 +162,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
-    public lateinit var cachedCall: Call
+    private lateinit var cachedCall: Call
 
     @Deprecated(
         "Use configurationMap instead",
@@ -284,7 +284,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private val defaultCallHandler = object : IncomingCallHandlerDelegate {
         override fun shouldAcceptNewCall(activeCall: Call, intent: Intent) = true
 
-        override fun onAcceptCall(context: Context, intent: Intent) {
+        override fun onAcceptCall(intent: Intent) {
             finish()
             startActivity(intent)
         }
@@ -383,7 +383,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         when {
             // No ongoing call, so we accept the new call
             activeCall == null -> {
-                handler.onAcceptCall(this, intent)
+                handler.onAcceptCall(intent)
             }
 
             // Incoming call is same as active call
@@ -400,7 +400,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                             getCallTransitionTime(),
                         ) // Grace time for call related things to be cleared safely
                         withContext(Dispatchers.Main) {
-                            handler.onAcceptCall(this@StreamCallActivity, intent)
+                            handler.onAcceptCall(intent)
                         }
                     }
                 } else {
