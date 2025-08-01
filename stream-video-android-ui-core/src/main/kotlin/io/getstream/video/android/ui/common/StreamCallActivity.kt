@@ -212,9 +212,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     logger.e(error) { "Finishing the activity" }
                     safeFinish()
                 }
-            }
-        } else {
-            // older version ~ this flow might never going to be execute (Need to check)
             } else {
                 logger.e(error) { "[onErrorFinish] for non-active call" }
             }

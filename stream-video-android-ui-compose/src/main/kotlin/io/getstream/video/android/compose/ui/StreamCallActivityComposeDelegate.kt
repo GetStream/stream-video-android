@@ -327,8 +327,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                         val configuration = configurationMap[call.id]
                         if (configuration?.closeScreenOnCallEnded == true) {
                             safeFinish()
-                        }
-                        else {
+                        } else {
                             logger.d { "Don't close activity as some other call is active" }
                         }
                     }
