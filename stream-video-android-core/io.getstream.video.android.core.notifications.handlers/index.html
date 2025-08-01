@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             stream-video-android
                     </a>            </div>
-            <div class="library-version">1.10.0
+            <div class="library-version">1.11.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -82,7 +82,7 @@
         application,
     )<span class="token punctuation">, </span></span><span class="parameter ">notificationManager<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/core/app/NotificationManagerCompat.html">NotificationManagerCompat</a><span class="token operator"> = </span>NotificationManagerCompat.from(
         application.applicationContext,
-    )<span class="token punctuation">, </span></span><span class="parameter ">intentResolver<span class="token operator">: </span><a href="../io.getstream.video.android.core.notifications/-stream-intent-resolver/index.html">StreamIntentResolver</a><span class="token operator"> = </span>DefaultStreamIntentResolver(application)<span class="token punctuation">, </span></span><span class="parameter ">hideRingingNotificationInForeground<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">initialNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-builder-interceptors/index.html">StreamNotificationBuilderInterceptors</a><span class="token operator"> = </span>StreamNotificationBuilderInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">updateNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-update-interceptors/index.html">StreamNotificationUpdateInterceptors</a><span class="token operator"> = </span>StreamNotificationUpdateInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionController<span class="token operator">: </span><a href="-stream-media-session-controller/index.html">StreamMediaSessionController</a><span class="token operator"> = </span>DefaultStreamMediaSessionController(
+    )<span class="token punctuation">, </span></span><span class="parameter ">intentResolver<span class="token operator">: </span><a href="../io.getstream.video.android.core.notifications/-stream-intent-resolver/index.html">StreamIntentResolver</a><span class="token operator"> = </span>DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver())<span class="token punctuation">, </span></span><span class="parameter ">hideRingingNotificationInForeground<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span></span><span class="parameter ">initialNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-builder-interceptors/index.html">StreamNotificationBuilderInterceptors</a><span class="token operator"> = </span>StreamNotificationBuilderInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">updateNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-update-interceptors/index.html">StreamNotificationUpdateInterceptors</a><span class="token operator"> = </span>StreamNotificationUpdateInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionController<span class="token operator">: </span><a href="-stream-media-session-controller/index.html">StreamMediaSessionController</a><span class="token operator"> = </span>DefaultStreamMediaSessionController(
             initialNotificationBuilderInterceptor,
             updateNotificationBuilderInterceptor,
         )<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionCallback<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/support/v4/media/session/MediaSessionCompat.Callback.html">MediaSessionCompat.Callback</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">notificationChannels<span class="token operator">: </span><a href="-stream-notification-channels/index.html">StreamNotificationChannels</a><span class="token operator"> = </span>StreamNotificationChannels(
@@ -148,7 +148,7 @@
         application.applicationContext,
     )<span class="token punctuation">, </span></span><span class="parameter ">notificationPermissionHandler<span class="token operator">: </span><span data-unresolved-link="io.getstream.android.push.permissions/NotificationPermissionHandler///PointingToDeclaration/">NotificationPermissionHandler</span><span class="token operator"> = </span>DefaultNotificationPermissionHandler.createDefaultNotificationPermissionHandler(
         application,
-    )<span class="token punctuation">, </span></span><span class="parameter ">intentResolver<span class="token operator">: </span><a href="../io.getstream.video.android.core.notifications/-stream-intent-resolver/index.html">StreamIntentResolver</a><span class="token operator"> = </span>DefaultStreamIntentResolver(application)<span class="token punctuation">, </span></span><span class="parameter ">hideRingingNotificationInForeground<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">initialNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-builder-interceptors/index.html">StreamNotificationBuilderInterceptors</a><span class="token operator"> = </span>StreamNotificationBuilderInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">updateNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-update-interceptors/index.html">StreamNotificationUpdateInterceptors</a><span class="token operator"> = </span>StreamNotificationUpdateInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">notificationChannels<span class="token operator">: </span><a href="-stream-notification-channels/index.html">StreamNotificationChannels</a><span class="token operator"> = </span>StreamNotificationChannels(
+    )<span class="token punctuation">, </span></span><span class="parameter ">intentResolver<span class="token operator">: </span><a href="../io.getstream.video.android.core.notifications/-stream-intent-resolver/index.html">StreamIntentResolver</a><span class="token operator"> = </span>DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver())<span class="token punctuation">, </span></span><span class="parameter ">hideRingingNotificationInForeground<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">initialNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-builder-interceptors/index.html">StreamNotificationBuilderInterceptors</a><span class="token operator"> = </span>StreamNotificationBuilderInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">updateNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-update-interceptors/index.html">StreamNotificationUpdateInterceptors</a><span class="token operator"> = </span>StreamNotificationUpdateInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">notificationChannels<span class="token operator">: </span><a href="-stream-notification-channels/index.html">StreamNotificationChannels</a><span class="token operator"> = </span>StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
             R.string.stream_video_incoming_call_notification_channel_id,
@@ -212,7 +212,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-stream-notification-builder-interceptors/index.html">StreamNotificationBuilderInterceptors</a></div><div class="brief "><p class="paragraph">Interceptor for notification builders.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-stream-notification-builder-interceptors/index.html">StreamNotificationBuilderInterceptors</a> : <a href="-stream-notification-builder-interceptors-with-payload/index.html">StreamNotificationBuilderInterceptorsWithPayload</a></div><div class="brief "><p class="paragraph">Interceptor for notification builders.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="182207012%2FClasslikes%2F-1625990423" anchor-label="StreamNotificationBuilderInterceptorsWithPayload" id="182207012%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-stream-notification-builder-interceptors-with-payload/index.html"><span>Stream</span><wbr><span>Notification</span><wbr><span>Builder</span><wbr><span>Interceptors</span><wbr><span>With</span><wbr><span><span>Payload</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="182207012%2FClasslikes%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-stream-notification-builder-interceptors-with-payload/index.html">StreamNotificationBuilderInterceptorsWithPayload</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -257,7 +272,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-stream-notification-handler/index.html">StreamNotificationHandler</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-stream-notification-handler/index.html">StreamNotificationHandler</a> : <a href="-stream-notification-handler-with-payload/index.html">StreamNotificationHandlerWithPayload</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="505705925%2FClasslikes%2F-1625990423" anchor-label="StreamNotificationHandlerWithPayload" id="505705925%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-stream-notification-handler-with-payload/index.html"><span>Stream</span><wbr><span>Notification</span><wbr><span>Handler</span><wbr><span>With</span><wbr><span><span>Payload</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="505705925%2FClasslikes%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-stream-notification-handler-with-payload/index.html">StreamNotificationHandlerWithPayload</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -272,7 +302,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-stream-notification-provider/index.html">StreamNotificationProvider</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-stream-notification-provider/index.html">StreamNotificationProvider</a> : <a href="-stream-notification-provider-with-payload/index.html">StreamNotificationProviderWithPayload</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="832629512%2FClasslikes%2F-1625990423" anchor-label="StreamNotificationProviderWithPayload" id="832629512%2FClasslikes%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-stream-notification-provider-with-payload/index.html"><span>Stream</span><wbr><span>Notification</span><wbr><span>Provider</span><wbr><span>With</span><wbr><span><span>Payload</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="832629512%2FClasslikes%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-stream-notification-provider-with-payload/index.html">StreamNotificationProviderWithPayload</a></div></div></div>
                 </div>
               </div>
             </div>
