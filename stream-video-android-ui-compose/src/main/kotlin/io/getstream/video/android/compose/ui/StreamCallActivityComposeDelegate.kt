@@ -38,6 +38,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +71,7 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
@@ -305,6 +307,29 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
 
                         NoneGranted {
                             InternalPermissionContent(it, call, emptyList(), emptyList())
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Call can be rejected by [RejectCallBroadcastReceiver] so the activity
+             * needs to observe [Call.state.rejectedBy]
+             */
+            val rejectedBy by call.state.rejectedBy.collectAsStateWithLifecycle()
+            LaunchedEffect(rejectedBy) {
+                val currentUserId = StreamVideo.instanceOrNull()?.userId
+                if (rejectedBy.contains(currentUserId)) {
+                    // check if there is no ongoing call then safely finish it else do nothing
+                    val noActiveCall = (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
+                    if (noActiveCall) {
+                        onEnded(call)
+                        val configuration = configurationMap[call.id]
+                        if (configuration?.closeScreenOnCallEnded == true) {
+                            safeFinish()
+                        }
+                        else {
+                            logger.d { "Don't close activity as some other call is active" }
                         }
                     }
                 }

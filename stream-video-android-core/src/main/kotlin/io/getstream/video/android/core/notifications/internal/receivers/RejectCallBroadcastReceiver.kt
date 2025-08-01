@@ -39,8 +39,17 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
 
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
         when (val rejectResult = call.reject(RejectReason.Decline)) {
-            is Result.Success -> logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
-            is Result.Failure -> logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
+            is Result.Success -> {
+                val userId = StreamVideo.instanceOrNull()?.userId
+                userId?.let {
+                    val set = mutableSetOf(it)
+                    call.state.updateRejectedBy(set)
+                }
+                logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
+            }
+            is Result.Failure -> {
+                logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
+            }
         }
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
         CallService.removeIncomingCall(

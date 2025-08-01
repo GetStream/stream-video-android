@@ -177,7 +177,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * You can get Call id via
      * `intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)?.id`
      */
-    private val configurationMap: HashMap<String, StreamCallActivityConfiguration> =
+    public val configurationMap: HashMap<String, StreamCallActivityConfiguration> =
         HashMap()
 
     private var cachedCallEventJob: Job? = null
@@ -193,11 +193,13 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             if (configuration?.closeScreenOnCallEnded == true) {
                 safeFinish()
             }
+        } else {
+            logger.d { "[onSuccessFinish] for non-active call" }
         }
     }
 
     /**
-     * The Exception is `StreamCallActivityException`. We will update the args in next major release
+     * The Exception is [StreamCallActivityException]. We will update the args in next major release
      */
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
         logger.e(error) { "Something went wrong" }
@@ -213,6 +215,13 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
         } else {
             // older version ~ this flow might never going to be execute (Need to check)
+            } else {
+                logger.e(error) { "[onErrorFinish] for non-active call" }
+            }
+        } else {
+            /**
+             * This will execute when we got a error before creating the call object
+             */
             if (config.closeScreenOnError) {
                 logger.e(error) { "Finishing the activity" }
                 safeFinish()
