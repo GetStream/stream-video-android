@@ -22,6 +22,7 @@ import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.utils.hasNonAsciiCharacters
 
 @InternalStreamVideoApi
 class HeadersUtil {
@@ -55,16 +56,25 @@ class HeadersUtil {
      *
      * @return The application name or `"UnknownApp"` if retrieval fails.
      */
+    @Throws(IllegalArgumentException::class)
     private fun getAppName(): String {
         val context = getContext() ?: return "UnknownApp"
         val applicationInfo = context.applicationInfo
         val stringId = applicationInfo.labelRes
 
-        return if (stringId != 0) {
+        val appName = if (stringId != 0) {
             context.getString(stringId)
         } else {
             applicationInfo.nonLocalizedLabel?.toString() ?: "UnknownApp"
         }
+
+        if (appName.hasNonAsciiCharacters()) {
+            throw IllegalArgumentException(
+                "The application name contains non-ASCII characters. " +
+                    "Please provide an ASCII-only appName (e.g., 'MyApp') when initializing StreamVideoBuilder.",
+            )
+        }
+        return appName
     }
 
     /**
