@@ -496,6 +496,9 @@ class StreamDefaultNotificationHandlerTest {
     fun `onCallNotificationUpdate handles Active state with participants`() = runTest {
         // Given
         val mockkApp = mockk<Application>(relaxed = true)
+        every { mockCall.state.members } returns MutableStateFlow(emptyList())
+        every { mockCall.state.remoteParticipants } returns MutableStateFlow(emptyList())
+        every { mockCall.state.ringingState } returns MutableStateFlow(RingingState.Active)
         every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Active)
         every { mockCallState.remoteParticipants } returns MutableStateFlow(
             listOf(
@@ -563,6 +566,10 @@ class StreamDefaultNotificationHandlerTest {
         every { mockCallState.remoteParticipants } returns MutableStateFlow(emptyList()) // No participants
         every { mockCallState.members } returns MutableStateFlow(emptyList())
 
+        every { mockCall.state.ringingState } returns MutableStateFlow(RingingState.Idle)
+        every { mockCall.state.members } returns MutableStateFlow(emptyList())
+        every { mockCall.state.remoteParticipants } returns MutableStateFlow(emptyList())
+
         testHandler = StreamDefaultNotificationHandler(
             application = mockkApp,
             notificationManager = mockNotificationManager,
@@ -614,6 +621,10 @@ class StreamDefaultNotificationHandlerTest {
             )
         } returns mockk(relaxed = true)
 
+        every { mockCall.state.members } returns MutableStateFlow(emptyList())
+        every { mockCall.state.remoteParticipants } returns MutableStateFlow(emptyList())
+        every { mockCall.state.ringingState } returns MutableStateFlow(RingingState.Incoming())
+
         testHandler = StreamDefaultNotificationHandler(
             application = mockkApp,
             notificationManager = mockNotificationManager,
@@ -643,6 +654,7 @@ class StreamDefaultNotificationHandlerTest {
         // Given
         val callDisplayName = "Ivy Chen"
         val mockkApp = mockk<Application>(relaxed = true)
+
         every {
             mockIntentResolver.searchOutgoingCallPendingIntent(any(), payload = payload)
         } returns mockPendingIntent
@@ -690,6 +702,9 @@ class StreamDefaultNotificationHandlerTest {
                 any(),
             )
         } returns mockk(relaxed = true)
+
+        every { mockCall.state.members } returns MutableStateFlow(emptyList())
+        every { mockCall.state.remoteParticipants } returns MutableStateFlow(emptyList())
 
         testHandler = StreamDefaultNotificationHandler(
             application = mockkApp,
