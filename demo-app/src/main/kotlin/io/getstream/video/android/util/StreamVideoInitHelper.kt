@@ -232,28 +232,6 @@ object StreamVideoInitHelper {
                     mediaSessionCallback = PausePlayMediaSessionCallback(),
                     updateNotificationBuilderInterceptor = LiveStreamMediaNotificationInterceptor(context),
                     hideRingingNotificationInForeground = true,
-                    initialNotificationBuilderInterceptor = object : StreamNotificationBuilderInterceptors() {
-                        override fun onBuildIncomingCallNotification(
-                            builder: NotificationCompat.Builder,
-                            fullScreenPendingIntent: PendingIntent,
-                            acceptCallPendingIntent: PendingIntent,
-                            rejectCallPendingIntent: PendingIntent,
-                            callerName: String?,
-                            shouldHaveContentIntent: Boolean,
-                            payload: Map<String, Any?>,
-                        ): NotificationCompat.Builder {
-                            return super.onBuildIncomingCallNotification(
-                                builder,
-                                fullScreenPendingIntent,
-                                acceptCallPendingIntent,
-                                rejectCallPendingIntent,
-                                callerName,
-                                shouldHaveContentIntent,
-                                payload,
-                            ).setContentTitle("Content title")
-                                .setContentText("Content text")
-                        }
-                    },
                     intentResolver = DefaultStreamIntentResolver(
                         context,
                         object : DefaultNotificationIntentBundleResolver() {
