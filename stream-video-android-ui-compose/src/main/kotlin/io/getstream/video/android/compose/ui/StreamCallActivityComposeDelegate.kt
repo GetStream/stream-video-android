@@ -390,13 +390,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         logger.d {
             "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=$this"
         }
-        LaunchedEffect(call.id) {
-            val activeCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value
-            val activeCallConnection = activeCall?.state?.connection?.value
-            logger.d {
-                "[ConnectionAvailable], LaunchedEffect, connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, activeCall = ${activeCall?.id}, activeCallConnection=$activeCallConnection"
-            }
-        }
 
         when (connection) {
             RealtimeConnection.Disconnected -> {
