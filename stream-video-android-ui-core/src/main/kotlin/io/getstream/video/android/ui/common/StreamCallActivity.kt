@@ -544,7 +544,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
         val streamCallId = intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
         streamCallId?.let {
-            logger.d { "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
+            logger.d { "[initializeConfig], Noob call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
             configurationMap[it.id] = config
         }
     }
@@ -561,7 +561,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         call: Call,
     ) {
         logger.d {
-            "[onCreate(Bundle,PersistableBundle,Call)], call_id:${call.id}, setting up compose delegate."
+            "[onCreate(Bundle,PersistableBundle,Call)] Noob, call_id:${call.id}, setting up compose delegate."
         }
         uiDelegate.setContent(this, call)
     }
@@ -807,7 +807,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call_id: ${call.id}" }
+        logger.d { "[reject] Noob #ringing; rejectReason: $reason, call_id: ${call.id}" }
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         call.state.cancelTimeout()
         call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
@@ -1187,7 +1187,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     public fun safeFinish() {
         if (!this.isFinishing && !isFinishingSafely) {
             isFinishingSafely = true
-            logger.d { "[safeFinish] call_id:${cachedCall.cid}" }
+            logger.d { "[safeFinish] Noob call_id:${cachedCall.cid}" }
             finish()
         }
     }
