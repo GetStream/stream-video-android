@@ -439,9 +439,9 @@ class StreamDefaultNotificationHandlerTest {
         // Given
         val mockkApp = mockk<Application>(relaxed = true)
         every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Incoming())
-        every { mockIntentResolver.searchIncomingCallPendingIntent(any()) } returns mockPendingIntent
-        every { mockIntentResolver.searchAcceptCallPendingIntent(any()) } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchIncomingCallPendingIntent(any(), any(), payload) } returns mockPendingIntent
+        every { mockIntentResolver.searchAcceptCallPendingIntent(any(), any(), payload) } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(any(), any()) } returns mockPendingIntent
         every {
             mockInitialInterceptor.onBuildIncomingCallNotification(
                 any(),
