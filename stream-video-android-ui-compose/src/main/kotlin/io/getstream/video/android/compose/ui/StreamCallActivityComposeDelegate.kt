@@ -388,13 +388,13 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     ) {
         val connection by call.state.connection.collectAsStateWithLifecycle()
         logger.d {
-            "[ConnectionAvailable], Noob connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=$this"
+            "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=$this"
         }
         LaunchedEffect(call.id) {
             val activeCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value
             val activeCallConnection = activeCall?.state?.connection?.value
             logger.d {
-                "[ConnectionAvailable], LaunchedEffect, Noob connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, activeCall = ${activeCall?.id}, activeCallConnection=$activeCallConnection"
+                "[ConnectionAvailable], LaunchedEffect, connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, activeCall = ${activeCall?.id}, activeCallConnection=$activeCallConnection"
             }
         }
 
@@ -405,7 +405,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     if (configuration?.closeScreenOnCallEnded == false) {
                         CallDisconnectedContent(call)
                     } else {
-                        logger.d { "[RealtimeConnection.Disconnected], Noob call_id = ${call.id}" }
+                        logger.d { "[RealtimeConnection.Disconnected], call_id = ${call.id}" }
                         safeFinish()
                     }
                 } else {
@@ -426,7 +426,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     }
                 } else {
                     // Do nothing, this block belongs to in-active call
-                    logger.d { "[RealtimeConnection.Failed] Noob for in-active call, call_id = ${call.id}" }
+                    logger.d { "[RealtimeConnection.Failed] for in-active call, call_id = ${call.id}" }
                 }
             }
 
