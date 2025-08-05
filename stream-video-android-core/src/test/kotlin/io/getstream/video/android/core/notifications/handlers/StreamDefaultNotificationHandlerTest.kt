@@ -31,6 +31,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.StreamIntentResolver
+import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.model.StreamCallId
@@ -76,6 +77,9 @@ class StreamDefaultNotificationHandlerTest {
 
     @MockK
     lateinit var mockUpdateInterceptor: StreamNotificationUpdateInterceptors
+
+    @MockK
+    lateinit var notificationDispatcher: NotificationDispatcher
 
     @MockK
     lateinit var mockCall: Call
@@ -161,6 +165,7 @@ class StreamDefaultNotificationHandlerTest {
         // Mock call state
         every { mockCall.cid } returns "default:test-call-123"
         every { mockCall.state } returns mockCallState
+        every { mockCall.state.createdBy } returns MutableStateFlow(null)
         every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Incoming())
         every { mockCallState.members } returns MutableStateFlow(emptyList())
         every { mockCallState.remoteParticipants } returns MutableStateFlow(emptyList())
@@ -438,9 +443,16 @@ class StreamDefaultNotificationHandlerTest {
     fun `onCallNotificationUpdate handles incoming ringing state`() = runTest {
         // Given
         val mockkApp = mockk<Application>(relaxed = true)
+        every { mockCall.state.ringingState } returns MutableStateFlow(RingingState.Incoming())
+        every { mockCall.state.members } returns MutableStateFlow(emptyList())
+        every { mockCall.state.remoteParticipants } returns MutableStateFlow(emptyList())
         every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Incoming())
-        every { mockIntentResolver.searchIncomingCallPendingIntent(any(), any(), payload) } returns mockPendingIntent
-        every { mockIntentResolver.searchAcceptCallPendingIntent(any(), any(), payload) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(any(), any(), payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(any(), any(), payload)
+        } returns mockPendingIntent
         every { mockIntentResolver.searchRejectCallPendingIntent(any(), any()) } returns mockPendingIntent
         every {
             mockInitialInterceptor.onBuildIncomingCallNotification(
@@ -450,6 +462,7 @@ class StreamDefaultNotificationHandlerTest {
                 any(),
                 any(),
                 any(),
+                payload,
             )
         } returns mockk(relaxed = true)
         coEvery {
@@ -468,6 +481,7 @@ class StreamDefaultNotificationHandlerTest {
             hideRingingNotificationInForeground = false,
             initialNotificationBuilderInterceptor = mockInitialInterceptor,
             updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            notificationDispatcher = notificationDispatcher,
             permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
         )
 
@@ -489,15 +503,22 @@ class StreamDefaultNotificationHandlerTest {
                 mockk(),
             ),
         ) // 2 participants
-        every { mockIntentResolver.searchOutgoingCallPendingIntent(any()) } returns mockPendingIntent
-        every { mockIntentResolver.searchEndCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchOutgoingCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchEndCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
         every {
             mockIntentResolver.searchOngoingCallPendingIntent(
                 any(),
                 any(),
+                payload,
             )
         } returns mockPendingIntent
-        every { mockIntentResolver.searchRejectCallPendingIntent(any()) } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(any(), payload = payload)
+        } returns mockPendingIntent
         every {
             mockInitialInterceptor.onBuildOngoingCallNotification(
                 any(),
@@ -505,6 +526,7 @@ class StreamDefaultNotificationHandlerTest {
                 any(),
                 any(),
                 any(),
+                payload = payload,
             )
         } returns mockk(relaxed = true)
         coEvery {
