@@ -18,7 +18,6 @@ package io.getstream.video.android.core.notifications
 
 import android.app.Application
 import android.app.NotificationManager
-import android.media.AudioManager
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
