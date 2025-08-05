@@ -68,6 +68,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -164,6 +166,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
 
+    private val _isTransitioningToAnotherCall: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    public val isTransitioningToAnotherCall: StateFlow<Boolean> = _isTransitioningToAnotherCall
+
     @Deprecated(
         "Use configurationMap instead",
         replaceWith = ReplaceWith("configurationMap"),
@@ -186,45 +191,51 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
         logger.d { "[onSuccessFinish]" }
-        onEnded(call)
-        if (isCurrentAcceptedCall(call)) {
-            val configuration = configurationMap[call.id]
-            if (configuration?.closeScreenOnCallEnded == true) {
-                logger.w {
-                    "[onSuccessFinish], The call was successfully finished! Closing activity, call_cid:${call.cid}"
+        if (!isTransitioningToAnotherCall.value) {
+            onEnded(call)
+            if (isCurrentAcceptedCall(call)) {
+                val configuration = configurationMap[call.id]
+                if (configuration?.closeScreenOnCallEnded == true) {
+                    logger.w {
+                        "[onSuccessFinish], The call was successfully finished! Closing activity, call_cid:${call.cid}"
+                    }
+                    safeFinish()
                 }
-                safeFinish()
+            } else {
+                logger.d { "[onSuccessFinish] for non-active call" }
             }
-        } else {
-            logger.d { "[onSuccessFinish] for non-active call" }
         }
+
     }
 
     /**
      * The Exception is [StreamCallActivityException]. We will update the args in next major release
      */
     protected val onErrorFinish: suspend (Exception) -> Unit = { error ->
-        onFailed(error)
-        if (error is StreamCallActivityException) {
-            logger.e(error) { "[onErrorFinish] Something went wrong, call_id:${error.call.id}" }
-            if (isCurrentAcceptedCall(error.call)) {
-                val configuration = configurationMap[error.call.id]
-                if (configuration?.closeScreenOnError == true) {
+        if (!isTransitioningToAnotherCall.value) {
+            onFailed(error)
+            if (error is StreamCallActivityException) {
+                logger.e(error) { "[onErrorFinish] Something went wrong, call_id:${error.call.id}" }
+                if (isCurrentAcceptedCall(error.call)) {
+                    val configuration = configurationMap[error.call.id]
+                    if (configuration?.closeScreenOnError == true) {
+                        logger.e(error) { "Finishing the activity" }
+                        safeFinish()
+                    }
+                } else {
+                    logger.e(error) { "[onErrorFinish] for non-active call" }
+                }
+            } else {
+                /**
+                 * This will execute when we got a error before creating the call object
+                 */
+                if (config.closeScreenOnError) {
                     logger.e(error) { "Finishing the activity" }
                     safeFinish()
                 }
-            } else {
-                logger.e(error) { "[onErrorFinish] for non-active call" }
-            }
-        } else {
-            /**
-             * This will execute when we got a error before creating the call object
-             */
-            if (config.closeScreenOnError) {
-                logger.e(error) { "Finishing the activity" }
-                safeFinish()
             }
         }
+
     }
 
     /**
@@ -295,11 +306,13 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                         applyDashboardSettings(successCall)
                         onCreate(instanceState, persistentState, successCall)
                     }
+                    _isTransitioningToAnotherCall.value = false
                 },
                 onError = {
                     // We are not calling onErrorFinish here on purpose
                     // we want to crash if we cannot initialize the call
                     logger.e(it) { "Failed to initialize call." }
+                    _isTransitioningToAnotherCall.value = false
                     throw it
                 },
             )
@@ -410,6 +423,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             else -> {
                 if (handler.shouldAcceptNewCall(activeCall, intent)) {
                     // We want to leave the ongoing active call
+                    _isTransitioningToAnotherCall.value = true
                     leave(activeCall, onSuccessFinish, onErrorFinish)
                     lifecycleScope.launch(Dispatchers.Default) {
                         delay(
