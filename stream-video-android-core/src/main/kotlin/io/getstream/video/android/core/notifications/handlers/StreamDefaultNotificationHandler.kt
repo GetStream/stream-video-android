@@ -39,17 +39,24 @@ import io.getstream.android.push.permissions.DefaultNotificationPermissionHandle
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.notifications.internal.storage.DefaultNotificationDataStore
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
+import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
+import io.getstream.video.android.core.notifications.internal.storage.NotificationDataStore
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.StreamIntentResolver
+import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -110,6 +117,8 @@ constructor(
             initialNotificationBuilderInterceptor,
             updateNotificationBuilderInterceptor,
         ),
+//    private val notificationDataStore: NotificationDataStore = DefaultNotificationDataStore(),
+    private val notificationDispatcher: NotificationDispatcher = DefaultNotificationDispatcher(notificationManager),
     @ExperimentalStreamVideoApi
     private val permissionChecker: (
         context: Context,
@@ -166,7 +175,7 @@ constructor(
             setCategory(NotificationCompat.CATEGORY_STATUS)
             setContentIntent(liveCallPendingIntent)
             setOngoing(false)
-        }.showNotification(notificationId)
+        }.showNotification(callId, notificationId)
     }
 
     override fun onMissedCall(
@@ -184,7 +193,7 @@ constructor(
             callId,
             callDisplayName,
             payload,
-        ).showNotification(notificationId = callId.hashCode())
+        ).showNotification(callId, callId.hashCode())
     }
 
     override fun onNotification(
@@ -207,7 +216,7 @@ constructor(
             setChannelId(notificationChannels.ongoingCallChannel.id)
             setCategory(NotificationCompat.CATEGORY_STATUS)
             setOngoing(false)
-        }.showNotification(notificationId)
+        }.showNotification(callId, notificationId)
     }
 
     // END REGION : On push arrived
@@ -649,75 +658,98 @@ constructor(
     }
 
     // START REGION: Notification updates
-
     override suspend fun onCallNotificationUpdate(call: Call): Notification? {
         val ringingState = call.state.ringingState.value
         val members = call.state.members.value
         val remoteParticipants = call.state.remoteParticipants.value
+
+        logCallState(call, ringingState, members, remoteParticipants)
+
+        return when (ringingState) {
+            is RingingState.Outgoing -> handleOutgoingCallNotificationUpdate(call, members)
+            is RingingState.Incoming -> handleIncomingCallNotificationUpdate(call, members)
+            is RingingState.Active -> handleActiveCallNotificationUpdate(call, remoteParticipants)
+            else -> {
+                logger.d { "[onCallNotificationUpdate] Unhandled ringing state: $ringingState" }
+                null
+            }
+        }
+    }
+
+    private fun logCallState(
+        call: Call,
+        ringingState: RingingState,
+        members: List<MemberState>,
+        remoteParticipants: List<ParticipantState>
+    ) {
         logger.d { "[onCallNotificationUpdate] #ringingState: $ringingState; callId: ${call.cid}" }
         logger.d { "[onCallNotificationUpdate] #members: $members; callId: ${call.cid}" }
-        logger.d {
-            "[onCallNotificationUpdate] #remoteParticipants: $remoteParticipants; callId: ${call.cid}"
-        }
-
-        val notification: Notification? = if (ringingState is RingingState.Outgoing) {
-            logger.d { "[onCallNotificationUpdate] Handling outgoing call" }
-            val remoteMembersCount = members.size - 1
-            val callDisplayName = if (remoteMembersCount != 1) {
-                application.getString(
-                    R.string.stream_video_outgoing_call_notification_title,
-                )
-            } else {
-                members.firstOrNull { member ->
-                    member.user.id != call.state.me.value?.userId?.value
-                }?.user?.name ?: "Unknown"
-            }
-
-            updateOutgoingCallNotification(
-                call = call,
-                callDisplayName = callDisplayName,
-            )
-        } else if (ringingState is RingingState.Incoming) {
-            logger.d { "[onCallNotificationUpdate] Handling incoming call" }
-            val callDisplayName = members.firstOrNull { member ->
-                member.user.id != call.state.me.value?.userId?.value
-            }?.user?.name ?: "Unknown"
-
-            logger.d { "[onCallNotificationUpdate] Incoming call from: $callDisplayName" }
-            updateIncomingCallNotification(
-                call = call,
-                callDisplayName = callDisplayName,
-            )
-        } else if (ringingState is RingingState.Active) {
-            logger.d { "[onCallNotificationUpdate] Handling active call" }
-            val callDisplayName = if (remoteParticipants.isEmpty()) {
-                // If no remote participants, get simple call notification title
-                application.getString(
-                    R.string.stream_video_ongoing_call_notification_title,
-                )
-            } else {
-                if (remoteParticipants.size > 1) {
-                    // If more than 1 remote participant, get group call notification title
-                    application.getString(
-                        R.string.stream_video_ongoing_group_call_notification_title,
-                    )
-                } else {
-                    // If 1 remote participant, get the name of the remote participant
-                    remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
-                }
-            }
-
-            updateOngoingCallNotification(
-                call = call,
-                callDisplayName = callDisplayName,
-            )
-        } else {
-            logger.d { "[onCallNotificationUpdate] Unhandled ringing state: $ringingState" }
-            null
-        }
-
-        return notification
+        logger.d { "[onCallNotificationUpdate] #remoteParticipants: $remoteParticipants; callId: ${call.cid}" }
     }
+
+    private suspend fun handleOutgoingCallNotificationUpdate(call: Call, members: List<MemberState>): Notification? {
+        logger.d { "[onCallNotificationUpdate] Handling outgoing call" }
+
+        val callDisplayName = getOutgoingCallDisplayName(call, members)
+        return updateOutgoingCallNotification(call = call, callDisplayName = callDisplayName)
+    }
+
+    private suspend fun handleIncomingCallNotificationUpdate(call: Call, members: List<MemberState>): Notification? {
+        logger.d { "[onCallNotificationUpdate] Handling incoming call" }
+
+        val callDisplayName = getIncomingCallDisplayName(call, members)
+        logger.d { "[onCallNotificationUpdate] Incoming call from: $callDisplayName" }
+
+        return updateIncomingCallNotification(call = call, callDisplayName = callDisplayName)
+    }
+
+    private suspend fun handleActiveCallNotificationUpdate(call: Call, remoteParticipants: List<ParticipantState>): Notification? {
+        logger.d { "[onCallNotificationUpdate] Handling active call" }
+
+        val callDisplayName = getActiveCallDisplayName(remoteParticipants)
+        return updateOngoingCallNotification(call = call, callDisplayName = callDisplayName)
+    }
+
+    private fun getOutgoingCallDisplayName(call: Call, members: List<MemberState>): String {
+        val remoteMembersCount = members.size - 1
+        val baseName = if (remoteMembersCount != 1) {
+            application.getString(R.string.stream_video_outgoing_call_notification_title)
+        } else {
+            getRemoteMemberName(call, members)
+        }
+
+        return getCustomDisplayNameOrDefault(call, baseName)
+    }
+
+    private fun getIncomingCallDisplayName(call: Call, members: List<MemberState>): String {
+        val baseName = getRemoteMemberName(call, members)
+        return getCustomDisplayNameOrDefault(call, baseName)
+    }
+
+    private fun getActiveCallDisplayName(remoteParticipants: List<ParticipantState>): String {
+        return when {
+            remoteParticipants.isEmpty() ->
+                application.getString(R.string.stream_video_ongoing_call_notification_title)
+            remoteParticipants.size > 1 ->
+                application.getString(R.string.stream_video_ongoing_group_call_notification_title)
+            else ->
+                remoteParticipants.firstOrNull()?.name?.value ?: "Unknown"
+        }
+    }
+
+    private fun getRemoteMemberName(call: Call, members: List<MemberState>): String {
+        return members.firstOrNull { member ->
+            member.user.id != call.state.me.value?.userId?.value
+        }?.user?.name ?: "Unknown"
+    }
+
+    private fun getCustomDisplayNameOrDefault(call: Call, defaultName: String): String {
+        val lastNotification = notificationDataStore.getNotification(call)
+        return lastNotification?.let { notification ->
+            DefaultNotificationContentExtractor.getText(notification)?.toString()
+        } ?: defaultName
+    }
+
 
     override suspend fun updateIncomingCallNotification(
         call: Call,
@@ -877,14 +909,14 @@ constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun Notification?.showNotification(notificationId: Int) {
+    private fun Notification?.showNotification(callId: StreamCallId, notificationId: Int) {
         this?.let { notification ->
             if (permissionChecker(
                     application,
                     Manifest.permission.POST_NOTIFICATIONS,
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                notificationManager.notify(notificationId, notification)
+                notificationDispatcher.notify(callId, notificationId, notification)
                 logger.d { "[showNotification] with notificationId: $notificationId" }
             } else {
                 logger.w { "[showNotification] Permission not granted, not showing notification." }
