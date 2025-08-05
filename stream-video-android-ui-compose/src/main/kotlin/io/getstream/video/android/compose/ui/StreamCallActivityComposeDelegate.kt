@@ -38,7 +38,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +71,6 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
@@ -80,7 +78,6 @@ import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
-import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
 /**
@@ -319,34 +316,11 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         }
     }
 
+    /**
+     * Keeping it for backward compatibility, its logic is shifted to [StreamCallActivity.observeRejectCallFromNotification]
+     */
     @Composable
     public open fun StreamCallActivity.HandleCallRejectionFromNotification(call: Call) {
-        /**
-         * Call can be rejected by [RejectCallBroadcastReceiver] so the activity
-         * needs to observe [Call.state.rejectedBy]
-         */
-        val rejectedBy by call.state.rejectedBy.collectAsStateWithLifecycle()
-        val rejectActionBundle by call.state.rejectActionBundle.collectAsStateWithLifecycle()
-
-        LaunchedEffect(rejectedBy, rejectActionBundle) {
-            val currentUserId = StreamVideo.instanceOrNull()?.userId
-            if (rejectedBy.contains(currentUserId) && rejectActionBundle != null) {
-                logger.d { "[HandleCallRejectionFromNotification] Start" }
-                // check if there is no ongoing call then safely finish it else do nothing
-                val noActiveCall = (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
-                if (noActiveCall) {
-                    onEnded(call)
-                    val localConfiguration = rejectActionBundle?.extractStreamActivityConfig()
-                    localConfiguration?.let { configuration ->
-                        if (configuration.closeScreenOnCallEnded) {
-                            safeFinish()
-                        } else {
-                            logger.d { "Don't close activity as some other call is active" }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private fun getRequiredPermissions(call: Call): List<String> {

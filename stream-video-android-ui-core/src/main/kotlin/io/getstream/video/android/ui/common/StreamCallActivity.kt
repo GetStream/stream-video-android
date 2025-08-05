@@ -28,7 +28,9 @@ import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallSessionEndedEvent
 import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
@@ -69,6 +71,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -163,6 +166,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
+    private var rejectCallFromNotificationJob: Job? = null
 
     @Deprecated(
         "Use configurationMap instead",
@@ -315,6 +319,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 IgnoreReason.DelegateDeclined -> {
                     logger.d { "Call declined by delegate declined call_cid:$newCallCid" }
                 }
+
                 else -> {}
             }
         }
@@ -387,6 +392,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 handleOnNewIncomingCallAcceptAction()
             }
+
             else -> {}
         }
     }
@@ -564,6 +570,42 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             "[onCreate(Bundle,PersistableBundle,Call)], call_id:${call.id}, setting up compose delegate."
         }
         uiDelegate.setContent(this, call)
+    }
+
+    protected open fun observeRejectCallFromNotification(call: Call) {
+        /**
+         * Call can be rejected by [RejectCallBroadcastReceiver] so the activity
+         * needs to observe [Call.state.rejectedBy]
+         */
+        rejectCallFromNotificationJob?.cancel()
+        rejectCallFromNotificationJob = lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                call.state.rejectedBy
+                    .zip(call.state.rejectActionBundle) { rejectedBy, bundle ->
+                        rejectedBy to bundle
+                    }.collect { (rejectedBy, rejectActionBundle) ->
+                        val currentUserId = StreamVideo.instanceOrNull()?.userId
+                        if (rejectedBy.contains(currentUserId) && rejectActionBundle != null) {
+                            logger.d { "[HandleCallRejectionFromNotification] Start" }
+                            // check if there is no ongoing call then safely finish it else do nothing
+                            val noActiveCall =
+                                (StreamVideo.instanceOrNull()?.state?.activeCall?.value == null)
+                            if (noActiveCall) {
+                                onEnded(call)
+                                val localConfiguration =
+                                    rejectActionBundle?.extractStreamActivityConfig()
+                                localConfiguration?.let { configuration ->
+                                    if (configuration.closeScreenOnCallEnded) {
+                                        safeFinish()
+                                    } else {
+                                        logger.d { "Don't close activity as some other call is active" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }
+        }
     }
 
     /**
