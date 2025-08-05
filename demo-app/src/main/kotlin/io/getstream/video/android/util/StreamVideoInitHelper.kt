@@ -17,11 +17,9 @@
 package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
@@ -39,7 +37,6 @@ import io.getstream.video.android.core.notifications.DefaultNotificationIntentBu
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
-import io.getstream.video.android.core.notifications.handlers.StreamNotificationBuilderInterceptors
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.socket.common.token.TokenProvider
