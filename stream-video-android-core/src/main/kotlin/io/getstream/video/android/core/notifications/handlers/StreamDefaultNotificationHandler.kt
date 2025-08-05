@@ -722,7 +722,6 @@ constructor(
         return getCustomDisplayNameOrDefault(call, baseName)
     }
 
-    // TODO Rahul: Review from Alex
     private fun getIncomingCallDisplayName(call: Call, members: List<MemberState>): String {
         val baseName = getCallerName(call, members)
         return getCustomDisplayNameOrDefault(call, baseName)
@@ -739,10 +738,6 @@ constructor(
         }
     }
 
-    /**
-     * TODO Rahul - This logic is flawed (if call.state.me is null), then it can return any user name instead of caller name
-     * And call.state.me is indeed null, the output depends on the order of items in [members] list
-     */
     private fun getRemoteMemberName(call: Call, members: List<MemberState>): String {
         return members.firstOrNull { member ->
             member.user.id != call.state.me.value?.userId?.value
