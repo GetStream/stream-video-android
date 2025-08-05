@@ -116,7 +116,7 @@ constructor(
             updateNotificationBuilderInterceptor,
         ),
 //    private val notificationDataStore: NotificationDataStore = DefaultNotificationDataStore(),
-    private val notificationDispatcher: NotificationDispatcher =
+    protected val notificationDispatcher: NotificationDispatcher =
         DefaultNotificationDispatcher(notificationManager),
     @ExperimentalStreamVideoApi
     private val permissionChecker: (
@@ -722,10 +722,9 @@ constructor(
         return getCustomDisplayNameOrDefault(call, baseName)
     }
 
-    // TODO Rahul, might need fix
+    // TODO Rahul: Review from Alex
     private fun getIncomingCallDisplayName(call: Call, members: List<MemberState>): String {
-//        val baseName = getCallerName(call, members)
-        val baseName = getRemoteMemberName(call, members)
+        val baseName = getCallerName(call, members)
         return getCustomDisplayNameOrDefault(call, baseName)
     }
 
@@ -740,7 +739,10 @@ constructor(
         }
     }
 
-    // TODO Rahul - This logic is flawed (if call.state.me is null), then it can return any user name instead of caller name
+    /**
+     * TODO Rahul - This logic is flawed (if call.state.me is null), then it can return any user name instead of caller name
+     * And call.state.me is indeed null, the output depends on the order of items in [members] list
+     */
     private fun getRemoteMemberName(call: Call, members: List<MemberState>): String {
         return members.firstOrNull { member ->
             member.user.id != call.state.me.value?.userId?.value
@@ -752,7 +754,10 @@ constructor(
     }
 
     private fun getCustomDisplayNameOrDefault(call: Call, defaultName: String): String {
-        val lastNotification = call.state.notification.value
+        val lastNotification = call.state.atomicNotification.get()
+        logger.d {
+            "[getCustomDisplayNameOrDefault] callId: ${call.cid}, lastNotification: $lastNotification"
+        }
         return lastNotification?.let { notification ->
             DefaultNotificationContentExtractor.getText(notification)?.toString()
         } ?: defaultName

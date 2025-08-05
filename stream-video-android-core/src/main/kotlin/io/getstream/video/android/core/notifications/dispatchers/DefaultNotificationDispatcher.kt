@@ -20,16 +20,19 @@ import android.Manifest
 import android.app.Notification
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
 
 class DefaultNotificationDispatcher(
     val notificationManager: NotificationManagerCompat,
-//    val notificationDataStore: NotificationDataStore
 ) : NotificationDispatcher {
+
+    private val logger by taggedLogger("DefaultNotificationDispatcher")
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
+        logger.d { "[notify] callId: ${streamCallId.id}, notificationId: $id" }
         StreamVideo.instanceOrNull()?.call(streamCallId.type, streamCallId.id)
             ?.state?.updateNotification(notification)
 

@@ -22,6 +22,7 @@ import androidx.core.app.NotificationCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -95,6 +96,10 @@ internal object NoOpNotificationHandler : NotificationHandler {
         call: Call,
         callDisplayName: String,
     ): Notification? = null
+
+    override fun getStreamNotificationDispatcher(): NotificationDispatcher {
+        return (null as NotificationDispatcher)
+    }
 
     override fun getRingingCallNotification(
         ringingState: RingingState,

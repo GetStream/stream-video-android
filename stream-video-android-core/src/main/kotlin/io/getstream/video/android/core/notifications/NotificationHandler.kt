@@ -19,6 +19,7 @@ package io.getstream.video.android.core.notifications
 import android.app.Notification
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationHandler
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationProvider
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdatesProvider
@@ -31,6 +32,7 @@ public interface NotificationHandler :
     StreamNotificationHandler,
     StreamNotificationProvider,
     StreamNotificationUpdatesProvider,
+    StreamNotificationDispatcher,
     MediaNotificationHandler {
 
     /**
@@ -72,4 +74,9 @@ public interface NotificationHandler :
             "io.getstream.video.android.intent-extra.notification_id"
         const val INCOMING_CALL_NOTIFICATION_ID = 24756
     }
+}
+
+// TODO Rahul: Review from Alex
+interface StreamNotificationDispatcher {
+    fun getStreamNotificationDispatcher(): NotificationDispatcher
 }

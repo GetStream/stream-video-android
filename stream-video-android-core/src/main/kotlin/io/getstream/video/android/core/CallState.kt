@@ -145,6 +145,7 @@ import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -652,8 +653,7 @@ public class CallState(
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
-    private val _notification: MutableStateFlow<Notification?> = MutableStateFlow(null)
-    val notification: StateFlow<Notification?> = _notification
+    internal val atomicNotification: AtomicReference<Notification?> = AtomicReference(null)
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -1543,7 +1543,7 @@ public class CallState(
     }
 
     fun updateNotification(notification: Notification) {
-        _notification.value = notification
+        atomicNotification.set(notification)
     }
 }
 
