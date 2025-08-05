@@ -46,17 +46,15 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
-import io.getstream.video.android.core.notifications.internal.storage.DefaultNotificationDataStore
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
-import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
-import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
-import io.getstream.video.android.core.notifications.internal.storage.NotificationDataStore
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.StreamIntentResolver
+import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
+import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -118,7 +116,8 @@ constructor(
             updateNotificationBuilderInterceptor,
         ),
 //    private val notificationDataStore: NotificationDataStore = DefaultNotificationDataStore(),
-    private val notificationDispatcher: NotificationDispatcher = DefaultNotificationDispatcher(notificationManager),
+    private val notificationDispatcher: NotificationDispatcher =
+        DefaultNotificationDispatcher(notificationManager),
     @ExperimentalStreamVideoApi
     private val permissionChecker: (
         context: Context,
@@ -680,11 +679,13 @@ constructor(
         call: Call,
         ringingState: RingingState,
         members: List<MemberState>,
-        remoteParticipants: List<ParticipantState>
+        remoteParticipants: List<ParticipantState>,
     ) {
         logger.d { "[onCallNotificationUpdate] #ringingState: $ringingState; callId: ${call.cid}" }
         logger.d { "[onCallNotificationUpdate] #members: $members; callId: ${call.cid}" }
-        logger.d { "[onCallNotificationUpdate] #remoteParticipants: $remoteParticipants; callId: ${call.cid}" }
+        logger.d {
+            "[onCallNotificationUpdate] #remoteParticipants: $remoteParticipants; callId: ${call.cid}"
+        }
     }
 
     private suspend fun handleOutgoingCallNotificationUpdate(call: Call, members: List<MemberState>): Notification? {
@@ -721,7 +722,9 @@ constructor(
         return getCustomDisplayNameOrDefault(call, baseName)
     }
 
+    // TODO Rahul, might need fix
     private fun getIncomingCallDisplayName(call: Call, members: List<MemberState>): String {
+//        val baseName = getCallerName(call, members)
         val baseName = getRemoteMemberName(call, members)
         return getCustomDisplayNameOrDefault(call, baseName)
     }
@@ -737,19 +740,23 @@ constructor(
         }
     }
 
+    // TODO Rahul - This logic is flawed (if call.state.me is null), then it can return any user name instead of caller name
     private fun getRemoteMemberName(call: Call, members: List<MemberState>): String {
         return members.firstOrNull { member ->
             member.user.id != call.state.me.value?.userId?.value
         }?.user?.name ?: "Unknown"
     }
 
+    private fun getCallerName(call: Call, members: List<MemberState>): String {
+        return call.state.createdBy.value?.name ?: getRemoteMemberName(call, members)
+    }
+
     private fun getCustomDisplayNameOrDefault(call: Call, defaultName: String): String {
-        val lastNotification = notificationDataStore.getNotification(call)
+        val lastNotification = call.state.notification.value
         return lastNotification?.let { notification ->
             DefaultNotificationContentExtractor.getText(notification)?.toString()
         } ?: defaultName
     }
-
 
     override suspend fun updateIncomingCallNotification(
         call: Call,

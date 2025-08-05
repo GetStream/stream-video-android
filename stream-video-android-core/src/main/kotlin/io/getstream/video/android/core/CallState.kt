@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.app.Notification
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.Stable
@@ -650,6 +651,9 @@ public class CallState(
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
+
+    private val _notification: MutableStateFlow<Notification?> = MutableStateFlow(null)
+    val notification: StateFlow<Notification?> = _notification
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -1536,6 +1540,10 @@ public class CallState(
 
     fun updateRejectActionBundle(bundle: Bundle) {
         _rejectActionBundle.value = bundle
+    }
+
+    fun updateNotification(notification: Notification) {
+        _notification.value = notification
     }
 }
 
