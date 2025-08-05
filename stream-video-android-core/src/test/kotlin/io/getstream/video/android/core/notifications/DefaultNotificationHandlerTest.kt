@@ -17,10 +17,14 @@
 package io.getstream.video.android.core.notifications
 
 import android.app.Application
+import android.app.NotificationManager
+import android.media.AudioManager
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -45,6 +49,7 @@ class DefaultNotificationHandlerTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
+        every { mockApplication.getSystemService(any()) } returns mockk<NotificationManager>(relaxed = true)
         testCallId = StreamCallId(type = "default", id = "test-call-123")
     }
 
