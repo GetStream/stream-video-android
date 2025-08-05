@@ -285,8 +285,24 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         override fun shouldAcceptNewCall(activeCall: Call, intent: Intent) = true
 
         override fun onAcceptCall(intent: Intent) {
-            finish()
-            startActivity(intent)
+            initializeCallOrFail(
+                null,
+                null,
+                intent,
+                onSuccess = { instanceState, persistentState, call, action ->
+                    logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
+                    onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                        applyDashboardSettings(successCall)
+                        onCreate(instanceState, persistentState, successCall)
+                    }
+                },
+                onError = {
+                    // We are not calling onErrorFinish here on purpose
+                    // we want to crash if we cannot initialize the call
+                    logger.e(it) { "Failed to initialize call." }
+                    throw it
+                },
+            )
         }
 
         override fun onIgnoreCall(intent: Intent, reason: IgnoreReason) {
@@ -528,7 +544,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
         val streamCallId = intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
         streamCallId?.let {
-            logger.d { "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
+            logger.d { "[initializeConfig], Noob call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
             configurationMap[it.id] = config
         }
     }
@@ -544,7 +560,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         persistentState: PersistableBundle?,
         call: Call,
     ) {
-        logger.d { "[onCreate(Bundle,PersistableBundle,Call)] setting up compose delegate." }
+        logger.d {
+            "[onCreate(Bundle,PersistableBundle,Call)] Noob, call_id:${call.id}, setting up compose delegate."
+        }
         uiDelegate.setContent(this, call)
     }
 
@@ -554,7 +572,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * @param call
      */
     public open fun onResume(call: Call) {
-        if (config.canKeepScreenOn) {
+        if (configurationMap[call.id]?.canKeepScreenOn == true) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         logger.d { "DefaultCallActivity - Resumed (call -> $call)" }
@@ -789,7 +807,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call_id: ${call.id}" }
+        logger.d { "[reject] Noob #ringing; rejectReason: $reason, call_id: ${call.id}" }
         val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         call.state.cancelTimeout()
         call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
@@ -1169,7 +1187,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     public fun safeFinish() {
         if (!this.isFinishing && !isFinishingSafely) {
             isFinishingSafely = true
-            logger.d { "[safeFinish] call_id:${cachedCall.cid}" }
+            logger.d { "[safeFinish] Noob call_id:${cachedCall.cid}" }
             finish()
         }
     }
