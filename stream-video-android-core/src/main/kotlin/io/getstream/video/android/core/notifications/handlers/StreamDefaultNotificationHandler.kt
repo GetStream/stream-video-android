@@ -724,6 +724,7 @@ constructor(
 
     private fun getIncomingCallDisplayName(call: Call, members: List<MemberState>): String {
         val baseName = getCallerName(call, members)
+        logger.d { "[getIncomingCallDisplayName] baseName = $baseName, getCustomDisplayNameOrDefault(..) = ${getCustomDisplayNameOrDefault(call, baseName)}" }
         return getCustomDisplayNameOrDefault(call, baseName)
     }
 
@@ -750,11 +751,14 @@ constructor(
 
     private fun getCustomDisplayNameOrDefault(call: Call, defaultName: String): String {
         val lastNotification = call.state.atomicNotification.get()
-        logger.d {
-            "[getCustomDisplayNameOrDefault] callId: ${call.cid}, lastNotification: $lastNotification"
-        }
+
         return lastNotification?.let { notification ->
-            DefaultNotificationContentExtractor.getText(notification)?.toString()
+            val title = DefaultNotificationContentExtractor.getTitle(notification)?.toString()
+            logger.d {
+                "[getCustomDisplayNameOrDefault] callId: ${call.cid}, lastNotification: $lastNotification, title from notification = $title, defaultName: $defaultName"
+            }
+            title
+
         } ?: defaultName
     }
 
