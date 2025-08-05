@@ -76,7 +76,6 @@ public interface NotificationHandler :
     }
 }
 
-// TODO Rahul: Review from Alex
 interface StreamNotificationDispatcher {
     fun getStreamNotificationDispatcher(): NotificationDispatcher
 }

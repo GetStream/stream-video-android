@@ -313,11 +313,9 @@ public open class DefaultNotificationHandler(
         callDisplayName: String,
     ): Notification? = null
 
-    // TODO Rahul: Review from Alex
     protected val notificationDispatcher: NotificationDispatcher =
         DefaultNotificationDispatcher(notificationManager)
 
-    // TODO Rahul: Review from Alex
     override fun getStreamNotificationDispatcher(): NotificationDispatcher {
         return notificationDispatcher
     }

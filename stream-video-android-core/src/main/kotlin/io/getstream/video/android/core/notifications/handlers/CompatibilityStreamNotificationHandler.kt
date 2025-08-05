@@ -125,7 +125,6 @@ constructor(
         // Do nothing, deprecated
     }
 
-    // TODO Rahul: Review from Alex
     override fun getStreamNotificationDispatcher(): NotificationDispatcher {
         return notificationDispatcher
     }
