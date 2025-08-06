@@ -754,7 +754,7 @@ constructor(
     }
 
     private fun getCustomDisplayNameOrDefault(call: Call, defaultName: String): String {
-        val lastNotification = call.state.atomicNotification.get()
+        val lastNotification: Notification? = call.state.atomicNotification.get() as? Notification
 
         return lastNotification?.let { notification ->
             val title = DefaultNotificationContentExtractor.getTitle(notification)?.toString()
