@@ -54,7 +54,7 @@ constructor(
     ),
     intentResolver: StreamIntentResolver =
         DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver()),
-    hideRingingNotificationInForeground: Boolean = false,
+    hideRingingNotificationInForeground: Boolean,
     initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
         StreamNotificationBuilderInterceptors(),
     updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors =
@@ -71,11 +71,7 @@ constructor(
             R.string.stream_video_incoming_call_notification_channel_id,
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
-            if (hideRingingNotificationInForeground) {
-                NotificationManager.IMPORTANCE_DEFAULT
-            } else {
-                NotificationManager.IMPORTANCE_HIGH
-            },
+            NotificationManager.IMPORTANCE_HIGH,
         ),
         ongoingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
@@ -98,6 +94,14 @@ constructor(
             R.string.stream_video_missed_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
         ),
+        incomingCallLowImportanceChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            R.string.stream_video_incoming_call_notification_channel_title,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+
     ),
 ) : NotificationHandler, StreamDefaultNotificationHandler(
     application,

@@ -105,13 +105,16 @@ data class StreamNotificationChannelInfo(
 /**
  * Provides the channel information for the notification.
  *
- * @param incomingCallChannel The channel for incoming calls.
+ * @param incomingCallChannel The channel for incoming calls (Notification will remain in notification/system, tray)
  * @param ongoingCallChannel The channel for ongoing calls.
- * @param callSetupChannel The channel for call setup.
+ * @param outgoingCallChannel The channel for call setup.
+ * @param missedCallChannel The channel for call setup.
+ * @param incomingCallLowImportanceChannel The channel for call setup (Notification will pop-up on screen)
  */
 data class StreamNotificationChannels(
     val incomingCallChannel: StreamNotificationChannelInfo,
     val ongoingCallChannel: StreamNotificationChannelInfo,
     val outgoingCallChannel: StreamNotificationChannelInfo,
     val missedCallChannel: StreamNotificationChannelInfo,
+    val incomingCallLowImportanceChannel: StreamNotificationChannelInfo,
 )

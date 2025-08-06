@@ -844,6 +844,7 @@ public open class DefaultNotificationHandler(
         ).build()
     }
 
+    @Deprecated("Use isAppInForeground")
     open fun isInForeground(): Boolean {
         val appProcessInfo = ActivityManager.RunningAppProcessInfo()
         ActivityManager.getMyMemoryState(appProcessInfo)
