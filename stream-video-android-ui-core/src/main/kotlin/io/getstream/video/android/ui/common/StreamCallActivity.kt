@@ -299,12 +299,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 null,
                 intent,
                 onSuccess = { instanceState, persistentState, call, action ->
+                    _isTransitioningToAnotherCall.value = false
                     logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
                     onIntentAction(call, action, onError = onErrorFinish) { successCall ->
                         applyDashboardSettings(successCall)
                         onCreate(instanceState, persistentState, successCall)
                     }
-                    _isTransitioningToAnotherCall.value = false
                 },
                 onError = {
                     // We are not calling onErrorFinish here on purpose

@@ -390,6 +390,12 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         logger.d {
             "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=$this"
         }
+        /**
+         * We need [StreamCallActivity.isTransitioningToAnotherCall] because we leave a call first then join another
+         * withing the same Activity Lifecycle
+         * Now leaving a call can lead to emit [RealtimeConnection.Disconnected] which we don't want to observe when
+         * we know we are in transitioning to anotherCall
+         */
         val isTransitioningToAnotherCall by isTransitioningToAnotherCall.collectAsStateWithLifecycle()
         if (!isTransitioningToAnotherCall) {
             when (connection) {
