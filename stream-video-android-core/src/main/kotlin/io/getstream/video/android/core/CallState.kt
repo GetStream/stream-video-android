@@ -653,7 +653,8 @@ public class CallState(
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
-    internal val atomicNotification: AtomicReference<Notification?> = AtomicReference<Notification?>(null)
+    internal val atomicNotification: AtomicReference<Notification?> =
+        AtomicReference<Notification?>(null)
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
