@@ -205,7 +205,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 logger.d { "[onSuccessFinish] for non-active call" }
             }
         }
-
     }
 
     /**
@@ -235,7 +234,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 }
             }
         }
-
     }
 
     /**
