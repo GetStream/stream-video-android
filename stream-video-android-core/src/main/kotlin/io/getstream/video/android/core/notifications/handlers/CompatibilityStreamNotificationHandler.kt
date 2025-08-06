@@ -71,7 +71,11 @@ constructor(
             R.string.stream_video_incoming_call_notification_channel_id,
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
-            NotificationManager.IMPORTANCE_HIGH,
+            if (hideRingingNotificationInForeground) {
+                NotificationManager.IMPORTANCE_DEFAULT
+            } else {
+                NotificationManager.IMPORTANCE_HIGH
+            },
         ),
         ongoingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
