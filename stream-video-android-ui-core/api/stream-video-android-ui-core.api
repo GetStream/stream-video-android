@@ -101,6 +101,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	protected fun handleOnNewIncomingCallAcceptAction ()V
 	protected fun handleOnNewIntentAction (Landroid/content/Intent;)V
 	public fun isCurrentAcceptedCall (Lio/getstream/video/android/core/Call;)Z
+	public final fun isTransitioningToAnotherCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public fun isVideoCall (Lio/getstream/video/android/core/Call;)Z
 	public fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public fun leave (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
