@@ -116,5 +116,6 @@ data class StreamNotificationChannels(
     val ongoingCallChannel: StreamNotificationChannelInfo,
     val outgoingCallChannel: StreamNotificationChannelInfo,
     val missedCallChannel: StreamNotificationChannelInfo,
+    val missedCallLowImportanceChannel: StreamNotificationChannelInfo,
     val incomingCallLowImportanceChannel: StreamNotificationChannelInfo,
 )

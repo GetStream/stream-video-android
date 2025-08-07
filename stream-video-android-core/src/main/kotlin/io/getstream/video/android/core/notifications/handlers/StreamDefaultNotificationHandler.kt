@@ -83,10 +83,10 @@ constructor(
     private val notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            R.string.stream_video_incoming_call_notification_channel_id,
             R.string.stream_video_incoming_call_notification_channel_title,
-            R.string.stream_video_incoming_call_low_priority_notification_channel_description,
-            NotificationManager.IMPORTANCE_DEFAULT,
+            R.string.stream_video_incoming_call_notification_channel_description,
+            NotificationManager.IMPORTANCE_HIGH,
         ),
         ongoingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
@@ -109,12 +109,19 @@ constructor(
             R.string.stream_video_missed_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
         ),
+        missedCallLowImportanceChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_missed_call_low_priority_notification_channel_id,
+            R.string.stream_video_missed_call_notification_channel_title,
+            R.string.stream_video_missed_call_low_priority_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
         incomingCallLowImportanceChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_notification_channel_id,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
             R.string.stream_video_incoming_call_notification_channel_title,
-            R.string.stream_video_incoming_call_notification_channel_description,
-            NotificationManager.IMPORTANCE_HIGH,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
         ),
     ),
     private val mediaSessionCallback: MediaSessionCompat.Callback? = null,
@@ -238,7 +245,11 @@ constructor(
         val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId, payload)
             ?: intentResolver.getDefaultPendingIntent(payload)
 
-        notificationChannels.missedCallChannel.create(notificationManager)
+        val notificationChannel = when {
+            isAppInForeground() && hideRingingNotificationInForeground ->
+                notificationChannels.missedCallLowImportanceChannel
+            else -> notificationChannels.missedCallChannel
+        }
 
         // Build notification
         val notificationContent = callDisplayName?.let {
@@ -247,9 +258,9 @@ constructor(
                 it,
             )
         }
-        return ensureChannelAndBuildNotification(notificationChannels.missedCallChannel) {
+        return ensureChannelAndBuildNotification(notificationChannel) {
             setSmallIcon(R.drawable.stream_video_ic_call)
-            setChannelId(notificationChannels.missedCallChannel.id)
+            setChannelId(notificationChannel.id)
             setContentTitle(
                 application.getString(R.string.stream_video_missed_call_notification_title),
             )
@@ -401,10 +412,10 @@ constructor(
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
         logger.d {
-            "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
+            "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent, isAppInForeground = ${isAppInForeground()}, hideRingingNotificationInForeground = $hideRingingNotificationInForeground"
         }
         val notificationChannel = when {
-            isAppInForeground() && !hideRingingNotificationInForeground ->
+            isAppInForeground() && hideRingingNotificationInForeground ->
                 notificationChannels.incomingCallLowImportanceChannel
             else -> notificationChannels.incomingCallChannel
         }
