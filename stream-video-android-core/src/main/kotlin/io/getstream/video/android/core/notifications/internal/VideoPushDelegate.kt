@@ -80,10 +80,13 @@ internal class VideoPushDelegate : PushDelegate() {
         getStreamVideo("live-started-notification")?.onLiveCall(callId, callDisplayName, payload)
     }
 
+    /**
+     * It should return non-empty string otherwise notification apis will cause crash
+     */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun getCallDisplayName(payload: Map<String, Any?>): String {
-        return payload.getStringValue(KEY_CALL_DISPLAY_NAME)
-            ?: payload.getStringValue(KEY_CREATED_BY_DISPLAY_NAME)
+        return payload.getStringValue(KEY_CALL_DISPLAY_NAME)?.takeIf { it.isNotBlank() }
+            ?: payload.getStringValue(KEY_CREATED_BY_DISPLAY_NAME)?.takeIf { it.isNotBlank() }
             ?: DEFAULT_CALL_TEXT
     }
 
