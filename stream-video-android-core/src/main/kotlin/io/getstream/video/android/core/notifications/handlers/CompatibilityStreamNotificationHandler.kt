@@ -31,6 +31,7 @@ import io.getstream.video.android.core.notifications.DefaultNotificationIntentBu
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.StreamIntentResolver
+import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -130,6 +131,10 @@ constructor(
         onUpdate: (Notification) -> Unit,
     ) {
         // Do nothing, deprecated
+    }
+
+    override fun getStreamNotificationDispatcher(): NotificationDispatcher {
+        return notificationDispatcher
     }
 
     @Deprecated(
