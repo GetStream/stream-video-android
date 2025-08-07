@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal
 
+import androidx.annotation.VisibleForTesting
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.delegate.AndroidPushDelegateProvider
 import io.getstream.android.push.delegate.PushDelegate
@@ -34,7 +35,6 @@ import kotlinx.coroutines.launch
  */
 internal class VideoPushDelegate : PushDelegate() {
     private val logger by taggedLogger("Call:PushDelegate")
-    private val DEFAULT_CALL_TEXT = "Unknown caller"
 
     /**
      * Handle a push message.
@@ -61,23 +61,33 @@ internal class VideoPushDelegate : PushDelegate() {
     }
 
     private fun handleRingType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        val callDisplayName = getCallDisplayName(payload)
         getStreamVideo("ring-type-notification")?.onRingingCall(callId, callDisplayName, payload)
     }
 
     private fun handleMissedType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        val callDisplayName = getCallDisplayName(payload)
         getStreamVideo("missed-type-notification")?.onMissedCall(callId, callDisplayName, payload)
     }
 
     private fun handleNotificationType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        val callDisplayName = getCallDisplayName(payload)
         getStreamVideo("generic-notification")?.onNotification(callId, callDisplayName, payload)
     }
 
     private fun handleLiveStartedType(callId: StreamCallId, payload: Map<String, Any?>) {
-        val callDisplayName = (payload[KEY_CREATED_BY_DISPLAY_NAME] as String).ifEmpty { DEFAULT_CALL_TEXT }
+        val callDisplayName = getCallDisplayName(payload)
         getStreamVideo("live-started-notification")?.onLiveCall(callId, callDisplayName, payload)
+    }
+
+    /**
+     * It should return non-empty string otherwise notification apis will cause crash
+     */
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun getCallDisplayName(payload: Map<String, Any?>): String {
+        return payload.getStringValue(KEY_CALL_DISPLAY_NAME)?.takeIf { it.isNotBlank() }
+            ?: payload.getStringValue(KEY_CREATED_BY_DISPLAY_NAME)?.takeIf { it.isNotBlank() }
+            ?: DEFAULT_CALL_TEXT
     }
 
     /**
@@ -101,6 +111,20 @@ internal class VideoPushDelegate : PushDelegate() {
                 }
             }
         }
+
+    /**
+     * Return if the map contains string value for the given key.
+     *
+     * @param key The key to be checked.
+     * @return the string value for the given key, null otherwise.
+     */
+    private fun <K> Map<out K, *>.getStringValue(key: K): String? {
+        return if ((this as Map<K, *>).containsKey(key) && this[key] != null) {
+            this[key] as? String
+        } else {
+            null
+        }
+    }
 
     /**
      * Return if the map is valid.
@@ -184,7 +208,8 @@ internal class VideoPushDelegate : PushDelegate() {
     private fun Map<String, Any?>.isValidIncomingCall(): Boolean =
         !(this[KEY_TYPE] as? String).isNullOrBlank() && !(this[KEY_CALL_CID] as? String).isNullOrBlank()
 
-    private companion object {
+    internal companion object {
+        internal val DEFAULT_CALL_TEXT = "Unknown caller"
         private const val KEY_SENDER = "sender"
         private const val KEY_TYPE = "type"
         private const val KEY_TYPE_RING = "call.ring"
@@ -192,8 +217,8 @@ internal class VideoPushDelegate : PushDelegate() {
         private const val KEY_TYPE_NOTIFICATION = "call.notification"
         private const val KEY_TYPE_LIVE_STARTED = "call.live_started"
         private const val KEY_CALL_CID = "call_cid"
-        private const val KEY_CALL_DISPLAY_NAME = "call_display_name"
-        private const val KEY_CREATED_BY_DISPLAY_NAME = "created_by_display_name"
+        internal const val KEY_CALL_DISPLAY_NAME = "call_display_name"
+        internal const val KEY_CREATED_BY_DISPLAY_NAME = "created_by_display_name"
         private const val VALUE_STREAM_SENDER = "stream.video"
     }
 }
