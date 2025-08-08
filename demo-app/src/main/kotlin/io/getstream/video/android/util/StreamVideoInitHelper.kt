@@ -276,6 +276,7 @@ object StreamVideoInitHelper {
                         },
                     ),
                 ),
+                notificationUpdateTriggers = { _ -> MutableStateFlow<Int>(0) } //TODO Rahul remove later, used for testing
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {

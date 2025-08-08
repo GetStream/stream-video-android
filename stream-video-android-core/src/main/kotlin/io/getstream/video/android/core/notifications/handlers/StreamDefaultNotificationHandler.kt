@@ -152,7 +152,7 @@ constructor(
         callDisplayName: String,
         payload: Map<String, Any?>,
     ) {
-        logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
+        logger.d { "[onRingingCall] Noob 10 (Firebase) #ringing; callId: ${callId.id}" }
         CallService.showIncomingCall(
             application,
             callId,
@@ -282,7 +282,7 @@ constructor(
         payload: Map<String, Any?>,
     ): Notification? {
         logger.d {
-            "[getRingingCallNotification] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
+            "[getRingingCallNotification] Noob 4 callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
             val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
@@ -346,7 +346,7 @@ constructor(
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification? {
         logger.d {
-            "[getRingingCallNotificationInternal] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
+            "[getRingingCallNotificationInternal] Noob 2 callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
             val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
@@ -363,6 +363,7 @@ constructor(
             )
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
+
                 getIncomingCallNotificationInternal(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
@@ -412,7 +413,7 @@ constructor(
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
         logger.d {
-            "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent, isAppInForeground = ${isAppInForeground()}, hideRingingNotificationInForeground = $hideRingingNotificationInForeground"
+            "[getIncomingCallNotificationInternal] Noob 1 callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent, isAppInForeground = ${isAppInForeground()}, hideRingingNotificationInForeground = $hideRingingNotificationInForeground"
         }
         val notificationChannel = when {
             isAppInForeground() && hideRingingNotificationInForeground ->
@@ -461,7 +462,7 @@ constructor(
         payload: Map<String, Any?>,
     ): Notification? {
         logger.d {
-            "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
+            "[getIncomingCallNotification] Noob 3 callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return getIncomingCallNotificationInternal(
             fullScreenPendingIntent,
@@ -705,7 +706,7 @@ constructor(
         members: List<MemberState>,
         remoteParticipants: List<ParticipantState>,
     ) {
-        logger.d { "[onCallNotificationUpdate] #ringingState: $ringingState; callId: ${call.cid}" }
+        logger.d { "[onCallNotificationUpdate] Noob 8 #ringingState: $ringingState; callId: ${call.cid}" }
         logger.d { "[onCallNotificationUpdate] #members: $members; callId: ${call.cid}" }
         logger.d {
             "[onCallNotificationUpdate] #remoteParticipants: $remoteParticipants; callId: ${call.cid}"
@@ -720,7 +721,7 @@ constructor(
     }
 
     private suspend fun handleIncomingCallNotificationUpdate(call: Call, members: List<MemberState>): Notification? {
-        logger.d { "[onCallNotificationUpdate] Handling incoming call" }
+        logger.d { "[onCallNotificationUpdate] Noob 7 Handling incoming call" }
 
         val callDisplayName = getIncomingCallDisplayName(call, members)
         logger.d { "[onCallNotificationUpdate] Incoming call from: $callDisplayName" }
@@ -795,7 +796,7 @@ constructor(
         callDisplayName: String,
     ): Notification? {
         logger.d {
-            "[onUpdateIncomingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
+            "[onUpdateIncomingCallNotification] Noob 5 callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
         val callId = StreamCallId.fromCallCid(call.cid)
         val payload = emptyMap<String, Any?>()
@@ -921,7 +922,7 @@ constructor(
         callDisplayName: String?,
     ): Notification? {
         logger.d {
-            "[updateOutgoingCallNotification] callId: ${call.cid}, callDisplayName: $callDisplayName"
+            "[updateOutgoingCallNotification] Noob 6 callId: ${call.cid}, callDisplayName: $callDisplayName"
         }
         val payload = emptyMap<String, Any?>()
         return getRingingCallNotificationInternal(

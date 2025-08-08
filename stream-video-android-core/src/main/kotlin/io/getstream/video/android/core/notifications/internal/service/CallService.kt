@@ -431,7 +431,7 @@ internal open class CallService : Service() {
             TRIGGER_INCOMING_CALL -> {
                 logger.d { "[getNotificationPair] Creating incoming call notification" }
                 val shouldHaveContentIntent = streamVideo.state.activeCall.value == null
-                logger.d { "[getNotificationPair] shouldHaveContentIntent: $shouldHaveContentIntent" }
+                logger.d { "[getNotificationPair] Noob 9 (CallService) shouldHaveContentIntent: $shouldHaveContentIntent" }
                 Pair(
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
@@ -600,7 +600,9 @@ internal open class CallService : Service() {
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
-        observeNotificationUpdates(callId, streamVideo)
+        if (streamVideo.enableCallNotificationUpdates) {
+            observeNotificationUpdates(callId, streamVideo)
+        }
     }
 
     private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoClient) {
@@ -737,7 +739,7 @@ internal open class CallService : Service() {
 
             notificationUpdateTriggers.collectLatest { state ->
                 val ringingState = call.state.ringingState.value
-                logger.d { "[observeNotificationUpdates] ringingState: $ringingState" }
+                logger.d { "[observeNotificationUpdates] Noob 10 (Notification Updates) ringingState: $ringingState" }
                 val notification = streamVideo.onCallNotificationUpdate(
                     call = call,
                 )
@@ -765,7 +767,7 @@ internal open class CallService : Service() {
                         }
 
                         is RingingState.Incoming -> {
-                            logger.d { "[observeNotificationUpdates] Showing incoming call notification" }
+                            logger.d { "[observeNotificationUpdates] Noob 11, Showing incoming call notification" }
                             startForegroundWithServiceType(
                                 INCOMING_CALL_NOTIFICATION_ID,
                                 notification,
