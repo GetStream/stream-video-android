@@ -285,8 +285,24 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         override fun shouldAcceptNewCall(activeCall: Call, intent: Intent) = true
 
         override fun onAcceptCall(intent: Intent) {
-            finish()
-            startActivity(intent)
+            initializeCallOrFail(
+                null,
+                null,
+                intent,
+                onSuccess = { instanceState, persistentState, call, action ->
+                    logger.d { "Calling [onNewIntent(intent)], because call is initialized $call, action=$action" }
+                    onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                        applyDashboardSettings(successCall)
+                        onCreate(instanceState, persistentState, successCall)
+                    }
+                },
+                onError = {
+                    // We are not calling onErrorFinish here on purpose
+                    // we want to crash if we cannot initialize the call
+                    logger.e(it) { "Failed to initialize call." }
+                    throw it
+                },
+            )
         }
 
         override fun onIgnoreCall(intent: Intent, reason: IgnoreReason) {
@@ -544,7 +560,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         persistentState: PersistableBundle?,
         call: Call,
     ) {
-        logger.d { "[onCreate(Bundle,PersistableBundle,Call)] setting up compose delegate." }
+        logger.d {
+            "[onCreate(Bundle,PersistableBundle,Call)], call_id:${call.id}, setting up compose delegate."
+        }
         uiDelegate.setContent(this, call)
     }
 
@@ -554,7 +572,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * @param call
      */
     public open fun onResume(call: Call) {
-        if (config.canKeepScreenOn) {
+        if (configurationMap[call.id]?.canKeepScreenOn == true) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         logger.d { "DefaultCallActivity - Resumed (call -> $call)" }
