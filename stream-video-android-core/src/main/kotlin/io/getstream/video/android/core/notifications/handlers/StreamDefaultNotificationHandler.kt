@@ -363,7 +363,6 @@ constructor(
             )
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
-
                 getIncomingCallNotificationInternal(
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,

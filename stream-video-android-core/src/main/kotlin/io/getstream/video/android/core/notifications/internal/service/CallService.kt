@@ -431,7 +431,9 @@ internal open class CallService : Service() {
             TRIGGER_INCOMING_CALL -> {
                 logger.d { "[getNotificationPair] Creating incoming call notification" }
                 val shouldHaveContentIntent = streamVideo.state.activeCall.value == null
-                logger.d { "[getNotificationPair] Noob 9 (CallService) shouldHaveContentIntent: $shouldHaveContentIntent" }
+                logger.d {
+                    "[getNotificationPair] Noob 9 (CallService) shouldHaveContentIntent: $shouldHaveContentIntent"
+                }
                 Pair(
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
@@ -739,7 +741,9 @@ internal open class CallService : Service() {
 
             notificationUpdateTriggers.collectLatest { state ->
                 val ringingState = call.state.ringingState.value
-                logger.d { "[observeNotificationUpdates] Noob 10 (Notification Updates) ringingState: $ringingState" }
+                logger.d {
+                    "[observeNotificationUpdates] Noob 10 (Notification Updates) ringingState: $ringingState"
+                }
                 val notification = streamVideo.onCallNotificationUpdate(
                     call = call,
                 )
