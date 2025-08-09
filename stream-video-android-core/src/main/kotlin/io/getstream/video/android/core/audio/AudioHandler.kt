@@ -65,6 +65,7 @@ public class AudioSwitchHandler(
 
                     val switch = AudioSwitch(
                         context = context,
+                        loggingEnabled = true, //TODO RAHUL TEMP COMMIT
                         audioFocusChangeListener = onAudioFocusChangeListener,
                         preferredDeviceList = preferredDeviceList,
                     )
