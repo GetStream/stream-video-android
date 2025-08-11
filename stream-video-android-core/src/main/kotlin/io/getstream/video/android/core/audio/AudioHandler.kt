@@ -91,6 +91,24 @@ public class AudioSwitchHandler(
         audioSwitch?.activate()
     }
 
+    /**
+     * Has a internal delay of 300L
+     */
+    public suspend fun selectDeviceAsync(audioDevice: AudioDevice?) {
+//        runBlocking {
+            logger.i { "[selectDevice] audioDevice: $audioDevice" }
+            audioSwitch?.activate()
+            if (audioDevice is AudioDevice.BluetoothHeadset) {
+                Handler(Looper.getMainLooper())
+                    .postDelayed({ audioSwitch?.selectDevice(audioDevice) }, 300L)
+//                delay(300L)
+
+            } else {
+                audioSwitch?.selectDevice(audioDevice)
+            }
+//        }
+    }
+
     public companion object {
         private const val TAG = "AudioSwitchHandler"
         private val onAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
