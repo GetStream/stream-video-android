@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.4.2" type="baseline" client="gradle" dependencies="false" name="AGP (7.4.2)" variant="all" version="7.4.2">
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="    override val name: String = device.name ?: DEFAULT_DEVICE_NAME,"
+        errorLine2="                                ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/android/BluetoothDeviceWrapperImpl.kt"
+            line="9"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="    override val name: String = device.name ?: DEFAULT_DEVICE_NAME,"
+        errorLine2="                                ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/android/BluetoothDeviceWrapperImpl.kt"
+            line="9"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="    override val deviceClass: Int? = device.bluetoothClass?.deviceClass"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/android/BluetoothDeviceWrapperImpl.kt"
+            line="10"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="    override val deviceClass: Int? = device.bluetoothClass?.deviceClass"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/android/BluetoothDeviceWrapperImpl.kt"
+            line="10"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="        bluetoothProfile.connectedDevices.forEach { device ->"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="92"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="            logger.d(TAG, &quot;Bluetooth &quot; + device.name + &quot; connected&quot;)"
+        errorLine2="                                         ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="93"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                proxy.connectedDevices?.let { devices ->"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="257"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                            val device = devices.find { proxy.isAudioConnected(it) }?.name"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="260"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                            val device = devices.find { proxy.isAudioConnected(it) }?.name"
+        errorLine2="                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="260"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                            val device = devices.first().name"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="265"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                proxy.connectedDevices?.let { devices ->"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="279"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                    devices.any { proxy.isAudioConnected(it) }"
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="280"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Call requires permission which may be rejected by user: code should explicitly check to see if permission is available (with `checkPermission`) or explicitly handle a potential `SecurityException`"
+        errorLine1="                proxy.connectedDevices?.let { devices ->"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/twilio/audioswitch/bluetooth/BluetoothHeadsetManager.kt"
+            line="286"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.annotation:annotation than 1.3.0 is available: 1.6.0"
+        errorLine1="    }"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="57"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of org.mockito.kotlin:mockito-kotlin than 4.1.0 is available: 5.0.0"
+        errorLine1=""
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="59"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test:runner than 1.4.1-alpha03 is available: 1.6.0-alpha03"
+        errorLine1="    testImplementation &apos;org.mockito.kotlin:mockito-kotlin:4.1.0&apos;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="63"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test:rules than 1.4.1-alpha03 is available: 1.6.0-alpha01"
+        errorLine1="    testImplementation &apos;pl.pragmatists:JUnitParams:1.1.1&apos;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="64"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.1.3 is available: 1.1.5"
+        errorLine1="    def androidXTest = &apos;1.4.1-alpha03&apos;"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle"
+            line="65"
+            column="31"/>
+    </issue>
+
+</issues>

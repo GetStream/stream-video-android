@@ -43,6 +43,7 @@ include(":tutorials:tutorial-video")
 include(":tutorials:tutorial-audio")
 include(":tutorials:tutorial-livestream")
 include(":tutorials:tutorial-ringing")
+include(":audioswitch")
 
 // Support
 include(":metrics:stream-video-android-metrics")

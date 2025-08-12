@@ -87,8 +87,10 @@ public class AudioSwitchHandler(
 
     public fun selectDevice(audioDevice: AudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
-        audioSwitch?.selectDevice(audioDevice)
-        audioSwitch?.activate()
+        mainThreadHandler.post {
+            audioSwitch?.selectDevice(audioDevice)
+            audioSwitch?.activate()
+        }
     }
 
     /**

@@ -297,7 +297,8 @@ dependencies {
     // Http
     implementation(libs.okhttp)
 
-    implementation(libs.audioswitch)
+//    implementation(libs.audioswitch)
+    implementation(project(":audioswitch"))
 
     // Also Leak Canary added in the previous block
 
