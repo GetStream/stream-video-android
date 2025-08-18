@@ -367,11 +367,39 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     protected open fun handleOnNewIntentAction(intent: Intent) {
+        logger.d { "[handleOnNewIntentAction], intent action = ${intent.action}" }
         when (intent.action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 handleOnNewIncomingCallAcceptAction()
             }
+            NotificationHandler.ACTION_INCOMING_CALL -> {
+                handleOnNewIncomingCallAction()
+            }
             else -> {}
+        }
+    }
+
+    protected open fun handleOnNewIncomingCallAction() {
+        val activeCall = StreamVideo.instance().state.activeCall.value
+        if (activeCall == null) {
+            initializeCallOrFail(
+                null,
+                null,
+                intent,
+                onSuccess = { instanceState, persistedState, call, action ->
+                    logger.d { "Calling [handleOnNewIncomingCallAction], because call id: ${call.id}" }
+                    onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                        applyDashboardSettings(successCall)
+                        onCreate(instanceState, persistedState, successCall)
+                    }
+                },
+                onError = {
+                    // We are not calling onErrorFinish here on purpose
+                    // we want to crash if we cannot initialize the call
+                    logger.e(it) { "Failed to initialize call." }
+                    throw it
+                },
+            )
         }
     }
 
@@ -528,7 +556,19 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
         val streamCallId = intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
         streamCallId?.let {
-            logger.d { "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
+            val sb = StringBuilder()
+            sb.append("closeScreenOnError=${config.closeScreenOnError}\n")
+            sb.append("closeScreenOnCallEnded=${config.closeScreenOnCallEnded}\n")
+            sb.append("canKeepScreenOn=${config.canKeepScreenOn}\n")
+            sb.append("canSkipPermissionRationale=${config.canSkipPermissionRationale}\n")
+            sb.append("StreamVideo is null=${StreamVideo.instanceOrNull() == null}\n")
+            val leaveWhenLastInCall = intent.getBooleanExtra(
+                EXTRA_LEAVE_WHEN_LAST,
+                DEFAULT_LEAVE_WHEN_LAST,
+            )
+            logger.d {
+                "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}, Configuration: $sb, Leave when last in call: $leaveWhenLastInCall"
+            }
             configurationMap[it.id] = config
         }
     }
@@ -683,9 +723,18 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: ((Call) -> Unit)?,
         onError: ((Exception) -> Unit)?,
     ) {
-        val sdkInstance = StreamVideo.instance()
-        val call = sdkInstance.call(cid.type, cid.id)
-        onSuccess?.invoke(call)
+        // TODO Rahul, need testing
+        val sdkInstance = StreamVideo.instanceOrNull()
+        if (sdkInstance != null) {
+            val call = sdkInstance.call(cid.type, cid.id)
+            onSuccess?.invoke(call)
+        } else {
+            onError?.invoke(
+                IllegalStateException(
+                    "StreamVideoBuilder.build() must be called before obtaining StreamVideo instance.",
+                ),
+            )
+        }
     }
 
     /**
@@ -768,7 +817,14 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     ) {
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
-            call.acceptThenJoin()
+            // TODO Rahul need to be tested
+            val result = call.acceptThenJoin()
+            result.onError { error ->
+                lifecycleScope.launch {
+                    onError?.invoke(Exception(error.message))
+                }
+            }
+            result
         }
     }
 
@@ -1164,7 +1220,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     protected open fun getCallTransitionTime(): Long = 0L
 
     private suspend fun Call.acceptThenJoin() =
-        withContext(Dispatchers.IO) { accept().flatMap { join() } }
+        withContext(Dispatchers.IO) {
+            accept().flatMap { join() }
+        }
 
     public fun safeFinish() {
         if (!this.isFinishing && !isFinishingSafely) {
