@@ -20,6 +20,16 @@ import android.content.pm.ServiceInfo
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 
+/**
+ * This Service restricts to only earpiece and mic usage.
+ * We cannot use speaker phone unlike other apps WhatsApp which allows speakerphone
+ * usage even in audio call
+ *
+ * Current solution
+ * 1. Replace AudioCallService with Callservice ~ Risk ~ CallService allows camera access as well.
+ * This might tell the users that the sdk is accessing the camera ~ Privacy issue
+ * 2. Create new Service AudioCallServiceV2 with corrected service type
+ */
 internal class AudioCallService : CallService() {
     override val logger: TaggedLogger by taggedLogger("AudioCallService")
     override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE

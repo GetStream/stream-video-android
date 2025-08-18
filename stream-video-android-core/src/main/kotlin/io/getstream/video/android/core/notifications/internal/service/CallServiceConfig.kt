@@ -134,7 +134,7 @@ public fun audioCallServiceConfig(): CallServiceConfig {
         runCallServiceInForeground = true,
         callServicePerType = mapOf(
             Pair(ANY_MARKER, CallService::class.java),
-            Pair("audio_call", AudioCallService::class.java),
+            Pair("audio_call", CallService::class.java),
         ),
     )
 }

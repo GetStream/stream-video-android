@@ -23,6 +23,8 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PersistableBundle
 import android.util.Rational
 import android.view.WindowManager
@@ -44,6 +46,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
@@ -1027,6 +1030,16 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         if (cameraStatus == DeviceStatus.NotSelected) {
             call.camera.setEnabled(callSettings?.video?.cameraDefaultOn == true)
         }
+        //TODO Rahul, this a demo-code - Need to be removed before merging
+        /**
+         * There is problem with audioswitching
+         * If if enable earpiece first
+         * Then if I right away enable speakerphone then speaker phone request is skipped
+         */
+        Handler(Looper.getMainLooper()).postDelayed({
+            call.speaker.setEnabled(true, true)
+        }, 3_000L)
+
     }
 
     // Internal logic
