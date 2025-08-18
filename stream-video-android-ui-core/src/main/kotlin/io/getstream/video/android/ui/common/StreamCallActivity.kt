@@ -683,9 +683,14 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: ((Call) -> Unit)?,
         onError: ((Exception) -> Unit)?,
     ) {
-        val sdkInstance = StreamVideo.instance()
-        val call = sdkInstance.call(cid.type, cid.id)
-        onSuccess?.invoke(call)
+        //TODO Rahul, need testing
+        val sdkInstance = StreamVideo.instanceOrNull()
+        if (sdkInstance != null) {
+            val call = sdkInstance.call(cid.type, cid.id)
+            onSuccess?.invoke(call)
+        } else {
+            onError?.invoke(IllegalStateException("StreamVideoBuilder.build() must be called before obtaining StreamVideo instance."))
+        }
     }
 
     /**
