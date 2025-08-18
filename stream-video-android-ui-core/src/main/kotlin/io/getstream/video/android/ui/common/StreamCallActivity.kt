@@ -768,7 +768,14 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     ) {
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
-            call.acceptThenJoin()
+            //TODO Rahul need to be tested
+            val result = call.acceptThenJoin()
+            result.onError { error->
+                lifecycleScope.launch {
+                    onError?.invoke(Exception(error.message))
+                }
+            }
+            result
         }
     }
 
@@ -1164,7 +1171,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     protected open fun getCallTransitionTime(): Long = 0L
 
     private suspend fun Call.acceptThenJoin() =
-        withContext(Dispatchers.IO) { accept().flatMap { join() } }
+        withContext(Dispatchers.IO) {
+            accept().flatMap { join() }
+        }
 
     public fun safeFinish() {
         if (!this.isFinishing && !isFinishingSafely) {
