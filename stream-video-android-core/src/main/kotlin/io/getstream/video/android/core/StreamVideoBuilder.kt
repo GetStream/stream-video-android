@@ -41,6 +41,7 @@ import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.toSounds
+import io.getstream.video.android.core.telecom.TelecomConfig
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -139,6 +140,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val enableStatsReporting: Boolean = true,
     @InternalStreamVideoApi
     private val enableStereoForSubscriber: Boolean = true,
+    private val telecomConfig: TelecomConfig?= null //TODO Rahul need better api design like an array
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -265,6 +267,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
             enableStereoForSubscriber = enableStereoForSubscriber,
+            telecomConfig = telecomConfig
         )
 
         if (user.type == UserType.Guest) {

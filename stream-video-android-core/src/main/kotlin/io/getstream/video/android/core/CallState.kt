@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.os.Bundle
+import android.telecom.Connection
 import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.BlockedUserEvent
@@ -75,6 +76,7 @@ import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.IncomingNotificationIntent
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -103,6 +105,7 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
@@ -653,8 +656,17 @@ public class CallState(
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
+    /**
+     * We re-create notification more than 1 times, so we don't want to
+     * overwrite to the notifications builder properties once it is already set
+     */
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
+
+    internal val _telecomConnection: MutableStateFlow<Connection?> = MutableStateFlow(null)
+    val telecomConnection: StateFlow<Connection?> = _telecomConnection
+
+    internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "Updating call state with event ${event::class.java}" }
@@ -995,7 +1007,7 @@ public class CallState(
                         anonymousParticipantCount = event.anonymousParticipantCount,
                     )
                 }
-
+                logger.d { "CallSessionParticipantCountsUpdatedEvent ${session.value?.toString()}" }
                 updateParticipantCounts(session = session.value)
             }
 
@@ -1543,8 +1555,12 @@ public class CallState(
         _rejectActionBundle.value = bundle
     }
 
-    fun updateNotification(notification: Notification) {
+    fun updateNotification(notification: Notification?) {
         atomicNotification.set(notification)
+    }
+
+    fun updateTelecomConnection(connection: Connection?) {
+        _telecomConnection.value = connection
     }
 }
 

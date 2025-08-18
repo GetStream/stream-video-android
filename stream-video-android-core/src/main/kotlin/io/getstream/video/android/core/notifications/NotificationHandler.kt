@@ -69,6 +69,8 @@ public interface NotificationHandler :
         const val INTENT_EXTRA_CALL_CID: String = "io.getstream.video.android.intent-extra.call_cid"
         const val INTENT_EXTRA_CALL_DISPLAY_NAME: String =
             "io.getstream.video.android.intent-extra.call_displayname"
+        const val INTENT_EXTRA_IS_VIDEO: String =
+            "io.getstream.video.android.intent-extra.is_video"
 
         const val INTENT_EXTRA_NOTIFICATION_ID: String =
             "io.getstream.video.android.intent-extra.notification_id"

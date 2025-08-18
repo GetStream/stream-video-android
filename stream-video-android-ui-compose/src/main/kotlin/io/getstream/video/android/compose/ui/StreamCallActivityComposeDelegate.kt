@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -81,6 +82,7 @@ import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
+import kotlin.math.log
 
 /**
  * A default implementation of the compose delegate for the call activity.
@@ -103,6 +105,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
      */
     @StreamCallActivityDelicateApi
     override fun loadingContent(activity: StreamCallActivity) {
+        logger.d { "loadingContent" }
         // Nothing to set, by default.
     }
 
@@ -115,14 +118,16 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun setContent(activity: StreamCallActivity, call: Call) {
         logger.d { "[setContent(activity, call)] invoked from compose delegate." }
         activity.setContent {
-            VideoTheme {
-                Box(
-                    modifier = Modifier
-                        .background(VideoTheme.colors.baseSheetPrimary)
-                        .systemBarsPadding(),
-                ) {
-                    logger.d { "[setContent] with RootContent" }
-                    activity.RootContent(call = call)
+            key(call.id) {
+                VideoTheme {
+                    Box(
+                        modifier = Modifier
+                            .background(VideoTheme.colors.baseSheetPrimary)
+                            .systemBarsPadding(),
+                    ) {
+                        logger.d { "[setContent] with RootContent" }
+                        activity.RootContent(call = call)
+                    }
                 }
             }
         }

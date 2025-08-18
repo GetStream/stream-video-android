@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 /**
  * A foreground service that is running when there is an active call.
  */
-internal open class CallService : Service() {
+internal open class CallService : Service(), CallingServiceContract {
     internal open val logger by taggedLogger("CallService")
 
     // Service type
@@ -111,6 +111,7 @@ internal open class CallService : Service() {
          * @param trigger one of [TRIGGER_INCOMING_CALL], [TRIGGER_OUTGOING_CALL] or [TRIGGER_ONGOING_CALL]
          * @param callDisplayName the display name.
          */
+        @Deprecated("Moved to ServiceIntentBuilder")
         fun buildStartIntent(
             context: Context,
             callId: StreamCallId,
@@ -155,6 +156,7 @@ internal open class CallService : Service() {
          *
          * @param context the context.
          */
+        @Deprecated("Moved to ServiceIntentBuilder", level = DeprecationLevel.ERROR)
         fun buildStopIntent(
             context: Context,
             callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
@@ -168,6 +170,10 @@ internal open class CallService : Service() {
             }
         }
 
+        /**
+         * Shows from notification from PN flow
+         */
+        @Deprecated("Moved to ServiceTriggers", level = DeprecationLevel.ERROR)
         fun showIncomingCall(
             context: Context,
             callId: StreamCallId,
@@ -185,25 +191,25 @@ internal open class CallService : Service() {
                     StreamLog.d(TAG) { "[showIncomingCall] Starting foreground service" }
                     ContextCompat.startForegroundService(
                         context,
-                        buildStartIntent(
+                        ServiceIntentBuilder().buildStartIntent(
                             context,
-                            callId,
+                            StartServiceParam(callId,
                             TRIGGER_INCOMING_CALL,
                             callDisplayName,
                             callServiceConfiguration,
-                        ),
+                        )),
                     )
                     ComponentName(context, CallService::class.java)
                 } else {
                     StreamLog.d(TAG) { "[showIncomingCall] Starting regular service" }
                     context.startService(
-                        buildStartIntent(
+                        ServiceIntentBuilder().buildStartIntent(
                             context,
-                            callId,
+                            StartServiceParam(callId,
                             TRIGGER_INCOMING_CALL,
                             callDisplayName,
                             callServiceConfiguration,
-                        ),
+                        )),
                     )
                 }
                 result!!
@@ -233,6 +239,7 @@ internal open class CallService : Service() {
             }
         }
 
+        @Deprecated("Moved to ServiceTriggers", level = DeprecationLevel.ERROR)
         fun removeIncomingCall(
             context: Context,
             callId: StreamCallId,
@@ -240,12 +247,12 @@ internal open class CallService : Service() {
         ) {
             safeCallWithResult {
                 context.startService(
-                    buildStartIntent(
+                    ServiceIntentBuilder().buildStartIntent(
                         context,
-                        callId,
+                        StartServiceParam(callId,
                         TRIGGER_REMOVE_INCOMING_CALL,
                         callServiceConfiguration = config,
-                    ),
+                    )),
                 )!!
             }.onError {
                 NotificationManagerCompat.from(context).cancel(INCOMING_CALL_NOTIFICATION_ID)
@@ -378,6 +385,7 @@ internal open class CallService : Service() {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
             }
 
+            //TODO Rahul, this code should be in onCreate(..)
             if (callSoundPlayer == null) {
                 callSoundPlayer = CallSoundPlayer(applicationContext)
             }
@@ -390,7 +398,7 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
+    override fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
         val handler = streamDefaultNotificationHandler()
         if (handler != null && callId != null) {
             val isMediaNotification = notificationConfig().mediaNotificationCallTypes.contains(
@@ -475,7 +483,7 @@ internal open class CallService : Service() {
         return notificationData
     }
 
-    private fun maybePromoteToForegroundService(
+    override fun maybePromoteToForegroundService(
         videoClient: StreamVideoClient,
         notificationId: Int,
         trigger: String,
@@ -518,6 +526,9 @@ internal open class CallService : Service() {
         }
     }
 
+    /**
+     * Shows from notification from Service
+     */
     @SuppressLint("MissingPermission")
     private fun showIncomingCall(
         callId: StreamCallId,
@@ -561,7 +572,7 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun initializeCallAndSocket(
+    override fun initializeCallAndSocket(
         streamVideo: StreamVideo,
         callId: StreamCallId,
     ) {
@@ -870,7 +881,7 @@ internal open class CallService : Service() {
     /**
      * Handle all aspects of stopping the service.
      */
-    private fun stopService() {
+    override fun stopService() {
         // Cancel the notification
         val notificationManager = NotificationManagerCompat.from(this)
         callId?.let {

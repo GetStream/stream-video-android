@@ -104,6 +104,7 @@ class SpeakerManager(
     internal var selectedBeforeSpeaker: StreamAudioDevice? = null
 
     internal fun enable(fromUser: Boolean = true) {
+        logger.d { "[enable], true fromUser = $fromUser" }
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
@@ -111,6 +112,7 @@ class SpeakerManager(
     }
 
     fun disable(fromUser: Boolean = true) {
+        logger.d { "[disable], true fromUser = $fromUser" }
         if (fromUser) {
             _status.value = DeviceStatus.Disabled
         }
@@ -121,7 +123,7 @@ class SpeakerManager(
      * Enable or disable the speakerphone.
      */
     fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
-        logger.i { "setEnabled $enabled" }
+        logger.i { "[setEnabled] $enabled=$enabled, fromUser = $fromUser" }
         // TODO: what is fromUser?
         if (enabled) {
             enable(fromUser = fromUser)
@@ -144,6 +146,7 @@ class SpeakerManager(
      * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
      * */
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
+        logger.d { "[setSpeakerPhone], enable = $enable" }
         microphoneManager.enforceSetup(preferSpeaker = enable) {
             val devices = devices.value
             if (enable) {
@@ -352,6 +355,7 @@ class ScreenShareManager(
  * microphone.status // the status of the microphone
  * microphone.selectedDevice // the selected device
  * microphone.speakerPhoneEnabled // the status of the speaker. true/false
+ * @param audioUsage can be either [AudioAttributes.USAGE_MEDIA] or [AudioAttributes.USAGE_VOICE_COMMUNICATION]
  */
 class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
@@ -509,7 +513,7 @@ class MicrophoneManager(
                         )
                     },
                     audioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
+                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices, audioUsage = $audioUsage" }
 
                         _devices.value = devices.map { it.fromAudio() }
                         _selectedDevice.value = selected?.fromAudio()

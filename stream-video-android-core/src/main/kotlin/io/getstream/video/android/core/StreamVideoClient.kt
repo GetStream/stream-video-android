@@ -96,8 +96,9 @@ import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
+import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -106,6 +107,7 @@ import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.telecom.TelecomConfig
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeCall
@@ -168,6 +170,7 @@ internal class StreamVideoClient internal constructor(
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
+    internal val telecomConfig: TelecomConfig? = null
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -217,9 +220,9 @@ internal class StreamVideoClient internal constructor(
         val runCallServiceInForeground = callConfig.runCallServiceInForeground
         if (runCallServiceInForeground) {
             safeCall {
-                val serviceIntent = CallService.buildStopIntent(
+                val serviceIntent = ServiceIntentBuilder().buildStopIntent(
                     context = context,
-                    callServiceConfiguration = callConfig,
+                    StopServiceParam(callServiceConfiguration = callConfig),
                 )
                 context.stopService(serviceIntent)
             }

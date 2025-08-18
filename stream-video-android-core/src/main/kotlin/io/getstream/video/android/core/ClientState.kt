@@ -25,6 +25,9 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
+import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
+import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -184,11 +187,12 @@ class ClientState(private val client: StreamVideo) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
-            val serviceIntent = CallService.buildStartIntent(
+            val serviceIntent = ServiceIntentBuilder().buildStartIntent(
                 context,
-                StreamCallId.fromCallCid(call.cid),
-                trigger,
-                callServiceConfiguration = callConfig,
+                StartServiceParam(StreamCallId.fromCallCid(call.cid),
+                    trigger,
+                    callServiceConfiguration = callConfig,)
+
             )
             ContextCompat.startForegroundService(context, serviceIntent)
         }
@@ -201,9 +205,9 @@ class ClientState(private val client: StreamVideo) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
-            val serviceIntent = CallService.buildStopIntent(
+            val serviceIntent = ServiceIntentBuilder().buildStopIntent(
                 context,
-                callConfig,
+                stopServiceParam = StopServiceParam(callConfig) ,
             )
             context.stopService(serviceIntent)
         }
