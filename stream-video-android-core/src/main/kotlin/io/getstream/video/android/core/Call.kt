@@ -67,6 +67,7 @@ import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -1136,6 +1137,9 @@ public class Call(
     val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
 
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
+        if (event is ParticipantLeftEvent) {
+            logger.d { "Noob, START Call event: $event, subscriptions size = ${subscriptions.size}" }
+        }
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
                 // subs without filters should always fire
@@ -1326,7 +1330,7 @@ public class Call(
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
+        logger.d { "Noob, [reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
     }
 

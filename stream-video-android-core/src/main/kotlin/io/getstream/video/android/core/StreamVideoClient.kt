@@ -347,6 +347,7 @@ internal class StreamVideoClient internal constructor(
         // listen to socket events and errors
         scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
             coordinatorConnectionModule.socketConnection.events().collect {
+                logger.d { "Noob, StreamVideoClient, event: $it" }
                 fireEvent(it)
             }
         }
@@ -495,7 +496,7 @@ internal class StreamVideoClient internal constructor(
      * After that it loops over the subscriptions and calls their listener
      */
     internal fun fireEvent(event: VideoEvent, cid: String = "") {
-        logger.d { "Event received $event" }
+        logger.d { "Noob Event received $event" }
         // update state for the client
         state.handleEvent(event)
 
@@ -541,7 +542,7 @@ internal class StreamVideoClient internal constructor(
                     return
                 }
             }
-
+            logger.d { "Noob, calls[selectedCid] = ${calls[selectedCid]}" }
             // Update calls as usual
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)

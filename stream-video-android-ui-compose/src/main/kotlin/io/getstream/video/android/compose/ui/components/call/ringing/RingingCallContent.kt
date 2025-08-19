@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing
 
+import android.util.Log
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
@@ -111,8 +112,10 @@ public fun RingingCallContent(
         ) -> Unit
     )? = null,
     onIdle: @Composable () -> Unit = {},
+    onAcceptedOnOtherDevice: @Composable () -> Unit = {},
 ) {
     val ringingState by call.state.ringingState.collectAsStateWithLifecycle()
+    Log.d("RingingCallContent", "Noob, RingingState Jetpack Compose: $ringingState")
     when (ringingState) {
         is RingingState.Incoming -> {
             onIncomingContent?.invoke(
@@ -177,6 +180,10 @@ public fun RingingCallContent(
         RingingState.Idle -> {
             // Includes Idle
             onIdle.invoke()
+        }
+
+        RingingState.ActiveOnOtherDevice -> {
+            onAcceptedOnOtherDevice.invoke()
         }
     }
 }

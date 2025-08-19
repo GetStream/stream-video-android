@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.BlockedUserEvent
 import io.getstream.android.video.generated.models.CallAcceptedEvent
@@ -106,6 +105,11 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.ringingstatetransition.CallAcceptedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallCreatedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallEndedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallRejectedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallRingRingingReducer
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.sorting.SortedParticipantsState
@@ -657,7 +661,7 @@ public class CallState(
         AtomicReference<Notification?>(null)
 
     fun handleEvent(event: VideoEvent) {
-        logger.d { "Updating call state with event ${event::class.java}" }
+        logger.d { "Noob [handleEvent] ${event::class.java.name.split(".").last()}" }
         when (event) {
             is BlockedUserEvent -> {
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()
@@ -681,6 +685,11 @@ public class CallState(
                 _acceptedBy.value = newAcceptedBy.toSet()
                 updateRingingState()
 
+                val callAcceptedRingingReducer = CallAcceptedRingingReducer(call)
+                val newState = callAcceptedRingingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallAcceptedEvent , ringingState = ${_ringingState.value}" }
+
                 // auto-join the call if it's an outgoing call and someone has accepted
                 // do not auto-join if it's already accepted by us
                 val callRingState = _ringingState.value
@@ -701,6 +710,7 @@ public class CallState(
             }
 
             is CallRejectedEvent -> {
+                logger.d { "Noob Call Rejected by ${event.user.name}" }
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
@@ -714,6 +724,10 @@ public class CallState(
                         }
                     },
                 )
+                val ringingReducer = CallRejectedRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallRejectedEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallEndedEvent -> {
@@ -721,6 +735,11 @@ public class CallState(
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
                 call.leave()
+
+                val ringingReducer = CallEndedRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallEndedEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallEndedSfuEvent -> {
@@ -743,9 +762,16 @@ public class CallState(
             is CallCreatedEvent -> {
                 getOrCreateMembers(event.members)
                 updateFromResponse(event.call)
+
+                val ringingReducer = CallCreatedRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallCreatedEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallRingEvent -> {
+                StreamVideo.instanceOrNull()?.state?._ringingCall?.value = call
+
                 getOrCreateMembers(event.members)
                 updateFromResponse(event.call)
 
@@ -761,6 +787,11 @@ public class CallState(
                     )
                     _members.value = memberMap
                 }
+
+                val ringingReducer = CallRingRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallRingEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallUpdatedEvent -> {
@@ -912,6 +943,7 @@ public class CallState(
             }
 
             is ParticipantLeftEvent -> {
+                logger.d { "Noob START CallState event: $event, current participant count = ${participants.value.size}" }
                 safeCall { pendingParticipantsJoined.remove(event.participant.session_id) }
                 val sessionId = event.participant.session_id
                 removeParticipant(sessionId)
@@ -931,6 +963,7 @@ public class CallState(
                         call.unpinForEveryone(sessionId, event.participant.user_id)
                     }
                 }
+                logger.d { "Noob FINISH CallState event: $event, current participant count = ${participants.value.size}" }
             }
 
             is SubscriberOfferEvent -> {
@@ -1082,7 +1115,7 @@ public class CallState(
         }
     }
 
-    private fun updateRingingState(rejectReason: RejectReason? = null) {
+    private fun updateRingingStateOld(rejectReason: RejectReason? = null) {
         // this is only true when we are in the session (we have accepted/joined the call)
         val rejectedBy = _rejectedBy.value
         val isRejectedByMe = _rejectedBy.value.contains(client.userId)
@@ -1095,11 +1128,8 @@ public class CallState(
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
 
-        Log.d("RingingState", "Current: ${_ringingState.value}")
-        Log.d(
-            "RingingState",
-            "Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
-        )
+        logger.d { "RingingState: Current: ${_ringingState.value}" }
+        logger.d { "RingingState: Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]" }
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall) {
@@ -1112,6 +1142,7 @@ public class CallState(
             cancelTimeout()
 
             if (rejectReason?.alias == REJECT_REASON_TIMEOUT) {
+                logger.d { "RingingState: Setting RingingState.TimeoutNoAnswer 2" }
                 RingingState.TimeoutNoAnswer
             } else {
                 RingingState.RejectedByAll
@@ -1140,6 +1171,7 @@ public class CallState(
             }
         } else {
             if (_ringingState.value is RingingState.Incoming && !acceptedOnThisDevice) {
+                logger.d { "RingingState: Setting RingingState.TimeoutNoAnswer 1" }
                 RingingState.TimeoutNoAnswer
             } else {
                 RingingState.Idle
@@ -1147,7 +1179,7 @@ public class CallState(
         }
 
         if (_ringingState.value != state) {
-            logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+            logger.d { "RingingState: Updating  ${_ringingState.value} -> $state" }
 
             // handle the auto-cancel for outgoing ringing calls
             if (state is RingingState.Outgoing && !state.acceptedByCallee) {
@@ -1160,9 +1192,129 @@ public class CallState(
 
             // stop the call ringing timer if it's running
         }
-        Log.d("RingingState", "Update: $state")
+        logger.d { "RingingState: Update: $state" }
 
         _ringingState.value = state
+    }
+
+    private fun updateRingingState(rejectReason: RejectReason? = null) {
+        if(true) return
+        // this is only true when we are in the session (we have accepted/joined the call)
+        val rejectedBy = _rejectedBy.value
+        val isRejectedByMe = _rejectedBy.value.contains(client.userId)
+        val acceptedBy = _acceptedBy.value
+        val isAcceptedByMe = _acceptedBy.value.contains(client.userId)
+        val createdBy = _createdBy.value
+
+        /**
+         * Either the call is active or it is ringing
+         */
+        val hasActiveCall = client.state.activeCall.value != null
+        val hasRingingCall = client.state.ringingCall.value != null
+
+        val userIsParticipant =
+            _session.value?.participants?.find { it.user.id == client.userId } != null
+        val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
+
+        logger.d { "RingingState: Current: ${_ringingState.value}" }
+        logger.d { "RingingState: Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]" }
+
+        // no members - call is empty, we can join
+
+        val state: RingingState = if (hasActiveCall) {
+            RingingState.Active
+        } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
+            (rejectedBy.contains(createdBy?.id) && hasRingingCall)
+        ) {
+
+            if (rejectReason?.alias == REJECT_REASON_TIMEOUT) {
+                logger.d { "RingingState: Setting RingingState.TimeoutNoAnswer 2" }
+                RingingState.TimeoutNoAnswer
+            } else {
+                RingingState.RejectedByAll
+            }
+        } else if (hasRingingCall && createdBy?.id != client.userId) { //including not active call
+            /**
+             * This is to handle when the same callee is signed up on multiple devices
+             * If the call is accepted by my userId and if I don't have this call as active call then this call has been picked on other device by
+             * same user
+             */
+
+            // Member list is not empty, it's not rejected - it's an incoming call
+            // If it's already accepted by me then we are in an Active call
+            if (userIsParticipant) {
+                RingingState.ActiveOnOtherDevice
+            } else {
+                RingingState.Incoming(acceptedByMe = isAcceptedByMe)
+            }
+        } else if (hasRingingCall && createdBy?.id == client.userId) {
+
+            // The call is created by us
+            if (acceptedBy.isEmpty()) {
+                // no one accepted the call
+                RingingState.Outgoing(acceptedByCallee = false)
+            } else if (!userIsParticipant) {
+                /**
+                 * Should have use call accepted event not this
+                 */
+                // someone already accepted the call, but it's not us (client needs to do call.join)
+                RingingState.Outgoing(acceptedByCallee = true)
+            } else {
+                // call is accepted and we are already in the call
+                /**
+                 * Should have use call accepted event not this
+                 */
+                cancelTimeout()
+                RingingState.Active
+            }
+        } else {
+            if (_ringingState.value is RingingState.Incoming && !acceptedOnThisDevice) {
+                logger.d { "RingingState: Setting RingingState.TimeoutNoAnswer 1" }
+                /**
+                 * Should have use call missed event or wait for timer
+                 */
+                RingingState.TimeoutNoAnswer
+            } else {
+                /**
+                 * It can never be idle
+                 */
+                RingingState.Idle
+            }
+        }
+
+        if (_ringingState.value != state) {
+            logger.d { "RingingState: Updating  ${_ringingState.value} -> $state" }
+
+            // handle the auto-cancel for outgoing ringing calls
+            if (state is RingingState.Outgoing && !state.acceptedByCallee) {
+                startRingingTimer()
+            } else if (state is RingingState.Incoming && !state.acceptedByMe) {
+                startRingingTimer()
+            } else {
+                cancelTimeout()
+            }
+
+            // stop the call ringing timer if it's running
+        }
+        logger.d { "RingingState: Update: $state" }
+
+        _ringingState.value = state
+
+        when(state){
+            is RingingState.Active-> cancelTimeout()
+            is RingingState.ActiveOnOtherDevice-> cancelTimeout()
+            is RingingState.Idle -> TODO()
+            is RingingState.Incoming -> TODO()
+            is RingingState.Outgoing -> TODO()
+            is RingingState.RejectedByAll -> {
+                call.leave() //TODO Rahul, maybe required only when there was a RTC Session
+                cancelTimeout()
+            }
+            is RingingState.TimeoutNoAnswer -> {
+                call.leave() //TODO Rahul maybe this is not required as we never had the RTC Session
+                cancelTimeout()
+            }
+        }
     }
 
     @InternalStreamVideoApi

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -93,7 +94,7 @@ public fun IncomingCallContent(
     } else {
         call.camera.isEnabled.collectAsStateWithLifecycle()
     }
-
+    Log.d("Noob", "Noob, IncomingCallContent, callid: ${call.cid}")
     IncomingCallContent(
         call = call,
         isVideoType = isVideoType,

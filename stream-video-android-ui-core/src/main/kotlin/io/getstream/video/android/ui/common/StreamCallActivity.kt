@@ -31,7 +31,6 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallSessionEndedEvent
-import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
@@ -55,7 +54,6 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
-import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
@@ -181,6 +179,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         HashMap()
 
     private var cachedCallEventJob: Job? = null
+    private var participantCountJob: Job? = null
     private val supervisorJob = SupervisorJob()
     private var isFinishingSafely = false
 
@@ -358,6 +357,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        logger.d { "[onNewIntent]" }
         /**
          * Necessary because the intent is read during the activity's lifecycle methods.
          */
@@ -367,11 +367,40 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     protected open fun handleOnNewIntentAction(intent: Intent) {
+        logger.d { "[handleOnNewIntentAction], intent action = ${intent.action}" }
         when (intent.action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 handleOnNewIncomingCallAcceptAction()
             }
+            NotificationHandler.ACTION_INCOMING_CALL -> {
+                handleOnNewIncomingCallAction()
+            }
             else -> {}
+        }
+    }
+
+    protected open fun handleOnNewIncomingCallAction() {
+        val newCallCid = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)?.cid
+        val activeCall = StreamVideo.instance().state.activeCall.value
+        if (activeCall == null) {
+            initializeCallOrFail(
+                null,
+                null,
+                intent,
+                onSuccess = { instanceState, persistedState, call, action ->
+                    logger.d { "Calling [handleOnNewIncomingCallAction], because call is initialized $call" }
+                    onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                        applyDashboardSettings(successCall)
+                        onCreate(instanceState, persistedState, successCall)
+                    }
+                },
+                onError = {
+                    // We are not calling onErrorFinish here on purpose
+                    // we want to crash if we cannot initialize the call
+                    logger.e(it) { "Failed to initialize call." }
+                    throw it
+                },
+            )
         }
     }
 
@@ -412,6 +441,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     public override fun onResume() {
         super.onResume()
+        logger.d { "[onResume]" }
         withCachedCall {
             onResume(it)
         }
@@ -425,6 +455,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     public override fun onPause() {
+        logger.d { "[onPause]" }
         withCachedCall {
             onPause(it)
             super.onPause()
@@ -432,6 +463,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     public override fun onStop() {
+        logger.d { "[onStop]" }
         withCachedCall {
             onStop(it)
             super.onStop()
@@ -529,6 +561,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         val streamCallId = intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
         streamCallId?.let {
             logger.d { "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
+            val sb = StringBuilder()
+            sb.append("closeScreenOnError=${config.closeScreenOnError}\n")
+            sb.append("closeScreenOnCallEnded=${config.closeScreenOnCallEnded}\n")
+            sb.append("canKeepScreenOn=${config.canKeepScreenOn}\n")
+            sb.append("canSkipPermissionRationale=${config.canSkipPermissionRationale}\n")
+            sb.append("StreamVideo is null=${StreamVideo.instanceOrNull() == null}\n")
+            logger.d { "Noob Call: ${streamCallId}, Configuration: $sb" }
+            logger.d { "Noob Call: ${streamCallId}, Leave when last in call: ${intent.getBooleanExtra(EXTRA_LEAVE_WHEN_LAST, DEFAULT_LEAVE_WHEN_LAST)}" }
+
             configurationMap[it.id] = config
         }
     }
@@ -942,19 +983,19 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
             }
 
-            is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val total = call.state.participants.value.size
-                logger.d { "Participant left, remaining: $total" }
-                lifecycleScope.launch(Dispatchers.Default) {
-                    call.state.participants.value.forEachIndexed { i, v ->
-                        logger.d { "Participant [$i]=${v.name.value}" }
-                    }
-                }
-
-                if (total <= 1) {
-                    onLastParticipant(call)
-                }
-            }
+//            is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
+//                val participants = call.state.participants.value
+//                logger.d { "Noob Participant left, remaining: ${participants.size}" }
+//                lifecycleScope.launch(Dispatchers.Default) {
+//                    participants.forEachIndexed { i, v ->
+//                        logger.d { "Noob Participant [$i]=${v.name.value}" }
+//                    }
+//                }
+//
+//                if (participants.size <= 1) {
+//                    onLastParticipant(call)
+//                }
+//            }
         }
     }
 
@@ -969,7 +1010,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         logger.d { "You are the last participant." }
         val leaveWhenLastInCall =
             intent.getBooleanExtra(EXTRA_LEAVE_WHEN_LAST, DEFAULT_LEAVE_WHEN_LAST)
-        logger.d { "leaveWhenLastInCall = $leaveWhenLastInCall" }
+        logger.d { "Noob, leaveWhenLastInCall = $leaveWhenLastInCall" }
         if (leaveWhenLastInCall) {
             onCallAction(call, LeaveCall)
         }
@@ -1073,6 +1114,21 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 cachedCallEventJob = lifecycleScope.launch(supervisorJob) {
                     cachedCall.events.collect { event ->
                         onCallEvent(cachedCall, event)
+                    }
+                }
+
+                participantCountJob?.cancel()
+                participantCountJob = lifecycleScope.launch(supervisorJob) {
+                    cachedCall.state.participants.collect {
+                        logger.d { "Noob Participant left, remaining: ${it.size}" }
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            it.forEachIndexed { i, v ->
+                                logger.d { "Noob Participant [$i]=${v.name.value}" }
+                            }
+                        }
+                        if (it.size <= 1) {
+                            onLastParticipant(call)
+                        }
                     }
                 }
 

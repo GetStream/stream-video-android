@@ -444,6 +444,7 @@ public class RtcSession internal constructor(
         eventJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.events().collect {
                 traceEvent(it)
+                logger.d { "Noob, RtcSession, event: $it" }
                 clientImpl.fireEvent(it, call.cid)
             }
         }

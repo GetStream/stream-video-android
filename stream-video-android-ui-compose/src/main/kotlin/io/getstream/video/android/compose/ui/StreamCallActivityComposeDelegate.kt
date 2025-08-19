@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -115,14 +116,16 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     override fun setContent(activity: StreamCallActivity, call: Call) {
         logger.d { "[setContent(activity, call)] invoked from compose delegate." }
         activity.setContent {
-            VideoTheme {
-                Box(
-                    modifier = Modifier
-                        .background(VideoTheme.colors.baseSheetPrimary)
-                        .systemBarsPadding(),
-                ) {
-                    logger.d { "[setContent] with RootContent" }
-                    activity.RootContent(call = call)
+            key(call.id) {
+                VideoTheme {
+                    Box(
+                        modifier = Modifier
+                            .background(VideoTheme.colors.baseSheetPrimary)
+                            .systemBarsPadding(),
+                    ) {
+                        logger.d { "[setContent] with RootContent" }
+                        activity.RootContent(call = call)
+                    }
                 }
             }
         }
@@ -298,6 +301,9 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                 onIdle = {
                                     LoadingContent(call)
                                 },
+                                onAcceptedOnOtherDevice = {
+                                    CallDisconnectedContent(call)
+                                },
                             )
                         }
 
@@ -375,7 +381,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.LoadingContent(call: Call) {
         // No loading screen by default...
-        logger.d { "[LoadingContent] call.id = ${call.id}" }
+        logger.d { "Noob [LoadingContent] call.id = ${call.id}" }
     }
 
     @Composable
