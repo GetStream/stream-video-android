@@ -105,6 +105,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun join (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public fun leave (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	protected fun loadConfigFromIntent (Landroid/content/Intent;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	protected fun observeRejectCallFromNotification (Lio/getstream/video/android/core/Call;)V
 	public fun onBackPressed (Lio/getstream/video/android/core/Call;)V
 	public fun onCallAction (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/call/state/CallAction;)V
 	public fun onCallEvent (Lio/getstream/video/android/core/Call;Lio/getstream/android/video/generated/models/VideoEvent;)V
