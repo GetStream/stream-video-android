@@ -31,7 +31,6 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallSessionEndedEvent
-import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
@@ -55,7 +54,6 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
-import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
@@ -181,6 +179,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         HashMap()
 
     private var cachedCallEventJob: Job? = null
+    private var participantCountJob: Job? = null
     private val supervisorJob = SupervisorJob()
     private var isFinishingSafely = false
 
@@ -985,20 +984,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // In any case finish the activity, the call is done for
                 leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
             }
-
-            is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val total = call.state.participants.value.size
-                logger.d { "Participant left, remaining: $total" }
-                lifecycleScope.launch(Dispatchers.Default) {
-                    call.state.participants.value.forEachIndexed { i, v ->
-                        logger.d { "Participant [$i]=${v.name.value}" }
-                    }
-                }
-
-                if (total <= 1) {
-                    onLastParticipant(call)
-                }
-            }
         }
     }
 
@@ -1117,6 +1102,21 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 cachedCallEventJob = lifecycleScope.launch(supervisorJob) {
                     cachedCall.events.collect { event ->
                         onCallEvent(cachedCall, event)
+                    }
+                }
+
+                participantCountJob?.cancel()
+                participantCountJob = lifecycleScope.launch(supervisorJob) {
+                    cachedCall.state.participants.collect {
+                        logger.d { "Participant left, remaining: ${it.size}" }
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            it.forEachIndexed { i, v ->
+                                logger.d { "Participant [$i]=${v.name.value}" }
+                            }
+                        }
+                        if (it.size <= 1) {
+                            onLastParticipant(call)
+                        }
                     }
                 }
 
