@@ -6176,6 +6176,13 @@ public final class io/getstream/video/android/core/RingingState$Active : io/gets
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/RingingState$ActiveOnOtherDevice : io/getstream/video/android/core/RingingState {
+	public static final field INSTANCE Lio/getstream/video/android/core/RingingState$ActiveOnOtherDevice;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/RingingState$Idle : io/getstream/video/android/core/RingingState {
 	public static final field INSTANCE Lio/getstream/video/android/core/RingingState$Idle;
 	public fun equals (Ljava/lang/Object;)Z

@@ -106,6 +106,11 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.ringingstatetransition.CallAcceptedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallCreatedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallEndedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallRejectedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallRingRingingReducer
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.sorting.SortedParticipantsState
@@ -681,6 +686,11 @@ public class CallState(
                 _acceptedBy.value = newAcceptedBy.toSet()
                 updateRingingState()
 
+                val callAcceptedRingingReducer = CallAcceptedRingingReducer(call)
+                val newState = callAcceptedRingingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallAcceptedEvent , ringingState = ${_ringingState.value}" }
+
                 // auto-join the call if it's an outgoing call and someone has accepted
                 // do not auto-join if it's already accepted by us
                 val callRingState = _ringingState.value
@@ -714,6 +724,10 @@ public class CallState(
                         }
                     },
                 )
+                val ringingReducer = CallRejectedRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallRejectedEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallEndedEvent -> {
@@ -721,6 +735,11 @@ public class CallState(
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
                 call.leave()
+
+                val ringingReducer = CallEndedRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallEndedEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallEndedSfuEvent -> {
@@ -743,9 +762,16 @@ public class CallState(
             is CallCreatedEvent -> {
                 getOrCreateMembers(event.members)
                 updateFromResponse(event.call)
+
+                val ringingReducer = CallCreatedRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallCreatedEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallRingEvent -> {
+                StreamVideo.instanceOrNull()?.state?._ringingCall?.value = call
+
                 getOrCreateMembers(event.members)
                 updateFromResponse(event.call)
 
@@ -761,6 +787,11 @@ public class CallState(
                     )
                     _members.value = memberMap
                 }
+
+                val ringingReducer = CallRingRingingReducer(call)
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+                logger.d { "Noob CallRingEvent , ringingState = ${_ringingState.value}" }
             }
 
             is CallUpdatedEvent -> {
@@ -912,6 +943,9 @@ public class CallState(
             }
 
             is ParticipantLeftEvent -> {
+                logger.d {
+                    "Noob START CallState event: $event, current participant count = ${participants.value.size}"
+                }
                 safeCall { pendingParticipantsJoined.remove(event.participant.session_id) }
                 val sessionId = event.participant.session_id
                 removeParticipant(sessionId)
@@ -930,6 +964,9 @@ public class CallState(
                     scope.launch {
                         call.unpinForEveryone(sessionId, event.participant.user_id)
                     }
+                }
+                logger.d {
+                    "Noob FINISH CallState event: $event, current participant count = ${participants.value.size}"
                 }
             }
 

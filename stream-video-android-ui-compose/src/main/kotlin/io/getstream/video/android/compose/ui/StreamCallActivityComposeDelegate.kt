@@ -301,6 +301,9 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                 onIdle = {
                                     LoadingContent(call)
                                 },
+                                onAcceptedOnOtherDevice = {
+                                    CallDisconnectedContent(call)
+                                },
                             )
                         }
 
