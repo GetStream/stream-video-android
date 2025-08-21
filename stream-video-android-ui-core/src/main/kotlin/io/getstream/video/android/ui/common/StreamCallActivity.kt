@@ -428,6 +428,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             else -> {
                 if (handler.shouldAcceptNewCall(activeCall, intent)) {
+                    // Rest states
+                    participantCountJob?.cancel()
+                    participantCountJob = null
+
                     // We want to leave the ongoing active call
                     leave(activeCall, onSuccessFinish, onErrorFinish)
                     lifecycleScope.launch(Dispatchers.Default) {
@@ -992,17 +996,22 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                participantCountJob?.cancel()
-                participantCountJob = lifecycleScope.launch(supervisorJob) {
-                    cachedCall.state.participants.collect {
-                        logger.d { "Participant left, remaining: ${it.size}" }
-                        lifecycleScope.launch(Dispatchers.Default) {
-                            it.forEachIndexed { i, v ->
-                                logger.d { "Participant [$i]=${v.name.value}" }
+                /**
+                 * participantCountJob will be null when activity is newly created
+                 * participantCountJob will be inactive when activity is resumed with another call
+                 */
+                if (participantCountJob == null) {
+                    participantCountJob = lifecycleScope.launch(supervisorJob) {
+                        cachedCall.state.participants.collect {
+                            logger.d { "Participant left, remaining: ${it.size}" }
+                            lifecycleScope.launch(Dispatchers.Default) {
+                                it.forEachIndexed { i, v ->
+                                    logger.d { "Participant [$i]=${v.name.value}" }
+                                }
                             }
-                        }
-                        if (it.size <= 1) {
-                            onLastParticipant(call)
+                            if (it.size <= 1) {
+                                onLastParticipant(call)
+                            }
                         }
                     }
                 }
