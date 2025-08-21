@@ -22,7 +22,6 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.projection.MediaProjection
@@ -39,6 +38,8 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
+import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
+import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValidator
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -569,6 +570,7 @@ public sealed class CameraDirection {
 class CameraManager(
     public val mediaManager: MediaManagerImpl,
     public val eglBaseContext: EglBase.Context,
+    public val cameraCharacteristicsValidator: CameraCharacteristicsValidator,
     defaultCameraDirection: CameraDirection = CameraDirection.Front,
 ) {
     private var priorStatus: DeviceStatus? = null
@@ -932,7 +934,8 @@ class CameraManager(
         enumerator: Camera2Enumerator,
     ): CameraDeviceWrapped? {
         val characteristics = cameraManager?.getCameraCharacteristics(id)
-        val direction = when (characteristics?.get(CameraCharacteristics.LENS_FACING) ?: -1) {
+
+        val direction = when (cameraCharacteristicsValidator.getLensFacing(characteristics) ?: -1) {
             CameraCharacteristics.LENS_FACING_FRONT -> CameraDirection.Front
             CameraCharacteristics.LENS_FACING_BACK -> CameraDirection.Back
             // Note: The camera device is an external camera, and has no fixed facing relative to the device's screen.
@@ -942,15 +945,9 @@ class CameraManager(
         val supportedFormats = enumerator.getSupportedFormats(id)
         val maxResolution = supportedFormats?.maxOfOrNull { it.width * it.height } ?: 0
 
-        // ✅ Check camera usability
-        val capabilities = characteristics?.get(
-            CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES,
-        )
-        val isUsable = capabilities?.contains(
-            CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE,
-        ) == true
+        val isCameraUsable = cameraCharacteristicsValidator.isUsable(characteristics)
 
-        if (!isUsable) {
+        if (!isCameraUsable) {
             logger.d { "Camera device $id is not usable" }
             return null
         }
@@ -1041,7 +1038,8 @@ class MediaManagerImpl(
         trackId = UUID.randomUUID().toString(),
     )
 
-    internal val camera = CameraManager(this, eglBaseContext)
+    internal val camera =
+        CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
     internal val microphone = MicrophoneManager(this, audioUsage)
     internal val speaker = SpeakerManager(this, microphone)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
