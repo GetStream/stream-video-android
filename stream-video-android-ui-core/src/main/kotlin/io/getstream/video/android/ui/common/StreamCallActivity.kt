@@ -730,7 +730,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: ((Call) -> Unit)?,
         onError: ((Exception) -> Unit)?,
     ) {
-        // TODO Rahul, need testing
         val sdkInstance = StreamVideo.instanceOrNull()
         if (sdkInstance != null) {
             val call = sdkInstance.call(cid.type, cid.id)
@@ -824,7 +823,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     ) {
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
-            // TODO Rahul need to be tested
             val result = call.acceptThenJoin()
             result.onError { error ->
                 lifecycleScope.launch {
