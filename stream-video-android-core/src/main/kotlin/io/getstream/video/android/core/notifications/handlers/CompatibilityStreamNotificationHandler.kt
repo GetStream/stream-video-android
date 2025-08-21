@@ -26,6 +26,8 @@ import io.getstream.android.push.permissions.DefaultNotificationPermissionHandle
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -55,7 +57,7 @@ constructor(
     ),
     intentResolver: StreamIntentResolver =
         DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver()),
-    hideRingingNotificationInForeground: Boolean = false,
+    hideRingingNotificationInForeground: Boolean = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.streamNotificationManager?.notificationConfig?.hideRingingNotificationInForeground == true,
     initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
         StreamNotificationBuilderInterceptors(),
     updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors =
@@ -95,6 +97,21 @@ constructor(
             R.string.stream_video_missed_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
         ),
+        missedCallLowImportanceChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_missed_call_low_priority_notification_channel_id,
+            R.string.stream_video_missed_call_notification_channel_title,
+            R.string.stream_video_missed_call_low_priority_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+        incomingCallLowImportanceChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            R.string.stream_video_incoming_call_notification_channel_title,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+
     ),
 ) : NotificationHandler, StreamDefaultNotificationHandler(
     application,
