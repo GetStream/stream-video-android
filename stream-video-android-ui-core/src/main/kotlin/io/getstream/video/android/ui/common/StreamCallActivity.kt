@@ -325,7 +325,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // We are not calling onErrorFinish here on purpose
                 // we want to crash if we cannot initialize the call
                 logger.e(it) { "Failed to initialize call." }
-                throw it
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             },
         )
     }
@@ -352,7 +354,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // We are not calling onErrorFinish here on purpose
                 // we want to crash if we cannot initialize the call
                 logger.e(it) { "Failed to initialize call." }
-                throw it
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             },
         )
     }
@@ -398,7 +402,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     // We are not calling onErrorFinish here on purpose
                     // we want to crash if we cannot initialize the call
                     logger.e(it) { "Failed to initialize call." }
-                    throw it
+                    lifecycleScope.launch {
+                        onErrorFinish(it)
+                    }
                 },
             )
         }
@@ -447,23 +453,23 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     public override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
         withCachedCall {
             onUserLeaveHint(it)
-            super.onUserLeaveHint()
         }
     }
 
     public override fun onPause() {
+        super.onPause()
         withCachedCall {
             onPause(it)
-            super.onPause()
         }
     }
 
     public override fun onStop() {
+        super.onStop()
         withCachedCall {
             onStop(it)
-            super.onStop()
         }
     }
 
@@ -1147,8 +1153,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             initializeCallOrFail(null, null, intent, onSuccess = { _, _, call, _ ->
                 action(call)
             }, onError = {
-                // Call is missing, we need to crash, no other way
-                throw it
+                logger.e(it) { "Failed to initialize call." }
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             })
         } else {
             action(cachedCall)
