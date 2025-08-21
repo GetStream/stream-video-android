@@ -949,6 +949,7 @@ class CameraManager(
         val isUsable = capabilities?.contains(
             CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE,
         ) == true
+
         if (!isUsable) {
             logger.d { "Camera device $id is not usable" }
             return null
