@@ -19,14 +19,23 @@ package io.getstream.video.android.core.ringingstatetransition
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 
-internal class CallRingRingingReducer(call: Call) :
+/**
+ * Changing to RingingState is done on the Service class because
+ * For incoming call - we have 2 sources
+ * - PN - we update the state in [io.getstream.video.android.core.notifications.internal.service.CallService.updateRingingCall]
+ * - WS - we update the state in [io.getstream.video.android.core.ClientState.handleEvent]
+ * For outgoing Call - we have only 1 source - StreamCallActivity //TODO Rahul
+ */
+internal class CallRingRingingReducer(val call: Call) :
     RingingStateReducer1<CallRingEvent, RingingState.Incoming> {
 
     override fun reduce(
         originalState: RingingState,
         event: CallRingEvent,
     ): ReducerOutput1<RingingState, CallRingEvent, RingingState.Incoming> {
-        return ReducerOutput1.Change(RingingState.Incoming(false))
+        return ReducerOutput1.NoChange(originalState)
     }
 }

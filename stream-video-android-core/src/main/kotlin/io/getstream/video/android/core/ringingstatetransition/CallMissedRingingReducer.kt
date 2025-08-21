@@ -16,20 +16,16 @@
 
 package io.getstream.video.android.core.ringingstatetransition
 
-import io.getstream.android.video.generated.models.CallCreatedEvent
-import io.getstream.video.android.core.Call
+import io.getstream.android.video.generated.models.CallMissedEvent
 import io.getstream.video.android.core.RingingState
 
-/**
- * This event does not arrive on most of the time, so its unreliable to set RingingState
- */
-internal class CallCreatedRingingReducer(call: Call) :
-    RingingStateReducer1<CallCreatedEvent, RingingState.Incoming> {
+internal class CallMissedRingingReducer() :
+    RingingStateReducer1<CallMissedEvent, RingingState.TimeoutNoAnswer> {
 
     override fun reduce(
         originalState: RingingState,
-        event: CallCreatedEvent,
-    ): ReducerOutput1<RingingState, CallCreatedEvent, RingingState.Incoming> {
-        return ReducerOutput1.NoChange(originalState)
+        event: CallMissedEvent,
+    ): ReducerOutput1<RingingState, CallMissedEvent, RingingState.TimeoutNoAnswer> {
+        return ReducerOutput1.Change(RingingState.TimeoutNoAnswer)
     }
 }

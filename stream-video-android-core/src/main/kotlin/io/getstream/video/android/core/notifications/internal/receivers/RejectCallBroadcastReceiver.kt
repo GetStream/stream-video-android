@@ -25,7 +25,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.triggers.CallServiceLauncherImpl
 import io.getstream.video.android.model.StreamCallId
 
 /**
@@ -54,10 +54,12 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
             }
         }
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
-        CallService.removeIncomingCall(
-            context,
-            StreamCallId.fromCallCid(call.cid),
-            StreamVideo.instance().state.callConfigRegistry.get(call.type),
-        )
+
+        CallServiceLauncherImpl()
+            .removeIncomingCall(
+                context,
+                StreamCallId.fromCallCid(call.cid),
+                StreamVideo.instance().state.callConfigRegistry.get(call.type),
+            )
     }
 }

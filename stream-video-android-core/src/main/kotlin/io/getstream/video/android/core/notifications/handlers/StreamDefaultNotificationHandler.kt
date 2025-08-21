@@ -55,7 +55,7 @@ import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.triggers.CallServiceLauncherImpl
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 
@@ -138,11 +138,13 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(
+
+        CallServiceLauncherImpl().showIncomingCall(
             application,
             callId,
             callDisplayName,
             StreamVideo.instance().state.callConfigRegistry.get(callId.type),
+            payload = payload,
             notification = getRingingCallNotification(
                 RingingState.Incoming(),
                 callId,

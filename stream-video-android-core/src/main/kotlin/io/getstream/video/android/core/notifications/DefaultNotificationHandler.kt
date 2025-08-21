@@ -48,7 +48,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.triggers.CallServiceLauncherImpl
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -111,19 +111,21 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(
-            application,
-            callId,
-            callDisplayName,
-            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
+        CallServiceLauncherImpl()
+            .showIncomingCall(
+                application,
                 callId,
                 callDisplayName,
-                shouldHaveContentIntent = true,
-                payload,
-            ),
-        )
+                StreamVideo.instance().state.callConfigRegistry.get(callId.type),
+                payload = payload,
+                notification = getRingingCallNotification(
+                    RingingState.Incoming(),
+                    callId,
+                    callDisplayName,
+                    shouldHaveContentIntent = true,
+                    payload,
+                ),
+            )
     }
 
     override fun onMissedCall(

@@ -33,6 +33,7 @@ import io.getstream.android.video.generated.models.CallMemberAddedEvent
 import io.getstream.android.video.generated.models.CallMemberRemovedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.CallMissedEvent
 import io.getstream.android.video.generated.models.CallParticipantResponse
 import io.getstream.android.video.generated.models.CallReactionEvent
 import io.getstream.android.video.generated.models.CallRecordingStartedEvent
@@ -109,6 +110,7 @@ import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import io.getstream.video.android.core.ringingstatetransition.CallAcceptedRingingReducer
 import io.getstream.video.android.core.ringingstatetransition.CallCreatedRingingReducer
 import io.getstream.video.android.core.ringingstatetransition.CallEndedRingingReducer
+import io.getstream.video.android.core.ringingstatetransition.CallMissedRingingReducer
 import io.getstream.video.android.core.ringingstatetransition.CallRejectedRingingReducer
 import io.getstream.video.android.core.ringingstatetransition.CallRingRingingReducer
 import io.getstream.video.android.core.socket.common.scope.ClientScope
@@ -681,6 +683,7 @@ public class CallState(
             }
 
             is CallAcceptedEvent -> {
+                // Update local states
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
@@ -690,6 +693,8 @@ public class CallState(
                 val newState = callAcceptedRingingReducer.reduce(_ringingState.value, event)
                 _ringingState.value = newState.getOutput() as RingingState
                 logger.d { "Noob CallAcceptedEvent , ringingState = ${_ringingState.value}" }
+
+                // Using _ringingState
 
                 // auto-join the call if it's an outgoing call and someone has accepted
                 // do not auto-join if it's already accepted by us
@@ -724,10 +729,14 @@ public class CallState(
                         }
                     },
                 )
-                val ringingReducer = CallRejectedRingingReducer(call)
-                val newState = ringingReducer.reduce(_ringingState.value, event)
-                _ringingState.value = newState.getOutput() as RingingState
-                logger.d { "Noob CallRejectedEvent , ringingState = ${_ringingState.value}" }
+
+                StreamVideo.instanceOrNull()?.let { streamVideo ->
+                    val ringingReducer = CallRejectedRingingReducer(call, rejectedBy, members, streamVideo)
+                    val newState = ringingReducer.reduce(_ringingState.value, event)
+                    _ringingState.value = newState.getOutput() as RingingState
+                    logger.d { "Noob CallRejectedEvent , ringingState = ${_ringingState.value}" }
+                }
+
             }
 
             is CallEndedEvent -> {
@@ -768,7 +777,11 @@ public class CallState(
                 _ringingState.value = newState.getOutput() as RingingState
                 logger.d { "Noob CallCreatedEvent , ringingState = ${_ringingState.value}" }
             }
-
+            is CallMissedEvent -> {
+                val ringingReducer = CallMissedRingingReducer()
+                val newState = ringingReducer.reduce(_ringingState.value, event)
+                _ringingState.value = newState.getOutput() as RingingState
+            }
             is CallRingEvent -> {
                 StreamVideo.instanceOrNull()?.state?._ringingCall?.value = call
 
@@ -1120,6 +1133,7 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
+        if (true) return
         // this is only true when we are in the session (we have accepted/joined the call)
         val rejectedBy = _rejectedBy.value
         val isRejectedByMe = _rejectedBy.value.contains(client.userId)
@@ -1583,6 +1597,10 @@ public class CallState(
     fun updateNotification(notification: Notification) {
         atomicNotification.set(notification)
     }
+
+    fun updateRingingState(ringingState: RingingState) {
+        _ringingState.value = ringingState
+    }
 }
 
 private fun MemberResponse.toMemberState(): MemberState {
@@ -1596,4 +1614,4 @@ private fun MemberResponse.toMemberState(): MemberState {
     )
 }
 
-private const val REJECT_REASON_TIMEOUT = "timeout"
+internal const val REJECT_REASON_TIMEOUT = "timeout"

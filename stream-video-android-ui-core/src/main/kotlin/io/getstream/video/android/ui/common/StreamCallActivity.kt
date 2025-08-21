@@ -984,6 +984,23 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // In any case finish the activity, the call is done for
                 leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
             }
+
+            is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
+                participantCountJob?.cancel()
+                participantCountJob = lifecycleScope.launch(supervisorJob) {
+                    cachedCall.state.participants.collect { participants->
+                        logger.d { "Participant left, remaining: ${participants.size}" }
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            participants.forEachIndexed { i, v ->
+                                logger.d { "Participant [$i]=${v.name.value}" }
+                            }
+                        }
+                        if (participants.size <= 1) {
+                            onLastParticipant(call)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1102,21 +1119,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 cachedCallEventJob = lifecycleScope.launch(supervisorJob) {
                     cachedCall.events.collect { event ->
                         onCallEvent(cachedCall, event)
-                    }
-                }
-
-                participantCountJob?.cancel()
-                participantCountJob = lifecycleScope.launch(supervisorJob) {
-                    cachedCall.state.participants.collect {
-                        logger.d { "Participant left, remaining: ${it.size}" }
-                        lifecycleScope.launch(Dispatchers.Default) {
-                            it.forEachIndexed { i, v ->
-                                logger.d { "Participant [$i]=${v.name.value}" }
-                            }
-                        }
-                        if (it.size <= 1) {
-                            onLastParticipant(call)
-                        }
                     }
                 }
 

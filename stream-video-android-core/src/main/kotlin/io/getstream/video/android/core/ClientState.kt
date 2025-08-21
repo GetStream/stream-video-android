@@ -25,6 +25,9 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
+import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
+import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -47,9 +50,20 @@ public sealed interface ConnectionState {
 @Stable
 public sealed interface RingingState {
     public data object Idle : RingingState
+
+    /**
+     *  Updated from 2 sources
+     * - PN - we update the state in [io.getstream.video.android.core.notifications.internal.service.CallService.updateRingingCall]
+     *  - WS - we update the state in [io.getstream.video.android.core.ClientState.handleEvent]
+     */
     public data class Incoming(val acceptedByMe: Boolean = false) : RingingState
+
+    /**
+     * Updated from
+     * - Call.create()
+     */
     public class Outgoing(val acceptedByCallee: Boolean = false) : RingingState
-    public data object ActiveOnOtherDevice : RingingState
+    public data object ActiveOnOtherDevice : RingingState // NEW ONE
     public data object Active : RingingState
     public data object RejectedByAll : RingingState
     public data object TimeoutNoAnswer : RingingState
@@ -119,6 +133,7 @@ class ClientState(private val client: StreamVideo) {
                 val (type, id) = event.callCid.split(":")
                 val call = client.call(type, id)
                 _ringingCall.value = call
+                call.state.updateRingingState(RingingState.Incoming(false))
             }
         }
     }
@@ -163,11 +178,19 @@ class ClientState(private val client: StreamVideo) {
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
-        if (ringingState is RingingState.Outgoing) {
-            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
-        }
+        when (ringingState) {
+            is RingingState.Incoming ->
+                call.state.updateRingingState(ringingState)
 
-        // TODO: behaviour if you are already in a call
+            is RingingState.Outgoing -> {
+                call.state.updateRingingState(ringingState)
+                maybeStartForegroundService(
+                    call,
+                    CallService.TRIGGER_OUTGOING_CALL,
+                )
+            }
+            else -> {}
+        }
     }
 
     fun removeRingingCall() {
@@ -185,11 +208,14 @@ class ClientState(private val client: StreamVideo) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
-            val serviceIntent = CallService.buildStartIntent(
+            val serviceIntent = ServiceIntentBuilder().buildStartIntent(
                 context,
-                StreamCallId.fromCallCid(call.cid),
-                trigger,
-                callServiceConfiguration = callConfig,
+                StartServiceParam(
+                    StreamCallId.fromCallCid(call.cid),
+                    trigger,
+                    callServiceConfiguration = callConfig,
+                ),
+
             )
             ContextCompat.startForegroundService(context, serviceIntent)
         }
@@ -202,9 +228,9 @@ class ClientState(private val client: StreamVideo) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
-            val serviceIntent = CallService.buildStopIntent(
+            val serviceIntent = ServiceIntentBuilder().buildStopIntent(
                 context,
-                callConfig,
+                StopServiceParam(callConfig),
             )
             context.stopService(serviceIntent)
         }

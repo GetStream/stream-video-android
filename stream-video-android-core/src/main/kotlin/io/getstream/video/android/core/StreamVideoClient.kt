@@ -96,8 +96,9 @@ import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
+import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -190,6 +191,7 @@ internal class StreamVideoClient internal constructor(
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
+
     private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
 
     val socketImpl = coordinatorConnectionModule.socketConnection
@@ -217,9 +219,9 @@ internal class StreamVideoClient internal constructor(
         val runCallServiceInForeground = callConfig.runCallServiceInForeground
         if (runCallServiceInForeground) {
             safeCall {
-                val serviceIntent = CallService.buildStopIntent(
+                val serviceIntent = ServiceIntentBuilder().buildStopIntent(
                     context = context,
-                    callServiceConfiguration = callConfig,
+                    StopServiceParam(callServiceConfiguration = callConfig),
                 )
                 context.stopService(serviceIntent)
             }
@@ -243,6 +245,7 @@ internal class StreamVideoClient internal constructor(
         try {
             apiCall()
         } catch (e: HttpException) {
+            logger.e(e) { "API call failed with: $e" }
             // Retry once with a new token if the token is expired
             if (e.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
@@ -523,7 +526,7 @@ internal class StreamVideoClient internal constructor(
         }
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
-            calls[selectedCid]?.fireEvent(event)
+            calls[selectedCid]?.fireEvent(event) // --> Reaches to activity
             notifyDestroyedCalls(event)
         }
 
@@ -1183,6 +1186,8 @@ internal class StreamVideoClient internal constructor(
             )
         }
     }
+
+    internal fun getCalls(): Map<String, Call> = calls.toMap()
 }
 
 /** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */

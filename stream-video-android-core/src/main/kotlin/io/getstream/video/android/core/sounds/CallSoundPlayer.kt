@@ -27,6 +27,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.model.StreamCallId
 
 internal class CallSoundPlayer(private val context: Context) {
     private val logger by taggedLogger("CallSoundPlayer")
@@ -34,10 +35,13 @@ internal class CallSoundPlayer(private val context: Context) {
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
     private var ringtone: Ringtone? = null
+    private val ringingCallIds = mutableSetOf<StreamCallId>()
 
-    fun playCallSound(soundUri: Uri?, playIfMuted: Boolean = false) {
+    fun playCallSound(callId: StreamCallId, soundUri: Uri?, playIfMuted: Boolean = false) {
         try {
             synchronized(this) {
+                logger.d { "[playCallSound] for callid: ${callId.id}" }
+                ringingCallIds.add(callId)
                 requestAudioFocus(playIfMuted) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         playWithRingtoneManager(soundUri, playIfMuted)
@@ -47,7 +51,8 @@ internal class CallSoundPlayer(private val context: Context) {
                 }
             }
         } catch (e: Exception) {
-            logger.d { "[playCallSound] Error playing call sound: ${e.message}" }
+            ringingCallIds.remove(callId)
+            logger.d { "[playCallSound] Error playing call sound: ${e.message} for callid: ${callId.id}" }
         }
     }
 
@@ -56,7 +61,7 @@ internal class CallSoundPlayer(private val context: Context) {
             (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
                 audioManager = it
             } ?: run {
-                logger.d { "[requestAudioFocus] Error getting AudioManager system service" }
+                logger.d { "[requestAudioFocus] Error getting AudioManager system service" } //TODO Rahul, need to be propagated
                 return
             }
         }
@@ -146,21 +151,50 @@ internal class CallSoundPlayer(private val context: Context) {
         mediaPlayer.prepare()
     }
 
-    fun stopCallSound() {
+//    fun stopCallSound(callId: StreamCallId) {
+//        logger.d { "[stopCallSound] Requested by callid: ${callId.id}" }
+//        synchronized(this) {
+//            ringingCallIds.remove(callId)
+//            if (ringingCallIds.isNotEmpty()) {
+//                logger.d { "[stopCallSound] Won't stop ringing as ringing is owned by other call(s)" }
+//                return
+//            }
+//            stopCallSound()
+//        }
+//    }
+
+    fun stopCallSound(callId: StreamCallId, source: String) {
+        logger.d { "[stopCallSound] Requested by callid: ${callId.id}, from source: $source" }
         synchronized(this) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    logger.d { "[stopCallSound] Stopping RingtoneManager sound" }
-                    if (ringtone?.isPlaying == true) ringtone?.stop()
-                } else {
-                    logger.d { "[stopCallSound] Stopping MediaPlayer sound" }
-                    if (mediaPlayer.isPlaying == true) mediaPlayer.stop()
-                }
-            } catch (e: Exception) {
-                logger.d { "[stopCallSound] Error stopping call sound: ${e.message}" }
-            } finally {
-                abandonAudioFocus()
+            ringingCallIds.remove(callId)
+            if (ringingCallIds.isNotEmpty()) {
+                logger.d { "[stopCallSound] Won't stop ringing as ringing is owned by other call(s)" }
+                return
             }
+            stopCallSound()
+        }
+    }
+
+    private fun stopCallSound() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                logger.d { "[stopCallSound] Stopping RingtoneManager sound" }
+                if (ringtone?.isPlaying == true) ringtone?.stop()
+            } else {
+                logger.d { "[stopCallSound] Stopping MediaPlayer sound" }
+                if (mediaPlayer.isPlaying == true) mediaPlayer.stop()
+            }
+        } catch (e: Exception) {
+            logger.d { "[stopCallSound] Error stopping call sound: ${e.message}" }
+        } finally {
+            abandonAudioFocus()
+        }
+    }
+
+    fun forceStopCallSound() {
+        synchronized(this) {
+            ringingCallIds.clear()
+            stopCallSound()
         }
     }
 

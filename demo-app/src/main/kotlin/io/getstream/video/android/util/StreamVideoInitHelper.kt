@@ -215,6 +215,7 @@ object StreamVideoInitHelper {
             token = token,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
+            connectionTimeoutInMs = 30_000L,
             callServiceConfigRegistry = callServiceConfigRegistry,
             notificationConfig = testNotificationConfig ?: NotificationConfig(
                 pushDeviceGenerators = listOf(
