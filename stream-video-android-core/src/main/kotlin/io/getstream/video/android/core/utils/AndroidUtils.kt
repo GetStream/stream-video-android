@@ -34,6 +34,8 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ServiceCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.log.StreamLog
 import io.getstream.result.Error
 import io.getstream.result.Result
@@ -251,5 +253,13 @@ internal suspend fun <T : Any> safeSuspendingCallWithResult(block: suspend () ->
         // Handle or log the exception here
         StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
         Result.Failure(Error.ThrowableError("Safe call failed with ${e.message}", e))
+    }
+}
+
+internal fun isAppInForeground(): Boolean {
+    return try {
+        ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+    } catch (e: IllegalStateException) {
+        false // fallback if lifecycle isn't initialized yet
     }
 }

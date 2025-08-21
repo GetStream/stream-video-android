@@ -56,6 +56,8 @@ import io.getstream.video.android.core.notifications.dispatchers.DefaultNotifica
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
 import io.getstream.video.android.core.notifications.internal.service.triggers.CallServiceLauncherImpl
+import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 
@@ -74,7 +76,7 @@ constructor(
     ),
     private val intentResolver: StreamIntentResolver =
         DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver()),
-    private val hideRingingNotificationInForeground: Boolean,
+    private val hideRingingNotificationInForeground: Boolean = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.streamNotificationManager?.notificationConfig?.hideRingingNotificationInForeground == true,
     private val initialNotificationBuilderInterceptor: StreamNotificationBuilderInterceptors =
         StreamNotificationBuilderInterceptors(),
     private val updateNotificationBuilderInterceptor: StreamNotificationUpdateInterceptors =
@@ -107,6 +109,20 @@ constructor(
             R.string.stream_video_missed_call_notification_channel_title,
             R.string.stream_video_missed_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
+        ),
+        missedCallLowImportanceChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_missed_call_low_priority_notification_channel_id,
+            R.string.stream_video_missed_call_notification_channel_title,
+            R.string.stream_video_missed_call_low_priority_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ),
+        incomingCallLowImportanceChannel = createChannelInfoFromResIds(
+            application.applicationContext,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            R.string.stream_video_incoming_call_notification_channel_title,
+            R.string.stream_video_incoming_call_low_priority_notification_channel_description,
+            NotificationManager.IMPORTANCE_DEFAULT,
         ),
     ),
     private val mediaSessionCallback: MediaSessionCompat.Callback? = null,
@@ -232,7 +248,11 @@ constructor(
         val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId, payload)
             ?: intentResolver.getDefaultPendingIntent(payload)
 
-        notificationChannels.missedCallChannel.create(notificationManager)
+        val notificationChannel = when {
+            isAppInForeground() && hideRingingNotificationInForeground ->
+                notificationChannels.missedCallLowImportanceChannel
+            else -> notificationChannels.missedCallChannel
+        }
 
         // Build notification
         val notificationContent = callDisplayName?.let {
@@ -241,9 +261,9 @@ constructor(
                 it,
             )
         }
-        return ensureChannelAndBuildNotification(notificationChannels.missedCallChannel) {
+        return ensureChannelAndBuildNotification(notificationChannel) {
             setSmallIcon(R.drawable.stream_video_ic_call)
-            setChannelId(notificationChannels.missedCallChannel.id)
+            setChannelId(notificationChannel.id)
             setContentTitle(
                 application.getString(R.string.stream_video_missed_call_notification_title),
             )
@@ -397,7 +417,13 @@ constructor(
         logger.d {
             "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
-        return ensureChannelAndBuildNotification(notificationChannels.incomingCallChannel) {
+        val notificationChannel = when {
+            isAppInForeground() && hideRingingNotificationInForeground ->
+                notificationChannels.incomingCallLowImportanceChannel
+            else -> notificationChannels.incomingCallChannel
+        }
+
+        return ensureChannelAndBuildNotification(notificationChannel) {
             priority = if (hideRingingNotificationInForeground) {
                 NotificationCompat.PRIORITY_LOW
             } else {
@@ -408,7 +434,7 @@ constructor(
                 application.getString(R.string.stream_video_incoming_call_notification_description),
             )
             setSmallIcon(R.drawable.stream_video_ic_call)
-            setChannelId(notificationChannels.incomingCallChannel.id)
+            setChannelId(notificationChannel.id)
             setOngoing(true)
             setCategory(NotificationCompat.CATEGORY_CALL)
             setFullScreenIntent(fullScreenPendingIntent, true)

@@ -471,7 +471,9 @@ internal open class CallService : Service() {
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
-        observeNotificationUpdates(callId, streamVideo)
+        if (streamVideo.enableCallNotificationUpdates) {
+            observeNotificationUpdates(callId, streamVideo)
+        }
     }
 
     private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoClient) {

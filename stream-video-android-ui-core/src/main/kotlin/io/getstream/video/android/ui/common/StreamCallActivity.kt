@@ -325,7 +325,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // We are not calling onErrorFinish here on purpose
                 // we want to crash if we cannot initialize the call
                 logger.e(it) { "Failed to initialize call." }
-                throw it
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             },
         )
     }
@@ -352,7 +354,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // We are not calling onErrorFinish here on purpose
                 // we want to crash if we cannot initialize the call
                 logger.e(it) { "Failed to initialize call." }
-                throw it
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             },
         )
     }
@@ -398,7 +402,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     // We are not calling onErrorFinish here on purpose
                     // we want to crash if we cannot initialize the call
                     logger.e(it) { "Failed to initialize call." }
-                    throw it
+                    lifecycleScope.launch {
+                        onErrorFinish(it)
+                    }
                 },
             )
         }
@@ -422,6 +428,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             else -> {
                 if (handler.shouldAcceptNewCall(activeCall, intent)) {
+                    // Rest states
+                    participantCountJob?.cancel()
+                    participantCountJob = null
+
                     // We want to leave the ongoing active call
                     leave(activeCall, onSuccessFinish, onErrorFinish)
                     lifecycleScope.launch(Dispatchers.Default) {
@@ -447,23 +457,23 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     public override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
         withCachedCall {
             onUserLeaveHint(it)
-            super.onUserLeaveHint()
         }
     }
 
     public override fun onPause() {
+        super.onPause()
         withCachedCall {
             onPause(it)
-            super.onPause()
         }
     }
 
     public override fun onStop() {
+        super.onStop()
         withCachedCall {
             onStop(it)
-            super.onStop()
         }
     }
 
@@ -724,7 +734,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: ((Call) -> Unit)?,
         onError: ((Exception) -> Unit)?,
     ) {
-        // TODO Rahul, need testing
         val sdkInstance = StreamVideo.instanceOrNull()
         if (sdkInstance != null) {
             val call = sdkInstance.call(cid.type, cid.id)
@@ -818,7 +827,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     ) {
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
-            // TODO Rahul need to be tested
             val result = call.acceptThenJoin()
             result.onError { error ->
                 lifecycleScope.launch {
@@ -988,17 +996,22 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                participantCountJob?.cancel()
-                participantCountJob = lifecycleScope.launch(supervisorJob) {
-                    cachedCall.state.participants.collect { participants->
-                        logger.d { "Participant left, remaining: ${participants.size}" }
-                        lifecycleScope.launch(Dispatchers.Default) {
-                            participants.forEachIndexed { i, v ->
-                                logger.d { "Participant [$i]=${v.name.value}" }
+                /**
+                 * participantCountJob will be null when activity is newly created
+                 * participantCountJob will be inactive when activity is resumed with another call
+                 */
+                if (participantCountJob == null) {
+                    participantCountJob = lifecycleScope.launch(supervisorJob) {
+                        cachedCall.state.participants.collect {
+                            logger.d { "Participant left, remaining: ${it.size}" }
+                            lifecycleScope.launch(Dispatchers.Default) {
+                                it.forEachIndexed { i, v ->
+                                    logger.d { "Participant [$i]=${v.name.value}" }
+                                }
                             }
-                        }
-                        if (participants.size <= 1) {
-                            onLastParticipant(call)
+                            if (it.size <= 1) {
+                                onLastParticipant(call)
+                            }
                         }
                     }
                 }
@@ -1147,8 +1160,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             initializeCallOrFail(null, null, intent, onSuccess = { _, _, call, _ ->
                 action(call)
             }, onError = {
-                // Call is missing, we need to crash, no other way
-                throw it
+                logger.e(it) { "Failed to initialize call." }
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             })
         } else {
             action(cachedCall)

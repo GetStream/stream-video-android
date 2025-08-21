@@ -80,6 +80,18 @@ class DefaultNotificationChannelConfigurationTest {
         every {
             mockApplication.getString(R.string.stream_video_missed_call_notification_channel_description)
         } returns "Missed call notifications"
+        every {
+            mockApplication.getString(R.string.stream_video_missed_call_low_priority_notification_channel_id)
+        } returns "stream_missed_call_low_importance_channel"
+        every {
+            mockApplication.getString(R.string.stream_video_missed_call_low_priority_notification_channel_description)
+        } returns "Missed call notifications"
+        every {
+            mockApplication.getString(R.string.stream_video_incoming_call_low_priority_notification_channel_id)
+        } returns "incoming_calls_low_priority"
+        every {
+            mockApplication.getString(R.string.stream_video_incoming_call_low_priority_notification_channel_description)
+        } returns "Incoming audio and video call alerts"
     }
 
     @Test
@@ -304,6 +316,20 @@ class DefaultNotificationChannelConfigurationTest {
                 R.string.stream_video_missed_call_notification_channel_title,
                 R.string.stream_video_missed_call_notification_channel_description,
                 NotificationManager.IMPORTANCE_HIGH,
+            ),
+            missedCallLowImportanceChannel = createChannelInfoFromResIds(
+                mockApplication,
+                R.string.stream_video_missed_call_low_priority_notification_channel_id,
+                R.string.stream_video_missed_call_notification_channel_title,
+                R.string.stream_video_missed_call_low_priority_notification_channel_description,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            ),
+            incomingCallLowImportanceChannel = createChannelInfoFromResIds(
+                mockApplication,
+                R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+                R.string.stream_video_incoming_call_notification_channel_title,
+                R.string.stream_video_incoming_call_low_priority_notification_channel_description,
+                NotificationManager.IMPORTANCE_DEFAULT,
             ),
         )
 
