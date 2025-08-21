@@ -236,7 +236,7 @@ internal inline fun <T : Any> safeCallWithResult(block: () -> T): Result<T> {
     } catch (e: Exception) {
         // Handle or log the exception here
         StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
-        Result.Failure(Error.ThrowableError("Safe call failed", e))
+        Result.Failure(Error.ThrowableError("Safe call failed with ${e.message}", e))
     }
 }
 
@@ -252,7 +252,7 @@ internal suspend fun <T : Any> safeSuspendingCallWithResult(block: suspend () ->
     } catch (e: Exception) {
         // Handle or log the exception here
         StreamLog.e("SafeCall", e) { "Exception occurred: ${e.message}" }
-        Result.Failure(Error.ThrowableError("Safe call failed", e))
+        Result.Failure(Error.ThrowableError("Safe call failed with ${e.message}", e))
     }
 }
 
