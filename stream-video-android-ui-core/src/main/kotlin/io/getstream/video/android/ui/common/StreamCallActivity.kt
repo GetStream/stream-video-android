@@ -31,6 +31,7 @@ import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallSessionEndedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
@@ -54,6 +55,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
+import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.StreamCallId
@@ -184,7 +186,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     private var isFinishingSafely = false
 
     protected val onSuccessFinish: suspend (Call) -> Unit = { call ->
-        logger.d { "[onSuccessFinish]" }
+        logger.d { "[onSuccessFinish] for callid: ${call.cid}" }
         onEnded(call)
         if (isCurrentAcceptedCall(call)) {
             val configuration = configurationMap[call.id]
