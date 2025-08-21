@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.projection.MediaProjection
@@ -884,8 +885,9 @@ class CameraManager(
 
         for (id in ids) {
             try {
-                val device = createCameraDeviceWrapper(id, cameraManager, enumerator)
-                devices.add(device)
+                createCameraDeviceWrapper(id, cameraManager, enumerator)?.let {
+                    devices.add(it)
+                }
             } catch (t: Throwable) {
                 logger.e(t) { "Could not create camera device for camera with id: $id" }
             }
@@ -928,7 +930,7 @@ class CameraManager(
         id: String,
         cameraManager: CameraManager?,
         enumerator: Camera2Enumerator,
-    ): CameraDeviceWrapped {
+    ): CameraDeviceWrapped? {
         val characteristics = cameraManager?.getCameraCharacteristics(id)
         val direction = when (characteristics?.get(CameraCharacteristics.LENS_FACING) ?: -1) {
             CameraCharacteristics.LENS_FACING_FRONT -> CameraDirection.Front
@@ -939,6 +941,18 @@ class CameraManager(
         }
         val supportedFormats = enumerator.getSupportedFormats(id)
         val maxResolution = supportedFormats?.maxOfOrNull { it.width * it.height } ?: 0
+
+        // ✅ Check camera usability
+        val capabilities = characteristics?.get(
+            CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES,
+        )
+        val isUsable = capabilities?.contains(
+            CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE,
+        ) == true && direction != null
+        if (!isUsable) {
+            logger.d { "Camera device $id is not usable" }
+            return null
+        }
 
         return CameraDeviceWrapped(
             id = id,
