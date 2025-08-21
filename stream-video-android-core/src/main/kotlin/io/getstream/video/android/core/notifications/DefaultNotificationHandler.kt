@@ -46,6 +46,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
+import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
@@ -310,6 +312,13 @@ public open class DefaultNotificationHandler(
         call: Call,
         callDisplayName: String,
     ): Notification? = null
+
+    protected val notificationDispatcher: NotificationDispatcher =
+        DefaultNotificationDispatcher(notificationManager)
+
+    override fun getStreamNotificationDispatcher(): NotificationDispatcher {
+        return notificationDispatcher
+    }
 
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,

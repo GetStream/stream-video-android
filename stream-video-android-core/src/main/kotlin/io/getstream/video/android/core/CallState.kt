@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.app.Notification
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.Stable
@@ -144,6 +145,7 @@ import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -651,8 +653,11 @@ public class CallState(
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
+    internal val atomicNotification: AtomicReference<Notification?> =
+        AtomicReference<Notification?>(null)
+
     fun handleEvent(event: VideoEvent) {
-        logger.d { "Updating call state with event ${event::class.java}" }
+        logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
         when (event) {
             is BlockedUserEvent -> {
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()
@@ -1536,6 +1541,10 @@ public class CallState(
 
     fun updateRejectActionBundle(bundle: Bundle) {
         _rejectActionBundle.value = bundle
+    }
+
+    fun updateNotification(notification: Notification) {
+        atomicNotification.set(notification)
     }
 }
 

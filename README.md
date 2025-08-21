@@ -8,11 +8,15 @@
   <a href="https://search.maven.org/search?q=stream-video-android"><img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-core.svg?label=Maven%20Central" /></a>
 </p>
 
+<p align="center">
+  <a href="https://deepwiki.com/GetStream/stream-video-android"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+</p>
+
 <div align="center">
 
 ![stream-video-android-core](https://img.shields.io/badge/stream--video--android--core-11.42%20MB-lightgreen)
 ![stream-video-android-ui-xml](https://img.shields.io/badge/stream--video--android--ui--xml-5.69%20MB-lightgreen)
-![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-5.89%20MB-lightgreen)
+![stream-video-android-ui-compose](https://img.shields.io/badge/stream--video--android--ui--compose-5.87%20MB-lightgreen)
 
 </div>
 

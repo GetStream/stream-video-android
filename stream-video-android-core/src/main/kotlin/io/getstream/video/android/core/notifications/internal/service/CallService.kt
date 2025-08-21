@@ -63,7 +63,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -221,8 +220,11 @@ internal open class CallService : Service() {
                     StreamLog.d(TAG) {
                         "[showIncomingCall] Showing notification fallback with ID: $INCOMING_CALL_NOTIFICATION_ID"
                     }
-                    NotificationManagerCompat.from(context)
-                        .notify(INCOMING_CALL_NOTIFICATION_ID, notification)
+                    StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
+                        callId,
+                        INCOMING_CALL_NOTIFICATION_ID,
+                        notification,
+                    )
                 } else {
                     StreamLog.w(TAG) {
                         "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}"
@@ -324,12 +326,15 @@ internal open class CallService : Service() {
                 if (trigger == TRIGGER_INCOMING_CALL) {
                     logger.d { "[onStartCommand] Handling incoming call trigger" }
                     showIncomingCall(
+                        callId = intentCallId,
                         notificationId = notificationData.second,
                         notification = notification,
                     )
                 } else {
                     logger.d { "[onStartCommand] Handling non-incoming call trigger: $trigger" }
                     callId = intentCallId
+
+                    call.state.updateNotification(notification)
 
                     startForegroundWithServiceType(
                         intentCallId.hashCode(),
@@ -494,13 +499,17 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun justNotify(notificationId: Int, notification: Notification) {
+    private fun justNotify(callId: StreamCallId, notificationId: Int, notification: Notification) {
         logger.d { "[justNotify] notificationId: $notificationId" }
         if (ActivityCompat.checkSelfPermission(
                 this, Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            NotificationManagerCompat.from(this).notify(notificationId, notification)
+            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
+                callId,
+                notificationId,
+                notification,
+            )
             logger.d { "[justNotify] Notification shown with ID: $notificationId" }
         } else {
             logger.w {
@@ -510,7 +519,11 @@ internal open class CallService : Service() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun showIncomingCall(notificationId: Int, notification: Notification) {
+    private fun showIncomingCall(
+        callId: StreamCallId,
+        notificationId: Int,
+        notification: Notification,
+    ) {
         logger.d { "[showIncomingCall] notificationId: $notificationId" }
         val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
         logger.d { "[showIncomingCall] hasActiveCall: $hasActiveCall" }
@@ -518,6 +531,10 @@ internal open class CallService : Service() {
         if (!hasActiveCall) { // If there isn't another call in progress
             // The service was started with startForegroundService() (from companion object), so we need to call startForeground().
             logger.d { "[showIncomingCall] Starting foreground service with notification" }
+
+            StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
+                ?.state?.updateNotification(notification)
+
             startForegroundWithServiceType(
                 notificationId,
                 notification,
@@ -527,12 +544,12 @@ internal open class CallService : Service() {
                 logger.e {
                     "[showIncomingCall] Failed to start foreground service, falling back to justNotify: $it"
                 }
-                justNotify(notificationId, notification)
+                justNotify(callId, notificationId, notification)
             }
         } else {
             // Else, we show a simple notification (the service was already started as a foreground service).
             logger.d { "[showIncomingCall] Service already running, showing simple notification" }
-            justNotify(notificationId, notification)
+            justNotify(callId, notificationId, notification)
         }
     }
 
@@ -583,12 +600,14 @@ internal open class CallService : Service() {
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
-        observeNotificationUpdates(callId, streamVideo)
+        if (streamVideo.enableCallNotificationUpdates) {
+            observeNotificationUpdates(callId, streamVideo)
+        }
     }
 
     private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoClient) {
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
+        val call = streamVideo.call(callId.type, callId.id)
+        call.scope.launch {
             call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
 
@@ -642,8 +661,11 @@ internal open class CallService : Service() {
     }
 
     private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoClient) {
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
+        val call = streamVideo.call(callId.type, callId.id)
+        /**
+         * This scope will be cleaned as soon as call is destroyed via rejection/decline
+         */
+        call.scope.launch {
             call.events.collect { event ->
                 logger.i { "Received event in service: $event" }
                 when (event) {
@@ -852,6 +874,8 @@ internal open class CallService : Service() {
 
     /**
      * Handle all aspects of stopping the service.
+     * Should be invoke carefully for the calls which are still present in [StreamVideoClient.calls]
+     * Else stopping service by an expired call can cancel current call's notification and the service itself
      */
     private fun stopService() {
         // Cancel the notification
