@@ -43,7 +43,7 @@ class DefaultCameraCharacteristicsValidatorTest {
             characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
         } returns intArrayOf(
             CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE,
-            CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_RAW
+            CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_RAW,
         )
 
         // When
@@ -61,7 +61,7 @@ class DefaultCameraCharacteristicsValidatorTest {
             characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
         } returns intArrayOf(
             CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_RAW,
-            CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT
+            CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT,
         )
 
         // When
@@ -193,5 +193,4 @@ class DefaultCameraCharacteristicsValidatorTest {
         // Then
         assertTrue(result)
     }
-
 }
