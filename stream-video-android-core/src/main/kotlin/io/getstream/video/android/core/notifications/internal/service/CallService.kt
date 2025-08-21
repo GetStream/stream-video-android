@@ -70,7 +70,7 @@ internal open class CallService : Service() {
     open val serviceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
 
     // Data
-    private var callId: StreamCallId? = null
+//    private var callId: StreamCallId? = null
 
     // Service scope
     val handler = CoroutineExceptionHandler { _, exception ->
@@ -266,7 +266,10 @@ internal open class CallService : Service() {
         )
 
         return if (notification != null) {
-            callId = params.callId
+            StreamVideo.instanceOrNull()?.let {
+                it.state.callServiceRepository.addCallId(params.callId)
+            }
+
             val call = params.streamVideo.call(params.callId.type, params.callId.id)
             call.state.updateNotification(notification)
 
@@ -421,8 +424,7 @@ internal open class CallService : Service() {
 
     private fun removeIncomingCall(notificationId: Int) {
         NotificationManagerCompat.from(this).cancel(notificationId)
-
-        if (callId == null) {
+        if(StreamVideo.instanceOrNull()?.state?.callServiceRepository?.callId == null) {
             stopService()
         }
     }
@@ -485,6 +487,7 @@ internal open class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
+                            call.state.startRingingTimer()
                             callSoundPlayer?.playCallSound(
                                 callId,
                                 streamVideo.sounds.ringingConfig.incomingCallSoundUri,
@@ -499,6 +502,7 @@ internal open class CallService : Service() {
 
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
+                            call.state.startRingingTimer()
                             callSoundPlayer?.playCallSound(
                                 callId,
                                 streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
@@ -512,10 +516,12 @@ internal open class CallService : Service() {
                     }
 
                     is RingingState.Active -> { // Handle Active to make it more reliable
+                        call.state.cancelTimeout()
                         callSoundPlayer?.stopCallSound(callId, "Ringing State is active")
                     }
 
                     is RingingState.RejectedByAll -> {
+                        call.state.cancelTimeout()
                         ClientScope().launch {
                             call.reject(RejectReason.Decline)
                         }
@@ -524,6 +530,7 @@ internal open class CallService : Service() {
                     }
 
                     is RingingState.TimeoutNoAnswer -> {
+                        call.state.cancelTimeout()
                         callSoundPlayer?.stopCallSound(callId, "Ringstate state reached time out")
                     }
 
@@ -532,6 +539,7 @@ internal open class CallService : Service() {
                     }
 
                     is RingingState.ActiveOnOtherDevice -> {
+                        call.state.cancelTimeout()
                         callSoundPlayer?.stopCallSound(callId, "Ringstate state is in else case: $it")
                     }
                 }
@@ -703,7 +711,8 @@ internal open class CallService : Service() {
     }
 
     private fun endCall() {
-        callId?.let { callId ->
+
+        StreamVideo.instanceOrNull()?.state?.callServiceRepository?.callId?.let { callId ->
             StreamVideo.instanceOrNull()?.let { streamVideo ->
                 val call = streamVideo.call(callId.type, callId.id)
                 val ringingState = call.state.ringingState.value
@@ -759,7 +768,7 @@ internal open class CallService : Service() {
     private fun stopService() {
         // Cancel the notification
         val notificationManager = NotificationManagerCompat.from(this)
-        callId?.let {
+        StreamVideo.instanceOrNull()?.state?.callServiceRepository?.callId?.let { callId->
             val notificationId = callId.hashCode()
             notificationManager.cancel(notificationId)
 
@@ -767,8 +776,11 @@ internal open class CallService : Service() {
         }
 
         safeCall {
-            val handler = streamDefaultNotificationHandler()
-            handler?.clearMediaSession(callId)
+            StreamVideo.instanceOrNull()?.state?.callServiceRepository?.callId?.let { callId ->
+
+                val handler = streamDefaultNotificationHandler()
+                handler?.clearMediaSession(callId)
+            }
         }
 
         // Optionally cancel any incoming call notification

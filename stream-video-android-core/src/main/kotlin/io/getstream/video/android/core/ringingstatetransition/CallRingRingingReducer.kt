@@ -36,6 +36,7 @@ internal class CallRingRingingReducer(val call: Call) :
         originalState: RingingState,
         event: CallRingEvent,
     ): ReducerOutput1<RingingState, CallRingEvent, RingingState.Incoming> {
+
         return ReducerOutput1.NoChange(originalState)
     }
 }

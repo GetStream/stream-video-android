@@ -85,6 +85,7 @@ import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
@@ -788,6 +789,7 @@ public class Call(
         stopScreenSharing()
         camera.disable()
         microphone.disable()
+        client.state.callServiceRepository.removeCallId(StreamCallId(type, id, cid))
         client.state.removeActiveCall() // Will also stop CallService
         client.state.removeRingingCall()
         (client as StreamVideoClient).onCallCleanUp(this)
@@ -1321,7 +1323,7 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService(call = this)
+//        clientImpl.state.maybeStopForegroundService(call = this)
         return clientImpl.accept(type, id)
     }
 

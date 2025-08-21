@@ -28,6 +28,7 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
 import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
+import io.getstream.video.android.core.notifications.internal.service.repository.CallServiceRepository
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -98,6 +99,8 @@ class ClientState(private val client: StreamVideo) {
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
 
+    internal val callServiceRepository = CallServiceRepository()
+
     /**
      * Returns true if there is an active or ringing call
      */
@@ -133,7 +136,6 @@ class ClientState(private val client: StreamVideo) {
                 val (type, id) = event.callCid.split(":")
                 val call = client.call(type, id)
                 _ringingCall.value = call
-                call.state.updateRingingState(RingingState.Incoming(false))
             }
         }
     }
@@ -170,7 +172,8 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeActiveCall() {
         _activeCall.value?.let {
-            maybeStopForegroundService(it)
+//            callServiceRepository.removeCallId(StreamCallId(it.type, it.id, it.cid))
+//            maybeStopForegroundService(it)
         }
         this._activeCall.value = null
         removeRingingCall()
@@ -180,10 +183,10 @@ class ClientState(private val client: StreamVideo) {
         _ringingCall.value = call
         when (ringingState) {
             is RingingState.Incoming ->
-                call.state.updateRingingState(ringingState)
+                call.state.updateRingingState("addRingingCall 1",ringingState)
 
             is RingingState.Outgoing -> {
-                call.state.updateRingingState(ringingState)
+                call.state.updateRingingState("addRingingCall 2",ringingState)
                 maybeStartForegroundService(
                     call,
                     CallService.TRIGGER_OUTGOING_CALL,
@@ -195,7 +198,7 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeRingingCall() {
         ringingCall.value?.let {
-            maybeStopForegroundService(it)
+//            maybeStopForegroundService(it)
         }
         _ringingCall.value = null
     }
@@ -225,14 +228,17 @@ class ClientState(private val client: StreamVideo) {
      * Stop the foreground service that manages the call even when the UI is gone.
      */
     internal fun maybeStopForegroundService(call: Call) {
-        val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
-        if (callConfig.runCallServiceInForeground) {
-            val context = streamVideoClient.context
-            val serviceIntent = ServiceIntentBuilder().buildStopIntent(
-                context,
-                StopServiceParam(callConfig),
-            )
-            context.stopService(serviceIntent)
+        if(callServiceRepository.noActiveCall()) {
+            val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
+            if (callConfig.runCallServiceInForeground) {
+                val context = streamVideoClient.context
+                val serviceIntent = ServiceIntentBuilder().buildStopIntent(
+                    context,
+                    StopServiceParam(callConfig),
+                )
+                context.stopService(serviceIntent)
+            }
         }
+
     }
 }

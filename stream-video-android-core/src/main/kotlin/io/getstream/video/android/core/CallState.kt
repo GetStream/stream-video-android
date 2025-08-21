@@ -687,12 +687,12 @@ public class CallState(
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
-                updateRingingState()
 
                 val callAcceptedRingingReducer = CallAcceptedRingingReducer(call)
                 val newState = callAcceptedRingingReducer.reduce(_ringingState.value, event)
-                _ringingState.value = newState.getOutput() as RingingState
-                logger.d { "Noob CallAcceptedEvent , ringingState = ${_ringingState.value}" }
+                logger.d { "Noob CallAcceptedEvent , oldRinging State: ${_ringingState.value}, newRingingState = ${newState.getOutput()}" }
+                updateRingingState("CallAcceptedEvent", newState.getOutput() as RingingState)
+
 
                 // Using _ringingState
 
@@ -719,22 +719,13 @@ public class CallState(
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
-                updateRingingState(
-                    rejectReason = event.reason?.let {
-                        when (it) {
-                            RejectReason.Busy.alias -> RejectReason.Busy
-                            RejectReason.Cancel.alias -> RejectReason.Cancel
-                            RejectReason.Decline.alias -> RejectReason.Decline
-                            else -> RejectReason.Custom(alias = it)
-                        }
-                    },
-                )
+
 
                 StreamVideo.instanceOrNull()?.let { streamVideo ->
                     val ringingReducer = CallRejectedRingingReducer(call, rejectedBy, members, streamVideo)
                     val newState = ringingReducer.reduce(_ringingState.value, event)
-                    _ringingState.value = newState.getOutput() as RingingState
-                    logger.d { "Noob CallRejectedEvent , ringingState = ${_ringingState.value}" }
+                    logger.d { "Noob CallRejectedEvent , oldRinging State: ${_ringingState.value}, newRingingState = ${newState.getOutput()}" }
+                    updateRingingState("CallRejectedEvent", newState.getOutput() as RingingState)
                 }
 
             }
@@ -747,8 +738,8 @@ public class CallState(
 
                 val ringingReducer = CallEndedRingingReducer(call)
                 val newState = ringingReducer.reduce(_ringingState.value, event)
-                _ringingState.value = newState.getOutput() as RingingState
-                logger.d { "Noob CallEndedEvent , ringingState = ${_ringingState.value}" }
+                logger.d { "Noob CallEndedEvent , oldRinging State: ${_ringingState.value}, newRingingState = ${newState.getOutput()}" }
+                updateRingingState("CallEndedEvent", newState.getOutput() as RingingState)
             }
 
             is CallEndedSfuEvent -> {
@@ -774,13 +765,13 @@ public class CallState(
 
                 val ringingReducer = CallCreatedRingingReducer(call)
                 val newState = ringingReducer.reduce(_ringingState.value, event)
-                _ringingState.value = newState.getOutput() as RingingState
-                logger.d { "Noob CallCreatedEvent , ringingState = ${_ringingState.value}" }
+                logger.d { "Noob CallCreatedEvent , oldRinging State: ${_ringingState.value}, newRingingState = ${newState.getOutput()}" }
+                updateRingingState("CallCreatedEvent", newState.getOutput() as RingingState)
             }
             is CallMissedEvent -> {
                 val ringingReducer = CallMissedRingingReducer()
                 val newState = ringingReducer.reduce(_ringingState.value, event)
-                _ringingState.value = newState.getOutput() as RingingState
+                updateRingingState("CallMissedEvent", newState.getOutput() as RingingState)
             }
             is CallRingEvent -> {
                 StreamVideo.instanceOrNull()?.state?._ringingCall?.value = call
@@ -803,8 +794,8 @@ public class CallState(
 
                 val ringingReducer = CallRingRingingReducer(call)
                 val newState = ringingReducer.reduce(_ringingState.value, event)
-                _ringingState.value = newState.getOutput() as RingingState
-                logger.d { "Noob CallRingEvent , ringingState = ${_ringingState.value}" }
+                logger.d { "Noob CallRingEvent , oldRinging State: ${_ringingState.value}, newRingingState = ${newState.getOutput()}" }
+                updateRingingState("CallRingEvent", newState.getOutput() as RingingState)
             }
 
             is CallUpdatedEvent -> {
@@ -926,7 +917,6 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
-                updateRingingState()
                 updateServerSidePins(
                     event.callState.pins.map {
                         PinUpdate(it.user_id, it.session_id)
@@ -1097,7 +1087,7 @@ public class CallState(
                 }
 
                 updateParticipantCounts(session = session.value)
-                updateRingingState()
+                //TODO Rahul - updateRingingState was here
             }
 
             is CallTranscriptionStartedEvent -> {
@@ -1130,90 +1120,6 @@ public class CallState(
                 PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server),
             )
         }
-    }
-
-    private fun updateRingingState(rejectReason: RejectReason? = null) {
-        if (true) return
-        // this is only true when we are in the session (we have accepted/joined the call)
-        val rejectedBy = _rejectedBy.value
-        val isRejectedByMe = _rejectedBy.value.contains(client.userId)
-        val acceptedBy = _acceptedBy.value
-        val isAcceptedByMe = _acceptedBy.value.contains(client.userId)
-        val createdBy = _createdBy.value
-        val hasActiveCall = client.state.activeCall.value != null
-        val hasRingingCall = client.state.ringingCall.value != null
-        val userIsParticipant =
-            _session.value?.participants?.find { it.user.id == client.userId } != null
-        val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
-
-        Log.d("RingingState", "Current: ${_ringingState.value}")
-        Log.d(
-            "RingingState",
-            "Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
-        )
-
-        // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall) {
-            cancelTimeout()
-            RingingState.Active
-        } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
-            (rejectedBy.contains(createdBy?.id) && hasRingingCall)
-        ) {
-            call.leave()
-            cancelTimeout()
-
-            if (rejectReason?.alias == REJECT_REASON_TIMEOUT) {
-                RingingState.TimeoutNoAnswer
-            } else {
-                RingingState.RejectedByAll
-            }
-        } else if (hasRingingCall && createdBy?.id != client.userId) {
-            // Member list is not empty, it's not rejected - it's an incoming call
-            // If it's already accepted by me then we are in an Active call
-            if (userIsParticipant) {
-                cancelTimeout()
-                RingingState.Active
-            } else {
-                RingingState.Incoming(acceptedByMe = isAcceptedByMe)
-            }
-        } else if (hasRingingCall && createdBy?.id == client.userId) {
-            // The call is created by us
-            if (acceptedBy.isEmpty()) {
-                // no one accepted the call
-                RingingState.Outgoing(acceptedByCallee = false)
-            } else if (!userIsParticipant) {
-                // someone already accepted the call, but it's not us (client needs to do call.join)
-                RingingState.Outgoing(acceptedByCallee = true)
-            } else {
-                // call is accepted and we are already in the call
-                cancelTimeout()
-                RingingState.Active
-            }
-        } else {
-            if (_ringingState.value is RingingState.Incoming && !acceptedOnThisDevice) {
-                RingingState.TimeoutNoAnswer
-            } else {
-                RingingState.Idle
-            }
-        }
-
-        if (_ringingState.value != state) {
-            logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
-
-            // handle the auto-cancel for outgoing ringing calls
-            if (state is RingingState.Outgoing && !state.acceptedByCallee) {
-                startRingingTimer()
-            } else if (state is RingingState.Incoming && !state.acceptedByMe) {
-                startRingingTimer()
-            } else {
-                cancelTimeout()
-            }
-
-            // stop the call ringing timer if it's running
-        }
-        Log.d("RingingState", "Update: $state")
-
-        _ringingState.value = state
     }
 
     @InternalStreamVideoApi
@@ -1257,7 +1163,7 @@ public class CallState(
         }
     }
 
-    private fun startRingingTimer() {
+    internal fun startRingingTimer() {
         ringingTimerJob?.cancel()
         ringingTimerJob = UserScope(ClientScope()).launch {
             val autoCancelTimeout = settings.value?.ring?.autoCancelTimeoutMs
@@ -1363,7 +1269,6 @@ public class CallState(
         }
         _members.value = memberMap
 
-        updateRingingState()
     }
 
     fun getParticipantBySessionId(sessionId: String): ParticipantState? {
@@ -1401,7 +1306,6 @@ public class CallState(
         _team.value = response.team
         didUpdateSession(response.session)
 
-        updateRingingState()
         closedCaptionManager.handleCallUpdate(response)
     }
 
@@ -1598,7 +1502,8 @@ public class CallState(
         atomicNotification.set(notification)
     }
 
-    fun updateRingingState(ringingState: RingingState) {
+    fun updateRingingState(source:String, ringingState: RingingState) {
+        logger.d { "[updateRingingState] source: $source, oldState: ${_ringingState.value}, newState: $ringingState" }
         _ringingState.value = ringingState
     }
 }
