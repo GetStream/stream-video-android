@@ -439,8 +439,8 @@ internal open class CallService : Service() {
         callId: StreamCallId,
     ) {
         // Update call
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
+        val call = streamVideo.call(callId.type, callId.id)
+        call.state.scope.launch {
             val update = call.get()
             if (update.isFailure) {
                 update.errorOrNull()?.let {
@@ -454,7 +454,7 @@ internal open class CallService : Service() {
         }
 
         // Monitor coordinator socket
-        serviceScope.launch {
+        call.state.scope.launch {
             streamVideo.connectIfNotAlreadyConnected()
         }
     }
@@ -464,10 +464,8 @@ internal open class CallService : Service() {
         callId: StreamCallId,
         ringingState: RingingState,
     ) {
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
-            streamVideo.state.addRingingCall(call, ringingState)
-        }
+        val call = streamVideo.call(callId.type, callId.id)
+        streamVideo.state.addRingingCall(call, ringingState)
     }
 
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
@@ -612,8 +610,8 @@ internal open class CallService : Service() {
 
     @OptIn(ExperimentalStreamVideoApi::class)
     private fun observeNotificationUpdates(callId: StreamCallId, streamVideo: StreamVideoClient) {
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
+        val call = streamVideo.call(callId.type, callId.id)
+        call.state.scope.launch {
             logger.d { "Observing notification updates for call: ${call.cid}" }
             val notificationUpdateTriggers =
                 streamVideo.streamNotificationManager.notificationConfig.notificationUpdateTriggers(
@@ -719,7 +717,7 @@ internal open class CallService : Service() {
 
                 if (ringingState is RingingState.Outgoing) {
                     // If I'm calling, end the call for everyone
-                    serviceScope.launch {
+                    call.scope.launch {
                         call.reject()
                         logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
                     }
@@ -729,7 +727,7 @@ internal open class CallService : Service() {
                     logger.i { "[onTaskRemoved] Total members: $memberCount" }
                     if (memberCount == 2) {
                         // ...and I'm the only one being called, end the call for both users
-                        serviceScope.launch {
+                        call.scope.launch {
                             call.reject()
                             logger.i { "[onTaskRemoved] Ended incoming call for both users." }
                         }
@@ -787,7 +785,7 @@ internal open class CallService : Service() {
         notificationManager.cancel(INCOMING_CALL_NOTIFICATION_ID)
         logger.i { "[stopService]. Cancelled incoming call notificationId: $INCOMING_CALL_NOTIFICATION_ID" }
 
-        // Camera privacy
+        // Camera privacy TODO Rahul should be based on call
         unregisterToggleCameraBroadcastReceiver()
 
         // Call sounds
@@ -795,13 +793,16 @@ internal open class CallService : Service() {
          * Temp Fix!! The observeRingingState scope was getting cancelled and as a result,
          * ringing state was not properly updated
          */
-        callSoundPlayer?.forceStopCallSound()
+        callSoundPlayer?.forceStopCallSound() //TODO Rahul, should be removed by watching RingingState or UserAction
 
         // Stop any jobs
-        serviceScope.cancel()
+        if (StreamVideo.instanceOrNull()?.state?.callServiceRepository?.noActiveCall() == true) {
+            serviceScope.cancel()
 
-        // Optionally (no-op if already stopping)
-        stopSelf()
+            // Optionally (no-op if already stopping)
+            stopSelf()
+        }
+
     }
 
     private fun streamDefaultNotificationHandler(): StreamDefaultNotificationHandler? {

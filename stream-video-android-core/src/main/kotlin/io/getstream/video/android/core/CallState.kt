@@ -1502,6 +1502,12 @@ public class CallState(
         atomicNotification.set(notification)
     }
 
+    fun updateAcceptedBy(userId: String) {
+        val newAcceptedBy = _acceptedBy.value.toMutableSet()
+        newAcceptedBy.add(userId)
+        _acceptedBy.value = newAcceptedBy.toSet()
+    }
+
     fun updateRingingState(source:String, ringingState: RingingState) {
         logger.d { "[updateRingingState] source: $source, oldState: ${_ringingState.value}, newState: $ringingState" }
         _ringingState.value = ringingState

@@ -20,7 +20,9 @@ import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 
-
+/**
+ * Comes for both incoming & outgoing
+ */
 internal class CallAcceptedRingingReducer(private val call: Call) :
     StateReducer1<RingingState, CallAcceptedEvent, RingingState.Active> {
 
@@ -28,8 +30,8 @@ internal class CallAcceptedRingingReducer(private val call: Call) :
         originalState: RingingState,
         event: CallAcceptedEvent,
     ): ReducerOutput1<RingingState, CallAcceptedEvent, RingingState.Active> {
-        if (originalState is RingingState.Outgoing)
+//        if (originalState is RingingState.Outgoing)
             return ReducerOutput1.Change(RingingState.Active)
-        else throw IllegalStateException("Illegal state in CallAcceptedRingingReducer, $originalState")
+//        else throw IllegalStateException("Illegal state in CallAcceptedRingingReducer, $originalState")
     }
 }

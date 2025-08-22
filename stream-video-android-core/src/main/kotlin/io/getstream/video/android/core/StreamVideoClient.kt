@@ -524,11 +524,7 @@ internal class StreamVideoClient internal constructor(
                 }
             }
         }
-        // call level subscriptions
-        if (selectedCid.isNotEmpty()) {
-            calls[selectedCid]?.fireEvent(event) // --> Reaches to activity
-            notifyDestroyedCalls(event)
-        }
+
 
         if (selectedCid.isNotEmpty()) {
             // Special handling  for accepted events
@@ -541,6 +537,7 @@ internal class StreamVideoClient internal constructor(
                     currentRingingCall.cid != event.callCid
                 ) {
                     // Skip this event
+                    if (true) throw IllegalStateException("Why I am here")
                     return
                 }
             }
@@ -552,6 +549,12 @@ internal class StreamVideoClient internal constructor(
                 it.handleEvent(event)
             }
             deliverIntentToDestroyedCalls(event)
+
+            // call level subscriptions
+            if (selectedCid.isNotEmpty()) {
+                calls[selectedCid]?.fireEvent(event) // --> Reaches to activity
+                notifyDestroyedCalls(event)
+            }
         }
     }
 

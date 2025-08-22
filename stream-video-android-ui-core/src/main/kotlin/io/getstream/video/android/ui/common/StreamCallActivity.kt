@@ -832,8 +832,11 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 lifecycleScope.launch {
                     onError?.invoke(Exception(error.message))
                 }
+            }.onSuccess {
+                //TODO Rahul should we do it here or should we do it after receiving WS Events?
+//                call.state.updateRingingState("UI", RingingState.Active)
+//                call.state.updateAcceptedBy(StreamVideo.instance().userId)
             }
-            result
         }
     }
 
