@@ -64,7 +64,7 @@ object DefaultCallConfigurations {
      * Uses the [AudioCallService] class with voice communication audio usage.
      */
     val audioCall = CallServiceConfig(
-        serviceClass = AudioCallService::class.java,
+        serviceClass = CallService::class.java,
         audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
     )
 
