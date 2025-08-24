@@ -463,9 +463,7 @@ public class Call(
         sfuListener?.cancel()
 
         if (session != null) {
-            throw IllegalStateException(
-                "Call $cid has already been joined. Please use call.leave before joining it again",
-            )
+            return Failure(Error.GenericError("Call $cid has already been joined"))
         }
         logger.d {
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"

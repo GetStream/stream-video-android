@@ -5708,13 +5708,14 @@ public final class io/getstream/video/android/core/CameraDirection$Front : io/ge
 }
 
 public final class io/getstream/video/android/core/CameraManager {
-	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lorg/webrtc/EglBase$Context;Lio/getstream/video/android/core/CameraDirection;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lorg/webrtc/EglBase$Context;Lio/getstream/video/android/core/CameraDirection;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lorg/webrtc/EglBase$Context;Lio/getstream/video/android/core/camera/CameraCharacteristicsValidator;Lio/getstream/video/android/core/CameraDirection;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lorg/webrtc/EglBase$Context;Lio/getstream/video/android/core/camera/CameraCharacteristicsValidator;Lio/getstream/video/android/core/CameraDirection;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun cleanup ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/CameraManager;ZILjava/lang/Object;)V
 	public final fun flip ()V
 	public final fun getAvailableResolutions ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getCameraCharacteristicsValidator ()Lio/getstream/video/android/core/camera/CameraCharacteristicsValidator;
 	public final fun getDirection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEglBaseContext ()Lorg/webrtc/EglBase$Context;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
@@ -10222,16 +10223,20 @@ public final class io/getstream/video/android/core/notifications/handlers/Stream
 }
 
 public final class io/getstream/video/android/core/notifications/handlers/StreamNotificationChannels {
-	public fun <init> (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;)V
+	public fun <init> (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;)V
 	public final fun component1 ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
 	public final fun component2 ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
 	public final fun component3 ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
 	public final fun component4 ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
-	public final fun copy (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;)Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;
+	public final fun component5 ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
+	public final fun component6 ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
+	public final fun copy (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;)Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIncomingCallChannel ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
+	public final fun getIncomingCallLowImportanceChannel ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
 	public final fun getMissedCallChannel ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
+	public final fun getMissedCallLowImportanceChannel ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
 	public final fun getOngoingCallChannel ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
 	public final fun getOutgoingCallChannel ()Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannelInfo;
 	public fun hashCode ()I

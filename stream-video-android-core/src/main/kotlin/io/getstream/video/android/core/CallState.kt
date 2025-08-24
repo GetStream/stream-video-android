@@ -669,7 +669,7 @@ public class CallState(
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
     fun handleEvent(event: VideoEvent) {
-        logger.d { "Updating call state with event ${event::class.java}" }
+        logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
         when (event) {
             is BlockedUserEvent -> {
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()

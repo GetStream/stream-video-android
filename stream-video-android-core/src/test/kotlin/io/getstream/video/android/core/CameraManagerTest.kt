@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import android.hardware.camera2.CameraCharacteristics
+import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Test
@@ -45,11 +46,14 @@ class CameraManagerTest {
         every { enumerator.getSupportedFormats(successIdMinRes) } returns listOf(minFormat)
         every { enumerator.getSupportedFormats(successIdMaxRes) } returns listOf(maxFormat)
         every { cameraManagerSystem.getCameraCharacteristics(any()) } returns characteristics
-        every {
-            characteristics.get(CameraCharacteristics.LENS_FACING)
-        } returns CameraCharacteristics.LENS_FACING_FRONT
 
-        val cameraManager = CameraManager(mediaManager, elgContext)
+        val cameraCharacteristicsValidator = mockk<CameraCharacteristicsValidator>(relaxed = true)
+        every {
+            cameraCharacteristicsValidator.getLensFacing(characteristics)
+        } returns CameraCharacteristics.LENS_FACING_FRONT
+        every { cameraCharacteristicsValidator.isUsable(characteristics) } returns true
+        val cameraManager = CameraManager(mediaManager, elgContext, cameraCharacteristicsValidator)
+
         // When
         val actual = cameraManager.sortDevices(
             cameraManagerSystem.cameraIdList,
