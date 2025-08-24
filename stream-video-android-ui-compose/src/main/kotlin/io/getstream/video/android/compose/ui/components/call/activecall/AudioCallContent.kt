@@ -28,10 +28,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.HeadsetMic
+import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,13 +52,15 @@ import io.getstream.video.android.compose.ui.components.call.activecall.internal
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.MicSelectorDropDown
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
-import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
+import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControlsV2
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -96,10 +104,10 @@ public fun AudioCallContent(
     isShowingHeader: Boolean = true,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
-        @Composable ColumnScope.(
-            participants: List<MemberState>,
-            topPadding: Dp,
-        ) -> Unit
+    @Composable ColumnScope.(
+        participants: List<MemberState>,
+        topPadding: Dp,
+    ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -128,18 +136,41 @@ public fun AudioCallContent(
         },
         onBackPressed = onBackPressed,
         controlsContent = controlsContent ?: {
-            OutgoingCallControls(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(VideoTheme.dimens.spacingM),
-                isVideoCall = false,
-                isCameraEnabled = false,
-                isMicrophoneEnabled = isMicrophoneEnabled,
-                onCallAction = onCallAction,
-            )
+            val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
+            val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
+            val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
+                val icon = when (it) {
+                    is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+                    is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+                    is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+                    is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+                }
+                AudioDeviceUiState(
+                    it,
+                    it.name,
+                    icon,
+                    it.name == selectedMicroPhoneDevice?.name,
+                )
+            }
+
+            if (selectedMicroPhoneDevice != null) {
+                OutgoingCallControlsV2(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(VideoTheme.dimens.spacingM),
+                    isVideoCall = false,
+                    isCameraEnabled = false,
+                    isMicrophoneEnabled = isMicrophoneEnabled,
+                    audioDeviceUiStateList = audioDeviceUiStateList,
+                    call = call,
+                    onCallAction = onCallAction,
+                )
+            }
+
         },
     )
 }
+
 
 /**
  * Represents the UI for an active audio-only call. By default, it shows the current participants that are in the call.
@@ -171,10 +202,10 @@ public fun AudioOnlyCallContent(
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     durationPlaceholder: String = "",
     detailsContent: (
-        @Composable ColumnScope.(
-            remoteParticipants: List<ParticipantState>,
-            topPadding: Dp,
-        ) -> Unit
+    @Composable ColumnScope.(
+        remoteParticipants: List<ParticipantState>,
+        topPadding: Dp,
+    ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onCallAction: (CallAction) -> Unit = { action: CallAction ->
@@ -209,12 +240,30 @@ public fun AudioOnlyCallContent(
                     duration = durationText,
                 )
         }
+        val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
+        val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
+        val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
+            val icon = when (it) {
+                is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+                is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+                is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+                is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+            }
+            AudioDeviceUiState(
+                it,
+                it.name,
+                icon,
+                it.name == selectedMicroPhoneDevice?.name,
+            )
+        }
 
-        controlsContent?.invoke(this) ?: AudioOnlyCallControls(
+        controlsContent?.invoke(this) ?: AudioOnlyCallControlsV2(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.genericXxl),
             isMicrophoneEnabled = isMicrophoneEnabled,
+            audioDeviceUiStateList = audioDeviceUiStateList,
+            call = call,
             onCallAction = onCallAction,
         )
     }
@@ -253,6 +302,7 @@ public fun AudioOnlyCallDetails(
  * @param isMicrophoneEnabled Weather or not the microphone icon will show the mic as enabled or not.
  * @param onCallAction Handler used when the user triggers a [CallAction].
  */
+@Deprecated("Use the new AudioOnlyCallControlsV2 instead.", level = DeprecationLevel.ERROR)
 @Composable
 public fun AudioOnlyCallControls(
     modifier: Modifier,
@@ -271,6 +321,39 @@ public fun AudioOnlyCallControls(
             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
             onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
         )
+
+        LeaveCallAction(
+            modifier = Modifier.testTag("Stream_HangUpButton"),
+            onCallAction = onCallAction,
+            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
+        )
+    }
+}
+
+@Composable
+public fun AudioOnlyCallControlsV2(
+    modifier: Modifier,
+    isMicrophoneEnabled: Boolean,
+    call: Call,
+    audioDeviceUiStateList: List<AudioDeviceUiState>,
+    onCallAction: (CallAction) -> Unit,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        ToggleMicrophoneAction(
+            modifier = Modifier.testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            onCallAction = onCallAction,
+            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
+            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
+        )
+
+        if (audioDeviceUiStateList.isNotEmpty()) {
+            MicSelectorDropDown(call, audioDeviceUiStateList)
+        }
 
         LeaveCallAction(
             modifier = Modifier.testTag("Stream_HangUpButton"),
@@ -306,3 +389,10 @@ private fun AudioOnlyCallContentPreview() {
         )
     }
 }
+
+public data class AudioDeviceUiState(
+    val streamAudioDevice: StreamAudioDevice,
+    val text: String,
+    val icon: ImageVector, // Assuming it's a drawable resource ID
+    val highlight: Boolean,
+)

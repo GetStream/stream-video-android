@@ -1,0 +1,124 @@
+package io.getstream.video.android.core.notifications.internal.telecom.connection
+
+import android.content.Context
+import android.telecom.CallAudioState
+import android.telecom.CallEndpoint
+import android.telecom.Connection
+import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.IncomingNotificationAction
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
+import io.getstream.video.android.core.notifications.internal.telecom.notificationtrigger.TelecomSelfManagedNotificationTrigger
+
+/**
+ * Important apis to invoke
+ * Connection.setRinging()
+ * Connection.setActive() ~ for ongoing call
+ * Connection.reject/decline
+ */
+class SuccessTelecomConnection(
+    val context: Context,
+    val streamVideo: StreamVideo,
+    val telecomSelfManagedNotificationTrigger: TelecomSelfManagedNotificationTrigger,
+    val telecomConnectionIncomingCallData: TelecomConnectionIncomingCallData,
+
+    ) : Connection() {
+    val logger by taggedLogger("SuccessTelecomConnection")
+
+    /**
+     * Accept from wearable
+     */
+    override fun onAnswer() {
+        super.onAnswer()
+        logger.d { "[onAnswer]" }
+
+        with(telecomConnectionIncomingCallData) {
+            val pendingIntentMap = streamVideo.call(callId.type, callId.id)
+                .state.incomingNotificationData.pendingIntentMap
+
+            pendingIntentMap[IncomingNotificationAction.Accept]?.send()
+        }
+    }
+
+
+    /**
+     * Incoming call is rejected
+     */
+    override fun onReject() {
+        super.onReject()
+        logger.d { "[onReject]" }
+
+        with(telecomConnectionIncomingCallData) {
+            val pendingIntentMap = streamVideo.call(callId.type, callId.id)
+                .state.incomingNotificationData.pendingIntentMap
+
+            pendingIntentMap[IncomingNotificationAction.Reject]?.send()
+        }
+    }
+
+    override fun onAnswer(videoState: Int) {
+        super.onAnswer(videoState)
+        logger.d { "[onAnswer($videoState)]" }
+        //Start media track
+    }
+
+    override fun onAbort() {
+        super.onAbort()
+        logger.d { "[onAbort]" }
+    }
+
+    override fun onMuteStateChanged(isMuted: Boolean) {
+        super.onMuteStateChanged(isMuted)
+        logger.d { "[onMuteStateChanged]" }
+    }
+
+    /**
+     * Triggered when wearable will take ownership or leave ownership of voice
+     */
+    override fun onCallEndpointChanged(callEndpoint: CallEndpoint) {
+        super.onCallEndpointChanged(callEndpoint)
+    }
+
+    override fun onAvailableCallEndpointsChanged(availableEndpoints: MutableList<CallEndpoint>) {
+        super.onAvailableCallEndpointsChanged(availableEndpoints)
+    }
+
+    /**
+     * Ongoing call is cancelled from wearable
+     */
+    override fun onDisconnect() {
+        super.onDisconnect()
+        logger.d { "[onDisconnect]" }
+        with(telecomConnectionIncomingCallData) {
+            streamVideo.call(callId.type, callId.id).leave()
+        }
+    }
+
+    /**
+     * Incoming call is rejected
+     */
+    override fun onReject(rejectReason: Int) {
+        super.onReject(rejectReason)
+        logger.d { "onReject($rejectReason)" }
+    }
+
+    override fun onReject(replyMessage: String?) {
+        super.onReject(replyMessage)
+        logger.d { "onReject($replyMessage)" }
+    }
+
+    override fun onShowIncomingCallUi() {
+        super.onShowIncomingCallUi()
+        logger.d { "onShowIncomingCallUi" }
+        telecomConnectionIncomingCallData.let {
+            telecomSelfManagedNotificationTrigger.showIncomingCall(
+                context,
+                it.callId,
+                it.callDisplayName,
+                it.callServiceConfiguration,
+                it.notification
+            )
+        }
+    }
+}
+

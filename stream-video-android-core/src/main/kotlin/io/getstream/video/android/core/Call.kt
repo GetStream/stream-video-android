@@ -522,7 +522,7 @@ public class Call(
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
-        return Success(value = session!!)
+        return Success(value = session!!) //TODO Rahul later, this caused NPE
     }
 
     private fun Call.monitorSession(result: JoinCallResponse) {
@@ -765,7 +765,7 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
+        logger.d { "Noob, [leave] #ringing; no args, call_cid:$cid" }
         leave(disconnectionReason = null)
     }
 
@@ -890,7 +890,7 @@ public class Call(
     }
 
     fun handleEvent(event: VideoEvent) {
-        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
+//        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
 
         when (event) {
             is GoAwayEvent ->
@@ -1177,7 +1177,7 @@ public class Call(
                 logger.d { "[monitorHeadset] no headset found" }
 
                 microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
-                    logger.d { "[monitorHeadset] before device selected" }
+                    logger.d { "[monitorHeadset] before device selected: $deviceBeforeHeadset" }
                     microphone.select(deviceBeforeHeadset)
                 }
             }
@@ -1185,6 +1185,7 @@ public class Call(
     }
 
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
+        logger.d { "[updateMediaManagerFromSettings]" }
         // Speaker
         if (speaker.status.value is DeviceStatus.NotSelected) {
             val enableSpeaker =
@@ -1196,8 +1197,8 @@ public class Call(
                     callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
                         callSettings.audio.speakerDefaultOn
                 }
-
-            speaker.setEnabled(enabled = enableSpeaker)
+            logger.d { "[updateMediaManagerFromSettings], enableSpeaker=$enableSpeaker" }
+            speaker.setEnabled(enabled = enableSpeaker) //TODO Rahul commented to test audio routing
         }
 
         monitorHeadset()

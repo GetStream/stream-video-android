@@ -67,6 +67,7 @@ public class AudioSwitchHandler(
                         context = context,
                         audioFocusChangeListener = onAudioFocusChangeListener,
                         preferredDeviceList = preferredDeviceList,
+                        loggingEnabled = true
                     )
                     audioSwitch = switch
                     switch.start(audioDeviceChangeListener)

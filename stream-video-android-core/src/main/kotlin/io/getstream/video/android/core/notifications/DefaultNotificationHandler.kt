@@ -48,7 +48,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceTriggerDispatcher
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -88,6 +88,8 @@ public open class DefaultNotificationHandler(
     private val logger by taggedLogger("Call:NotificationHandler")
     val intentResolver =
         DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver())
+    private val serviceTriggerDispatcher = ServiceTriggerDispatcher(application)
+
     protected val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -111,11 +113,15 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(
+        val streamVideo = StreamVideo.instance()
+        serviceTriggerDispatcher.showIncomingCall(
             application,
             callId,
             callDisplayName,
-            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
+            streamVideo.state.callConfigRegistry.get(callId.type),
+            isVideo = isVideoCall(callId, payload),
+            payload = payload,
+            streamVideo,
             notification = getRingingCallNotification(
                 RingingState.Incoming(),
                 callId,
@@ -931,6 +937,14 @@ public open class DefaultNotificationHandler(
             MediaNotificationVisuals(android.R.drawable.ic_media_play, null),
             null,
         )
+    }
+
+    internal fun isVideoCall(callId: StreamCallId, payload:Map<String, Any?>) : Boolean {
+        if (payload.containsKey("video")) {
+            return payload["video"] == true
+        }
+        val call = StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
+        return call?.isVideoEnabled() == true
     }
 
     companion object {
