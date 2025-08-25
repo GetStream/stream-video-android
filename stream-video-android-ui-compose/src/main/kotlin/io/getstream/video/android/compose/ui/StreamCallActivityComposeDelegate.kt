@@ -114,7 +114,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
      * @param call the call
      */
     override fun setContent(activity: StreamCallActivity, call: Call) {
-        logger.d { "[setContent(activity, call)] invoked from compose delegate." }
+        logger.d { "[setContent(activity, call)] invoked from compose delegate, call_id:${call.id}" }
         activity.setContent {
             key(call.id) {
                 VideoTheme {
@@ -390,6 +390,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         logger.d {
             "[ConnectionAvailable], connection: $connection call_id = ${call.id}, activity hashcode=${this.hashCode()}, this=$this"
         }
+
         when (connection) {
             RealtimeConnection.Disconnected -> {
                 if (isCurrentAcceptedCall(call)) {
