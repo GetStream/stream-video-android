@@ -198,7 +198,7 @@ class ClientState(private val client: StreamVideo) {
      * Stop the foreground service that manages the call even when the UI is gone.
      */
     internal fun maybeStopForegroundService(call: Call, source: String) {
-        logger.d { "maybeStartForegroundService, call_id: ${call.id}, source: $source "}
+        logger.d { "maybeStartForegroundService, call_id: ${call.id}, source: $source " }
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
