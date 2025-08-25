@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.Manifest
@@ -25,7 +41,6 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.sounds.CallSoundPlayer
-import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +53,7 @@ import kotlinx.coroutines.launch
 internal class CallServiceStatePresenter(
     val serviceScope: CoroutineScope,
     val callSoundPlayer: CallSoundPlayer,
-    val serviceType: Int
+    val serviceType: Int,
 ) {
 
     private val logger by taggedLogger("CallServiceStatePresenter")
@@ -104,7 +119,7 @@ internal class CallServiceStatePresenter(
                         }
                         callSoundPlayer?.stopCallSound()
                         _stopServiceState.value = true
-                        //stopService() TODO RAHUL no need after _stopServiceState.value = true
+                        // stopService() TODO RAHUL no need after _stopServiceState.value = true
                     }
 
                     is RingingState.TimeoutNoAnswer -> {
@@ -123,7 +138,7 @@ internal class CallServiceStatePresenter(
         context: Context,
         callId: StreamCallId,
         notificationId: Int,
-        notification: Notification
+        notification: Notification,
     ) {
         logger.d { "[justNotify] notificationId: $notificationId" }
         if (ActivityCompat.checkSelfPermission(
@@ -240,7 +255,7 @@ internal class CallServiceStatePresenter(
                                     callId.hashCode(),
                                     notification,
                                     TRIGGER_ONGOING_CALL,
-                                    serviceType
+                                    serviceType,
                                 )
 //                            startForegroundWithServiceType(
 //                                callId.hashCode(),
@@ -263,7 +278,7 @@ internal class CallServiceStatePresenter(
                                     INCOMING_CALL_NOTIFICATION_ID,
                                     notification,
                                     TRIGGER_OUTGOING_CALL,
-                                    serviceType
+                                    serviceType,
                                 )
                         }
 
@@ -280,7 +295,7 @@ internal class CallServiceStatePresenter(
                                     INCOMING_CALL_NOTIFICATION_ID,
                                     notification,
                                     TRIGGER_INCOMING_CALL,
-                                    serviceType
+                                    serviceType,
                                 )
                         }
 
@@ -334,7 +349,6 @@ internal class CallServiceStatePresenter(
             }
         }
     }
-
 }
 
 data class StartForegroundWithServiceType(

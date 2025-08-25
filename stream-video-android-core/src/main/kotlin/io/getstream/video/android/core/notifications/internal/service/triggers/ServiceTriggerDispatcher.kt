@@ -1,23 +1,42 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.service.triggers
 
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
+import android.telecom.DisconnectCause
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.telecom.CallsManager
+import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
+import io.getstream.video.android.core.telecom.TelecomPermissions
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 
 /**
- * TODO Rahul change the name of the claass its a decision maker class which will decide which
+ * TODO Rahul change the name of the class its a decision maker class which will decide which
  * which service to pick
  */
 class ServiceTriggerDispatcher(val context: Context) {
@@ -26,10 +45,7 @@ class ServiceTriggerDispatcher(val context: Context) {
     private val serviceIntentBuilder = ServiceIntentBuilder()
     private val legacyServiceTrigger = LegacyServiceTrigger(serviceIntentBuilder)
 
-    @SuppressLint("NewApi")
-    private val callsManager =
-        CallsManager(context) //TODO Rahul risk - remove @SuppressLint("NewApi")
-    private val rawTelecomServiceTrigger = RawTelecomServiceTrigger(context, serviceIntentBuilder)
+    private val telecomServiceTrigger = TelecomServiceTrigger(context, serviceIntentBuilder)
 
     fun showIncomingCall(
         context: Context,
@@ -41,10 +57,9 @@ class ServiceTriggerDispatcher(val context: Context) {
         streamVideo: StreamVideo,
         notification: Notification?,
     ) {
-
-        if (isTelecomSupported()) {
-
-            rawTelecomServiceTrigger.addIncomingCallToTelecom(
+        val telecomPermissions = TelecomPermissions()
+        if (telecomPermissions.canUseTelecom(context)) {
+            telecomServiceTrigger.addIncomingCallToTelecom(
                 context,
                 callId,
                 callDisplayName,
@@ -52,7 +67,7 @@ class ServiceTriggerDispatcher(val context: Context) {
                 isVideo,
                 payload,
                 streamVideo,
-                notification
+                notification,
             )
         }
 
@@ -63,9 +78,8 @@ class ServiceTriggerDispatcher(val context: Context) {
             callServiceConfiguration,
             isVideo,
             payload,
-            notification
+            notification,
         )
-
     }
 
     fun removeIncomingCall(
@@ -81,7 +95,7 @@ class ServiceTriggerDispatcher(val context: Context) {
                         callId,
                         TRIGGER_REMOVE_INCOMING_CALL,
                         callServiceConfiguration = config,
-                    )
+                    ),
                 ),
             )!!
         }.onError {
@@ -89,8 +103,42 @@ class ServiceTriggerDispatcher(val context: Context) {
         }
     }
 
-    fun isTelecomSupported(): Boolean = true //TODO Rahul hardcoded remove later
+    fun showOutgoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
+        val callConfig = (streamVideo as StreamVideoClient).callServiceConfigRegistry.get(call.type)
+        if (!callConfig.runCallServiceInForeground) {
+            return
+        }
 
+        val serviceIntent = ServiceIntentBuilder().buildStartIntent(
+            context,
+            StartServiceParam(
+                StreamCallId.fromCallCid(call.cid),
+                trigger,
+                callServiceConfiguration = callConfig,
+            ),
+
+        )
+
+        val telecomPermissions = TelecomPermissions()
+        if (telecomPermissions.canUseTelecom(context)) {
+            telecomServiceTrigger.addOutgoingCallToTelecom(
+                context,
+                callId = StreamCallId(call.type, call.id),
+                callDisplayName = "NOT SET YET", // TODO Rahul Later
+                streamVideo = streamVideo,
+            )
+        }
+
+        ContextCompat.startForegroundService(context, serviceIntent)
+    }
+
+    fun removeCallFromTelecom(call: Call, trigger: String, streamVideo: StreamVideo) {
+        val telecomPermissions = TelecomPermissions()
+        if (telecomPermissions.canUseTelecom(context)) {
+            call.state.telecomConnection.value?.let {
+                it.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
+                it.destroy()
+            }
+        }
+    }
 }
-
-

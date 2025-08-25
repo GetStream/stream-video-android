@@ -291,7 +291,7 @@ object StreamVideoInitHelper {
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-            telecomConfig = TelecomConfig(context.packageName)
+            telecomConfig = TelecomConfig(context.packageName, true),
         ).build()
     }
 }

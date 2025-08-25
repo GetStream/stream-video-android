@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.app.Application
 import android.app.Notification
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -42,6 +43,7 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.core.telecom.TelecomConfig
+import io.getstream.video.android.core.telecom.ui.TelecomPermissionHandler
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -140,7 +142,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val enableStatsReporting: Boolean = true,
     @InternalStreamVideoApi
     private val enableStereoForSubscriber: Boolean = true,
-    private val telecomConfig: TelecomConfig?= null //TODO Rahul need better api design like an array
+    private val telecomConfig: TelecomConfig? = null, // TODO Rahul need better api design like an array
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -267,7 +269,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
             enableStereoForSubscriber = enableStereoForSubscriber,
-            telecomConfig = telecomConfig
+            telecomConfig = telecomConfig,
         )
 
         if (user.type == UserType.Guest) {
@@ -301,6 +303,18 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         scope.launch {
             val location = client.loadLocationAsync().await()
             streamLog { "location initialized: ${location.getOrNull()}" }
+        }
+
+        // TODO Rahul Later: Ask telecom permission (maybe not needed at startup because we should have registered it in the Content provider)
+        telecomConfig?.let {
+            if (it.requestPermissionOnAppLaunch) {
+                val app = (context.applicationContext as Application)
+                with(app) {
+                    registerActivityLifecycleCallbacks(
+                        TelecomPermissionHandler.instance(app),
+                    )
+                }
+            }
         }
 
         // Installs Stream Video instance

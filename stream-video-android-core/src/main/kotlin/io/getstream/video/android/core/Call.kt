@@ -522,7 +522,7 @@ public class Call(
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
-        return Success(value = session!!) //TODO Rahul later, this caused NPE
+        return Success(value = session!!) // TODO Rahul later, this caused NPE
     }
 
     private fun Call.monitorSession(result: JoinCallResponse) {
@@ -789,7 +789,7 @@ public class Call(
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+        client.state.removeRingingCall("after call.leave()")
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
@@ -1198,7 +1198,9 @@ public class Call(
                         callSettings.audio.speakerDefaultOn
                 }
             logger.d { "[updateMediaManagerFromSettings], enableSpeaker=$enableSpeaker" }
-            speaker.setEnabled(enabled = enableSpeaker) //TODO Rahul commented to test audio routing
+            speaker.setEnabled(
+                enabled = enableSpeaker,
+            ) // TODO Rahul commented to test audio routing
         }
 
         monitorHeadset()
@@ -1321,8 +1323,8 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.removeRingingCall("accepting the call")
+        clientImpl.state.maybeStopForegroundService(call = this, "accepting the call")
         return clientImpl.accept(type, id)
     }
 

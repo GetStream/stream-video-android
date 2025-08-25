@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.app.Application
 import android.content.Context
 import android.media.AudioAttributes
 import androidx.collection.LruCache
@@ -108,6 +109,7 @@ import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.telecom.TelecomConfig
+import io.getstream.video.android.core.telecom.ui.TelecomPermissionHandler
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeCall
@@ -170,7 +172,7 @@ internal class StreamVideoClient internal constructor(
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
-    internal val telecomConfig: TelecomConfig? = null
+    internal val telecomConfig: TelecomConfig? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -228,6 +230,11 @@ internal class StreamVideoClient internal constructor(
             }
         }
         activeCall?.leave()
+
+        val app = (context.applicationContext as Application)
+        with(app) {
+            unregisterActivityLifecycleCallbacks(TelecomPermissionHandler.instance(app))
+        }
     }
 
     /**

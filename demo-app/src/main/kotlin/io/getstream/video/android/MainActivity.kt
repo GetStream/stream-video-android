@@ -35,6 +35,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.telecom.TelecomPermissions
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var dataStore: StreamUserDataStore
     private val firebaseAnalytics by lazy { FirebaseAnalytics.getInstance(this) }
+    private val telecomPermission = TelecomPermissions()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,6 +106,11 @@ class MainActivity : ComponentActivity() {
         }
 
         observeIncomingCall()
+        requestTelecomPermission()
+    }
+
+    private fun requestTelecomPermission() {
+        telecomPermission.requestPermissions(this) {}
     }
 
     /**

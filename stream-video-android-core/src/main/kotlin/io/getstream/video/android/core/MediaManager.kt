@@ -515,7 +515,9 @@ class MicrophoneManager(
                         )
                     },
                     audioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices, audioUsage = $audioUsage" }
+                        logger.i {
+                            "[audioSwitch] audio devices. selected $selected, available devices are $devices, audioUsage = $audioUsage"
+                        }
 
                         _devices.value = devices.map { it.fromAudio() }
                         _selectedDevice.value = selected?.fromAudio()

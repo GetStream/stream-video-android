@@ -193,11 +193,13 @@ internal open class CallService : Service(), CallingServiceContract {
                         context,
                         ServiceIntentBuilder().buildStartIntent(
                             context,
-                            StartServiceParam(callId,
-                            TRIGGER_INCOMING_CALL,
-                            callDisplayName,
-                            callServiceConfiguration,
-                        )),
+                            StartServiceParam(
+                                callId,
+                                TRIGGER_INCOMING_CALL,
+                                callDisplayName,
+                                callServiceConfiguration,
+                            ),
+                        ),
                     )
                     ComponentName(context, CallService::class.java)
                 } else {
@@ -205,11 +207,13 @@ internal open class CallService : Service(), CallingServiceContract {
                     context.startService(
                         ServiceIntentBuilder().buildStartIntent(
                             context,
-                            StartServiceParam(callId,
-                            TRIGGER_INCOMING_CALL,
-                            callDisplayName,
-                            callServiceConfiguration,
-                        )),
+                            StartServiceParam(
+                                callId,
+                                TRIGGER_INCOMING_CALL,
+                                callDisplayName,
+                                callServiceConfiguration,
+                            ),
+                        ),
                     )
                 }
                 result!!
@@ -249,10 +253,12 @@ internal open class CallService : Service(), CallingServiceContract {
                 context.startService(
                     ServiceIntentBuilder().buildStartIntent(
                         context,
-                        StartServiceParam(callId,
-                        TRIGGER_REMOVE_INCOMING_CALL,
-                        callServiceConfiguration = config,
-                    )),
+                        StartServiceParam(
+                            callId,
+                            TRIGGER_REMOVE_INCOMING_CALL,
+                            callServiceConfiguration = config,
+                        ),
+                    ),
                 )!!
             }.onError {
                 NotificationManagerCompat.from(context).cancel(INCOMING_CALL_NOTIFICATION_ID)
@@ -274,6 +280,11 @@ internal open class CallService : Service(), CallingServiceContract {
                 StreamLog.w(TAG) { "Service is NOT running: $serviceClass" }
                 return false
             }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        callSoundPlayer = StreamVideo.instanceOrNull()?.state?.soundPlayer
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -385,13 +396,6 @@ internal open class CallService : Service(), CallingServiceContract {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
             }
 
-            //TODO Rahul, this code should be in onCreate(..)
-            if (callSoundPlayer == null) {
-                callSoundPlayer = CallSoundPlayer(applicationContext)
-            }
-            logger.d {
-                "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
-            }
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
@@ -772,7 +776,7 @@ internal open class CallService : Service(), CallingServiceContract {
 
                         is RingingState.Outgoing -> {
                             logger.d { "[observeNotificationUpdates] Showing outgoing call notification" }
-                            startForegroundWithServiceType(
+                            startForegroundWithServiceType( // TODO Rahul should all outgoing and ongoing startForegroundWithServiceType be present in telecom voip service?
                                 INCOMING_CALL_NOTIFICATION_ID,
                                 notification,
                                 TRIGGER_OUTGOING_CALL,

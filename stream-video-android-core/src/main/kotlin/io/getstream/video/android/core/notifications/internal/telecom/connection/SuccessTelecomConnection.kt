@@ -1,7 +1,22 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.telecom.connection
 
 import android.content.Context
-import android.telecom.CallAudioState
 import android.telecom.CallEndpoint
 import android.telecom.Connection
 import io.getstream.log.taggedLogger
@@ -22,7 +37,7 @@ class SuccessTelecomConnection(
     val telecomSelfManagedNotificationTrigger: TelecomSelfManagedNotificationTrigger,
     val telecomConnectionIncomingCallData: TelecomConnectionIncomingCallData,
 
-    ) : Connection() {
+) : Connection() {
     val logger by taggedLogger("SuccessTelecomConnection")
 
     /**
@@ -39,7 +54,6 @@ class SuccessTelecomConnection(
             pendingIntentMap[IncomingNotificationAction.Accept]?.send()
         }
     }
-
 
     /**
      * Incoming call is rejected
@@ -59,7 +73,7 @@ class SuccessTelecomConnection(
     override fun onAnswer(videoState: Int) {
         super.onAnswer(videoState)
         logger.d { "[onAnswer($videoState)]" }
-        //Start media track
+        // Start media track
     }
 
     override fun onAbort() {
@@ -116,9 +130,8 @@ class SuccessTelecomConnection(
                 it.callId,
                 it.callDisplayName,
                 it.callServiceConfiguration,
-                it.notification
+                it.notification,
             )
         }
     }
 }
-

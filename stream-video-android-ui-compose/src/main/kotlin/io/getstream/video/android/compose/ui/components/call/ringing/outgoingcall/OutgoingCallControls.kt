@@ -45,8 +45,8 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.mock.previewCall
 
 /**
  * A list of call control action buttons that allows people to accept or cancel a call.
@@ -187,13 +187,13 @@ private fun OutgoingCallOptionsPreview() {
     }
 }
 
-//TODO Rahul
+// TODO Rahul
 @Composable
-internal fun MicSelectorDropDown(call: Call, audioDeviceUiStateList: List<AudioDeviceUiState>){
+internal fun MicSelectorDropDown(call: Call, audioDeviceUiStateList: List<AudioDeviceUiState>) {
     val audioInput = audioDeviceUiStateList.firstOrNull { it.highlight }
     val filteredList = audioDeviceUiStateList.filter { !it.highlight }
     var buttonPosition by remember { mutableStateOf(IntOffset.Zero) }
-    if (audioInput!=null){
+    if (audioInput != null) {
         var collapsed by remember { mutableStateOf(true) }
         if (collapsed) {
             Button(onClick = {
@@ -207,9 +207,10 @@ internal fun MicSelectorDropDown(call: Call, audioDeviceUiStateList: List<AudioD
             val offsetY = with(density) {
                 100.dp.roundToPx()
             }
-            Popup(alignment = Alignment.TopStart,
-                offset = IntOffset(buttonPosition.x, buttonPosition.y - offsetY)
-            ){
+            Popup(
+                alignment = Alignment.TopStart,
+                offset = IntOffset(buttonPosition.x, buttonPosition.y - offsetY),
+            ) {
                 Box() {
                     LazyColumn {
                         items(filteredList.size) { index ->
@@ -228,9 +229,6 @@ internal fun MicSelectorDropDown(call: Call, audioDeviceUiStateList: List<AudioD
                     }
                 }
             }
-
         }
     }
-
-
 }

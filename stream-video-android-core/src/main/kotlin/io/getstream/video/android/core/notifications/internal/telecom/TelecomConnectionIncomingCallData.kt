@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications
+package io.getstream.video.android.core.notifications.internal.telecom
 
-import android.app.PendingIntent
+import android.app.Notification
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.model.StreamCallId
 
-internal data class IncomingNotificationData(val pendingIntentMap: Map<IncomingNotificationAction, PendingIntent>)
-
-internal sealed class IncomingNotificationAction {
-    data object Accept : IncomingNotificationAction()
-    data object Reject : IncomingNotificationAction()
-}
+data class TelecomConnectionIncomingCallData(
+    val callId: StreamCallId,
+    val callDisplayName: String?,
+    val callServiceConfiguration: CallServiceConfig,
+    val isVideo: Boolean,
+    val notification: Notification?,
+)

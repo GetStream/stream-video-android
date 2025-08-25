@@ -848,7 +848,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             result.onError { error ->
                 lifecycleScope.launch {
                     onError?.invoke(Exception(error.message))
-                    //TODO Rahul, should we update telecom-connection
+                    // TODO Rahul, should we update telecom-connection
                 }
             }
             result
@@ -926,7 +926,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             try {
                 call.leave()
                 onSuccess?.invoke(call)
-                call.state.telecomConnection.value?.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
+                call.state.telecomConnection.value?.setDisconnected(
+                    DisconnectCause(DisconnectCause.CANCELED),
+                )
             } catch (e: Exception) {
                 onError?.invoke(e)
             }

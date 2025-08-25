@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.activecall
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,9 +61,11 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Pa
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallStatus
+import io.getstream.video.android.core.telecom.TelecomPermissions
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -93,9 +96,7 @@ public fun AudioCallContent(
     isMicrophoneEnabled: Boolean,
     permissions: VideoPermissionsState = rememberCallPermissionsState(
         call = call,
-        permissions = listOf(
-            android.Manifest.permission.RECORD_AUDIO,
-        ),
+        permissions = getPermissions(),
     ),
     onCallAction: (CallAction) -> Unit = { action: CallAction ->
         DefaultOnCallActionHandler.onCallAction(call, action)
@@ -104,10 +105,10 @@ public fun AudioCallContent(
     isShowingHeader: Boolean = true,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     detailsContent: (
-    @Composable ColumnScope.(
-        participants: List<MemberState>,
-        topPadding: Dp,
-    ) -> Unit
+        @Composable ColumnScope.(
+            participants: List<MemberState>,
+            topPadding: Dp,
+        ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
@@ -166,11 +167,38 @@ public fun AudioCallContent(
                     onCallAction = onCallAction,
                 )
             }
-
         },
     )
 }
 
+@Composable
+private fun getPermissions(): List<String> {
+    val context = LocalContext.current
+    val permissionsList = mutableListOf<String>()
+    val telecomPermissions = TelecomPermissions()
+
+    with(telecomPermissions) {
+        val optedForTelecom = StreamVideo.instanceOrNull()?.state?.optedForTelecom() == true
+        if (optedForTelecom && supportsTelecom(context)) {
+            permissionsList.addAll(getRequiredPermissionsList())
+        }
+    }
+
+    permissionsList.addAll(
+        mutableListOf(
+            android.Manifest.permission.RECORD_AUDIO,
+        ),
+    )
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        permissionsList.addAll(
+            mutableListOf(
+                android.Manifest.permission.BLUETOOTH_CONNECT, // This is new addition to addition to audio call content, it should be added only when services are correctly configured
+            ),
+        )
+    }
+    return permissionsList
+}
 
 /**
  * Represents the UI for an active audio-only call. By default, it shows the current participants that are in the call.
@@ -194,18 +222,16 @@ public fun AudioOnlyCallContent(
     isMicrophoneEnabled: Boolean,
     permissions: VideoPermissionsState = rememberCallPermissionsState(
         call = call,
-        permissions = listOf(
-            android.Manifest.permission.RECORD_AUDIO,
-        ),
+        permissions = getPermissions(),
     ),
     isShowingHeader: Boolean = true,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,
     durationPlaceholder: String = "",
     detailsContent: (
-    @Composable ColumnScope.(
-        remoteParticipants: List<ParticipantState>,
-        topPadding: Dp,
-    ) -> Unit
+        @Composable ColumnScope.(
+            remoteParticipants: List<ParticipantState>,
+            topPadding: Dp,
+        ) -> Unit
     )? = null,
     controlsContent: (@Composable BoxScope.() -> Unit)? = null,
     onCallAction: (CallAction) -> Unit = { action: CallAction ->

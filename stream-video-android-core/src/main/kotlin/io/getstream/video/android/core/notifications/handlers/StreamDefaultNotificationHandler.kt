@@ -306,13 +306,13 @@ constructor(
             )
 
             val streamVideo = StreamVideo.instanceOrNull()
-            streamVideo?.let { streamVideoInstance->
+            streamVideo?.let { streamVideoInstance ->
                 val call = streamVideoInstance.call(callId.type, callId.id)
                 val map = HashMap<IncomingNotificationAction, PendingIntent>()
-                acceptCallPendingIntent?.let { pendingIntent->
+                acceptCallPendingIntent?.let { pendingIntent ->
                     map[IncomingNotificationAction.Accept] = pendingIntent
                 }
-                rejectCallPendingIntent?.let { pendingIntent->
+                rejectCallPendingIntent?.let { pendingIntent ->
                     map[IncomingNotificationAction.Reject] = pendingIntent
                 }
                 call.state.incomingNotificationData = IncomingNotificationData(map)
@@ -1161,7 +1161,7 @@ constructor(
         callId?.let { mediaSessionController.clear(it) }
     }
 
-    internal fun isVideoCall(callId: StreamCallId, payload:Map<String, Any?>) : Boolean {
+    internal fun isVideoCall(callId: StreamCallId, payload: Map<String, Any?>): Boolean {
         if (payload.containsKey("video")) {
             return payload["video"] == true
         }

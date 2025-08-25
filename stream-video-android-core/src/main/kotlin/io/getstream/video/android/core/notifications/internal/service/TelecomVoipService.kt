@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.annotation.SuppressLint
@@ -5,6 +21,7 @@ import android.app.Notification
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.net.Uri
+import android.os.Build
 import android.telecom.Connection
 import android.telecom.ConnectionRequest
 import android.telecom.ConnectionService
@@ -18,13 +35,13 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
-import io.getstream.video.android.core.notifications.internal.telecom.notificationtrigger.TelecomSelfManagedNotificationTrigger
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceTriggerDispatcher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.connection.ErrorTelecomConnection
 import io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessTelecomConnection
+import io.getstream.video.android.core.notifications.internal.telecom.notificationtrigger.TelecomSelfManagedNotificationTrigger
 import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
@@ -41,9 +58,7 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
     internal open val logger by taggedLogger("TelecomVoipService")
     val serviceNotificationRetriever = ServiceNotificationRetriever()
     lateinit var serviceTriggerDispatcher: ServiceTriggerDispatcher
-    val serviceType = (ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE or
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
+
     private var callId: StreamCallId? = null
     val serviceIncomingCallHandler = ServiceIncomingCallHandler()
 
@@ -59,13 +74,29 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
 
     override fun onCreate() {
         super.onCreate()
-        callSoundPlayer = CallSoundPlayer(applicationContext)
+        callSoundPlayer = StreamVideo.instanceOrNull()?.state?.soundPlayer
         serviceTriggerDispatcher = ServiceTriggerDispatcher(applicationContext)
     }
 
+    open fun getServiceType(): Int {
+        var serviceType = 0
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            serviceType = serviceType or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE // TODO Rahul, maybe not required
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            serviceType = serviceType or ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+        }
+        return serviceType
+    }
+
+    /**
+     * This is invoked when
+     */
     override fun onCreateIncomingConnection(
         connectionManagerPhoneAccount: PhoneAccountHandle?,
-        request: ConnectionRequest?
+        request: ConnectionRequest?,
     ): Connection {
         logger.d { "[onCreateIncomingConnection]" }
         try {
@@ -91,14 +122,14 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
                     callDisplayName = displayName,
                     callServiceConfiguration = callServiceConfiguration,
                     isVideo = isVideo,
-                    notification = call.state.atomicNotification.get()
+                    notification = call.state.atomicNotification.get(),
                 )
 
                 val connection = SuccessTelecomConnection(
                     applicationContext,
                     streamVideoClient,
                     telecomSelfManagedNotificationTrigger,
-                    telecomConnectionIncomingCallData
+                    telecomConnectionIncomingCallData,
                 )
 //                val address = Uri.fromParts(PhoneAccount.SCHEME_TEL, "0000", null)
                 /**
@@ -148,20 +179,17 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
                 failedConn.setDisconnected(
                     DisconnectCause(
                         DisconnectCause.ERROR,
-                        "StreamVideoClient is null"
-                    )
+                        "StreamVideoClient is null",
+                    ),
                 )
                 return failedConn
             }
-
         } catch (e: Exception) {
             val failedConn = ErrorTelecomConnection(applicationContext)
             failedConn.setDisconnected(DisconnectCause(DisconnectCause.ERROR, e.message))
             return failedConn
         }
     }
-
-
 
 //    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 //        super.onStartCommand(intent, flags, startId)
@@ -312,7 +340,7 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
     override fun maybePromoteToForegroundService(
         videoClient: StreamVideoClient,
         notificationId: Int,
-        trigger: String
+        trigger: String,
     ) {
         // TODO RAHUL
     }
@@ -338,7 +366,7 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
                 notificationId,
                 notification,
                 TRIGGER_INCOMING_CALL,
-                serviceType,
+                getServiceType(),
             ).onError {
                 logger.e {
                     "[showIncomingCall] Failed to start foreground service, falling back to justNotify: $it"
@@ -385,7 +413,6 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
         }
     }
 
-
     override fun stopService() {
         // Cancel the notification
         val notificationManager = NotificationManagerCompat.from(this)
@@ -422,12 +449,11 @@ internal class TelecomVoipService : ConnectionService(), CallingServiceContract 
         stopSelf()
     }
 
-    //TODO Rahul for missed call
+    // TODO Rahul for missed call
     override fun onCreateIncomingConnectionFailed(
         connectionManagerPhoneAccount: PhoneAccountHandle?,
-        request: ConnectionRequest?
+        request: ConnectionRequest?,
     ) {
         super.onCreateIncomingConnectionFailed(connectionManagerPhoneAccount, request)
     }
-
 }

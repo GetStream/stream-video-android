@@ -939,7 +939,7 @@ public open class DefaultNotificationHandler(
         )
     }
 
-    internal fun isVideoCall(callId: StreamCallId, payload:Map<String, Any?>) : Boolean {
+    internal fun isVideoCall(callId: StreamCallId, payload: Map<String, Any?>): Boolean {
         if (payload.containsKey("video")) {
             return payload["video"] == true
         }

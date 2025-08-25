@@ -82,7 +82,6 @@ import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
-import kotlin.math.log
 
 /**
  * A default implementation of the compose delegate for the call activity.

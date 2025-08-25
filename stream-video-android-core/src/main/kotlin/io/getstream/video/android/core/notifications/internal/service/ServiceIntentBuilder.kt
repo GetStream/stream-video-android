@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.app.ActivityManager
@@ -50,12 +66,13 @@ class ServiceIntentBuilder {
         return serviceIntent
     }
 
-    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam):Intent{
+    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent {
         val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
 
         return if (isServiceRunning(context, serviceClass)) {
             Intent(context, serviceClass)
         } else {
+            if (true) throw IllegalStateException("Why the fuck are we here?") // TODO Rahul
             Intent(context, TelecomVoipService::class.java)
         }
     }

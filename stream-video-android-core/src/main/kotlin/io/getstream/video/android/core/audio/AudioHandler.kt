@@ -67,7 +67,7 @@ public class AudioSwitchHandler(
                         context = context,
                         audioFocusChangeListener = onAudioFocusChangeListener,
                         preferredDeviceList = preferredDeviceList,
-                        loggingEnabled = true
+                        loggingEnabled = true, //TODO Rahul, remove before release or better enable with sdk logger
                     )
                     audioSwitch = switch
                     switch.start(audioDeviceChangeListener)
