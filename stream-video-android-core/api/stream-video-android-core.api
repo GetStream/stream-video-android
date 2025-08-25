@@ -5763,7 +5763,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun optedForTelecom ()Z
 	public final fun removeActiveCall ()V
-	public final fun removeRingingCall ()V
+	public final fun removeRingingCall (Ljava/lang/String;)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
 }
 
