@@ -32,3 +32,7 @@ internal fun StreamPeerType.stringify() = when (this) {
 internal fun String?.isWhitespaceOnly(): Boolean {
     return !this.isNullOrEmpty() && this.all { it.isWhitespace() }
 }
+
+internal fun String.hasNonAsciiCharacters(): Boolean {
+    return !this.all { it.code <= 127 }
+}
