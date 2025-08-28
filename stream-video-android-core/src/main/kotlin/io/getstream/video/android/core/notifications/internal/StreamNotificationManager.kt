@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 internal class StreamNotificationManager private constructor(
+    private val context: Context,
     private var scope: CoroutineScope,
     internal val notificationConfig: NotificationConfig,
     private var api: ProductvideoApi,
@@ -192,6 +193,7 @@ internal class StreamNotificationManager private constructor(
                         )
                     }
                     internalStreamNotificationManager = StreamNotificationManager(
+                        context,
                         scope,
                         updatedNotificationConfig,
                         api,
