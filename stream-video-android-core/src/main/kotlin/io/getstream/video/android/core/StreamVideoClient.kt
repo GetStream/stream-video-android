@@ -234,6 +234,14 @@ internal class StreamVideoClient internal constructor(
         return streamNotificationManager.createDevice(pushDevice)
     }
 
+    override suspend fun getDevice(): Device? {
+        return streamNotificationManager.getDevice()
+    }
+
+    override suspend fun updateDevice(device: Device?) {
+        return streamNotificationManager.updateDevice(device)
+    }
+
     /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
      */

@@ -108,15 +108,27 @@ public interface StreamVideo : NotificationHandler {
     ): EventSubscription
 
     /**
+     * Get a cached device used to receive push notifications.
+     *
+     * @return [Result] containing the [Device].
+     */
+    public suspend fun getDevice(): io.getstream.video.android.model.Device?
+
+    /**
      * Create a device that will be used to receive push notifications.
      *
      * @param pushDevice The PushDevice obtained from the selected push provider.
-     *
-     * @return [Result] containing the [Device].
      */
     public suspend fun createDevice(
         pushDevice: PushDevice,
     ): Result<io.getstream.video.android.model.Device>
+
+    /**
+     * Update a device used to receive push notifications.
+     *
+     * @param device The Device.
+     */
+    public suspend fun updateDevice(device: Device?)
 
     /**
      * Remove a device used to receive push notifications.
