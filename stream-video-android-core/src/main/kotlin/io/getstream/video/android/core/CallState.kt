@@ -91,7 +91,9 @@ import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.events.PinsUpdatedEvent
+import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
+import io.getstream.result.Result
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
@@ -205,11 +207,40 @@ public class CallState(
     private val client: StreamVideo,
     private val call: Call,
     private val user: User,
-    internal val scope: CoroutineScope,
+    @InternalStreamVideoApi
+    val scope: CoroutineScope,
 ) {
 
     private val logger by taggedLogger("CallState")
     private var participantsVisibilityMonitor: Job? = null
+
+    // Create a CallActions implementation that delegates to the Call object
+    @InternalStreamVideoApi
+    val callActions = object : CallActions {
+        override suspend fun muteUserAudio(userId: String): Result<MuteUsersResponse> {
+            return call.muteUser(userId, audio = true, video = false, screenShare = false)
+        }
+
+        override suspend fun muteUserVideo(userId: String): Result<MuteUsersResponse> {
+            return call.muteUser(userId, audio = false, video = true, screenShare = false)
+        }
+
+        override suspend fun muteUserScreenShare(userId: String): Result<MuteUsersResponse> {
+            return call.muteUser(userId, audio = false, video = false, screenShare = true)
+        }
+
+        override suspend fun pinParticipant(userId: String, sessionId: String) {
+            call.state.pin(userId, sessionId)
+        }
+
+        override suspend fun unpinParticipant(sessionId: String) {
+            call.state.unpin(sessionId)
+        }
+        
+        override fun isLocalParticipant(sessionId: String): Boolean {
+            return sessionId == call.sessionId
+        }
+    }
 
     internal val _connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
     public val connection: StateFlow<RealtimeConnection> = _connection
@@ -1287,7 +1318,8 @@ public class CallState(
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                call = call,
+                scope = scope,
+                callActions = callActions,
                 initialUserId = userId,
             )
         }

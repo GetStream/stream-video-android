@@ -135,23 +135,23 @@ class CallStateTest : IntegrationTestBase() {
         )
 
         call.state.updateParticipant(
-            ParticipantState("4", call, "4").apply { _videoEnabled.value = true },
+            ParticipantState("4", call.state.scope, call.state.callActions, "4").apply { _videoEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("5", call, "5").apply { _lastSpeakingAt.value = nowUtc },
+            ParticipantState("5", call.state.scope, call.state.callActions, "5").apply { _lastSpeakingAt.value = nowUtc },
         )
         call.state.updateParticipant(
-            ParticipantState("6", call, "6").apply { _joinedAt.value = nowUtc },
+            ParticipantState("6", call.state.scope, call.state.callActions, "6").apply { _joinedAt.value = nowUtc },
         )
 
         call.state.updateParticipant(
-            ParticipantState("1", call, "1"),
+            ParticipantState("1", call.state.scope, call.state.callActions, "1"),
         )
         call.state.updateParticipant(
-            ParticipantState("2", call, "2").apply { _screenSharingEnabled.value = true },
+            ParticipantState("2", call.state.scope, call.state.callActions, "2").apply { _screenSharingEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("3", call, "3").apply { _dominantSpeaker.value = true },
+            ParticipantState("3", call.state.scope, call.state.callActions, "3").apply { _dominantSpeaker.value = true },
         )
 
         val participants = call.state.participants.value
@@ -185,13 +185,13 @@ class CallStateTest : IntegrationTestBase() {
         )
 
         call.state.updateParticipant(
-            ParticipantState("1", call, "1"),
+            ParticipantState("1", call.state.scope, call.state.callActions, "1"),
         )
         call.state.updateParticipant(
-            ParticipantState("2", call, "2").apply { _screenSharingEnabled.value = true },
+            ParticipantState("2", call.state.scope, call.state.callActions, "2").apply { _screenSharingEnabled.value = true },
         )
         call.state.updateParticipant(
-            ParticipantState("3", call, "3").apply { _dominantSpeaker.value = true },
+            ParticipantState("3", call.state.scope, call.state.callActions, "3").apply { _dominantSpeaker.value = true },
         )
 
         delay(1000)
