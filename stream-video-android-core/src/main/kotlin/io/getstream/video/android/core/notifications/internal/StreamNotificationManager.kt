@@ -41,6 +41,7 @@ import io.getstream.video.android.core.notifications.handlers.CompatibilityStrea
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -75,7 +76,7 @@ internal class StreamNotificationManager private constructor(
         val newDevice = pushDevice.toDevice()
         return pushDevice
             .takeUnless {
-                val equal = newDevice == getDevice()
+                val equal = newDevice == getDevice().firstOrNull()
                 logger.d { "[createDevice] Device equal to stored: $equal" }
                 equal
             }
@@ -99,7 +100,7 @@ internal class StreamNotificationManager private constructor(
 
     private suspend fun removeStoredDevice(device: Device) {
         logger.d { "[removeStoredDevice] device: device" }
-        getDevice()
+        getDevice().firstOrNull()
             .takeIf {
                 val equal = it == device
                 logger.d { "[removeStoredDevice] Device equal to stored: $equal" }
@@ -108,7 +109,7 @@ internal class StreamNotificationManager private constructor(
             ?.let { updateDevice(null) }
     }
 
-    suspend fun getDevice(): Device? = deviceTokenStorage.userDevice.firstOrNull()
+    fun getDevice(): Flow<Device?> = deviceTokenStorage.userDevice
 
     suspend fun updateDevice(device: Device?) {
         logger.d { "[updateUserDevice] device: $device" }

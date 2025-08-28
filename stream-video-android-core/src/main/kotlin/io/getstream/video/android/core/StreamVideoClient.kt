@@ -125,6 +125,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -234,10 +235,16 @@ internal class StreamVideoClient internal constructor(
         return streamNotificationManager.createDevice(pushDevice)
     }
 
-    override suspend fun getDevice(): Device? {
+    /**
+     * @see StreamVideo.getDevice
+     */
+    override fun getDevice(): Flow<Device?> {
         return streamNotificationManager.getDevice()
     }
 
+    /**
+     * @see StreamVideo.updateDevice
+     */
     override suspend fun updateDevice(device: Device?) {
         return streamNotificationManager.updateDevice(device)
     }
