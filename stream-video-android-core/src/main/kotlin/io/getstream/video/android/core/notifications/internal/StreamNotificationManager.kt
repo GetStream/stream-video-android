@@ -89,8 +89,8 @@ internal class StreamNotificationManager private constructor(
                 } catch (e: Exception) {
                     logger.e(e) {
                         "Failed to register device for push notifications " +
-                                "(PN will not work!). Does the push provider key " +
-                                "(${pushDevice.pushProvider.key}) match the key in the Stream Dashboard?"
+                            "(PN will not work!). Does the push provider key " +
+                            "(${pushDevice.pushProvider.key}) match the key in the Stream Dashboard?"
                     }
                     Result.Failure(Error.ThrowableError("Device couldn't be created", e))
                 }

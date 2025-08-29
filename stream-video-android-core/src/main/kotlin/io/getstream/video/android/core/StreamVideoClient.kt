@@ -279,7 +279,7 @@ internal class StreamVideoClient internal constructor(
             VideoErrorCode.TOKEN_NOT_VALID.code,
             VideoErrorCode.TOKEN_DATE_INCORRECT.code,
             VideoErrorCode.TOKEN_SIGNATURE_INCORRECT.code,
-                -> true
+            -> true
 
             else -> false
         }
