@@ -274,16 +274,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             StreamCallActivityConfigStrings.EXTRA_STREAM_CONFIG,
         )
         return runCatching {
-            val config =
-                bundledConfig?.extractStreamActivityConfig() ?: StreamCallActivityConfiguration()
-            // To support backward compatibility
-            configuration.copy(
-                closeScreenOnCallEnded = config.closeScreenOnCallEnded,
-                closeScreenOnError = config.closeScreenOnError,
-                canKeepScreenOn = config.canKeepScreenOn,
-                canSkiPermissionRationale = config.canSkipPermissionRationale,
-                custom = config.custom,
-            )
+            bundledConfig?.extractStreamActivityConfig() ?: StreamCallActivityConfiguration()
         }.getOrElse { e ->
             logger.e(e) { "Failed to load config. Using default." }
             StreamCallActivityConfiguration()
