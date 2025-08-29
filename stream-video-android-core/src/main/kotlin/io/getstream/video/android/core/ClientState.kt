@@ -152,16 +152,16 @@ class ClientState(private val client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
-        removeRingingCall("setting active call")
+        removeRingingCall(StopForegroundServiceSource.SetActiveCall)
         maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
     }
 
     fun removeActiveCall() {
         _activeCall.value?.let {
-            maybeStopForegroundService(it, "after call.leave()")
+            maybeStopForegroundService(it, StopForegroundServiceSource.RemoveActiveCall)
         }
         this._activeCall.value = null
-        removeRingingCall("after call.leave()")
+        removeRingingCall(StopForegroundServiceSource.RemoveActiveCall)
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
@@ -173,9 +173,9 @@ class ClientState(private val client: StreamVideo) {
         // TODO: behaviour if you are already in a call
     }
 
-    fun removeRingingCall(source: String) {
+    fun removeRingingCall(stopForegroundServiceSource: StopForegroundServiceSource) {
         ringingCall.value?.let {
-            maybeStopForegroundService(it, source)
+            maybeStopForegroundService(it, stopForegroundServiceSource)
         }
         _ringingCall.value = null
     }
@@ -190,25 +190,36 @@ class ClientState(private val client: StreamVideo) {
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
             val serviceTriggerDispatcher = ServiceTriggerDispatcher(context)
-            serviceTriggerDispatcher.showOutgoingCall(call, trigger, streamVideoClient)
+
+            if (trigger == CallService.TRIGGER_ONGOING_CALL) {
+                serviceTriggerDispatcher.showOnGoingCall(call, trigger, streamVideoClient)
+            } else if (trigger == CallService.TRIGGER_OUTGOING_CALL) {
+                serviceTriggerDispatcher.showOutgoingCall(call, trigger, streamVideoClient)
+            }
         }
     }
 
     /**
      * Stop the foreground service that manages the call even when the UI is gone.
      */
-    internal fun maybeStopForegroundService(call: Call, source: String) {
-        logger.d { "maybeStartForegroundService, call_id: ${call.id}, source: $source " }
+    internal fun maybeStopForegroundService(call: Call, stopForegroundServiceSource: StopForegroundServiceSource) {
+        logger.d { "maybeStartForegroundService, call_id: ${call.id}, source: ${stopForegroundServiceSource.source} " }
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
-            val serviceIntent = ServiceIntentBuilder().buildStopIntent(
-                context,
-                stopServiceParam = StopServiceParam(callConfig),
-            )
-            context.stopService(serviceIntent)
+            val serviceTriggerDispatcher = ServiceTriggerDispatcher(context)
+
+            serviceTriggerDispatcher.stopService(call, stopForegroundServiceSource)
+
         }
     }
 
     fun optedForTelecom() = (client as StreamVideoClient).telecomConfig != null
+}
+
+sealed class StopForegroundServiceSource(val source: String) {
+    data object CallAccept : StopForegroundServiceSource("accept the call")
+    data object SetActiveCall : StopForegroundServiceSource("set active call")
+    data object RemoveActiveCall : StopForegroundServiceSource("remove active call")
+    data object RemoveRingingCall : StopForegroundServiceSource("remove ringing call")
 }

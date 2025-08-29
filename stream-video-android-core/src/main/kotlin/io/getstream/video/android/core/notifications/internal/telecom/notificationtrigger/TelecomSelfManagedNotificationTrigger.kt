@@ -106,4 +106,10 @@ class TelecomSelfManagedNotificationTrigger(private val serviceIntentBuilder: Se
             }
         }
     }
+
+    fun showOutgoingCall(context: Context,
+                         callId: StreamCallId,
+                         callDisplayName: String?,
+                         callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
+                         notification: Notification?,){}
 }

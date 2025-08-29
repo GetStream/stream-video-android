@@ -79,6 +79,7 @@ import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
+import io.getstream.video.android.core.telecom.TelecomPermissions
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
@@ -357,6 +358,20 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             }
             if (call.state.ownCapabilities.value.contains(OwnCapability.SendVideo)) {
                 add(Manifest.permission.CAMERA)
+            }
+            /**
+             * This flow will initiate a call without telecom and then will add telecom because of permission
+             * So this call will start/stop in a non-telecom way, But after giving the permission the next call will start in telecom way.
+             */
+            val streamVideo = StreamVideo.instanceOrNull()
+            streamVideo?.let {
+                val optedForTelecom = streamVideo.state.optedForTelecom()
+                val telecomPermissions = TelecomPermissions()
+                with(telecomPermissions){
+                    if (optedForTelecom && supportsTelecom(streamVideo.context)) {
+                        addAll(getRequiredPermissionsList())
+                    }
+                }
             }
         }
     }

@@ -31,14 +31,19 @@ import io.getstream.video.android.core.notifications.internal.telecom.notificati
  * Connection.setActive() ~ for ongoing call
  * Connection.reject/decline
  */
-class SuccessTelecomConnection(
+class SuccessIncomingTelecomConnection(
     val context: Context,
     val streamVideo: StreamVideo,
     val telecomSelfManagedNotificationTrigger: TelecomSelfManagedNotificationTrigger,
     val telecomConnectionIncomingCallData: TelecomConnectionIncomingCallData,
 
 ) : Connection() {
-    val logger by taggedLogger("SuccessTelecomConnection")
+    val logger by taggedLogger("SuccessIncomingTelecomConnection")
+
+    override fun onStateChanged(state: Int) {
+        super.onStateChanged(state)
+        logger.d { "onStateChanged: state:$state" }
+    }
 
     /**
      * Accept from wearable
@@ -62,12 +67,25 @@ class SuccessTelecomConnection(
         super.onReject()
         logger.d { "[onReject]" }
 
-        with(telecomConnectionIncomingCallData) {
-            val pendingIntentMap = streamVideo.call(callId.type, callId.id)
-                .state.incomingNotificationData.pendingIntentMap
+//        with(telecomConnectionIncomingCallData) {
+//            val pendingIntentMap = streamVideo.call(callId.type, callId.id)
+//                .state.incomingNotificationData.pendingIntentMap
+//
+//            pendingIntentMap[IncomingNotificationAction.Reject]?.send()
+//        }
+    }
 
-            pendingIntentMap[IncomingNotificationAction.Reject]?.send()
-        }
+    /**
+     * Incoming call is rejected
+     */
+    override fun onReject(rejectReason: Int) {
+        super.onReject(rejectReason)
+        logger.d { "onReject($rejectReason)" }
+    }
+
+    override fun onReject(replyMessage: String?) {
+        super.onReject(replyMessage)
+        logger.d { "onReject($replyMessage)" }
     }
 
     override fun onAnswer(videoState: Int) {
@@ -108,18 +126,6 @@ class SuccessTelecomConnection(
         }
     }
 
-    /**
-     * Incoming call is rejected
-     */
-    override fun onReject(rejectReason: Int) {
-        super.onReject(rejectReason)
-        logger.d { "onReject($rejectReason)" }
-    }
-
-    override fun onReject(replyMessage: String?) {
-        super.onReject(replyMessage)
-        logger.d { "onReject($replyMessage)" }
-    }
 
     override fun onShowIncomingCallUi() {
         super.onShowIncomingCallUi()

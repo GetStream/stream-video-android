@@ -66,14 +66,13 @@ class ServiceIntentBuilder {
         return serviceIntent
     }
 
-    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent {
+    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent? {
         val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
 
         return if (isServiceRunning(context, serviceClass)) {
             Intent(context, serviceClass)
         } else {
-            if (true) throw IllegalStateException("Why the fuck are we here?") // TODO Rahul
-            Intent(context, TelecomVoipService::class.java)
+           null
         }
     }
 

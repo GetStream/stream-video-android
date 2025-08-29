@@ -50,18 +50,18 @@ object TelecomHelper {
                     )
                     //                .setHighlightColor(ContextCompat.getColor(context, R.color.app_primary))
                     .setShortDescription("VoIP Calls")
-                    .addSupportedUriScheme("tel")
+                    .addSupportedUriScheme("voip")
                     .addSupportedUriScheme("sip")
                     .build()
             } else {
                 PhoneAccount.builder(phoneAccountHandle, "MyApp Calls")
                     .setCapabilities(
                         PhoneAccount.CAPABILITY_CALL_PROVIDER or
-                            PhoneAccount.CAPABILITY_VIDEO_CALLING,
+                            PhoneAccount.CAPABILITY_VIDEO_CALLING
                     )
                     //                .setHighlightColor(ContextCompat.getColor(context, R.color.app_primary))
                     .setShortDescription("VoIP Calls")
-                    .addSupportedUriScheme("tel")
+                    .addSupportedUriScheme("voip")
                     .addSupportedUriScheme("sip")
                     .build()
             }
@@ -82,8 +82,12 @@ object TelecomHelper {
                 ComponentName(context, TelecomVoipService::class.java),
                 "MyAppPhoneAccount",
             )
-            telecomManager.getPhoneAccount(phoneAccountHandle) != null
+
+            val v = telecomManager.getPhoneAccount(phoneAccountHandle) != null
+            logger.d { "[isPhoneAccountRegistered] success" }
+            v
         } catch (e: Exception) {
+            logger.e { "[isPhoneAccountRegistered] throws: ${e.message}" }
             e.printStackTrace() // TODO Rahul getting exception of READ_PHONE_NUMBERS
             false
         }

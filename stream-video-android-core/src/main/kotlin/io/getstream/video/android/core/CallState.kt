@@ -712,6 +712,7 @@ public class CallState(
             }
 
             is CallRejectedEvent -> {
+                logger.d { "Noob 02, CallRejectedEvent, call id: ${event.call.id}" }
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()

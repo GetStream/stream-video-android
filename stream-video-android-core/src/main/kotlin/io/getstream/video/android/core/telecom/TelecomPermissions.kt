@@ -36,7 +36,7 @@ public class TelecomPermissions {
 
     fun getRequiredPermissionsList(): List<String> {
         val permissions = mutableListOf<String>()
-        permissions += android.Manifest.permission.READ_PHONE_STATE
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             with(permissions) {
                 add(android.Manifest.permission.MANAGE_OWN_CALLS)
@@ -79,7 +79,7 @@ public class TelecomPermissions {
     }
 
     fun requestPermissions(activity: ComponentActivity, callback: (Boolean) -> Unit) {
-        if (supportsTelecom(activity)) {
+        if (!supportsTelecom(activity)) {
             logger.d { "Telecom not supported on this device" }
             callback(false)
             return

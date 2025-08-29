@@ -226,7 +226,10 @@ internal class StreamVideoClient internal constructor(
                     context = context,
                     StopServiceParam(callServiceConfiguration = callConfig),
                 )
-                context.stopService(serviceIntent)
+                serviceIntent?.let {
+                    context.stopService(serviceIntent)
+                }
+
             }
         }
         activeCall?.leave()

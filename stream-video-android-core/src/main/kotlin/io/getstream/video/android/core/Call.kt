@@ -789,7 +789,7 @@ public class Call(
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall("after call.leave()")
+        client.state.removeRingingCall(StopForegroundServiceSource.RemoveActiveCall)
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
@@ -1323,13 +1323,13 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall("accepting the call")
-        clientImpl.state.maybeStopForegroundService(call = this, "accepting the call")
+        clientImpl.state.removeRingingCall(StopForegroundServiceSource.CallAccept)
+        clientImpl.state.maybeStopForegroundService(call = this, StopForegroundServiceSource.CallAccept)
         return clientImpl.accept(type, id)
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
+        logger.d { "Noob 03, [reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
     }
 

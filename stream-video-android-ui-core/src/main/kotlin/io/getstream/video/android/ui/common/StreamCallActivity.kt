@@ -59,7 +59,7 @@ import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessTelecomConnection
+import io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.ui.common.models.StreamCallActivityException
@@ -973,7 +973,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                  * Update Telecom Connection State
                  */
                 val telecomConnection = call.state.telecomConnection.value
-                if (telecomConnection != null && telecomConnection is SuccessTelecomConnection) {
+                if (telecomConnection != null && telecomConnection is SuccessIncomingTelecomConnection) {
                     telecomConnection.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
                 }
             }
@@ -985,7 +985,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                  * Update Telecom Connection State
                  */
                 val telecomConnection = call.state.telecomConnection.value
-                if (telecomConnection != null && telecomConnection is SuccessTelecomConnection) {
+                if (telecomConnection != null && telecomConnection is SuccessIncomingTelecomConnection) {
                     telecomConnection.setDisconnected(DisconnectCause(DisconnectCause.REJECTED))
                 }
             }
@@ -997,7 +997,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                  * Update Telecom Connection State
                  */
                 val telecomConnection = call.state.telecomConnection.value
-                if (telecomConnection != null && telecomConnection is SuccessTelecomConnection) {
+                if (telecomConnection != null && telecomConnection is SuccessIncomingTelecomConnection) {
                     telecomConnection.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
                 }
             }
@@ -1047,8 +1047,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                  */
                 if (participantCountJob == null) {
                     participantCountJob = lifecycleScope.launch(supervisorJob) {
+                        val size = cachedCall.state.participants.value.size
                         cachedCall.state.participants.collect {
-                            logger.d { "Participant left, remaining: ${it.size}" }
+                            logger.d { "Participant left, remaining: $size" }
                             lifecycleScope.launch(Dispatchers.Default) {
                                 it.forEachIndexed { i, v ->
                                     logger.d { "Participant [$i]=${v.name.value}" }

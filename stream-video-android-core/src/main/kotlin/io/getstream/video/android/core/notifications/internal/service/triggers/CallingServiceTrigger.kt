@@ -21,7 +21,6 @@ import android.content.Context
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
-import io.getstream.video.android.core.notifications.internal.service.TelecomVoipService
 import io.getstream.video.android.model.StreamCallId
 
 interface CallingServiceTrigger {
@@ -37,11 +36,11 @@ interface CallingServiceTrigger {
     )
 
     fun getServiceClass(): Class<*> {
-        val canUseTelecom = true // TODO Rahul hardcoded check, wrong they both should be started
-        return if (canUseTelecom) {
-            TelecomVoipService::class.java
-        } else {
-            CallService::class.java
-        }
+//        val canUseTelecom = TelecomPermissions().canUseTelecom(context) // TODO Rahul hardcoded check, wrong they both should be started
+//        return if (canUseTelecom) {
+//            TelecomVoipService::class.java
+//        } else {
+          return CallService::class.java
+//        }
     }
 }

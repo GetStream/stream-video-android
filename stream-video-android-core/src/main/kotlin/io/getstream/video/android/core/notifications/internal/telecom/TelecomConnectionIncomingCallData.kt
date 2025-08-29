@@ -27,3 +27,11 @@ data class TelecomConnectionIncomingCallData(
     val isVideo: Boolean,
     val notification: Notification?,
 )
+
+data class TelecomConnectionOutgoingCallData(
+    val callId: StreamCallId,
+    val callDisplayName: String?,
+    val callServiceConfiguration: CallServiceConfig,
+    val isVideo: Boolean,
+    val notification: Notification?,
+)

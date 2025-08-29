@@ -214,6 +214,7 @@ object StreamVideoInitHelper {
             apiKey = apiKey,
             user = user,
             token = token,
+            connectionTimeoutInMs = 12_000L,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             callServiceConfigRegistry = callServiceConfigRegistry,
