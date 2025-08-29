@@ -1261,7 +1261,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                      * may receive a [ParticipantLeftEvent] prematurely, which could trigger
                      * unintended reactions in the call flow.
                      */
-                    .debounce(getParticipantUpdateDebounce())
+                    .debounce(getParticipantUpdateDebounce(call))
                     .collect {
                         logger.d { "Participant left, remaining: ${it.size}" }
                         lifecycleScope.launch(Dispatchers.Default) {
@@ -1277,7 +1277,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 
-    public open fun getParticipantUpdateDebounce(): Long = 1_000L
+    public open fun getParticipantUpdateDebounce(call: Call): Long = 1_000L
 }
 
 public typealias StreamCallIdString = String
