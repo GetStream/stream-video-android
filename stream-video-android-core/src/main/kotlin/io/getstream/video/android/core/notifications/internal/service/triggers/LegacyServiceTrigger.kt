@@ -35,6 +35,7 @@ import io.getstream.video.android.model.StreamCallId
 internal class LegacyServiceTrigger(val serviceIntentBuilder: ServiceIntentBuilder) :
     CallingServiceTrigger {
     private val logger by taggedLogger("ServiceTriggers")
+
     override fun showIncomingCall(
         context: Context,
         callId: StreamCallId,

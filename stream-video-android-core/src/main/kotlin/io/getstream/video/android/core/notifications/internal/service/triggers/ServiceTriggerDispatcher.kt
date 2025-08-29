@@ -23,17 +23,21 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StopForegroundServiceSource
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
+import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
 import io.getstream.video.android.core.telecom.TelecomPermissions
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
+import kotlin.math.log
 
 /**
  * TODO Rahul change the name of the class its a decision maker class which will decide which
@@ -103,6 +107,36 @@ class ServiceTriggerDispatcher(val context: Context) {
         }
     }
 
+    fun showOnGoingCall(call: Call, trigger: String, streamVideo: StreamVideo){
+        val client = streamVideo as StreamVideoClient
+        val callConfig = client.callServiceConfigRegistry.get(call.type)
+        if (!callConfig.runCallServiceInForeground) {
+            return
+        }
+
+        val context = client.context
+        val serviceIntent = ServiceIntentBuilder().buildStartIntent(
+            context,
+            StartServiceParam(StreamCallId.fromCallCid(call.cid),
+                trigger,
+                callServiceConfiguration = callConfig),
+        )
+
+        val telecomPermissions = TelecomPermissions()
+        if (telecomPermissions.canUseTelecom(context)) {
+            telecomServiceTrigger.addOnGoingCall(
+                context,
+                callId = StreamCallId(call.type, call.id),
+                callDisplayName = "ON GOING CALL NOT SET", // TODO Rahul Later
+                isVideo = call.isVideoEnabled(),
+                streamVideo = streamVideo,
+            )
+        }
+
+        ContextCompat.startForegroundService(context, serviceIntent)
+
+    }
+
     fun showOutgoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
         val callConfig = (streamVideo as StreamVideoClient).callServiceConfigRegistry.get(call.type)
         if (!callConfig.runCallServiceInForeground) {
@@ -125,6 +159,7 @@ class ServiceTriggerDispatcher(val context: Context) {
                 context,
                 callId = StreamCallId(call.type, call.id),
                 callDisplayName = "NOT SET YET", // TODO Rahul Later
+                isVideo = call.isVideoEnabled(),
                 streamVideo = streamVideo,
             )
         }
@@ -132,12 +167,37 @@ class ServiceTriggerDispatcher(val context: Context) {
         ContextCompat.startForegroundService(context, serviceIntent)
     }
 
-    fun removeCallFromTelecom(call: Call, trigger: String, streamVideo: StreamVideo) {
+
+
+    fun stopService(call: Call, stopForegroundServiceSource: StopForegroundServiceSource) {
+        logger.d { "stopService, call id: ${call.cid}, source: ${stopForegroundServiceSource.source}" }
         val telecomPermissions = TelecomPermissions()
         if (telecomPermissions.canUseTelecom(context)) {
             call.state.telecomConnection.value?.let {
-                it.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
-                it.destroy()
+                when(stopForegroundServiceSource){
+                    StopForegroundServiceSource.CallAccept -> {}
+                    StopForegroundServiceSource.RemoveActiveCall -> {
+                        it.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
+                        it.destroy()
+                    }
+                    StopForegroundServiceSource.RemoveRingingCall -> {}
+                    StopForegroundServiceSource.SetActiveCall -> {}
+                }
+            }
+        }
+
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        streamVideo?.let { streamVideoClient ->
+            val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
+            if (callConfig.runCallServiceInForeground) {
+                val context = streamVideoClient.context
+                val serviceIntent = ServiceIntentBuilder().buildStopIntent(
+                    context,
+                    stopServiceParam = StopServiceParam(callConfig),
+                )
+                serviceIntent?.let {
+                    context.stopService(serviceIntent)
+                }
             }
         }
     }

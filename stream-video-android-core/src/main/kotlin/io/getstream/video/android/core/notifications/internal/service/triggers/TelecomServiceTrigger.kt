@@ -16,11 +16,14 @@
 
 package io.getstream.video.android.core.notifications.internal.service.triggers
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.app.Notification
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.telecom.DisconnectCause
 import android.telecom.TelecomManager
+import android.telecom.VideoProfile
 import androidx.core.net.toUri
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
@@ -30,6 +33,7 @@ import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.TelecomHelper
+import io.getstream.video.android.core.notifications.internal.service.TelecomVoipService
 import io.getstream.video.android.model.StreamCallId
 
 internal class TelecomServiceTrigger(
@@ -53,7 +57,7 @@ internal class TelecomServiceTrigger(
 
         /**
          * Because we need to retrieve the notification
-         * in [io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessTelecomConnection]
+         * in [io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection]
          */
         notification?.let {
             streamVideo.call(callId.type, callId.id)
@@ -88,17 +92,21 @@ internal class TelecomServiceTrigger(
         telecomManager.addNewIncomingCall(TelecomHelper.getPhoneAccountHandle(context), extras)
     }
 
-    @SuppressLint("MissingPermission")
     fun addOutgoingCallToTelecom(
         context: Context,
         callId: StreamCallId,
+        isVideo: Boolean,
         callDisplayName: String?,
         streamVideo: StreamVideo,
     ) {
         val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
 //        val addressUri = Uri.fromParts(PhoneAccount.SCHEME_TEL, "0000", null)
-        val addressUri = "$appSchema:${callId.id}".toUri()
+        val addressUri = callId.cid.toUri()
         val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
+
+        if (!TelecomHelper.isPhoneAccountRegistered(context)) {
+            TelecomHelper.registerPhoneAccount(context)
+        }
 
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
 
@@ -110,10 +118,41 @@ internal class TelecomServiceTrigger(
 
             // For Our Service
             putString(NotificationHandler.INTENT_EXTRA_CALL_CID, callId.cid)
-            putString(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
+            putString(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME, formattedCallDisplayName)
+            putString(TelecomManager.EXTRA_CALL_SUBJECT, formattedCallDisplayName)
+
+            putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false) //TODO Rahul, if we want speaker to be ON by default
+
+            val videoState = if (isVideo) VideoProfile.STATE_BIDIRECTIONAL else VideoProfile.STATE_AUDIO_ONLY
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                putInt(TelecomManager.EXTRA_INCOMING_VIDEO_STATE, videoState)
+            } // For framework ConnectionService
+
         }
 
         // This shows the native incoming call UI
+//        if (ActivityCompat.checkSelfPermission(
+//                context,
+//                Manifest.permission.CALL_PHONE //TODO Rahul ADD this check in telecom support
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            throw IllegalStateException("Bc ye permission thodi na cahiye ab")
+//        }
+        /**
+         * Requires [Manifest.permission.CALL_PHONE]
+         */
         telecomManager.placeCall(addressUri, extras)
+    }
+
+    fun addOnGoingCall(context: Context,
+                       callId: StreamCallId,
+                       isVideo: Boolean,
+                       callDisplayName: String?,
+                       streamVideo: StreamVideo,) {
+        val call = streamVideo.call(callId.type, callId.id)
+        call.state.telecomConnection.value?.let {
+            it.onAnswer()
+            it.setActive()
+        }
     }
 }
