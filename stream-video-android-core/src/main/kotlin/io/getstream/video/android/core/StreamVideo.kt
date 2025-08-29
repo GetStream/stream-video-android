@@ -29,9 +29,9 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.utils.TokenUtils
-import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -108,15 +108,27 @@ public interface StreamVideo : NotificationHandler {
     ): EventSubscription
 
     /**
+     * Get a cached device used to receive push notifications.
+     *
+     * @return stream of Device.
+     */
+    public fun getDevice(): Flow<io.getstream.video.android.model.Device?>
+
+    /**
      * Create a device that will be used to receive push notifications.
      *
      * @param pushDevice The PushDevice obtained from the selected push provider.
-     *
-     * @return [Result] containing the [Device].
      */
     public suspend fun createDevice(
         pushDevice: PushDevice,
     ): Result<io.getstream.video.android.model.Device>
+
+    /**
+     * Update a device used to receive push notifications.
+     *
+     * @param device The Device.
+     */
+    public suspend fun updateDevice(device: io.getstream.video.android.model.Device?)
 
     /**
      * Remove a device used to receive push notifications.
@@ -124,7 +136,7 @@ public interface StreamVideo : NotificationHandler {
      * @param device The Device, previously provided by [createDevice].
      * @return Result if the operation was successful or not.
      */
-    public suspend fun deleteDevice(device: Device): Result<Unit>
+    public suspend fun deleteDevice(device: io.getstream.video.android.model.Device): Result<Unit>
 
     /**
      * Returns a list of all the edges available on the network.
@@ -194,7 +206,7 @@ public interface StreamVideo : NotificationHandler {
                 if (isInstalled) {
                     StreamLog.e("StreamVideo") {
                         "The $internalStreamVideo is already installed but you've tried to " +
-                            "install a new exception handler: $streamVideo"
+                                "install a new exception handler: $streamVideo"
                     }
                 }
                 isInstalled = true

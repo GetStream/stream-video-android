@@ -125,6 +125,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -235,6 +236,20 @@ internal class StreamVideoClient internal constructor(
     }
 
     /**
+     * @see StreamVideo.getDevice
+     */
+    override fun getDevice(): Flow<Device?> {
+        return streamNotificationManager.getDevice()
+    }
+
+    /**
+     * @see StreamVideo.updateDevice
+     */
+    override suspend fun updateDevice(device: Device?) {
+        return streamNotificationManager.updateDevice(device)
+    }
+
+    /**
      * Ensure that every API call runs on the IO dispatcher and has correct error handling
      */
     internal suspend fun <T : Any> apiCall(
@@ -264,7 +279,7 @@ internal class StreamVideoClient internal constructor(
             VideoErrorCode.TOKEN_NOT_VALID.code,
             VideoErrorCode.TOKEN_DATE_INCORRECT.code,
             VideoErrorCode.TOKEN_SIGNATURE_INCORRECT.code,
-            -> true
+                -> true
 
             else -> false
         }
