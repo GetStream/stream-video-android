@@ -18,15 +18,10 @@ package io.getstream.video.android.core.notifications.internal.receivers
 
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import io.getstream.log.taggedLogger
-import io.getstream.result.Result
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.CallRejectionHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.model.StreamCallId
 
 /**
  * Used to process any pending intents that feature the [ACTION_REJECT_CALL] action. By consuming this
@@ -37,27 +32,9 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
 
     val logger by taggedLogger("Call:RejectReceiver")
     override val action = ACTION_REJECT_CALL
+    private val callRejectionHandler = CallRejectionHandler()
 
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
-        when (val rejectResult = call.reject(RejectReason.Decline)) {
-            is Result.Success -> {
-                val userId = StreamVideo.instanceOrNull()?.userId
-                userId?.let {
-                    val set = mutableSetOf(it)
-                    call.state.updateRejectedBy(set)
-                    call.state.updateRejectActionBundle(intent.extras ?: Bundle())
-                }
-                logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
-            }
-            is Result.Failure -> {
-                logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
-            }
-        }
-        logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
-        CallService.removeIncomingCall(
-            context,
-            StreamCallId.fromCallCid(call.cid),
-            StreamVideo.instance().state.callConfigRegistry.get(call.type),
-        )
+        callRejectionHandler.reject(call, context, intent)
     }
 }

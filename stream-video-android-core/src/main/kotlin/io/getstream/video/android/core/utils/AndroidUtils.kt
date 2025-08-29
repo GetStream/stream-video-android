@@ -201,7 +201,7 @@ internal fun Service.startForegroundWithServiceType(
         )
     } else {
         val beforeOrAfterAndroid14Type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE //TODO RAHUL, THIS NEEDS TO BE REMOVED ELSE THE SERVICE WILL KILL ITSELF IN 10 MINS
         } else {
             foregroundServiceType
         }

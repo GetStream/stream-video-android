@@ -1049,7 +1049,26 @@ public final class io/getstream/video/android/compose/ui/components/call/activec
 	public static final fun AudioCallContent (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/compose/permission/VideoPermissionsState;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 	public static final fun AudioOnlyCallContent (Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/compose/permission/VideoPermissionsState;ZLkotlin/jvm/functions/Function3;Ljava/lang/String;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;III)V
 	public static final fun AudioOnlyCallControls (Landroidx/compose/ui/Modifier;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+	public static final fun AudioOnlyCallControlsV2 (Landroidx/compose/ui/Modifier;ZLio/getstream/video/android/core/Call;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 	public static final fun AudioOnlyCallDetails (Landroidx/compose/ui/Modifier;Ljava/lang/String;Ljava/util/List;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/activecall/AudioDeviceUiState {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/audio/StreamAudioDevice;Ljava/lang/String;Landroidx/compose/ui/graphics/vector/ImageVector;Z)V
+	public final fun component1 ()Lio/getstream/video/android/core/audio/StreamAudioDevice;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun component4 ()Z
+	public final fun copy (Lio/getstream/video/android/core/audio/StreamAudioDevice;Ljava/lang/String;Landroidx/compose/ui/graphics/vector/ImageVector;Z)Lio/getstream/video/android/compose/ui/components/call/activecall/AudioDeviceUiState;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/ui/components/call/activecall/AudioDeviceUiState;Lio/getstream/video/android/core/audio/StreamAudioDevice;Ljava/lang/String;Landroidx/compose/ui/graphics/vector/ImageVector;ZILjava/lang/Object;)Lio/getstream/video/android/compose/ui/components/call/activecall/AudioDeviceUiState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHighlight ()Z
+	public final fun getIcon ()Landroidx/compose/ui/graphics/vector/ImageVector;
+	public final fun getStreamAudioDevice ()Lio/getstream/video/android/core/audio/StreamAudioDevice;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/activecall/CallContentKt {
@@ -1731,6 +1750,7 @@ public final class io/getstream/video/android/compose/ui/components/call/ringing
 
 public final class io/getstream/video/android/compose/ui/components/call/ringing/outgoingcall/OutgoingCallControlsKt {
 	public static final fun OutgoingCallControls (Landroidx/compose/ui/Modifier;ZZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun OutgoingCallControlsV2 (Landroidx/compose/ui/Modifier;ZZZLio/getstream/video/android/core/Call;Ljava/util/List;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/ringing/outgoingcall/OutgoingCallDetailsKt {

@@ -24,6 +24,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.telecom.DisconnectCause
 import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -58,6 +59,7 @@ import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.ui.common.models.StreamCallActivityException
@@ -524,6 +526,11 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             else -> {
+                /**
+                 * When we join a call (its not part of incoming/outgoing call flow)
+                 * This is when user joins a room
+                 * This should have its own action <--- TODO Rahul
+                 */
                 logger.w {
                     "[onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
                 }
@@ -605,7 +612,8 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * @param call
      */
     public open fun onResume(call: Call) {
-        if (config.canKeepScreenOn) {
+        val configuration = configurationMap[call.id]
+        if (configuration?.canKeepScreenOn == true) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
         logger.d { "DefaultCallActivity - Resumed (call -> $call)" }
@@ -831,6 +839,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             result.onError { error ->
                 lifecycleScope.launch {
                     onError?.invoke(Exception(error.message))
+                    // TODO Rahul, should we update telecom-connection
                 }
             }
             result
@@ -890,7 +899,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     /**
-     * Leave the call from the parameter.
+     * Leave an ongoing call from the parameter.
      *
      * @param call the call object.
      * @param onSuccess optionally get notified if the operation was success.
@@ -908,6 +917,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             try {
                 call.leave()
                 onSuccess?.invoke(call)
+                call.state.telecomConnection.value?.setDisconnected(
+                    DisconnectCause(DisconnectCause.CANCELED),
+                )
             } catch (e: Exception) {
                 onError?.invoke(e)
             }
@@ -947,14 +959,38 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         when (action) {
             is LeaveCall -> {
                 leave(call, onSuccessFinish, onErrorFinish)
+
+                /**
+                 * Update Telecom Connection State
+                 */
+                val telecomConnection = call.state.telecomConnection.value
+                if (telecomConnection != null && telecomConnection is SuccessIncomingTelecomConnection) {
+                    telecomConnection.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
+                }
             }
 
             is DeclineCall -> {
                 reject(call, RejectReason.Decline, onSuccessFinish, onErrorFinish)
+
+                /**
+                 * Update Telecom Connection State
+                 */
+                val telecomConnection = call.state.telecomConnection.value
+                if (telecomConnection != null && telecomConnection is SuccessIncomingTelecomConnection) {
+                    telecomConnection.setDisconnected(DisconnectCause(DisconnectCause.REJECTED))
+                }
             }
 
             is CancelCall -> {
                 cancel(call, onSuccessFinish, onErrorFinish)
+
+                /**
+                 * Update Telecom Connection State
+                 */
+                val telecomConnection = call.state.telecomConnection.value
+                if (telecomConnection != null && telecomConnection is SuccessIncomingTelecomConnection) {
+                    telecomConnection.setDisconnected(DisconnectCause(DisconnectCause.CANCELED))
+                }
             }
 
             is AcceptCall -> {
@@ -1002,8 +1038,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                  */
                 if (participantCountJob == null) {
                     participantCountJob = lifecycleScope.launch(supervisorJob) {
+                        val size = cachedCall.state.participants.value.size
                         cachedCall.state.participants.collect {
-                            logger.d { "Participant left, remaining: ${it.size}" }
+                            logger.d { "Participant left, remaining: $size" }
                             lifecycleScope.launch(Dispatchers.Default) {
                                 it.forEachIndexed { i, v ->
                                     logger.d { "Participant [$i]=${v.name.value}" }

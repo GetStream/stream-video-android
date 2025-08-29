@@ -17,7 +17,9 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.media.AudioAttributes
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.CallType
+import io.getstream.video.android.core.telecom.TelecomPermissions
 
 /**
  * Provides default configurations for different types of call services.
@@ -32,7 +34,10 @@ object DefaultCallConfigurations {
      * The default configuration for call services.
      * This serves as a fallback configuration and uses the `CallService` class.
      */
-    val default = CallServiceConfig().copy(serviceClass = CallService::class.java)
+    val default =
+        CallServiceConfig().copy(
+            serviceClass = if (canUseTelecom()) TelecomVoipService::class.java else CallService::class.java,
+        ) // TODO Rahul needs testing for outgoing/incoming/ongoing
 
     /**
      * The configuration for livestream calls.
@@ -97,5 +102,17 @@ object DefaultCallConfigurations {
             Pair(CallType.AudioCall, audioCall),
             Pair(CallType.Livestream, livestreamGuestCall),
         )
+    }
+
+    private fun canUseTelecom(): Boolean {
+        val telecomPermissions = TelecomPermissions()
+        with(telecomPermissions) {
+            val context = StreamVideo.instanceOrNull()?.context
+            return if (context == null) {
+                false
+            } else {
+                canUseTelecom(context)
+            }
+        }
     }
 }

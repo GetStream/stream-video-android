@@ -195,6 +195,10 @@ dependencies {
 
     implementation(libs.androidx.media.media)
 
+    //permission for telecom
+    implementation(libs.androidx.activity)
+
+
     // unit tests
     testImplementation(libs.stream.result)
     testImplementation(libs.stream.result.call)

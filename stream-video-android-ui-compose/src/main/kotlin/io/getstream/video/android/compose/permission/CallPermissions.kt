@@ -21,11 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.telecom.TelecomPermissions
 
 /**
  * Remember call related Android permissions below:
@@ -39,18 +42,7 @@ import io.getstream.video.android.core.Call
 @Composable
 public fun rememberCallPermissionsState(
     call: Call,
-    permissions: List<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        mutableListOf(
-            android.Manifest.permission.CAMERA,
-            android.Manifest.permission.RECORD_AUDIO,
-            android.Manifest.permission.BLUETOOTH_CONNECT,
-        )
-    } else {
-        mutableListOf(
-            android.Manifest.permission.CAMERA,
-            android.Manifest.permission.RECORD_AUDIO,
-        )
-    },
+    permissions: List<String> = getPermissions(),
     onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
     onAllPermissionsGranted: (suspend () -> Unit)? = null,
 ): VideoPermissionsState {
@@ -91,6 +83,36 @@ public fun rememberCallPermissionsState(
             }
         }
     }
+}
+
+@Composable
+private fun getPermissions(): List<String> {
+    val context = LocalContext.current
+    val permissionsList = mutableListOf<String>()
+    val telecomPermissions = TelecomPermissions()
+
+    with(telecomPermissions) {
+        val optedForTelecom = StreamVideo.instanceOrNull()?.state?.optedForTelecom() == true
+        if (optedForTelecom && supportsTelecom(context)) {
+            permissionsList.addAll(getRequiredPermissionsList())
+        }
+    }
+
+    permissionsList.addAll(
+        mutableListOf(
+            android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO,
+        ),
+    )
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        permissionsList.addAll(
+            mutableListOf(
+                android.Manifest.permission.BLUETOOTH_CONNECT,
+            ),
+        )
+    }
+    return permissionsList
 }
 
 /**

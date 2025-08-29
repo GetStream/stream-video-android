@@ -51,6 +51,16 @@
     <!-- Required if calls support screensharing -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
 
+    <!-- Required telecom -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+
+    <!-- https://developer.android.com/reference/android/telecom/TelecomManager#getPhoneAccount(android.telecom.PhoneAccountHandle) -->
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+    <!-- Required telecom for Below API 26 -->
+<!--    <uses-permission android:name="android.permission.READ_PHONE_STATE" android:maxSdkVersion="25"/>-->
+    <!-- Required for outgoing call-->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+
     <application>
         <provider
             android:name="io.getstream.android.push.delegate.AndroidPushDelegateProvider"
@@ -93,6 +103,20 @@
         <service android:name=".notifications.internal.service.CallService"
             android:foregroundServiceType="shortService|phoneCall"/>
 
+
+
+                <service
+                    android:name=".notifications.internal.service.AudioCallService"
+                    android:foregroundServiceType="microphone|shortService"
+                    android:exported="false" />
+
+<!--        <service android:name=".notifications.internal.service.CallService"-->
+<!--            android:foregroundServiceType="phoneCall|camera"/>-->
+
+<!--        <service-->
+<!--            android:name=".notifications.internal.service.AudioCallService"-->
+<!--            android:foregroundServiceType="phoneCall"/>-->
+
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>
 
@@ -111,9 +135,19 @@
             android:foregroundServiceType="mediaPlayback"
             android:exported="false" />
 
+
+        <!-- Must be exported for Telecom to bind -->
         <service
-            android:name=".notifications.internal.service.AudioCallService"
-            android:foregroundServiceType="microphone|shortService"
-            android:exported="false" />
+            android:exported="true"
+            android:name=".notifications.internal.service.TelecomVoipService"
+            android:label="GetStream Telecom Void Service"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".telecom.ui.TelecomPermissionRequestActivity"/>
+
     </application>
 </manifest>

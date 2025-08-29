@@ -71,7 +71,7 @@ import kotlinx.coroutines.launch
 /**
  * A foreground service that is running when there is an active call.
  */
-internal open class CallService : Service() {
+internal open class CallService : Service(), CallingServiceContract {
     internal open val logger by taggedLogger("CallService")
 
     // Service type
@@ -102,171 +102,11 @@ internal open class CallService : Service() {
         const val TRIGGER_REMOVE_INCOMING_CALL = "remove_call"
         const val TRIGGER_OUTGOING_CALL = "outgoing_call"
         const val TRIGGER_ONGOING_CALL = "ongoing_call"
+    }
 
-        /**
-         * Build start intent.
-         *
-         * @param context the context.
-         * @param callId the call id.
-         * @param trigger one of [TRIGGER_INCOMING_CALL], [TRIGGER_OUTGOING_CALL] or [TRIGGER_ONGOING_CALL]
-         * @param callDisplayName the display name.
-         */
-        fun buildStartIntent(
-            context: Context,
-            callId: StreamCallId,
-            trigger: String,
-            callDisplayName: String? = null,
-            callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
-        ): Intent {
-            val serviceClass = callServiceConfiguration.serviceClass
-            StreamLog.i(TAG) { "Resolved service class: $serviceClass" }
-            val serviceIntent = Intent(context, serviceClass)
-            serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, callId)
-
-            when (trigger) {
-                TRIGGER_INCOMING_CALL -> {
-                    serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_INCOMING_CALL)
-                    serviceIntent.putExtra(INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
-                }
-
-                TRIGGER_OUTGOING_CALL -> {
-                    serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_OUTGOING_CALL)
-                }
-
-                TRIGGER_ONGOING_CALL -> {
-                    serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_ONGOING_CALL)
-                }
-
-                TRIGGER_REMOVE_INCOMING_CALL -> {
-                    serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_REMOVE_INCOMING_CALL)
-                }
-
-                else -> {
-                    throw IllegalArgumentException(
-                        "Unknown $trigger, must be one of: $TRIGGER_INCOMING_CALL, $TRIGGER_OUTGOING_CALL, $TRIGGER_ONGOING_CALL",
-                    )
-                }
-            }
-            return serviceIntent
-        }
-
-        /**
-         * Build stop intent.
-         *
-         * @param context the context.
-         */
-        fun buildStopIntent(
-            context: Context,
-            callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
-        ) = safeCallWithDefault(Intent(context, CallService::class.java)) {
-            val serviceClass = callServiceConfiguration.serviceClass
-
-            if (isServiceRunning(context, serviceClass)) {
-                Intent(context, serviceClass)
-            } else {
-                Intent(context, CallService::class.java)
-            }
-        }
-
-        fun showIncomingCall(
-            context: Context,
-            callId: StreamCallId,
-            callDisplayName: String?,
-            callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
-            notification: Notification?,
-        ) {
-            StreamLog.d(TAG) {
-                "[showIncomingCall] callId: ${callId.id}, callDisplayName: $callDisplayName, notification: ${notification != null}"
-            }
-            val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
-            StreamLog.d(TAG) { "[showIncomingCall] hasActiveCall: $hasActiveCall" }
-            safeCallWithResult {
-                val result = if (!hasActiveCall) {
-                    StreamLog.d(TAG) { "[showIncomingCall] Starting foreground service" }
-                    ContextCompat.startForegroundService(
-                        context,
-                        buildStartIntent(
-                            context,
-                            callId,
-                            TRIGGER_INCOMING_CALL,
-                            callDisplayName,
-                            callServiceConfiguration,
-                        ),
-                    )
-                    ComponentName(context, CallService::class.java)
-                } else {
-                    StreamLog.d(TAG) { "[showIncomingCall] Starting regular service" }
-                    context.startService(
-                        buildStartIntent(
-                            context,
-                            callId,
-                            TRIGGER_INCOMING_CALL,
-                            callDisplayName,
-                            callServiceConfiguration,
-                        ),
-                    )
-                }
-                result!!
-            }.onError {
-                // Show notification
-                StreamLog.e(TAG) { "Could not start service, showing notification only: $it" }
-                val hasPermission = ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ) == PackageManager.PERMISSION_GRANTED
-                StreamLog.i(TAG) { "Has permission: $hasPermission" }
-                StreamLog.i(TAG) { "Notification: $notification" }
-                if (hasPermission && notification != null) {
-                    StreamLog.d(TAG) {
-                        "[showIncomingCall] Showing notification fallback with ID: $INCOMING_CALL_NOTIFICATION_ID"
-                    }
-                    StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
-                        callId,
-                        INCOMING_CALL_NOTIFICATION_ID,
-                        notification,
-                    )
-                } else {
-                    StreamLog.w(TAG) {
-                        "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}"
-                    }
-                }
-            }
-        }
-
-        fun removeIncomingCall(
-            context: Context,
-            callId: StreamCallId,
-            config: CallServiceConfig = DefaultCallConfigurations.default,
-        ) {
-            safeCallWithResult {
-                context.startService(
-                    buildStartIntent(
-                        context,
-                        callId,
-                        TRIGGER_REMOVE_INCOMING_CALL,
-                        callServiceConfiguration = config,
-                    ),
-                )!!
-            }.onError {
-                NotificationManagerCompat.from(context).cancel(INCOMING_CALL_NOTIFICATION_ID)
-            }
-        }
-
-        private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
-            safeCallWithDefault(true) {
-                val activityManager = context.getSystemService(
-                    Context.ACTIVITY_SERVICE,
-                ) as ActivityManager
-                val runningServices = activityManager.getRunningServices(Int.MAX_VALUE)
-                for (service in runningServices) {
-                    if (serviceClass.name == service.service.className) {
-                        StreamLog.w(TAG) { "Service is running: $serviceClass" }
-                        return true
-                    }
-                }
-                StreamLog.w(TAG) { "Service is NOT running: $serviceClass" }
-                return false
-            }
+    override fun onCreate() {
+        super.onCreate()
+        callSoundPlayer = StreamVideo.instanceOrNull()?.state?.soundPlayer
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -378,19 +218,13 @@ internal open class CallService : Service() {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
             }
 
-            if (callSoundPlayer == null) {
-                callSoundPlayer = CallSoundPlayer(applicationContext)
-            }
-            logger.d {
-                "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
-            }
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
             return START_NOT_STICKY
         }
     }
 
-    private fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
+    override fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
         val handler = streamDefaultNotificationHandler()
         if (handler != null && callId != null) {
             val isMediaNotification = notificationConfig().mediaNotificationCallTypes.contains(
@@ -475,7 +309,7 @@ internal open class CallService : Service() {
         return notificationData
     }
 
-    private fun maybePromoteToForegroundService(
+    override fun maybePromoteToForegroundService(
         videoClient: StreamVideoClient,
         notificationId: Int,
         trigger: String,
@@ -518,6 +352,9 @@ internal open class CallService : Service() {
         }
     }
 
+    /**
+     * Shows from notification from Service
+     */
     @SuppressLint("MissingPermission")
     private fun showIncomingCall(
         callId: StreamCallId,
@@ -561,7 +398,7 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun initializeCallAndSocket(
+    override fun initializeCallAndSocket(
         streamVideo: StreamVideo,
         callId: StreamCallId,
     ) {
@@ -575,7 +412,7 @@ internal open class CallService : Service() {
                 } ?: let {
                     logger.e { "Failed to update call." }
                 }
-                stopService() // Failed to update call
+                stopService() // Failed to update call //TODO RAHUL, send this error back to UI
                 return@launch
             }
         }
@@ -678,6 +515,7 @@ internal open class CallService : Service() {
                     }
 
                     is CallRejectedEvent -> {
+                        logger.d { "Noob 01, CallRejectedEvent, call id: ${event.call.id}" }
                         handleIncomingCallRejectedByMeOrCaller(
                             rejectedByUserId = event.user.id,
                             myUserId = streamVideo.userId,
@@ -761,7 +599,7 @@ internal open class CallService : Service() {
 
                         is RingingState.Outgoing -> {
                             logger.d { "[observeNotificationUpdates] Showing outgoing call notification" }
-                            startForegroundWithServiceType(
+                            startForegroundWithServiceType( // TODO Rahul should all outgoing and ongoing startForegroundWithServiceType be present in telecom voip service?
                                 INCOMING_CALL_NOTIFICATION_ID,
                                 notification,
                                 TRIGGER_OUTGOING_CALL,
@@ -877,7 +715,7 @@ internal open class CallService : Service() {
      * Should be invoke carefully for the calls which are still present in [StreamVideoClient.calls]
      * Else stopping service by an expired call can cancel current call's notification and the service itself
      */
-    private fun stopService() {
+    override fun stopService() {
         // Cancel the notification
         val notificationManager = NotificationManagerCompat.from(this)
         callId?.let {
