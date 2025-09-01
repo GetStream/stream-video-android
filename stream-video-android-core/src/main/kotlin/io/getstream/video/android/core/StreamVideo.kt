@@ -110,7 +110,7 @@ public interface StreamVideo : NotificationHandler {
     /**
      * Get a cached device used to receive push notifications.
      *
-     * @return stream of Device.
+     * @return stream of [io.getstream.video.android.model.Device].
      */
     public fun getDevice(): Flow<io.getstream.video.android.model.Device?>
 
@@ -118,6 +118,8 @@ public interface StreamVideo : NotificationHandler {
      * Create a device that will be used to receive push notifications.
      *
      * @param pushDevice The PushDevice obtained from the selected push provider.
+     *
+     * @return [Result] containing the [io.getstream.video.android.model.Device].
      */
     public suspend fun createDevice(
         pushDevice: PushDevice,
