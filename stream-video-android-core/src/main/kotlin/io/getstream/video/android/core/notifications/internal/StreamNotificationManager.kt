@@ -76,9 +76,13 @@ internal class StreamNotificationManager private constructor(
         val newDevice = pushDevice.toDevice()
         return pushDevice
             .takeUnless {
-                val equal = newDevice == getDevice().firstOrNull()
-                logger.d { "[createDevice] Device equal to stored: $equal" }
-                equal
+                if (!notificationConfig.autoRegisterPushDevice) {
+                    false
+                } else {
+                    val equal = newDevice == getDevice().firstOrNull()
+                    logger.d { "[createDevice] Device equal to stored: $equal" }
+                    equal
+                }
             }
             ?.toCreateDeviceRequest()
             ?.flatMapSuspend { createDeviceRequest ->
