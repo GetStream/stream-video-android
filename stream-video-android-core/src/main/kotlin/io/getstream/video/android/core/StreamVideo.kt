@@ -29,6 +29,7 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.utils.TokenUtils
+import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
@@ -112,7 +113,7 @@ public interface StreamVideo : NotificationHandler {
      *
      * @return stream of Device.
      */
-    public fun getDevice(): Flow<io.getstream.video.android.model.Device?>
+    public fun getDevice(): Flow<Device?>
 
     /**
      * Create a device that will be used to receive push notifications.
@@ -121,14 +122,14 @@ public interface StreamVideo : NotificationHandler {
      */
     public suspend fun createDevice(
         pushDevice: PushDevice,
-    ): Result<io.getstream.video.android.model.Device>
+    ): Result<Device>
 
     /**
      * Update a device used to receive push notifications.
      *
      * @param device The Device.
      */
-    public suspend fun updateDevice(device: io.getstream.video.android.model.Device?)
+    public suspend fun updateDevice(device: Device?)
 
     /**
      * Remove a device used to receive push notifications.
@@ -136,7 +137,7 @@ public interface StreamVideo : NotificationHandler {
      * @param device The Device, previously provided by [createDevice].
      * @return Result if the operation was successful or not.
      */
-    public suspend fun deleteDevice(device: io.getstream.video.android.model.Device): Result<Unit>
+    public suspend fun deleteDevice(device: Device): Result<Unit>
 
     /**
      * Returns a list of all the edges available on the network.
