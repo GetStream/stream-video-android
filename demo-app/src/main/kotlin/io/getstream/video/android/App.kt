@@ -19,10 +19,7 @@ package io.getstream.video.android
 import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
-import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
-import io.getstream.video.android.util.StreamVideoInitHelper
-import kotlinx.coroutines.runBlocking
 
 @HiltAndroidApp
 class App : Application() {
