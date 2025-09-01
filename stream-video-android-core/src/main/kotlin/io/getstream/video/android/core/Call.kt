@@ -522,7 +522,7 @@ public class Call(
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
-        return Success(value = session!!)
+        return Success(value = session!!) // TODO Rahul later, this caused NPE
     }
 
     private fun Call.monitorSession(result: JoinCallResponse) {
@@ -765,7 +765,7 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave() {
-        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
+        logger.d { "Noob, [leave] #ringing; no args, call_cid:$cid" }
         leave(disconnectionReason = null)
     }
 
@@ -789,7 +789,7 @@ public class Call(
         camera.disable()
         microphone.disable()
         client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+        client.state.removeRingingCall(StopForegroundServiceSource.RemoveActiveCall)
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
@@ -890,7 +890,7 @@ public class Call(
     }
 
     fun handleEvent(event: VideoEvent) {
-        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
+//        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
 
         when (event) {
             is GoAwayEvent ->
@@ -1177,7 +1177,7 @@ public class Call(
                 logger.d { "[monitorHeadset] no headset found" }
 
                 microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
-                    logger.d { "[monitorHeadset] before device selected" }
+                    logger.d { "[monitorHeadset] before device selected: $deviceBeforeHeadset" }
                     microphone.select(deviceBeforeHeadset)
                 }
             }
@@ -1185,6 +1185,7 @@ public class Call(
     }
 
     private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
+        logger.d { "[updateMediaManagerFromSettings]" }
         // Speaker
         if (speaker.status.value is DeviceStatus.NotSelected) {
             val enableSpeaker =
@@ -1196,8 +1197,10 @@ public class Call(
                     callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
                         callSettings.audio.speakerDefaultOn
                 }
-
-            speaker.setEnabled(enabled = enableSpeaker)
+            logger.d { "[updateMediaManagerFromSettings], enableSpeaker=$enableSpeaker" }
+            speaker.setEnabled(
+                enabled = enableSpeaker,
+            ) // TODO Rahul commented to test audio routing
         }
 
         monitorHeadset()
@@ -1320,13 +1323,13 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.removeRingingCall(StopForegroundServiceSource.CallAccept)
+        clientImpl.state.maybeStopForegroundService(call = this, StopForegroundServiceSource.CallAccept)
         return clientImpl.accept(type, id)
     }
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
+        logger.d { "Noob 03, [reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
     }
 
