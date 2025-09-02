@@ -76,7 +76,6 @@ internal class Subscriber(
         RestartIceJobDelegate(coroutineScope),
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : StreamPeerConnection(
-    coroutineScope = coroutineScope,
     type = StreamPeerType.SUBSCRIBER,
     mediaConstraints = MediaConstraints(),
     onStreamAdded = { _ -> },

@@ -145,7 +145,6 @@ class StreamPeerConnectionFactoryTest {
 
         val config = PeerConnection.RTCConfiguration(emptyList())
         val result = factory.makePeerConnection(
-            coroutineScope = testScope,
             configuration = config,
             type = io.getstream.video.android.core.model.StreamPeerType.SUBSCRIBER,
             mediaConstraints = MediaConstraints(),

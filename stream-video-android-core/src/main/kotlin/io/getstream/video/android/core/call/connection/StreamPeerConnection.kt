@@ -71,7 +71,6 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param tracer The tracer used to trace the connection.
  */
 open class StreamPeerConnection(
-    private val coroutineScope: CoroutineScope,
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,

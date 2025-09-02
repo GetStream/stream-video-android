@@ -84,7 +84,6 @@ internal class Publisher(
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
 ) : StreamPeerConnection(
-    coroutineScope,
     type,
     mediaConstraints,
     onStreamAdded,
@@ -227,7 +226,7 @@ internal class Publisher(
     /**
      * Starts publishing the given track.
      */
-    suspend fun publishStream(
+    fun publishStream(
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
     ): MediaStreamTrack? {
