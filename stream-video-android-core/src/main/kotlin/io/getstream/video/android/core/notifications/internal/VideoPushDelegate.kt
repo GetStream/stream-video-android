@@ -23,6 +23,7 @@ import io.getstream.android.push.delegate.PushDelegate
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.notifications.interceptor.StreamVideoPushInterceptor
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,14 @@ internal class VideoPushDelegate : PushDelegate() {
         payload: Map<String, Any?>,
     ): Boolean {
         logger.d { "[handlePushMessage] payload: $payload, metadata: $metadata" }
+        val interceptor = StreamVideoPushInterceptor.interceptor
+        if (interceptor != null) {
+            if (!interceptor.onRemoteMessageHook(metadata, payload)) {
+                logger.d { "[handlePushMessage] exiting early" }
+            }
+            return false
+        }
+
         return payload.ifValid {
             val callId = (payload[KEY_CALL_CID] as String).toTypeAndId()
                 .let { StreamCallId(it.first, it.second) }
@@ -97,6 +106,14 @@ internal class VideoPushDelegate : PushDelegate() {
      */
     override fun registerPushDevice(pushDevice: PushDevice) {
         logger.d { "[registerPushDevice] pushDevice: $pushDevice" }
+
+        val interceptor = StreamVideoPushInterceptor.interceptor
+        if (interceptor != null) {
+            if (!interceptor.registerPushDeviceHook(pushDevice)) {
+                logger.d { "[handlePushMessage] exiting early" }
+            }
+            return
+        }
         CoroutineScope(DispatcherProvider.IO).launch {
             getStreamVideo("register-push-device")?.createDevice(pushDevice)
         }
