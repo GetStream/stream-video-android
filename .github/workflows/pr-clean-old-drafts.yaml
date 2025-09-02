@@ -1,5 +1,5 @@
 # .github/workflows/pr-quality-check.yml (caller)
-name: PR checklist
+name: PR cleanup
 
 on:
   schedule:
