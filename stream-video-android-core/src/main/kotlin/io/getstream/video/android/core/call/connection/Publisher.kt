@@ -65,7 +65,6 @@ import stream.video.sfu.signal.SetPublisherRequest
 import java.util.UUID
 
 internal class Publisher(
-    private val localParticipant: ParticipantState,
     private val mediaManager: MediaManagerImpl,
     private val peerConnectionFactory: StreamPeerConnectionFactory,
     private val publishOptions: List<PublishOption>,

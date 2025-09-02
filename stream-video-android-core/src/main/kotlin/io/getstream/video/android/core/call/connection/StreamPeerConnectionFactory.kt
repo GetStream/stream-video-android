@@ -349,7 +349,6 @@ public class StreamPeerConnectionFactory(
     }
 
     internal fun makePublisher(
-        me: ParticipantState,
         mediaManager: MediaManagerImpl,
         publishOptions: List<PublishOption>,
         coroutineScope: CoroutineScope,
@@ -368,7 +367,6 @@ public class StreamPeerConnectionFactory(
             sessionId = sessionId,
             sfuClient = sfuClient,
             peerConnectionFactory = this,
-            localParticipant = me,
             mediaManager = mediaManager,
             publishOptions = publishOptions,
             coroutineScope = coroutineScope,
