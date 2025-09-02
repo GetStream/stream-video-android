@@ -45,6 +45,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.events.CallRejectedSlowEvent
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -207,6 +208,22 @@ constructor(
             callDisplayName,
             payload,
         ).showNotification(callId, callId.hashCode())
+
+        StreamVideo.instanceOrNull()?.let {
+            val call = it.call(callId.type, callId.id)
+            val ringingState = call.state.ringingState.value
+
+            if (ringingState is RingingState.Incoming) {
+                if (!ringingState.acceptedByMe) {
+                    /**
+                     * Using dispatcher in notification can cause 15 seconds delay
+                     * One alternative is to use this inside service class
+                     */
+                    logger.d { "[onMissedCall] Ringing State: $ringingState" }
+                    call.state.updateSlowEvent(CallRejectedSlowEvent())
+                }
+            }
+        }
     }
 
     override fun onNotification(

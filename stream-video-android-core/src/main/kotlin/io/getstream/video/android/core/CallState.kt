@@ -18,6 +18,8 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.BlockedUserEvent
@@ -83,6 +85,7 @@ import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.DummySlowEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -92,6 +95,7 @@ import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.events.PinsUpdatedEvent
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
+import io.getstream.video.android.core.events.SlowEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
@@ -656,6 +660,9 @@ public class CallState(
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
 
+    private val _slowEvent = MutableStateFlow<SlowEvent>(DummySlowEvent)
+    val slowEvent: StateFlow<SlowEvent> = _slowEvent
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
         when (event) {
@@ -701,19 +708,23 @@ public class CallState(
             }
 
             is CallRejectedEvent -> {
-                val new = _rejectedBy.value.toMutableSet()
-                new.add(event.user.id)
-                _rejectedBy.value = new.toSet()
-                updateRingingState(
-                    rejectReason = event.reason?.let {
-                        when (it) {
-                            RejectReason.Busy.alias -> RejectReason.Busy
-                            RejectReason.Cancel.alias -> RejectReason.Cancel
-                            RejectReason.Decline.alias -> RejectReason.Decline
-                            else -> RejectReason.Custom(alias = it)
-                        }
-                    },
-                )
+                //TODO Rahul added for debugging
+                Handler(Looper.getMainLooper())
+                    .postDelayed({
+                        val new = _rejectedBy.value.toMutableSet()
+                        new.add(event.user.id)
+                        _rejectedBy.value = new.toSet()
+                        updateRingingState(
+                            rejectReason = event.reason?.let {
+                                when (it) {
+                                    RejectReason.Busy.alias -> RejectReason.Busy
+                                    RejectReason.Cancel.alias -> RejectReason.Cancel
+                                    RejectReason.Decline.alias -> RejectReason.Decline
+                                    else -> RejectReason.Custom(alias = it)
+                                }
+                            },
+                        )
+                    }, 10_000L)
             }
 
             is CallEndedEvent -> {
@@ -1545,6 +1556,11 @@ public class CallState(
 
     fun updateNotification(notification: Notification) {
         atomicNotification.set(notification)
+    }
+
+    fun updateSlowEvent(slowEvent: SlowEvent) {
+        logger.d { "[updateSlowEvent], call_id:${call.id}" }
+        _slowEvent.value = slowEvent
     }
 }
 

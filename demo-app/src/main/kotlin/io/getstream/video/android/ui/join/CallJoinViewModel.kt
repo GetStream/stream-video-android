@@ -20,20 +20,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.getstream.android.push.PushProvider
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.data.datasource.local.InMemoryStore
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
-import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallCid
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.NetworkMonitor
 import io.getstream.video.android.util.StreamVideoInitHelper
-import io.getstream.video.android.util.fcmToken
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +39,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
@@ -80,7 +79,7 @@ class CallJoinViewModel @Inject constructor(
         .shareIn(viewModelScope, SharingStarted.Lazily, 0)
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             isNetworkAvailable.collect { isNetworkAvailable ->
                 if (isNetworkAvailable && !StreamVideo.isInstalled) {
                     StreamVideoInitHelper.loadSdk(
@@ -122,20 +121,15 @@ class CallJoinViewModel @Inject constructor(
     }
 
     fun logOut() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             ChatClient.instance().disconnect(true).enqueue()
             dataStore.clear() // Demo App DataStore
             googleSignInClient.signOut()
 
             StreamVideo.instanceOrNull()?.let { streamVideo ->
-                fcmToken?.let { fcmToken ->
-                    streamVideo.deleteDevice(
-                        Device(
-                            id = fcmToken,
-                            pushProvider = PushProvider.FIREBASE.key,
-                            pushProviderName = "firebase",
-                        ),
-                    )
+                val device = streamVideo.getDevice().firstOrNull()
+                if (device != null) {
+                    streamVideo.deleteDevice(device)
                 }
                 streamVideo.logOut()
             }

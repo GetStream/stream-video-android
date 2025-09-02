@@ -32,6 +32,7 @@ import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -125,6 +126,12 @@ object StreamVideoInitHelper {
                 // Store the data (note that this datastore belongs to the client - it's not
                 // used by the SDK directly in any way)
                 dataStore.updateUser(loggedInUser)
+
+                dataStore.updateUserToken(authData.token)
+                dataStore.updateApiKey(authData.apiKey)
+
+                Log.d("StreamVideoInitHelper", "token = ${authData.token}")
+                Log.d("StreamVideoInitHelper", "api key = ${authData.apiKey}")
             }
 
             // If we have a logged in user (from the data store or randomly created above)
@@ -135,6 +142,12 @@ object StreamVideoInitHelper {
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = loggedInUser.id,
                     )
+
+                    dataStore.updateUserToken(authData.token)
+                    dataStore.updateApiKey(authData.apiKey)
+
+                    Log.d("StreamVideoInitHelper", "token = ${authData.token}")
+                    Log.d("StreamVideoInitHelper", "api key = ${authData.apiKey}")
                 }
 
                 initializeStreamChat(
@@ -156,10 +169,71 @@ object StreamVideoInitHelper {
             _initState.value = InitializedState.FINISHED
         } catch (e: Exception) {
             _initState.value = InitializedState.FAILED
-            Log.e("StreamVideoInitHelper", "Init failed.", e)
+            Log.e("StreamVideoInitHelper", "Init failed with ${e.message}", e)
         }
 
         isInitialising = false
+    }
+
+    suspend fun loadSdkFromPNFlow(
+        dataStore: StreamUserDataStore,
+    ) = AppConfig.load(context) {
+        if (StreamVideo.isInstalled) {
+            _initState.value = InitializedState.FINISHED
+            Log.w("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialised.")
+            return@load
+        }
+
+        if (isInitialising) {
+            _initState.value = InitializedState.RUNNING
+            Log.d("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialising")
+            return@load
+        }
+
+        isInitialising = true
+        _initState.value = InitializedState.RUNNING
+
+        try {
+            // Load the signed-in user (can be null)
+            val loggedInUser = dataStore.data.firstOrNull()?.user
+
+//            // If we have a logged in user (from the data store or randomly created above)
+//            // then we can initialise the SDK
+            Log.i("StreamVideoInitHelper", "Phase 2")
+            if (loggedInUser != null) {
+                val apiKey = dataStore.apiKey.firstOrNull().toString()
+                val token = dataStore.userToken.firstOrNull().toString()
+
+                Log.i("StreamVideoInitHelper", "Phase 4 initializeStreamChat")
+                initializeStreamChat(
+                    context = context,
+                    apiKey = apiKey,
+                    user = loggedInUser,
+                    token = token,
+                )
+
+                Log.i("StreamVideoInitHelper", "Phase 5 initializeStreamVideo")
+                initializeStreamVideo(
+                    context = context,
+                    apiKey = apiKey,
+                    user = loggedInUser,
+                    token = token,
+                    loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                )
+
+                Log.i("StreamVideoInitHelper", "Init successful.")
+                _initState.value = InitializedState.FINISHED
+            } else {
+                Log.i("StreamVideoInitHelper", "Skipped no user logged in")
+                _initState.value = InitializedState.NOT_STARTED
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _initState.value = InitializedState.FAILED
+            Log.e("StreamVideoInitHelper", "Init failed with ${e.message}", e)
+        } finally {
+            isInitialising = false
+        }
     }
 
     private fun initializeStreamChat(
@@ -213,7 +287,7 @@ object StreamVideoInitHelper {
             apiKey = apiKey,
             user = user,
             token = token,
-            loggingLevel = loggingLevel,
+            loggingLevel = loggingLevel.copy(httpLoggingLevel = HttpLoggingLevel.BODY),
             ensureSingleInstance = false,
             callServiceConfigRegistry = callServiceConfigRegistry,
             notificationConfig = testNotificationConfig ?: NotificationConfig(

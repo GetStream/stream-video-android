@@ -17,6 +17,7 @@
 package io.getstream.video.android.ui.login
 
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -106,7 +107,15 @@ class LoginViewModel @Inject constructor(
                     // Store the data in the demo app
                     dataStore.updateUser(user)
                     // Init the Video SDK with the data
-                    StreamVideoInitHelper.loadSdk(dataStore)
+                    Log.d(
+                        "Noob",
+                        "Noob Load sdk start, userId: ${authData.userId}, token: ${authData.token}, apiKey: ${authData.apiKey}, env: ${it.env}",
+                    )
+                    delay(
+                        2_000L,
+                    ) // Intentional delay for first time loading as creating device token is failing createDevice api is called right away
+                    StreamVideoInitHelper.loadSdk(dataStore) // TODO Rahul 1
+                    Log.d("Noob", "Noob Load sdk finish")
                     flowOf(LoginUiState.SignInComplete(authData))
                 } catch (exception: Throwable) {
                     val message = "Sign in failed: ${exception.message ?: "Generic error"}"

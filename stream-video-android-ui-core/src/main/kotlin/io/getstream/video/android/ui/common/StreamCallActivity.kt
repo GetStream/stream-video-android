@@ -55,6 +55,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
+import io.getstream.video.android.core.events.CallRejectedSlowEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -184,6 +185,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     private var cachedCallEventJob: Job? = null
     private var participantCountJob: Job? = null
+    private var slowCallEventJob: Job? = null
     private val supervisorJob = SupervisorJob()
     private var isFinishingSafely = false
 
@@ -1128,6 +1130,22 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                             onConnectionEvent(call, it)
                         }
                     }
+
+                slowCallEventJob?.cancel()
+                slowCallEventJob = lifecycleScope.launch(Dispatchers.IO + supervisorJob) {
+                    call.state.slowEvent.collectLatest { event ->
+                        when (event) {
+                            is CallRejectedSlowEvent -> {
+                                reject(
+                                    call,
+                                    RejectReason.Custom("slow-event"),
+                                    onSuccessFinish,
+                                    onErrorFinish,
+                                )
+                            }
+                        }
+                    }
+                }
                 onSuccess?.invoke(
                     savedInstanceState,
                     persistentState,

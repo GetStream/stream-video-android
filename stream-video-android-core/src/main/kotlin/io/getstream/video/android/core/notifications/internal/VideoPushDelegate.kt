@@ -51,10 +51,12 @@ internal class VideoPushDelegate : PushDelegate() {
         logger.d { "[handlePushMessage] payload: $payload, metadata: $metadata" }
         val interceptor = StreamVideoPushInterceptor.interceptor
         if (interceptor != null) {
-            if (!interceptor.onRemoteMessageHook(metadata, payload)) {
+            val result = interceptor.onRemoteMessageHook(metadata, payload)
+
+            if (!result) {
                 logger.d { "[handlePushMessage] exiting early" }
+                return false
             }
-            return false
         }
 
         return payload.ifValid {
@@ -111,8 +113,8 @@ internal class VideoPushDelegate : PushDelegate() {
         if (interceptor != null) {
             if (!interceptor.registerPushDeviceHook(pushDevice)) {
                 logger.d { "[handlePushMessage] exiting early" }
+                return
             }
-            return
         }
         CoroutineScope(DispatcherProvider.IO).launch {
             getStreamVideo("register-push-device")?.createDevice(pushDevice)

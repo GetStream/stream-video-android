@@ -37,10 +37,12 @@ import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallRejectedEvent
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.events.CallRejectedSlowEvent
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -63,6 +65,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -678,6 +681,7 @@ internal open class CallService : Service() {
                     }
 
                     is CallRejectedEvent -> {
+                        delay(10_000L) //TODO Rahul added for debugging
                         handleIncomingCallRejectedByMeOrCaller(
                             rejectedByUserId = event.user.id,
                             myUserId = streamVideo.userId,
@@ -693,6 +697,14 @@ internal open class CallService : Service() {
                 }
             }
         }
+
+        call.scope.launch(Dispatchers.Default) {
+            call.state.slowEvent.collectLatest {
+                when (it) {
+                    is CallRejectedSlowEvent -> handleSlowCallRejectedEvent(call)
+                }
+            }
+        }
     }
 
     private fun handleIncomingCallAcceptedByMeOnAnotherDevice(
@@ -705,6 +717,12 @@ internal open class CallService : Service() {
             // So stop ringing on this device
             stopService()
         }
+    }
+
+    private suspend fun handleSlowCallRejectedEvent(call: Call) {
+        logger.d { "[handleSlowCallRejectedEvent]" }
+        removeIncomingCall(INCOMING_CALL_NOTIFICATION_ID)
+        call.reject(RejectReason.Custom("slow-event"))
     }
 
     private fun handleIncomingCallRejectedByMeOrCaller(
