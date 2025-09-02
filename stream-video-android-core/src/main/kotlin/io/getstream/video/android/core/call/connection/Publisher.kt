@@ -160,7 +160,7 @@ internal class Publisher(
     }
 
     @VisibleForTesting
-    public suspend fun negotiate(iceRestart: Boolean = false) = sdpProcessor.submit {
+    public suspend fun negotiate(iceRestart: Boolean = false) = sdpProcessor.submit("publisherNegotiate") {
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
             return@submit
