@@ -19,7 +19,6 @@ package io.getstream.video.android.core.call.connection
 import androidx.annotation.VisibleForTesting
 import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.MediaManagerImpl
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
