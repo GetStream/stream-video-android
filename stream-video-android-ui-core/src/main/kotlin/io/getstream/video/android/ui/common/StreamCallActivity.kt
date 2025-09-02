@@ -64,11 +64,13 @@ import io.getstream.video.android.ui.common.models.StreamCallActivityException
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -181,6 +183,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         HashMap()
 
     private var cachedCallEventJob: Job? = null
+    private var participantCountJob: Job? = null
     private val supervisorJob = SupervisorJob()
     private var isFinishingSafely = false
 
@@ -324,7 +327,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // We are not calling onErrorFinish here on purpose
                 // we want to crash if we cannot initialize the call
                 logger.e(it) { "Failed to initialize call." }
-                throw it
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             },
         )
     }
@@ -351,7 +356,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // We are not calling onErrorFinish here on purpose
                 // we want to crash if we cannot initialize the call
                 logger.e(it) { "Failed to initialize call." }
-                throw it
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             },
         )
     }
@@ -367,11 +374,41 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     protected open fun handleOnNewIntentAction(intent: Intent) {
+        logger.d { "[handleOnNewIntentAction], intent action = ${intent.action}" }
         when (intent.action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 handleOnNewIncomingCallAcceptAction()
             }
+            NotificationHandler.ACTION_INCOMING_CALL -> {
+                handleOnNewIncomingCallAction()
+            }
             else -> {}
+        }
+    }
+
+    protected open fun handleOnNewIncomingCallAction() {
+        val activeCall = StreamVideo.instance().state.activeCall.value
+        if (activeCall == null) {
+            initializeCallOrFail(
+                null,
+                null,
+                intent,
+                onSuccess = { instanceState, persistedState, call, action ->
+                    logger.d { "Calling [handleOnNewIncomingCallAction], because call id: ${call.id}" }
+                    onIntentAction(call, action, onError = onErrorFinish) { successCall ->
+                        applyDashboardSettings(successCall)
+                        onCreate(instanceState, persistedState, successCall)
+                    }
+                },
+                onError = {
+                    // We are not calling onErrorFinish here on purpose
+                    // we want to crash if we cannot initialize the call
+                    logger.e(it) { "Failed to initialize call." }
+                    lifecycleScope.launch {
+                        onErrorFinish(it)
+                    }
+                },
+            )
         }
     }
 
@@ -393,6 +430,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             else -> {
                 if (handler.shouldAcceptNewCall(activeCall, intent)) {
+                    // Rest states
+                    participantCountJob?.cancel()
+                    participantCountJob = null
+
                     // We want to leave the ongoing active call
                     leave(activeCall, onSuccessFinish, onErrorFinish)
                     lifecycleScope.launch(Dispatchers.Default) {
@@ -418,23 +459,23 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     public override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
         withCachedCall {
             onUserLeaveHint(it)
-            super.onUserLeaveHint()
         }
     }
 
     public override fun onPause() {
+        super.onPause()
         withCachedCall {
             onPause(it)
-            super.onPause()
         }
     }
 
     public override fun onStop() {
+        super.onStop()
         withCachedCall {
             onStop(it)
-            super.onStop()
         }
     }
 
@@ -528,7 +569,19 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
         val streamCallId = intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
         streamCallId?.let {
-            logger.d { "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}" }
+            val sb = StringBuilder()
+            sb.append("closeScreenOnError=${config.closeScreenOnError}\n")
+            sb.append("closeScreenOnCallEnded=${config.closeScreenOnCallEnded}\n")
+            sb.append("canKeepScreenOn=${config.canKeepScreenOn}\n")
+            sb.append("canSkipPermissionRationale=${config.canSkipPermissionRationale}\n")
+            sb.append("StreamVideo is null=${StreamVideo.instanceOrNull() == null}\n")
+            val leaveWhenLastInCall = intent.getBooleanExtra(
+                EXTRA_LEAVE_WHEN_LAST,
+                DEFAULT_LEAVE_WHEN_LAST,
+            )
+            logger.d {
+                "[initializeConfig], call_id: ${it.id}, activity hashcode=${this.hashCode()}, Configuration: $sb, Leave when last in call: $leaveWhenLastInCall"
+            }
             configurationMap[it.id] = config
         }
     }
@@ -683,9 +736,17 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: ((Call) -> Unit)?,
         onError: ((Exception) -> Unit)?,
     ) {
-        val sdkInstance = StreamVideo.instance()
-        val call = sdkInstance.call(cid.type, cid.id)
-        onSuccess?.invoke(call)
+        val sdkInstance = StreamVideo.instanceOrNull()
+        if (sdkInstance != null) {
+            val call = sdkInstance.call(cid.type, cid.id)
+            onSuccess?.invoke(call)
+        } else {
+            onError?.invoke(
+                IllegalStateException(
+                    "StreamVideoBuilder.build() must be called before obtaining StreamVideo instance.",
+                ),
+            )
+        }
     }
 
     /**
@@ -768,7 +829,13 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     ) {
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
-            call.acceptThenJoin()
+            val result = call.acceptThenJoin()
+            result.onError { error ->
+                lifecycleScope.launch {
+                    onError?.invoke(Exception(error.message))
+                }
+            }
+            result
         }
     }
 
@@ -931,17 +998,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                val total = call.state.participants.value.size
-                logger.d { "Participant left, remaining: $total" }
-                lifecycleScope.launch(Dispatchers.Default) {
-                    call.state.participants.value.forEachIndexed { i, v ->
-                        logger.d { "Participant [$i]=${v.name.value}" }
-                    }
-                }
-
-                if (total <= 1) {
-                    onLastParticipant(call)
-                }
+                processParticipantLeftEvent(call, event)
             }
         }
     }
@@ -1087,8 +1144,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             initializeCallOrFail(null, null, intent, onSuccess = { _, _, call, _ ->
                 action(call)
             }, onError = {
-                // Call is missing, we need to crash, no other way
-                throw it
+                logger.e(it) { "Failed to initialize call." }
+                lifecycleScope.launch {
+                    onErrorFinish(it)
+                }
             })
         } else {
             action(cachedCall)
@@ -1164,7 +1223,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     protected open fun getCallTransitionTime(): Long = 0L
 
     private suspend fun Call.acceptThenJoin() =
-        withContext(Dispatchers.IO) { accept().flatMap { join() } }
+        withContext(Dispatchers.IO) {
+            accept().flatMap { join() }
+        }
 
     public fun safeFinish() {
         if (!this.isFinishing && !isFinishingSafely) {
@@ -1173,6 +1234,50 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             finish()
         }
     }
+
+    /**
+     * Processes participant leave events for the given [call].
+     *
+     * Observes [cachedCall.state.participants] and triggers [onLastParticipant] if only
+     * one or fewer participants remain. Debouncing is applied to handle quick network
+     * disconnect/reconnect scenarios.
+     *
+     * @param call the active [Call] associated with the event.
+     * @param event the [VideoEvent] that triggered this processing, typically a [ParticipantLeftEvent]
+     *              or [CallSessionParticipantLeftEvent].
+     */
+    @OptIn(FlowPreview::class)
+    private fun processParticipantLeftEvent(call: Call, event: VideoEvent) {
+        /**
+         * - participantCountJob will be null when activity is newly created
+         * - participantCountJob will be inactive when activity is resumed with another call
+         */
+        if (participantCountJob == null) {
+            participantCountJob = lifecycleScope.launch(supervisorJob) {
+                cachedCall.state.participants
+                    /**
+                     * A debounce is applied here to handle quick disconnect/reconnect scenarios
+                     * caused by unstable network conditions. Without the debounce, other devices
+                     * may receive a [ParticipantLeftEvent] prematurely, which could trigger
+                     * unintended reactions in the call flow.
+                     */
+                    .debounce(getParticipantUpdateDebounce(call))
+                    .collect {
+                        logger.d { "Participant left, remaining: ${it.size}" }
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            it.forEachIndexed { i, v ->
+                                logger.d { "Participant [$i]=${v.name.value}" }
+                            }
+                        }
+                        if (it.size <= 1) {
+                            onLastParticipant(call)
+                        }
+                    }
+            }
+        }
+    }
+
+    public open fun getParticipantUpdateDebounce(call: Call): Long = 1_000L
 }
 
 public typealias StreamCallIdString = String

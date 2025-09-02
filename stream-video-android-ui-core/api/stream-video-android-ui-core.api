@@ -97,8 +97,10 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public final fun getConfigurationMap ()Ljava/util/HashMap;
 	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
 	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;
+	public fun getParticipantUpdateDebounce (Lio/getstream/video/android/core/Call;)J
 	public abstract fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
 	protected fun handleOnNewIncomingCallAcceptAction ()V
+	protected fun handleOnNewIncomingCallAction ()V
 	protected fun handleOnNewIntentAction (Landroid/content/Intent;)V
 	public fun isCurrentAcceptedCall (Lio/getstream/video/android/core/Call;)Z
 	public fun isVideoCall (Lio/getstream/video/android/core/Call;)Z

@@ -263,12 +263,30 @@ class StreamNotificationChannelsTest {
                 NotificationManager.IMPORTANCE_HIGH,
             )
 
+        val incomingCallLowImportanceChannel =
+            createChannelInfo(
+                "incoming_low",
+                "Incoming",
+                "Incoming desc",
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
+        val missedCallLowImportanceChannel =
+            createChannelInfo(
+                "missed_low",
+                "Missed",
+                "Missed desc",
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
         // When
         val channels = StreamNotificationChannels(
             incomingCallChannel = incomingChannel,
             ongoingCallChannel = ongoingChannel,
             outgoingCallChannel = outgoingChannel,
             missedCallChannel = missedChannel,
+            incomingCallLowImportanceChannel = incomingCallLowImportanceChannel,
+            missedCallLowImportanceChannel = missedCallLowImportanceChannel,
         )
 
         // Then
@@ -276,6 +294,8 @@ class StreamNotificationChannelsTest {
         assertEquals(ongoingChannel, channels.ongoingCallChannel)
         assertEquals(outgoingChannel, channels.outgoingCallChannel)
         assertEquals(missedChannel, channels.missedCallChannel)
+        assertEquals(incomingCallLowImportanceChannel, channels.incomingCallLowImportanceChannel)
+        assertEquals(missedCallLowImportanceChannel, channels.missedCallLowImportanceChannel)
     }
 
     @Test

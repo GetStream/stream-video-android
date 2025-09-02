@@ -600,12 +600,14 @@ internal open class CallService : Service() {
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         observeRingingState(callId, streamVideo)
         observeCallEvents(callId, streamVideo)
-        observeNotificationUpdates(callId, streamVideo)
+        if (streamVideo.enableCallNotificationUpdates) {
+            observeNotificationUpdates(callId, streamVideo)
+        }
     }
 
     private fun observeRingingState(callId: StreamCallId, streamVideo: StreamVideoClient) {
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
+        val call = streamVideo.call(callId.type, callId.id)
+        call.scope.launch {
             call.state.ringingState.collect {
                 logger.i { "Ringing state: $it" }
 
@@ -659,8 +661,11 @@ internal open class CallService : Service() {
     }
 
     private fun observeCallEvents(callId: StreamCallId, streamVideo: StreamVideoClient) {
-        serviceScope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
+        val call = streamVideo.call(callId.type, callId.id)
+        /**
+         * This scope will be cleaned as soon as call is destroyed via rejection/decline
+         */
+        call.scope.launch {
             call.events.collect { event ->
                 logger.i { "Received event in service: $event" }
                 when (event) {
@@ -869,6 +874,8 @@ internal open class CallService : Service() {
 
     /**
      * Handle all aspects of stopping the service.
+     * Should be invoke carefully for the calls which are still present in [StreamVideoClient.calls]
+     * Else stopping service by an expired call can cancel current call's notification and the service itself
      */
     private fun stopService() {
         // Cancel the notification

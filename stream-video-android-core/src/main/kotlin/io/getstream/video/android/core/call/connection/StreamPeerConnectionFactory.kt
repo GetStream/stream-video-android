@@ -21,7 +21,6 @@ import android.media.AudioAttributes
 import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDecoderFactory
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
@@ -347,7 +346,6 @@ public class StreamPeerConnectionFactory(
     }
 
     internal fun makePublisher(
-        me: ParticipantState,
         mediaManager: MediaManagerImpl,
         publishOptions: List<PublishOption>,
         coroutineScope: CoroutineScope,
@@ -366,7 +364,6 @@ public class StreamPeerConnectionFactory(
             sessionId = sessionId,
             sfuClient = sfuClient,
             peerConnectionFactory = this,
-            localParticipant = me,
             mediaManager = mediaManager,
             publishOptions = publishOptions,
             coroutineScope = coroutineScope,
