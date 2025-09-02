@@ -63,6 +63,7 @@ import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.MemberResponse
+import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PermissionRequestEvent
 import io.getstream.android.video.generated.models.QueryCallMembersResponse
@@ -75,6 +76,7 @@ import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -91,9 +93,7 @@ import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.events.PinsUpdatedEvent
-import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.video.android.core.events.SFUHealthCheckEvent
-import io.getstream.result.Result
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
@@ -236,7 +236,7 @@ public class CallState(
         override suspend fun unpinParticipant(sessionId: String) {
             call.state.unpin(sessionId)
         }
-        
+
         override fun isLocalParticipant(sessionId: String): Boolean {
             return sessionId == call.sessionId
         }
@@ -251,6 +251,7 @@ public class CallState(
 
     private val internalParticipants = ConcurrentHashMap<String, ParticipantState>()
     private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
+
     /** Participants returns a list of participant state object. @see [ParticipantState] */
     public val participants: StateFlow<List<ParticipantState>> =
         _participants.mapState { it.values.toList() }
@@ -1554,7 +1555,7 @@ public class CallState(
             internalParticipants[participant.sessionId] = participant
         }
         _participants.value = HashMap(internalParticipants)
-        
+
         val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {
             if (it.screenSharingEnabled.value) {

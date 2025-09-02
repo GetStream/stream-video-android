@@ -59,8 +59,10 @@ internal class SerialProcessor(
         handler: suspend () -> T,
     ): Result<T> {
         val currentJobId = ++jobCounter
-        logger.d { "[submit] Job #$currentJobId '$jobName' submitted to SerialProcessor (worker running: ${workerJob?.isActive == true})" }
-        
+        logger.d {
+            "[submit] Job #$currentJobId '$jobName' submitted to SerialProcessor (worker running: ${workerJob?.isActive == true})"
+        }
+
         // Start the worker job if it's not already running
         if (workerJob == null) {
             logger.d { "[submit] Starting SerialProcessor worker" }
@@ -70,19 +72,23 @@ internal class SerialProcessor(
                     for (job in channel) {
                         logger.d { "[execute] Job #${job.jobId} '${job.jobName}' starting execution" }
                         val startTime = System.currentTimeMillis()
-                        
+
                         // run the block, capture success or failure
                         val result = runCatching { job.block() }
-                        
+
                         val executionTime = System.currentTimeMillis() - startTime
                         completedJobs++
                         queuedJobs--
                         if (result.isSuccess) {
-                            logger.d { "[execute] Job #${job.jobId} '${job.jobName}' completed successfully in ${executionTime}ms (completed: $completedJobs, queued: $queuedJobs)" }
+                            logger.d {
+                                "[execute] Job #${job.jobId} '${job.jobName}' completed successfully in ${executionTime}ms (completed: $completedJobs, queued: $queuedJobs)"
+                            }
                         } else {
-                            logger.w { "[execute] Job #${job.jobId} '${job.jobName}' failed after ${executionTime}ms: ${result.exceptionOrNull()?.message} (completed: $completedJobs, queued: $queuedJobs)" }
+                            logger.w {
+                                "[execute] Job #${job.jobId} '${job.jobName}' failed after ${executionTime}ms: ${result.exceptionOrNull()?.message} (completed: $completedJobs, queued: $queuedJobs)"
+                            }
                         }
-                        
+
                         job.reply.complete(result)
                     }
                     logger.d { "[execute] SerialProcessor worker finished processing all jobs in channel" }
@@ -111,18 +117,20 @@ internal class SerialProcessor(
             logger.e { "[submit] Job #$currentJobId '$jobName' failed - channel is closed" }
             return Result.failure(Exception("[SerialProcessor] Channel is closed"))
         }
-        
+
         val finalResult = reply.await().fold(
             onSuccess = { Result.success(it as T) },
             onFailure = { Result.failure(it) },
         )
-        
+
         if (finalResult.isSuccess) {
             logger.d { "[submit] Job #$currentJobId '$jobName' returned successfully" }
         } else {
-            logger.w { "[submit] Job #$currentJobId '$jobName' returned with failure: ${finalResult.exceptionOrNull()?.message}" }
+            logger.w {
+                "[submit] Job #$currentJobId '$jobName' returned with failure: ${finalResult.exceptionOrNull()?.message}"
+            }
         }
-        
+
         return finalResult
     }
 

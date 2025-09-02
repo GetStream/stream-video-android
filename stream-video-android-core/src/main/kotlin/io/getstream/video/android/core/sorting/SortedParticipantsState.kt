@@ -29,8 +29,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
-import java.util.SortedMap
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * A state that takes care of book-keeping participants and its sort order.

@@ -98,7 +98,11 @@ public data class ParticipantState(
     internal val _audioTrack by lazy { MutableStateFlow<AudioTrack?>(null) }
     val audioTrack: StateFlow<AudioTrack?> = _audioTrack
 
-    internal val _screenSharingEnabled: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
+    internal val _screenSharingEnabled: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(
+            false,
+        )
+    }
     val screenSharingEnabled: StateFlow<Boolean> = _screenSharingEnabled
 
     internal val _screenSharingTrack by lazy { MutableStateFlow<VideoTrack?>(null) }
@@ -150,10 +154,18 @@ public data class ParticipantState(
     internal val _speaking: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
     val speaking: StateFlow<Boolean> = _speaking
 
-    internal val _lastSpeakingAt: MutableStateFlow<OffsetDateTime?> by lazy { MutableStateFlow(null) }
+    internal val _lastSpeakingAt: MutableStateFlow<OffsetDateTime?> by lazy {
+        MutableStateFlow(
+            null,
+        )
+    }
     val lastSpeakingAt: StateFlow<OffsetDateTime?> = _lastSpeakingAt
 
-    internal val _reactions: MutableStateFlow<List<Reaction>> by lazy { MutableStateFlow(emptyList()) }
+    internal val _reactions: MutableStateFlow<List<Reaction>> by lazy {
+        MutableStateFlow(
+            emptyList(),
+        )
+    }
     val reactions: StateFlow<List<Reaction>> = _reactions
 
     val video: StateFlow<Video?> = combine(

@@ -93,11 +93,11 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -157,10 +157,9 @@ import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.Collections
-import java.util.concurrent.Executors
-import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -226,9 +225,9 @@ public class RtcSession internal constructor(
     },
     private val rtcSessionScope: CoroutineScope = CoroutineScope(
         clientImpl.scope.coroutineContext +
-                supervisorJob +
-                CoroutineName("rtc-session-coroutine") +
-                rtcSessionExecutor.asCoroutineDispatcher()
+            supervisorJob +
+            CoroutineName("rtc-session-coroutine") +
+            rtcSessionExecutor.asCoroutineDispatcher(),
     ),
     private val serialProcessor: SerialProcessor = SerialProcessor(rtcSessionScope),
     private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
@@ -1021,110 +1020,110 @@ public class RtcSession internal constructor(
             coroutineScope.launch {
                 serialProcessor.submit("handleSfuDataEvent: ${event.getEventType()}") {
                     logger.v { "[onRtcEvent] event: $event" }
-                when (event) {
-                    is JoinCallResponseEvent -> {
-                        val participantStates = event.callState.participants.map {
-                            call.state.getOrCreateParticipant(it)
+                    when (event) {
+                        is JoinCallResponseEvent -> {
+                            val participantStates = event.callState.participants.map {
+                                call.state.getOrCreateParticipant(it)
+                            }
+                            call.state.replaceParticipants(participantStates)
+                            sfuConnectionModule.socketConnection.whenConnected {
+                                publisher = createPublisher(event.publishOptions)
+                                processPendingSubscriberEvents()
+                                processPendingPublisherEvents()
+                                connectRtc()
+                            }
                         }
-                        call.state.replaceParticipants(participantStates)
-                        sfuConnectionModule.socketConnection.whenConnected {
-                            publisher = createPublisher(event.publishOptions)
-                            processPendingSubscriberEvents()
-                            processPendingPublisherEvents()
-                            connectRtc()
+
+                        is ChangePublishOptionsEvent -> {
+                            logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
+                            publisher?.syncPublishOptions(
+                                call.mediaManager.camera.resolution.value,
+                                event.change.publish_options,
+                            ) ?: let {
+                                publisherPendingEvents.add(event)
+                            }
                         }
-                    }
 
-                    is ChangePublishOptionsEvent -> {
-                        logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
-                        publisher?.syncPublishOptions(
-                            call.mediaManager.camera.resolution.value,
-                            event.change.publish_options,
-                        ) ?: let {
-                            publisherPendingEvents.add(event)
+                        is SubscriberOfferEvent -> handleSubscriberOffer(event)
+                        // this dynascale event tells the SDK to change the quality of the video it's uploading
+                        is ChangePublishQualityEvent -> {
+                            event.changePublishQuality.video_senders.forEach {
+                                publisher?.changePublishQuality(it)
+                            }
                         }
-                    }
 
-                    is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                    // this dynascale event tells the SDK to change the quality of the video it's uploading
-                    is ChangePublishQualityEvent -> {
-                        event.changePublishQuality.video_senders.forEach {
-                            publisher?.changePublishQuality(it)
-                        }
-                    }
-
-                    is TrackPublishedEvent -> {
-                        updatePublishState(
-                            userId = event.userId,
-                            sessionId = event.sessionId,
-                            trackType = event.trackType,
-                            videoEnabled = true,
-                            audioEnabled = true,
-                            paused = false,
-                        )
-                    }
-
-                    is InboundStateNotificationEvent -> {
-                        event.inboundVideoStates.forEach { publishState ->
+                        is TrackPublishedEvent -> {
                             updatePublishState(
-                                userId = publishState.userId,
-                                sessionId = publishState.sessionId,
-                                trackType = publishState.trackType,
+                                userId = event.userId,
+                                sessionId = event.sessionId,
+                                trackType = event.trackType,
                                 videoEnabled = true,
                                 audioEnabled = true,
-                                paused = publishState.paused,
+                                paused = false,
                             )
                         }
-                    }
 
-                    is TrackUnpublishedEvent -> {
-                        updatePublishState(
-                            userId = event.userId,
-                            sessionId = event.sessionId,
-                            trackType = event.trackType,
-                            videoEnabled = false,
-                            audioEnabled = false,
-                            paused = false,
-                        )
-                    }
-
-                    is ParticipantJoinedEvent -> {
-                        // the UI layer will automatically trigger updateParticipantsSubscriptions
-                    }
-
-                    is ParticipantLeftEvent -> {
-                        subscriber?.participantLeft(event.participant)
-                        subscriber?.setVideoSubscriptions(
-                            trackOverridesHandler,
-                            call.state.participants.value,
-                            call.state.remoteParticipants.value,
-                        )
-                    }
-
-                    is ICETrickleEvent -> {
-                        handleIceTrickle(event)
-                    }
-
-                    is ICERestartEvent -> {
-                        val peerType = event.peerType
-                        when (peerType) {
-                            PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
-                                publisher?.restartIce() ?: let {
-                                    publisherPendingEvents.add(event)
-                                }
-                            }
-
-                            PeerType.PEER_TYPE_SUBSCRIBER -> {
-                                requestSubscriberIceRestart()
+                        is InboundStateNotificationEvent -> {
+                            event.inboundVideoStates.forEach { publishState ->
+                                updatePublishState(
+                                    userId = publishState.userId,
+                                    sessionId = publishState.sessionId,
+                                    trackType = publishState.trackType,
+                                    videoEnabled = true,
+                                    audioEnabled = true,
+                                    paused = publishState.paused,
+                                )
                             }
                         }
-                    }
 
-                    else -> {
-                        logger.d { "[onRtcEvent] skipped event: $event" }
+                        is TrackUnpublishedEvent -> {
+                            updatePublishState(
+                                userId = event.userId,
+                                sessionId = event.sessionId,
+                                trackType = event.trackType,
+                                videoEnabled = false,
+                                audioEnabled = false,
+                                paused = false,
+                            )
+                        }
+
+                        is ParticipantJoinedEvent -> {
+                            // the UI layer will automatically trigger updateParticipantsSubscriptions
+                        }
+
+                        is ParticipantLeftEvent -> {
+                            subscriber?.participantLeft(event.participant)
+                            subscriber?.setVideoSubscriptions(
+                                trackOverridesHandler,
+                                call.state.participants.value,
+                                call.state.remoteParticipants.value,
+                            )
+                        }
+
+                        is ICETrickleEvent -> {
+                            handleIceTrickle(event)
+                        }
+
+                        is ICERestartEvent -> {
+                            val peerType = event.peerType
+                            when (peerType) {
+                                PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
+                                    publisher?.restartIce() ?: let {
+                                        publisherPendingEvents.add(event)
+                                    }
+                                }
+
+                                PeerType.PEER_TYPE_SUBSCRIBER -> {
+                                    requestSubscriberIceRestart()
+                                }
+                            }
+                        }
+
+                        else -> {
+                            logger.d { "[onRtcEvent] skipped event: $event" }
+                        }
                     }
-                }
-                Unit
+                    Unit
                 }
             }
         }
@@ -1203,17 +1202,17 @@ public class RtcSession internal constructor(
         coroutineScope.launch {
             serialProcessor.submit("sendIceCandidate") {
                 flow {
-                logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
-                val iceTrickle = ICETrickle(
-                    peer_type = peerType.toPeerType(),
-                    ice_candidate = Json.encodeToString(candidate),
-                    session_id = sessionId,
-                )
-                logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
-                val result = sendIceCandidate(iceTrickle)
-                logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
-                emit(result.getOrThrow())
-            }.retry(3).catch { logger.w { "sending ice candidate failed" } }.collect()
+                    logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
+                    val iceTrickle = ICETrickle(
+                        peer_type = peerType.toPeerType(),
+                        ice_candidate = Json.encodeToString(candidate),
+                        session_id = sessionId,
+                    )
+                    logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
+                    val result = sendIceCandidate(iceTrickle)
+                    logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
+                    emit(result.getOrThrow())
+                }.retry(3).catch { logger.w { "sending ice candidate failed" } }.collect()
             }
         }
     }
