@@ -935,7 +935,6 @@ public class RtcSession internal constructor(
     internal fun createPublisher(publishOptions: List<PublishOption>): Publisher {
         return call.peerConnectionFactory.makePublisher(
             sessionId = sessionId,
-            me = call.state.me.value!!,
             sfuClient = sfuConnectionModule.api,
             mediaManager = call.mediaManager,
             configuration = connectionConfiguration,

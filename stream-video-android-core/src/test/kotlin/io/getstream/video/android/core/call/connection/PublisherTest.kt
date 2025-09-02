@@ -152,7 +152,6 @@ class PublisherTest {
         // Construct a "real" Publisher but spy it, so we can mock or verify inherited calls.
         publisher = spyk(
             Publisher(
-                localParticipant = mockParticipantState,
                 mediaManager = mockMediaManager,
                 peerConnectionFactory = mockPeerConnectionFactory,
                 publishOptions = listOf(videoPublishOption, audioPublishOption),
