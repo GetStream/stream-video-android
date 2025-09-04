@@ -19,7 +19,6 @@ package io.getstream.video.android.core.call.connection
 import androidx.annotation.VisibleForTesting
 import io.getstream.result.onErrorSuspend
 import io.getstream.video.android.core.MediaManagerImpl
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
@@ -65,7 +64,6 @@ import stream.video.sfu.signal.SetPublisherRequest
 import java.util.UUID
 
 internal class Publisher(
-    private val localParticipant: ParticipantState,
     private val mediaManager: MediaManagerImpl,
     private val peerConnectionFactory: StreamPeerConnectionFactory,
     private val publishOptions: List<PublishOption>,
