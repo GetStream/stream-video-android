@@ -785,11 +785,16 @@ public class Call(
         isDestroyed = true
 
         sfuSocketReconnectionTime = null
+
+        /**
+         * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
+         */
         stopScreenSharing()
         camera.disable()
         microphone.disable()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+        client.state.removeActiveCall(this) // Will also stop CallService
+        client.state.removeRingingCall(this)
+
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
@@ -1294,7 +1299,7 @@ public class Call(
         session?.cleanup()
         shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
-        mediaManager.cleanup()
+        mediaManager.cleanup() // TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
         session = null
     }
 
@@ -1325,8 +1330,8 @@ public class Call(
         return clientImpl.accept(type, id)
     }
 
-    suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
+    suspend fun reject(source: String, reason: RejectReason? = null): Result<RejectCallResponse> { // TODO Rahul, remove source before merging PR
+        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id, source: $source" }
         return clientImpl.reject(type, id, reason)
     }
 

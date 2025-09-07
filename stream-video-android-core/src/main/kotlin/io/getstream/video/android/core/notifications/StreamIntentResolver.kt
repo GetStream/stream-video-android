@@ -19,6 +19,7 @@ package io.getstream.video.android.core.notifications
 import android.app.PendingIntent
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ONGOING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
+import io.getstream.video.android.model.NotificationType
 import io.getstream.video.android.model.StreamCallId
 
 /**
@@ -41,7 +42,7 @@ interface StreamIntentResolver : StreamIntentResolverWithPayload {
     )
     fun searchIncomingCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+        notificationId: Int = callId.hashCode(),
     ): PendingIntent? {
         return searchIncomingCallPendingIntent(callId, notificationId, emptyMap())
     }
@@ -62,7 +63,7 @@ interface StreamIntentResolver : StreamIntentResolverWithPayload {
     )
     fun searchOutgoingCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+        notificationId: Int = callId.hashCode(),
     ): PendingIntent? {
         return searchIncomingCallPendingIntent(callId, notificationId, emptyMap())
     }
@@ -146,7 +147,7 @@ interface StreamIntentResolver : StreamIntentResolverWithPayload {
     )
     fun searchAcceptCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+        notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
     ): PendingIntent? {
         return searchAcceptCallPendingIntent(callId, notificationId, emptyMap())
     }

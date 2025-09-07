@@ -5496,8 +5496,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun processAudioSample (Lorg/webrtc/audio/JavaAudioDeviceModule$AudioSamples;)V
 	public final fun queryMembers (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun reject (Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun reject$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun reject (Ljava/lang/String;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun reject$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun rejoin (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun removeMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestPermissions ([Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -5617,6 +5617,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSlowEvent ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartedAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -5651,6 +5652,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateParticipantVisibilityFlow (Lkotlinx/coroutines/flow/Flow;)V
 	public final fun updateRejectActionBundle (Landroid/os/Bundle;)V
 	public final fun updateRejectedBy (Ljava/util/Set;)V
+	public final fun updateSlowEvent (Lio/getstream/video/android/core/events/SlowEvent;)V
 	public final fun upsertParticipants (Ljava/util/List;)V
 }
 
@@ -5748,6 +5750,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
 	public final fun removeRingingCall ()V
+	public final fun removeRingingCall (Lio/getstream/video/android/core/Call;)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
 }
 
@@ -8593,6 +8596,10 @@ public final class io/getstream/video/android/core/events/CallGrantsUpdatedEvent
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/events/CallRejectedSlowEvent : io/getstream/video/android/core/events/SlowEvent {
+	public fun <init> ()V
+}
+
 public final class io/getstream/video/android/core/events/ChangePublishOptionsEvent : io/getstream/video/android/core/events/SfuDataEvent {
 	public fun <init> (Lstream/video/sfu/event/ChangePublishOptions;)V
 	public final fun component1 ()Lstream/video/sfu/event/ChangePublishOptions;
@@ -8637,6 +8644,10 @@ public final class io/getstream/video/android/core/events/DominantSpeakerChanged
 	public final fun getUserId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/DummySlowEvent : io/getstream/video/android/core/events/SlowEvent {
+	public static final field INSTANCE Lio/getstream/video/android/core/events/DummySlowEvent;
 }
 
 public final class io/getstream/video/android/core/events/ErrorEvent : io/getstream/video/android/core/events/SfuDataEvent {
@@ -8857,6 +8868,9 @@ public final class io/getstream/video/android/core/events/SfuSocketError : java/
 	public fun <init> (Lstream/video/sfu/models/Error;)V
 	public final fun getError ()Lstream/video/sfu/models/Error;
 	public fun getMessage ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/core/events/SlowEvent {
 }
 
 public final class io/getstream/video/android/core/events/SubscriberOfferEvent : io/getstream/video/android/core/events/SfuDataEvent {
@@ -12629,6 +12643,45 @@ public final class io/getstream/video/android/model/Device$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class io/getstream/video/android/model/NotificationType$Custom : io/getstream/video/android/model/NotificationType {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/model/NotificationType$Custom;
+	public static synthetic fun copy$default (Lio/getstream/video/android/model/NotificationType$Custom;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/model/NotificationType$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/model/NotificationType$Incoming : io/getstream/video/android/model/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Incoming;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/model/NotificationType$Missed : io/getstream/video/android/model/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Missed;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/model/NotificationType$Ongoing : io/getstream/video/android/model/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Ongoing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/model/NotificationType$Outgoing : io/getstream/video/android/model/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Outgoing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/model/OffsetDateTimeSerializer : kotlinx/serialization/KSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/OffsetDateTimeSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -12653,6 +12706,7 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
+	public final fun getNotificationId (Lio/getstream/video/android/model/NotificationType;)I
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun isValid ()Z

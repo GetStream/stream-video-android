@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.content.Intent
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.CallCreatedEvent
@@ -160,6 +161,16 @@ class ClientState(private val client: StreamVideo) {
         removeRingingCall()
     }
 
+    internal fun removeActiveCall(call: Call) {
+        if (call.id == activeCall.value?.id) {
+            _activeCall.value?.let {
+                maybeStopForegroundService(it)
+            }
+            this._activeCall.value = null
+            removeRingingCall()
+        }
+    }
+
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
         if (ringingState is RingingState.Outgoing) {
@@ -176,6 +187,15 @@ class ClientState(private val client: StreamVideo) {
         _ringingCall.value = null
     }
 
+    fun removeRingingCall(call: Call) {
+        if (call.id == ringingCall.value?.id) {
+            ringingCall.value?.let {
+                maybeStopForegroundService(it)
+            }
+            _ringingCall.value = null
+        }
+    }
+
     /**
      * Start a foreground service that manages the call even when the UI is gone.
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
@@ -188,6 +208,7 @@ class ClientState(private val client: StreamVideo) {
                 context,
                 StreamCallId.fromCallCid(call.cid),
                 trigger,
+                "maybeStartForegroundService, trigger: $trigger",
                 callServiceConfiguration = callConfig,
             )
             ContextCompat.startForegroundService(context, serviceIntent)
@@ -201,11 +222,30 @@ class ClientState(private val client: StreamVideo) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
+
             val serviceIntent = CallService.buildStopIntent(
                 context,
+                call,
                 callConfig,
             )
-            context.stopService(serviceIntent)
+            logger.d { "Noob building stop intent for call_id: ${call.cid}" }
+            serviceIntent.let { intent: Intent ->
+                val bundle = intent.extras
+                val keys = bundle?.keySet()
+                if (keys != null) {
+                    val sb = StringBuilder()
+                    for (key in keys) {
+                        val itemInBundle = bundle[key]
+                        val text = "key:$key, value=$itemInBundle"
+                        sb.append(text)
+                        sb.append("\n")
+                    }
+                    if (sb.toString().isNotEmpty()) {
+                        logger.d { " Noob [maybeStopForegroundService], stop intent extras: $sb" }
+                    }
+                }
+            }
+            context.startService(serviceIntent)
         }
     }
 }

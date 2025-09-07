@@ -708,7 +708,7 @@ public class CallState(
             }
 
             is CallRejectedEvent -> {
-                //TODO Rahul added for debugging
+                // TODO Rahul added for debugging
                 Handler(Looper.getMainLooper())
                     .postDelayed({
                         val new = _rejectedBy.value.toMutableSet()
@@ -724,7 +724,7 @@ public class CallState(
                                 }
                             },
                         )
-                    }, 10_000L)
+                    }, 5_000L)
             }
 
             is CallEndedEvent -> {
@@ -1227,7 +1227,7 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
-                    call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
+                    call.reject("[startRingingTimer]", reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
                     call.leave()
                 }
             } else {
