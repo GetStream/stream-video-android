@@ -149,16 +149,19 @@ class ClientState(private val client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
-        removeRingingCall()
+        removeRingingCall(call)
         maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
     }
 
+    /**
+     * Use removeActiveCall(call: Call) instead, requires explicit call instance.
+     */
     fun removeActiveCall() {
         _activeCall.value?.let {
             maybeStopForegroundService(it)
         }
         this._activeCall.value = null
-        removeRingingCall()
+        removeRingingCall() // TODO shouldn't be here because we have no idea of which call is responsible for ringing
     }
 
     internal fun removeActiveCall(call: Call) {
@@ -167,7 +170,7 @@ class ClientState(private val client: StreamVideo) {
                 maybeStopForegroundService(it)
             }
             this._activeCall.value = null
-            removeRingingCall()
+            removeRingingCall(call)
         }
     }
 
@@ -180,6 +183,9 @@ class ClientState(private val client: StreamVideo) {
         // TODO: behaviour if you are already in a call
     }
 
+    /**
+     * Use removeRingingCall(call: Call) instead, requires explicit call instance..
+     */
     fun removeRingingCall() {
         ringingCall.value?.let {
             maybeStopForegroundService(it)

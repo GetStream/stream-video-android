@@ -8646,10 +8646,6 @@ public final class io/getstream/video/android/core/events/DominantSpeakerChanged
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/events/DummySlowEvent : io/getstream/video/android/core/events/SlowEvent {
-	public static final field INSTANCE Lio/getstream/video/android/core/events/DummySlowEvent;
-}
-
 public final class io/getstream/video/android/core/events/ErrorEvent : io/getstream/video/android/core/events/SfuDataEvent {
 	public fun <init> (Lstream/video/sfu/models/Error;Lstream/video/sfu/models/WebsocketReconnectStrategy;)V
 	public final fun component1 ()Lstream/video/sfu/models/Error;
@@ -8743,6 +8739,10 @@ public final class io/getstream/video/android/core/events/JoinCallResponseEvent 
 	public fun hashCode ()I
 	public final fun isReconnected ()Z
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/events/NoSlowEvent : io/getstream/video/android/core/events/SlowEvent {
+	public static final field INSTANCE Lio/getstream/video/android/core/events/NoSlowEvent;
 }
 
 public final class io/getstream/video/android/core/events/ParticipantCount {

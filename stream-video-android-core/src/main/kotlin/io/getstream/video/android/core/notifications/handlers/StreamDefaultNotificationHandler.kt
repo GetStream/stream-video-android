@@ -57,6 +57,8 @@ import io.getstream.video.android.core.notifications.dispatchers.DefaultNotifica
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.slowevent.CallRejectedSlowEventDetector
+import io.getstream.video.android.core.slowevent.SlowEventContext
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -209,20 +211,19 @@ constructor(
             payload,
         ).showNotification(callId, callId.hashCode())
 
+        /**
+         * Strategy to detect the slow event
+         * For now we are detecting the presence of [io.getstream.android.video.generated.models.CallRejectedEvent] via [CallRejectedSlowEvent]
+         */
         StreamVideo.instanceOrNull()?.let {
             val call = it.call(callId.type, callId.id)
-            val ringingState = call.state.ringingState.value
-
-            if (ringingState is RingingState.Incoming) {
-                if (!ringingState.acceptedByMe) {
-                    /**
-                     * Using dispatcher in notification can cause 15 seconds delay
-                     * One alternative is to use this inside service class
-                     */
-                    logger.d { "[onMissedCall] Ringing State: $ringingState" }
-                    call.state.updateSlowEvent(CallRejectedSlowEvent())
-                }
-            }
+            val slowEventContext =
+                SlowEventContext(
+                    SlowEventContext.ContextSource.PUSH_NOTIFICATION,
+                    SlowEventContext.EventType.MISSED_CALL,
+                )
+            CallRejectedSlowEventDetector()
+                .detectAndMarkSlowEvent(call, slowEventContext)
         }
     }
 

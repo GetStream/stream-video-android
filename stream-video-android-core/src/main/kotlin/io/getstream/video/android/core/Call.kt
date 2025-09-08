@@ -792,8 +792,14 @@ public class Call(
         stopScreenSharing()
         camera.disable()
         microphone.disable()
-        client.state.removeActiveCall(this) // Will also stop CallService
-        client.state.removeRingingCall(this)
+
+        if (id == client.state.activeCall.value?.id) {
+            client.state.removeActiveCall(this) // Will also stop CallService
+        }
+
+        if (id == client.state.ringingCall.value?.id) {
+            client.state.removeRingingCall(this)
+        }
 
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
@@ -1325,7 +1331,7 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
+        clientImpl.state.removeRingingCall(this)
         clientImpl.state.maybeStopForegroundService(call = this)
         return clientImpl.accept(type, id)
     }

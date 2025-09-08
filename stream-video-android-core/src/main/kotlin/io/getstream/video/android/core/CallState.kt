@@ -85,10 +85,10 @@ import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
-import io.getstream.video.android.core.events.DummySlowEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.events.NoSlowEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
@@ -660,7 +660,22 @@ public class CallState(
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
 
-    private val _slowEvent = MutableStateFlow<SlowEvent>(DummySlowEvent)
+    /**
+     * Represents a stream of "slow" call-related events.
+     *
+     * A [SlowEvent] mirrors the structure of real-time call events (e.g., [CallRejectedEvent]),
+     * but is emitted when those events are detected or reconstructed belatedly
+     * (for example, after being triggered by a push notification when the
+     * original event is delayed).
+     *
+     * The [slowEvent] flow allows the SDK to observe and handle these delayed
+     * events in the same way as their real-time counterparts — either by
+     * executing the same instructions as the original event, or by applying
+     * modified logic when special handling is required.
+     *
+     * Default value is [NoSlowEvent], representing the absence of any slow event.
+     */
+    private val _slowEvent = MutableStateFlow<SlowEvent>(NoSlowEvent)
     val slowEvent: StateFlow<SlowEvent> = _slowEvent
 
     fun handleEvent(event: VideoEvent) {
