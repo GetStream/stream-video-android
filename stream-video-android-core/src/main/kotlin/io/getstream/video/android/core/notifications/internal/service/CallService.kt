@@ -120,7 +120,7 @@ internal open class CallService : Service() {
             context: Context,
             callId: StreamCallId,
             trigger: String,
-            tempSource: String,
+            debugSource: String,
             callDisplayName: String? = null,
             callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
         ): Intent {
@@ -155,7 +155,7 @@ internal open class CallService : Service() {
             }
             Log.d(
                 "AudioCallService",
-                "[buildStartIntent], call_id:${callId.cid}, source: $tempSource",
+                "[buildStartIntent], call_id:${callId.cid}, source: $debugSource",
             )
             return serviceIntent
         }
