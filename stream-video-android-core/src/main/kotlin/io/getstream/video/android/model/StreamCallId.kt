@@ -20,7 +20,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import androidx.core.content.IntentCompat
-import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -71,7 +71,7 @@ public data class StreamCallId constructor(
         }
     }
 
-    internal fun getNotificationId(notificationType: NotificationType): Int {
+    fun getNotificationId(notificationType: NotificationType): Int {
         return (notificationType.type + cid).hashCode()
     }
 }
@@ -85,12 +85,3 @@ public fun Intent.streamCallId(key: String): StreamCallId? =
     IntentCompat.getParcelableExtra(this, key, StreamCallId::class.java)
 
 public fun Intent.streamCallDisplayName(key: String): String? = this.getStringExtra(key)
-
-@InternalStreamVideoApi
-internal sealed class NotificationType(open val type: String) {
-    public data object Incoming : NotificationType("incoming")
-    public data object Missed : NotificationType("missed")
-    public data object Outgoing : NotificationType("outgoing")
-    public data object Ongoing : NotificationType("ongoing")
-    public data class Custom(override val type: String) : NotificationType(type)
-}

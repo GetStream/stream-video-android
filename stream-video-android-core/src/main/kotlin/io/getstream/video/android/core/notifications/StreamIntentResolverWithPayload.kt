@@ -19,7 +19,6 @@ package io.getstream.video.android.core.notifications
 import android.app.PendingIntent
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ONGOING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
-import io.getstream.video.android.model.NotificationType
 import io.getstream.video.android.model.StreamCallId
 
 interface StreamIntentResolverWithPayload {
