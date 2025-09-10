@@ -1310,12 +1310,16 @@ public class CallState(
         userId: String,
         updateFlow: Boolean = false,
     ): ParticipantState {
-        val participantState = internalParticipants[sessionId] ?: ParticipantState(
-            sessionId = sessionId,
-            scope = scope,
-            callActions = callActions,
-            initialUserId = userId,
-        )
+        val participantState = if (internalParticipants.containsKey(sessionId)) {
+            internalParticipants[sessionId]!!
+        } else {
+            ParticipantState(
+                sessionId = sessionId,
+                scope = scope,
+                callActions = callActions,
+                initialUserId = userId,
+            )
+        }
         if (updateFlow) {
             upsertParticipants(listOf(participantState))
         }
