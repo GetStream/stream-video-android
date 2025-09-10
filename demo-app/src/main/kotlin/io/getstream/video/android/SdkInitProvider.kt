@@ -36,7 +36,7 @@ class SdkInitProvider : BaseContentProvider() {
         StreamVideoPushInterceptor.interceptor = object : VideoPushEventInterceptor {
             override fun registerPushDeviceHook(pushDevice: PushDevice): Boolean {
                 if (ctx != null) {
-                    initSdk(ctx, "registerPushDeviceHook")
+                    initSdk(ctx, DemoAppSdkInitSource.RegisterPushDevice)
                     return true
                 } else {
                     return false
@@ -48,7 +48,7 @@ class SdkInitProvider : BaseContentProvider() {
                 payload: Map<String, Any?>,
             ): Boolean {
                 if (ctx != null) {
-                    initSdk(ctx, "onRemoteMessageHook")
+                    initSdk(ctx, DemoAppSdkInitSource.OnRemoteMessage)
                     return true
                 } else {
                     return false
@@ -61,7 +61,7 @@ class SdkInitProvider : BaseContentProvider() {
     companion object {
         private val TAG = "SdkInitProvider"
 
-        fun initSdk(ctx: Context, source: String) {
+        fun initSdk(ctx: Context, source: DemoAppSdkInitSource) {
             Log.d(TAG, "[initSdk], source: $source")
             if (StreamVideo.instanceOrNull() != null) {
                 Log.d(TAG, "SDK is already installed, source: $source")
@@ -73,9 +73,8 @@ class SdkInitProvider : BaseContentProvider() {
             // For simpler code we "inject" the Context manually instead of using DI.
             StreamVideoInitHelper.init(ctx)
 
-
             runBlocking {
-                if (source == "App") {
+                if (source == DemoAppSdkInitSource.App) {
                     StreamVideoInitHelper.loadSdk(
                         dataStore = StreamUserDataStore.instance(),
                         useRandomUserAsFallback = false,
@@ -88,4 +87,11 @@ class SdkInitProvider : BaseContentProvider() {
             }
         }
     }
+}
+
+sealed class DemoAppSdkInitSource(open val type: String) {
+    public data object App : DemoAppSdkInitSource("app")
+    public data object RegisterPushDevice : DemoAppSdkInitSource("RegisterPushDevice")
+    public data object OnRemoteMessage : DemoAppSdkInitSource("OnRemoteMessage")
+    public data class Custom(override val type: String) : DemoAppSdkInitSource(type)
 }
