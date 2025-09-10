@@ -158,13 +158,9 @@ object StreamVideoInitHelper {
         ).enqueue()
     }
 
-
-    private suspend fun loadSdkForLoggedInUser(loggedInUser: User, dataStore: StreamUserDataStore){
-
+    private suspend fun loadSdkForLoggedInUser(loggedInUser: User, dataStore: StreamUserDataStore) {
         val apiKey = dataStore.apiKey.firstOrNull().toString()
         val token = dataStore.userToken.firstOrNull().toString()
-
-        Log.d("[loadSdkForNonLoggedInUser]", "api key: ${apiKey}, token:${token}")
 
         initializeStreamChat(
             context = context,
@@ -182,7 +178,7 @@ object StreamVideoInitHelper {
         )
     }
 
-    private suspend fun loadSdkForNonLoggedInUser(dataStore: StreamUserDataStore, useRandomUserAsFallback: Boolean){
+    private suspend fun loadSdkForNonLoggedInUser(dataStore: StreamUserDataStore, useRandomUserAsFallback: Boolean) {
         var loggedInUser = dataStore.data.firstOrNull()?.user
         var authData: GetAuthDataResponse? = null
 
@@ -202,7 +198,10 @@ object StreamVideoInitHelper {
 
             dataStore.updateUserToken(authData.token)
             dataStore.updateApiKey(authData.apiKey)
-            Log.d("[loadSdkForNonLoggedInUser]", "api key: ${authData.apiKey}, token:${authData.token}")
+            Log.d(
+                "[loadSdkForNonLoggedInUser]",
+                "api key: ${authData.apiKey}, token:${authData.token}",
+            )
         }
 
         // If we have a logged in user (from the data store or randomly created above)
