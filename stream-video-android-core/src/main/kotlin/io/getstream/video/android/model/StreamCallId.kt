@@ -71,7 +71,7 @@ public data class StreamCallId constructor(
         }
     }
 
-    fun getNotificationId(notificationType: NotificationType): Int {
+    internal fun getNotificationId(notificationType: NotificationType): Int {
         return (notificationType.type + cid).hashCode()
     }
 }
@@ -87,7 +87,7 @@ public fun Intent.streamCallId(key: String): StreamCallId? =
 public fun Intent.streamCallDisplayName(key: String): String? = this.getStringExtra(key)
 
 @InternalStreamVideoApi
-sealed class NotificationType(open val type: String) {
+internal sealed class NotificationType(open val type: String) {
     public data object Incoming : NotificationType("incoming")
     public data object Missed : NotificationType("missed")
     public data object Outgoing : NotificationType("outgoing")

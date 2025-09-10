@@ -12643,45 +12643,6 @@ public final class io/getstream/video/android/model/Device$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class io/getstream/video/android/model/NotificationType$Custom : io/getstream/video/android/model/NotificationType {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/model/NotificationType$Custom;
-	public static synthetic fun copy$default (Lio/getstream/video/android/model/NotificationType$Custom;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/model/NotificationType$Custom;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getType ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/NotificationType$Incoming : io/getstream/video/android/model/NotificationType {
-	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Incoming;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/NotificationType$Missed : io/getstream/video/android/model/NotificationType {
-	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Missed;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/NotificationType$Ongoing : io/getstream/video/android/model/NotificationType {
-	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Ongoing;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/model/NotificationType$Outgoing : io/getstream/video/android/model/NotificationType {
-	public static final field INSTANCE Lio/getstream/video/android/model/NotificationType$Outgoing;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/model/OffsetDateTimeSerializer : kotlinx/serialization/KSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/OffsetDateTimeSerializer;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
@@ -12706,7 +12667,6 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
-	public final fun getNotificationId (Lio/getstream/video/android/model/NotificationType;)I
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun isValid ()Z
