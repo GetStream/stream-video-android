@@ -18,8 +18,6 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.BlockedUserEvent
@@ -723,23 +721,19 @@ public class CallState(
             }
 
             is CallRejectedEvent -> {
-                // TODO Rahul added for debugging
-                Handler(Looper.getMainLooper())
-                    .postDelayed({
-                        val new = _rejectedBy.value.toMutableSet()
-                        new.add(event.user.id)
-                        _rejectedBy.value = new.toSet()
-                        updateRingingState(
-                            rejectReason = event.reason?.let {
-                                when (it) {
-                                    RejectReason.Busy.alias -> RejectReason.Busy
-                                    RejectReason.Cancel.alias -> RejectReason.Cancel
-                                    RejectReason.Decline.alias -> RejectReason.Decline
-                                    else -> RejectReason.Custom(alias = it)
-                                }
-                            },
-                        )
-                    }, 5_000L)
+                val new = _rejectedBy.value.toMutableSet()
+                new.add(event.user.id)
+                _rejectedBy.value = new.toSet()
+                updateRingingState(
+                    rejectReason = event.reason?.let {
+                        when (it) {
+                            RejectReason.Busy.alias -> RejectReason.Busy
+                            RejectReason.Cancel.alias -> RejectReason.Cancel
+                            RejectReason.Decline.alias -> RejectReason.Decline
+                            else -> RejectReason.Custom(alias = it)
+                        }
+                    },
+                )
             }
 
             is CallEndedEvent -> {
