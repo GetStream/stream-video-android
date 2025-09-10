@@ -63,7 +63,6 @@ class SdkInitProvider : BaseContentProvider() {
 
         fun initSdk(ctx: Context, source: String) {
             Log.d(TAG, "[initSdk], source: $source")
-//            FirebaseApp.initializeApp(ctx)
             if (StreamVideo.instanceOrNull() != null) {
                 Log.d(TAG, "SDK is already installed, source: $source")
                 return
@@ -74,12 +73,7 @@ class SdkInitProvider : BaseContentProvider() {
             // For simpler code we "inject" the Context manually instead of using DI.
             StreamVideoInitHelper.init(ctx)
 
-            // Prepare the Video SDK if we already have a user logged in the demo app.
-            // If you need to receive push messages (incoming call) then the SDK must be initialised
-            // in Application.onCreate. Otherwise it doesn't know how to init itself when push arrives
-            // and will ignore the push messages.
-            // If push messages are not used then you don't need to init here - you can init
-            // on-demand (initialising here is usually less error-prone).
+
             runBlocking {
                 if (source == "App") {
                     StreamVideoInitHelper.loadSdk(
@@ -92,7 +86,6 @@ class SdkInitProvider : BaseContentProvider() {
                     )
                 }
             }
-            Log.d(TAG, "[initSdk] Finish, source: $source")
         }
     }
 }

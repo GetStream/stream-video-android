@@ -32,7 +32,6 @@ import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
-import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -129,9 +128,6 @@ object StreamVideoInitHelper {
 
                 dataStore.updateUserToken(authData.token)
                 dataStore.updateApiKey(authData.apiKey)
-
-                Log.d("StreamVideoInitHelper", "token = ${authData.token}")
-                Log.d("StreamVideoInitHelper", "api key = ${authData.apiKey}")
             }
 
             // If we have a logged in user (from the data store or randomly created above)
@@ -145,9 +141,6 @@ object StreamVideoInitHelper {
 
                     dataStore.updateUserToken(authData.token)
                     dataStore.updateApiKey(authData.apiKey)
-
-                    Log.d("StreamVideoInitHelper", "token = ${authData.token}")
-                    Log.d("StreamVideoInitHelper", "api key = ${authData.apiKey}")
                 }
 
                 initializeStreamChat(
@@ -180,13 +173,11 @@ object StreamVideoInitHelper {
     ) = AppConfig.load(context) {
         if (StreamVideo.isInstalled) {
             _initState.value = InitializedState.FINISHED
-            Log.w("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialised.")
             return@load
         }
 
         if (isInitialising) {
             _initState.value = InitializedState.RUNNING
-            Log.d("StreamVideoInitHelper", "[initStreamVideo] StreamVideo is already initialising")
             return@load
         }
 
@@ -199,12 +190,10 @@ object StreamVideoInitHelper {
 
 //            // If we have a logged in user (from the data store or randomly created above)
 //            // then we can initialise the SDK
-            Log.i("StreamVideoInitHelper", "Phase 2")
             if (loggedInUser != null) {
                 val apiKey = dataStore.apiKey.firstOrNull().toString()
                 val token = dataStore.userToken.firstOrNull().toString()
 
-                Log.i("StreamVideoInitHelper", "Phase 4 initializeStreamChat")
                 initializeStreamChat(
                     context = context,
                     apiKey = apiKey,
@@ -212,7 +201,6 @@ object StreamVideoInitHelper {
                     token = token,
                 )
 
-                Log.i("StreamVideoInitHelper", "Phase 5 initializeStreamVideo")
                 initializeStreamVideo(
                     context = context,
                     apiKey = apiKey,
@@ -221,10 +209,8 @@ object StreamVideoInitHelper {
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                 )
 
-                Log.i("StreamVideoInitHelper", "Init successful.")
                 _initState.value = InitializedState.FINISHED
             } else {
-                Log.i("StreamVideoInitHelper", "Skipped no user logged in")
                 _initState.value = InitializedState.NOT_STARTED
             }
         } catch (e: Exception) {
@@ -287,7 +273,7 @@ object StreamVideoInitHelper {
             apiKey = apiKey,
             user = user,
             token = token,
-            loggingLevel = loggingLevel.copy(httpLoggingLevel = HttpLoggingLevel.BODY),
+            loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             callServiceConfigRegistry = callServiceConfigRegistry,
             notificationConfig = testNotificationConfig ?: NotificationConfig(
