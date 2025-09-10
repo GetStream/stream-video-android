@@ -19,7 +19,6 @@ package io.getstream.video.android.core.notifications.internal
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import io.getstream.android.push.PushDevice
 import io.getstream.android.push.PushProvider
 import io.getstream.android.push.permissions.NotificationPermissionManager
