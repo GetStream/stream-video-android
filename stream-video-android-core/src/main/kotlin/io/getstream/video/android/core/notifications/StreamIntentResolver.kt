@@ -41,7 +41,7 @@ interface StreamIntentResolver : StreamIntentResolverWithPayload {
     )
     fun searchIncomingCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = callId.hashCode(),
+        notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
     ): PendingIntent? {
         return searchIncomingCallPendingIntent(callId, notificationId, emptyMap())
     }
@@ -62,7 +62,7 @@ interface StreamIntentResolver : StreamIntentResolverWithPayload {
     )
     fun searchOutgoingCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = callId.hashCode(),
+        notificationId: Int = callId.getNotificationId(NotificationType.Outgoing),
     ): PendingIntent? {
         return searchIncomingCallPendingIntent(callId, notificationId, emptyMap())
     }

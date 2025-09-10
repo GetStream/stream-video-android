@@ -97,7 +97,6 @@ internal class StreamNotificationManager private constructor(
             ?.toCreateDeviceRequest()
             ?.flatMapSuspend { createDeviceRequest ->
                 try {
-                    Log.d("Noob", "Noob Create Device Start")
                     val result = api.createDevice(createDeviceRequest)
                     updateDevice(pushDevice.toDevice())
                     Result.Success(newDevice)
@@ -110,8 +109,6 @@ internal class StreamNotificationManager private constructor(
                             "(${pushDevice.pushProvider.key}) match the key in the Stream Dashboard?"
                     }
                     Result.Failure(Error.ThrowableError("Device couldn't be created", e))
-                } finally {
-                    Log.d("Noob", "Noob Create Device finish")
                 }
             }
             ?: Result.Success(newDevice)

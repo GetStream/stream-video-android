@@ -1568,7 +1568,6 @@ public class CallState(
     }
 
     fun updateSlowEvent(slowEvent: SlowEvent) {
-        logger.d { "[updateSlowEvent], call_id:${call.id}" }
         _slowEvent.value = slowEvent
     }
 }

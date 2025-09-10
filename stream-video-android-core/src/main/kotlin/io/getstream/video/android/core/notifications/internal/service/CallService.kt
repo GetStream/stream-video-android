@@ -152,10 +152,7 @@ internal open class CallService : Service() {
                     )
                 }
             }
-            Log.d(
-                "AudioCallService",
-                "[buildStartIntent], call_id:${callId.cid}, source: $debugSource",
-            )
+            StreamLog.d(TAG) { "[buildStartIntent], call_id:${callId.cid}, source: $debugSource" }
             return serviceIntent
         }
 
@@ -177,7 +174,7 @@ internal open class CallService : Service() {
                 Intent(context, CallService::class.java)
             }
             call?.let {
-                Log.d("AudioCallService", "[buildStopIntent], call_id:${call.cid}")
+                StreamLog.d(TAG) { "[buildStopIntent], call_id:${call.cid}" }
                 val streamCallId = StreamCallId(call.type, call.id, call.cid)
                 intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)
             }
