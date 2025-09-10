@@ -24,12 +24,12 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_KEY
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
-import io.getstream.video.android.model.NotificationType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
