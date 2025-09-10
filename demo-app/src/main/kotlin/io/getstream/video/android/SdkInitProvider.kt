@@ -74,16 +74,10 @@ class SdkInitProvider : BaseContentProvider() {
             StreamVideoInitHelper.init(ctx)
 
             runBlocking {
-                if (source == DemoAppSdkInitSource.App) {
-                    StreamVideoInitHelper.loadSdk(
-                        dataStore = StreamUserDataStore.instance(),
-                        useRandomUserAsFallback = false,
-                    )
-                } else {
-                    StreamVideoInitHelper.loadSdkFromPNFlow(
-                        dataStore = StreamUserDataStore.instance(),
-                    )
-                }
+                StreamVideoInitHelper.loadSdk(
+                    dataStore = StreamUserDataStore.instance(),
+                    useRandomUserAsFallback = false,
+                )
             }
         }
     }

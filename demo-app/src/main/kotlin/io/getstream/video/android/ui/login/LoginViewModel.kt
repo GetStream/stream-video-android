@@ -105,6 +105,8 @@ class LoginViewModel @Inject constructor(
                     )
                     // Store the data in the demo app
                     dataStore.updateUser(user)
+                    dataStore.updateApiKey(authData.apiKey)
+                    dataStore.updateUserToken(authData.token)
                     // Init the Video SDK with the data
                     /**
                      * Intentional delay for first time loading as creating device token is

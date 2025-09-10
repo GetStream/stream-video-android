@@ -101,11 +101,11 @@
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
 
-        <provider
-            android:name=".SdkInitProvider"
-            android:authorities="${applicationId}.sdkinitializer"
-            android:exported="false"
-            android:initOrder="0" />
+<!--        <provider-->
+<!--            android:name=".SdkInitProvider"-->
+<!--            android:authorities="${applicationId}.sdkinitializer"-->
+<!--            android:exported="false"-->
+<!--            android:initOrder="0" />-->
 
     </application>
 </manifest>
