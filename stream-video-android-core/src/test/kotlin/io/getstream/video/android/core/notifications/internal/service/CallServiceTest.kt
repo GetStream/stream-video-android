@@ -29,6 +29,7 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
+import io.getstream.video.android.model.NotificationType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
@@ -99,6 +100,7 @@ class CallServiceTest {
             context = context,
             callId = testCallId,
             trigger = TRIGGER_INCOMING_CALL,
+            debugSource = "test",
             callDisplayName = "John Doe",
         )
 
@@ -115,6 +117,7 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
+            debugSource = "test",
             trigger = TRIGGER_OUTGOING_CALL,
         )
 
@@ -131,6 +134,7 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
+            debugSource = "test",
             trigger = TRIGGER_ONGOING_CALL,
         )
 
@@ -146,6 +150,7 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
+            debugSource = "test",
             trigger = TRIGGER_REMOVE_INCOMING_CALL,
         )
 
@@ -162,6 +167,7 @@ class CallServiceTest {
             CallService.buildStartIntent(
                 context = context,
                 callId = testCallId,
+                debugSource = "test",
                 trigger = "invalid_trigger",
             )
         }
@@ -179,6 +185,7 @@ class CallServiceTest {
             context = context,
             callId = testCallId,
             trigger = TRIGGER_INCOMING_CALL,
+            debugSource = "test",
             callServiceConfiguration = customConfig,
         )
 
@@ -258,7 +265,7 @@ class CallServiceTest {
 
         // Then
         assertEquals(mockNotification, result.first)
-        assertEquals(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID, result.second)
+        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 
     @Test
@@ -273,7 +280,7 @@ class CallServiceTest {
 
         // Then
         assertNull(result.first)
-        assertEquals(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID, result.second)
+        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 
     @Test
@@ -363,6 +370,7 @@ class CallServiceTest {
             context = context,
             callId = StreamCallId(type = "livestream", id = "test-123"),
             trigger = TRIGGER_INCOMING_CALL,
+            debugSource = "test",
             callServiceConfiguration = livestreamConfig,
         )
 
@@ -386,7 +394,7 @@ class CallServiceTest {
 
         // Then - Should handle gracefully and return expected result
         assertNull(result.first) // No notification for remove trigger
-        assertEquals(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID, result.second)
+        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 
     // Test constants consistency
