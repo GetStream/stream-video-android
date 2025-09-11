@@ -18,45 +18,12 @@ package io.getstream.video.android
 
 import android.content.Context
 import android.util.Log
-import io.getstream.android.push.PushDevice
-import io.getstream.video.android.contentprovider.BaseContentProvider
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.interceptor.StreamVideoPushInterceptor
-import io.getstream.video.android.core.notifications.interceptor.VideoPushEventInterceptor
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.runBlocking
 
-class SdkInitProvider : BaseContentProvider() {
-
-    override fun onCreate(): Boolean {
-        Log.d(TAG, "onCreate")
-        val ctx = context
-
-        StreamVideoPushInterceptor.interceptor = object : VideoPushEventInterceptor {
-            override fun registerPushDeviceHook(pushDevice: PushDevice): Boolean {
-                if (ctx != null) {
-                    initSdk(ctx, DemoAppSdkInitSource.RegisterPushDevice)
-                    return true
-                } else {
-                    return false
-                }
-            }
-
-            override fun onRemoteMessageHook(
-                metadata: Map<String, Any?>,
-                payload: Map<String, Any?>,
-            ): Boolean {
-                if (ctx != null) {
-                    initSdk(ctx, DemoAppSdkInitSource.OnRemoteMessage)
-                    return true
-                } else {
-                    return false
-                }
-            }
-        }
-        return true
-    }
+class SdkInitProvider {
 
     companion object {
         private val TAG = "SdkInitProvider"
