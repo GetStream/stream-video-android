@@ -231,6 +231,10 @@ internal class Publisher(
     ): MediaStreamTrack? {
         logger.i { "[trackPublishing] Publishing track: $trackType" }
 
+        if (trackType.value == 2) {
+            delay(1_000L)
+        }
+
         if (publishOptions.none { it.track_type == trackType }) {
             logger.e { "[trackPublishing] No publish options found for $trackType" }
             return null
