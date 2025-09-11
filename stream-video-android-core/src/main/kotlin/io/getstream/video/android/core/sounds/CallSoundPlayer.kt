@@ -86,7 +86,7 @@ internal class CallSoundPlayer(private val context: Context) {
         }
 
         logger.d { "[requestAudioFocus] Audio focus " + if (isGranted) "granted" else "not granted" }
-        if (isGranted) onGranted()
+        if (isGranted) onGranted() else onGranted() // Forcing as playing ringtone do not ideally requires audio focus
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
