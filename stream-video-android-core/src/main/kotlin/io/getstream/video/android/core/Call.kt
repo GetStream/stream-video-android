@@ -785,11 +785,22 @@ public class Call(
         isDestroyed = true
 
         sfuSocketReconnectionTime = null
+
+        /**
+         * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
+         */
         stopScreenSharing()
         camera.disable()
         microphone.disable()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+
+        if (id == client.state.activeCall.value?.id) {
+            client.state.removeActiveCall(this) // Will also stop CallService
+        }
+
+        if (id == client.state.ringingCall.value?.id) {
+            client.state.removeRingingCall(this)
+        }
+
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
@@ -1294,7 +1305,7 @@ public class Call(
         session?.cleanup()
         shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
-        mediaManager.cleanup()
+        mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
         session = null
     }
 
@@ -1320,7 +1331,7 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
+        clientImpl.state.removeRingingCall(this)
         clientImpl.state.maybeStopForegroundService(call = this)
         return clientImpl.accept(type, id)
     }
