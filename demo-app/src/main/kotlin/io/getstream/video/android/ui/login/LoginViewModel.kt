@@ -22,7 +22,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.getstream.log.streamLog
-import io.getstream.log.taggedLogger
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.data.repositories.GoogleAccountRepository
@@ -53,7 +52,7 @@ class LoginViewModel @Inject constructor(
     private val googleAccountRepository: GoogleAccountRepository,
 ) : ViewModel() {
     var autoLogIn: Boolean = true
-    private val logger by taggedLogger("LoginViewModel")
+
     private val event: MutableSharedFlow<LoginEvent> = MutableSharedFlow()
     internal val uiState: SharedFlow<LoginUiState> = event
         .flatMapLatest { event ->
@@ -94,7 +93,6 @@ class LoginViewModel @Inject constructor(
                         environment = it.env,
                         userId = userId,
                     )
-                    logger.d { "[signInSuccess], authData:$authData" }
                     val loggedInGoogleUser =
                         if (autoLogIn) null else googleAccountRepository.getCurrentUser()
                     val user = User(
@@ -107,15 +105,8 @@ class LoginViewModel @Inject constructor(
                     )
                     // Store the data in the demo app
                     dataStore.updateUser(user)
-                    dataStore.updateApiKey(authData.apiKey)
-                    dataStore.updateUserToken(authData.token)
                     // Init the Video SDK with the data
-                    /**
-                     * Intentional delay for first time loading as creating device token is
-                     * failing createDevice api is called right away
-                     */
-                    delay(2_000L)
-                    StreamVideoInitHelper.loadSdk(dataStore, false) // TODO Rahul 1
+                    StreamVideoInitHelper.loadSdk(dataStore)
                     flowOf(LoginUiState.SignInComplete(authData))
                 } catch (exception: Throwable) {
                     val message = "Sign in failed: ${exception.message ?: "Generic error"}"
@@ -140,10 +131,8 @@ class LoginViewModel @Inject constructor(
                     )
                     // Store the data in the demo app
                     dataStore.updateUser(user)
-                    dataStore.updateApiKey(authData.apiKey)
-                    dataStore.updateUserToken(authData.token)
                     // Init the Video SDK with the data
-                    StreamVideoInitHelper.loadSdk(dataStore, false)
+                    StreamVideoInitHelper.loadSdk(dataStore)
                     flowOf(LoginUiState.SignInComplete(authData))
                 } catch (exception: Throwable) {
                     val message = "Sign in failed: ${exception.message ?: "Generic error"}"
