@@ -83,6 +83,7 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -255,21 +256,45 @@ public class Call(
         }
     }
 
+    fun getLastFiveMethods(n:Int = 5): String {
+        val stackTrace = Thread.currentThread().stackTrace
+        val builder = StringBuilder()
+
+        // Take last 5 elements safely
+        val lastFive = stackTrace.takeLast(n)
+
+        lastFive.forEach { element ->
+            builder.append("${element.className}.${element.methodName} (Line: ${element.lineNumber})\n")
+        }
+
+        return builder.toString()
+    }
+
+
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
-            logger.d { "[NetworkStateListener#onConnected] #network; no args" }
+
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
+            logger.d { "[NetworkStateListener#onConnected] #network; no args, lastDisconnect:$lastDisconnect, elapsedTime:$elapsedTimeMils, reconnectDeadlineMils: $reconnectDeadlineMils" }
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast) 1. Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
                 fastReconnect()
-            } else {
+            } else if (lastDisconnect == 0L){
+                logger.d {
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast) 2. lastDisconnect is 0L"
+                }
+                fastReconnect()
+            }
+            else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+
+                throw IllegalStateException(getLastFiveMethods().toString())
+                //rejoin()
             }
         }
 
@@ -641,10 +666,8 @@ public class Call(
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
     suspend fun rejoin() = schedule {
-
-        if(true) return@schedule
-
         logger.d { "[rejoin] Rejoining" }
+
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
@@ -756,14 +779,11 @@ public class Call(
         }
     }
 
-    private var reconnectJob: Job? = null
+    private val serialProcessor = SerialProcessor(scope)
 
-    private suspend fun schedule(block: suspend () -> Unit) = synchronized(this) {
+    private suspend fun schedule(block: suspend () -> Unit)  {
         logger.d { "[schedule] #reconnect; no args" }
-        reconnectJob?.cancel()
-        reconnectJob = scope.launch {
-            block()
-        }
+        serialProcessor.submit { block() }
     }
 
     /** Leave the call, but don't end it for other users */

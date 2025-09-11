@@ -629,7 +629,7 @@ public class RtcSession internal constructor(
                         val track = publisher?.publishStream(
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
-                        )
+                        )?.getOrNull()
 
                         setLocalTrack(
                             TrackType.TRACK_TYPE_VIDEO,
@@ -660,7 +660,7 @@ public class RtcSession internal constructor(
 
                         val track = publisher?.publishStream(
                             TrackType.TRACK_TYPE_AUDIO,
-                        )
+                        )?.getOrNull()
 
                         setLocalTrack(
                             TrackType.TRACK_TYPE_AUDIO,
@@ -689,7 +689,7 @@ public class RtcSession internal constructor(
 
                         val track = publisher?.publishStream(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        )
+                        )?.getOrNull()
 
                         setLocalTrack(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
@@ -861,11 +861,7 @@ public class RtcSession internal constructor(
             sessionId = sessionId,
             enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
-            rejoin = {
-                coroutineScope.launch {
-                    call.rejoin()
-                }
-            },
+            rejoin = {},
             onIceCandidateRequest = ::sendIceCandidate,
         )
         return peerConnection
@@ -944,11 +940,7 @@ public class RtcSession internal constructor(
             onNegotiationNeeded = { _, _ -> },
             tracer = publisherTracer,
             onIceCandidate = ::sendIceCandidate,
-        ) {
-            coroutineScope.launch {
-                call.rejoin()
-            }
-        }
+        )
     }
 
     private fun buildTrackId(trackTypeVideo: TrackType): String {
@@ -995,10 +987,14 @@ public class RtcSession internal constructor(
                         }
                         call.state.replaceParticipants(participantStates)
                         sfuConnectionModule.socketConnection.whenConnected {
-                            publisher = createPublisher(event.publishOptions)
-                            processPendingSubscriberEvents()
-                            processPendingPublisherEvents()
-                            connectRtc()
+                            if (publisher != null) {
+                                publisher?.restartIce()
+                            } else {
+                                publisher = createPublisher(event.publishOptions)
+                                processPendingSubscriberEvents()
+                                processPendingPublisherEvents()
+                                connectRtc()
+                            }
                         }
                     }
 
@@ -1496,7 +1492,7 @@ public class RtcSession internal constructor(
             reconnect_details = reconnectDetails,
             capabilities = call.clientCapabilities.values.toList(),
         )
-        publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request)
+        publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request.toString())
 
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()

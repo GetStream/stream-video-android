@@ -77,6 +77,38 @@ internal class SerialProcessor(
         )
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    suspend fun <T> submitNullable(
+        handler: suspend () -> T,
+    ): Result<T> {
+        // Start the worker job if it's not already running
+        if (workerJob == null) {
+            workerJob = scope.launch {
+                for (job in channel) {
+                    // run the block, capture success or failure
+                    val result = runCatching { job.block() }
+                    job.reply.complete(result)
+                }
+            }
+        }
+
+        val reply = CompletableDeferred<Result<Any?>>()
+        if (!channel.isClosedForSend) {
+            channel.send(
+                JobItem(
+                    block = handler,
+                    reply = reply,
+                ),
+            )
+        } else {
+            return Result.failure(Exception("[SerialProcessor] Channel is closed"))
+        }
+        return reply.await().fold(
+            onSuccess = { Result.success(it as T) },
+            onFailure = { Result.failure(it) },
+        )
+    }
+
     /**
      * Stop the processor.
      */
