@@ -234,7 +234,7 @@ class ClientState(private val client: StreamVideo) {
                 call,
                 callConfig,
             )
-            logger.d { "Noob building stop intent for call_id: ${call.cid}" }
+            logger.d { "Building stop intent for call_id: ${call.cid}" }
             serviceIntent.let { intent: Intent ->
                 val bundle = intent.extras
                 val keys = bundle?.keySet()
@@ -247,7 +247,7 @@ class ClientState(private val client: StreamVideo) {
                         sb.append("\n")
                     }
                     if (sb.toString().isNotEmpty()) {
-                        logger.d { " Noob [maybeStopForegroundService], stop intent extras: $sb" }
+                        logger.d { " [maybeStopForegroundService], stop intent extras: $sb" }
                     }
                 }
             }
