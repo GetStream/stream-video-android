@@ -76,7 +76,6 @@ internal class Subscriber(
         RestartIceJobDelegate(coroutineScope),
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
 ) : StreamPeerConnection(
-    coroutineScope = coroutineScope,
     type = StreamPeerType.SUBSCRIBER,
     mediaConstraints = MediaConstraints(),
     onStreamAdded = { _ -> },
@@ -262,7 +261,7 @@ internal class Subscriber(
      *
      * @param offerSdp The offer SDP from the SFU.
      */
-    suspend fun negotiate(offerSdp: String) = sdpProcessor.submit {
+    suspend fun negotiate(offerSdp: String) = sdpProcessor.submit("subscriberNegotiate") {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
         val result = setRemoteDescription(offerDescription)
             .onErrorSuspend {

@@ -82,7 +82,6 @@ internal class Publisher(
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
 ) : StreamPeerConnection(
-    coroutineScope,
     type,
     mediaConstraints,
     onStreamAdded,
@@ -159,7 +158,9 @@ internal class Publisher(
     }
 
     @VisibleForTesting
-    public suspend fun negotiate(iceRestart: Boolean = false) = sdpProcessor.submit {
+    public suspend fun negotiate(
+        iceRestart: Boolean = false,
+    ) = sdpProcessor.submit("publisherNegotiate") {
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
             return@submit
@@ -225,7 +226,7 @@ internal class Publisher(
     /**
      * Starts publishing the given track.
      */
-    suspend fun publishStream(
+    fun publishStream(
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
     ): MediaStreamTrack? {

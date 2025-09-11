@@ -63,6 +63,7 @@ import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.MemberResponse
+import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PermissionRequestEvent
 import io.getstream.android.video.generated.models.QueryCallMembersResponse
@@ -75,6 +76,7 @@ import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -205,11 +207,40 @@ public class CallState(
     private val client: StreamVideo,
     private val call: Call,
     private val user: User,
-    internal val scope: CoroutineScope,
+    @InternalStreamVideoApi
+    val scope: CoroutineScope,
 ) {
 
     private val logger by taggedLogger("CallState")
     private var participantsVisibilityMonitor: Job? = null
+
+    // Create a CallActions implementation that delegates to the Call object
+    @InternalStreamVideoApi
+    val callActions = object : CallActions {
+        override suspend fun muteUserAudio(userId: String): Result<MuteUsersResponse> {
+            return call.muteUser(userId, audio = true, video = false, screenShare = false)
+        }
+
+        override suspend fun muteUserVideo(userId: String): Result<MuteUsersResponse> {
+            return call.muteUser(userId, audio = false, video = true, screenShare = false)
+        }
+
+        override suspend fun muteUserScreenShare(userId: String): Result<MuteUsersResponse> {
+            return call.muteUser(userId, audio = false, video = false, screenShare = true)
+        }
+
+        override suspend fun pinParticipant(userId: String, sessionId: String) {
+            call.state.pin(userId, sessionId)
+        }
+
+        override suspend fun unpinParticipant(sessionId: String) {
+            call.state.unpin(sessionId)
+        }
+
+        override fun isLocalParticipant(sessionId: String): Boolean {
+            return sessionId == call.sessionId
+        }
+    }
 
     internal val _connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
     public val connection: StateFlow<RealtimeConnection> = _connection
@@ -218,8 +249,8 @@ public class CallState(
         it is RealtimeConnection.Reconnecting
     }
 
-    private val _participants: MutableStateFlow<SortedMap<String, ParticipantState>> =
-        MutableStateFlow(emptyMap<String, ParticipantState>().toSortedMap())
+    private val internalParticipants = ConcurrentHashMap<String, ParticipantState>()
+    private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
 
     /** Participants returns a list of participant state object. @see [ParticipantState] */
     public val participants: StateFlow<List<ParticipantState>> =
@@ -1072,7 +1103,7 @@ public class CallState(
     private fun updateServerSidePins(pins: List<PinUpdate>) {
         // Update participants that are still in the call
         val pinnedInCall = pins.filter {
-            _participants.value.containsKey(it.sessionId)
+            internalParticipants.containsKey(it.sessionId)
         }
         _serverPins.value = pinnedInCall.associate {
             Pair(
@@ -1226,22 +1257,20 @@ public class CallState(
     }
 
     internal fun removeParticipant(sessionId: String) {
-        val new = _participants.value.toSortedMap()
-        new.remove(sessionId)
-        _participants.value = new
+        internalParticipants.remove(sessionId)
+        _participants.value = HashMap(internalParticipants)
     }
 
     public fun upsertParticipants(participants: List<ParticipantState>) {
-        val new = _participants.value.toSortedMap()
         val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {
-            new[it.sessionId] = it
+            internalParticipants[it.sessionId] = it
 
             if (it.screenSharingEnabled.value) {
                 screensharing.add(it)
             }
         }
-        _participants.value = new
+        _participants.value = HashMap(internalParticipants)
 
         if (screensharing.isNotEmpty()) {
             _screenSharingSession.value = ScreenSharingSession(
@@ -1281,13 +1310,13 @@ public class CallState(
         userId: String,
         updateFlow: Boolean = false,
     ): ParticipantState {
-        val participantMap = _participants.value.toSortedMap()
-        val participantState = if (participantMap.contains(sessionId)) {
-            participantMap[sessionId]!!
+        val participantState = if (internalParticipants.containsKey(sessionId)) {
+            internalParticipants[sessionId]!!
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                call = call,
+                scope = scope,
+                callActions = callActions,
                 initialUserId = userId,
             )
         }
@@ -1316,17 +1345,17 @@ public class CallState(
     }
 
     fun getParticipantBySessionId(sessionId: String): ParticipantState? {
-        return _participants.value[sessionId]
+        return internalParticipants[sessionId]
     }
 
     fun updateParticipant(participant: ParticipantState) {
-        val new = _participants.value.toSortedMap()
-        new[participant.sessionId] = participant
-        _participants.value = new
+        internalParticipants[participant.sessionId] = participant
+        _participants.value = HashMap(internalParticipants)
     }
 
     fun clearParticipants() {
-        _participants.value = emptyMap<String, ParticipantState>().toSortedMap()
+        internalParticipants.clear()
+        _participants.value = HashMap(internalParticipants)
     }
 
     fun updateFromResponse(response: CallResponse) {
@@ -1472,7 +1501,8 @@ public class CallState(
         sessionId: String,
         visibilityOnScreenState: VisibilityOnScreenState,
     ) {
-        _participants.value[sessionId]?._visibleOnScreen?.value = visibilityOnScreenState
+        internalParticipants[sessionId]?._visibleOnScreen?.value = visibilityOnScreenState
+        _participants.value = HashMap(internalParticipants)
     }
 
     /**
@@ -1504,7 +1534,7 @@ public class CallState(
         if (flow != null) {
             participantsVisibilityMonitor = scope.launch {
                 flow.collectLatest { visibleParticipantIds ->
-                    _participants.value.forEach {
+                    internalParticipants.forEach {
                         if (visibleParticipantIds.contains(it.key)) {
                             // If participant is in the lists its visible
                             it.value._visibleOnScreen.value = VisibilityOnScreenState.VISIBLE
@@ -1513,13 +1543,19 @@ public class CallState(
                             it.value._visibleOnScreen.value = VisibilityOnScreenState.INVISIBLE
                         }
                     }
+                    _participants.value = HashMap(internalParticipants)
                 }
             }
         }
     }
 
     fun replaceParticipants(participants: List<ParticipantState>) {
-        this._participants.value = participants.associate { it.sessionId to it }.toSortedMap()
+        internalParticipants.clear()
+        participants.forEach { participant ->
+            internalParticipants[participant.sessionId] = participant
+        }
+        _participants.value = HashMap(internalParticipants)
+
         val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {
             if (it.screenSharingEnabled.value) {

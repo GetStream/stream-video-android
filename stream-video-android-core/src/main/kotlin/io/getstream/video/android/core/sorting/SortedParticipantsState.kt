@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
-import java.util.SortedMap
 
 /**
  * A state that takes care of book-keeping participants and its sort order.
@@ -43,7 +42,7 @@ import java.util.SortedMap
 internal class SortedParticipantsState(
     scope: CoroutineScope,
     private val call: Call,
-    private val participants: MutableStateFlow<SortedMap<String, ParticipantState>>,
+    private val participants: MutableStateFlow<Map<String, ParticipantState>>,
     private val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>>,
     private var comparator: Comparator<ParticipantState>? = null,
 ) {
