@@ -791,11 +791,9 @@ internal open class CallService : Service() {
         }
     }
 
-    private suspend fun handleSlowCallRejectedEvent(call: Call) {
-        logger.d { "[handleSlowCallRejectedEvent]" }
+    private fun handleSlowCallRejectedEvent(call: Call) {
         val callId = StreamCallId(call.type, call.id)
         removeIncomingCall(callId.getNotificationId(NotificationType.Incoming))
-        call.reject(RejectReason.Custom("slow-event"))
     }
 
     private fun handleIncomingCallRejectedByMeOrCaller(
