@@ -1229,7 +1229,7 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
-                    call.reject("[startRingingTimer]", reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
+                    call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
                     call.leave()
                 }
             } else {

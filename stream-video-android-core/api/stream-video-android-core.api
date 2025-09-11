@@ -5513,8 +5513,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun processAudioSample (Lorg/webrtc/audio/JavaAudioDeviceModule$AudioSamples;)V
 	public final fun queryMembers (Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun reject (Ljava/lang/String;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun reject$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun reject (Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun reject$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun rejoin (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun removeMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestPermissions ([Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

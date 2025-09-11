@@ -40,10 +40,7 @@ internal class RejectCallBroadcastReceiver : GenericCallActionBroadcastReceiver(
 
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
         when (
-            val rejectResult = call.reject(
-                "[RejectCallBroadcastReceiver]",
-                RejectReason.Decline,
-            )
+            val rejectResult = call.reject(RejectReason.Decline)
         ) {
             is Result.Success -> {
                 val userId = StreamVideo.instanceOrNull()?.userId

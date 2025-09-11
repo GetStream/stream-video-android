@@ -726,7 +726,7 @@ internal open class CallService : Service() {
 
                     is RingingState.RejectedByAll -> {
                         ClientScope().launch {
-                            call.reject("[observeRingingState]", RejectReason.Decline)
+                            call.reject(RejectReason.Decline)
                         }
                         callSoundPlayer?.stopCallSound()
                         stopService()
@@ -798,7 +798,7 @@ internal open class CallService : Service() {
         logger.d { "[handleSlowCallRejectedEvent]" }
         val callId = StreamCallId(call.type, call.id)
         removeIncomingCall(callId.getNotificationId(NotificationType.Incoming))
-        call.reject("[handleSlowCallRejectedEvent]", RejectReason.Custom("slow-event"))
+        call.reject(RejectReason.Custom("slow-event"))
     }
 
     private fun handleIncomingCallRejectedByMeOrCaller(
@@ -928,7 +928,7 @@ internal open class CallService : Service() {
                 if (ringingState is RingingState.Outgoing) {
                     // If I'm calling, end the call for everyone
                     serviceScope.launch {
-                        call.reject("[endCall] with RingingState: $ringingState")
+                        call.reject()
                         logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
                     }
                 } else if (ringingState is RingingState.Incoming) {
@@ -938,7 +938,7 @@ internal open class CallService : Service() {
                     if (memberCount == 2) {
                         // ...and I'm the only one being called, end the call for both users
                         serviceScope.launch {
-                            call.reject("[endCall] with RingingState: $ringingState")
+                            call.reject()
                             logger.i { "[onTaskRemoved] Ended incoming call for both users." }
                         }
                     } else {
