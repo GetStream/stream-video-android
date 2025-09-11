@@ -5581,6 +5581,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getCreatedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCreatedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCustom ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getDelayedEvent ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDominantSpeaker ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDuration ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDurationInDateFormat ()Lkotlinx/coroutines/flow/StateFlow;
@@ -5617,7 +5618,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSlowEvent ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartedAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -5652,7 +5652,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateParticipantVisibilityFlow (Lkotlinx/coroutines/flow/Flow;)V
 	public final fun updateRejectActionBundle (Landroid/os/Bundle;)V
 	public final fun updateRejectedBy (Ljava/util/Set;)V
-	public final fun updateSlowEvent (Lio/getstream/video/android/core/events/SlowEvent;)V
+	public final fun updateSlowEvent (Lio/getstream/video/android/core/events/DelayedEvent;)V
 	public final fun upsertParticipants (Ljava/util/List;)V
 }
 
@@ -8596,7 +8596,7 @@ public final class io/getstream/video/android/core/events/CallGrantsUpdatedEvent
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/events/CallRejectedSlowEvent : io/getstream/video/android/core/events/SlowEvent {
+public final class io/getstream/video/android/core/events/CallRejectedDelayedEvent : io/getstream/video/android/core/events/DelayedEvent {
 	public fun <init> ()V
 }
 
@@ -8631,6 +8631,9 @@ public final class io/getstream/video/android/core/events/ConnectionQualityChang
 	public final fun getUpdates ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/core/events/DelayedEvent {
 }
 
 public final class io/getstream/video/android/core/events/DominantSpeakerChangedEvent : io/getstream/video/android/core/events/SfuDataEvent {
@@ -8741,8 +8744,8 @@ public final class io/getstream/video/android/core/events/JoinCallResponseEvent 
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/events/NoSlowEvent : io/getstream/video/android/core/events/SlowEvent {
-	public static final field INSTANCE Lio/getstream/video/android/core/events/NoSlowEvent;
+public final class io/getstream/video/android/core/events/NoDelayedEvent : io/getstream/video/android/core/events/DelayedEvent {
+	public static final field INSTANCE Lio/getstream/video/android/core/events/NoDelayedEvent;
 }
 
 public final class io/getstream/video/android/core/events/ParticipantCount {
@@ -8868,9 +8871,6 @@ public final class io/getstream/video/android/core/events/SfuSocketError : java/
 	public fun <init> (Lstream/video/sfu/models/Error;)V
 	public final fun getError ()Lstream/video/sfu/models/Error;
 	public fun getMessage ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/core/events/SlowEvent {
 }
 
 public final class io/getstream/video/android/core/events/SubscriberOfferEvent : io/getstream/video/android/core/events/SfuDataEvent {

@@ -19,7 +19,7 @@ package io.getstream.video.android.core.slowevent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
-import io.getstream.video.android.core.events.CallRejectedSlowEvent
+import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 
 internal class CallRejectedSlowEventDetector : SlowEventDetector {
     private val logger by taggedLogger("CallRejectedSlowEventDetector")
@@ -33,7 +33,7 @@ internal class CallRejectedSlowEventDetector : SlowEventDetector {
                  * One alternative is to use this inside service class
                  */
                 logger.d { "[onMissedCall] Ringing State: $ringingState" }
-                call.state.updateSlowEvent(CallRejectedSlowEvent())
+                call.state.updateSlowEvent(CallRejectedDelayedEvent())
                 return true
             }
         }

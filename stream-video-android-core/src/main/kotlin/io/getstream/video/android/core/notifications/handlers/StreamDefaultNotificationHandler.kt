@@ -45,7 +45,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.events.CallRejectedSlowEvent
+import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -213,7 +213,7 @@ constructor(
 
         /**
          * Strategy to detect the slow event
-         * For now we are detecting the presence of [io.getstream.android.video.generated.models.CallRejectedEvent] via [CallRejectedSlowEvent]
+         * For now we are detecting the presence of [io.getstream.android.video.generated.models.CallRejectedEvent] via [CallRejectedDelayedEvent]
          */
         StreamVideo.instanceOrNull()?.let {
             val call = it.call(callId.type, callId.id)

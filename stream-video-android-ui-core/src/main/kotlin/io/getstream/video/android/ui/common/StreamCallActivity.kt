@@ -55,7 +55,7 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
-import io.getstream.video.android.core.events.CallRejectedSlowEvent
+import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -1133,9 +1133,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
                 slowCallEventJob?.cancel()
                 slowCallEventJob = lifecycleScope.launch(Dispatchers.IO + supervisorJob) {
-                    call.state.slowEvent.collectLatest { event ->
+                    call.state.delayedEvent.collectLatest { event ->
                         when (event) {
-                            is CallRejectedSlowEvent -> {
+                            is CallRejectedDelayedEvent -> {
                                 reject(
                                     call,
                                     RejectReason.Custom("slow-event"),

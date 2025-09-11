@@ -42,7 +42,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.events.CallRejectedSlowEvent
+import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -780,9 +780,9 @@ internal open class CallService : Service() {
         }
 
         call.scope.launch(Dispatchers.Default) {
-            call.state.slowEvent.collectLatest {
+            call.state.delayedEvent.collectLatest {
                 when (it) {
-                    is CallRejectedSlowEvent -> handleSlowCallRejectedEvent(call)
+                    is CallRejectedDelayedEvent -> handleSlowCallRejectedEvent(call)
                 }
             }
         }

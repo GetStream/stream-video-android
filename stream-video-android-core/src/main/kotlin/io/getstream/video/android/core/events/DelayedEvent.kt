@@ -19,14 +19,14 @@ package io.getstream.video.android.core.events
 /**
  * Marker interface for representing delayed or "slow" call-related events.
  *
- * A [SlowEvent] mirrors real-time call events (e.g., CallRejectedEvent),
+ * A [DelayedEvent] mirrors real-time call events (e.g., CallRejectedEvent),
  * but is used when the original event is detected late (e.g., due to
  * push notification delivery or network disruption).
  *
  * SDK components can observe these events to replay the same instructions
  * as their real-time counterparts, or to apply special handling.
  */
-interface SlowEvent
+interface DelayedEvent
 
 /**
  * Slow counterpart of [io.getstream.android.video.generated.models.CallRejectedEvent].
@@ -35,12 +35,12 @@ interface SlowEvent
  * allowing the SDK to handle it as if a [io.getstream.android.video.generated.models.CallRejectedEvent] had
  * been received in real time (or to apply adjusted logic if needed).
  */
-class CallRejectedSlowEvent() : SlowEvent
+class CallRejectedDelayedEvent() : DelayedEvent
 
 /**
- * Represents the absence of any [SlowEvent].
+ * Represents the absence of any [DelayedEvent].
  *
  * Used as the default value in state flows to indicate that
  * no delayed event has been detected yet.
  */
-object NoSlowEvent : SlowEvent
+object NoDelayedEvent : DelayedEvent

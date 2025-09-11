@@ -79,7 +79,7 @@ import io.getstream.video.android.core.call.state.CancelCall
 import io.getstream.video.android.core.call.state.CustomAction
 import io.getstream.video.android.core.call.state.DeclineCall
 import io.getstream.video.android.core.call.state.LeaveCall
-import io.getstream.video.android.core.events.CallRejectedSlowEvent
+import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.extractStreamActivityConfig
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
@@ -204,9 +204,9 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 }
             }
         } else {
-            val slowEvent by call.state.slowEvent.collectAsStateWithLifecycle()
+            val slowEvent by call.state.delayedEvent.collectAsStateWithLifecycle()
             when (slowEvent) {
-                is CallRejectedSlowEvent -> CallDisconnectedContent(call)
+                is CallRejectedDelayedEvent -> CallDisconnectedContent(call)
             }
 
             var callAction: CallAction by remember {
