@@ -264,7 +264,7 @@ public class Call(
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+                fastReconnect()
             } else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
@@ -641,6 +641,9 @@ public class Call(
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
     suspend fun rejoin() = schedule {
+
+        if(true) return@schedule
+
         logger.d { "[rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
