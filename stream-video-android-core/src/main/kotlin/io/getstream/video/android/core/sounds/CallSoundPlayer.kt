@@ -150,14 +150,10 @@ internal class CallSoundPlayer(private val context: Context) {
         synchronized(this) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    logger.d {
-                        "[stopCallSound] Stopping RingtoneManager sound if ringtone is playing: ${ringtone?.isPlaying}"
-                    }
+                    logger.d { "[stopCallSound] Stopping RingtoneManager sound" }
                     if (ringtone?.isPlaying == true) ringtone?.stop()
                 } else {
-                    logger.d {
-                        "[stopCallSound] Stopping MediaPlayer sound if mediaPlayer is playing: ${ringtone?.isPlaying}"
-                    }
+                    logger.d { "[stopCallSound] Stopping MediaPlayer sound" }
                     if (mediaPlayer.isPlaying == true) mediaPlayer.stop()
                 }
             } catch (e: Exception) {
