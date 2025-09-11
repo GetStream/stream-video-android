@@ -199,7 +199,8 @@ object StreamVideoInitHelper {
 
             dataStore.updateUserToken(authData.token)
             dataStore.updateApiKey(authData.apiKey)
-            Log.d("StreamVideoInitHelper",
+            Log.d(
+                "StreamVideoInitHelper",
                 "[loadSdkForNonLoggedInUser] api key: ${authData.apiKey}, token:${authData.token}",
             )
         }
