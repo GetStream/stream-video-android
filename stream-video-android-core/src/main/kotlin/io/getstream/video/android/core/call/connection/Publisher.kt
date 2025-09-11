@@ -226,11 +226,15 @@ internal class Publisher(
     /**
      * Starts publishing the given track.
      */
-    fun publishStream(
+    suspend fun publishStream(
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
     ): MediaStreamTrack? {
         logger.i { "[trackPublishing] Publishing track: $trackType" }
+
+        if (trackType.value == 2) {
+            delay(1_000L)
+        }
 
         if (publishOptions.none { it.track_type == trackType }) {
             logger.e { "[trackPublishing] No publish options found for $trackType" }

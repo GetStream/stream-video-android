@@ -1026,7 +1026,11 @@ public class RtcSession internal constructor(
                             }
                             call.state.replaceParticipants(participantStates)
                             sfuConnectionModule.socketConnection.whenConnected {
-                                publisher = createPublisher(event.publishOptions)
+                                if (publisher != null) {
+                                    publisher?.restartIce()
+                                } else {
+                                    publisher = createPublisher(event.publishOptions)
+                                }
                                 processPendingSubscriberEvents()
                                 processPendingPublisherEvents()
                                 connectRtc()
