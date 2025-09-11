@@ -32,6 +32,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallSessionEndedEvent
 import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
@@ -55,7 +56,6 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
-import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
@@ -185,7 +185,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     private var cachedCallEventJob: Job? = null
     private var participantCountJob: Job? = null
-    private var slowCallEventJob: Job? = null
     private val supervisorJob = SupervisorJob()
     private var isFinishingSafely = false
 
@@ -994,7 +993,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     @CallSuper
     public open fun onCallEvent(call: Call, event: VideoEvent) {
         when (event) {
-            is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent -> {
+            is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent, is LocalCallMissedEvent -> {
                 // In any case finish the activity, the call is done for
                 leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
             }
@@ -1131,21 +1130,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                         }
                     }
 
-                slowCallEventJob?.cancel()
-                slowCallEventJob = lifecycleScope.launch(Dispatchers.IO + supervisorJob) {
-                    call.state.delayedEvent.collectLatest { event ->
-                        when (event) {
-                            is CallRejectedDelayedEvent -> {
-                                reject(
-                                    call,
-                                    RejectReason.Custom("slow-event"),
-                                    onSuccessFinish,
-                                    onErrorFinish,
-                                )
-                            }
-                        }
-                    }
-                }
                 onSuccess?.invoke(
                     savedInstanceState,
                     persistentState,

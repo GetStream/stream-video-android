@@ -62,6 +62,7 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PermissionRequestEvent
@@ -82,12 +83,10 @@ import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
-import io.getstream.video.android.core.events.DelayedEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.events.NoDelayedEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
@@ -658,24 +657,6 @@ public class CallState(
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
 
-    /**
-     * Represents a stream of "slow" call-related events.
-     *
-     * A [DelayedEvent] mirrors the structure of real-time call events (e.g., [CallRejectedEvent]),
-     * but is emitted when those events are detected or reconstructed belatedly
-     * (for example, after being triggered by a push notification when the
-     * original event is delayed).
-     *
-     * The [delayedEvent] flow allows the SDK to observe and handle these delayed
-     * events in the same way as their real-time counterparts — either by
-     * executing the same instructions as the original event, or by applying
-     * modified logic when special handling is required.
-     *
-     * Default value is [NoDelayedEvent], representing the absence of any slow event.
-     */
-    private val _delayedEvent = MutableStateFlow<DelayedEvent>(NoDelayedEvent)
-    val delayedEvent: StateFlow<DelayedEvent> = _delayedEvent
-
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
         when (event) {
@@ -734,6 +715,18 @@ public class CallState(
                         }
                     },
                 )
+            }
+
+            is LocalCallMissedEvent -> {
+                scope.launch {
+                    val newRejectedBySet = _rejectedBy.value.toMutableSet()
+                    StreamVideo.instanceOrNull()?.let {
+                        newRejectedBySet.add(it.user.id)
+                    }
+                    _rejectedBy.value = newRejectedBySet.toSet()
+                    _ringingState.value = RingingState.RejectedByAll
+                    call.leave()
+                }
             }
 
             is CallEndedEvent -> {
@@ -1565,10 +1558,6 @@ public class CallState(
 
     fun updateNotification(notification: Notification) {
         atomicNotification.set(notification)
-    }
-
-    fun updateSlowEvent(delayedEvent: DelayedEvent) {
-        _delayedEvent.value = delayedEvent
     }
 }
 

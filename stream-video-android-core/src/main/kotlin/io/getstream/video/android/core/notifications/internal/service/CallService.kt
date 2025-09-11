@@ -35,6 +35,7 @@ import androidx.media.session.MediaButtonReceiver
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallRejectedEvent
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
@@ -42,7 +43,6 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -775,14 +775,8 @@ internal open class CallService : Service() {
                         // When call ends for any reason
                         stopService()
                     }
-                }
-            }
-        }
 
-        call.scope.launch(Dispatchers.Default) {
-            call.state.delayedEvent.collectLatest {
-                when (it) {
-                    is CallRejectedDelayedEvent -> handleSlowCallRejectedEvent(call)
+                    is LocalCallMissedEvent -> handleSlowCallRejectedEvent(call)
                 }
             }
         }

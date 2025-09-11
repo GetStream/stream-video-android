@@ -37,6 +37,7 @@ import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
@@ -45,7 +46,6 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.events.CallRejectedDelayedEvent
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -57,8 +57,6 @@ import io.getstream.video.android.core.notifications.dispatchers.DefaultNotifica
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
 import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.slowevent.CallRejectedSlowEventDetector
-import io.getstream.video.android.core.slowevent.SlowEventContext
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -212,18 +210,11 @@ constructor(
         ).showNotification(callId, callId.hashCode())
 
         /**
-         * Strategy to detect the slow event
-         * For now we are detecting the presence of [io.getstream.android.video.generated.models.CallRejectedEvent] via [CallRejectedDelayedEvent]
+         * Under poor internet there can be delay in receiving the
+         *  [io.getstream.android.video.generated.models.CallRejectedEvent] so we emit [LocalCallMissedEvent]
          */
         StreamVideo.instanceOrNull()?.let {
-            val call = it.call(callId.type, callId.id)
-            val slowEventContext =
-                SlowEventContext(
-                    SlowEventContext.ContextSource.PUSH_NOTIFICATION,
-                    SlowEventContext.EventType.MISSED_CALL,
-                )
-            CallRejectedSlowEventDetector()
-                .detectAndMarkSlowEvent(call, slowEventContext)
+            (it as StreamVideoClient).fireEvent(LocalCallMissedEvent(callId.cid))
         }
     }
 

@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.events
+package io.getstream.android.video.generated.models
 
 /**
- * Marker interface for representing delayed or "slow" call-related events.
+ * Marker class for representing delayed or "slow" call-related events.
  *
- * A [DelayedEvent] mirrors real-time call events (e.g., CallRejectedEvent),
+ * A [LocalEvent] mirrors real-time call events (e.g., CallRejectedEvent),
  * but is used when the original event is detected late (e.g., due to
  * push notification delivery or network disruption).
  *
  * SDK components can observe these events to replay the same instructions
  * as their real-time counterparts, or to apply special handling.
  */
-interface DelayedEvent
+abstract class LocalEvent : WSCallEvent, VideoEvent()
 
 /**
- * Slow counterpart of [io.getstream.android.video.generated.models.CallRejectedEvent].
+ * Delayed counterpart of [io.getstream.android.video.generated.models.CallRejectedEvent].
  *
  * Emitted when a call rejection is inferred or detected late,
  * allowing the SDK to handle it as if a [io.getstream.android.video.generated.models.CallRejectedEvent] had
  * been received in real time (or to apply adjusted logic if needed).
  */
-class CallRejectedDelayedEvent() : DelayedEvent
+data class LocalCallMissedEvent(val callCid: String) : LocalEvent() {
+    override fun getCallCID(): String {
+        return callCid
+    }
 
-/**
- * Represents the absence of any [DelayedEvent].
- *
- * Used as the default value in state flows to indicate that
- * no delayed event has been detected yet.
- */
-object NoDelayedEvent : DelayedEvent
+    override fun getEventType(): String {
+        return "local.call.reject"
+    }
+}
