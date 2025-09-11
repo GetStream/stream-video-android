@@ -301,7 +301,7 @@ internal open class CallService : Service() {
      * This logic is triggered when we want to stop the service [EXTRA_STOP_SERVICE] which is
      * usually when we get [CallRejected] event
      */
-    private fun isIntentForExpiredCall(intent: Intent?): Boolean { // TODO RAHUL
+    private fun isIntentForExpiredCall(intent: Intent?): Boolean {
         var isCallExpired = false
         val intentCallId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         val shouldStopService = intent?.getBooleanExtra(EXTRA_STOP_SERVICE, false) ?: false
