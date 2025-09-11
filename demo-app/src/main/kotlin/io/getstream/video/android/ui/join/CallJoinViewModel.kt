@@ -31,7 +31,6 @@ import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.NetworkMonitor
 import io.getstream.video.android.util.StreamVideoInitHelper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -79,7 +78,7 @@ class CallJoinViewModel @Inject constructor(
         .shareIn(viewModelScope, SharingStarted.Lazily, 0)
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             isNetworkAvailable.collect { isNetworkAvailable ->
                 if (isNetworkAvailable && !StreamVideo.isInstalled) {
                     StreamVideoInitHelper.loadSdk(
@@ -121,7 +120,7 @@ class CallJoinViewModel @Inject constructor(
     }
 
     fun logOut() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             ChatClient.instance().disconnect(true).enqueue()
             dataStore.clear() // Demo App DataStore
             googleSignInClient.signOut()
