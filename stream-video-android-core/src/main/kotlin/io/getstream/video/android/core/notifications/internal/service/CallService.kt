@@ -118,7 +118,6 @@ internal open class CallService : Service() {
             context: Context,
             callId: StreamCallId,
             trigger: String,
-            debugSource: String,
             callDisplayName: String? = null,
             callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
         ): Intent {
@@ -151,7 +150,7 @@ internal open class CallService : Service() {
                     )
                 }
             }
-            StreamLog.d(TAG) { "[buildStartIntent], call_id:${callId.cid}, source: $debugSource" }
+            StreamLog.d(TAG) { "[buildStartIntent], call_id:${callId.cid}" }
             return serviceIntent
         }
 
@@ -201,7 +200,6 @@ internal open class CallService : Service() {
                             context,
                             callId,
                             TRIGGER_INCOMING_CALL,
-                            "showIncomingCall, 1 trigger:$TRIGGER_INCOMING_CALL",
                             callDisplayName,
                             callServiceConfiguration,
                         ),
@@ -214,7 +212,6 @@ internal open class CallService : Service() {
                             context,
                             callId,
                             TRIGGER_INCOMING_CALL,
-                            "showIncomingCall, 2 trigger:$TRIGGER_INCOMING_CALL",
                             callDisplayName,
                             callServiceConfiguration,
                         ),

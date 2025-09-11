@@ -100,7 +100,6 @@ class CallServiceTest {
             context = context,
             callId = testCallId,
             trigger = TRIGGER_INCOMING_CALL,
-            debugSource = "test",
             callDisplayName = "John Doe",
         )
 
@@ -117,7 +116,6 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
-            debugSource = "test",
             trigger = TRIGGER_OUTGOING_CALL,
         )
 
@@ -134,7 +132,6 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
-            debugSource = "test",
             trigger = TRIGGER_ONGOING_CALL,
         )
 
@@ -150,7 +147,6 @@ class CallServiceTest {
         val intent = CallService.buildStartIntent(
             context = context,
             callId = testCallId,
-            debugSource = "test",
             trigger = TRIGGER_REMOVE_INCOMING_CALL,
         )
 
@@ -167,7 +163,6 @@ class CallServiceTest {
             CallService.buildStartIntent(
                 context = context,
                 callId = testCallId,
-                debugSource = "test",
                 trigger = "invalid_trigger",
             )
         }
@@ -185,7 +180,6 @@ class CallServiceTest {
             context = context,
             callId = testCallId,
             trigger = TRIGGER_INCOMING_CALL,
-            debugSource = "test",
             callServiceConfiguration = customConfig,
         )
 
@@ -370,7 +364,6 @@ class CallServiceTest {
             context = context,
             callId = StreamCallId(type = "livestream", id = "test-123"),
             trigger = TRIGGER_INCOMING_CALL,
-            debugSource = "test",
             callServiceConfiguration = livestreamConfig,
         )
 
