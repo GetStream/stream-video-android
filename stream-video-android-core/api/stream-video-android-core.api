@@ -10361,17 +10361,6 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public abstract fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class io/getstream/video/android/core/notifications/interceptor/StreamVideoPushInterceptor {
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/interceptor/StreamVideoPushInterceptor;
-	public final fun getInterceptor ()Lio/getstream/video/android/core/notifications/interceptor/VideoPushEventInterceptor;
-	public final fun setInterceptor (Lio/getstream/video/android/core/notifications/interceptor/VideoPushEventInterceptor;)V
-}
-
-public abstract interface class io/getstream/video/android/core/notifications/interceptor/VideoPushEventInterceptor {
-	public abstract fun onRemoteMessageHook (Ljava/util/Map;Ljava/util/Map;)Z
-	public abstract fun registerPushDeviceHook (Lio/getstream/android/push/PushDevice;)Z
-}
-
 public final class io/getstream/video/android/core/notifications/internal/receivers/ToggleCameraBroadcastReceiver : android/content/BroadcastReceiver {
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
 	public fun onReceive (Landroid/content/Context;Landroid/content/Intent;)V
