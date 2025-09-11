@@ -32,6 +32,7 @@ import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -252,7 +253,7 @@ object StreamVideoInitHelper {
             apiKey = apiKey,
             user = user,
             token = token,
-            loggingLevel = loggingLevel,
+            loggingLevel = loggingLevel.copy(httpLoggingLevel = HttpLoggingLevel.BODY),
             ensureSingleInstance = false,
             callServiceConfigRegistry = callServiceConfigRegistry,
             notificationConfig = testNotificationConfig ?: NotificationConfig(
