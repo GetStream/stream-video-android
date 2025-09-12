@@ -85,6 +85,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
@@ -169,6 +170,7 @@ internal class StreamVideoClient internal constructor(
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
+    internal val networkStateProvider: NetworkStateProvider,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null

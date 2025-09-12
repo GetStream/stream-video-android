@@ -69,6 +69,7 @@ import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.IceServer
@@ -212,6 +213,7 @@ public class RtcSession internal constructor(
     private val supervisorJob: CompletableJob = SupervisorJob(),
     private val coroutineScope: CoroutineScope =
         CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
+    private val myNetworkStateProvider: NetworkStateProvider,
     private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
     private val sfuTracer: Tracer = tracerManager.tracer(
         "${sessionCounter + 1}-${
@@ -234,6 +236,7 @@ public class RtcSession internal constructor(
                 call.debug.fastReconnect()
             },
             tracer = sfuTracer,
+            networkStateProvider = myNetworkStateProvider,
         )
     },
 ) {

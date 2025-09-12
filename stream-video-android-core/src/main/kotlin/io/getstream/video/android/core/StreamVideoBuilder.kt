@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.content.Context
+import android.net.ConnectivityManager
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.AndroidStreamLogger
@@ -26,6 +27,7 @@ import io.getstream.log.streamLog
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
@@ -210,6 +212,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // Android JSR-310 backport backport
         AndroidThreeTen.init(context)
 
+        val networkStateProvider =
+            NetworkStateProvider(
+                scope,
+                connectivityManager = context.getSystemService(
+                    Context.CONNECTIVITY_SERVICE,
+                ) as ConnectivityManager,
+            )
+
         // This connection module class exposes the connections to the various retrofit APIs.
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
@@ -223,6 +233,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
+            networkStateProvider = networkStateProvider,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -265,6 +276,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
             enableStereoForSubscriber = enableStereoForSubscriber,
+            networkStateProvider = networkStateProvider,
         )
 
         if (user.type == UserType.Guest) {

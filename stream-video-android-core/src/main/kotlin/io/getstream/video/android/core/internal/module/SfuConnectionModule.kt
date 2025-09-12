@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.internal.module
 
 import android.content.Context
-import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.utils.SignalLostSignalingServiceDecorator
@@ -44,6 +43,7 @@ internal class SfuConnectionModule(
     override val userToken: SfuToken,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer,
+    override val networkStateProvider: NetworkStateProvider,
     val onSignalingLost: (Error) -> Unit,
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
@@ -80,14 +80,7 @@ internal class SfuConnectionModule(
     ) {
         onSignalingLost(it)
     }
-    override val networkStateProvider: NetworkStateProvider by lazy {
-        NetworkStateProvider(
-            scope,
-            connectivityManager = context.getSystemService(
-                Context.CONNECTIVITY_SERVICE,
-            ) as ConnectivityManager,
-        )
-    }
+
     private var _internalSocketConnection: SfuSocketConnection = SfuSocketConnection(
         url = wssUrl,
         apiKey = apiKey,

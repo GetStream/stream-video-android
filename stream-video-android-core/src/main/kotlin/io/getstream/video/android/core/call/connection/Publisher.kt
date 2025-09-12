@@ -237,7 +237,7 @@ internal class Publisher(
 
         if (publishOptions.none { it.track_type == trackType }) {
             logger.e { "[trackPublishing] No publish options found for $trackType" }
-             return@submitNullable null
+            return@submitNullable null
         }
 
         for (publishOption in publishOptions) {

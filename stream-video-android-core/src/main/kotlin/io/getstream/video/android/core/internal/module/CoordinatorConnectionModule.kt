@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.internal.module
 
 import android.content.Context
-import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.infrastructure.Serializer
@@ -56,6 +55,7 @@ internal class CoordinatorConnectionModule(
     override val apiKey: ApiKey,
     override val userToken: UserToken,
     override val lifecycle: Lifecycle,
+    override val networkStateProvider: NetworkStateProvider,
     override val tracer: Tracer = Tracer("coordinator"),
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
     // Internals
@@ -83,14 +83,7 @@ internal class CoordinatorConnectionModule(
         .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
         .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
-    override val networkStateProvider: NetworkStateProvider by lazy {
-        NetworkStateProvider(
-            scope,
-            connectivityManager = context.getSystemService(
-                Context.CONNECTIVITY_SERVICE,
-            ) as ConnectivityManager,
-        )
-    }
+
     override val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
     override val socketConnection: CoordinatorSocketConnection = CoordinatorSocketConnection(
         apiKey = apiKey,

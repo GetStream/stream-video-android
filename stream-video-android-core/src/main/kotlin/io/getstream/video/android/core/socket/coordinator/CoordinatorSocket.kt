@@ -31,6 +31,8 @@ import io.getstream.video.android.core.lifecycle.ConnectionPolicyLifecycleHandle
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.CallAwareConnectionPolicy
 import io.getstream.video.android.core.socket.common.ConnectionConf
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_REASON
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_RECONNECT
 import io.getstream.video.android.core.socket.common.HealthMonitor
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
@@ -176,7 +178,10 @@ internal open class CoordinatorSocket(
                             }
 
                             is VideoSocketState.Disconnected.NetworkDisconnected -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close(
+                                    DISPOSE_SOCKET_RECONNECT,
+                                    DISPOSE_SOCKET_REASON,
+                                )
                                 healthMonitor.stop()
                             }
 
@@ -197,7 +202,10 @@ internal open class CoordinatorSocket(
                             }
 
                             is VideoSocketState.Disconnected.WebSocketEventLost -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close(
+                                    DISPOSE_SOCKET_RECONNECT,
+                                    DISPOSE_SOCKET_REASON,
+                                )
                                 connectionConf?.let {
                                     coordinatorSocketStateService.onReconnect(
                                         it,

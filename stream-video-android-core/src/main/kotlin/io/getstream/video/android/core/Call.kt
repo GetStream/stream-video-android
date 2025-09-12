@@ -256,7 +256,7 @@ public class Call(
         }
     }
 
-    fun getLastFiveMethods(n:Int = 5): String {
+    private fun getLastFiveMethods(n: Int = 5): String {
         val stackTrace = Thread.currentThread().stackTrace
         val builder = StringBuilder()
 
@@ -264,37 +264,39 @@ public class Call(
         val lastFive = stackTrace.takeLast(n)
 
         lastFive.forEach { element ->
-            builder.append("${element.className}.${element.methodName} (Line: ${element.lineNumber})\n")
+            builder.append(
+                "${element.className}.${element.methodName} (Line: ${element.lineNumber})\n",
+            )
         }
 
         return builder.toString()
     }
-
 
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
 
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
-            logger.d { "[NetworkStateListener#onConnected] #network; no args, lastDisconnect:$lastDisconnect, elapsedTime:$elapsedTimeMils, reconnectDeadlineMils: $reconnectDeadlineMils" }
+            logger.d {
+                "[NetworkStateListener#onConnected] #network; no args, lastDisconnect:$lastDisconnect, elapsedTime:$elapsedTimeMils, reconnectDeadlineMils: $reconnectDeadlineMils"
+            }
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast) 1. Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
                 fastReconnect()
-            } else if (lastDisconnect == 0L){
+            } else if (lastDisconnect == 0L) {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast) 2. lastDisconnect is 0L"
                 }
                 fastReconnect()
-            }
-            else {
+            } else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
 
                 throw IllegalStateException(getLastFiveMethods().toString())
-                //rejoin()
+                // rejoin()
             }
         }
 
@@ -533,6 +535,7 @@ public class Call(
                 sfuToken = sfuToken,
                 remoteIceServers = iceServers,
                 powerManager = powerManager,
+                myNetworkStateProvider = (client as StreamVideoClient).networkStateProvider,
             )
         }
 
@@ -706,6 +709,7 @@ public class Call(
                     cred.iceServers.map { ice ->
                         ice.toIceServer()
                     },
+                    myNetworkStateProvider = (client as StreamVideoClient).networkStateProvider,
                 )
                 this.session?.connect(reconnectDetails, currentOptions)
                 session.cleanup()
@@ -762,6 +766,7 @@ public class Call(
                     cred.iceServers.map { ice ->
                         ice.toIceServer()
                     },
+                    myNetworkStateProvider = (client as StreamVideoClient).networkStateProvider,
                 )
                 val oldSession = this.session
                 this.session = newSession
@@ -781,7 +786,7 @@ public class Call(
 
     private val serialProcessor = SerialProcessor(scope)
 
-    private suspend fun schedule(block: suspend () -> Unit)  {
+    private suspend fun schedule(block: suspend () -> Unit) {
         logger.d { "[schedule] #reconnect; no args" }
         serialProcessor.submit { block() }
     }

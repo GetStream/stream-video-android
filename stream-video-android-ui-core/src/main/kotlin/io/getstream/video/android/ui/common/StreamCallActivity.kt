@@ -1279,7 +1279,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         }
     }
 
-    public open fun getParticipantUpdateDebounce(call: Call): Long = 1_000L
+    public open fun getParticipantUpdateDebounce(call: Call): Long = 2_000L
 }
 
 public typealias StreamCallIdString = String

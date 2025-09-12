@@ -31,6 +31,8 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.NoOpLifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.ConnectionConf
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_REASON
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_RECONNECT
 import io.getstream.video.android.core.socket.common.HealthMonitor
 import io.getstream.video.android.core.socket.common.SfuParser
 import io.getstream.video.android.core.socket.common.SocketFactory
@@ -177,7 +179,10 @@ internal open class SfuSocket(
                             }
 
                             is SfuSocketState.Disconnected.NetworkDisconnected -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close(
+                                    DISPOSE_SOCKET_RECONNECT,
+                                    DISPOSE_SOCKET_REASON,
+                                )
                                 healthMonitor.stop()
                             }
 
@@ -194,7 +199,10 @@ internal open class SfuSocket(
                             }
 
                             is SfuSocketState.Disconnected.DisconnectedPermanently -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close(
+                                    DISPOSE_SOCKET_RECONNECT,
+                                    DISPOSE_SOCKET_REASON,
+                                )
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
@@ -204,7 +212,10 @@ internal open class SfuSocket(
                             }
 
                             is SfuSocketState.Disconnected.WebSocketEventLost -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close(
+                                    DISPOSE_SOCKET_RECONNECT,
+                                    DISPOSE_SOCKET_REASON,
+                                )
                                 connectionConf?.let {
                                     sfuSocketStateService.onReconnect(
                                         it,
