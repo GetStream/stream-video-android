@@ -1115,7 +1115,7 @@ public class CallState(
         )
 
         // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall && client.state.activeCall.value?.id == call.id) {
+        val state: RingingState = if (hasActiveCall) {
             cancelTimeout()
             RingingState.Active
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
