@@ -62,6 +62,7 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PermissionRequestEvent
@@ -714,6 +715,18 @@ public class CallState(
                         }
                     },
                 )
+            }
+
+            is LocalCallMissedEvent -> {
+                scope.launch {
+                    val newRejectedBySet = _rejectedBy.value.toMutableSet()
+                    StreamVideo.instanceOrNull()?.let {
+                        newRejectedBySet.add(it.user.id)
+                    }
+                    _rejectedBy.value = newRejectedBySet.toSet()
+                    _ringingState.value = RingingState.RejectedByAll
+                    call.leave()
+                }
             }
 
             is CallEndedEvent -> {

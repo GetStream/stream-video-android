@@ -1,8 +1,8 @@
-### 🎯 Goal
+### Goal
 
 _Describe why we are making this change_
 
-### 🛠 Implementation details
+### Implementation
 
 _Describe the implementation_
 
@@ -35,7 +35,7 @@ _Add relevant videos_
 </tbody>
 </table>
 
-### 🧪 Testing
+### Testing
 
 _Explain how this change can be tested (or why it can't be tested)_
 

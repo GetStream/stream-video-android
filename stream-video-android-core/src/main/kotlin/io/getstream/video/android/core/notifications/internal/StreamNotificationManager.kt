@@ -41,6 +41,7 @@ import io.getstream.video.android.core.notifications.handlers.CompatibilityStrea
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.model.Device
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
@@ -56,12 +57,21 @@ internal class StreamNotificationManager private constructor(
     suspend fun registerPushDevice() {
         logger.d { "[registerPushDevice] no args" }
         // first get a push device generator that works for this device
+
+        logger.d {
+            "[registerPushDevice] no args, push device generator: ${notificationConfig.pushDeviceGenerators.size}"
+        }
+        notificationConfig.pushDeviceGenerators.forEach { it ->
+            logger.d {
+                "[registerPushDevice] no args, push device generator name: $it, valid: ${it.isValidForThisDevice()}"
+            }
+        }
         notificationConfig.pushDeviceGenerators
             .firstOrNull { it.isValidForThisDevice() }
             ?.let { generator ->
                 generator.onPushDeviceGeneratorSelected()
                 generator.asyncGeneratePushDevice { generatedDevice ->
-                    logger.d { "[registerPushDevice] pushDevice gnerated: $generatedDevice" }
+                    logger.d { "[registerPushDevice] pushDevice generated: $generatedDevice" }
                     scope.launch { createDevice(generatedDevice) }
                 }
                 if (notificationConfig.requestPermissionOnDeviceRegistration()) {
@@ -74,14 +84,24 @@ internal class StreamNotificationManager private constructor(
         logger.d { "[createDevice] pushDevice: $pushDevice" }
         val newDevice = pushDevice.toDevice()
         return pushDevice
-            .takeUnless { newDevice == deviceTokenStorage.userDevice.firstOrNull() }
+            .takeUnless {
+                if (!notificationConfig.autoRegisterPushDevice) {
+                    false
+                } else {
+                    val equal = newDevice == getDevice().firstOrNull()
+                    logger.d { "[createDevice] Device equal to stored: $equal" }
+                    equal
+                }
+            }
             ?.toCreateDeviceRequest()
             ?.flatMapSuspend { createDeviceRequest ->
                 try {
-                    api.createDevice(createDeviceRequest)
-                    deviceTokenStorage.updateUserDevice(pushDevice.toDevice())
+                    val result = api.createDevice(createDeviceRequest)
+                    updateDevice(pushDevice.toDevice())
                     Result.Success(newDevice)
                 } catch (e: Exception) {
+                    e.printStackTrace()
+                    logger.e { "Failed to register device for push notifications with ${e.message}" }
                     logger.e(e) {
                         "Failed to register device for push notifications " +
                             "(PN will not work!). Does the push provider key " +
@@ -95,9 +115,20 @@ internal class StreamNotificationManager private constructor(
 
     private suspend fun removeStoredDevice(device: Device) {
         logger.d { "[removeStoredDevice] device: device" }
-        deviceTokenStorage.userDevice.firstOrNull()
-            .takeIf { it == device }
-            ?.let { deviceTokenStorage.updateUserDevice(null) }
+        getDevice().firstOrNull()
+            .takeIf {
+                val equal = it == device
+                logger.d { "[removeStoredDevice] Device equal to stored: $equal" }
+                equal
+            }
+            ?.let { updateDevice(null) }
+    }
+
+    fun getDevice(): Flow<Device?> = deviceTokenStorage.userDevice
+
+    suspend fun updateDevice(device: Device?) {
+        logger.d { "[updateUserDevice] device: $device" }
+        deviceTokenStorage.updateUserDevice(device)
     }
 
     /**
@@ -105,7 +136,6 @@ internal class StreamNotificationManager private constructor(
      */
     suspend fun deleteDevice(device: Device): Result<Unit> {
         logger.d { "[deleteDevice] device: $device" }
-        val userId = StreamVideo.instanceOrNull()?.user?.id
         return try {
             api.deleteDevice(device.id)
             removeStoredDevice(device)
@@ -119,7 +149,7 @@ internal class StreamNotificationManager private constructor(
         Device(
             id = this.token,
             pushProvider = this.pushProvider.key,
-            pushProviderName = this.providerName ?: "",
+            pushProviderName = this.providerName,
         )
 
     private fun PushDevice.toCreateDeviceRequest(): Result<CreateDeviceRequest> =

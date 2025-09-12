@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.camera
+package io.getstream.video.android.core.notifications
 
-import android.hardware.camera2.CameraCharacteristics
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @InternalStreamVideoApi
-interface CameraCharacteristicsValidator {
-    fun isUsable(
-        characteristics: CameraCharacteristics?,
-        allowMono: Boolean = true,
-        allowNir: Boolean = false,
-    ): Boolean
-    fun getLensFacing(characteristics: CameraCharacteristics?): Int?
+sealed class NotificationType(open val type: String) {
+    public data object Incoming : NotificationType("incoming")
+    public data object Missed : NotificationType("missed")
+    public data object Outgoing : NotificationType("outgoing")
+    public data object Ongoing : NotificationType("ongoing")
+    public data class Custom(override val type: String) : NotificationType(type)
 }
