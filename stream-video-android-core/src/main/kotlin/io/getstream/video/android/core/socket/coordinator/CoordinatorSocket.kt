@@ -172,13 +172,13 @@ internal open class CoordinatorSocket(
                     is VideoSocketState.Disconnected -> {
                         when (state) {
                             is VideoSocketState.Disconnected.DisconnectedByRequest -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.DisconnectedByRequest")
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
 
                             is VideoSocketState.Disconnected.NetworkDisconnected -> {
-                                streamWebSocket?.close(
+                                streamWebSocket?.close("VideoSocketState.Disconnected.NetworkDisconnected",
                                     DISPOSE_SOCKET_RECONNECT,
                                     DISPOSE_SOCKET_REASON,
                                 )
@@ -186,13 +186,13 @@ internal open class CoordinatorSocket(
                             }
 
                             is VideoSocketState.Disconnected.Stopped -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.Stopped")
                                 healthMonitor.stop()
                                 disposeNetworkStateObserver()
                             }
 
                             is VideoSocketState.Disconnected.DisconnectedPermanently -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.DisconnectedPermanently")
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
@@ -203,6 +203,7 @@ internal open class CoordinatorSocket(
 
                             is VideoSocketState.Disconnected.WebSocketEventLost -> {
                                 streamWebSocket?.close(
+                                    "VideoSocketState.Disconnected.WebSocketEventLost",
                                     DISPOSE_SOCKET_RECONNECT,
                                     DISPOSE_SOCKET_REASON,
                                 )

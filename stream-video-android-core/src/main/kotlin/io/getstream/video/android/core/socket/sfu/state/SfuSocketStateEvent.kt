@@ -67,7 +67,7 @@ public sealed class SfuSocketStateEvent {
     ) : SfuSocketStateEvent()
 
     /**
-     * Event to stop WebSocket connection required by user.
+     * Event to stop WebSocket connectio n required by user.
      */
     object RequiredDisconnection : SfuSocketStateEvent() { override fun toString() = "RequiredDisconnection" }
 

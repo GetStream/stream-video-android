@@ -173,13 +173,13 @@ internal open class SfuSocket(
                     is SfuSocketState.Disconnected -> {
                         when (state) {
                             is SfuSocketState.Disconnected.DisconnectedByRequest -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.DisconnectedByRequest")
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
 
                             is SfuSocketState.Disconnected.NetworkDisconnected -> {
-                                streamWebSocket?.close(
+                                streamWebSocket?.close("SfuSocketState.Disconnected.NetworkDisconnected",
                                     DISPOSE_SOCKET_RECONNECT,
                                     DISPOSE_SOCKET_REASON,
                                 )
@@ -187,19 +187,19 @@ internal open class SfuSocket(
                             }
 
                             is SfuSocketState.Disconnected.Rejoin -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.Rejoin")
                                 healthMonitor.stop()
                                 disposeNetworkStateObserver()
                             }
 
                             is SfuSocketState.Disconnected.Stopped -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.Stopped")
                                 healthMonitor.stop()
                                 disposeNetworkStateObserver()
                             }
 
                             is SfuSocketState.Disconnected.DisconnectedPermanently -> {
-                                streamWebSocket?.close(
+                                streamWebSocket?.close("SfuSocketState.Disconnected.DisconnectedPermanently",
                                     DISPOSE_SOCKET_RECONNECT,
                                     DISPOSE_SOCKET_REASON,
                                 )
@@ -213,6 +213,7 @@ internal open class SfuSocket(
 
                             is SfuSocketState.Disconnected.WebSocketEventLost -> {
                                 streamWebSocket?.close(
+                                    "SfuSocketState.Disconnected.WebSocketEventLost",
                                     DISPOSE_SOCKET_RECONNECT,
                                     DISPOSE_SOCKET_REASON,
                                 )

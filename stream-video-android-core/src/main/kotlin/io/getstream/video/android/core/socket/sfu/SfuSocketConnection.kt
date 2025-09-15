@@ -69,7 +69,7 @@ class SfuSocketConnection(
         internal const val DEFAULT_SFU_SOCKET_TIMEOUT: Long = 10000L
     }
 
-    private val logger by taggedLogger("Video:SfuSocket")
+    private val logger by taggedLogger("Video:SfuSocketConnection")
     private val tokenManager = TokenManagerImpl()
     private val internalSocket: SfuSocket = SfuSocket(
         wssUrl = url,
