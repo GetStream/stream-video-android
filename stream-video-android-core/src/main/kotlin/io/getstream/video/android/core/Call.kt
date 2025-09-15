@@ -445,10 +445,18 @@ public class Call(
             }
             delay(retryCount - 1 * 1000L)
         }
-        return Failure(value = Error.GenericError("Join failed after 3 retries"))
+        session = null
+        val errorMessage = "Join failed after 3 retries"
+        state._connection.value = RealtimeConnection.Failed(errorMessage)
+        return Failure(value = Error.GenericError(errorMessage))
     }
 
     internal fun isPermanentError(error: Any): Boolean {
+        if (error is Error.ThrowableError) {
+            if (error.message.contains("Unable to resolve host")) {
+                return false
+            }
+        }
         return true
     }
 
