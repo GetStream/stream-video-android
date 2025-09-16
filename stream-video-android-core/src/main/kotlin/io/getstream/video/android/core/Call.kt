@@ -83,6 +83,7 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
+import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -258,16 +259,17 @@ public class Call(
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
-            logger.d { "[NetworkStateListener#onConnected] #network; no args" }
+
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
+            logger.d { "Noob [NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMils" }
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "Noob [NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+                fastReconnect("[NetworkStateListener#onConnected]")
             } else {
                 logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
+                    "Noob [NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
                 rejoin()
             }
@@ -275,15 +277,18 @@ public class Call(
 
         override suspend fun onDisconnected() {
             state._connection.value = RealtimeConnection.Reconnecting
+            logger.d { "Noob [NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}" }
             lastDisconnect = System.currentTimeMillis()
-            leaveTimeoutAfterDisconnect = scope.launch {
-                delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
-                logger.d {
-                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
-                }
-                leave()
-            }
-            logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
+            logger.d { "Noob [NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect" }
+            //TODO Rahul, only commented for testing purpose, I don't want the user to leave the call while I am debugging
+//            leaveTimeoutAfterDisconnect = scope.launch {
+//                delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
+//                logger.d {
+//                    "Noob [NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+//                }
+//                leave()
+//            }
+            logger.d { "Noob [NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
         }
     }
 
@@ -295,6 +300,7 @@ public class Call(
     private var monitorSubscriberPCStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
+    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
 
     init {
         scope.launch {
@@ -553,7 +559,7 @@ public class Call(
             session?.publisher?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.publisher?.restartIce()
+                        session?.publisher?.restartIce("PeerConnection.IceConnectionState.FAILED or PeerConnection.IceConnectionState.DISCONNECTED: $it")
                     }
 
                     else -> {
@@ -622,8 +628,8 @@ public class Call(
     /**
      * Fast reconnect to the same SFU with the same participant session.
      */
-    suspend fun fastReconnect() = schedule {
-        logger.d { "[fastReconnect] Reconnecting" }
+    suspend fun fastReconnect(debugSource: String) = schedule("fast") {
+        logger.d { "Noob [fastReconnect] Reconnecting, debugSource: $debugSource, reconnectAttepmts:$reconnectAttepmts" }
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
@@ -640,7 +646,7 @@ public class Call(
             )
             session.fastReconnect(reconnectDetails)
         } else {
-            logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
+            logger.d { "Noob [fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
         }
     }
@@ -648,8 +654,8 @@ public class Call(
     /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
-    suspend fun rejoin() = schedule {
-        logger.d { "[rejoin] Rejoining" }
+    suspend fun rejoin() = schedule("rejoin") {
+        logger.d { "Noob [rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
@@ -704,8 +710,8 @@ public class Call(
     /**
      * Migrate to another SFU.
      */
-    suspend fun migrate() = schedule {
-        logger.d { "[migrate] Migrating" }
+    suspend fun migrate() = schedule("migrate") {
+        logger.d { "Noob [migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
             reconnectStartTime = System.currentTimeMillis()
@@ -763,12 +769,20 @@ public class Call(
 
     private var reconnectJob: Job? = null
 
-    private suspend fun schedule(block: suspend () -> Unit) = synchronized(this) {
-        logger.d { "[schedule] #reconnect; no args" }
-        reconnectJob?.cancel()
-        reconnectJob = scope.launch {
-            block()
-        }
+    private suspend fun schedule(key:String, block: suspend () -> Unit) {
+
+        logger.d { "Noob [schedule] #reconnect; no args" } //noob 4
+
+        streamSingleFlightProcessorImpl.run(key, block)
+//        if(reconnectJob == null) {
+//            reconnectJob = scope.launch {
+//                logger.d { "Noob [schedule] #reconnectJob; no args" } //noob 4
+//                block()
+//                reconnectJob = null
+//            }
+//        }
+//        reconnectJob?.cancel()
+
     }
 
     /** Leave the call, but don't end it for other users */
@@ -1537,7 +1551,7 @@ public class Call(
 
         fun fastReconnect() {
             call.scope.launch {
-                call.fastReconnect()
+                call.fastReconnect("[fastReconnect]: sfuConnectionModuleProvider")
             }
         }
     }

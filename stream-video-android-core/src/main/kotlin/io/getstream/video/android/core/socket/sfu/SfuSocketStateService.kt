@@ -172,8 +172,21 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
             initialState(initialState)
 
             defaultHandler { state, event ->
-                logger.e { "Cannot handle event $event while being in inappropriate state $state" }
-                state
+                logger.d { "Noob current state: $state, event $event" }
+                when (event) {
+                    is SfuSocketStateEvent.Connect -> {
+                        logger.d { "Noob SfuSocketStateEvent.Connect" }
+                        SfuSocketState.Connecting(
+                            event.connectionConf,
+                            event.connectionType
+                        )
+                    }
+
+                    else -> {
+                        logger.e { "Cannot handle event $event while being in inappropriate state $state" }
+                        state
+                    }
+                }
             }
 
             state<SfuSocketState.RestartConnection> {
@@ -290,12 +303,12 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                     SfuSocketState.Disconnected.DisconnectedByRequest
                 }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
-                onEvent<SfuSocketStateEvent.NetworkAvailable> {
-                    SfuSocketState.RestartConnection(
-                        RestartReason.NETWORK_AVAILABLE,
-                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                    )
-                }
+//                onEvent<SfuSocketStateEvent.NetworkAvailable> {
+//                    SfuSocketState.RestartConnection(
+//                        RestartReason.NETWORK_AVAILABLE,
+//                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+//                    )
+//                }
             }
 
             state<SfuSocketState.Disconnected.WebSocketEventLost> {

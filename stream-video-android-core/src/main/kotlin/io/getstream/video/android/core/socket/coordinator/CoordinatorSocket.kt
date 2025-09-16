@@ -31,6 +31,8 @@ import io.getstream.video.android.core.lifecycle.ConnectionPolicyLifecycleHandle
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.CallAwareConnectionPolicy
 import io.getstream.video.android.core.socket.common.ConnectionConf
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_REASON
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_RECONNECT
 import io.getstream.video.android.core.socket.common.HealthMonitor
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener
@@ -170,24 +172,24 @@ internal open class CoordinatorSocket(
                     is VideoSocketState.Disconnected -> {
                         when (state) {
                             is VideoSocketState.Disconnected.DisconnectedByRequest -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.DisconnectedByRequest")
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
 
                             is VideoSocketState.Disconnected.NetworkDisconnected -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.NetworkDisconnected", DISPOSE_SOCKET_RECONNECT, DISPOSE_SOCKET_REASON) // To prevent the emission of ParticipantLeftEvent to other users
                                 healthMonitor.stop()
                             }
 
                             is VideoSocketState.Disconnected.Stopped -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.Stopped")
                                 healthMonitor.stop()
                                 disposeNetworkStateObserver()
                             }
 
                             is VideoSocketState.Disconnected.DisconnectedPermanently -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.DisconnectedPermanently")
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
@@ -197,7 +199,7 @@ internal open class CoordinatorSocket(
                             }
 
                             is VideoSocketState.Disconnected.WebSocketEventLost -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("VideoSocketState.Disconnected.WebSocketEventLost")
                                 connectionConf?.let {
                                     coordinatorSocketStateService.onReconnect(
                                         it,

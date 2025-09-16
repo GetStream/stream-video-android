@@ -29,6 +29,8 @@ import okio.ByteString
 
 private const val EVENTS_BUFFER_SIZE = 100
 private const val CLOSE_SOCKET_CODE = 1000
+internal const val DISPOSE_SOCKET_RECONNECT = 4002
+internal const val DISPOSE_SOCKET_REASON = "Connection closed to reconnect"
 private const val CLOSE_SOCKET_REASON = "Connection close by client"
 
 internal class StreamWebSocket<V, T : GenericParser<V>>(
@@ -94,7 +96,11 @@ internal class StreamWebSocket<V, T : GenericParser<V>>(
         val parsedEvent = parser.encode(event)
         return webSocket.send(parsedEvent)
     }
-    fun close(): Boolean = webSocket.close(CLOSE_SOCKET_CODE, CLOSE_SOCKET_REASON)
+    fun close(source: String = "N/A", code: Int = CLOSE_SOCKET_CODE, reason: String = CLOSE_SOCKET_REASON): Boolean {
+        logger.d { "[close], source:$source, code: $code, reason: $reason" }
+//        return webSocket.close(DISPOSE_SOCKET_RECONNECT, DISPOSE_SOCKET_REASON)
+        return webSocket.close(code, reason)
+    }
     fun listen(): Flow<StreamWebSocketEvent> = eventFlow.asSharedFlow()
 
     fun sendRaw(data: String) {

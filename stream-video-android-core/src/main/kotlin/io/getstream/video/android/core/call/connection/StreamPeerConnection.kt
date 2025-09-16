@@ -78,9 +78,11 @@ open class StreamPeerConnection(
     private val onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
     private val onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
     private val onRejoinNeeded: () -> Unit,
+    private val onFastReconnectNeeded: () -> Unit,
     private val maxBitRate: Int,
     private val traceCreateAnswer: Boolean = true,
     private val tracer: Tracer,
+    private val debugText: String
 ) : PeerConnection.Observer {
 
     private val localDescriptionMutex = Mutex()
@@ -523,23 +525,25 @@ open class StreamPeerConnection(
      */
 
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
-        logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
+        logger.i { "Noob [onConnectionChange] #sfu; #$typeTag; oldState: ${state.value}, newState: $newState" }
         state.value = newState
         tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState.name)
         if (newState == PeerConnection.PeerConnectionState.FAILED) {
-            onRejoinNeeded()
+            logger.i { "Noob [onConnectionChange] rejoin cause newsState: PeerConnection.PeerConnectionState.FAILED" }
+//            onRejoinNeeded() // Perform fast-reconnect
+            onFastReconnectNeeded() //Todo Rahul re check
         }
     }
 
     // better to monitor onConnectionChange for the state
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
-        logger.i { "[onIceConnectionChange] #ice; #sfu; #$typeTag; newState: $newState" }
+        logger.i { "[onIceConnectionChange] #ice; #sfu; #$typeTag; oldIceState: ${iceState.value}, newState: $newState" }
         iceState.value = newState
         tracer.trace(PeerConnectionTraceKey.ON_ICE_CONNECTION_STATE_CHANGE.value, newState?.name)
     }
 
     fun close() {
-        logger.i { "[close] #sfu; #$typeTag; no args" }
+        logger.i { "[close] #sfu; #$typeTag; no args, debugText: $debugText" }
         tracer.trace(PeerConnectionTraceKey.CLOSE.value, null)
         connection.close()
     }

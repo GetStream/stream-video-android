@@ -231,7 +231,7 @@ public class RtcSession internal constructor(
             userToken = sfuToken,
             lifecycle = lifecycle,
             onSignalingLost = { error ->
-                call.debug.fastReconnect()
+//                call.debug.fastReconnect()
             },
             tracer = sfuTracer,
         )
@@ -426,7 +426,7 @@ public class RtcSession internal constructor(
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
                         _peerConnectionStates.value.let {
                             if (publisher?.isHealthy() == true && subscriber?.isHealthy() == true) {
-                                call.fastReconnect()
+                                call.fastReconnect("[listenToSfuSocket]: SfuSocketState.Disconnected.WebSocketEventLost")
                             } else {
                                 call.rejoin()
                             }
@@ -455,7 +455,7 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.fastReconnect()
+                        call.fastReconnect("[listenToSfuSocket]: WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST")
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
@@ -547,7 +547,7 @@ public class RtcSession internal constructor(
             publisher?.let {
                 if (!it.isHealthy() || forceRestart) {
                     logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
-                    it.restartIce()
+                    it.restartIce("it.isHealthy() = ${it.isHealthy()}, forceRestart=$forceRestart")
                 }
             }
         }
@@ -625,8 +625,11 @@ public class RtcSession internal constructor(
                     }
                     if (canUserSendVideo) {
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
+                        val streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
 
-                        val track = publisher?.publishStream(
+
+                        val track = publisher?.publishStream( //noob 9
+                            streamId,
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
                         )
@@ -634,7 +637,7 @@ public class RtcSession internal constructor(
                         setLocalTrack(
                             TrackType.TRACK_TYPE_VIDEO,
                             VideoTrack(
-                                streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
+                                streamId = streamId,
                                 video = track as org.webrtc.VideoTrack,
                             ),
                         )
@@ -657,15 +660,16 @@ public class RtcSession internal constructor(
                 if (it == DeviceStatus.Enabled) {
                     if (canUserSendAudio) {
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
-
+                        val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
                         val track = publisher?.publishStream(
+                            streamId,
                             TrackType.TRACK_TYPE_AUDIO,
                         )
 
                         setLocalTrack(
                             TrackType.TRACK_TYPE_AUDIO,
                             AudioTrack(
-                                streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                                streamId = streamId,
                                 audio = track as org.webrtc.AudioTrack,
                             ),
                         )
@@ -686,15 +690,16 @@ public class RtcSession internal constructor(
                 if (it == DeviceStatus.Enabled) {
                     if (canUserShareScreen) {
                         setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
-
+                        val streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)
                         val track = publisher?.publishStream(
+                            streamId,
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                         )
 
                         setLocalTrack(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                             VideoTrack(
-                                streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
+                                streamId = streamId,
                                 video = track as org.webrtc.VideoTrack,
                             ),
                         )
@@ -862,9 +867,16 @@ public class RtcSession internal constructor(
             enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
             rejoin = {
-                coroutineScope.launch {
-                    call.rejoin()
-                }
+//                coroutineScope.launch {
+                    logger.d { "Noob [createSubscriber] rejoin attempt 1" }
+//                    call.rejoin() //noob 1
+//                }
+            },
+            fastReconnect = { //Noob problematic code - can't just fast-reconnect blindly
+//                coroutineScope.launch {
+//                    logger.d { "Noob [createSubscriber] fastReconnect" }
+//                    call.fastReconnect("Noob [createSubscriber] fastReconnect") //noob 1
+//                }
             },
             onIceCandidateRequest = ::sendIceCandidate,
         )
@@ -919,6 +931,7 @@ public class RtcSession internal constructor(
                 StreamPeerType.SUBSCRIBER
             },
             mediaConstraints = defaultConstraints,
+            debugText = "DummyPeerConnection"
         ).apply {
             addTempTransceivers(this)
         }
@@ -944,11 +957,32 @@ public class RtcSession internal constructor(
             onNegotiationNeeded = { _, _ -> },
             tracer = publisherTracer,
             onIceCandidate = ::sendIceCandidate,
-        ) {
-            coroutineScope.launch {
-                call.rejoin()
+            rejoin = {
+                logger.d { "Noob [createPublisher] rejoin attempt ENTER, connection state: ${call.state.connection.value}" }
+                if(call.state.connection.value is RealtimeConnection.Reconnecting){
+
+                }else {
+                    coroutineScope.launch {
+                        logger.d { "Noob [createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} " } //TODO Rahul, sometimes the code will come here right in the first attempt to call
+                        call.rejoin()
+                    }
+                }
+
+            },
+            fastReconnect = { //Noob problematic code - can't just fast-reconnect blindly
+                coroutineScope.launch {
+                    logger.d { "Noob [createPublisher] fast reconnect ENTER, connection state: ${call.state.connection.value}" }
+                    if(call.state.connection.value is RealtimeConnection.Reconnecting){
+
+                    }else {
+                        coroutineScope.launch {
+                            logger.d { "Noob [createPublisher] fast reconnect EXECUTE" }
+                            call.fastReconnect("Noob [createPublisher] fast reconnect EXECUTE, connection state: ${call.state.connection.value}") //noob 2
+                        }
+                    }
+                }
             }
-        }
+        )
     }
 
     private fun buildTrackId(trackTypeVideo: TrackType): String {
@@ -987,14 +1021,20 @@ public class RtcSession internal constructor(
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is SfuDataEvent) {
             coroutineScope.launch {
-                logger.v { "[onRtcEvent] event: $event" }
+                if(event is SubscriberOfferEvent){
+                    logger.v { "Noob [onRtcEvent] event: SubscriberOfferEvent" }
+                }else {
+                    logger.v { "Noob [onRtcEvent] event: $event" }
+                }
+
                 when (event) {
                     is JoinCallResponseEvent -> {
                         val participantStates = event.callState.participants.map {
                             call.state.getOrCreateParticipant(it)
                         }
                         call.state.replaceParticipants(participantStates)
-                        sfuConnectionModule.socketConnection.whenConnected {
+                        sfuConnectionModule.socketConnection.whenConnected { //noob 3
+                            logger.d { "Noob JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
                             publisher = createPublisher(event.publishOptions)
                             processPendingSubscriberEvents()
                             processPendingPublisherEvents()
@@ -1076,7 +1116,7 @@ public class RtcSession internal constructor(
                         val peerType = event.peerType
                         when (peerType) {
                             PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
-                                publisher?.restartIce() ?: let {
+                                publisher?.restartIce("ICERestartEvent, peerType: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED") ?: let {
                                     publisherPendingEvents.add(event)
                                 }
                             }
@@ -1109,7 +1149,7 @@ public class RtcSession internal constructor(
                     }
 
                     is ICERestartEvent -> {
-                        publisher?.restartIce()
+                        publisher?.restartIce("ICERestartEvent")
                     }
 
                     is ChangePublishOptionsEvent -> {
@@ -1224,7 +1264,8 @@ public class RtcSession internal constructor(
      * - Sends the answer back to the SFU
      */
     suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
-        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
+//        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: ${offerEvent}" }
+        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: " } //Todo Rahul, Revert before merge
         if (subscriber == null) {
             subscriberPendingEvents.add(offerEvent)
             return
@@ -1484,7 +1525,7 @@ public class RtcSession internal constructor(
         // and restart ICE on publisher
         logger.d { "[fastReconnect] Starting fast reconnect." }
         val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
-        logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
+        logger.d { "Noob [fastReconnect] Published tracks: $publisherTracks" }
 
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
@@ -1496,9 +1537,9 @@ public class RtcSession internal constructor(
             reconnect_details = reconnectDetails,
             capabilities = call.clientCapabilities.values.toList(),
         )
-        publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request)
+        publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request.toString())
 
-        logger.d { "Connecting RTC, $request" }
+        logger.d { "Noob Connecting RTC, ${request.toString()}" }
         listenToSfuSocket()
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.connect(request)
@@ -1506,11 +1547,11 @@ public class RtcSession internal constructor(
                 val peerConnectionNotUsable =
                     subscriber?.isFailedOrClosed() == true && publisher?.isFailedOrClosed() == true
                 if (peerConnectionNotUsable) {
-                    logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
+                    logger.w { "Noob [fastReconnect] Peer connections are not usable, rejoining." }
                     // We could not reuse the peer connections.
                     call.rejoin()
                 } else {
-                    publisher?.restartIce()
+                    publisher?.restartIce("peerConnection is usable")
                     sendCallStats(
                         report = call.collectStats(),
                         reconnectionTimeSeconds = Pair(

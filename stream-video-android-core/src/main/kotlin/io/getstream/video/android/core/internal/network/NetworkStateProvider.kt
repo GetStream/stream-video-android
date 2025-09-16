@@ -42,19 +42,20 @@ public class NetworkStateProvider(
     private val lock: Any = Any()
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            logger.d { "[callback#onAvailable] #network; onAvailable." }
+            logger.d { "Noob [callback#onAvailable] #network; onAvailable." }
             notifyListenersIfNetworkStateChanged()
         }
 
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-            logger.d { "[callback#onCapabilitiesChanged] #network; onCapabilitiesChanged" }
+            logger.d { "Noob [callback#onCapabilitiesChanged] #network; onCapabilitiesChanged" }
             notifyListenersIfNetworkStateChanged()
         }
 
         override fun onLost(network: Network) {
-            logger.d { "[callback#onLost] #network; onLost" }
+            logger.d { "Noob [callback#onLost] #network; onLost, hashcode: ${hashCode()}" }
             isConnected = false
-            notifyListenersIfNetworkStateChanged()
+//            notifyListenersIfNetworkStateChanged()
+            notifyListenersIfNetworkStateChangedNew()
         }
     }
 
@@ -68,15 +69,20 @@ public class NetworkStateProvider(
 
     private fun notifyListenersIfNetworkStateChanged() {
         val isNowConnected = isConnected()
+        logger.d { "Noob [notifyListenersIfNetworkStateChanged] isConnected:${isConnected}, isNowConnected: $isNowConnected" }
         if (!isConnected && isNowConnected) {
-            logger.d { "[notifyListenersIfNetworkStateChanged] #network; Network connected." }
+            logger.d { "Noob [notifyListenersIfNetworkStateChanged] #network; Network connected." }
             isConnected = true
             listeners.onConnected()
         } else if (isConnected && !isNowConnected) {
-            logger.d { "[notifyListenersIfNetworkStateChanged] #network; Network disconnected." }
+            logger.d { "Noob [notifyListenersIfNetworkStateChanged] #network; Network disconnected." }
             isConnected = false
             listeners.onDisconnected()
-        }
+        } //TODO Rahul, why we missed the case of !isConnected && !isNowConnected ?
+    }
+
+    private fun notifyListenersIfNetworkStateChangedNew() {
+            listeners.onDisconnected()
     }
 
     private fun Set<NetworkStateListener>.onConnected() {
@@ -91,6 +97,9 @@ public class NetworkStateProvider(
         }
     }
 
+    /**
+     * Warning: Returns false positive if invoked right after wifi is switched off
+     */
     public fun isConnected(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             runCatching {

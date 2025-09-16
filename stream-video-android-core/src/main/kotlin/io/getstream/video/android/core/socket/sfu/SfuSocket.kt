@@ -31,6 +31,8 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.NoOpLifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.ConnectionConf
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_REASON
+import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_RECONNECT
 import io.getstream.video.android.core.socket.common.HealthMonitor
 import io.getstream.video.android.core.socket.common.SfuParser
 import io.getstream.video.android.core.socket.common.SocketFactory
@@ -105,7 +107,7 @@ internal open class SfuSocket(
         var socketListenerJob: Job? = null
 
         suspend fun connectUser(connectionConf: ConnectionConf.SfuConnectionConf) {
-            logger.d { "[connectUser] connectionConf: $connectionConf" }
+            logger.d { "Noob [connectUser] connectionConf: $connectionConf" }
             userScope.launch { startObservers() }
             this.connectionConf = connectionConf
             socketListenerJob?.cancel()
@@ -171,30 +173,30 @@ internal open class SfuSocket(
                     is SfuSocketState.Disconnected -> {
                         when (state) {
                             is SfuSocketState.Disconnected.DisconnectedByRequest -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.DisconnectedByRequest", DISPOSE_SOCKET_RECONNECT, DISPOSE_SOCKET_REASON)
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
 
                             is SfuSocketState.Disconnected.NetworkDisconnected -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.NetworkDisconnected", DISPOSE_SOCKET_RECONNECT, DISPOSE_SOCKET_REASON)
                                 healthMonitor.stop()
                             }
 
                             is SfuSocketState.Disconnected.Rejoin -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.Rejoin")
                                 healthMonitor.stop()
                                 disposeNetworkStateObserver()
                             }
 
                             is SfuSocketState.Disconnected.Stopped -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.Stopped")
                                 healthMonitor.stop()
                                 disposeNetworkStateObserver()
                             }
 
                             is SfuSocketState.Disconnected.DisconnectedPermanently -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.DisconnectedPermanently")
                                 healthMonitor.stop()
                                 userScope.launch { disposeObservers() }
                             }
@@ -204,7 +206,7 @@ internal open class SfuSocket(
                             }
 
                             is SfuSocketState.Disconnected.WebSocketEventLost -> {
-                                streamWebSocket?.close()
+                                streamWebSocket?.close("SfuSocketState.Disconnected.WebSocketEventLost", DISPOSE_SOCKET_RECONNECT, DISPOSE_SOCKET_REASON)
                                 connectionConf?.let {
                                     sfuSocketStateService.onReconnect(
                                         it,
