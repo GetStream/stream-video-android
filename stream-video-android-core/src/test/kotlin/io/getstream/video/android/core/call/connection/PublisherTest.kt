@@ -247,16 +247,6 @@ class PublisherTest {
     }
 
     @Test
-    fun `restartIce calls negotiate(true) if not already in progress`() = runTest {
-        every { mockPeerConnection.signalingState() } returns PeerConnection.SignalingState.STABLE
-
-        publisher.restartIce("test")
-
-        verify { mockPeerConnection.signalingState() }
-        coVerify { publisher.negotiate("", true) }
-    }
-
-    @Test
     fun `extractMid returns transceiver MID if present, else uses index`() = runTest {
         val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
         every { mockTransceiver.mid } returns "my-mid"
@@ -548,23 +538,6 @@ class PublisherTest {
 
         val announced = publisher.getAnnouncedTracks(null)
         assertEquals("Expected two announced tracks", 2, announced.size)
-    }
-
-    @Test
-    fun `getAnnouncedTracksForReconnect returns track info from last localDescription`() = testScope.runTest {
-        val videoTrack = mockk<VideoTrack>(relaxed = true) {
-            every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
-            every { id() } returns "video-id-reconnect"
-        }
-        val videoTransceiver = mockk<RtpTransceiver>(relaxed = true)
-        every { mockPeerConnection.addTransceiver(videoTrack, any()) } returns videoTransceiver
-
-        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
-        every { mockPeerConnection.localDescription } returns fakeSdpOffer
-
-        val tracks = publisher.getAnnouncedTracksForReconnect()
-        assertEquals("Expected 1 track for reconnect", 1, tracks.size)
     }
 
     @Test

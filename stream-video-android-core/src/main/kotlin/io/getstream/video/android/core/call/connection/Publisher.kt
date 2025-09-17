@@ -169,7 +169,7 @@ internal class Publisher(
         source: String = "unknown",
         iceRestart: Boolean = false,
     ) = sdpProcessor.submit {
-        logger.d { "Noob [negotiate] source: $source, iceRestart:$iceRestart" }
+        logger.d { "[negotiate] source: $source, iceRestart:$iceRestart" }
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
             return@submit
@@ -188,7 +188,7 @@ internal class Publisher(
             trackInfos.joinToString(separator = ";") { it.toString() },
         )
         if (trackInfos.isEmpty()) {
-            logger.e { ("Noob rejoin cause, Can't negotiate without announcing any tracks") }
+            logger.e { ("rejoin cause, Can't negotiate without announcing any tracks") }
             rejoin.invoke()
         }
         logger.i { "Negotiating with tracks: $trackInfos" }
@@ -208,15 +208,15 @@ internal class Publisher(
             logger.i { "Received answer: ${response.sdp}" }
             if (response.error != null) {
                 logger.e {
-                    "Noob SetPublisherRequest Received error: ${response.error}, SetPublisherRequest: $request"
+                    "SetPublisherRequest Received error: ${response.error}, SetPublisherRequest: $request"
                 }
                 tracer.trace("negotiate-error-setpublisher", response.error.message ?: "unknown")
-                logger.e { "Noob rejoin cause error in sfuClient.setPublisher, message:${response.error.message}" }
+                logger.e { "rejoin cause error in sfuClient.setPublisher, message:${response.error.message}" }
 
                 when (response.error.code) {
                     /**
                      *  We are getting this error right away after joining the call first time
-                     *  Full error: 16:04:05.032 Call:PeerC...:publisher  E  (DefaultDispatcher-worker-17:526) Noob SetPublisherRequest Received error: Error{code=ERROR_CODE_REQUEST_VALIDATION_FAILED, message=Invalid SetPublisher request, should_retry=false}
+                     *  Full error: 16:04:05.032 Call:PeerC...:publisher  E  (DefaultDispatcher-worker-17:526) SetPublisherRequest Received error: Error{code=ERROR_CODE_REQUEST_VALIDATION_FAILED, message=Invalid SetPublisher request, should_retry=false}
                      * This will cause emission of ParticipantLeftEvent to other person
                      */
                     ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED -> rejoin()
@@ -277,7 +277,7 @@ internal class Publisher(
                         traceTrack(trackType, senderTrack.id())
                         return@submit senderTrack
                     } else {
-                        logger.d { "Noob [trackPublishing] Track is disposed, creating new one." }
+                        logger.d { "[trackPublishing] Track is disposed, creating new one." }
                         val newTrack = newTrackFromSource(publishOption.track_type)
                         traceTrack(trackType, newTrack.id())
                         sender.setTrack(newTrack, true)
@@ -285,7 +285,7 @@ internal class Publisher(
                     }
                 } catch (e: Exception) {
                     // Fallback if anything happens with the sender
-                    logger.w { "Noob Failed to set track for ${publishOption.track_type}, creating new transceiver" }
+                    logger.w { "Failed to set track for ${publishOption.track_type}, creating new transceiver" }
                     transceiverCache.remove(publishOption)
                     val fallbackTrack = newTrackFromSource(publishOption.track_type)
                     traceTrack(trackType, fallbackTrack.id())
@@ -361,13 +361,13 @@ internal class Publisher(
             }
             transceiverCache.add(publishOption, transceiver)
         } catch (e: Exception) {
-            logger.e(e) { "Noob Failed to add transceiver for ${publishOption.track_type}" }
+            logger.e(e) { "Failed to add transceiver for ${publishOption.track_type}" }
         }
     }
 
     fun syncPublishOptions(captureFormat: CaptureFormat?, publishOptions: List<PublishOption>) {
         // enable publishing with new options
-        logger.d { "Noob New publish options: $publishOptions" }
+        logger.d { "New publish options: $publishOptions" }
         for (publishOption in publishOptions) {
             val trackType = publishOption.track_type
             if (!isPublishing(trackType)) {
@@ -534,7 +534,7 @@ internal class Publisher(
     }
 
     suspend fun restartIce(debugSource: String) = singleFlightProcessor.run("restartIce") {
-        logger.i { "Noob [restartIce] debugSource:$debugSource, negotiate on Restarting ICE connection" }
+        logger.i { "[restartIce] debugSource:$debugSource, negotiate on Restarting ICE connection" }
         negotiate("[restartIce]", true)
     }
 

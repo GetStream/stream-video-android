@@ -171,10 +171,10 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
             initialState(initialState)
 
             defaultHandler { state, event ->
-                logger.d { "Noob current state: $state, event $event" }
+                logger.d { "current state: $state, event $event" }
                 when (event) {
                     is SfuSocketStateEvent.Connect -> {
-                        logger.d { "Noob SfuSocketStateEvent.Connect" }
+                        logger.d { "SfuSocketStateEvent.Connect" }
                         SfuSocketState.Connecting(
                             event.connectionConf,
                             event.connectionType,

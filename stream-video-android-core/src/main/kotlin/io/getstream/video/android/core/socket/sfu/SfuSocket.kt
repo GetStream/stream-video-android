@@ -107,7 +107,7 @@ internal open class SfuSocket(
         var socketListenerJob: Job? = null
 
         suspend fun connectUser(connectionConf: ConnectionConf.SfuConnectionConf) {
-            logger.d { "Noob [connectUser] connectionConf: $connectionConf" }
+            logger.d { "[connectUser] connectionConf: $connectionConf" }
             userScope.launch { startObservers() }
             this.connectionConf = connectionConf
             socketListenerJob?.cancel()

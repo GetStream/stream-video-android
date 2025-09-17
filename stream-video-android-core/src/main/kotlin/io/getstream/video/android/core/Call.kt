@@ -280,20 +280,20 @@ public class Call(
         override suspend fun onDisconnected() {
             state._connection.value = RealtimeConnection.Reconnecting
             logger.d {
-                "Noob [NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
+                "[NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
             }
             lastDisconnect = System.currentTimeMillis()
             logger.d {
-                "Noob [NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect"
+                "[NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect"
             }
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
                 logger.d {
-                    "Noob [NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
                 }
                 leave()
             }
-            logger.d { "Noob [NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
+            logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
         }
     }
 
@@ -716,7 +716,7 @@ public class Call(
      * Migrate to another SFU.
      */
     suspend fun migrate() = schedule("migrate") {
-        logger.d { "Noob [migrate] Migrating" }
+        logger.d { "[migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
             reconnectStartTime = System.currentTimeMillis()
@@ -775,7 +775,7 @@ public class Call(
     private var reconnectJob: Job? = null
 
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
-        logger.d { "Noob [schedule] #reconnect; no args" } // noob 4
+        logger.d { "[schedule] #reconnect; no args" } // noob 4
 
         streamSingleFlightProcessorImpl.run(key, block)
     }
