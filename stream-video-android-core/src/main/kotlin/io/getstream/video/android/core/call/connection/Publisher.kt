@@ -226,8 +226,6 @@ internal class Publisher(
                     }
                     else -> {}
                 }
-//                rejoin() //TODO Rahul, trying to replace it with fast-reconnect
-//                fastReconnect()
             }
             setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, response.sdp))
                 .onErrorSuspend {
