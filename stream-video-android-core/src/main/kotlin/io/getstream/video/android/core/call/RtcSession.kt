@@ -1262,8 +1262,7 @@ public class RtcSession internal constructor(
      * - Sends the answer back to the SFU
      */
     suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
-//        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: ${offerEvent}" }
-        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: " } // Todo Rahul, Revert before merge
+        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: ${offerEvent}" }
         if (subscriber == null) {
             subscriberPendingEvents.add(offerEvent)
             return
