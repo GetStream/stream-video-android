@@ -59,7 +59,6 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
-import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -106,7 +105,9 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
         if (IntegrationTestState.client == null) {
             client = builder.build()
             clientImpl = client as StreamVideoClient
-            clientImpl.testSessionId = UUID.randomUUID().toString()
+            clientImpl.testSessionId = runBlocking {
+                (client as StreamVideoClient).coordinatorConnectionModule.socketConnection.connectionId().value
+            }
             // always mock the peer connection factory, it can't work in unit tests
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
             Call.testInstanceProvider.rtcSessionCreator = { mockk(relaxed = true) }
