@@ -262,7 +262,7 @@ internal class Publisher(
         streamId: String,
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
-    ) : MediaStreamTrack? {
+    ): MediaStreamTrack? {
         logger.i { "[trackPublishing] Publishing track: $trackType" }
 
         if (publishOptions.none { it.track_type == trackType }) {
