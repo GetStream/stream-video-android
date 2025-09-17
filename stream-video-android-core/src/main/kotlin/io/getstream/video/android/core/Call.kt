@@ -560,19 +560,6 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = scope.launch {
-            session?.publisher?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        // session?.publisher?.restartIce("PeerConnection.IceConnectionState.FAILED or PeerConnection.IceConnectionState.DISCONNECTED: $it")
-                    }
-
-                    else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {

@@ -302,12 +302,6 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                     SfuSocketState.Disconnected.DisconnectedByRequest
                 }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
-//                onEvent<SfuSocketStateEvent.NetworkAvailable> {
-//                    SfuSocketState.RestartConnection(
-//                        RestartReason.NETWORK_AVAILABLE,
-//                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-//                    )
-//                }
             }
 
             state<SfuSocketState.Disconnected.WebSocketEventLost> {
