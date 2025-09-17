@@ -458,9 +458,8 @@ internal open class CallService : Service() {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
             }
 
-            if (callSoundPlayer == null) {
-                callSoundPlayer = CallSoundPlayer(applicationContext)
-            }
+            callSoundPlayer = streamVideo.callSoundPlayer
+
             logger.d {
                 "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
             }
