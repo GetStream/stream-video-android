@@ -778,14 +778,6 @@ public class Call(
         logger.d { "Noob [schedule] #reconnect; no args" } // noob 4
 
         streamSingleFlightProcessorImpl.run(key, block)
-//        if(reconnectJob == null) {
-//            reconnectJob = scope.launch {
-//                logger.d { "Noob [schedule] #reconnectJob; no args" } //noob 4
-//                block()
-//                reconnectJob = null
-//            }
-//        }
-//        reconnectJob?.cancel()
     }
 
     /** Leave the call, but don't end it for other users */
