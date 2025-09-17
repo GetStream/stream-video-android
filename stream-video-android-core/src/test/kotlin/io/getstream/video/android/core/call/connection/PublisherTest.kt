@@ -166,6 +166,7 @@ class PublisherTest {
                 sessionId = "session-id",
                 rejoin = { },
                 tracer = mockk(relaxed = true),
+                fastReconnect = {},
                 transceiverCache = mockTransceiverCache,
             ),
         ) {
@@ -196,7 +197,7 @@ class PublisherTest {
         every { mockTransceiverCache.get(videoPublishOption) } returns mockTransceiver
         every { mockSender.track() } returns null
 
-        val resultTrack = publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        val resultTrack = publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
 
         coVerify {
             // Verify new track is set to the sender
@@ -210,18 +211,18 @@ class PublisherTest {
     @Test
     fun `publishStream with no matching option logs an error and does nothing`() = runTest {
         // There's no matching PublishOption for SCREEN_SHARE in the list
-        publisher.publishStream(TrackType.TRACK_TYPE_SCREEN_SHARE)
+        publisher.publishStream("", TrackType.TRACK_TYPE_SCREEN_SHARE)
 
-        verify(exactly = 0) { publisher.addTransceiver(any(), any(), any()) }
+        verify(exactly = 0) { publisher.addTransceiver(any(), any(), any(), any()) }
     }
 
     @Test
     fun `publishStream for a valid video track calls addTransceiver`() = runTest {
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
 
         // Should call addTransceiver at least once for the video option
         verify(atLeast = 1) {
-            publisher.addTransceiver(any(), any(), videoPublishOption)
+            publisher.addTransceiver(any(), any(), any(), videoPublishOption)
         }
     }
 
@@ -229,6 +230,7 @@ class PublisherTest {
     fun `unpublishStream stops and disposes matching transceiver`() = runTest {
         // We'll manually publish an AUDIO transceiver
         publisher.publishStream(
+            "",
             trackType = TrackType.TRACK_TYPE_AUDIO,
         )
 
@@ -248,10 +250,10 @@ class PublisherTest {
     fun `restartIce calls negotiate(true) if not already in progress`() = runTest {
         every { mockPeerConnection.signalingState() } returns PeerConnection.SignalingState.STABLE
 
-        publisher.restartIce()
+        publisher.restartIce("test")
 
         verify { mockPeerConnection.signalingState() }
-        coVerify { publisher.negotiate(true) }
+        coVerify { publisher.negotiate("", true) }
     }
 
     @Test
@@ -290,7 +292,7 @@ class PublisherTest {
         )
 
         // Publish
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
 
         publisher.close(stopTracks = true)
         verify { mockPeerConnection.close() }
@@ -321,7 +323,7 @@ class PublisherTest {
         } returns mockTransceiver
 
         // 3) Publish the video track
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
 
         // 4) Now check currentOptions()
         val options = publisher.currentOptions()
@@ -373,9 +375,9 @@ class PublisherTest {
         } returns mockAudioTransceiver
 
         // Publish the video track
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
         // Publish the audio track
-        publisher.publishStream(TrackType.TRACK_TYPE_AUDIO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_AUDIO)
         coVerifySequence {
             // Video
             mockPeerConnection.addTransceiver(any<VideoTrack>(), any())
@@ -400,7 +402,7 @@ class PublisherTest {
         )
 
         coVerify {
-            publisher.addTransceiver(any(), any(), videoPublishOption)
+            publisher.addTransceiver(any(), any(), any(), videoPublishOption)
         }
 
         val newPublishOptions2 = newPublishOptions - videoPublishOption
@@ -442,7 +444,7 @@ class PublisherTest {
         every { mockTransceiver.sender.track() } returns mockVideoTrack
 
         // 3) Publish the track
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
 
         // 4) Now check that getTrackType returns VIDEO for "my-video-track-id"
         val foundType = publisher.getTrackType("my-video-track-id")
@@ -486,7 +488,7 @@ class PublisherTest {
         every { mockTransceiverCache.get(videoPublishOption) } returns mockTransceiver
         every { mockPeerConnection.addTransceiver(videoTrack, any()) } returns mockTransceiver
 
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
 
         val newSender = VideoSender(
             track_type = TrackType.TRACK_TYPE_VIDEO,
@@ -541,8 +543,8 @@ class PublisherTest {
             TransceiverId(audioPublishOption, audioTransceiver),
         )
 
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
-        publisher.publishStream(TrackType.TRACK_TYPE_AUDIO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_AUDIO)
 
         val announced = publisher.getAnnouncedTracks(null)
         assertEquals("Expected two announced tracks", 2, announced.size)
@@ -558,7 +560,7 @@ class PublisherTest {
         val videoTransceiver = mockk<RtpTransceiver>(relaxed = true)
         every { mockPeerConnection.addTransceiver(videoTrack, any()) } returns videoTransceiver
 
-        publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
         every { mockPeerConnection.localDescription } returns fakeSdpOffer
 
         val tracks = publisher.getAnnouncedTracksForReconnect()
@@ -580,12 +582,12 @@ class PublisherTest {
             every { track() } returns mockVideoTrack
         }
         every { mockTransceiverCache.get(videoPublishOption) } returns mockTransceiver
-        val track = publisher.publishStream(TrackType.TRACK_TYPE_VIDEO)
+        val track = publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
 
         // Ensure track was enabled
         coVerify { mockVideoTrack.setEnabled(true) }
         // Ensure no transceiver was added if transceiver exists for publish option
-        coVerify(exactly = 0) { publisher.addTransceiver(any(), any(), videoPublishOption) }
+        coVerify(exactly = 0) { publisher.addTransceiver(any(), any(), any(), videoPublishOption) }
     }
     //endregion
 

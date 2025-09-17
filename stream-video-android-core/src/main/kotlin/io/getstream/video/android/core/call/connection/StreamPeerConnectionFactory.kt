@@ -287,7 +287,7 @@ public class StreamPeerConnectionFactory(
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
         maxPublishingBitrate: Int = 1_200_000,
-        debugText: String,
+        debugText: String = "",
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope = coroutineScope,

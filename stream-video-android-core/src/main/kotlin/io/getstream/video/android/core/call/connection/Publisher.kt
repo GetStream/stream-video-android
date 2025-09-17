@@ -166,7 +166,7 @@ internal class Publisher(
 
     @VisibleForTesting
     public suspend fun negotiate(
-        source: String,
+        source: String = "unknown",
         iceRestart: Boolean = false,
     ) = sdpProcessor.submit {
         logger.d { "Noob [negotiate] source: $source, iceRestart:$iceRestart" }
