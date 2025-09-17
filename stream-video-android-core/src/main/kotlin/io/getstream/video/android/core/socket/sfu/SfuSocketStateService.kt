@@ -22,7 +22,6 @@ import io.getstream.result.Error
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.fsm.FiniteStateMachine
-import io.getstream.video.android.core.socket.sfu.state.RestartReason
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketStateEvent
 import kotlinx.coroutines.flow.StateFlow
@@ -172,8 +171,21 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
             initialState(initialState)
 
             defaultHandler { state, event ->
-                logger.e { "Cannot handle event $event while being in inappropriate state $state" }
-                state
+                logger.d { "current state: $state, event $event" }
+                when (event) {
+                    is SfuSocketStateEvent.Connect -> {
+                        logger.d { "SfuSocketStateEvent.Connect" }
+                        SfuSocketState.Connecting(
+                            event.connectionConf,
+                            event.connectionType,
+                        )
+                    }
+
+                    else -> {
+                        logger.e { "Cannot handle event $event while being in inappropriate state $state" }
+                        state
+                    }
+                }
             }
 
             state<SfuSocketState.RestartConnection> {
@@ -290,12 +302,6 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                     SfuSocketState.Disconnected.DisconnectedByRequest
                 }
                 onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
-                onEvent<SfuSocketStateEvent.NetworkAvailable> {
-                    SfuSocketState.RestartConnection(
-                        RestartReason.NETWORK_AVAILABLE,
-                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                    )
-                }
             }
 
             state<SfuSocketState.Disconnected.WebSocketEventLost> {
