@@ -40,6 +40,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
@@ -774,6 +775,21 @@ internal open class CallService : Service() {
                     }
 
                     is LocalCallMissedEvent -> handleSlowCallRejectedEvent(call)
+                }
+            }
+        }
+
+        call.scope.launch {
+            call.state.connection.collectLatest { event ->
+                when (event) {
+                    is RealtimeConnection.Failed -> {
+                        if (call.id == streamVideo.state.ringingCall.value?.id) {
+                            streamVideo.state.removeRingingCall(call)
+                            streamVideo.onCallCleanUp(call)
+                        }
+                    }
+
+                    else -> {}
                 }
             }
         }
