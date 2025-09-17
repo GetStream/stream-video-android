@@ -96,7 +96,11 @@ internal class StreamWebSocket<V, T : GenericParser<V>>(
         val parsedEvent = parser.encode(event)
         return webSocket.send(parsedEvent)
     }
-    fun close(source: String = "N/A", code: Int = CLOSE_SOCKET_CODE, reason: String = CLOSE_SOCKET_REASON): Boolean {
+    fun close(
+        source: String = "N/A",
+        code: Int = CLOSE_SOCKET_CODE,
+        reason: String = CLOSE_SOCKET_REASON,
+    ): Boolean {
         logger.d { "[close], source:$source, code: $code, reason: $reason" }
 //        return webSocket.close(DISPOSE_SOCKET_RECONNECT, DISPOSE_SOCKET_REASON)
         return webSocket.close(code, reason)

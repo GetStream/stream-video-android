@@ -82,7 +82,7 @@ open class StreamPeerConnection(
     private val maxBitRate: Int,
     private val traceCreateAnswer: Boolean = true,
     private val tracer: Tracer,
-    private val tag: String
+    private val tag: String,
 ) : PeerConnection.Observer {
 
     private val localDescriptionMutex = Mutex()
@@ -535,7 +535,9 @@ open class StreamPeerConnection(
 
     // better to monitor onConnectionChange for the state
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
-        logger.i { "[onIceConnectionChange] #ice; #sfu; #$typeTag; oldIceState: ${iceState.value}, newState: $newState" }
+        logger.i {
+            "[onIceConnectionChange] #ice; #sfu; #$typeTag; oldIceState: ${iceState.value}, newState: $newState"
+        }
         iceState.value = newState
         tracer.trace(PeerConnectionTraceKey.ON_ICE_CONNECTION_STATE_CHANGE.value, newState?.name)
     }

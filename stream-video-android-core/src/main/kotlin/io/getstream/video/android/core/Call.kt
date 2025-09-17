@@ -261,7 +261,9 @@ public class Call(
             leaveTimeoutAfterDisconnect?.cancel()
 
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
-            logger.d { "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMils" }
+            logger.d {
+                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMils"
+            }
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
@@ -277,9 +279,13 @@ public class Call(
 
         override suspend fun onDisconnected() {
             state._connection.value = RealtimeConnection.Reconnecting
-            logger.d { "Noob [NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}" }
+            logger.d {
+                "Noob [NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
+            }
             lastDisconnect = System.currentTimeMillis()
-            logger.d { "Noob [NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect" }
+            logger.d {
+                "Noob [NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect"
+            }
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
                 logger.d {
@@ -403,11 +409,11 @@ public class Call(
         if (!permissionPass) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
-                        "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
-                        "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
-                        "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
-                        "otherwise the service will fail to start, resulting in a crash.\n" +
-                        "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
+                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
+                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
+                    "otherwise the service will fail to start, resulting in a crash.\n" +
+                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
             }
         }
         // if we are a guest user, make sure we wait for the token before running the join flow
@@ -433,7 +439,7 @@ public class Call(
                 } else {
                     logger.w {
                         "[join] Call settings were null - this should never happen after a call" +
-                                "is joined. MediaManager will not be initialised with server settings."
+                            "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
                 return result
@@ -558,7 +564,7 @@ public class Call(
             session?.publisher?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        //session?.publisher?.restartIce("PeerConnection.IceConnectionState.FAILED or PeerConnection.IceConnectionState.DISCONNECTED: $it")
+                        // session?.publisher?.restartIce("PeerConnection.IceConnectionState.FAILED or PeerConnection.IceConnectionState.DISCONNECTED: $it")
                     }
 
                     else -> {
@@ -759,7 +765,7 @@ public class Call(
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
-                            "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
+                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
                 }
                 state._connection.value = RealtimeConnection.Reconnecting
             }
@@ -769,8 +775,7 @@ public class Call(
     private var reconnectJob: Job? = null
 
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
-
-        logger.d { "Noob [schedule] #reconnect; no args" } //noob 4
+        logger.d { "Noob [schedule] #reconnect; no args" } // noob 4
 
         streamSingleFlightProcessorImpl.run(key, block)
 //        if(reconnectJob == null) {
@@ -781,7 +786,6 @@ public class Call(
 //            }
 //        }
 //        reconnectJob?.cancel()
-
     }
 
     /** Leave the call, but don't end it for other users */
@@ -958,8 +962,8 @@ public class Call(
                     val height = videoRenderer.measuredHeight
                     logger.i {
                         "[initRenderer.onFirstFrameRendered] #sfu; #track; " +
-                                "trackType: $trackType, dimension: ($width - $height), " +
-                                "sessionId: $sessionId"
+                            "trackType: $trackType, dimension: ($width - $height), " +
+                            "sessionId: $sessionId"
                     }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
                         session?.updateTrackDimensions(
@@ -982,10 +986,10 @@ public class Call(
                     val height = videoRenderer.measuredHeight
                     logger.v {
                         "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
-                                "trackType: $trackType, " +
-                                "viewport size: ($width - $height), " +
-                                "video size: ($videoWidth - $videoHeight), " +
-                                "sessionId: $sessionId"
+                            "trackType: $trackType, " +
+                            "viewport size: ($width - $height), " +
+                            "video size: ($videoWidth - $videoHeight), " +
+                            "sessionId: $sessionId"
                     }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
@@ -1226,7 +1230,7 @@ public class Call(
                     true
                 } else {
                     callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
-                            callSettings.audio.speakerDefaultOn
+                        callSettings.audio.speakerDefaultOn
                 }
 
             speaker.setEnabled(enabled = enableSpeaker)

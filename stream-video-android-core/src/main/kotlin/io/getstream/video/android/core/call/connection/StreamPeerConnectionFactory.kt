@@ -287,7 +287,7 @@ public class StreamPeerConnectionFactory(
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
         maxPublishingBitrate: Int = 1_200_000,
-        debugText: String
+        debugText: String,
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope = coroutineScope,
@@ -300,7 +300,7 @@ public class StreamPeerConnectionFactory(
             onRejoinNeeded = { },
             tracer = Tracer(type.toPeerType().name),
             tag = debugText,
-            onFastReconnectNeeded = {}
+            onFastReconnectNeeded = {},
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
@@ -383,7 +383,7 @@ public class StreamPeerConnectionFactory(
             maxBitRate = maxPublishingBitrate,
             tracer = tracer,
             rejoin = rejoin,
-            fastReconnect = fastReconnect
+            fastReconnect = fastReconnect,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,

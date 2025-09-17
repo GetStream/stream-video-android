@@ -617,8 +617,7 @@ public class RtcSession internal constructor(
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
 
-
-                        val track = publisher?.publishStream( //noob 9
+                        val track = publisher?.publishStream( // noob 9
                             streamId,
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
@@ -858,9 +857,11 @@ public class RtcSession internal constructor(
             tracer = subscriberTracer,
             rejoin = {
                 logger.d { "[createPublisher] rejoin attempt, connection state: ${call.state.connection.value}" }
-                if (call.state.connection.value !is RealtimeConnection.Reconnecting){
+                if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
                     coroutineScope.launch {
-                        logger.d { "Noob [createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} " } //TODO Rahul, sometimes the code will come here right in the first attempt to call
+                        logger.d {
+                            "Noob [createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
+                        } // TODO Rahul, sometimes the code will come here right in the first attempt to call
                         call.rejoin()
                     }
                 }
@@ -868,7 +869,7 @@ public class RtcSession internal constructor(
             fastReconnect = {
                 coroutineScope.launch {
                     logger.d { "[createPublisher] Fast reconnect, connection state: ${call.state.connection.value}" }
-                    if (call.state.connection.value !is RealtimeConnection.Reconnecting){
+                    if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
                         coroutineScope.launch {
                             logger.d { "[createPublisher] fast reconnect EXECUTE" }
                             call.fastReconnect()
@@ -929,7 +930,7 @@ public class RtcSession internal constructor(
                 StreamPeerType.SUBSCRIBER
             },
             mediaConstraints = defaultConstraints,
-            debugText = "DummyPeerConnection"
+            debugText = "DummyPeerConnection",
         ).apply {
             addTempTransceivers(this)
         }
@@ -957,9 +958,11 @@ public class RtcSession internal constructor(
             onIceCandidate = ::sendIceCandidate,
             rejoin = {
                 logger.d { "[createPublisher] rejoin attempt, connection state: ${call.state.connection.value}" }
-                if (call.state.connection.value !is RealtimeConnection.Reconnecting){
+                if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
                     coroutineScope.launch {
-                        logger.d { "Noob [createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} " } //TODO Rahul, sometimes the code will come here right in the first attempt to call
+                        logger.d {
+                            "Noob [createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
+                        } // TODO Rahul, sometimes the code will come here right in the first attempt to call
                         call.rejoin()
                     }
                 }
@@ -967,14 +970,14 @@ public class RtcSession internal constructor(
             fastReconnect = {
                 coroutineScope.launch {
                     logger.d { "[createPublisher] Fast reconnect, connection state: ${call.state.connection.value}" }
-                    if (call.state.connection.value !is RealtimeConnection.Reconnecting){
+                    if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
                         coroutineScope.launch {
                             logger.d { "[createPublisher] fast reconnect EXECUTE" }
                             call.fastReconnect()
                         }
                     }
                 }
-            }
+            },
         )
     }
 
@@ -1014,9 +1017,9 @@ public class RtcSession internal constructor(
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is SfuDataEvent) {
             coroutineScope.launch {
-                if(event is SubscriberOfferEvent){
+                if (event is SubscriberOfferEvent) {
                     logger.v { "Noob [onRtcEvent] event: SubscriberOfferEvent" }
-                }else {
+                } else {
                     logger.v { "Noob [onRtcEvent] event: $event" }
                 }
 
@@ -1026,7 +1029,7 @@ public class RtcSession internal constructor(
                             call.state.getOrCreateParticipant(it)
                         }
                         call.state.replaceParticipants(participantStates)
-                        sfuConnectionModule.socketConnection.whenConnected { //noob 3
+                        sfuConnectionModule.socketConnection.whenConnected { // noob 3
                             logger.d { "Noob JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
                             if (publisher == null) {
                                 publisher = createPublisher(event.publishOptions)
@@ -1260,7 +1263,7 @@ public class RtcSession internal constructor(
      */
     suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
 //        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: ${offerEvent}" }
-        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: " } //Todo Rahul, Revert before merge
+        logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: " } // Todo Rahul, Revert before merge
         if (subscriber == null) {
             subscriberPendingEvents.add(offerEvent)
             return
@@ -1535,7 +1538,7 @@ public class RtcSession internal constructor(
         )
         publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request.toString())
 
-        logger.d { "Noob Connecting RTC, ${request.toString()}" }
+        logger.d { "Noob Connecting RTC, $request" }
         listenToSfuSocket()
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.connect(request)

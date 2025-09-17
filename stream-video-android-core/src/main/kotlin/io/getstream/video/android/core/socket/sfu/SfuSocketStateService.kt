@@ -22,7 +22,6 @@ import io.getstream.result.Error
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.fsm.FiniteStateMachine
-import io.getstream.video.android.core.socket.sfu.state.RestartReason
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketStateEvent
 import kotlinx.coroutines.flow.StateFlow
@@ -178,7 +177,7 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                         logger.d { "Noob SfuSocketStateEvent.Connect" }
                         SfuSocketState.Connecting(
                             event.connectionConf,
-                            event.connectionType
+                            event.connectionType,
                         )
                     }
 

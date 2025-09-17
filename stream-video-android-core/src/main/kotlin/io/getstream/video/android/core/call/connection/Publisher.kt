@@ -96,7 +96,7 @@ internal class Publisher(
     maxBitRate,
     true,
     tracer,
-    "Publisher"
+    "Publisher",
 ) {
     private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
@@ -107,7 +107,7 @@ internal class Publisher(
     override fun onRenegotiationNeeded() {
         coroutineScope.launch {
             delay(500)
-            negotiate("[onRenegotiationNeeded]",false)
+            negotiate("[onRenegotiationNeeded]", false)
         }
     }
 
@@ -150,12 +150,12 @@ internal class Publisher(
 
             PeerConnection.IceConnectionState.FAILED -> {
                 restartIceJobDelegate.scheduleRestartIce {
-                    negotiate("negotiate on PeerConnection.IceConnectionState.FAILED",true)
+                    negotiate("negotiate on PeerConnection.IceConnectionState.FAILED", true)
                 }
             }
             PeerConnection.IceConnectionState.DISCONNECTED -> {
                 restartIceJobDelegate.scheduleRestartIce(3000) {
-                    negotiate("negotiate on PeerConnection.IceConnectionState.DISCONNECTED",true)
+                    negotiate("negotiate on PeerConnection.IceConnectionState.DISCONNECTED", true)
                 }
             }
             else -> {
@@ -165,7 +165,10 @@ internal class Publisher(
     }
 
     @VisibleForTesting
-    public suspend fun negotiate(source: String, iceRestart: Boolean = false) = sdpProcessor.submit {
+    public suspend fun negotiate(
+        source: String,
+        iceRestart: Boolean = false,
+    ) = sdpProcessor.submit {
         logger.d { "Noob [negotiate] source: $source, iceRestart:$iceRestart" }
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
@@ -204,11 +207,13 @@ internal class Publisher(
             val response = sfuClient.setPublisher(request)
             logger.i { "Received answer: ${response.sdp}" }
             if (response.error != null) {
-                logger.e { "Noob SetPublisherRequest Received error: ${response.error}, SetPublisherRequest: $request" }
+                logger.e {
+                    "Noob SetPublisherRequest Received error: ${response.error}, SetPublisherRequest: $request"
+                }
                 tracer.trace("negotiate-error-setpublisher", response.error.message ?: "unknown")
                 logger.e { "Noob rejoin cause error in sfuClient.setPublisher, message:${response.error.message}" }
 
-                when (response.error.code){
+                when (response.error.code) {
                     /**
                      *  We are getting this error right away after joining the call first time
                      *  Full error: 16:04:05.032 Call:PeerC...:publisher  E  (DefaultDispatcher-worker-17:526) Noob SetPublisherRequest Received error: Error{code=ERROR_CODE_REQUEST_VALIDATION_FAILED, message=Invalid SetPublisher request, should_retry=false}
@@ -217,9 +222,9 @@ internal class Publisher(
                     ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED -> rejoin()
                     ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND -> {}
                     ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST -> {
-                        //should fast-reconnect but wait for further investigation
+                        // should fast-reconnect but wait for further investigation
                     }
-                    else ->{}
+                    else -> {}
                 }
 //                rejoin() //TODO Rahul, trying to replace it with fast-reconnect
 //                fastReconnect()
@@ -286,7 +291,12 @@ internal class Publisher(
                     transceiverCache.remove(publishOption)
                     val fallbackTrack = newTrackFromSource(publishOption.track_type)
                     traceTrack(trackType, fallbackTrack.id())
-                    addTransceiver(arrayListOf(streamId), captureFormat, fallbackTrack, publishOption)
+                    addTransceiver(
+                        arrayListOf(streamId),
+                        captureFormat,
+                        fallbackTrack,
+                        publishOption,
+                    )
                     return@submit fallbackTrack
                 }
             } else {
@@ -527,7 +537,7 @@ internal class Publisher(
 
     suspend fun restartIce(debugSource: String) = singleFlightProcessor.run("restartIce") {
         logger.i { "Noob [restartIce] debugSource:$debugSource, negotiate on Restarting ICE connection" }
-        negotiate("[restartIce]",true)
+        negotiate("[restartIce]", true)
     }
 
     fun getAnnouncedTracks(captureFormat: CaptureFormat?, sdp: String? = null): List<TrackInfo> =

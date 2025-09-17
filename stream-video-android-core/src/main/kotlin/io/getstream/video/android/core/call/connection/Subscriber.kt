@@ -93,7 +93,7 @@ internal class Subscriber(
     traceCreateAnswer = false,
     tracer = tracer,
     maxBitRate = 0, // Set as needed,
-    tag = "Subscriber"
+    tag = "Subscriber",
 ) {
 
     /**
