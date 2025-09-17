@@ -82,7 +82,7 @@ open class StreamPeerConnection(
     private val maxBitRate: Int,
     private val traceCreateAnswer: Boolean = true,
     private val tracer: Tracer,
-    private val debugText: String
+    private val tag: String
 ) : PeerConnection.Observer {
 
     private val localDescriptionMutex = Mutex()
@@ -525,13 +525,11 @@ open class StreamPeerConnection(
      */
 
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
-        logger.i { "Noob [onConnectionChange] #sfu; #$typeTag; oldState: ${state.value}, newState: $newState" }
+        logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState
         tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState.name)
         if (newState == PeerConnection.PeerConnectionState.FAILED) {
-            logger.i { "Noob [onConnectionChange] rejoin cause newsState: PeerConnection.PeerConnectionState.FAILED" }
-//            onRejoinNeeded() // Perform fast-reconnect
-            onFastReconnectNeeded() //Todo Rahul re check
+            onFastReconnectNeeded()
         }
     }
 
@@ -543,7 +541,7 @@ open class StreamPeerConnection(
     }
 
     fun close() {
-        logger.i { "[close] #sfu; #$typeTag; no args, debugText: $debugText" }
+        logger.i { "[close] #sfu; #$typeTag; no args, debugText: $tag" }
         tracer.trace(PeerConnectionTraceKey.CLOSE.value, null)
         connection.close()
     }

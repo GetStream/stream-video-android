@@ -37,6 +37,7 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.SerialProcessor
+import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.iceRestartConstraints
 import io.getstream.video.android.core.utils.safeCall
@@ -101,6 +102,7 @@ internal class Publisher(
     private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
     private var isIceRestarting = false
     private val sdpProcessor = SerialProcessor(coroutineScope)
+    private val singleFlightProcessor = StreamSingleFlightProcessorImpl(coroutineScope)
 
     override fun onRenegotiationNeeded() {
         coroutineScope.launch {
@@ -249,12 +251,12 @@ internal class Publisher(
         streamId: String,
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
-    ): MediaStreamTrack? {
+    ): MediaStreamTrack? = sdpProcessor.submit {
         logger.i { "[trackPublishing] Publishing track: $trackType" }
 
         if (publishOptions.none { it.track_type == trackType }) {
             logger.e { "[trackPublishing] No publish options found for $trackType" }
-            return null
+            return@submit null
         }
 
         for (publishOption in publishOptions) {
@@ -270,13 +272,13 @@ internal class Publisher(
                         senderTrack.trySetEnabled(true)
                         logTrack(senderTrack)
                         traceTrack(trackType, senderTrack.id())
-                        return senderTrack
+                        return@submit senderTrack
                     } else {
                         logger.d { "Noob [trackPublishing] Track is disposed, creating new one." }
                         val newTrack = newTrackFromSource(publishOption.track_type)
                         traceTrack(trackType, newTrack.id())
                         sender.setTrack(newTrack, true)
-                        return newTrack
+                        return@submit newTrack
                     }
                 } catch (e: Exception) {
                     // Fallback if anything happens with the sender
@@ -285,7 +287,7 @@ internal class Publisher(
                     val fallbackTrack = newTrackFromSource(publishOption.track_type)
                     traceTrack(trackType, fallbackTrack.id())
                     addTransceiver(arrayListOf(streamId), captureFormat, fallbackTrack, publishOption)
-                    return fallbackTrack
+                    return@submit fallbackTrack
                 }
             } else {
                 logger.d {
@@ -295,11 +297,11 @@ internal class Publisher(
                 val newTrack = newTrackFromSource(publishOption.track_type)
                 traceTrack(trackType, newTrack.id())
                 addTransceiver(arrayListOf(streamId), captureFormat, newTrack, publishOption)
-                return newTrack
+                return@submit newTrack
             }
         }
-        return null
-    }
+        return@submit null
+    }.getOrNull()
 
     private fun logTrack(senderTrack: MediaStreamTrack?) {
         logger.d {
@@ -523,13 +525,8 @@ internal class Publisher(
         return changed
     }
 
-    suspend fun restartIce(debugSource: String) {
+    suspend fun restartIce(debugSource: String) = singleFlightProcessor.run("restartIce") {
         logger.i { "Noob [restartIce] debugSource:$debugSource, negotiate on Restarting ICE connection" }
-        val signalingState = connection.signalingState()
-        if (isIceRestarting || signalingState == PeerConnection.SignalingState.HAVE_LOCAL_OFFER) {
-            logger.d { "ICE restart is already in progress" }
-            return
-        }
         negotiate("[restartIce]",true)
     }
 
@@ -549,14 +546,7 @@ internal class Publisher(
 
     fun getAnnouncedTracksForReconnect(): List<TrackInfo> {
         val sdp = connection.localDescription?.description
-        val trackInfos = mutableListOf<TrackInfo>()
-        for (publishOption in publishOptions) {
-            val transceiver = transceiverCache.get(publishOption)
-            if (transceiver?.sender?.track() == null) continue
-            trackInfos.add(toTrackInfo(null, transceiver, publishOption, sdp))
-        }
-        logger.i { "Announced tracks for reconnect: $trackInfos" }
-        return trackInfos
+        return getAnnouncedTracks(null, sdp)
     }
 
     private fun toTrackInfo(

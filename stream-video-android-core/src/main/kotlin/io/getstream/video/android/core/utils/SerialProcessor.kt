@@ -46,7 +46,7 @@ internal class SerialProcessor(
      * @return The result of the job.
      */
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun <T : Any> submit(
+    suspend fun <T : Any?> submit(
         handler: suspend () -> T,
     ): Result<T> {
         // Start the worker job if it's not already running

@@ -299,7 +299,7 @@ public class StreamPeerConnectionFactory(
             maxBitRate = maxPublishingBitrate,
             onRejoinNeeded = { },
             tracer = Tracer(type.toPeerType().name),
-            debugText = debugText,
+            tag = debugText,
             onFastReconnectNeeded = {}
         )
         val connection = makePeerConnectionInternal(
