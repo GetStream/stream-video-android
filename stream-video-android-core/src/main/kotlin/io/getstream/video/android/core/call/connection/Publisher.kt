@@ -255,11 +255,19 @@ internal class Publisher(
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
     ): MediaStreamTrack? = sdpProcessor.submit {
+        return@submit publishStreamInternal(streamId, trackType, captureFormat)
+    }.getOrNull()
+
+    internal fun publishStreamInternal(
+        streamId: String,
+        trackType: TrackType,
+        captureFormat: CaptureFormat? = null,
+    ) : MediaStreamTrack? {
         logger.i { "[trackPublishing] Publishing track: $trackType" }
 
         if (publishOptions.none { it.track_type == trackType }) {
             logger.e { "[trackPublishing] No publish options found for $trackType" }
-            return@submit null
+            return null
         }
 
         for (publishOption in publishOptions) {
@@ -275,13 +283,13 @@ internal class Publisher(
                         senderTrack.trySetEnabled(true)
                         logTrack(senderTrack)
                         traceTrack(trackType, senderTrack.id())
-                        return@submit senderTrack
+                        return senderTrack
                     } else {
                         logger.d { "[trackPublishing] Track is disposed, creating new one." }
                         val newTrack = newTrackFromSource(publishOption.track_type)
                         traceTrack(trackType, newTrack.id())
                         sender.setTrack(newTrack, true)
-                        return@submit newTrack
+                        return newTrack
                     }
                 } catch (e: Exception) {
                     // Fallback if anything happens with the sender
@@ -295,7 +303,7 @@ internal class Publisher(
                         fallbackTrack,
                         publishOption,
                     )
-                    return@submit fallbackTrack
+                    return fallbackTrack
                 }
             } else {
                 logger.d {
@@ -305,12 +313,11 @@ internal class Publisher(
                 val newTrack = newTrackFromSource(publishOption.track_type)
                 traceTrack(trackType, newTrack.id())
                 addTransceiver(arrayListOf(streamId), captureFormat, newTrack, publishOption)
-                return@submit newTrack
+                return newTrack
             }
         }
-        return@submit null
-    }.getOrNull()
-
+        return null
+    }
     private fun logTrack(senderTrack: MediaStreamTrack?) {
         logger.d {
             "[trackPublishing] Track: ${senderTrack?.enabled()}:${senderTrack?.state()}:${senderTrack?.id()}"

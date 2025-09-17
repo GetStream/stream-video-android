@@ -555,7 +555,7 @@ class PublisherTest {
             every { track() } returns mockVideoTrack
         }
         every { mockTransceiverCache.get(videoPublishOption) } returns mockTransceiver
-        val track = publisher.publishStream("", TrackType.TRACK_TYPE_VIDEO)
+        val track = publisher.publishStreamInternal("", TrackType.TRACK_TYPE_VIDEO)
 
         // Ensure track was enabled
         coVerify { mockVideoTrack.setEnabled(true) }

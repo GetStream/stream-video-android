@@ -276,7 +276,7 @@ class RtcSessionTest2 {
 
         // A typical ICETrickleEvent with peerType = PUBLISHER_UNSPECIFIED
         val event = ICETrickleEvent(
-            candidate = """{"sdpMid":"0","sdpMLineIndex":0,"candidate":"fake-candidate"}""",
+            candidate = mockk(relaxed = true),
             peerType = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
             // other fields if needed
         )
