@@ -284,7 +284,7 @@ class RtcSessionTest2 {
             "sdpMLineIndex": 0,
             "candidate": "candidate-data",
             "usernameFragment": "fake-username-frag"}
-                """.trimIndent(),
+            """.trimIndent(),
             peerType = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
         )
 
