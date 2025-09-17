@@ -151,6 +151,7 @@ public class Call(
     private val supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
     private var powerManager: PowerManager? = null
+    private val debugText = "Hello World!"
 
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
