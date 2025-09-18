@@ -38,7 +38,7 @@ internal class CallSoundPlayer(private val context: Context) {
     fun playCallSound(soundUri: Uri?, playIfMuted: Boolean = false) {
         try {
             synchronized(this) {
-                requestAudioFocus(playIfMuted) {
+                requestAudioFocus {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         playWithRingtoneManager(soundUri, playIfMuted)
                     } else {
@@ -51,7 +51,7 @@ internal class CallSoundPlayer(private val context: Context) {
         }
     }
 
-    private fun requestAudioFocus(playIfMuted: Boolean = false, onGranted: () -> Unit) {
+    private fun requestAudioFocus(onGranted: () -> Unit) {
         if (audioManager == null) {
             (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)?.let {
                 audioManager = it
@@ -61,32 +61,7 @@ internal class CallSoundPlayer(private val context: Context) {
             }
         }
 
-        val isGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest = AudioFocusRequest
-                .Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
-                .setAudioAttributes(
-                    if (playIfMuted) {
-                        AudioAttributes.Builder().setVoiceCommunicationAttributes().build()
-                    } else {
-                        AudioAttributes.Builder().setNotificationRingtoneAttributes().build()
-                    },
-                )
-                .setAcceptsDelayedFocusGain(false)
-                .build()
-
-            audioFocusRequest?.let {
-                audioManager?.requestAudioFocus(it) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-            } ?: false
-        } else {
-            audioManager?.requestAudioFocus(
-                null,
-                if (playIfMuted) AudioManager.STREAM_VOICE_CALL else AudioManager.STREAM_RING,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE,
-            ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-        }
-
-        logger.d { "[requestAudioFocus] Audio focus " + if (isGranted) "granted" else "not granted" }
-        if (isGranted) onGranted() else onGranted() // Forcing as playing ringtone do not ideally requires audio focus
+        onGranted()
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
