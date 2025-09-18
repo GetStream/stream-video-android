@@ -45,9 +45,9 @@ import io.getstream.video.android.compose.ui.components.video.config.VideoRender
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.renderer.VideoTextureViewRenderer
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 

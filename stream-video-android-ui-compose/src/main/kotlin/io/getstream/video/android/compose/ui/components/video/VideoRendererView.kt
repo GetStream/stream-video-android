@@ -26,7 +26,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import io.getstream.video.android.core.renderer.VideoTextureViewRenderer
 import java.util.UUID
 
 /**
