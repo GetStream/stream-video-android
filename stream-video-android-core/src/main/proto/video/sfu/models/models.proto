@@ -37,6 +37,16 @@ enum TrackType {
   TRACK_TYPE_SCREEN_SHARE_AUDIO = 4;
 }
 
+// must be aligned with kit
+enum ParticipantSource {
+  PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED = 0;
+  PARTICIPANT_SOURCE_RTMP = 1;
+  PARTICIPANT_SOURCE_WHIP = 2;
+  PARTICIPANT_SOURCE_SIP = 3;
+  PARTICIPANT_SOURCE_RTSP = 4;
+  PARTICIPANT_SOURCE_SRT = 5;
+}
+
 // CallState is the current state of the call
 // as seen by an SFU.
 message CallState {
@@ -86,6 +96,7 @@ message Participant {
   string image = 11;
   google.protobuf.Struct custom = 12;
   repeated string roles = 13;
+  ParticipantSource source = 14;
 }
 
 message StreamQuality {
@@ -169,6 +180,9 @@ message PublishOption {
   // disabling all lower layers. This applies to simulcast encodings.
   // For SVC codecs, prefer using the L1T3 (single spatial, 3 temporal layers) mode instead.
   bool use_single_layer = 9;
+
+  // Audio bitrate profiles for different audio quality profiles.
+  repeated AudioBitrate audio_bitrate_profiles = 10;
 }
 
 message Codec {
@@ -183,6 +197,17 @@ message ICETrickle {
   PeerType peer_type = 1;
   string ice_candidate = 2;
   string session_id = 3;
+}
+
+message AudioBitrate {
+  AudioBitrateProfile profile = 1;
+  int32 bitrate = 2;
+}
+
+enum AudioBitrateProfile {
+  AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED = 0;
+  AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY = 1;
+  AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY = 2;
 }
 
 message TrackInfo {

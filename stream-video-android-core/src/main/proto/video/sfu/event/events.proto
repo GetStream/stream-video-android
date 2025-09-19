@@ -188,6 +188,7 @@ message JoinRequest {
   repeated models.PublishOption preferred_publish_options = 9;
   repeated models.SubscribeOption preferred_subscribe_options = 10;
   repeated models.ClientCapability capabilities = 11;
+  models.ParticipantSource source = 12;
 }
 
 message ReconnectDetails {
