@@ -133,6 +133,7 @@ import stream.video.sfu.models.ClientDetails
 import stream.video.sfu.models.Device
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.models.OS
+import stream.video.sfu.models.ParticipantSource
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.Sdk
@@ -560,6 +561,7 @@ public class RtcSession internal constructor(
             preferred_publish_options = options ?: emptyList(),
             reconnect_details = reconnectDetails,
             capabilities = call.clientCapabilities.values.toList(),
+            source = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
         )
         sfuTracer.trace(
             PeerConnectionTraceKey.JOIN_REQUEST.value,
@@ -1534,6 +1536,7 @@ public class RtcSession internal constructor(
             preferred_publish_options = publisher?.currentOptions() ?: emptyList(),
             reconnect_details = reconnectDetails,
             capabilities = call.clientCapabilities.values.toList(),
+            source = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
         )
         publisherTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request.toString())
 

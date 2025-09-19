@@ -1291,6 +1291,11 @@ func (m *JoinRequest) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.Source != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.Source))
+		i--
+		dAtA[i] = 0x60
+	}
 	if len(m.Capabilities) > 0 {
 		var pksize2 int
 		for _, num := range m.Capabilities {
@@ -3494,6 +3499,9 @@ func (m *JoinRequest) SizeVT() (n int) {
 			l += sov(uint64(e))
 		}
 		n += 1 + sov(uint64(l)) + l
+	}
+	if m.Source != 0 {
+		n += 1 + sov(uint64(m.Source))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -6958,6 +6966,25 @@ func (m *JoinRequest) UnmarshalVT(dAtA []byte) error {
 				}
 			} else {
 				return fmt.Errorf("proto: wrong wireType = %d for field Capabilities", wireType)
+			}
+		case 12:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Source", wireType)
+			}
+			m.Source = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Source |= models.ParticipantSource(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
 			}
 		default:
 			iNdEx = preIndex

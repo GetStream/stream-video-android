@@ -19,7 +19,7 @@ package io.getstream.video.android.core.sorting
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.utils.combineComparators
-
+import stream.video.sfu.models.ParticipantSource
 /**
  * Default comparator for the participants.
  * Returns a function that takes a set of the pinned participants before starting the sorting.
@@ -36,6 +36,7 @@ internal val defaultComparator: (pinned: Set<String>) -> Comparator<ParticipantS
         compareBy(
             { it.screenSharingEnabled.value },
             { pinned.contains(it.sessionId) },
+            { participantSourceRank(it.source) },
         ),
     )
 }
@@ -65,4 +66,16 @@ private fun onlyIfInvisibleOrUnknown(
             0
         }
     }
+}
+
+/**
+ * Returns a rank for the given [ParticipantSource].
+ */
+private fun participantSourceRank(s: ParticipantSource): Int = when (s) {
+    ParticipantSource.PARTICIPANT_SOURCE_RTMP -> 0
+    ParticipantSource.PARTICIPANT_SOURCE_WHIP -> 1
+    ParticipantSource.PARTICIPANT_SOURCE_SIP -> 2
+    ParticipantSource.PARTICIPANT_SOURCE_RTSP -> 3
+    ParticipantSource.PARTICIPANT_SOURCE_SRT -> 4
+    ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED -> 5
 }
