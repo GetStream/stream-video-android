@@ -40,6 +40,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
@@ -457,9 +458,8 @@ internal open class CallService : Service() {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
             }
 
-            if (callSoundPlayer == null) {
-                callSoundPlayer = CallSoundPlayer(applicationContext)
-            }
+            callSoundPlayer = streamVideo.callSoundPlayer
+
             logger.d {
                 "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
             }
@@ -777,6 +777,21 @@ internal open class CallService : Service() {
                 }
             }
         }
+
+        call.scope.launch {
+            call.state.connection.collectLatest { event ->
+                when (event) {
+                    is RealtimeConnection.Failed -> {
+                        if (call.id == streamVideo.state.ringingCall.value?.id) {
+                            streamVideo.state.removeRingingCall(call)
+                            streamVideo.onCallCleanUp(call)
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
     }
 
     private fun handleIncomingCallAcceptedByMeOnAnotherDevice(
@@ -923,7 +938,7 @@ internal open class CallService : Service() {
                 if (ringingState is RingingState.Outgoing) {
                     // If I'm calling, end the call for everyone
                     serviceScope.launch {
-                        call.reject()
+                        call.reject(RejectReason.Custom("Android Service Task Removed"))
                         logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
                     }
                 } else if (ringingState is RingingState.Incoming) {

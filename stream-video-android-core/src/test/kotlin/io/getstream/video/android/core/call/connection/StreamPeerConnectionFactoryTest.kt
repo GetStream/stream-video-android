@@ -151,6 +151,7 @@ class StreamPeerConnectionFactoryTest {
             onStreamAdded = null,
             onNegotiationNeeded = null,
             onIceCandidateRequest = null,
+            debugText = "test",
             maxPublishingBitrate = 999_999,
         )
 

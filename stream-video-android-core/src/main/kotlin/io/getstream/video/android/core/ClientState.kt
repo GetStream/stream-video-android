@@ -195,6 +195,7 @@ class ClientState(private val client: StreamVideo) {
 
     fun removeRingingCall(call: Call) {
         if (call.id == ringingCall.value?.id) {
+            (client as StreamVideoClient).callSoundPlayer.stopCallSound()
             ringingCall.value?.let {
                 maybeStopForegroundService(it)
             }

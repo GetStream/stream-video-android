@@ -37,6 +37,7 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.SerialProcessor
+import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.iceRestartConstraints
 import io.getstream.video.android.core.utils.safeCall
@@ -56,6 +57,7 @@ import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.ErrorCode
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
@@ -77,6 +79,7 @@ internal class Publisher(
     private val sfuClient: SignalServerService,
     private val sessionId: String,
     private val rejoin: () -> Unit,
+    private val fastReconnect: () -> Unit,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
     private val tracer: Tracer,
     private val restartIceJobDelegate: RestartIceJobDelegate =
@@ -89,19 +92,22 @@ internal class Publisher(
     onNegotiationNeeded,
     onIceCandidate,
     rejoin,
+    fastReconnect,
     maxBitRate,
     true,
     tracer,
+    "Publisher",
 ) {
     private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1280, 720, 24, 30)
     private var isIceRestarting = false
     private val sdpProcessor = SerialProcessor(coroutineScope)
+    private val singleFlightProcessor = StreamSingleFlightProcessorImpl(coroutineScope)
 
     override fun onRenegotiationNeeded() {
         coroutineScope.launch {
             delay(500)
-            negotiate(false)
+            negotiate("[onRenegotiationNeeded]", false)
         }
     }
 
@@ -144,12 +150,12 @@ internal class Publisher(
 
             PeerConnection.IceConnectionState.FAILED -> {
                 restartIceJobDelegate.scheduleRestartIce {
-                    negotiate(true)
+                    negotiate("negotiate on PeerConnection.IceConnectionState.FAILED", true)
                 }
             }
             PeerConnection.IceConnectionState.DISCONNECTED -> {
                 restartIceJobDelegate.scheduleRestartIce(3000) {
-                    negotiate(true)
+                    negotiate("negotiate on PeerConnection.IceConnectionState.DISCONNECTED", true)
                 }
             }
             else -> {
@@ -159,7 +165,11 @@ internal class Publisher(
     }
 
     @VisibleForTesting
-    public suspend fun negotiate(iceRestart: Boolean = false) = sdpProcessor.submit {
+    public suspend fun negotiate(
+        source: String = "unknown",
+        iceRestart: Boolean = false,
+    ) = sdpProcessor.submit {
+        logger.d { "[negotiate] source: $source, iceRestart:$iceRestart" }
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
             return@submit
@@ -178,7 +188,7 @@ internal class Publisher(
             trackInfos.joinToString(separator = ";") { it.toString() },
         )
         if (trackInfos.isEmpty()) {
-            logger.e { ("Can't negotiate without announcing any tracks") }
+            logger.e { ("rejoin cause, Can't negotiate without announcing any tracks") }
             rejoin.invoke()
         }
         logger.i { "Negotiating with tracks: $trackInfos" }
@@ -196,11 +206,26 @@ internal class Publisher(
             )
             val response = sfuClient.setPublisher(request)
             logger.i { "Received answer: ${response.sdp}" }
-            logger.e { "Received error: ${response.error}" }
             if (response.error != null) {
+                logger.e {
+                    "SetPublisherRequest Received error: ${response.error}, SetPublisherRequest: $request"
+                }
                 tracer.trace("negotiate-error-setpublisher", response.error.message ?: "unknown")
-                logger.e { response.error.message }
-                rejoin()
+                logger.e { "rejoin cause error in sfuClient.setPublisher, message:${response.error.message}" }
+
+                when (response.error.code) {
+                    /**
+                     *  We are getting this error right away after joining the call first time
+                     *  Full error: 16:04:05.032 Call:PeerC...:publisher  E  (DefaultDispatcher-worker-17:526) SetPublisherRequest Received error: Error{code=ERROR_CODE_REQUEST_VALIDATION_FAILED, message=Invalid SetPublisher request, should_retry=false}
+                     * This will cause emission of ParticipantLeftEvent to other person
+                     */
+                    ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED -> rejoin()
+                    ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND -> {}
+                    ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST -> {
+                        // should fast-reconnect but wait for further investigation
+                    }
+                    else -> {}
+                }
             }
             setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, response.sdp))
                 .onErrorSuspend {
@@ -226,6 +251,15 @@ internal class Publisher(
      * Starts publishing the given track.
      */
     suspend fun publishStream(
+        streamId: String,
+        trackType: TrackType,
+        captureFormat: CaptureFormat? = null,
+    ): MediaStreamTrack? = sdpProcessor.submit {
+        return@submit publishStreamInternal(streamId, trackType, captureFormat)
+    }.getOrNull()
+
+    internal fun publishStreamInternal(
+        streamId: String,
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
     ): MediaStreamTrack? {
@@ -263,7 +297,12 @@ internal class Publisher(
                     transceiverCache.remove(publishOption)
                     val fallbackTrack = newTrackFromSource(publishOption.track_type)
                     traceTrack(trackType, fallbackTrack.id())
-                    addTransceiver(captureFormat, fallbackTrack, publishOption)
+                    addTransceiver(
+                        arrayListOf(streamId),
+                        captureFormat,
+                        fallbackTrack,
+                        publishOption,
+                    )
                     return fallbackTrack
                 }
             } else {
@@ -273,13 +312,12 @@ internal class Publisher(
                 // This is the first time we are adding the transceiver.
                 val newTrack = newTrackFromSource(publishOption.track_type)
                 traceTrack(trackType, newTrack.id())
-                addTransceiver(captureFormat, newTrack, publishOption)
+                addTransceiver(arrayListOf(streamId), captureFormat, newTrack, publishOption)
                 return newTrack
             }
         }
         return null
     }
-
     private fun logTrack(senderTrack: MediaStreamTrack?) {
         logger.d {
             "[trackPublishing] Track: ${senderTrack?.enabled()}:${senderTrack?.state()}:${senderTrack?.id()}"
@@ -310,6 +348,7 @@ internal class Publisher(
 
     @VisibleForTesting
     public fun addTransceiver(
+        streamIdList: List<String>,
         captureFormat: CaptureFormat?,
         track: MediaStreamTrack,
         publishOption: PublishOption,
@@ -320,7 +359,7 @@ internal class Publisher(
                 track,
                 RtpTransceiverInit(
                     RtpTransceiverDirection.SEND_ONLY,
-                    emptyList(),
+                    streamIdList,
                     init,
                 ),
             )
@@ -345,7 +384,7 @@ internal class Publisher(
             if (transceiverCache.has(publishOption)) continue
 
             val track = newTrackFromSource(publishOption.track_type)
-            addTransceiver(captureFormat ?: defaultFormat, track, publishOption)
+            addTransceiver(emptyList(), captureFormat ?: defaultFormat, track, publishOption)
         }
 
         // stop publishing with options not required anymore
@@ -501,14 +540,9 @@ internal class Publisher(
         return changed
     }
 
-    suspend fun restartIce() {
-        logger.i { "Restarting ICE connection" }
-        val signalingState = connection.signalingState()
-        if (isIceRestarting || signalingState == PeerConnection.SignalingState.HAVE_LOCAL_OFFER) {
-            logger.d { "ICE restart is already in progress" }
-            return
-        }
-        negotiate(true)
+    suspend fun restartIce(debugSource: String) = singleFlightProcessor.run("restartIce") {
+        logger.i { "[restartIce] debugSource:$debugSource, negotiate on Restarting ICE connection" }
+        negotiate("[restartIce]", true)
     }
 
     fun getAnnouncedTracks(captureFormat: CaptureFormat?, sdp: String? = null): List<TrackInfo> =
@@ -527,14 +561,7 @@ internal class Publisher(
 
     fun getAnnouncedTracksForReconnect(): List<TrackInfo> {
         val sdp = connection.localDescription?.description
-        val trackInfos = mutableListOf<TrackInfo>()
-        for (publishOption in publishOptions) {
-            val transceiver = transceiverCache.get(publishOption)
-            if (transceiver?.sender?.track() == null) continue
-            trackInfos.add(toTrackInfo(null, transceiver, publishOption, sdp))
-        }
-        logger.i { "Announced tracks for reconnect: $trackInfos" }
-        return trackInfos
+        return getAnnouncedTracks(null, sdp)
     }
 
     private fun toTrackInfo(

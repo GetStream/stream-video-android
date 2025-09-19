@@ -139,6 +139,7 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.ParticipantSource
 import stream.video.sfu.models.TrackType
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -877,7 +878,7 @@ public class CallState(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session!!.handleEvent(event)
+                call.session?.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -1281,7 +1282,12 @@ public class CallState(
             logger.w { "A user [id:${participant.user_id}] is in the call with empty session_id" }
         }
 
-        val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
+        val participantState = getOrCreateParticipant(
+            participant.session_id,
+            participant.user_id,
+            false,
+            participant.source,
+        )
         participantState.updateFromParticipantInfo(participant)
 
         upsertParticipants(listOf(participantState))
@@ -1293,6 +1299,7 @@ public class CallState(
         sessionId: String,
         userId: String,
         updateFlow: Boolean = false,
+        source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
     ): ParticipantState {
         val participantMap = _participants.value.toSortedMap()
         val participantState = if (participantMap.contains(sessionId)) {
@@ -1302,6 +1309,7 @@ public class CallState(
                 sessionId = sessionId,
                 call = call,
                 initialUserId = userId,
+                source = source,
             )
         }
         if (updateFlow) {
