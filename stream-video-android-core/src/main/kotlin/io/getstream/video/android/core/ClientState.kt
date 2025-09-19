@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.content.Intent
 import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.CallCreatedEvent
@@ -148,16 +149,29 @@ class ClientState(private val client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
-        removeRingingCall()
+        removeRingingCall(call)
         maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
     }
 
+    /**
+     * Use removeActiveCall(call: Call) instead, requires explicit call instance.
+     */
     fun removeActiveCall() {
         _activeCall.value?.let {
             maybeStopForegroundService(it)
         }
         this._activeCall.value = null
-        removeRingingCall()
+        removeRingingCall() // TODO shouldn't be here because we have no idea of which call is responsible for ringing
+    }
+
+    internal fun removeActiveCall(call: Call) {
+        if (call.id == activeCall.value?.id) {
+            _activeCall.value?.let {
+                maybeStopForegroundService(it)
+            }
+            this._activeCall.value = null
+            removeRingingCall(call)
+        }
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
@@ -169,11 +183,24 @@ class ClientState(private val client: StreamVideo) {
         // TODO: behaviour if you are already in a call
     }
 
+    /**
+     * Use removeRingingCall(call: Call) instead, requires explicit call instance..
+     */
     fun removeRingingCall() {
         ringingCall.value?.let {
             maybeStopForegroundService(it)
         }
         _ringingCall.value = null
+    }
+
+    fun removeRingingCall(call: Call) {
+        if (call.id == ringingCall.value?.id) {
+            (client as StreamVideoClient).callSoundPlayer.stopCallSound()
+            ringingCall.value?.let {
+                maybeStopForegroundService(it)
+            }
+            _ringingCall.value = null
+        }
     }
 
     /**
@@ -188,6 +215,7 @@ class ClientState(private val client: StreamVideo) {
                 context,
                 StreamCallId.fromCallCid(call.cid),
                 trigger,
+                "maybeStartForegroundService, trigger: $trigger",
                 callServiceConfiguration = callConfig,
             )
             ContextCompat.startForegroundService(context, serviceIntent)
@@ -201,11 +229,30 @@ class ClientState(private val client: StreamVideo) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
+
             val serviceIntent = CallService.buildStopIntent(
                 context,
+                call,
                 callConfig,
             )
-            context.stopService(serviceIntent)
+            logger.d { "Building stop intent for call_id: ${call.cid}" }
+            serviceIntent.let { intent: Intent ->
+                val bundle = intent.extras
+                val keys = bundle?.keySet()
+                if (keys != null) {
+                    val sb = StringBuilder()
+                    for (key in keys) {
+                        val itemInBundle = bundle[key]
+                        val text = "key:$key, value=$itemInBundle"
+                        sb.append(text)
+                        sb.append("\n")
+                    }
+                    if (sb.toString().isNotEmpty()) {
+                        logger.d { " [maybeStopForegroundService], stop intent extras: $sb" }
+                    }
+                }
+            }
+            context.startService(serviceIntent)
         }
     }
 }

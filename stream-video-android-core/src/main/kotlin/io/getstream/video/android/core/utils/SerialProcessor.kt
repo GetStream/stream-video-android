@@ -54,7 +54,7 @@ internal class SerialProcessor(
      * @return The result of the job.
      */
     @OptIn(DelicateCoroutinesApi::class)
-    suspend fun <T : Any> submit(
+    suspend fun <T : Any?> submit(
         jobName: String,
         handler: suspend () -> T,
     ): Result<T> {

@@ -37,6 +37,7 @@ import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
@@ -207,6 +208,14 @@ constructor(
             callDisplayName,
             payload,
         ).showNotification(callId, callId.hashCode())
+
+        /**
+         * Under poor internet there can be delay in receiving the
+         *  [io.getstream.android.video.generated.models.CallRejectedEvent] so we emit [LocalCallMissedEvent]
+         */
+        StreamVideo.instanceOrNull()?.let {
+            (it as StreamVideoClient).fireEvent(LocalCallMissedEvent(callId.cid))
+        }
     }
 
     override fun onNotification(

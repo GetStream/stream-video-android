@@ -62,6 +62,7 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
@@ -747,6 +748,18 @@ public class CallState(
                 )
             }
 
+            is LocalCallMissedEvent -> {
+                scope.launch {
+                    val newRejectedBySet = _rejectedBy.value.toMutableSet()
+                    StreamVideo.instanceOrNull()?.let {
+                        newRejectedBySet.add(it.user.id)
+                    }
+                    _rejectedBy.value = newRejectedBySet.toSet()
+                    _ringingState.value = RingingState.RejectedByAll
+                    call.leave()
+                }
+            }
+
             is CallEndedEvent -> {
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
@@ -895,7 +908,7 @@ public class CallState(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session!!.handleEvent(event)
+                call.session?.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -1120,16 +1133,16 @@ public class CallState(
         val acceptedBy = _acceptedBy.value
         val isAcceptedByMe = _acceptedBy.value.contains(client.userId)
         val createdBy = _createdBy.value
-        val hasActiveCall = client.state.activeCall.value != null
-        val hasRingingCall = client.state.ringingCall.value != null
+        val hasActiveCall = client.state.activeCall.value != null && client.state.activeCall.value?.id == call.id
+        val hasRingingCall = client.state.ringingCall.value != null && client.state.ringingCall.value?.id == call.id
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
 
-        Log.d("RingingState", "Current: ${_ringingState.value}")
+        Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
         Log.d(
             "RingingState",
-            "Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
+            "call_id: ${call.cid}, Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
         )
 
         // no members - call is empty, we can join

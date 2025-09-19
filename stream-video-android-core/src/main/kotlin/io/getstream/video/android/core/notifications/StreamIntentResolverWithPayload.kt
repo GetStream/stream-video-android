@@ -31,7 +31,7 @@ interface StreamIntentResolverWithPayload {
      */
     fun searchIncomingCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+        notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
         payload: Map<String, Any?>,
     ): PendingIntent?
 
@@ -45,7 +45,7 @@ interface StreamIntentResolverWithPayload {
      */
     fun searchOutgoingCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+        notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
         payload: Map<String, Any?>,
     ): PendingIntent?
 
@@ -100,7 +100,7 @@ interface StreamIntentResolverWithPayload {
      */
     fun searchAcceptCallPendingIntent(
         callId: StreamCallId,
-        notificationId: Int = NotificationHandler.INCOMING_CALL_NOTIFICATION_ID,
+        notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
         payload: Map<String, Any?>,
     ): PendingIntent?
 

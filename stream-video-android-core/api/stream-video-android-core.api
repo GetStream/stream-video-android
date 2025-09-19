@@ -2566,6 +2566,23 @@ public final class io/getstream/android/video/generated/models/ListTranscription
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/android/video/generated/models/LocalCallMissedEvent : io/getstream/android/video/generated/models/LocalEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/android/video/generated/models/LocalCallMissedEvent;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/LocalCallMissedEvent;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/LocalCallMissedEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCallCID ()Ljava/lang/String;
+	public final fun getCallCid ()Ljava/lang/String;
+	public fun getEventType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/getstream/android/video/generated/models/LocalEvent : io/getstream/android/video/generated/models/VideoEvent, io/getstream/android/video/generated/models/WSCallEvent {
+	public fun <init> ()V
+}
+
 public final class io/getstream/android/video/generated/models/Location {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -5748,6 +5765,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
 	public final fun removeRingingCall ()V
+	public final fun removeRingingCall (Lio/getstream/video/android/core/Call;)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
 }
 
@@ -10074,6 +10092,45 @@ public abstract interface class io/getstream/video/android/core/notifications/No
 	public abstract fun getRejectCallBundle (Lio/getstream/video/android/model/StreamCallId;Ljava/util/Map;)Landroid/os/Bundle;
 }
 
+public final class io/getstream/video/android/core/notifications/NotificationType$Custom : io/getstream/video/android/core/notifications/NotificationType {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/NotificationType$Custom;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/NotificationType$Custom;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/NotificationType$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/notifications/NotificationType$Incoming : io/getstream/video/android/core/notifications/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/core/notifications/NotificationType$Incoming;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/notifications/NotificationType$Missed : io/getstream/video/android/core/notifications/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/core/notifications/NotificationType$Missed;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/notifications/NotificationType$Ongoing : io/getstream/video/android/core/notifications/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/core/notifications/NotificationType$Ongoing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/notifications/NotificationType$Outgoing : io/getstream/video/android/core/notifications/NotificationType {
+	public static final field INSTANCE Lio/getstream/video/android/core/notifications/NotificationType$Outgoing;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class io/getstream/video/android/core/notifications/StreamIntentResolver : io/getstream/video/android/core/notifications/StreamIntentResolverWithPayload {
 	public fun getDefaultPendingIntent ()Landroid/app/PendingIntent;
 	public fun searchAcceptCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;I)Landroid/app/PendingIntent;
@@ -12640,6 +12697,7 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
+	public final fun getNotificationId (Lio/getstream/video/android/core/notifications/NotificationType;)I
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun isValid ()Z

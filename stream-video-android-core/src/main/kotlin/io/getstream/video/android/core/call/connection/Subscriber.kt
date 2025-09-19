@@ -72,6 +72,7 @@ internal class Subscriber(
     private val enableStereo: Boolean = true,
     private val tracer: Tracer,
     private val rejoin: () -> Unit,
+    private val fastReconnect: () -> Unit,
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
@@ -87,9 +88,11 @@ internal class Subscriber(
         )
     },
     onRejoinNeeded = rejoin,
+    onFastReconnectNeeded = fastReconnect,
     traceCreateAnswer = false,
     tracer = tracer,
-    maxBitRate = 0, // Set as needed
+    maxBitRate = 0, // Set as needed,
+    tag = "Subscriber",
 ) {
 
     /**
