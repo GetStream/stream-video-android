@@ -30,8 +30,10 @@ import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 // These are UI states, need to move out.
 @Stable
@@ -150,7 +152,13 @@ class ClientState(private val client: StreamVideo) {
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
         removeRingingCall(call)
-        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+        call.scope.launch {
+            /**
+             * Temporary fix: `maybeStartForegroundService` is called just before this code, which can stop the service
+             */
+            delay(500L)
+            maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+        }
     }
 
     /**
