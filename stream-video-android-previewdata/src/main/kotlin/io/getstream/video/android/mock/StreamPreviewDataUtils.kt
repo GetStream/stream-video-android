@@ -59,7 +59,8 @@ public val previewCall: Call = Call(
         ParticipantState(
             initialUserId = user.id,
             sessionId = sessionId,
-            call = this,
+            scope = this.state.scope,
+            callActions = this.state.callActions,
         )
     }
     state.upsertParticipants(participants)
@@ -128,7 +129,8 @@ public val previewParticipantsList: List<ParticipantState>
                 ParticipantState(
                     initialUserId = user.id,
                     sessionId = sessionId,
-                    call = previewCall,
+                    scope = previewCall.state.scope,
+                    callActions = previewCall.state.callActions,
                 ).also { previewCall.state.updateParticipant(it) },
             )
         }

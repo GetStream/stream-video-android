@@ -85,6 +85,7 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trace.TracerManager
 import io.getstream.video.android.core.trace.serialize
 import io.getstream.video.android.core.utils.AtomicUnitCall
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildRemoteIceServers
 import io.getstream.video.android.core.utils.defaultConstraints
@@ -92,9 +93,11 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CompletableJob
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -154,6 +157,9 @@ import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.Collections
+import java.util.concurrent.Executor
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -212,6 +218,18 @@ public class RtcSession internal constructor(
     private val supervisorJob: CompletableJob = SupervisorJob(),
     private val coroutineScope: CoroutineScope =
         CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
+    private val rtcSessionExecutor: Executor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "rtc-session-coroutine").apply {
+            isDaemon = true
+        }
+    },
+    private val rtcSessionScope: CoroutineScope = CoroutineScope(
+        clientImpl.scope.coroutineContext +
+            supervisorJob +
+            CoroutineName("rtc-session-coroutine") +
+            rtcSessionExecutor.asCoroutineDispatcher(),
+    ),
+    private val serialProcessor: SerialProcessor = SerialProcessor(rtcSessionScope),
     private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
     private val sfuTracer: Tracer = tracerManager.tracer(
         "${sessionCounter + 1}-${
@@ -524,7 +542,7 @@ public class RtcSession internal constructor(
      */
     suspend fun reconnect(forceRestart: Boolean) {
         // ice restart
-        val subscriberAsync = coroutineScope.async {
+        val subscriberAsync = rtcSessionScope.async {
             subscriber?.let {
                 if (!it.isHealthy()) {
                     logger.i { "ice restarting subscriber peer connection" }
@@ -533,7 +551,7 @@ public class RtcSession internal constructor(
             }
         }
 
-        val publisherAsync = coroutineScope.async {
+        val publisherAsync = rtcSessionScope.async {
             publisher?.let {
                 if (!it.isHealthy() || forceRestart) {
                     logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
@@ -767,8 +785,11 @@ public class RtcSession internal constructor(
         logger.i { "[cleanup] #sfu; #track; no args" }
 
         coroutineScope.launch {
-            sfuConnectionModule.socketConnection.disconnect()
-            sfuConnectionMigrationModule?.socketConnection?.disconnect()
+            serialProcessor.submit("cleanupSfuConnections") {
+                sfuConnectionModule.socketConnection.disconnect()
+                sfuConnectionMigrationModule?.socketConnection?.disconnect()
+                Unit
+            }
         }
         sfuConnectionMigrationModule = null
         subscriber?.clear()
@@ -784,6 +805,9 @@ public class RtcSession internal constructor(
 
         // cleanup all non-local tracks
         supervisorJob.cancel()
+
+        // Cleanup to properly close the single-threaded dispatcher and executor
+        (rtcSessionExecutor as? ExecutorService)?.shutdown()
     }
 
     internal val muteState = MutableStateFlow(
@@ -849,7 +873,7 @@ public class RtcSession internal constructor(
     internal fun createSubscriber(): Subscriber {
         logger.i { "[createSubscriber] #sfu; no args" }
         val peerConnection = call.peerConnectionFactory.makeSubscriber(
-            coroutineScope = coroutineScope,
+            coroutineScope = rtcSessionScope,
             configuration = connectionConfiguration,
             sfuClient = sfuConnectionModule.api,
             sessionId = sessionId,
@@ -859,10 +883,12 @@ public class RtcSession internal constructor(
                 logger.d { "[createPublisher] rejoin attempt, connection state: ${call.state.connection.value}" }
                 if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
                     coroutineScope.launch {
-                        logger.d {
-                            "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
-                        } // TODO Rahul, sometimes the code will come here right in the first attempt to call
-                        call.rejoin()
+                        serialProcessor.submit("subscriberRejoin") {
+                            logger.d {
+                                "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
+                            } // TODO Rahul, sometimes the code will come here right in the first attempt to call
+                            call.rejoin()
+                        }
                     }
                 }
             },
@@ -870,10 +896,8 @@ public class RtcSession internal constructor(
                 coroutineScope.launch {
                     logger.d { "[createPublisher] Fast reconnect, connection state: ${call.state.connection.value}" }
                     if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
-                        coroutineScope.launch {
-                            logger.d { "[createPublisher] fast reconnect EXECUTE" }
-                            call.fastReconnect()
-                        }
+                        logger.d { "[createPublisher] fast reconnect EXECUTE" }
+                        call.fastReconnect()
                     }
                 }
             },
@@ -922,7 +946,6 @@ public class RtcSession internal constructor(
         }
 
         return call.peerConnectionFactory.makePeerConnection(
-            coroutineScope = coroutineScope,
             configuration = PeerConnection.RTCConfiguration(emptyList()),
             type = if (direction == RtpTransceiverDirection.SEND_ONLY) {
                 StreamPeerType.PUBLISHER
@@ -951,7 +974,7 @@ public class RtcSession internal constructor(
             mediaManager = call.mediaManager,
             configuration = connectionConfiguration,
             publishOptions = publishOptions,
-            coroutineScope = coroutineScope,
+            coroutineScope = rtcSessionScope,
             mediaConstraints = defaultConstraints,
             onNegotiationNeeded = { _, _ -> },
             tracer = publisherTracer,
@@ -960,10 +983,12 @@ public class RtcSession internal constructor(
                 logger.d { "[createPublisher] rejoin attempt, connection state: ${call.state.connection.value}" }
                 if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
                     coroutineScope.launch {
-                        logger.d {
-                            "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
-                        } // TODO Rahul, sometimes the code will come here right in the first attempt to call
-                        call.rejoin()
+                        serialProcessor.submit("publisherRejoin") {
+                            logger.d {
+                                "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
+                            } // TODO Rahul, sometimes the code will come here right in the first attempt to call
+                            call.rejoin()
+                        }
                     }
                 }
             },
@@ -1003,12 +1028,15 @@ public class RtcSession internal constructor(
         val participants = call.state.participants.value
         val remoteParticipants = call.state.remoteParticipants.value
         coroutineScope.launch {
-            subscriber?.setVideoSubscriptions(
-                trackOverridesHandler,
-                participants,
-                remoteParticipants,
-                useDefaults,
-            )
+            serialProcessor.submit("setVideoSubscriptions") {
+                subscriber?.setVideoSubscriptions(
+                    trackOverridesHandler,
+                    participants,
+                    remoteParticipants,
+                    useDefaults,
+                )
+                Unit
+            }
         }
         logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
     }
@@ -1017,117 +1045,120 @@ public class RtcSession internal constructor(
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is SfuDataEvent) {
             coroutineScope.launch {
-                if (event is SubscriberOfferEvent) {
-                    logger.v { "[onRtcEvent] event: SubscriberOfferEvent" }
-                } else {
-                    logger.v { "[onRtcEvent] event: $event" }
-                }
+                serialProcessor.submit("handleSfuDataEvent: ${event.getEventType()}") {
+                    if (event is SubscriberOfferEvent) {
+                        logger.v { "[onRtcEvent] event: SubscriberOfferEvent" }
+                    } else {
+                        logger.v { "[onRtcEvent] event: $event" }
+                    }
 
-                when (event) {
-                    is JoinCallResponseEvent -> {
-                        val participantStates = event.callState.participants.map {
-                            call.state.getOrCreateParticipant(it)
-                        }
-                        call.state.replaceParticipants(participantStates)
-                        sfuConnectionModule.socketConnection.whenConnected { // noob 3
-                            logger.d { "JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
-                            if (publisher == null) {
-                                publisher = createPublisher(event.publishOptions)
+                    when (event) {
+                        is JoinCallResponseEvent -> {
+                            val participantStates = event.callState.participants.map {
+                                call.state.getOrCreateParticipant(it)
                             }
-                            connectRtc()
-                            processPendingSubscriberEvents()
-                            processPendingPublisherEvents()
+                            call.state.replaceParticipants(participantStates)
+                            sfuConnectionModule.socketConnection.whenConnected { // noob 3
+                                logger.d { "JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
+                                if (publisher == null) {
+                                    publisher = createPublisher(event.publishOptions)
+                                }
+                                connectRtc()
+                                processPendingSubscriberEvents()
+                                processPendingPublisherEvents()
+                            }
                         }
-                    }
 
-                    is ChangePublishOptionsEvent -> {
-                        logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
-                        publisher?.syncPublishOptions(
-                            call.mediaManager.camera.resolution.value,
-                            event.change.publish_options,
-                        ) ?: let {
-                            publisherPendingEvents.add(event)
+                        is ChangePublishOptionsEvent -> {
+                            logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
+                            publisher?.syncPublishOptions(
+                                call.mediaManager.camera.resolution.value,
+                                event.change.publish_options,
+                            ) ?: let {
+                                publisherPendingEvents.add(event)
+                            }
                         }
-                    }
 
-                    is SubscriberOfferEvent -> handleSubscriberOffer(event)
-                    // this dynascale event tells the SDK to change the quality of the video it's uploading
-                    is ChangePublishQualityEvent -> {
-                        event.changePublishQuality.video_senders.forEach {
-                            publisher?.changePublishQuality(it)
+                        is SubscriberOfferEvent -> handleSubscriberOffer(event)
+                        // this dynascale event tells the SDK to change the quality of the video it's uploading
+                        is ChangePublishQualityEvent -> {
+                            event.changePublishQuality.video_senders.forEach {
+                                publisher?.changePublishQuality(it)
+                            }
                         }
-                    }
 
-                    is TrackPublishedEvent -> {
-                        updatePublishState(
-                            userId = event.userId,
-                            sessionId = event.sessionId,
-                            trackType = event.trackType,
-                            videoEnabled = true,
-                            audioEnabled = true,
-                            paused = false,
-                        )
-                    }
-
-                    is InboundStateNotificationEvent -> {
-                        event.inboundVideoStates.forEach { publishState ->
+                        is TrackPublishedEvent -> {
                             updatePublishState(
-                                userId = publishState.userId,
-                                sessionId = publishState.sessionId,
-                                trackType = publishState.trackType,
+                                userId = event.userId,
+                                sessionId = event.sessionId,
+                                trackType = event.trackType,
                                 videoEnabled = true,
                                 audioEnabled = true,
-                                paused = publishState.paused,
+                                paused = false,
                             )
                         }
-                    }
 
-                    is TrackUnpublishedEvent -> {
-                        updatePublishState(
-                            userId = event.userId,
-                            sessionId = event.sessionId,
-                            trackType = event.trackType,
-                            videoEnabled = false,
-                            audioEnabled = false,
-                            paused = false,
-                        )
-                    }
-
-                    is ParticipantJoinedEvent -> {
-                        // the UI layer will automatically trigger updateParticipantsSubscriptions
-                    }
-
-                    is ParticipantLeftEvent -> {
-                        subscriber?.participantLeft(event.participant)
-                        subscriber?.setVideoSubscriptions(
-                            trackOverridesHandler,
-                            call.state.participants.value,
-                            call.state.remoteParticipants.value,
-                        )
-                    }
-
-                    is ICETrickleEvent -> {
-                        handleIceTrickle(event)
-                    }
-
-                    is ICERestartEvent -> {
-                        val peerType = event.peerType
-                        when (peerType) {
-                            PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
-                                publisher?.restartIce("ICERestartEvent, peerType: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED") ?: let {
-                                    publisherPendingEvents.add(event)
-                                }
-                            }
-
-                            PeerType.PEER_TYPE_SUBSCRIBER -> {
-                                requestSubscriberIceRestart()
+                        is InboundStateNotificationEvent -> {
+                            event.inboundVideoStates.forEach { publishState ->
+                                updatePublishState(
+                                    userId = publishState.userId,
+                                    sessionId = publishState.sessionId,
+                                    trackType = publishState.trackType,
+                                    videoEnabled = true,
+                                    audioEnabled = true,
+                                    paused = publishState.paused,
+                                )
                             }
                         }
-                    }
 
-                    else -> {
-                        logger.d { "[onRtcEvent] skipped event: $event" }
+                        is TrackUnpublishedEvent -> {
+                            updatePublishState(
+                                userId = event.userId,
+                                sessionId = event.sessionId,
+                                trackType = event.trackType,
+                                videoEnabled = false,
+                                audioEnabled = false,
+                                paused = false,
+                            )
+                        }
+
+                        is ParticipantJoinedEvent -> {
+                            // the UI layer will automatically trigger updateParticipantsSubscriptions
+                        }
+
+                        is ParticipantLeftEvent -> {
+                            subscriber?.participantLeft(event.participant)
+                            subscriber?.setVideoSubscriptions(
+                                trackOverridesHandler,
+                                call.state.participants.value,
+                                call.state.remoteParticipants.value,
+                            )
+                        }
+
+                        is ICETrickleEvent -> {
+                            handleIceTrickle(event)
+                        }
+
+                        is ICERestartEvent -> {
+                            val peerType = event.peerType
+                            when (peerType) {
+                                PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
+                                    publisher?.restartIce("ICERestartEvent, peerType: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED") ?: let {
+                                        publisherPendingEvents.add(event)
+                                    }
+                                }
+
+                                PeerType.PEER_TYPE_SUBSCRIBER -> {
+                                    requestSubscriberIceRestart()
+                                }
+                            }
+                        }
+
+                        else -> {
+                            logger.d { "[onRtcEvent] skipped event: $event" }
+                        }
                     }
+                    Unit
                 }
             }
         }
@@ -1204,18 +1235,20 @@ public class RtcSession internal constructor(
      */
     private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) {
         coroutineScope.launch {
-            flow {
-                logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
-                val iceTrickle = ICETrickle(
-                    peer_type = peerType.toPeerType(),
-                    ice_candidate = Json.encodeToString(candidate),
-                    session_id = sessionId,
-                )
-                logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
-                val result = sendIceCandidate(iceTrickle)
-                logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
-                emit(result.getOrThrow())
-            }.retry(3).catch { logger.w { "sending ice candidate failed" } }.collect()
+            serialProcessor.submit("sendIceCandidate") {
+                flow {
+                    logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
+                    val iceTrickle = ICETrickle(
+                        peer_type = peerType.toPeerType(),
+                        ice_candidate = Json.encodeToString(candidate),
+                        session_id = sessionId,
+                    )
+                    logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
+                    val result = sendIceCandidate(iceTrickle)
+                    logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
+                    emit(result.getOrThrow())
+                }.retry(3).catch { logger.w { "sending ice candidate failed" } }.collect()
+            }
         }
     }
 
@@ -1487,13 +1520,16 @@ public class RtcSession internal constructor(
         }
         subscriber?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
         coroutineScope.launch {
-            if (sessionId != call.sessionId) {
-                // dimension updated for another participant
-                subscriber?.setVideoSubscriptions(
-                    trackOverridesHandler,
-                    call.state.participants.value,
-                    call.state.remoteParticipants.value,
-                )
+            serialProcessor.submit("updateTrackDimensions") {
+                if (sessionId != call.sessionId) {
+                    // dimension updated for another participant
+                    subscriber?.setVideoSubscriptions(
+                        trackOverridesHandler,
+                        call.state.participants.value,
+                        call.state.remoteParticipants.value,
+                    )
+                }
+                Unit
             }
         }
     }
@@ -1501,11 +1537,14 @@ public class RtcSession internal constructor(
     private fun listenToSubscriberConnection() {
         subscriberListenJob?.cancel()
         subscriberListenJob = coroutineScope.launch {
-            // call update participant subscriptions debounced
-            subscriber?.let {
-                it.state.collect {
-                    updatePeerState()
+            serialProcessor.submit("listenToSubscriberConnection") {
+                // call update participant subscriptions debounced
+                subscriber?.let {
+                    it.state.collect {
+                        updatePeerState()
+                    }
                 }
+                Unit
             }
         }
     }
@@ -1540,24 +1579,26 @@ public class RtcSession internal constructor(
         logger.d { "Connecting RTC, $request" }
         listenToSfuSocket()
         coroutineScope.launch {
-            sfuConnectionModule.socketConnection.connect(request)
-            sfuConnectionModule.socketConnection.whenConnected {
-                val peerConnectionNotUsable =
-                    subscriber?.isFailedOrClosed() == true && publisher?.isFailedOrClosed() == true
-                if (peerConnectionNotUsable) {
-                    logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
-                    // We could not reuse the peer connections.
-                    call.rejoin()
-                } else {
-                    publisher?.restartIce("peerConnection is usable")
-                    sendCallStats(
-                        report = call.collectStats(),
-                        reconnectionTimeSeconds = Pair(
-                            (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
-                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-                        ),
-                    )
-                    setVideoSubscriptions(true)
+            serialProcessor.submit("fastReconnect") {
+                sfuConnectionModule.socketConnection.connect(request)
+                sfuConnectionModule.socketConnection.whenConnected {
+                    val peerConnectionNotUsable =
+                        subscriber?.isFailedOrClosed() == true && publisher?.isFailedOrClosed() == true
+                    if (peerConnectionNotUsable) {
+                        logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
+                        // We could not reuse the peer connections.
+                        call.rejoin()
+                    } else {
+                        publisher?.restartIce("peerConnection is usable")
+                        sendCallStats(
+                            report = call.collectStats(),
+                            reconnectionTimeSeconds = Pair(
+                                (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                            ),
+                        )
+                        setVideoSubscriptions(true)
+                    }
                 }
             }
         }
@@ -1589,7 +1630,10 @@ public class RtcSession internal constructor(
         )
         val request = SfuRequest(leave_call_request = leaveCallRequest)
         coroutineScope.launch {
-            sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
+            serialProcessor.submit("leaveWithReason") {
+                sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
+                Unit
+            }
         }
     }
 }

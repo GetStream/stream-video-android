@@ -29,6 +29,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,8 +51,10 @@ import stream.video.sfu.models.TrackType
 public data class ParticipantState(
     /** The SFU returns a session id for each participant. This session id is unique */
     var sessionId: String = "",
-    /** The call object */
-    val call: Call,
+    /** The coroutine scope for this participant */
+    private val scope: CoroutineScope,
+    /** The call actions interface for performing operations on this participant */
+    private val callActions: CallActions,
     /** The current version of the user, this is the start for participant.user stateflow */
     private val initialUserId: String,
     /** A prefix to identify tracks, internal */
@@ -62,24 +65,24 @@ public data class ParticipantState(
     private val logger by taggedLogger("ParticipantState")
 
     val isLocal by lazy {
-        sessionId == call.sessionId
+        callActions.isLocalParticipant(sessionId)
     }
 
     /** video track */
-    internal val _videoTrack = MutableStateFlow<VideoTrack?>(null)
+    internal val _videoTrack by lazy { MutableStateFlow<VideoTrack?>(null) }
     val videoTrack: StateFlow<VideoTrack?> = _videoTrack
 
-    internal val _visibleOnScreen = MutableStateFlow(VisibilityOnScreenState.UNKNOWN)
+    internal val _visibleOnScreen by lazy { MutableStateFlow(VisibilityOnScreenState.UNKNOWN) }
     val visibleOnScreen: StateFlow<VisibilityOnScreenState> = _visibleOnScreen
 
     /**
      * State that indicates whether the camera is capturing and sending video or not.
      */
     // todo: videoAvailable might be more descriptive
-    internal val _videoEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _videoEnabled: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
     val videoEnabled: StateFlow<Boolean> = _videoEnabled
 
-    internal val _videoPaused: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _videoPaused: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
 
     /**
      * State that indicates whether the video is paused or not.
@@ -89,25 +92,29 @@ public data class ParticipantState(
     /**
      * State that indicates whether the mic is capturing and sending the audio or not.
      */
-    internal val _audioEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _audioEnabled: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
     val audioEnabled: StateFlow<Boolean> = _audioEnabled
 
-    internal val _audioTrack = MutableStateFlow<AudioTrack?>(null)
+    internal val _audioTrack by lazy { MutableStateFlow<AudioTrack?>(null) }
     val audioTrack: StateFlow<AudioTrack?> = _audioTrack
 
-    internal val _screenSharingEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _screenSharingEnabled: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(
+            false,
+        )
+    }
     val screenSharingEnabled: StateFlow<Boolean> = _screenSharingEnabled
 
-    internal val _screenSharingTrack = MutableStateFlow<VideoTrack?>(null)
+    internal val _screenSharingTrack by lazy { MutableStateFlow<VideoTrack?>(null) }
     val screenSharingTrack: StateFlow<VideoTrack?> = _screenSharingTrack
 
-    internal val _name = MutableStateFlow("")
+    internal val _name by lazy { MutableStateFlow("") }
     val name: StateFlow<String> = _name
 
-    internal val _image = MutableStateFlow("")
+    internal val _image by lazy { MutableStateFlow("") }
     val image: StateFlow<String> = _image
 
-    internal val _userId = MutableStateFlow(initialUserId)
+    internal val _userId by lazy { MutableStateFlow(initialUserId) }
     val userId: StateFlow<String> = _userId
 
     // Could also be a property on the user
@@ -116,39 +123,49 @@ public data class ParticipantState(
     /**
      * When you joined the call
      */
-    internal val _joinedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    internal val _joinedAt: MutableStateFlow<OffsetDateTime?> by lazy { MutableStateFlow(null) }
     val joinedAt: StateFlow<OffsetDateTime?> = _joinedAt
 
     /**
      * The audio level of the participant, single float value
      */
-    internal val _audioLevel: MutableStateFlow<Float> = MutableStateFlow(0f)
+    internal val _audioLevel: MutableStateFlow<Float> by lazy { MutableStateFlow(0f) }
     val audioLevel: StateFlow<Float> = _audioLevel
 
     /**
      * The last 5 values for the audio level. This list easier to work with for some audio visualizations
      */
-    internal val _audioLevels: MutableStateFlow<List<Float>> =
+    internal val _audioLevels: MutableStateFlow<List<Float>> by lazy {
         MutableStateFlow(listOf(0f, 0f, 0f, 0f, 0f))
+    }
     val audioLevels: StateFlow<List<Float>> = _audioLevels
 
     /**
      * The video quality of the participant
      */
-    internal val _networkQuality: MutableStateFlow<NetworkQuality> =
+    internal val _networkQuality: MutableStateFlow<NetworkQuality> by lazy {
         MutableStateFlow(NetworkQuality.UnSpecified())
+    }
     val networkQuality: StateFlow<NetworkQuality> = _networkQuality
 
-    internal val _dominantSpeaker: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _dominantSpeaker: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
     val dominantSpeaker: StateFlow<Boolean> = _dominantSpeaker
 
-    internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    internal val _speaking: MutableStateFlow<Boolean> by lazy { MutableStateFlow(false) }
     val speaking: StateFlow<Boolean> = _speaking
 
-    internal val _lastSpeakingAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    internal val _lastSpeakingAt: MutableStateFlow<OffsetDateTime?> by lazy {
+        MutableStateFlow(
+            null,
+        )
+    }
     val lastSpeakingAt: StateFlow<OffsetDateTime?> = _lastSpeakingAt
 
-    internal val _reactions = MutableStateFlow<List<Reaction>>(emptyList())
+    internal val _reactions: MutableStateFlow<List<Reaction>> by lazy {
+        MutableStateFlow(
+            emptyList(),
+        )
+    }
     val reactions: StateFlow<List<Reaction>> = _reactions
 
     val video: StateFlow<Video?> = combine(
@@ -162,7 +179,7 @@ public data class ParticipantState(
             enabled = enabled,
             paused = paused,
         )
-    }.stateIn(call.scope, SharingStarted.Lazily, null)
+    }.stateIn(scope, SharingStarted.Lazily, null)
 
     val audio: StateFlow<Audio?> = combineStates(_audioTrack, _audioEnabled) { track, enabled ->
         Audio(
@@ -182,24 +199,23 @@ public data class ParticipantState(
         }
 
     suspend fun muteAudio(): Result<MuteUsersResponse> {
-        // how do i mute another user?
-        return call.muteUser(_userId.value, audio = true, video = false, screenShare = false)
+        return callActions.muteUserAudio(_userId.value)
     }
 
     suspend fun muteVideo(): Result<MuteUsersResponse> {
-        return call.muteUser(_userId.value, audio = false, video = true, screenShare = false)
+        return callActions.muteUserVideo(_userId.value)
     }
 
     suspend fun muteScreenshare(): Result<MuteUsersResponse> {
-        return call.muteUser(_userId.value, audio = false, video = false, screenShare = true)
+        return callActions.muteUserScreenShare(_userId.value)
     }
 
     suspend fun pin() {
-        return call.state.pin(this.userId.value, this.sessionId)
+        callActions.pinParticipant(this.userId.value, this.sessionId)
     }
 
     suspend fun unpin() {
-        return call.state.unpin(this.sessionId)
+        callActions.unpinParticipant(this.sessionId)
     }
 
     fun updateAudioLevel(audioLevel: Float) {
@@ -214,7 +230,7 @@ public data class ParticipantState(
         _audioLevel.value = audioLevel
     }
 
-    internal val _roles = MutableStateFlow<List<String>>(emptyList())
+    internal val _roles: MutableStateFlow<List<String>> by lazy { MutableStateFlow(emptyList()) }
     val roles: StateFlow<List<String>> = _roles
 
     fun setVideoTrack(track: VideoTrack?) {

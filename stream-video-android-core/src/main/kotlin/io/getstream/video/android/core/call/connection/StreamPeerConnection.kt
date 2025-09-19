@@ -36,7 +36,6 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.stringify
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -71,7 +70,6 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param tracer The tracer used to trace the connection.
  */
 open class StreamPeerConnection(
-    private val coroutineScope: CoroutineScope,
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
