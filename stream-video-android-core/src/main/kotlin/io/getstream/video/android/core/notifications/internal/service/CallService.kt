@@ -343,6 +343,7 @@ internal open class CallService : Service() {
         // STOP SERVICE LOGIC STARTS
         if (shouldStopServiceFromIntent(intent)) {
             stopService()
+            return START_NOT_STICKY
         }
         // STOP SERVICE LOGIC ENDS
 
