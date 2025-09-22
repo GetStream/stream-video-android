@@ -57,7 +57,7 @@ object VideoCodecScalabilityChecker {
      */
     private fun checkCodecFactory(factory: VideoEncoderFactory, factoryName: String?) {
         try {
-            val supportedCodecs = factory.getSupportedCodecs()
+            val supportedCodecs = factory.supportedCodecs
             Log.i(TAG, factoryName + " supports " + supportedCodecs.size + " codecs:")
 
             for (codecInfo in supportedCodecs) {
