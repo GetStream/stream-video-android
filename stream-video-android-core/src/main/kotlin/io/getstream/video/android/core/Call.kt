@@ -56,7 +56,9 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.JoinCallConfig
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -65,6 +67,7 @@ import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
+import io.getstream.video.android.core.errors.SfuJoinException
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
@@ -91,7 +94,6 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -399,6 +401,7 @@ public class Call(
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        joinCallConfig: JoinCallConfig = JoinCallConfig(),
     ): Result<RtcSession> {
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -427,7 +430,7 @@ public class Call(
         var result: Result<RtcSession>
 
         atomicLeave = AtomicUnitCall()
-        while (retryCount < 3) {
+        while (retryCount < joinCallConfig.maxRetries) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
@@ -447,17 +450,24 @@ public class Call(
             if (result is Failure) {
                 session = null
                 logger.e { "Join failed with error $result" }
-                if (isPermanentError(result.value)) {
+                if (ring && isSFuJoinError(result.value) && joinCallConfig.rejectRingingCallOnFailure) {
+                    state._connection.value = RealtimeConnection.Failed(result.value)
+                    return reject(RejectReason.Cancel).flatMap {
+                        logger.e { "[join] Failed to reject call after join failure $it" }
+                        result
+                    }
+                } else if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
                     return result
                 } else {
                     retryCount += 1
                 }
             }
-            delay(retryCount - 1 * 1000L)
+            val backoffDelay = ((retryCount - 1).coerceAtLeast(0)) * 1000L
+            delay(backoffDelay)
         }
         session = null
-        val errorMessage = "Join failed after 3 retries"
+        val errorMessage = "Join failed after ${joinCallConfig.maxRetries} retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
         return Failure(value = Error.GenericError(errorMessage))
     }
@@ -469,6 +479,10 @@ public class Call(
             }
         }
         return true
+    }
+
+    internal fun isSFuJoinError(error: Any): Boolean {
+        return error is Error.ThrowableError && error.cause is SfuJoinException
     }
 
     internal suspend fun _join(
@@ -537,7 +551,12 @@ public class Call(
         try {
             session?.connect()
         } catch (e: Exception) {
-            return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
+            return Failure(
+                Error.ThrowableError(
+                    message = "Failed to join SFU during connection.",
+                    cause = SfuJoinException(e.message ?: "connect() failed", e),
+                ),
+            )
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
