@@ -783,7 +783,9 @@ public class CallState(
             }
 
             is UpdatedCallPermissionsEvent -> {
-                _ownCapabilities.value = event.ownCapabilities
+                if (event.user.id == client.userId) {
+                    _ownCapabilities.value = event.ownCapabilities
+                }
             }
 
             is ConnectedEvent -> {
