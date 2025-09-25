@@ -61,6 +61,8 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -81,8 +83,6 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.call.scope.ScopeProvider
-import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl

@@ -214,7 +214,10 @@ public class RtcSession internal constructor(
     private val supervisorJob: CompletableJob = SupervisorJob(),
     private val scopeProvider: ScopeProvider = call.scopeProvider,
     private val coroutineScope: CoroutineScope = scopeProvider.getCoroutineScope(supervisorJob),
-    private val rtcSessionScope: CoroutineScope = scopeProvider.getRtcSessionScope(supervisorJob, call.id),
+    private val rtcSessionScope: CoroutineScope = scopeProvider.getRtcSessionScope(
+        supervisorJob,
+        call.id,
+    ),
     private val serialProcessor: SerialProcessor = SerialProcessor(rtcSessionScope),
     private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
     private val sfuTracer: Tracer = tracerManager.tracer(

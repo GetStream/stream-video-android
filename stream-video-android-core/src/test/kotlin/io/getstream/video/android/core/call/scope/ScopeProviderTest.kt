@@ -17,10 +17,8 @@
 package io.getstream.video.android.core.call.scope
 
 import io.getstream.video.android.core.socket.common.scope.ClientScope
-import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -50,7 +48,7 @@ class ScopeProviderTest {
     fun `getCoroutineScope should return a valid scope`() = runTest {
         val supervisorJob = SupervisorJob()
         val coroutineScope = scopeProvider.getCoroutineScope(supervisorJob)
-        
+
         assertNotNull(coroutineScope)
         assertEquals(clientScope.coroutineContext + supervisorJob, coroutineScope.coroutineContext)
     }
@@ -59,9 +57,9 @@ class ScopeProviderTest {
     fun `getRtcSessionScope should return a valid scope with dedicated thread`() = runTest {
         val callId = "test-call-1"
         val supervisorJob = SupervisorJob()
-        
+
         val rtcSessionScope = scopeProvider.getRtcSessionScope(supervisorJob, callId)
-        
+
         assertNotNull(rtcSessionScope)
         // The scope should have the client context, supervisor job, and a custom dispatcher
         assertTrue(rtcSessionScope.coroutineContext[supervisorJob.key] == supervisorJob)
@@ -73,10 +71,10 @@ class ScopeProviderTest {
         val callId2 = "test-call-2"
         val supervisorJob1 = SupervisorJob()
         val supervisorJob2 = SupervisorJob()
-        
+
         val scope1 = scopeProvider.getRtcSessionScope(supervisorJob1, callId1)
         val scope2 = scopeProvider.getRtcSessionScope(supervisorJob2, callId2)
-        
+
         assertNotNull(scope1)
         assertNotNull(scope2)
         // Both scopes should be valid
@@ -88,7 +86,7 @@ class ScopeProviderTest {
         val supervisorJob = SupervisorJob()
         scopeProvider.getCoroutineScope(supervisorJob)
         scopeProvider.getRtcSessionScope(supervisorJob, callId)
-        
+
         // Should not throw any exceptions
         scopeProvider.cleanup()
     }
@@ -109,15 +107,15 @@ class ScopeProviderTest {
     fun `executor should be created lazily on first getRtcSessionScope call`() = runTest {
         val callId = "test-call-1"
         val supervisorJob = SupervisorJob()
-        
+
         // First call should create the executor
         val scope1 = scopeProvider.getRtcSessionScope(supervisorJob, callId)
         assertNotNull(scope1)
-        
+
         // Second call should reuse the same executor
         val scope2 = scopeProvider.getRtcSessionScope(SupervisorJob(), callId)
         assertNotNull(scope2)
-        
+
         // Both scopes should be valid
         assertNotNull(scope1)
         assertNotNull(scope2)

@@ -25,7 +25,7 @@ import java.util.concurrent.Executors
 
 /**
  * Implementation of [ScopeProvider] that manages coroutine scopes for RTC sessions.
- * 
+ *
  * This implementation ensures that:
  * - Each Call gets its own dedicated single thread executor
  * - RtcSessions use the thread from their parent Call
@@ -33,7 +33,7 @@ import java.util.concurrent.Executors
  * - Scopes are properly managed and cleaned up
  */
 internal class ScopeProviderImpl(
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
 ) : ScopeProvider {
 
     private var executor: ExecutorService? = null
@@ -44,13 +44,13 @@ internal class ScopeProviderImpl(
         return CoroutineScope(
             coroutineScope.coroutineContext +
                 supervisorJob +
-                CoroutineName("rtc-session-main")
+                CoroutineName("rtc-session-main"),
         )
     }
 
     override fun getRtcSessionScope(supervisorJob: CompletableJob, callId: String): CoroutineScope {
         check(!isCleanedUp) { "ScopeProvider has been cleaned up" }
-        
+
         // Get or create executor for this call
         if (executor == null) {
             executor = Executors.newSingleThreadExecutor { runnable ->
@@ -59,19 +59,19 @@ internal class ScopeProviderImpl(
                 }
             }
         }
-        
+
         return CoroutineScope(
             coroutineScope.coroutineContext +
                 supervisorJob +
                 CoroutineName("rtc-session-coroutine") +
-                executor!!.asCoroutineDispatcher()
+                executor!!.asCoroutineDispatcher(),
         )
     }
 
     override fun cleanup() {
         if (isCleanedUp) return
         isCleanedUp = true
-        
+
         // Shutdown the executor
         executor?.shutdown()
         executor = null

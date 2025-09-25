@@ -233,7 +233,7 @@ internal class Publisher(
                         it.message ?: "unknown",
                     )
                 }.onSuccess {
-                    logger.d { "Publisher negotiation successfully done ✅"}
+                    logger.d { "Publisher negotiation successfully done ✅" }
                 }
             // Set ice trickle
         }
