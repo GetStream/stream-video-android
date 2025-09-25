@@ -58,11 +58,12 @@ internal class ScopeProviderImpl(
             }
         }
 
+        val currentExecutor = executor ?: error("Executor should not be null at this point")
         return CoroutineScope(
             coroutineScope.coroutineContext +
                 supervisorJob +
                 CoroutineName("rtc-session-coroutine") +
-                executor!!.asCoroutineDispatcher(),
+                currentExecutor.asCoroutineDispatcher(),
         )
     }
 
