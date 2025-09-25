@@ -33,6 +33,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallSessionEndedEvent
 import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
@@ -66,11 +67,13 @@ import io.getstream.video.android.ui.common.models.StreamCallActivityException
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -1026,32 +1029,13 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     @CallSuper
     public open fun onCallEvent(call: Call, event: VideoEvent) {
         when (event) {
-            is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent -> {
+            is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent, is LocalCallMissedEvent -> {
                 // In any case finish the activity, the call is done for
                 leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
-                /**
-                 * participantCountJob will be null when activity is newly created
-                 * participantCountJob will be inactive when activity is resumed with another call
-                 */
-                if (participantCountJob == null) {
-                    participantCountJob = lifecycleScope.launch(supervisorJob) {
-                        val size = cachedCall.state.participants.value.size
-                        cachedCall.state.participants.collect {
-                            logger.d { "Participant left, remaining: $size" }
-                            lifecycleScope.launch(Dispatchers.Default) {
-                                it.forEachIndexed { i, v ->
-                                    logger.d { "Participant [$i]=${v.name.value}" }
-                                }
-                            }
-                            if (it.size <= 1) {
-                                onLastParticipant(call)
-                            }
-                        }
-                    }
-                }
+                processParticipantLeftEvent(call, event)
             }
         }
     }
@@ -1181,6 +1165,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                             onConnectionEvent(call, it)
                         }
                     }
+
                 onSuccess?.invoke(
                     savedInstanceState,
                     persistentState,
@@ -1287,6 +1272,50 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             finish()
         }
     }
+
+    /**
+     * Processes participant leave events for the given [call].
+     *
+     * Observes [cachedCall.state.participants] and triggers [onLastParticipant] if only
+     * one or fewer participants remain. Debouncing is applied to handle quick network
+     * disconnect/reconnect scenarios.
+     *
+     * @param call the active [Call] associated with the event.
+     * @param event the [VideoEvent] that triggered this processing, typically a [ParticipantLeftEvent]
+     *              or [CallSessionParticipantLeftEvent].
+     */
+    @OptIn(FlowPreview::class)
+    private fun processParticipantLeftEvent(call: Call, event: VideoEvent) {
+        /**
+         * - participantCountJob will be null when activity is newly created
+         * - participantCountJob will be inactive when activity is resumed with another call
+         */
+        if (participantCountJob == null) {
+            participantCountJob = lifecycleScope.launch(supervisorJob) {
+                cachedCall.state.participants
+                    /**
+                     * A debounce is applied here to handle quick disconnect/reconnect scenarios
+                     * caused by unstable network conditions. Without the debounce, other devices
+                     * may receive a [ParticipantLeftEvent] prematurely, which could trigger
+                     * unintended reactions in the call flow.
+                     */
+                    .debounce(getParticipantUpdateDebounce(call))
+                    .collect {
+                        logger.d { "Participant left, remaining: ${it.size}" }
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            it.forEachIndexed { i, v ->
+                                logger.d { "Participant [$i]=${v.name.value}" }
+                            }
+                        }
+                        if (it.size <= 1) {
+                            onLastParticipant(call)
+                        }
+                    }
+            }
+        }
+    }
+
+    public open fun getParticipantUpdateDebounce(call: Call): Long = 1_000L
 }
 
 public typealias StreamCallIdString = String

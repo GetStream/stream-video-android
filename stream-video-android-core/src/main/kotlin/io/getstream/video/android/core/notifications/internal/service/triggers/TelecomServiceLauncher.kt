@@ -21,7 +21,6 @@ import android.app.Notification
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.telecom.DisconnectCause
 import android.telecom.TelecomManager
 import android.telecom.VideoProfile
 import androidx.core.net.toUri
@@ -33,10 +32,9 @@ import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.TelecomHelper
-import io.getstream.video.android.core.notifications.internal.service.TelecomVoipService
 import io.getstream.video.android.model.StreamCallId
 
-internal class TelecomServiceTrigger(
+internal class TelecomServiceLauncher(
     private val context: Context,
     private val serviceIntentBuilder: ServiceIntentBuilder,
 ) {

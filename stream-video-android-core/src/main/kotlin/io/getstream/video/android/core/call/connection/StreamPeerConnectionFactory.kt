@@ -21,7 +21,6 @@ import android.media.AudioAttributes
 import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDecoderFactory
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
@@ -288,6 +287,7 @@ public class StreamPeerConnectionFactory(
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
         maxPublishingBitrate: Int = 1_200_000,
+        debugText: String = "",
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope = coroutineScope,
@@ -299,6 +299,8 @@ public class StreamPeerConnectionFactory(
             maxBitRate = maxPublishingBitrate,
             onRejoinNeeded = { },
             tracer = Tracer(type.toPeerType().name),
+            tag = debugText,
+            onFastReconnectNeeded = {},
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
@@ -319,6 +321,7 @@ public class StreamPeerConnectionFactory(
         tracer: Tracer,
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
         rejoin: () -> Unit,
+        fastReconnect: () -> Unit,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
@@ -327,6 +330,7 @@ public class StreamPeerConnectionFactory(
             tracer = tracer,
             enableStereo = enableStereo,
             rejoin = rejoin,
+            fastReconnect = fastReconnect,
             onIceCandidateRequest = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(
@@ -349,7 +353,6 @@ public class StreamPeerConnectionFactory(
     }
 
     internal fun makePublisher(
-        me: ParticipantState,
         mediaManager: MediaManagerImpl,
         publishOptions: List<PublishOption>,
         coroutineScope: CoroutineScope,
@@ -363,12 +366,12 @@ public class StreamPeerConnectionFactory(
         sessionId: String,
         tracer: Tracer,
         rejoin: () -> Unit = {},
+        fastReconnect: () -> Unit = {},
     ): Publisher {
         val peerConnection = Publisher(
             sessionId = sessionId,
             sfuClient = sfuClient,
             peerConnectionFactory = this,
-            localParticipant = me,
             mediaManager = mediaManager,
             publishOptions = publishOptions,
             coroutineScope = coroutineScope,
@@ -380,6 +383,7 @@ public class StreamPeerConnectionFactory(
             maxBitRate = maxPublishingBitrate,
             tracer = tracer,
             rejoin = rejoin,
+            fastReconnect = fastReconnect,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,

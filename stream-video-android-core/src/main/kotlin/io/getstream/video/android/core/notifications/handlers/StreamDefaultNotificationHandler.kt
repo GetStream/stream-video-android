@@ -37,6 +37,7 @@ import androidx.core.app.Person
 import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
@@ -57,7 +58,7 @@ import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
-import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceTriggerDispatcher
+import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -147,7 +148,7 @@ constructor(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Video:StreamNotificationHandler")
-    private val serviceTriggerDispatcher = ServiceTriggerDispatcher(application)
+    private val serviceLauncher = ServiceLauncher(application)
 
     // START REGION : On push arrived
     override fun onRingingCall(
@@ -157,7 +158,7 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
-        serviceTriggerDispatcher.showIncomingCall(
+        serviceLauncher.showIncomingCall(
             application,
             callId,
             callDisplayName,
@@ -214,6 +215,14 @@ constructor(
             callDisplayName,
             payload,
         ).showNotification(callId, callId.hashCode())
+
+        /**
+         * Under poor internet there can be delay in receiving the
+         *  [io.getstream.android.video.generated.models.CallRejectedEvent] so we emit [LocalCallMissedEvent]
+         */
+        StreamVideo.instanceOrNull()?.let {
+            (it as StreamVideoClient).fireEvent(LocalCallMissedEvent(callId.cid))
+        }
     }
 
     override fun onNotification(

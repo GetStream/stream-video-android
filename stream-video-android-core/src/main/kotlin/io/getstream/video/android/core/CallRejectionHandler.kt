@@ -23,7 +23,7 @@ import android.telecom.DisconnectCause
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.RejectReason
-import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceTriggerDispatcher
+import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
 import io.getstream.video.android.model.StreamCallId
 
 internal class CallRejectionHandler {
@@ -53,8 +53,8 @@ internal class CallRejectionHandler {
         }
         call.state.updateTelecomConnection(null)
 
-        val serviceTriggerDispatcher = ServiceTriggerDispatcher(context)
-        serviceTriggerDispatcher.removeIncomingCall(
+        val serviceLauncher = ServiceLauncher(context)
+        serviceLauncher.removeIncomingCall(
             context,
             StreamCallId.fromCallCid(call.cid),
             StreamVideo.instance().state.callConfigRegistry.get(call.type),

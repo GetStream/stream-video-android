@@ -31,7 +31,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
-import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceTriggerDispatcher
+import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionOutgoingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.connection.ErrorTelecomConnection
@@ -44,7 +44,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 internal class TelecomVoipService : ConnectionService() {
 
     internal open val logger by taggedLogger("TelecomVoipService")
-    lateinit var serviceTriggerDispatcher: ServiceTriggerDispatcher
+    lateinit var serviceLauncher: ServiceLauncher
 
     val handler = CoroutineExceptionHandler { _, exception ->
         logger.e(exception) { "[CallService#Scope] Uncaught exception: $exception" }
@@ -54,7 +54,7 @@ internal class TelecomVoipService : ConnectionService() {
 
     override fun onCreate() {
         super.onCreate()
-        serviceTriggerDispatcher = ServiceTriggerDispatcher(applicationContext)
+        serviceLauncher = ServiceLauncher(applicationContext)
     }
 
 

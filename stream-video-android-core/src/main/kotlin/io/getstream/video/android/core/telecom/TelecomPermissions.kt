@@ -28,6 +28,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.telecom.ui.TelecomPermissionRequestActivity
 
 public class TelecomPermissions {
@@ -65,7 +67,8 @@ public class TelecomPermissions {
     }
 
     fun canUseTelecom(context: Context): Boolean {
-        return supportsTelecom(context) && hasPermissions(context)
+        val hasTelecomConfig = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.telecomConfig != null
+        return hasTelecomConfig && supportsTelecom(context) && hasPermissions(context)
     }
 
     fun supportsTelecom(context: Context): Boolean {

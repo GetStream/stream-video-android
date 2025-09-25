@@ -22,12 +22,14 @@ import android.content.Intent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.EXTRA_STOP_SERVICE
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_KEY
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.utils.safeCallWithDefault
+import io.getstream.video.android.model.StreamCallId
 
 class ServiceIntentBuilder {
 
@@ -66,14 +68,22 @@ class ServiceIntentBuilder {
         return serviceIntent
     }
 
-    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent? {
+    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent {
         val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
 
-        return if (isServiceRunning(context, serviceClass)) {
+        val intent = if (isServiceRunning(context, serviceClass)) {
             Intent(context, serviceClass)
         } else {
-           null
+            Intent(context, CallService::class.java)
         }
+
+        stopServiceParam.call?.let {call->
+            logger.d { "[buildStopIntent], call_id:${call.cid}" }
+            val streamCallId = StreamCallId(call.type, call.id, call.cid)
+            intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)
+        }
+        intent.putExtra(EXTRA_STOP_SERVICE, true)
+        return intent
     }
 
     private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =

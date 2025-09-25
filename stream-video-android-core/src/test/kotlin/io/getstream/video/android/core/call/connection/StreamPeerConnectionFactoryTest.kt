@@ -105,7 +105,6 @@ class StreamPeerConnectionFactoryTest {
 
         // We're testing makePublisher, so we pass in all required arguments
         val publisher = factory.makePublisher(
-            me = mockParticipantState,
             mediaManager = mockMediaManager,
             publishOptions = fakePublishOptions,
             coroutineScope = testScope,
@@ -152,6 +151,7 @@ class StreamPeerConnectionFactoryTest {
             onStreamAdded = null,
             onNegotiationNeeded = null,
             onIceCandidateRequest = null,
+            debugText = "test",
             maxPublishingBitrate = 999_999,
         )
 

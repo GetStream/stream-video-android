@@ -107,6 +107,7 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
+import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.telecom.TelecomConfig
 import io.getstream.video.android.core.telecom.ui.TelecomPermissionHandler
@@ -129,6 +130,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -196,6 +198,7 @@ internal class StreamVideoClient internal constructor(
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
     private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
+    internal val callSoundPlayer = CallSoundPlayer(context)
 
     val socketImpl = coordinatorConnectionModule.socketConnection
 
@@ -245,6 +248,20 @@ internal class StreamVideoClient internal constructor(
      */
     override suspend fun createDevice(pushDevice: PushDevice): Result<Device> {
         return streamNotificationManager.createDevice(pushDevice)
+    }
+
+    /**
+     * @see StreamVideo.getDevice
+     */
+    override fun getDevice(): Flow<Device?> {
+        return streamNotificationManager.getDevice()
+    }
+
+    /**
+     * @see StreamVideo.updateDevice
+     */
+    override suspend fun updateDevice(device: Device?) {
+        return streamNotificationManager.updateDevice(device)
     }
 
     /**

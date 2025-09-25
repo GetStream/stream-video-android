@@ -48,7 +48,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
-import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceTriggerDispatcher
+import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -88,7 +88,7 @@ public open class DefaultNotificationHandler(
     private val logger by taggedLogger("Call:NotificationHandler")
     val intentResolver =
         DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver())
-    private val serviceTriggerDispatcher = ServiceTriggerDispatcher(application)
+    private val serviceLauncher = ServiceLauncher(application)
 
     protected val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
@@ -114,7 +114,7 @@ public open class DefaultNotificationHandler(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
-        serviceTriggerDispatcher.showIncomingCall(
+        serviceLauncher.showIncomingCall(
             application,
             callId,
             callDisplayName,

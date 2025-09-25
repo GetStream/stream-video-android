@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core.notifications
 
-import io.getstream.video.android.core.Call
-import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
-data class StartServiceParam(
-    val callId: StreamCallId,
-    val trigger: String,
-    val callDisplayName: String? = null,
-    val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
-)
-
-data class StopServiceParam(
-    val call: Call? = null,
-    val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default
-)
+@InternalStreamVideoApi
+sealed class NotificationType(open val type: String) {
+    public data object Incoming : NotificationType("incoming")
+    public data object Missed : NotificationType("missed")
+    public data object Outgoing : NotificationType("outgoing")
+    public data object Ongoing : NotificationType("ongoing")
+    public data class Custom(override val type: String) : NotificationType(type)
+}

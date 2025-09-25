@@ -21,6 +21,10 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @InternalStreamVideoApi
 interface CameraCharacteristicsValidator {
-    fun isUsable(characteristics: CameraCharacteristics?): Boolean
+    fun isUsable(
+        characteristics: CameraCharacteristics?,
+        allowMono: Boolean = true,
+        allowNir: Boolean = false,
+    ): Boolean
     fun getLensFacing(characteristics: CameraCharacteristics?): Int?
 }

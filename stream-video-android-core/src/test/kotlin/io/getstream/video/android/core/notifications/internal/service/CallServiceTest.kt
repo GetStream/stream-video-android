@@ -24,6 +24,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_KEY
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
@@ -258,7 +259,7 @@ class CallServiceTest {
 
         // Then
         assertEquals(mockNotification, result.first)
-        assertEquals(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID, result.second)
+        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 
     @Test
@@ -273,7 +274,7 @@ class CallServiceTest {
 
         // Then
         assertNull(result.first)
-        assertEquals(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID, result.second)
+        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 
     @Test
@@ -386,7 +387,7 @@ class CallServiceTest {
 
         // Then - Should handle gracefully and return expected result
         assertNull(result.first) // No notification for remove trigger
-        assertEquals(NotificationHandler.INCOMING_CALL_NOTIFICATION_ID, result.second)
+        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 
     // Test constants consistency

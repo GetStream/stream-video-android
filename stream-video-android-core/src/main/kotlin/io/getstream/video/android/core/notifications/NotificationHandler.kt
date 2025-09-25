@@ -74,6 +74,11 @@ public interface NotificationHandler :
 
         const val INTENT_EXTRA_NOTIFICATION_ID: String =
             "io.getstream.video.android.intent-extra.notification_id"
+
+        @Deprecated(
+            message = "Use StreamCallId.getNotificationId(NotificationType.Incoming)",
+            replaceWith = ReplaceWith("StreamCallId.getNotificationId(NotificationType.Incoming)"),
+        )
         const val INCOMING_CALL_NOTIFICATION_ID = 24756
     }
 }
