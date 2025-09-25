@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.scope
 
+import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -36,11 +37,13 @@ internal class ScopeProviderImpl(
     private val coroutineScope: CoroutineScope,
 ) : ScopeProvider {
 
+    private val logger by taggedLogger("ScopeProviderImpl")
     private var executor: ExecutorService? = null
     private var isCleanedUp = false
 
     override fun getCoroutineScope(supervisorJob: CompletableJob): CoroutineScope {
         check(!isCleanedUp) { "ScopeProvider has been cleaned up" }
+        logger.d { "Creating coroutine scope for RTC session main" }
         return CoroutineScope(
             coroutineScope.coroutineContext +
                 supervisorJob +
@@ -50,26 +53,40 @@ internal class ScopeProviderImpl(
 
     override fun getRtcSessionScope(supervisorJob: CompletableJob, callId: String): CoroutineScope {
         check(!isCleanedUp) { "ScopeProvider has been cleaned up" }
+        logger.d { "Creating RTC session scope for callId: $callId" }
 
         // Get or create executor for this call
         if (executor == null) {
+            logger.d { "Creating new single thread executor for callId: $callId" }
             executor = Executors.newSingleThreadExecutor { runnable ->
                 Thread(runnable, "rtc-call-$callId")
             }
         }
 
-        val currentExecutor = executor ?: error("Executor should not be null at this point")
-        return CoroutineScope(
-            coroutineScope.coroutineContext +
-                supervisorJob +
-                CoroutineName("rtc-session-coroutine") +
-                currentExecutor.asCoroutineDispatcher(),
-        )
+        val currentExecutor = executor
+        return if (currentExecutor != null) {
+            logger.d { "Creating RTC session scope with dedicated executor for callId: $callId" }
+            CoroutineScope(
+                coroutineScope.coroutineContext +
+                    supervisorJob +
+                    CoroutineName("rtc-session-coroutine") +
+                    currentExecutor.asCoroutineDispatcher(),
+            )
+        } else {
+            // Fallback to regular scope without executor if executor is null
+            logger.w { "Executor is null, falling back to regular scope for callId: $callId" }
+            CoroutineScope(
+                coroutineScope.coroutineContext +
+                    supervisorJob +
+                    CoroutineName("rtc-session-coroutine"),
+            )
+        }
     }
 
     override fun cleanup() {
         if (isCleanedUp) return
         isCleanedUp = true
+        logger.d { "Cleaning up ScopeProvider and shutting down executor" }
 
         // Shutdown the executor
         executor?.shutdown()
