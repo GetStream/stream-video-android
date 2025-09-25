@@ -54,9 +54,7 @@ internal class ScopeProviderImpl(
         // Get or create executor for this call
         if (executor == null) {
             executor = Executors.newSingleThreadExecutor { runnable ->
-                Thread(runnable, "rtc-call-$callId").apply {
-                    isDaemon = true
-                }
+                Thread(runnable, "rtc-call-$callId")
             }
         }
 
