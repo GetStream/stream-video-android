@@ -18,11 +18,8 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.Service
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -30,13 +27,11 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.media.session.MediaButtonReceiver
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallRejectedEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
-import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.R
@@ -55,8 +50,6 @@ import io.getstream.video.android.core.notifications.internal.receivers.ToggleCa
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.sounds.CallSoundPlayer
 import io.getstream.video.android.core.utils.safeCall
-import io.getstream.video.android.core.utils.safeCallWithDefault
-import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName

@@ -16,9 +16,7 @@
 
 package io.getstream.video.android.core
 
-import android.content.Intent
 import androidx.compose.runtime.Stable
-import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.CallCreatedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.ConnectedEvent
@@ -29,7 +27,6 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -241,32 +238,32 @@ class ClientState(private val client: StreamVideo) {
             CallService.TRIGGER_ONGOING_CALL -> serviceLauncher.showOnGoingCall(
                 call,
                 trigger,
-                streamVideoClient
+                streamVideoClient,
             )
 
             CallService.TRIGGER_OUTGOING_CALL -> serviceLauncher.showOutgoingCall(
                 call,
                 trigger,
-                streamVideoClient
+                streamVideoClient,
             )
 
             else -> {}
         }
     }
 
-
     internal fun maybeStopForegroundService(
         call: Call,
-        stopForegroundServiceSource: StopForegroundServiceSource
+        stopForegroundServiceSource: StopForegroundServiceSource,
     ) {
-        logger.d { "maybeStartForegroundService, call_id: ${call.id}, source: ${stopForegroundServiceSource.source} " }
+        logger.d {
+            "maybeStartForegroundService, call_id: ${call.id}, source: ${stopForegroundServiceSource.source} "
+        }
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
             val serviceLauncher = ServiceLauncher(context)
 
             serviceLauncher.stopService(call, stopForegroundServiceSource)
-
         }
     }
 

@@ -24,7 +24,6 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
@@ -93,7 +92,9 @@ internal class CallingServiceTrigger(private val serviceIntentBuilder: ServiceIn
             logger.i { "Notification: $notification" }
             if (hasPermission && notification != null) {
                 logger.d {
-                    "[showIncomingCall] Showing notification fallback with ID: ${callId.getNotificationId(NotificationType.Incoming)}"
+                    "[showIncomingCall] Showing notification fallback with ID: ${callId.getNotificationId(
+                        NotificationType.Incoming,
+                    )}"
                 }
                 StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
                     callId,

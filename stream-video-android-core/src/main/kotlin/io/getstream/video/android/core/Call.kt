@@ -1339,7 +1339,10 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall(this)
-        clientImpl.state.maybeStopForegroundService(call = this, StopForegroundServiceSource.CallAccept)
+        clientImpl.state.maybeStopForegroundService(
+            call = this,
+            StopForegroundServiceSource.CallAccept,
+        )
         return clientImpl.accept(type, id)
     }
 

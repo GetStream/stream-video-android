@@ -126,7 +126,6 @@ class SuccessIncomingTelecomConnection(
         }
     }
 
-
     override fun onShowIncomingCallUi() {
         super.onShowIncomingCallUi()
         logger.d { "onShowIncomingCallUi" }

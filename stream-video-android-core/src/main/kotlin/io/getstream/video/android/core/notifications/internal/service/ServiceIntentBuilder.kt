@@ -77,7 +77,7 @@ class ServiceIntentBuilder {
             Intent(context, CallService::class.java)
         }
 
-        stopServiceParam.call?.let {call->
+        stopServiceParam.call?.let { call ->
             logger.d { "[buildStopIntent], call_id:${call.cid}" }
             val streamCallId = StreamCallId(call.type, call.id, call.cid)
             intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)

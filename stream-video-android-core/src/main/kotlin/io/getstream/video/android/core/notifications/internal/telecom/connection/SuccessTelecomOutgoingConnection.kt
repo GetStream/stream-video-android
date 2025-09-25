@@ -21,8 +21,6 @@ import android.telecom.CallEndpoint
 import android.telecom.Connection
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.IncomingNotificationAction
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionOutgoingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.notificationtrigger.TelecomSelfManagedNotificationTrigger
 
@@ -38,7 +36,7 @@ class SuccessTelecomOutgoingConnection(
     val telecomSelfManagedNotificationTrigger: TelecomSelfManagedNotificationTrigger,
     val telecomConnectionIOutgoingCallData: TelecomConnectionOutgoingCallData,
 
-    ) : Connection() {
+) : Connection() {
     val logger by taggedLogger("SuccessTelecomOutgoingConnection")
 
     /**

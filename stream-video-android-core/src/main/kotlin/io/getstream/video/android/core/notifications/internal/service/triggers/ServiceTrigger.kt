@@ -40,7 +40,7 @@ interface ServiceTrigger {
 //        return if (canUseTelecom) {
 //            TelecomVoipService::class.java
 //        } else {
-          return CallService::class.java
+        return CallService::class.java
 //        }
     }
 }

@@ -119,13 +119,15 @@ internal class TelecomServiceLauncher(
             putString(NotificationHandler.INTENT_EXTRA_CALL_DISPLAY_NAME, formattedCallDisplayName)
             putString(TelecomManager.EXTRA_CALL_SUBJECT, formattedCallDisplayName)
 
-            putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false) //TODO Rahul, if we want speaker to be ON by default
+            putBoolean(
+                TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE,
+                false,
+            ) // TODO Rahul, if we want speaker to be ON by default
 
             val videoState = if (isVideo) VideoProfile.STATE_BIDIRECTIONAL else VideoProfile.STATE_AUDIO_ONLY
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 putInt(TelecomManager.EXTRA_INCOMING_VIDEO_STATE, videoState)
             } // For framework ConnectionService
-
         }
 
         // This shows the native incoming call UI
@@ -142,11 +144,13 @@ internal class TelecomServiceLauncher(
         telecomManager.placeCall(addressUri, extras)
     }
 
-    fun addOnGoingCall(context: Context,
-                       callId: StreamCallId,
-                       isVideo: Boolean,
-                       callDisplayName: String?,
-                       streamVideo: StreamVideo,) {
+    fun addOnGoingCall(
+        context: Context,
+        callId: StreamCallId,
+        isVideo: Boolean,
+        callDisplayName: String?,
+        streamVideo: StreamVideo,
+    ) {
         val call = streamVideo.call(callId.type, callId.id)
         call.state.telecomConnection.value?.let {
             it.onAnswer()

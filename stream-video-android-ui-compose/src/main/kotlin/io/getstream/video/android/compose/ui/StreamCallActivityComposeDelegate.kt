@@ -367,7 +367,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             streamVideo?.let {
                 val optedForTelecom = streamVideo.state.optedForTelecom()
                 val telecomPermissions = TelecomPermissions()
-                with(telecomPermissions){
+                with(telecomPermissions) {
                     if (optedForTelecom && supportsTelecom(streamVideo.context)) {
                         addAll(getRequiredPermissionsList())
                     }

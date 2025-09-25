@@ -24,7 +24,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.StopForegroundServiceSource
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
@@ -121,7 +120,7 @@ class ServiceLauncher(val context: Context) {
             StartServiceParam(
                 StreamCallId.fromCallCid(call.cid),
                 trigger,
-                callServiceConfiguration = callConfig
+                callServiceConfiguration = callConfig,
             ),
         )
 
@@ -137,7 +136,6 @@ class ServiceLauncher(val context: Context) {
         }
 
         ContextCompat.startForegroundService(context, serviceIntent)
-
     }
 
     fun showOutgoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
@@ -152,7 +150,8 @@ class ServiceLauncher(val context: Context) {
                 StreamCallId.fromCallCid(call.cid),
                 trigger,
                 callServiceConfiguration = callConfig,
-            ))
+            ),
+        )
 
         val telecomPermissions = TelecomPermissions()
         if (telecomPermissions.canUseTelecom(context)) {
@@ -170,7 +169,7 @@ class ServiceLauncher(val context: Context) {
 
     fun stopService(
         call: Call,
-        stopForegroundServiceSource: StopForegroundServiceSource
+        stopForegroundServiceSource: StopForegroundServiceSource,
     ) {
         logger.d { "stopService, call id: ${call.cid}, source: ${stopForegroundServiceSource.source}" }
         stopTelecomInternal(call, stopForegroundServiceSource)
@@ -179,7 +178,7 @@ class ServiceLauncher(val context: Context) {
 
     private fun stopTelecomInternal(
         call: Call,
-        stopForegroundServiceSource: StopForegroundServiceSource
+        stopForegroundServiceSource: StopForegroundServiceSource,
     ) {
         val telecomPermissions = TelecomPermissions()
         if (telecomPermissions.canUseTelecom(context)) {
@@ -207,7 +206,7 @@ class ServiceLauncher(val context: Context) {
 
                 val serviceIntent = serviceIntentBuilder.buildStopIntent(
                     context,
-                    StopServiceParam(call, callConfig)
+                    StopServiceParam(call, callConfig),
                 )
                 logger.d { "Building stop intent for call_id: ${call.cid}" }
                 serviceIntent.extras?.let {
@@ -218,7 +217,7 @@ class ServiceLauncher(val context: Context) {
         }
     }
 
-    private fun logBundle(bundle: Bundle){
+    private fun logBundle(bundle: Bundle) {
         val keys = bundle.keySet()
         if (keys != null) {
             val sb = StringBuilder()

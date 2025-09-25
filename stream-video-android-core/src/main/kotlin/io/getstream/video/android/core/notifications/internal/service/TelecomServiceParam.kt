@@ -28,5 +28,5 @@ data class StartServiceParam(
 
 data class StopServiceParam(
     val call: Call? = null,
-    val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default
+    val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
 )

@@ -57,10 +57,9 @@ internal class TelecomVoipService : ConnectionService() {
         serviceLauncher = ServiceLauncher(applicationContext)
     }
 
-
     override fun onCreateOutgoingConnection(
         connectionManagerPhoneAccount: PhoneAccountHandle?,
-        request: ConnectionRequest?
+        request: ConnectionRequest?,
     ): Connection {
         super.onCreateOutgoingConnection(connectionManagerPhoneAccount, request)
         val streamVideoClient = (StreamVideo.instanceOrNull() as? StreamVideoClient)
@@ -68,13 +67,11 @@ internal class TelecomVoipService : ConnectionService() {
             val callCid =
                 request?.address?.toString() ?: return ErrorTelecomConnection(applicationContext)
 
-
             val displayName = request.extras?.getString(TelecomManager.EXTRA_CALL_SUBJECT)
                 ?: request.address?.schemeSpecificPart?.takeIf { it.isNotBlank() }
                 ?: DEFAULT_CALL_TEXT
             val isVideo =
                 request.extras?.getBoolean(NotificationHandler.INTENT_EXTRA_IS_VIDEO) == true
-
 
             logger.d { "Creating new YourVoipConnection for call_cid: $callCid, displayName: $displayName" }
             val callType = callCid.split(":")[0]
@@ -92,8 +89,8 @@ internal class TelecomVoipService : ConnectionService() {
                     displayName,
                     callServiceConfiguration,
                     isVideo,
-                    null
-                )
+                    null,
+                ),
             )
 
             with(connection) {
@@ -103,7 +100,7 @@ internal class TelecomVoipService : ConnectionService() {
                 setAddress(request.address, TelecomManager.PRESENTATION_ALLOWED)
                 setCallerDisplayName(
                     displayName,
-                    TelecomManager.PRESENTATION_ALLOWED
+                    TelecomManager.PRESENTATION_ALLOWED,
                 ) // Or your app's name as caller for outgoing
                 if (isVideo) {
                     setVideoState(VideoProfile.STATE_BIDIRECTIONAL)
@@ -112,7 +109,6 @@ internal class TelecomVoipService : ConnectionService() {
                 }
 
                 setRinging() // Indicate that the call is now attempting to connect (ringing out)
-
             }
             val call = streamVideoClient.call(streamCallId.type, streamCallId.id)
             call.state.updateTelecomConnection(connection)
@@ -131,7 +127,6 @@ internal class TelecomVoipService : ConnectionService() {
             )
             return failedConn
         }
-
     }
 
     /**
@@ -207,7 +202,6 @@ internal class TelecomVoipService : ConnectionService() {
             return failedConn
         }
     }
-
 
     // TODO Rahul for missed call
     override fun onCreateIncomingConnectionFailed(

@@ -57,7 +57,7 @@ object TelecomHelper {
                 PhoneAccount.builder(phoneAccountHandle, "MyApp Calls")
                     .setCapabilities(
                         PhoneAccount.CAPABILITY_CALL_PROVIDER or
-                            PhoneAccount.CAPABILITY_VIDEO_CALLING
+                            PhoneAccount.CAPABILITY_VIDEO_CALLING,
                     )
                     //                .setHighlightColor(ContextCompat.getColor(context, R.color.app_primary))
                     .setShortDescription("VoIP Calls")
