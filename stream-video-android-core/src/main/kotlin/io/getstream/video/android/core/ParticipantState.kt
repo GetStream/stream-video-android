@@ -39,6 +39,7 @@ import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.ParticipantSource
 import stream.video.sfu.models.TrackType
 
 /**
@@ -57,6 +58,7 @@ public data class ParticipantState(
     private val callActions: CallActions,
     /** The current version of the user, this is the start for participant.user stateflow */
     private val initialUserId: String,
+    val source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
     /** A prefix to identify tracks, internal */
     @InternalStreamVideoApi
     var trackLookupPrefix: String = "",
