@@ -47,6 +47,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
@@ -93,11 +94,9 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
 import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -157,9 +156,6 @@ import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.Collections
-import java.util.concurrent.Executor
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -216,19 +212,9 @@ public class RtcSession internal constructor(
     internal var remoteIceServers: List<IceServer>,
     internal val clientImpl: StreamVideoClient = client as StreamVideoClient,
     private val supervisorJob: CompletableJob = SupervisorJob(),
-    private val coroutineScope: CoroutineScope =
-        CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob),
-    private val rtcSessionExecutor: Executor = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "rtc-session-coroutine").apply {
-            isDaemon = true
-        }
-    },
-    private val rtcSessionScope: CoroutineScope = CoroutineScope(
-        clientImpl.scope.coroutineContext +
-            supervisorJob +
-            CoroutineName("rtc-session-coroutine") +
-            rtcSessionExecutor.asCoroutineDispatcher(),
-    ),
+    private val scopeProvider: ScopeProvider = call.scopeProvider,
+    private val coroutineScope: CoroutineScope = scopeProvider.getCoroutineScope(supervisorJob),
+    private val rtcSessionScope: CoroutineScope = scopeProvider.getRtcSessionScope(supervisorJob, call.id),
     private val serialProcessor: SerialProcessor = SerialProcessor(rtcSessionScope),
     private val tracerManager: TracerManager = TracerManager(clientImpl.enableStatsCollection),
     private val sfuTracer: Tracer = tracerManager.tracer(
@@ -806,8 +792,7 @@ public class RtcSession internal constructor(
         // cleanup all non-local tracks
         supervisorJob.cancel()
 
-        // Cleanup to properly close the single-threaded dispatcher and executor
-        (rtcSessionExecutor as? ExecutorService)?.shutdown()
+        // Note: Executor cleanup is handled by Call cleanup
     }
 
     internal val muteState = MutableStateFlow(

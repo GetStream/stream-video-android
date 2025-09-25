@@ -81,7 +81,7 @@ internal class SerialProcessor(
                         queuedJobs--
                         if (result.isSuccess) {
                             logger.d {
-                                "[execute] Job #${job.jobId} '${job.jobName}' completed successfully in ${executionTime}ms (completed: $completedJobs, queued: $queuedJobs)"
+                                "[execute] Job #${job.jobId} '${job.jobName}' completed in ${executionTime}ms (completed: $completedJobs, queued: $queuedJobs)"
                             }
                         } else {
                             logger.w {

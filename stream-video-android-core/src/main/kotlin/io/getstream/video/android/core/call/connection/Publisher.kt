@@ -232,6 +232,8 @@ internal class Publisher(
                         "negotiate-error-setremotedescription",
                         it.message ?: "unknown",
                     )
+                }.onSuccess {
+                    logger.d { "Publisher negotiation successfully done ✅"}
                 }
             // Set ice trickle
         }
