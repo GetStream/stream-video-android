@@ -25,6 +25,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
@@ -32,9 +33,8 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.model.StreamCallId
 
-// TODO Rahul Provide a default notification retriever or name ServiceNotificationRepository
 internal class ServiceNotificationRetriever {
-    internal val logger by taggedLogger("ServiceNotificationRetriever")
+    private val logger by taggedLogger("ServiceNotificationRetriever")
 
     open fun getNotificationPair(
         context: Context,
@@ -71,7 +71,7 @@ internal class ServiceNotificationRetriever {
                         shouldHaveContentIntent = shouldHaveContentIntent,
                         payload = emptyMap(),
                     ),
-                    second = INCOMING_CALL_NOTIFICATION_ID,
+                    second = streamCallId.getNotificationId(NotificationType.Incoming),
                 )
             }
 
@@ -86,13 +86,15 @@ internal class ServiceNotificationRetriever {
                         ),
                         payload = emptyMap(),
                     ),
-                    second = INCOMING_CALL_NOTIFICATION_ID, // Same for incoming and outgoing
+                    second = streamCallId.getNotificationId(
+                        NotificationType.Incoming, //TODO Rahul, should we change it to outgoing?
+                    ), // Same for incoming and outgoing
                 )
             }
 
             TRIGGER_REMOVE_INCOMING_CALL -> {
                 logger.d { "[getNotificationPair] Removing incoming call notification" }
-                Pair(null, INCOMING_CALL_NOTIFICATION_ID)
+                Pair(null, streamCallId.getNotificationId(NotificationType.Incoming))
             }
 
             else -> {

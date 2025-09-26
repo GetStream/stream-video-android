@@ -46,7 +46,7 @@ class ServiceLauncher(val context: Context) {
 
     private val logger by taggedLogger("ServiceTriggers")
     private val serviceIntentBuilder = ServiceIntentBuilder()
-    private val callingServiceTrigger = CallingServiceTrigger(serviceIntentBuilder)
+    private val incomingCallPresenter = IncomingCallPresenter(serviceIntentBuilder)
 
     private val telecomServiceLauncher = TelecomServiceLauncher(context, serviceIntentBuilder)
 
@@ -74,13 +74,11 @@ class ServiceLauncher(val context: Context) {
             )
         }
 
-        callingServiceTrigger.showIncomingCall(
+        incomingCallPresenter.showIncomingCall(
             context,
             callId,
             callDisplayName,
             callServiceConfiguration,
-            isVideo,
-            payload,
             notification,
         )
     }

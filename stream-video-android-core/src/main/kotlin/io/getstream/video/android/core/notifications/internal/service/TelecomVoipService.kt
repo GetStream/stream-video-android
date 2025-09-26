@@ -31,13 +31,13 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
+import io.getstream.video.android.core.notifications.internal.service.triggers.IncomingCallPresenter
 import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionOutgoingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.connection.ErrorTelecomConnection
 import io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection
 import io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessTelecomOutgoingConnection
-import io.getstream.video.android.core.notifications.internal.telecom.notificationtrigger.TelecomSelfManagedNotificationTrigger
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineExceptionHandler
 
@@ -47,10 +47,9 @@ internal class TelecomVoipService : ConnectionService() {
     lateinit var serviceLauncher: ServiceLauncher
 
     val handler = CoroutineExceptionHandler { _, exception ->
-        logger.e(exception) { "[CallService#Scope] Uncaught exception: $exception" }
+        logger.e(exception) { "[TelecomVoipService#Scope] Uncaught exception: $exception" }
     }
 
-    private val telecomSelfManagedNotificationTrigger = TelecomSelfManagedNotificationTrigger()
 
     override fun onCreate() {
         super.onCreate()
@@ -83,7 +82,6 @@ internal class TelecomVoipService : ConnectionService() {
             val connection = SuccessTelecomOutgoingConnection(
                 applicationContext,
                 StreamVideo.instance(),
-                telecomSelfManagedNotificationTrigger,
                 TelecomConnectionOutgoingCallData(
                     streamCallId,
                     displayName,
@@ -166,7 +164,7 @@ internal class TelecomVoipService : ConnectionService() {
                 val connection = SuccessIncomingTelecomConnection(
                     applicationContext,
                     streamVideoClient,
-                    telecomSelfManagedNotificationTrigger,
+                    IncomingCallPresenter(ServiceIntentBuilder()),
                     telecomConnectionIncomingCallData,
                 )
                 val address = Uri.fromParts(PhoneAccount.SCHEME_TEL, "0000", null)

@@ -25,7 +25,7 @@ import android.telecom.TelecomManager
 import io.getstream.log.taggedLogger
 
 // TODO Rahul remove hardcoded text from this helper class, remove object as well
-object TelecomHelper {
+class TelecomHelper {
 
     private val logger by taggedLogger("TelecomHelper")
 

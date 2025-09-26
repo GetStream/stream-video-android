@@ -22,8 +22,8 @@ import android.telecom.Connection
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
+import io.getstream.video.android.core.notifications.internal.service.triggers.IncomingCallPresenter
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
-import io.getstream.video.android.core.notifications.internal.telecom.notificationtrigger.TelecomSelfManagedNotificationTrigger
 
 /**
  * Important apis to invoke
@@ -31,10 +31,10 @@ import io.getstream.video.android.core.notifications.internal.telecom.notificati
  * Connection.setActive() ~ for ongoing call
  * Connection.reject/decline
  */
-class SuccessIncomingTelecomConnection(
+internal class SuccessIncomingTelecomConnection(
     val context: Context,
     val streamVideo: StreamVideo,
-    val telecomSelfManagedNotificationTrigger: TelecomSelfManagedNotificationTrigger,
+    val incomingCallPresenter: IncomingCallPresenter,
     val telecomConnectionIncomingCallData: TelecomConnectionIncomingCallData,
 
 ) : Connection() {
@@ -130,7 +130,7 @@ class SuccessIncomingTelecomConnection(
         super.onShowIncomingCallUi()
         logger.d { "onShowIncomingCallUi" }
         telecomConnectionIncomingCallData.let {
-            telecomSelfManagedNotificationTrigger.showIncomingCall(
+            incomingCallPresenter.showIncomingCall(
                 context,
                 it.callId,
                 it.callDisplayName,

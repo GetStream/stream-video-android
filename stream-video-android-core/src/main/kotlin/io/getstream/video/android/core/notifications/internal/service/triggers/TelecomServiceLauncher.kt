@@ -40,6 +40,7 @@ internal class TelecomServiceLauncher(
 ) {
 
     private val logger by taggedLogger("ServiceTriggers")
+    private val telecomHelper = TelecomHelper()
 
     fun addIncomingCallToTelecom(
         context: Context,
@@ -68,8 +69,8 @@ internal class TelecomServiceLauncher(
         val addressUri = "$appSchema:${callId.id}".toUri()
         val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
 
-        if (!TelecomHelper.isPhoneAccountRegistered(context)) {
-            TelecomHelper.registerPhoneAccount(context)
+        if (!telecomHelper.isPhoneAccountRegistered(context)) {
+            telecomHelper.registerPhoneAccount(context)
         }
 
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
@@ -77,7 +78,7 @@ internal class TelecomServiceLauncher(
         val extras = Bundle().apply {
             putParcelable(
                 TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE,
-                TelecomHelper.getPhoneAccountHandle(context),
+                telecomHelper.getPhoneAccountHandle(context),
             )
             putParcelable(TelecomManager.EXTRA_INCOMING_CALL_ADDRESS, addressUri)
 
@@ -87,7 +88,7 @@ internal class TelecomServiceLauncher(
         }
 
         // This shows the native incoming call UI
-        telecomManager.addNewIncomingCall(TelecomHelper.getPhoneAccountHandle(context), extras)
+        telecomManager.addNewIncomingCall(telecomHelper.getPhoneAccountHandle(context), extras)
     }
 
     fun addOutgoingCallToTelecom(
@@ -102,8 +103,8 @@ internal class TelecomServiceLauncher(
         val addressUri = callId.cid.toUri()
         val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
 
-        if (!TelecomHelper.isPhoneAccountRegistered(context)) {
-            TelecomHelper.registerPhoneAccount(context)
+        if (!telecomHelper.isPhoneAccountRegistered(context)) {
+            telecomHelper.registerPhoneAccount(context)
         }
 
         val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
@@ -111,7 +112,7 @@ internal class TelecomServiceLauncher(
         val extras = Bundle().apply {
             putParcelable(
                 TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE,
-                TelecomHelper.getPhoneAccountHandle(context),
+                telecomHelper.getPhoneAccountHandle(context),
             )
 
             // For Our Service

@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
@@ -32,17 +33,14 @@ import io.getstream.video.android.core.notifications.internal.service.StartServi
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 
-internal class CallingServiceTrigger(private val serviceIntentBuilder: ServiceIntentBuilder) :
-    ServiceTrigger {
+internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuilder) {
     private val logger by taggedLogger("ServiceTriggers")
 
-    override fun showIncomingCall(
+    fun showIncomingCall(
         context: Context,
         callId: StreamCallId,
         callDisplayName: String?,
         callServiceConfiguration: CallServiceConfig,
-        isVideo: Boolean,
-        payload: Map<String, Any?>,
         notification: Notification?,
     ) {
         logger.d {
@@ -65,7 +63,7 @@ internal class CallingServiceTrigger(private val serviceIntentBuilder: ServiceIn
                         ),
                     ),
                 )
-                ComponentName(context, getServiceClass())
+                ComponentName(context, CallService::class.java)
             } else {
                 logger.d { "[showIncomingCall] Starting regular service" }
                 context.startService(
