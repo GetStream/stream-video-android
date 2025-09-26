@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.scope
 
 import io.getstream.video.android.core.socket.common.scope.ClientScope
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
@@ -50,7 +51,10 @@ class ScopeProviderTest {
         val coroutineScope = scopeProvider.getCoroutineScope(supervisorJob)
 
         assertNotNull(coroutineScope)
-        assertEquals(clientScope.coroutineContext + supervisorJob, coroutineScope.coroutineContext)
+        assertEquals(
+            clientScope.coroutineContext + supervisorJob + CoroutineName("rtc-session-main"),
+            coroutineScope.coroutineContext
+        )
     }
 
     @Test
