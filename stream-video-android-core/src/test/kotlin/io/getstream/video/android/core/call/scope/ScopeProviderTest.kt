@@ -53,7 +53,7 @@ class ScopeProviderTest {
         assertNotNull(coroutineScope)
         assertEquals(
             clientScope.coroutineContext + supervisorJob + CoroutineName("rtc-session-main"),
-            coroutineScope.coroutineContext
+            coroutineScope.coroutineContext,
         )
     }
 
