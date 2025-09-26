@@ -33,7 +33,7 @@ import io.getstream.video.android.core.notifications.internal.service.StartServi
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 
-internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuilder) {
+class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuilder) {
     private val logger by taggedLogger("ServiceTriggers")
 
     fun showIncomingCall(

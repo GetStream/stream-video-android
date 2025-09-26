@@ -24,7 +24,6 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INCOMING_CALL_NOTIFICATION_ID
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
@@ -87,7 +86,7 @@ internal class ServiceNotificationRetriever {
                         payload = emptyMap(),
                     ),
                     second = streamCallId.getNotificationId(
-                        NotificationType.Incoming, //TODO Rahul, should we change it to outgoing?
+                        NotificationType.Incoming, // TODO Rahul, should we change it to outgoing?
                     ), // Same for incoming and outgoing
                 )
             }

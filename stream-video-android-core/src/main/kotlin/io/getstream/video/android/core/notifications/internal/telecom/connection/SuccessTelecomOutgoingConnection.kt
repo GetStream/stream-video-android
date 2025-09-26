@@ -21,7 +21,6 @@ import android.telecom.CallEndpoint
 import android.telecom.Connection
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.internal.service.triggers.IncomingCallPresenter
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionOutgoingCallData
 
 /**

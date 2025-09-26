@@ -10476,11 +10476,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun getLivestreamGuestCallServiceConfig ()Ljava/util/Map;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/service/ServiceIncomingCallHandler {
-	public fun <init> ()V
-	public final fun updateRingingCall (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/model/StreamCallId;Lio/getstream/video/android/core/RingingState;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public final class io/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder {
 	public fun <init> ()V
 	public final fun buildStartIntent (Landroid/content/Context;Lio/getstream/video/android/core/notifications/internal/service/StartServiceParam;)Landroid/content/Intent;
@@ -10521,10 +10516,15 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 }
 
 public final class io/getstream/video/android/core/notifications/internal/service/TelecomHelper {
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/service/TelecomHelper;
+	public fun <init> ()V
 	public final fun getPhoneAccountHandle (Landroid/content/Context;)Landroid/telecom/PhoneAccountHandle;
 	public final fun isPhoneAccountRegistered (Landroid/content/Context;)Z
 	public final fun registerPhoneAccount (Landroid/content/Context;)Z
+}
+
+public final class io/getstream/video/android/core/notifications/internal/service/triggers/IncomingCallPresenter {
+	public fun <init> (Lio/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder;)V
+	public final fun showIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;)V
 }
 
 public final class io/getstream/video/android/core/notifications/internal/service/triggers/ServiceLauncher {
@@ -10536,12 +10536,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun showOnGoingCall (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lio/getstream/video/android/core/StreamVideo;)V
 	public final fun showOutgoingCall (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lio/getstream/video/android/core/StreamVideo;)V
 	public final fun stopService (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/StopForegroundServiceSource;)V
-}
-
-public abstract interface class io/getstream/video/android/core/notifications/internal/service/triggers/ServiceTrigger {
-	public fun getServiceClass ()Ljava/lang/Class;
-	public abstract fun showIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZLjava/util/Map;Landroid/app/Notification;)V
-	public static synthetic fun showIncomingCall$default (Lio/getstream/video/android/core/notifications/internal/service/triggers/ServiceTrigger;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZLjava/util/Map;Landroid/app/Notification;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomConnectionIncomingCallData {
@@ -10593,12 +10587,12 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/connection/SuccessIncomingTelecomConnection : android/telecom/Connection {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSelfManagedNotificationTrigger;Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConnectionIncomingCallData;)V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/notifications/internal/service/triggers/IncomingCallPresenter;Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConnectionIncomingCallData;)V
 	public final fun getContext ()Landroid/content/Context;
+	public final fun getIncomingCallPresenter ()Lio/getstream/video/android/core/notifications/internal/service/triggers/IncomingCallPresenter;
 	public final fun getLogger ()Lio/getstream/log/TaggedLogger;
 	public final fun getStreamVideo ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun getTelecomConnectionIncomingCallData ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConnectionIncomingCallData;
-	public final fun getTelecomSelfManagedNotificationTrigger ()Lio/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSelfManagedNotificationTrigger;
 	public fun onAbort ()V
 	public fun onAnswer ()V
 	public fun onAnswer (I)V
@@ -10614,12 +10608,11 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/connection/SuccessTelecomOutgoingConnection : android/telecom/Connection {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSelfManagedNotificationTrigger;Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConnectionOutgoingCallData;)V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConnectionOutgoingCallData;)V
 	public final fun getContext ()Landroid/content/Context;
 	public final fun getLogger ()Lio/getstream/log/TaggedLogger;
 	public final fun getStreamVideo ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun getTelecomConnectionIOutgoingCallData ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConnectionOutgoingCallData;
-	public final fun getTelecomSelfManagedNotificationTrigger ()Lio/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSelfManagedNotificationTrigger;
 	public fun onAbort ()V
 	public fun onAnswer ()V
 	public fun onAnswer (I)V
@@ -10631,25 +10624,6 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public fun onReject (I)V
 	public fun onReject (Ljava/lang/String;)V
 	public fun onShowIncomingCallUi ()V
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSelfManagedNotificationTrigger {
-	public fun <init> ()V
-	public fun <init> (Lio/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun showIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;)V
-	public static synthetic fun showIncomingCall$default (Lio/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSelfManagedNotificationTrigger;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;ILjava/lang/Object;)V
-	public final fun showOutgoingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;)V
-	public static synthetic fun showOutgoingCall$default (Lio/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSelfManagedNotificationTrigger;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;ILjava/lang/Object;)V
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSystemOwnedNotificationTrigger {
-	public fun <init> ()V
-	public fun <init> (Lio/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getServiceIntentBuilder ()Lio/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder;
-	public final fun showIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;)V
-	public static synthetic fun showIncomingCall$default (Lio/getstream/video/android/core/notifications/internal/telecom/notificationtrigger/TelecomSystemOwnedNotificationTrigger;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/core/notifications/medianotifications/MediaNotificationConfig {

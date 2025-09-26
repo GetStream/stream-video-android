@@ -50,7 +50,6 @@ internal class TelecomVoipService : ConnectionService() {
         logger.e(exception) { "[TelecomVoipService#Scope] Uncaught exception: $exception" }
     }
 
-
     override fun onCreate() {
         super.onCreate()
         serviceLauncher = ServiceLauncher(applicationContext)

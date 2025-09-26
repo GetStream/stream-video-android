@@ -255,7 +255,6 @@ class ClientState(private val client: StreamVideo) {
             serviceLauncher.stopService(call, stopForegroundServiceSource)
         }
     }
-
 }
 
 sealed class StopForegroundServiceSource(val source: String) {

@@ -34,7 +34,6 @@ import io.getstream.android.video.generated.models.CallRejectedEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
@@ -313,10 +312,13 @@ internal open class CallService : Service(), CallingServiceContract {
         streamCallId: StreamCallId,
         intentCallDisplayName: String?,
     ): Pair<Notification?, Int> {
-        return serviceNotificationRetriever.getNotificationPair(applicationContext, trigger,
+        return serviceNotificationRetriever.getNotificationPair(
+            applicationContext,
+            trigger,
             streamVideo,
             streamCallId,
-            intentCallDisplayName)
+            intentCallDisplayName,
+        )
     }
 
     override fun maybePromoteToForegroundService(

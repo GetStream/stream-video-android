@@ -31,7 +31,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCon
  * Connection.setActive() ~ for ongoing call
  * Connection.reject/decline
  */
-internal class SuccessIncomingTelecomConnection(
+class SuccessIncomingTelecomConnection(
     val context: Context,
     val streamVideo: StreamVideo,
     val incomingCallPresenter: IncomingCallPresenter,
