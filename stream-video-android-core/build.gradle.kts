@@ -75,6 +75,8 @@ android {
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
         buildConfigField("String", "STREAM_WEBRTC_VERSION", "\"${Configuration.streamWebRtcVersionName}\"")
+
+        manifestPlaceholders["enableTelecom"] = "remove"
     }
 
     buildFeatures {
