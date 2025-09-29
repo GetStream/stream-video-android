@@ -52,8 +52,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
 
     <!-- Required telecom -->
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS"
-        tools:node="${enableTelecom}" />
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
 
     <!-- https://developer.android.com/reference/android/telecom/TelecomManager#getPhoneAccount(android.telecom.PhoneAccountHandle) -->
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"
@@ -127,7 +126,6 @@
 
         <!-- Must be exported for Telecom to bind -->
         <service
-            tools:node="${enableTelecom}"
             android:exported="true"
             android:name=".notifications.internal.service.TelecomVoipService"
             android:label="GetStream Telecom Void Service"
