@@ -254,7 +254,7 @@ public class Call(
                 this,
                 scope,
                 peerConnectionFactory.eglBase.eglBaseContext,
-                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+                audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
             )
         }
     }
