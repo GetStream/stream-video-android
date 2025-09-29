@@ -48,6 +48,7 @@ fun LiveAudience(
 
     // Step 2 - join a call, which type is `default` and id is `123`.
     val call = remember(callId) { client.call("livestream", callId) }
+    call.speaker.setEnabled(enabled = true)
 
     suspend fun performJoin() {
         call.join()

@@ -72,6 +72,7 @@ fun LiveHost(
 
     // Step 2 - join a call, which type is `default` and id is `123`.
     val call = client.call("livestream", callId)
+    call.speaker.setEnabled(enabled = false)
 
     LaunchCallPermissions(call = call) {
         val result = call.join(create = true)
