@@ -103,7 +103,6 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("debug")
-            manifestPlaceholders["enableTelecom"] = "remove" //Use either remove or merge
         }
         getByName("release") {
             isMinifyEnabled = true
@@ -113,7 +112,6 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
-            manifestPlaceholders["enableTelecom"] = "merge" //Use either remove or merge
         }
         create("benchmark") {
             isDebuggable = true
@@ -122,7 +120,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
             proguardFiles("benchmark-rules.pro")
-            manifestPlaceholders["enableTelecom"] = "merge" //Use either remove or merge
         }
     }
 
