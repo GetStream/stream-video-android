@@ -85,7 +85,6 @@ internal class Publisher(
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
 ) : StreamPeerConnection(
-    coroutineScope,
     type,
     mediaConstraints,
     onStreamAdded,
@@ -168,7 +167,7 @@ internal class Publisher(
     public suspend fun negotiate(
         source: String = "unknown",
         iceRestart: Boolean = false,
-    ) = sdpProcessor.submit {
+    ) = sdpProcessor.submit("publisherNegotiate") {
         logger.d { "[negotiate] source: $source, iceRestart:$iceRestart" }
         if (isIceRestarting) {
             logger.i { "ICE restart in progress, skipping negotiation" }
@@ -233,6 +232,8 @@ internal class Publisher(
                         "negotiate-error-setremotedescription",
                         it.message ?: "unknown",
                     )
+                }.onSuccess {
+                    logger.d { "Publisher negotiation successfully done ✅" }
                 }
             // Set ice trickle
         }
@@ -254,7 +255,7 @@ internal class Publisher(
         streamId: String,
         trackType: TrackType,
         captureFormat: CaptureFormat? = null,
-    ): MediaStreamTrack? = sdpProcessor.submit {
+    ): MediaStreamTrack? = sdpProcessor.submit("publishStream") {
         return@submit publishStreamInternal(streamId, trackType, captureFormat)
     }.getOrNull()
 
