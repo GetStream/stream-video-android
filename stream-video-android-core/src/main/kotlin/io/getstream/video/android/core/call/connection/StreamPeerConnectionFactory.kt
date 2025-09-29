@@ -285,7 +285,6 @@ public class StreamPeerConnectionFactory(
      * receive tracks.
      */
     public fun makePeerConnection(
-        coroutineScope: CoroutineScope,
         configuration: PeerConnection.RTCConfiguration,
         type: StreamPeerType,
         mediaConstraints: MediaConstraints,
@@ -296,7 +295,6 @@ public class StreamPeerConnectionFactory(
         debugText: String = "",
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
-            coroutineScope = coroutineScope,
             type = type,
             mediaConstraints = mediaConstraints,
             onStreamAdded = onStreamAdded,

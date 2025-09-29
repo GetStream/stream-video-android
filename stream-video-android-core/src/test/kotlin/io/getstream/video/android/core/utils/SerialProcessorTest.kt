@@ -41,7 +41,7 @@ class SerialProcessorTest {
 
     @Test
     fun `single job returns value`() = runTest {
-        val result = processor.submit { "hello".uppercase() }
+        val result = processor.submit("test-single-job-returns-value") { "hello".uppercase() }
         assertTrue(result.isSuccess)
         assertEquals("HELLO", result.getOrNull())
     }
@@ -51,7 +51,7 @@ class SerialProcessorTest {
         val results = mutableListOf<Int>()
         // schedule jobs that append to results in order
         repeat(5) { i ->
-            processor.submit {
+            processor.submit("test-multiple-jobs-run-in-FIFO-order") {
                 results += i
                 i
             }
@@ -64,7 +64,7 @@ class SerialProcessorTest {
     @Test
     fun `exception in job produces failure`() = runTest {
         val ex = RuntimeException("boom")
-        val result = processor.submit<Int> { throw ex }
+        val result = processor.submit<Int>("test-exception-in-job") { throw ex }
         assertTrue(result.isFailure)
         assertSame(ex, result.exceptionOrNull())
     }
@@ -72,7 +72,7 @@ class SerialProcessorTest {
     @Test
     fun `stop cancels worker and allows restart`() = runTest {
         // first job
-        val first = processor.submit { 1 }
+        val first = processor.submit("test-stop-cancels-worker") { 1 }
         assertTrue(first.isSuccess)
         assertEquals(1, first.getOrNull())
 
@@ -80,7 +80,7 @@ class SerialProcessorTest {
         processor.stop()
 
         // ensure we can submit again after stop
-        val second = processor.submit { 2 }
+        val second = processor.submit("test-second") { 2 }
         assertTrue(second.isSuccess)
         assertEquals(2, second.getOrNull())
     }
@@ -99,7 +99,7 @@ class SerialProcessorTest {
 
         // Fire off three submits concurrently
         val deferreds = (0 until 3).map { i ->
-            async { processor.submit { work(i) } }
+            async { processor.submit("test-concurrent-submits") { work(i) } }
         }
 
         // No need to advance time; yield() works with UnconfinedTestDispatcher

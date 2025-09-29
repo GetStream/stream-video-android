@@ -61,6 +61,8 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -144,6 +146,7 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
+    internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
@@ -1311,6 +1314,8 @@ public class Call(
         callStatsReportingJob?.cancel()
         mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
         session = null
+        // Cleanup the call's scope provider
+        scopeProvider.cleanup()
     }
 
     // This will allow the Rest APIs to be executed which are in queue before leave

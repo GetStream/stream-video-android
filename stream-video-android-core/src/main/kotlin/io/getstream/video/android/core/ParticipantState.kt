@@ -29,6 +29,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,8 +52,10 @@ import stream.video.sfu.models.TrackType
 public data class ParticipantState(
     /** The SFU returns a session id for each participant. This session id is unique */
     var sessionId: String = "",
-    /** The call object */
-    val call: Call,
+    /** The coroutine scope for this participant */
+    private val scope: CoroutineScope,
+    /** The call actions interface for performing operations on this participant */
+    private val callActions: CallActions,
     /** The current version of the user, this is the start for participant.user stateflow */
     private val initialUserId: String,
     val source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
@@ -64,7 +67,7 @@ public data class ParticipantState(
     private val logger by taggedLogger("ParticipantState")
 
     val isLocal by lazy {
-        sessionId == call.sessionId
+        callActions.isLocalParticipant(sessionId)
     }
 
     /** video track */
@@ -164,7 +167,7 @@ public data class ParticipantState(
             enabled = enabled,
             paused = paused,
         )
-    }.stateIn(call.scope, SharingStarted.Lazily, null)
+    }.stateIn(scope, SharingStarted.Lazily, null)
 
     val audio: StateFlow<Audio?> = combineStates(_audioTrack, _audioEnabled) { track, enabled ->
         Audio(
@@ -184,24 +187,23 @@ public data class ParticipantState(
         }
 
     suspend fun muteAudio(): Result<MuteUsersResponse> {
-        // how do i mute another user?
-        return call.muteUser(_userId.value, audio = true, video = false, screenShare = false)
+        return callActions.muteUserAudio(_userId.value)
     }
 
     suspend fun muteVideo(): Result<MuteUsersResponse> {
-        return call.muteUser(_userId.value, audio = false, video = true, screenShare = false)
+        return callActions.muteUserVideo(_userId.value)
     }
 
     suspend fun muteScreenshare(): Result<MuteUsersResponse> {
-        return call.muteUser(_userId.value, audio = false, video = false, screenShare = true)
+        return callActions.muteUserScreenShare(_userId.value)
     }
 
     suspend fun pin() {
-        return call.state.pin(this.userId.value, this.sessionId)
+        callActions.pinParticipant(this.userId.value, this.sessionId)
     }
 
     suspend fun unpin() {
-        return call.state.unpin(this.sessionId)
+        callActions.unpinParticipant(this.sessionId)
     }
 
     fun updateAudioLevel(audioLevel: Float) {
