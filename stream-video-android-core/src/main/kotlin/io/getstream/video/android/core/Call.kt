@@ -232,7 +232,7 @@ public class Call(
     internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
         context = clientImpl.context,
         audioProcessing = clientImpl.audioProcessing,
-        audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+        audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
     )
 
     internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {

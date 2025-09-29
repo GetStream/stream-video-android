@@ -1005,7 +1005,13 @@ class MediaManagerImpl(
     val call: Call,
     val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context,
-    val audioUsage: Int = defaultAudioUsage,
+    @Deprecated(
+        "Use audioUsageProvider instead",
+        replaceWith = ReplaceWith("audioUsageProvider"),
+        level = DeprecationLevel.ERROR,
+    )
+    private val audioUsage: Int = defaultAudioUsage,
+    private val audioUsageProvider: (() -> Int) = { defaultAudioUsage },
 ) {
     private val filterVideoProcessor =
         FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
@@ -1040,7 +1046,7 @@ class MediaManagerImpl(
 
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
-    internal val microphone = MicrophoneManager(this, audioUsage)
+    internal val microphone = MicrophoneManager(this, audioUsageProvider.invoke())
     internal val speaker = SpeakerManager(this, microphone)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 

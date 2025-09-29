@@ -62,7 +62,13 @@ import java.nio.ByteBuffer
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
+    @Deprecated(
+        "Use audioUsageProvider instead",
+        replaceWith = ReplaceWith("audioUsageProvider"),
+        level = DeprecationLevel.ERROR,
+    )
     private val audioUsage: Int = defaultAudioUsage,
+    private val audioUsageProvider: (() -> Int) = { defaultAudioUsage },
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
 ) {
 
@@ -174,9 +180,9 @@ public class StreamPeerConnectionFactory(
                     .setUseHardwareAcousticEchoCanceler(
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q,
                     ).apply {
-                        if (audioUsage != defaultAudioUsage) {
+                        if (audioUsageProvider.invoke() != defaultAudioUsage) {
                             setAudioAttributes(
-                                AudioAttributes.Builder().setUsage(audioUsage)
+                                AudioAttributes.Builder().setUsage(audioUsageProvider.invoke())
                                     .build(),
                             )
                         }
