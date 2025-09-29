@@ -198,6 +198,9 @@ dependencies {
     //permission for telecom
     implementation(libs.androidx.activity)
 
+    //jetpack telecom
+    implementation(libs.androidx.telecom)
+
 
     // unit tests
     testImplementation(libs.stream.result)

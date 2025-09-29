@@ -225,6 +225,8 @@ play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name 
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version = "1.3.0" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version = "1.3.0" }
 zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.2" }
+#jetpack telecom
+androidx-telecom = { group = "androidx.core", name = "core-telecom", version = "1.0.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
