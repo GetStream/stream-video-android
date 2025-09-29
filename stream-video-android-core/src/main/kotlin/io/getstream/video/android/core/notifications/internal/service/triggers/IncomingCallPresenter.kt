@@ -42,14 +42,15 @@ class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuild
         callDisplayName: String?,
         callServiceConfiguration: CallServiceConfig,
         notification: Notification?,
-    ) {
+    ): ShowIncomingCallResult {
         logger.d {
             "[showIncomingCall] callId: ${callId.id}, callDisplayName: $callDisplayName, notification: ${notification != null}"
         }
         val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
         logger.d { "[showIncomingCall] hasActiveCall: $hasActiveCall" }
+        var showIncomingCallResult = ShowIncomingCallResult.ERROR
         safeCallWithResult {
-            val result = if (!hasActiveCall) {
+            if (!hasActiveCall) {
                 logger.d { "[showIncomingCall] Starting foreground service" }
                 ContextCompat.startForegroundService(
                     context,
@@ -64,6 +65,7 @@ class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuild
                     ),
                 )
                 ComponentName(context, CallService::class.java)
+                showIncomingCallResult = ShowIncomingCallResult.FG_SERVICE
             } else {
                 logger.d { "[showIncomingCall] Starting regular service" }
                 context.startService(
@@ -77,8 +79,8 @@ class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuild
                         ),
                     ),
                 )
+                showIncomingCallResult = ShowIncomingCallResult.SERVICE
             }
-            result!!
         }.onError {
             // Show notification
             logger.e { "Could not start service, showing notification only: $it" }
@@ -99,11 +101,17 @@ class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuild
                     callId.getNotificationId(NotificationType.Incoming),
                     notification,
                 )
+                showIncomingCallResult = ShowIncomingCallResult.ONLY_NOTIFICATION
             } else {
                 logger.w {
                     "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}"
                 }
             }
         }
+        return showIncomingCallResult
     }
+}
+
+enum class ShowIncomingCallResult {
+    FG_SERVICE, SERVICE, ONLY_NOTIFICATION, ERROR
 }

@@ -60,8 +60,23 @@ class ServiceLauncher(val context: Context) {
         streamVideo: StreamVideo,
         notification: Notification?,
     ) {
+
+        val result = incomingCallPresenter.showIncomingCall(
+            context,
+            callId,
+            callDisplayName,
+            callServiceConfiguration,
+            notification,
+        )
         val telecomPermissions = TelecomPermissions()
         if (telecomPermissions.canUseTelecom(context)) {
+            when (result) {
+                ShowIncomingCallResult.FG_SERVICE -> {}
+                ShowIncomingCallResult.SERVICE -> {}
+                ShowIncomingCallResult.ONLY_NOTIFICATION -> {}
+                ShowIncomingCallResult.ERROR -> {}
+            }
+
             telecomServiceLauncher.addIncomingCallToTelecom(
                 context,
                 callId,
@@ -74,13 +89,6 @@ class ServiceLauncher(val context: Context) {
             )
         }
 
-        incomingCallPresenter.showIncomingCall(
-            context,
-            callId,
-            callDisplayName,
-            callServiceConfiguration,
-            notification,
-        )
     }
 
     fun removeIncomingCall(
