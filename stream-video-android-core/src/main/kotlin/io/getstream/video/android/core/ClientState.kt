@@ -181,7 +181,7 @@ class ClientState(private val client: StreamVideo) {
     }
 
     fun addRingingCall(call: Call, ringingState: RingingState) {
-        _ringingCall.value = call
+        updateRingingCall(call)
         if (ringingState is RingingState.Outgoing) {
             maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
         }
@@ -207,6 +207,10 @@ class ClientState(private val client: StreamVideo) {
             }
             _ringingCall.value = null
         }
+    }
+
+    internal fun updateRingingCall(call: Call) {
+        _ringingCall.value = call
     }
 
     fun optedForTelecom() = (client as StreamVideoClient).telecomConfig != null

@@ -22,11 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BluetoothAudio
-import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.HeadsetMic
-import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,10 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
-import io.getstream.video.android.compose.ui.components.call.activecall.AudioDeviceUiState
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
-import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -166,31 +159,14 @@ public fun OutgoingCallContent(
                 isVideoType = isVideoType,
             )
         }
-        val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
-        val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
-        val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
-            val icon = when (it) {
-                is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
-                is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
-                is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
-                is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
-            }
-            AudioDeviceUiState(
-                it,
-                it.name,
-                icon,
-                it.name == selectedMicroPhoneDevice?.name,
-            )
-        }
-        controlsContent?.invoke(this) ?: OutgoingCallControlsV2(
+
+        controlsContent?.invoke(this) ?: OutgoingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.genericXxl),
             isVideoCall = isVideoType,
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
-            audioDeviceUiStateList = audioDeviceUiStateList,
-            call = call,
             onCallAction = onCallAction,
         )
     }

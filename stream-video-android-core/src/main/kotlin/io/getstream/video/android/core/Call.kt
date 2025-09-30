@@ -368,6 +368,9 @@ public class Call(
         }
 
         response.onSuccess {
+//            if (ring) {
+//                client.state.updateRingingCall(this)
+//            }
             state.updateFromResponse(it)
             if (ring) {
                 client.state.addRingingCall(this, RingingState.Outgoing())

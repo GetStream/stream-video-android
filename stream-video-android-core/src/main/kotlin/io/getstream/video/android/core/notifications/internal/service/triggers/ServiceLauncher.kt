@@ -92,7 +92,6 @@ class ServiceLauncher(val context: Context) {
             updateIncomingCallNotification(notification, streamVideo, callId)
 
             if (telecomHelper.canUseJetpackTelecom()) {
-
                 val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
 
                 val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
@@ -145,7 +144,6 @@ class ServiceLauncher(val context: Context) {
         val telecomPermissions = TelecomPermissions()
         if (telecomPermissions.canUseTelecom(context)) {
             if (telecomHelper.canUseJetpackTelecom()) {
-
                 /**
                  * Do nothing, the logic already handled in [StreamCallActivity.accept()]
                  */
@@ -195,12 +193,12 @@ class ServiceLauncher(val context: Context) {
 
         ContextCompat.startForegroundService(context, serviceIntent)
 
-        val callDisplayName = "NOT SET YET" //TODO Rahul
+        val callDisplayName = "NOT SET YET" // TODO Rahul
 
         val telecomPermissions = TelecomPermissions()
         val telecomHelper = TelecomHelper()
-        if(telecomPermissions.canUseTelecom(context)){
-            if(telecomHelper.canUseJetpackTelecom()) {
+        if (telecomPermissions.canUseTelecom(context)) {
+            if (telecomHelper.canUseJetpackTelecom()) {
                 val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
 
                 val appSchema = streamVideo.telecomConfig?.schema
@@ -217,11 +215,9 @@ class ServiceLauncher(val context: Context) {
                     )
                 }
             } else {
-                //TODO Rahul pending, use telecom platform api
+                // TODO Rahul pending, use telecom platform api
             }
         }
-
-
     }
 
     /**
@@ -276,7 +272,7 @@ class ServiceLauncher(val context: Context) {
             // Register with the telecom interface with the supported capabilities
             registerAppWithTelecom(
                 capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
-                        CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
+                    CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
             )
         }
         val streamVideo = StreamVideo.instance()

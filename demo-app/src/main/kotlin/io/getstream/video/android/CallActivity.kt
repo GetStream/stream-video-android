@@ -19,20 +19,38 @@ package io.getstream.video.android
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BluetoothAudio
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.HeadsetMic
+import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.result.onSuccessSuspend
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
@@ -68,6 +86,79 @@ class CallActivity : ComposeStreamCallActivity() {
     }
 
     private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
+
+        @Composable
+        override fun StreamCallActivity.OutgoingCallContent(
+            modifier: Modifier,
+            call: Call,
+            isVideoType: Boolean,
+            isShowingHeader: Boolean,
+            headerContent:
+            @Composable()
+            (ColumnScope.() -> Unit)?,
+            detailsContent:
+            @Composable()
+            (
+                ColumnScope.(participants: List<MemberState>, topPadding: Dp) -> Unit
+            )?,
+            controlsContent:
+            @Composable()
+            (BoxScope.() -> Unit)?,
+            onBackPressed: () -> Unit,
+            onCallAction: (CallAction) -> Unit,
+        ) {
+            val isCameraEnabled by if (LocalInspectionMode.current) {
+                remember { mutableStateOf(true) }
+            } else {
+                call.camera.isEnabled.collectAsStateWithLifecycle()
+            }
+            val isMicrophoneEnabled by if (LocalInspectionMode.current) {
+                remember { mutableStateOf(true) }
+            } else {
+                call.microphone.isEnabled.collectAsStateWithLifecycle()
+            }
+
+            val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
+            val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
+            val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
+                val icon = when (it) {
+                    is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+                    is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+                    is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+                    is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+                }
+                AudioDeviceUiState(
+                    it,
+                    it.name,
+                    icon,
+                    it.name == selectedMicroPhoneDevice?.name,
+                )
+            }
+
+            OutgoingCallContent(
+                call = call,
+                isVideoType = isVideoType,
+                modifier = modifier,
+                isShowingHeader = isShowingHeader,
+                headerContent = headerContent,
+                detailsContent = detailsContent,
+                onBackPressed = onBackPressed,
+                onCallAction = onCallAction,
+                controlsContent = controlsContent ?: {
+                    OutgoingCallControlsV2(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = VideoTheme.dimens.genericXxl),
+                        isVideoCall = isVideoType,
+                        isCameraEnabled = isCameraEnabled,
+                        isMicrophoneEnabled = isMicrophoneEnabled,
+                        audioDeviceUiStateList = audioDeviceUiStateList,
+                        call = call,
+                        onCallAction = onCallAction,
+                    )
+                },
+            )
+        }
 
         @Composable
         override fun StreamCallActivity.LoadingContent(call: Call) {
@@ -125,6 +216,12 @@ class CallActivity : ComposeStreamCallActivity() {
                 isMicrophoneEnabled = micEnabled,
                 onCallAction = { onCallAction(call, it) },
                 onBackPressed = { onBackPressed(call) },
+                controlsContent = {
+                    OutgoingCallControlsRoot(
+                        call,
+                        micEnabled,
+                    ) { onCallAction(call, it) }
+                },
             )
         }
 

@@ -10539,10 +10539,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun stopService (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/StopForegroundServiceSource;)V
 }
 
-public final class io/getstream/video/android/core/notifications/internal/service/triggers/ServiceLauncherKt {
-	public static final field USE_JETPACK_TELECOM Z
-}
-
 public final class io/getstream/video/android/core/notifications/internal/service/triggers/ShowIncomingCallResult : java/lang/Enum {
 	public static final field ERROR Lio/getstream/video/android/core/notifications/internal/service/triggers/ShowIncomingCallResult;
 	public static final field FG_SERVICE Lio/getstream/video/android/core/notifications/internal/service/triggers/ShowIncomingCallResult;
