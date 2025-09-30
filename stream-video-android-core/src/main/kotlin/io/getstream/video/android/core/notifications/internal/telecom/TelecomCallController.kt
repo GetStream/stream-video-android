@@ -123,6 +123,7 @@ class TelecomCallController(val context: Context) {
                     }
                 }
             } else {
+                //TODO Rahul Seems wrong should be telecomServiceLauncher.addOnGoingCall()
                 telecomServiceLauncher.addOutgoingCallToTelecom(
                     context,
                     callId = StreamCallId(call.type, call.id),
