@@ -51,18 +51,6 @@
     <!-- Required if calls support screensharing -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
 
-    <!-- Required telecom -->
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
-
-    <!-- https://developer.android.com/reference/android/telecom/TelecomManager#getPhoneAccount(android.telecom.PhoneAccountHandle) -->
-    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"
-        tools:node="${enableTelecom}"/>
-    <!-- Required telecom for Below API 26 -->
-<!--    <uses-permission android:name="android.permission.READ_PHONE_STATE" android:maxSdkVersion="25"/>-->
-    <!-- Required for outgoing call-->
-    <uses-permission android:name="android.permission.CALL_PHONE"
-        tools:node="${enableTelecom}"/>
-
     <application>
         <provider
             android:name="io.getstream.android.push.delegate.AndroidPushDelegateProvider"

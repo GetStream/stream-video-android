@@ -30,11 +30,13 @@ import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.notifications.internal.service.TelecomHelper
 import io.getstream.video.android.core.telecom.ui.TelecomPermissionRequestActivity
 
 public class TelecomPermissions {
 
     private val logger: TaggedLogger by taggedLogger("StreamVideo:TelecomPermissions")
+    private val telecomHelper = TelecomHelper()
 
     fun getRequiredPermissionsList(): List<String> {
         val permissions = mutableListOf<String>()
@@ -42,7 +44,9 @@ public class TelecomPermissions {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             with(permissions) {
                 add(android.Manifest.permission.MANAGE_OWN_CALLS)
-                add(android.Manifest.permission.READ_PHONE_NUMBERS)
+                if (!telecomHelper.canUseJetpackTelecom()) {
+                    add(android.Manifest.permission.READ_PHONE_NUMBERS)
+                }
             }
         }
         return permissions

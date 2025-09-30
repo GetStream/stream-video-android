@@ -30,14 +30,10 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.TelecomHelper
 import io.getstream.video.android.model.StreamCallId
 
-internal class TelecomServiceLauncher(
-    private val context: Context,
-    private val serviceIntentBuilder: ServiceIntentBuilder,
-) {
+class TelecomServiceLauncher {
 
     private val logger by taggedLogger("ServiceTriggers")
     private val telecomHelper = TelecomHelper()
@@ -53,15 +49,6 @@ internal class TelecomServiceLauncher(
         notification: Notification?,
     ) {
         logger.d { "[showIncomingCall] Starting foreground service" }
-
-        /**
-         * Because we need to retrieve the notification
-         * in [io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection]
-         */
-        notification?.let {
-            streamVideo.call(callId.type, callId.id)
-                .state.updateNotification(notification)
-        }
 
         // Add Call to Telecom
         val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema

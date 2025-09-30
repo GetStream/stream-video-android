@@ -19,11 +19,11 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.telecom.DisconnectCause
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 
 internal class CallRejectionHandler {
@@ -41,17 +41,15 @@ internal class CallRejectionHandler {
                 }
                 logger.d { "[onReceive] rejectCall, Success: $rejectResult" }
             }
+
             is Result.Failure -> {
                 logger.d { "[onReceive] rejectCall, Failure: $rejectResult" }
             }
         }
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent?.action}" }
 
-        call.state.telecomConnection.value?.let {
-            it.setDisconnected(DisconnectCause(DisconnectCause.REJECTED))
-            it.destroy()
-        }
-        call.state.updateTelecomConnection(null)
+        TelecomCallController(context)
+            .onRejectFromNotification(call)
 
         val serviceLauncher = ServiceLauncher(context)
         serviceLauncher.removeIncomingCall(

@@ -21,6 +21,7 @@ import android.telecom.CallEndpoint
 import android.telecom.Connection
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.internal.telecom.OutgoingCallTelecomAction
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionOutgoingCallData
 
 /**
@@ -33,9 +34,23 @@ class SuccessTelecomOutgoingConnection(
     val context: Context,
     val streamVideo: StreamVideo,
     val telecomConnectionIOutgoingCallData: TelecomConnectionOutgoingCallData,
+    val outgoingCallTelecomAction: OutgoingCallTelecomAction,
 
 ) : Connection() {
     val logger by taggedLogger("SuccessTelecomOutgoingConnection")
+
+    /**
+     * Ongoing call is cancelled from wearable
+     * TODO Rahul, random invokation of this method, needs to be investigated,
+     * it was invoked when I was doing an outgoing call
+     */
+    override fun onDisconnect() {
+        super.onDisconnect()
+        logger.d { "[onDisconnect], callId: ${telecomConnectionIOutgoingCallData.callId}" }
+        with(telecomConnectionIOutgoingCallData) {
+            outgoingCallTelecomAction.onDisconnect(callId)
+        }
+    }
 
     /**
      * Accept from wearable
@@ -92,19 +107,6 @@ class SuccessTelecomOutgoingConnection(
 
     override fun onAvailableCallEndpointsChanged(availableEndpoints: MutableList<CallEndpoint>) {
         super.onAvailableCallEndpointsChanged(availableEndpoints)
-    }
-
-    /**
-     * Ongoing call is cancelled from wearable
-     * TODO Rahul, random invokation of this method, needs to be investigated,
-     * it was invoked when I was doing an outgoing call
-     */
-    override fun onDisconnect() {
-        super.onDisconnect()
-        logger.d { "[onDisconnect], callId: ${telecomConnectionIOutgoingCallData.callId}" }
-        with(telecomConnectionIOutgoingCallData) {
-            streamVideo.call(callId.type, callId.id).leave()
-        }
     }
 
     /**

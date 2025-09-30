@@ -24,16 +24,15 @@
         android:name="com.google.android.gms.permission.AD_ID"
         tools:node="remove" />
 
-    <!-- Required telecom START-->
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
-
+    <!-- Required for telecom platform api START-->
     <!-- https://developer.android.com/reference/android/telecom/TelecomManager#getPhoneAccount(android.telecom.PhoneAccountHandle) -->
-    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+<!--    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />-->
     <!-- Required telecom for Below API 26 -->
     <!--    <uses-permission android:name="android.permission.READ_PHONE_STATE" android:maxSdkVersion="25"/>-->
     <!-- Required for outgoing call-->
-    <uses-permission android:name="android.permission.CALL_PHONE"
-        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+<!--    <uses-permission android:name="android.permission.CALL_PHONE"-->
+<!--        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />-->
+    <!-- Required telecom platform api FINISH-->
     <!-- Required telecom FINISH-->
 
     <application

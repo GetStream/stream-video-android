@@ -106,6 +106,7 @@ import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.notifications.IncomingNotificationData
+import io.getstream.video.android.core.notifications.internal.telecom.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
@@ -666,6 +667,9 @@ public class CallState(
 
     internal val _telecomConnection: MutableStateFlow<Connection?> = MutableStateFlow(null)
     val telecomConnection: StateFlow<Connection?> = _telecomConnection
+
+    @InternalStreamVideoApi
+    var jetpackTelecomRepository: JetpackTelecomRepository? = null
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 

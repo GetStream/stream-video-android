@@ -33,6 +33,8 @@ import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.triggers.IncomingCallPresenter
 import io.getstream.video.android.core.notifications.internal.service.triggers.ServiceLauncher
+import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
+import io.getstream.video.android.core.notifications.internal.telecom.OutgoingCallTelecomAction
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionOutgoingCallData
 import io.getstream.video.android.core.notifications.internal.telecom.connection.ErrorTelecomConnection
@@ -88,6 +90,7 @@ internal class TelecomVoipService : ConnectionService() {
                     isVideo,
                     null,
                 ),
+                OutgoingCallTelecomAction(StreamVideo.instance()),
             )
 
             with(connection) {
@@ -163,8 +166,12 @@ internal class TelecomVoipService : ConnectionService() {
                 val connection = SuccessIncomingTelecomConnection(
                     applicationContext,
                     streamVideoClient,
-                    IncomingCallPresenter(ServiceIntentBuilder()),
                     telecomConnectionIncomingCallData,
+                    IncomingCallTelecomAction(
+                        applicationContext,
+                        streamVideoClient,
+                        IncomingCallPresenter(ServiceIntentBuilder()),
+                    ),
                 )
                 val address = Uri.fromParts(PhoneAccount.SCHEME_TEL, "0000", null)
                 /**

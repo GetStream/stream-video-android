@@ -16,40 +16,51 @@
 
 package io.getstream.video.android.core.notifications.internal.service.triggers
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
 import android.os.Bundle
 import android.telecom.DisconnectCause
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StopForegroundServiceSource
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
 import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
+import io.getstream.video.android.core.notifications.internal.service.TelecomHelper
+import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
+import io.getstream.video.android.core.notifications.internal.telecom.JetpackTelecomRepository
 import io.getstream.video.android.core.telecom.TelecomPermissions
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.launch
 
 /**
  * TODO Rahul change the name of the class its a decision maker class which will decide which
  * which service to pick
  */
+public const val USE_JETPACK_TELECOM = true
 class ServiceLauncher(val context: Context) {
 
     private val logger by taggedLogger("ServiceTriggers")
     private val serviceIntentBuilder = ServiceIntentBuilder()
     private val incomingCallPresenter = IncomingCallPresenter(serviceIntentBuilder)
+    private val telecomHelper = TelecomHelper()
 
-    private val telecomServiceLauncher = TelecomServiceLauncher(context, serviceIntentBuilder)
+    private val telecomServiceLauncher = TelecomServiceLauncher()
 
+    @SuppressLint("MissingPermission")
     fun showIncomingCall(
         context: Context,
         callId: StreamCallId,
@@ -60,7 +71,6 @@ class ServiceLauncher(val context: Context) {
         streamVideo: StreamVideo,
         notification: Notification?,
     ) {
-
         val result = incomingCallPresenter.showIncomingCall(
             context,
             callId,
@@ -70,6 +80,7 @@ class ServiceLauncher(val context: Context) {
         )
         val telecomPermissions = TelecomPermissions()
         if (telecomPermissions.canUseTelecom(context)) {
+            // TODO Rahul, correctly use result to launch telecom
             when (result) {
                 ShowIncomingCallResult.FG_SERVICE -> {}
                 ShowIncomingCallResult.SERVICE -> {}
@@ -77,18 +88,68 @@ class ServiceLauncher(val context: Context) {
                 ShowIncomingCallResult.ERROR -> {}
             }
 
-            telecomServiceLauncher.addIncomingCallToTelecom(
-                context,
-                callId,
-                callDisplayName,
-                callServiceConfiguration,
-                isVideo,
-                payload,
-                streamVideo,
-                notification,
-            )
-        }
+            updateIncomingCallNotification(notification, streamVideo, callId)
 
+            if (telecomHelper.canUseJetpackTelecom()) {
+                // Create the Jetpack Telecom entry point
+                val callsManager = CallsManager(context).apply {
+                    // Register with the telecom interface with the supported capabilities
+                    registerAppWithTelecom(
+                        capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
+                            CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
+                    )
+                }
+                val streamVideo = StreamVideo.instance()
+                val incomingCallPresenter = IncomingCallPresenter(ServiceIntentBuilder())
+                val incomingCallTelecomAction =
+                    IncomingCallTelecomAction(context, streamVideo, incomingCallPresenter)
+
+                val jetpackTelecomRepository =
+                    JetpackTelecomRepository(callsManager, callId, incomingCallTelecomAction)
+
+                val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
+                val addressUri = "$appSchema:${callId.id}".toUri()
+                val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
+
+                val call = streamVideo.call(callId.type, callId.id)
+
+                call.state.jetpackTelecomRepository = jetpackTelecomRepository
+
+                call.scope.launch {
+                    jetpackTelecomRepository.registerCall(
+                        formattedCallDisplayName,
+                        addressUri,
+                        true,
+                    )
+                }
+            } else {
+                telecomServiceLauncher.addIncomingCallToTelecom(
+                    context,
+                    callId,
+                    callDisplayName,
+                    callServiceConfiguration,
+                    isVideo,
+                    payload,
+                    streamVideo,
+                    notification,
+                )
+            }
+        }
+    }
+
+    /**
+     * Because we need to retrieve the notification
+     * in [io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection]
+     */
+    private fun updateIncomingCallNotification(
+        notification: Notification?,
+        streamVideo: StreamVideo,
+        callId: StreamCallId,
+    ) {
+        notification?.let {
+            streamVideo.call(callId.type, callId.id)
+                .state.updateNotification(notification)
+        }
     }
 
     fun removeIncomingCall(
@@ -131,14 +192,19 @@ class ServiceLauncher(val context: Context) {
         )
 
         val telecomPermissions = TelecomPermissions()
+
         if (telecomPermissions.canUseTelecom(context)) {
-            telecomServiceLauncher.addOnGoingCall(
-                context,
-                callId = StreamCallId(call.type, call.id),
-                callDisplayName = "ON GOING CALL NOT SET", // TODO Rahul Later
-                isVideo = call.isVideoEnabled(),
-                streamVideo = streamVideo,
-            )
+            if (telecomHelper.canUseJetpackTelecom()) {
+                // TODO Rahul
+            } else {
+                telecomServiceLauncher.addOnGoingCall(
+                    context,
+                    callId = StreamCallId(call.type, call.id),
+                    callDisplayName = "ON GOING CALL NOT SET", // TODO Rahul Later
+                    isVideo = call.isVideoEnabled(),
+                    streamVideo = streamVideo,
+                )
+            }
         }
 
         ContextCompat.startForegroundService(context, serviceIntent)
@@ -158,17 +224,6 @@ class ServiceLauncher(val context: Context) {
                 callServiceConfiguration = callConfig,
             ),
         )
-
-        val telecomPermissions = TelecomPermissions()
-        if (telecomPermissions.canUseTelecom(context)) {
-            telecomServiceLauncher.addOutgoingCallToTelecom(
-                context,
-                callId = StreamCallId(call.type, call.id),
-                callDisplayName = "NOT SET YET", // TODO Rahul Later
-                isVideo = call.isVideoEnabled(),
-                streamVideo = streamVideo,
-            )
-        }
 
         ContextCompat.startForegroundService(context, serviceIntent)
     }

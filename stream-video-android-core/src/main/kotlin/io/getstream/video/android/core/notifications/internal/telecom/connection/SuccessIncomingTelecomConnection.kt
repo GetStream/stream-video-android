@@ -21,8 +21,7 @@ import android.telecom.CallEndpoint
 import android.telecom.Connection
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.notifications.IncomingNotificationAction
-import io.getstream.video.android.core.notifications.internal.service.triggers.IncomingCallPresenter
+import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConnectionIncomingCallData
 
 /**
@@ -34,16 +33,11 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCon
 class SuccessIncomingTelecomConnection(
     val context: Context,
     val streamVideo: StreamVideo,
-    val incomingCallPresenter: IncomingCallPresenter,
     val telecomConnectionIncomingCallData: TelecomConnectionIncomingCallData,
+    val incomingCallTelecomAction: IncomingCallTelecomAction,
 
 ) : Connection() {
     val logger by taggedLogger("SuccessIncomingTelecomConnection")
-
-    override fun onStateChanged(state: Int) {
-        super.onStateChanged(state)
-        logger.d { "onStateChanged: state:$state" }
-    }
 
     /**
      * Accept from wearable
@@ -53,10 +47,31 @@ class SuccessIncomingTelecomConnection(
         logger.d { "[onAnswer]" }
 
         with(telecomConnectionIncomingCallData) {
-            val pendingIntentMap = streamVideo.call(callId.type, callId.id)
-                .state.incomingNotificationData.pendingIntentMap
+            incomingCallTelecomAction.onAnswer(callId)
+        }
+    }
 
-            pendingIntentMap[IncomingNotificationAction.Accept]?.send()
+    /**
+     * Ongoing call is cancelled from wearable
+     */
+    override fun onDisconnect() {
+        super.onDisconnect()
+        logger.d { "[onDisconnect]" }
+        with(telecomConnectionIncomingCallData) {
+            incomingCallTelecomAction.onDisconnect(callId)
+        }
+    }
+
+    override fun onShowIncomingCallUi() {
+        super.onShowIncomingCallUi()
+        logger.d { "onShowIncomingCallUi" }
+        telecomConnectionIncomingCallData.let {
+            incomingCallTelecomAction.onShowIncomingCallUi(
+                it.callId,
+                it.callDisplayName,
+                it.callServiceConfiguration,
+                it.notification,
+            )
         }
     }
 
@@ -113,30 +128,5 @@ class SuccessIncomingTelecomConnection(
 
     override fun onAvailableCallEndpointsChanged(availableEndpoints: MutableList<CallEndpoint>) {
         super.onAvailableCallEndpointsChanged(availableEndpoints)
-    }
-
-    /**
-     * Ongoing call is cancelled from wearable
-     */
-    override fun onDisconnect() {
-        super.onDisconnect()
-        logger.d { "[onDisconnect]" }
-        with(telecomConnectionIncomingCallData) {
-            streamVideo.call(callId.type, callId.id).leave()
-        }
-    }
-
-    override fun onShowIncomingCallUi() {
-        super.onShowIncomingCallUi()
-        logger.d { "onShowIncomingCallUi" }
-        telecomConnectionIncomingCallData.let {
-            incomingCallPresenter.showIncomingCall(
-                context,
-                it.callId,
-                it.callDisplayName,
-                it.callServiceConfiguration,
-                it.notification,
-            )
-        }
     }
 }
