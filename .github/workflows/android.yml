@@ -68,28 +68,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # fetch all history for sonar analysis
 
       - uses: GetStream/android-ci-actions/actions/setup-java@main
 
       - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
       - name: Run unit tests
-        run: |
-          ./gradlew :stream-video-android-ui-compose:koverXmlReportDebug --scan --stacktrace
-          ./gradlew :stream-video-android-core:koverXmlReportDebug --scan --stacktrace
+        run: ./gradlew :testCoverage --scan --stacktrace
 
-      - name: Unit tests core results
+      - name: Upload tests results
         uses: actions/upload-artifact@v4
+        if: failure()
         with:
-          name: unit-tests-core-results
-          path: stream-video-android-core/build/reports/tests/testDebugUnitTest/index.html
-
-      - name: Unit tests compose results
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-tests-compose-results
-          path: stream-video-android-ui-compose/build/reports/tests/testDebugUnitTest/index.html
+          name: testResults
+          path: ./**/build/reports/tests/**
 
       - uses: GetStream/android-ci-actions/actions/setup-ruby@main
 

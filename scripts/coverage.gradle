@@ -1,25 +1,16 @@
-if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
-    apply plugin: "org.jetbrains.kotlinx.kover"
-    apply plugin: "org.sonarqube"
+ext.koverClassExcludes = [
+        '*R',
+        '*R$*',
+        '*BuildConfig',
+        '*Manifest*',
+        '*Composable*'
+]
+ext.koverAnnotationExcludes = [
+        'androidx.compose.ui.tooling.preview.Preview'
+]
 
-    if (hasProperty('android')) {
-        android {
-            buildTypes {
-                debug {
-                    testCoverageEnabled = true
-                    enableUnitTestCoverage = true
-                    enableAndroidTestCoverage true
-                }
-            }
-        }
-    }
-
-    kover {
-        reports {
-            verify {
-                warningInsteadOfFailure = true
-            }
-        }
+def configureKoverReports(project) {
+    project.kover {
         currentProject {
             instrumentation {
                 excludedClasses.addAll(
@@ -28,14 +19,101 @@ if (!rootProject.ext.sonar.ignoreModules.contains(name)) {
                 )
             }
         }
+        reports {
+            verify {
+                warningInsteadOfFailure = true
+            }
+            filters {
+                excludes {
+                    classes(rootProject.ext.koverClassExcludes as String[])
+                    annotatedBy(rootProject.ext.koverAnnotationExcludes as String[])
+                }
+            }
+        }
+    }
+}
+
+// Configure code coverage for modules with tests, excluding specified modules
+subprojects {
+    sonar {
+        skipProject = rootProject.ext.sonar.ignoreModules.contains(name)
     }
 
-    sonarqube {
-        properties {
-            property "sonar.junit.reportPaths", "${buildDir}/test-results/testDebugUnitTest"
-            property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/kover/reportDebug.xml"
-            property "sonar.sources", "src/main/kotlin"
-            property "sonar.coverage.exclusions", "**/generated/**,**/io/getstream/video/android/core/model/**"
+    if (!rootProject.ext.sonar.ignoreModules.contains(name) && file("src/test").exists()) {
+        apply plugin: "org.jetbrains.kotlinx.kover"
+
+        afterEvaluate {
+            def isAndroidModule = plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")
+            def hasPaparazziPlugin = plugins.hasPlugin("app.cash.paparazzi")
+
+            if (isAndroidModule) {
+                android {
+                    buildTypes {
+                        debug {
+                            testCoverageEnabled = true
+                            enableUnitTestCoverage = true
+                        }
+                    }
+                }
+            }
+
+            // Determine the appropriate test task name based on module type and plugins
+            def testTaskName = isAndroidModule
+                    ? (hasPaparazziPlugin ? "verifyPaparazziDebug" : "testDebugUnitTest")
+                    : "test"
+
+            tasks.register("testCoverage") {
+                group = "verification"
+                description = "Run module-specific tests"
+                dependsOn(testTaskName)
+            }
+
+            kover {
+                currentProject {
+                    // Variant configuration for aggregated coverage
+                    createVariant("coverage") {
+                        if (isAndroidModule) {
+                            add(["debug"], true)
+                        } else {
+                            add(["jvm"], true)
+                        }
+                    }
+                }
+                configureKoverReports(project)
+            }
         }
+    }
+}
+
+// Configure root project to aggregate coverage reports
+apply plugin: "org.jetbrains.kotlinx.kover"
+
+// Specify the projects that should be included in the aggregate coverage report
+def coverageModules = subprojects.findAll {
+    !rootProject.ext.sonar.ignoreModules.contains(it.name) && file("${it.projectDir}/src/test").exists()
+}
+println("Set up code coverage for:\n${coverageModules.join("\n")}")
+coverageModules.each { project -> dependencies { kover(project) } }
+
+// Aggregate all submodules' testCoverage + merged reports
+tasks.register("testCoverage") {
+    group = "verification"
+    description = "Run all tests in all modules and generate merged coverage report"
+
+    dependsOn(subprojects.collect { it.tasks.matching { it.name == "testCoverage" } })
+    dependsOn("koverXmlReportCoverage", "koverHtmlReportCoverage")
+}
+
+kover {
+    currentProject {
+        // Variant configuration for aggregated coverage (needs to be defined in the root project too)
+        createVariant("coverage") {}
+    }
+    configureKoverReports(project)
+}
+
+sonar {
+    properties {
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/kover/reportCoverage.xml"
     }
 }
