@@ -29,7 +29,7 @@ import org.junit.Test
 internal class LivestreamTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
+    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_2)
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 

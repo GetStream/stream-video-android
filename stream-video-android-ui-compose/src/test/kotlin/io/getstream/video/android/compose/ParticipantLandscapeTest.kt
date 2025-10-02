@@ -39,7 +39,7 @@ import org.junit.Test
 internal class ParticipantLandscapeTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazziLandscape = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
+    val paparazziLandscape = Paparazzi(deviceConfig = DeviceConfig.PIXEL_2)
 
     override fun basePaparazzi(): Paparazzi = paparazziLandscape
 
