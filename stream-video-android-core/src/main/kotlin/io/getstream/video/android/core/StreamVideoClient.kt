@@ -98,6 +98,8 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
+import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -219,12 +221,15 @@ internal class StreamVideoClient internal constructor(
         val callConfig = callServiceConfigRegistry.get(activeCall?.type ?: ANY_MARKER)
         val runCallServiceInForeground = callConfig.runCallServiceInForeground
         if (runCallServiceInForeground) {
+
             safeCall {
-                val serviceIntent = CallService.buildStopIntent(
+                val serviceIntent = ServiceIntentBuilder().buildStopIntent(
                     context = context,
-                    callServiceConfiguration = callConfig,
+                    StopServiceParam(callServiceConfiguration = callConfig),
                 )
-                context.stopService(serviceIntent)
+                serviceIntent.let {
+                    context.stopService(serviceIntent)
+                }
             }
         }
         activeCall?.leave()

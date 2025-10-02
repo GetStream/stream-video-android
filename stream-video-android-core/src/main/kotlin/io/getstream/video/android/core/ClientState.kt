@@ -26,6 +26,8 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
+import io.getstream.video.android.core.notifications.internal.service.StopForegroundServiceSource
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
@@ -85,6 +87,7 @@ class ClientState(private val client: StreamVideo) {
     public val activeCall: StateFlow<Call?> = _activeCall
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
+    val serviceLauncher = ServiceLauncher(client.context)
 
     /**
      * Returns true if there is an active or ringing call
@@ -216,17 +219,20 @@ class ClientState(private val client: StreamVideo) {
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
-        val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
-        if (callConfig.runCallServiceInForeground) {
-            val context = streamVideoClient.context
-            val serviceIntent = CallService.buildStartIntent(
-                context,
-                StreamCallId.fromCallCid(call.cid),
+        when (trigger) {
+            CallService.TRIGGER_ONGOING_CALL -> serviceLauncher.showOnGoingCall(
+                call,
                 trigger,
-                "maybeStartForegroundService, trigger: $trigger",
-                callServiceConfiguration = callConfig,
+                streamVideoClient,
             )
-            ContextCompat.startForegroundService(context, serviceIntent)
+
+            CallService.TRIGGER_OUTGOING_CALL -> serviceLauncher.showOutgoingCall(
+                call,
+                trigger,
+                streamVideoClient,
+            )
+
+            else -> {}
         }
     }
 
@@ -238,29 +244,9 @@ class ClientState(private val client: StreamVideo) {
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
 
-            val serviceIntent = CallService.buildStopIntent(
-                context,
-                call,
-                callConfig,
-            )
             logger.d { "Building stop intent for call_id: ${call.cid}" }
-            serviceIntent.let { intent: Intent ->
-                val bundle = intent.extras
-                val keys = bundle?.keySet()
-                if (keys != null) {
-                    val sb = StringBuilder()
-                    for (key in keys) {
-                        val itemInBundle = bundle[key]
-                        val text = "key:$key, value=$itemInBundle"
-                        sb.append(text)
-                        sb.append("\n")
-                    }
-                    if (sb.toString().isNotEmpty()) {
-                        logger.d { " [maybeStopForegroundService], stop intent extras: $sb" }
-                    }
-                }
-            }
-            context.startService(serviceIntent)
+            val serviceLauncher = ServiceLauncher(context)
+            serviceLauncher.stopService(call)
         }
     }
 }

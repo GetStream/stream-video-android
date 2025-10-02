@@ -96,6 +96,7 @@ internal open class CallService : Service() {
 
     // Call sounds
     private var callSoundPlayer: CallSoundPlayer? = null
+    private val serviceNotificationRetriever = ServiceNotificationRetriever()
 
     internal companion object {
         private const val TAG = "CallServiceCompanion"
@@ -115,13 +116,16 @@ internal open class CallService : Service() {
          * @param trigger one of [TRIGGER_INCOMING_CALL], [TRIGGER_OUTGOING_CALL] or [TRIGGER_ONGOING_CALL]
          * @param callDisplayName the display name.
          */
+        @Deprecated("",level = DeprecationLevel.WARNING)
         fun buildStartIntent(
             context: Context,
             callId: StreamCallId,
             trigger: String,
             callDisplayName: String? = null,
             callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
-        ): Intent {
+        ): Intent
+        {
+            if(true) throw RuntimeException("Kyun aagaya idhar?")
             val serviceClass = callServiceConfiguration.serviceClass
             StreamLog.i(TAG) { "Resolved service class: $serviceClass" }
             val serviceIntent = Intent(context, serviceClass)
@@ -160,6 +164,7 @@ internal open class CallService : Service() {
          *
          * @param context the context.
          */
+        @Deprecated("",level = DeprecationLevel.ERROR)
         fun buildStopIntent(
             context: Context,
             call: Call? = null,
@@ -180,6 +185,7 @@ internal open class CallService : Service() {
             intent.putExtra(EXTRA_STOP_SERVICE, true)
         }
 
+        @Deprecated("",level = DeprecationLevel.ERROR)
         fun showIncomingCall(
             context: Context,
             callId: StreamCallId,
@@ -247,6 +253,7 @@ internal open class CallService : Service() {
             }
         }
 
+        @Deprecated("",level = DeprecationLevel.ERROR)
         fun removeIncomingCall(
             context: Context,
             callId: StreamCallId,
@@ -492,69 +499,13 @@ internal open class CallService : Service() {
         streamCallId: StreamCallId,
         intentCallDisplayName: String?,
     ): Pair<Notification?, Int> {
-        logger.d {
-            "[getNotificationPair] trigger: $trigger, callId: ${streamCallId.id}, callDisplayName: $intentCallDisplayName"
-        }
-        val notificationData: Pair<Notification?, Int> = when (trigger) {
-            TRIGGER_ONGOING_CALL -> {
-                logger.d { "[getNotificationPair] Creating ongoing call notification" }
-                Pair(
-                    first = streamVideo.getOngoingCallNotification(
-                        callId = streamCallId,
-                        callDisplayName = intentCallDisplayName,
-                        payload = emptyMap(),
-                    ),
-                    second = streamCallId.hashCode(),
-                )
-            }
-
-            TRIGGER_INCOMING_CALL -> {
-                logger.d { "[getNotificationPair] Creating incoming call notification" }
-                val shouldHaveContentIntent = streamVideo.state.activeCall.value == null
-                logger.d { "[getNotificationPair] shouldHaveContentIntent: $shouldHaveContentIntent" }
-                Pair(
-                    first = streamVideo.getRingingCallNotification(
-                        ringingState = RingingState.Incoming(),
-                        callId = streamCallId,
-                        callDisplayName = intentCallDisplayName,
-                        shouldHaveContentIntent = shouldHaveContentIntent,
-                        payload = emptyMap(),
-                    ),
-                    second = streamCallId.getNotificationId(NotificationType.Incoming),
-                )
-            }
-
-            TRIGGER_OUTGOING_CALL -> {
-                logger.d { "[getNotificationPair] Creating outgoing call notification" }
-                Pair(
-                    first = streamVideo.getRingingCallNotification(
-                        ringingState = RingingState.Outgoing(),
-                        callId = streamCallId,
-                        callDisplayName = getString(
-                            R.string.stream_video_outgoing_call_notification_title,
-                        ),
-                        payload = emptyMap(),
-                    ),
-                    second = streamCallId.getNotificationId(
-                        NotificationType.Incoming,
-                    ), // Same for incoming and outgoing
-                )
-            }
-
-            TRIGGER_REMOVE_INCOMING_CALL -> {
-                logger.d { "[getNotificationPair] Removing incoming call notification" }
-                Pair(null, streamCallId.getNotificationId(NotificationType.Incoming))
-            }
-
-            else -> {
-                logger.w { "[getNotificationPair] Unknown trigger: $trigger" }
-                Pair(null, streamCallId.hashCode())
-            }
-        }
-        logger.d {
-            "[getNotificationPair] Generated notification: ${notificationData.first != null}, notificationId: ${notificationData.second}"
-        }
-        return notificationData
+        return serviceNotificationRetriever.getNotificationPair(
+            applicationContext,
+            trigger,
+            streamVideo,
+            streamCallId,
+            intentCallDisplayName,
+        )
     }
 
     private fun maybePromoteToForegroundService(
