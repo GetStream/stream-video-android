@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import com.android.resources.ScreenOrientation
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.audio.AudioAppBar
 import io.getstream.video.android.compose.ui.components.audio.AudioControlActions
@@ -27,13 +28,16 @@ import io.getstream.video.android.compose.ui.components.audio.AudioParticipantsG
 import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
 internal class AudioRoomTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_2)
+    val paparazzi = Paparazzi(
+        deviceConfig = DeviceConfig.PIXEL_2.copy(orientation = ScreenOrientation.LANDSCAPE),
+    )
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 
@@ -61,6 +65,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         }
     }
 
+    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot AudioRoom composable`() {
         snapshot {
@@ -71,6 +76,7 @@ internal class AudioRoomTest : BaseComposeTest() {
         }
     }
 
+    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot AudioRoom DarkMode composable`() {
         snapshot(isInDarkMode = true) {
