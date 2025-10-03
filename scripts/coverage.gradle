@@ -1,9 +1,18 @@
+ext.coverageModules = [
+        'stream-video-android-core',
+        'stream-video-android-ui-core',
+        'stream-video-android-ui-xml',
+        'stream-video-android-ui-compose',
+]
+
 ext.koverClassExcludes = [
         '*R',
         '*R$*',
         '*BuildConfig',
         '*Manifest*',
-        '*Composable*'
+        '*Composable*',
+        "io.getstream.android.video.generated.*",
+        "io.getstream.video.android.core.model.*"
 ]
 ext.koverAnnotationExcludes = [
         'androidx.compose.ui.tooling.preview.Preview'
@@ -11,14 +20,6 @@ ext.koverAnnotationExcludes = [
 
 def configureKoverReports(project) {
     project.kover {
-        currentProject {
-            instrumentation {
-                excludedClasses.addAll(
-                        "io.getstream.android.video.generated.*",
-                        "io.getstream.video.android.core.model.*"
-                )
-            }
-        }
         reports {
             verify {
                 warningInsteadOfFailure = true
@@ -33,13 +34,20 @@ def configureKoverReports(project) {
     }
 }
 
-// Configure code coverage for modules with tests, excluding specified modules
+def coverageModulesWithTests = subprojects.findAll {
+    rootProject.ext.coverageModules.contains(it.name) && file("${it.projectDir}/src/test").exists()
+}
+println("Setting up coverage for:\n${coverageModulesWithTests.join("\n")}")
+
+// Configure code coverage for modules with tests
 subprojects {
+    def isCoverageModule = coverageModulesWithTests.collect {it.name}.contains(name)
+
     sonar {
-        skipProject = rootProject.ext.sonar.ignoreModules.contains(name)
+        skipProject = !isCoverageModule
     }
 
-    if (!rootProject.ext.sonar.ignoreModules.contains(name) && file("src/test").exists()) {
+    if (isCoverageModule) {
         apply plugin: "org.jetbrains.kotlinx.kover"
 
         afterEvaluate {
@@ -89,11 +97,7 @@ subprojects {
 apply plugin: "org.jetbrains.kotlinx.kover"
 
 // Specify the projects that should be included in the aggregate coverage report
-def coverageModules = subprojects.findAll {
-    !rootProject.ext.sonar.ignoreModules.contains(it.name) && file("${it.projectDir}/src/test").exists()
-}
-println("Set up code coverage for:\n${coverageModules.join("\n")}")
-coverageModules.each { project -> dependencies { kover(project) } }
+coverageModulesWithTests.each { project -> dependencies { kover(project) } }
 
 // Aggregate all submodules' testCoverage + merged reports
 tasks.register("testCoverage") {

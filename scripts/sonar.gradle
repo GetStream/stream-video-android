@@ -1,19 +1,6 @@
 apply plugin: "org.sonarqube"
 
 ext.sonar = [
-    ignoreModules : [
-        'stream-video-android-bom',
-        'stream-video-android-previewdata',
-        'demo-app',
-        'benchmark',
-        'tutorials',
-        'tutorial-audio',
-        'tutorial-video',
-        'tutorial-ringing',
-        'tutorial-livestream',
-        'metrics',
-        'stream-video-android-metrics'
-    ],
     excludeFilter : [
             '**/test/**',
             '**/androidTest/**',
