@@ -10,6 +10,7 @@ ext.sonar = [
             '**/BuildConfig.*',
             '**/Manifest*.*',
             '**/*.mp3',
+            '**/*.webp',
             "**/generated/**",
             "**/io/getstream/video/android/core/model/**"
     ]
