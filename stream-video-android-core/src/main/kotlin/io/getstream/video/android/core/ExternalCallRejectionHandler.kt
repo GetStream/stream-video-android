@@ -60,7 +60,7 @@ internal class ExternalCallRejectionHandler() {
         when (source) {
             ExternalCallRejectionSource.NOTIFICATION -> {
                 TelecomCallController(context)
-                    .onRejectFromNotification(call)
+                    .leaveCall(call)
             }
             ExternalCallRejectionSource.WEARABLE -> {
                 /**

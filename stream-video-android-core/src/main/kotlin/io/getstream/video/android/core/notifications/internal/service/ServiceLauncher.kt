@@ -272,32 +272,23 @@ class ServiceLauncher(val context: Context) {
     fun stopService(call: Call) {
 //        logger.d { "stopService, call id: ${call.cid}, source: ${stopForegroundServiceSource.source}" }
         stopCallServiceInternal(call)
-        stopTelecomInternal(call)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getJetpackTelecomRepository(callId: StreamCallId): JetpackTelecomRepository {
         val callsManager = CallsManager(context).apply {
-            // Register with the telecom interface with the supported capabilities
             registerAppWithTelecom(
                 capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
                     CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
             )
         }
+
         val streamVideo = StreamVideo.instance()
         val incomingCallPresenter = IncomingCallPresenter(ServiceIntentBuilder())
         val incomingCallTelecomAction =
             IncomingCallTelecomAction(context, streamVideo, incomingCallPresenter)
-
+        logger.d { "[getJetpackTelecomRepository] hashcode callsManager:${callsManager.hashCode()}" }
         return JetpackTelecomRepository(callsManager, callId, incomingCallTelecomAction)
-    }
-
-//
-    private fun stopTelecomInternal(call: Call) {
-        val telecomPermissions = TelecomPermissions()
-        if (telecomPermissions.canUseTelecom(context) && telecomHelper.canUseJetpackTelecom()) {
-            // TODO Rahul, what to do here....
-        }
     }
 
     private fun stopCallServiceInternal(call: Call) {

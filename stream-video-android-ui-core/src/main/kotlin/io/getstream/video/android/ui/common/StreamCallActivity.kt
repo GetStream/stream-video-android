@@ -955,21 +955,17 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     @CallSuper
     public open fun onCallAction(call: Call, action: CallAction) {
         logger.i { "[onCallAction] #ringing; action: $action, call.cid: ${call.cid}" }
-        val telecomCallController = TelecomCallController(this)
         when (action) {
             is LeaveCall -> {
                 leave(call, onSuccessFinish, onErrorFinish)
-                telecomCallController.leaveCurrentCall(call)
             }
 
             is DeclineCall -> {
                 reject(call, RejectReason.Decline, onSuccessFinish, onErrorFinish)
-                telecomCallController.onDeclineOngoingCall(call)
             }
 
             is CancelCall -> {
                 cancel(call, onSuccessFinish, onErrorFinish)
-                telecomCallController.onCancelOutgoingCall(call)
             }
 
             is AcceptCall -> {

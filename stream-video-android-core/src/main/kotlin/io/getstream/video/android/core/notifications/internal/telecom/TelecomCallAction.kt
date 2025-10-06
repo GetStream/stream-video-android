@@ -23,7 +23,7 @@ import kotlinx.parcelize.Parcelize
 
 /**
  * Simple interface to represent related call actions to communicate with the registered call scope
- * in the [TelecomCallRepository.registerCall]
+ * in the [JetpackTelecomRepository.registerCall]
  *
  * Note: we are using [Parcelize] to make the actions parcelable so they can be directly used in the
  * call notification.
@@ -55,5 +55,5 @@ sealed interface TelecomCallAction : Parcelable {
 }
 
 enum class DisconnectSource {
-    PHONE, WEARABLE
+    PHONE,
 }

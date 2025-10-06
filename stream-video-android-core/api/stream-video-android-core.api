@@ -10533,7 +10533,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/DisconnectSource : java/lang/Enum {
 	public static final field PHONE Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
-	public static final field WEARABLE Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
 	public static fun values ()[Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
@@ -10793,11 +10792,8 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallController {
 	public fun <init> (Landroid/content/Context;)V
 	public final fun getContext ()Landroid/content/Context;
-	public final fun leaveCurrentCall (Lio/getstream/video/android/core/Call;)V
+	public final fun leaveCall (Lio/getstream/video/android/core/Call;)V
 	public final fun onAnswer (Lio/getstream/video/android/core/Call;)V
-	public final fun onCancelOutgoingCall (Lio/getstream/video/android/core/Call;)V
-	public final fun onDeclineOngoingCall (Lio/getstream/video/android/core/Call;)V
-	public final fun onRejectFromNotification (Lio/getstream/video/android/core/Call;)V
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomConfig {

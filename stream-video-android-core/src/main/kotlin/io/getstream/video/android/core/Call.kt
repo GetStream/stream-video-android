@@ -81,6 +81,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
@@ -93,7 +94,6 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -807,6 +807,9 @@ public class Call(
         if (id == client.state.ringingCall.value?.id) {
             client.state.removeRingingCall(this)
         }
+
+        TelecomCallController(client.context)
+            .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()

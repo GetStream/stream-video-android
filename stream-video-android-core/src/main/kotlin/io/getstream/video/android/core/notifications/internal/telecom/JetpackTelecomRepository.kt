@@ -244,8 +244,8 @@ class JetpackTelecomRepository(
     private suspend fun CallControlScope.doDisconnect(action: TelecomCallAction.Disconnect) {
         logger.d { "[doDisconnect] action: $action " }
         disconnect(action.cause)
-        if (action.source != DisconnectSource.PHONE) {
-            onIsCallDisconnected(action.cause)
+        updateCurrentCall {
+            TelecomCall.Unregistered(id, callAttributes, action.cause)
         }
     }
 

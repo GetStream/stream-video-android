@@ -28,70 +28,43 @@ class TelecomCallController(val context: Context) {
     private val telecomPermissions = TelecomPermissions()
     private val telecomHelper = TelecomHelper()
 
-    fun onRejectFromNotification(call: Call) {
-        onDeclineOngoingCall(call)
-    }
-
-    fun leaveCurrentCall(call: Call) {
-        onCancelOutgoingCall(call)
-    }
-
-    fun onCancelOutgoingCall(call: Call) {
-        if (telecomPermissions.canUseTelecom(context)) {
-            if (telecomHelper.canUseJetpackTelecom()) {
-                val jetpackTelecomCall = call.state.jetpackTelecomRepository?.currentCall?.value
-                jetpackTelecomCall?.let {
-                    if (it is TelecomCall.Registered) {
-                        it.processAction(
-                            TelecomCallAction.Disconnect(
-                                DisconnectCause(
-                                    DisconnectCause.LOCAL,
-                                ),
-                                DisconnectSource.PHONE,
-                            ),
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    fun onDeclineOngoingCall(call: Call) {
-        if (telecomPermissions.canUseTelecom(context)) {
-            if (telecomHelper.canUseJetpackTelecom()) {
-                val jetpackTelecomCall = call.state.jetpackTelecomRepository?.currentCall?.value
-                jetpackTelecomCall?.let {
-                    if (it is TelecomCall.Registered) {
-                        it.processAction(
-                            TelecomCallAction.Disconnect(
-                                DisconnectCause(
-                                    DisconnectCause.LOCAL,
-                                ),
-                                DisconnectSource.PHONE,
-                            ),
-                        )
-                    }
-                }
+    fun leaveCall(call: Call) {
+        performAction(call) {
+            if (it is TelecomCall.Registered) {
+                it.processAction(
+                    TelecomCallAction.Disconnect(
+                        DisconnectCause(
+                            DisconnectCause.LOCAL,
+                        ),
+                        DisconnectSource.PHONE,
+                    ),
+                )
             }
         }
     }
 
     fun onAnswer(call: Call) {
-        if (telecomPermissions.canUseTelecom(context)) {
-            if (telecomHelper.canUseJetpackTelecom()) {
-                val jetpackTelecomCall =
-                    call.state.jetpackTelecomRepository?.currentCall?.value
-                jetpackTelecomCall?.let {
-                    if (it is TelecomCall.Registered) {
-                        it.processAction(TelecomCallAction.Activate)
-                        it.processAction(TelecomCallAction.Answer(!isVideoCall(call)))
-                    }
-                }
+        performAction(call) {
+            if (it is TelecomCall.Registered) {
+                it.processAction(TelecomCallAction.Activate)
+                it.processAction(TelecomCallAction.Answer(!isVideoCall(call)))
             }
         }
     }
 
     private fun isVideoCall(call: Call): Boolean {
         return call.hasCapability(OwnCapability.SendVideo) || call.isVideoEnabled()
+    }
+
+    private fun performAction(call: Call, block: (TelecomCall) -> Unit) {
+        if (telecomPermissions.canUseTelecom(context)) {
+            if (telecomHelper.canUseJetpackTelecom()) {
+                val telecomCall =
+                    call.state.jetpackTelecomRepository?.currentCall?.value
+                telecomCall?.let {
+                    block(telecomCall)
+                }
+            }
+        }
     }
 }
