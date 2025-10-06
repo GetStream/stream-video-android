@@ -18,8 +18,8 @@ package io.getstream.video.android.core.call.connection.utils
 
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
-import org.webrtc.CameraEnumerationAndroid.CaptureFormat
-import org.webrtc.RtpParameters
+import io.getstream.webrtc.CameraEnumerationAndroid.CaptureFormat
+import io.getstream.webrtc.RtpParameters
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension

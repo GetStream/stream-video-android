@@ -120,11 +120,11 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
 import org.json.JSONArray
-import org.webrtc.MediaStreamTrack
-import org.webrtc.PeerConnection
-import org.webrtc.RTCStatsReport
-import org.webrtc.RtpTransceiver.RtpTransceiverDirection
-import org.webrtc.SessionDescription
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RTCStatsReport
+import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
+import io.getstream.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
@@ -653,7 +653,7 @@ public class RtcSession internal constructor(
                             TrackType.TRACK_TYPE_VIDEO,
                             VideoTrack(
                                 streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO),
-                                video = track as org.webrtc.VideoTrack,
+                                video = track as io.getstream.webrtc.VideoTrack,
                             ),
                         )
                     } else {
@@ -684,7 +684,7 @@ public class RtcSession internal constructor(
                             TrackType.TRACK_TYPE_AUDIO,
                             AudioTrack(
                                 streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
-                                audio = track as org.webrtc.AudioTrack,
+                                audio = track as io.getstream.webrtc.AudioTrack,
                             ),
                         )
                     }
@@ -713,7 +713,7 @@ public class RtcSession internal constructor(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                             VideoTrack(
                                 streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE),
-                                video = track as org.webrtc.VideoTrack,
+                                video = track as io.getstream.webrtc.VideoTrack,
                             ),
                         )
                     }
@@ -1264,7 +1264,69 @@ public class RtcSession internal constructor(
             subscriberPendingEvents.add(offerEvent)
             return
         }
-        subscriber?.negotiate(offerEvent.sdp)
+        subscriber?.negotiate(enableOpusStereo(offerEvent.sdp))
+    }
+
+    fun enableOpusStereo(sdp: String): String {
+        val lines = sdp.split("\r\n", "\n")
+        val modifiedLines = mutableListOf<String>()
+        var currentMedia: String? = null
+        val opusPayloadTypes = mutableSetOf<String>()
+
+        for (line in lines) {
+            var modifiedLine = line
+
+            // Identify the current media section (audio or video)
+            if (line.startsWith("m=")) {
+                val tokens = line.substring(2).split(" ")
+                currentMedia = tokens[0]
+            }
+
+            // Process lines within the audio media section
+            if (currentMedia == "audio") {
+                // Find payload types associated with Opus codec
+                if (line.startsWith("a=rtpmap:")) {
+                    val matcher = Regex("""a=rtpmap:(\d+)\s+(\w+)/""").find(line)
+                    if (matcher != null) {
+                        val pt = matcher.groupValues[1]
+                        val codec = matcher.groupValues[2]
+                        if (codec.equals("opus", ignoreCase = true)) {
+                            opusPayloadTypes.add(pt)
+                        }
+                    }
+                }
+
+                // Modify fmtp lines to include stereo=1 for Opus payload types
+                if (line.startsWith("a=fmtp:")) {
+                    val matcher = Regex("""a=fmtp:(\d+)\s+(.*)""").find(line)
+                    if (matcher != null) {
+                        val pt = matcher.groupValues[1]
+                        var params = matcher.groupValues[2]
+
+                        if (opusPayloadTypes.contains(pt)) {
+                            val paramList = params.split(";").map { it.trim() }.toMutableList()
+                            var stereoFound = false
+                            for (i in paramList.indices) {
+                                if (paramList[i].startsWith("stereo=")) {
+                                    paramList[i] = "stereo=1"
+                                    stereoFound = true
+                                    break
+                                }
+                            }
+                            if (!stereoFound) {
+                                paramList.add("stereo=1")
+                            }
+                            params = paramList.joinToString("; ")
+                            modifiedLine = "a=fmtp:$pt $params"
+                        }
+                    }
+                }
+            }
+
+            modifiedLines.add(modifiedLine)
+        }
+
+        return modifiedLines.joinToString("\r\n")
     }
 
     internal fun getPublisherTracksForReconnect(): List<TrackInfo> {

@@ -22,9 +22,9 @@ import io.getstream.video.android.core.call.stats.toRtcOutboundRtpVideoStreamSta
 import io.getstream.video.android.core.call.stats.toRtcVideoSourceStats
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.webrtc.PeerConnection
-import org.webrtc.RTCStats
-import org.webrtc.RTCStatsReport
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RTCStats
+import io.getstream.webrtc.RTCStatsReport
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PerformanceStats

@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import org.webrtc.CameraEnumerationAndroid
-import org.webrtc.RTCStats
+import io.getstream.webrtc.CameraEnumerationAndroid
+import io.getstream.webrtc.RTCStats
 import stream.video.sfu.models.TrackType
 
 data class MediaStatsInfo(

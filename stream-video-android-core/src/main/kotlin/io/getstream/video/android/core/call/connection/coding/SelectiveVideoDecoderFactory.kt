@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.core.call.connection.coding
 
-import org.webrtc.EglBase
-import org.webrtc.SoftwareVideoDecoderFactory
-import org.webrtc.VideoCodecInfo
-import org.webrtc.VideoDecoder
-import org.webrtc.VideoDecoderFactory
-import org.webrtc.WrappedVideoDecoderFactory
+import io.getstream.webrtc.EglBase
+import io.getstream.webrtc.SoftwareVideoDecoderFactory
+import io.getstream.webrtc.VideoCodecInfo
+import io.getstream.webrtc.VideoDecoder
+import io.getstream.webrtc.VideoDecoderFactory
+import io.getstream.webrtc.WrappedVideoDecoderFactory
 
 internal class SelectiveVideoDecoderFactory(
     sharedContext: EglBase.Context?,

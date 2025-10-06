@@ -25,7 +25,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.webrtc.CameraEnumerationAndroid
+import io.getstream.webrtc.CameraEnumerationAndroid
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType

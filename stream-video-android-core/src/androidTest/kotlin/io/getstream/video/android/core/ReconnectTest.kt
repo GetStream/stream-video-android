@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import org.webrtc.PeerConnection
+import io.getstream.webrtc.PeerConnection
 import java.util.UUID
 
 /**

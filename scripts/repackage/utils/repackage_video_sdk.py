@@ -25,7 +25,7 @@ def repackage_and_install_video_sdk(project_root: str, repackaged_webrtc_version
     print(f"> VideoSDK: Repackage Started")
     replace_string_in_directory(
         directory_path=project_root,
-        search_string="org.webrtc",
+        search_string="io.getstream.webrtc",
         replace_string="io.getstream.webrtc"
     )
     print(f"> VideoSDK: Repackage Completed")

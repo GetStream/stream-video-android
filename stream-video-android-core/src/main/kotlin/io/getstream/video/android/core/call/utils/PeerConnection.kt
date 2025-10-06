@@ -20,9 +20,9 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import org.webrtc.AddIceObserver
-import org.webrtc.IceCandidate
-import org.webrtc.PeerConnection
+import io.getstream.webrtc.AddIceObserver
+import io.getstream.webrtc.IceCandidate
+import io.getstream.webrtc.PeerConnection
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 

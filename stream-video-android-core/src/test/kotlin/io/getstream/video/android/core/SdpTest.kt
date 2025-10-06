@@ -24,7 +24,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.webrtc.SessionDescription
+import io.getstream.webrtc.SessionDescription
 
 @RunWith(RobolectricTestRunner::class)
 class SdpTest : TestBase() {

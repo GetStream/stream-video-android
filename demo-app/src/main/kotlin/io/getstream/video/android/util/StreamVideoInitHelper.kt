@@ -289,7 +289,6 @@ object StreamVideoInitHelper {
             },
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
-            audioProcessing = NoiseCancellation(context),
         ).build()
     }
 }

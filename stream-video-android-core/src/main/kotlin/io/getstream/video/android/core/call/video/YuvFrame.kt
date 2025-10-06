@@ -23,7 +23,7 @@ import io.github.crow_misia.libyuv.I420Buffer
 import io.github.crow_misia.libyuv.PlanePrimitive
 import io.github.crow_misia.libyuv.RotateMode
 import io.github.crow_misia.libyuv.RowStride
-import org.webrtc.VideoFrame
+import io.getstream.webrtc.VideoFrame
 
 object YuvFrame {
     private val logger by taggedLogger("YuvFrame")

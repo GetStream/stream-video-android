@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.utils
 
 import io.getstream.video.android.core.model.IceServer
-import org.webrtc.MediaConstraints
-import org.webrtc.PeerConnection
-import org.webrtc.SessionDescription
+import io.getstream.webrtc.MediaConstraints
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.SessionDescription
 
 data class RtpMapAttribute(val index: Int, val number: String, val codec: String, val line: String)
 

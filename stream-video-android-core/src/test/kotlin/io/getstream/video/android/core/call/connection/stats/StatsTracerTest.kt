@@ -27,10 +27,10 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.PeerConnection
-import org.webrtc.RTCStats
-import org.webrtc.RTCStatsCollectorCallback
-import org.webrtc.RTCStatsReport
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RTCStats
+import io.getstream.webrtc.RTCStatsCollectorCallback
+import io.getstream.webrtc.RTCStatsReport
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 

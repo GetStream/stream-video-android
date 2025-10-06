@@ -23,7 +23,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.webrtc.RTCStats
+import io.getstream.webrtc.RTCStats
 
 @InternalStreamVideoApi
 data class CallStatsReport(

@@ -32,7 +32,7 @@ def repackage_and_install_webrtc_android(path: str) -> str:
     print("> WebRTC-Android: Repackage Started")
     replace_string_in_directory(
         directory_path=path,
-        search_string="org.webrtc",
+        search_string="io.getstream.webrtc",
         replace_string="io.getstream.webrtc"
     )
     print("> WebRTC-Android: Repackage Completed")

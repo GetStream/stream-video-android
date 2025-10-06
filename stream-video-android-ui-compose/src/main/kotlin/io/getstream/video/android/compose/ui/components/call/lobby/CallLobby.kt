@@ -97,7 +97,7 @@ public fun CallLobby(
         track = VideoTrack(
             streamId = call.sessionId,
             video = if (LocalInspectionMode.current) {
-                org.webrtc.VideoTrack(1000L)
+                io.getstream.webrtc.VideoTrack(1000L)
             } else {
                 call.camera.mediaManager.videoTrack
             },
@@ -234,7 +234,7 @@ private fun CallLobbyPreview() {
                 sessionId = previewCall.sessionId,
                 track = VideoTrack(
                     streamId = previewCall.sessionId,
-                    video = org.webrtc.VideoTrack(1000L),
+                    video = io.getstream.webrtc.VideoTrack(1000L),
                 ),
                 enabled = true,
                 paused = false,

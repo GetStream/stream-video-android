@@ -28,9 +28,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.RtpReceiver
-import org.webrtc.RtpSender
-import org.webrtc.RtpTransceiver
+import io.getstream.webrtc.RtpReceiver
+import io.getstream.webrtc.RtpSender
+import io.getstream.webrtc.RtpTransceiver
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension

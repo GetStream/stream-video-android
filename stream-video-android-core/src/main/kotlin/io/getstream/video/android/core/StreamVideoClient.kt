@@ -135,7 +135,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
-import org.webrtc.ManagedAudioProcessingFactory
+import io.getstream.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
 import java.util.*
 import kotlin.coroutines.Continuation

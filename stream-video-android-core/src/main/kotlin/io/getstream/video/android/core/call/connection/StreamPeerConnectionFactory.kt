@@ -32,24 +32,24 @@ import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
-import org.webrtc.AudioSource
-import org.webrtc.AudioTrack
-import org.webrtc.EglBase
-import org.webrtc.Logging
-import org.webrtc.ManagedAudioProcessingFactory
-import org.webrtc.MediaConstraints
-import org.webrtc.MediaStream
-import org.webrtc.MediaStreamTrack
-import org.webrtc.PeerConnection
-import org.webrtc.PeerConnectionFactory
-import org.webrtc.ResolutionAdjustment
-import org.webrtc.RtpCapabilities
-import org.webrtc.SimulcastAlignedVideoEncoderFactory
-import org.webrtc.SoftwareVideoEncoderFactory
-import org.webrtc.VideoSource
-import org.webrtc.VideoTrack
-import org.webrtc.audio.JavaAudioDeviceModule
-import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import io.getstream.webrtc.AudioSource
+import io.getstream.webrtc.AudioTrack
+import io.getstream.webrtc.EglBase
+import io.getstream.webrtc.Logging
+import io.getstream.webrtc.ManagedAudioProcessingFactory
+import io.getstream.webrtc.MediaConstraints
+import io.getstream.webrtc.MediaStream
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.PeerConnectionFactory
+import io.getstream.webrtc.ResolutionAdjustment
+import io.getstream.webrtc.RtpCapabilities
+import io.getstream.webrtc.SimulcastAlignedVideoEncoderFactory
+import io.getstream.webrtc.SoftwareVideoEncoderFactory
+import io.getstream.webrtc.VideoSource
+import io.getstream.webrtc.VideoTrack
+import io.getstream.webrtc.audio.JavaAudioDeviceModule
+import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.PublishOption
 import java.nio.ByteBuffer
 
@@ -182,6 +182,8 @@ public class StreamPeerConnectionFactory(
                             )
                         }
                     }
+                    .setUseStereoInput(true)
+                    .setUseStereoOutput(true)
                     .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                     .setAudioRecordErrorCallback(object :
                         JavaAudioDeviceModule.AudioRecordErrorCallback {

@@ -26,7 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.temporal.ChronoUnit
-import org.webrtc.PeerConnection
+import io.getstream.webrtc.PeerConnection
 
 /**
  * Monitors
