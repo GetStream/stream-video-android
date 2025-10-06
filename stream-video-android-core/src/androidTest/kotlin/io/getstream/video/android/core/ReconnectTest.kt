@@ -19,11 +19,11 @@ package io.getstream.video.android.core
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import io.getstream.log.taggedLogger
+import io.getstream.webrtc.PeerConnection
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
-import io.getstream.webrtc.PeerConnection
 import java.util.UUID
 
 /**

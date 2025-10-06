@@ -16,6 +16,10 @@
 
 package io.getstream.video.android.core.call.connection.stats
 
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RTCStats
+import io.getstream.webrtc.RTCStatsCollectorCallback
+import io.getstream.webrtc.RTCStatsReport
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
@@ -27,10 +31,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RTCStats
-import io.getstream.webrtc.RTCStatsCollectorCallback
-import io.getstream.webrtc.RTCStatsReport
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 

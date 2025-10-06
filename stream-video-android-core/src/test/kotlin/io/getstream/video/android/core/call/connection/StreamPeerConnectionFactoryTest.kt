@@ -20,6 +20,11 @@ import android.content.Context
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.webrtc.ManagedAudioProcessingFactory
+import io.getstream.webrtc.MediaConstraints
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.PeerConnection.Observer
+import io.getstream.webrtc.PeerConnectionFactory
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -35,11 +40,6 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import io.getstream.webrtc.ManagedAudioProcessingFactory
-import io.getstream.webrtc.MediaConstraints
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.PeerConnection.Observer
-import io.getstream.webrtc.PeerConnectionFactory
 import stream.video.sfu.models.PublishOption
 
 class StreamPeerConnectionFactoryTest {

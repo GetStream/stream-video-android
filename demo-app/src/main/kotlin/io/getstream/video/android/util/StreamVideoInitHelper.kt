@@ -46,7 +46,6 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
-import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.notification.LiveStreamMediaNotificationInterceptor
 import io.getstream.video.android.notification.PausePlayMediaSessionCallback
 import io.getstream.video.android.ui.common.StreamCallActivity

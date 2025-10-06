@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.call.connection.utils
 
 import android.util.Log
@@ -9,7 +25,6 @@ import io.getstream.webrtc.SimulcastAlignedVideoEncoderFactory
 import io.getstream.webrtc.SoftwareVideoEncoderFactory
 import io.getstream.webrtc.VideoCodecInfo
 import io.getstream.webrtc.VideoEncoderFactory
-
 
 /**
  * Utility class to check video codec scalability modes on Android devices
@@ -24,7 +39,6 @@ object VideoCodecScalabilityChecker {
     fun checkVideoCodecScalabilityModes() {
         Log.i(TAG, "=== Starting Video Codec Scalability Mode Check ===")
 
-
         // Create different encoder factories to test
         val factories = arrayOf<VideoEncoderFactory?>(
             SoftwareVideoEncoderFactory(),
@@ -35,13 +49,13 @@ object VideoCodecScalabilityChecker {
                 true,
                 ResolutionAdjustment.MULTIPLE_OF_16,
             ),
-            DefaultVideoEncoderFactory(null, false, true)
+            DefaultVideoEncoderFactory(null, false, true),
         )
 
         val factoryNames = arrayOf<String?>(
             "SoftwareVideoEncoderFactory",
             "HardwareVideoEncoderFactory",
-            "DefaultVideoEncoderFactory"
+            "DefaultVideoEncoderFactory",
         )
 
         for (i in factories.indices) {
@@ -75,7 +89,6 @@ object VideoCodecScalabilityChecker {
         val log = StringBuilder()
         log.append("Codec: ").append(codecInfo.name)
         log.append(" | Params: ").append(codecInfo.params)
-
 
         // Check scalability modes
         val scalabilityModes = codecInfo.scalabilityModes
@@ -123,7 +136,13 @@ object VideoCodecScalabilityChecker {
         for (codecInfo in supportedCodecs) {
             if (codecInfo.name.equals(codecName, ignoreCase = true)) {
                 val scalabilityModes = codecInfo.scalabilityModes
-                return if (scalabilityModes != null) ArrayList<String?>(scalabilityModes) else ArrayList<String?>()
+                return if (scalabilityModes != null) {
+                    ArrayList<String?>(
+                        scalabilityModes,
+                    )
+                } else {
+                    ArrayList<String?>()
+                }
             }
         }
         return ArrayList<String?>()
@@ -144,21 +163,21 @@ object VideoCodecScalabilityChecker {
         Log.i(TAG, "Software codecs: " + softwareCodecs.size)
         Log.i(TAG, "Hardware codecs: " + hardwareCodecs.size)
 
-
         // Find common codecs and compare their scalability modes
         for (swCodec in softwareCodecs) {
             for (hwCodec in hardwareCodecs) {
                 if (swCodec.name.equals(hwCodec.name, ignoreCase = true)) {
                     Log.i(TAG, "\nComparing codec: " + swCodec.name)
                     Log.i(
-                        TAG, "  Software scalability modes: " +
-                                (if (swCodec.scalabilityModes != null) swCodec.scalabilityModes else "NULL")
+                        TAG,
+                        "  Software scalability modes: " +
+                            (if (swCodec.scalabilityModes != null) swCodec.scalabilityModes else "NULL"),
                     )
                     Log.i(
-                        TAG, "  Hardware scalability modes: " +
-                                (if (hwCodec.scalabilityModes != null) hwCodec.scalabilityModes else "NULL")
+                        TAG,
+                        "  Hardware scalability modes: " +
+                            (if (hwCodec.scalabilityModes != null) hwCodec.scalabilityModes else "NULL"),
                     )
-
 
                     // Check if they're different
                     val different = swCodec.scalabilityModes != hwCodec.scalabilityModes
@@ -179,7 +198,7 @@ object VideoCodecScalabilityChecker {
 
         val commonModes = arrayOf<String?>(
             "L1T1", "L1T2", "L1T3", "L2T1", "L2T2", "L2T3",
-            "L3T1", "L3T2", "L3T3", "S2T1", "S2T2", "S2T3"
+            "L3T1", "L3T2", "L3T3", "S2T1", "S2T2", "S2T3",
         )
 
         val commonCodecs = arrayOf<String?>("VP8", "VP9", "H264", "AV1", "H265")
@@ -200,7 +219,7 @@ object VideoCodecScalabilityChecker {
                     val supported = supportedModes.contains(mode)
                     Log.i(
                         TAG,
-                        "    " + mode + ": " + (if (supported) "SUPPORTED" else "NOT SUPPORTED")
+                        "    " + mode + ": " + (if (supported) "SUPPORTED" else "NOT SUPPORTED"),
                     )
                 }
             }

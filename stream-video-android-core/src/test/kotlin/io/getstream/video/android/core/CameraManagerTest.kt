@@ -18,12 +18,12 @@ package io.getstream.video.android.core
 
 import android.hardware.camera2.CameraCharacteristics
 import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
-import io.mockk.every
-import io.mockk.mockk
-import org.junit.Test
 import io.getstream.webrtc.Camera2Enumerator
 import io.getstream.webrtc.CameraEnumerationAndroid.CaptureFormat
 import io.getstream.webrtc.EglBase
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.Test
 import kotlin.test.assertEquals
 
 class CameraManagerTest {

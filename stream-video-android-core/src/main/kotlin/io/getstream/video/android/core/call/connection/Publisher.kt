@@ -42,9 +42,6 @@ import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.iceRestartConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import io.getstream.webrtc.CameraEnumerationAndroid.CaptureFormat
 import io.getstream.webrtc.MediaConstraints
 import io.getstream.webrtc.MediaStream
@@ -55,6 +52,9 @@ import io.getstream.webrtc.RtpTransceiver
 import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
 import io.getstream.webrtc.RtpTransceiver.RtpTransceiverInit
 import io.getstream.webrtc.SessionDescription
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.PublishOption
@@ -321,7 +321,7 @@ internal class Publisher(
             VideoCodecScalabilityChecker.checkVideoCodecScalabilityModes()
 
             logger.d {
-                "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: ${init})"
+                "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: $init)"
             }
             logger.d {
                 "Transceiver init details - captureFormat: ${captureFormat?.let { "${it.width}x${it.height}@${it.framerate}fps" } ?: "null"}, publishOption: ${publishOption.track_type}, encodings count: ${init.size}"

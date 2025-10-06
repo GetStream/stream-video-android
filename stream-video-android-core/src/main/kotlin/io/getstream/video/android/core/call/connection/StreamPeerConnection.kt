@@ -36,9 +36,6 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.stringify
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import io.getstream.webrtc.CandidatePairChangeEvent
 import io.getstream.webrtc.DataChannel
 import io.getstream.webrtc.IceCandidateErrorEvent
@@ -51,6 +48,9 @@ import io.getstream.webrtc.RtpReceiver
 import io.getstream.webrtc.RtpTransceiver
 import io.getstream.webrtc.RtpTransceiver.RtpTransceiverInit
 import io.getstream.webrtc.SessionDescription
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import stream.video.sfu.models.TrackType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine

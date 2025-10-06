@@ -44,13 +44,6 @@ import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import io.getstream.webrtc.Camera2Capturer
 import io.getstream.webrtc.Camera2Enumerator
 import io.getstream.webrtc.CameraEnumerationAndroid
@@ -59,6 +52,13 @@ import io.getstream.webrtc.EglBase
 import io.getstream.webrtc.MediaStreamTrack
 import io.getstream.webrtc.ScreenCapturerAndroid
 import io.getstream.webrtc.SurfaceTextureHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import stream.video.sfu.models.VideoDimension
 import java.util.UUID
 import kotlin.coroutines.resumeWithException

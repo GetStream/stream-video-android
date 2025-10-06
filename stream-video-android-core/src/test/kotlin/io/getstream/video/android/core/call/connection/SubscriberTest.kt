@@ -23,6 +23,13 @@ import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
+import io.getstream.webrtc.MediaStream
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RtpReceiver
+import io.getstream.webrtc.RtpTransceiver
+import io.getstream.webrtc.SessionDescription
+import io.getstream.webrtc.VideoTrack
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -45,13 +52,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.robolectric.shadows.ShadowTrace.setEnabled
-import io.getstream.webrtc.MediaStream
-import io.getstream.webrtc.MediaStreamTrack
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RtpReceiver
-import io.getstream.webrtc.RtpTransceiver
-import io.getstream.webrtc.SessionDescription
-import io.getstream.webrtc.VideoTrack
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.ICERestartRequest
@@ -80,7 +80,9 @@ class SubscriberTest {
         override fun addTrack(track: io.getstream.webrtc.AudioTrack?): Boolean {
             val audioTracksField = MediaStream::class.java.getDeclaredField("audioTracks")
             audioTracksField.isAccessible = true
-            val audioTracks = audioTracksField.get(this) as MutableList<io.getstream.webrtc.AudioTrack>
+            val audioTracks = audioTracksField.get(
+                this,
+            ) as MutableList<io.getstream.webrtc.AudioTrack>
             audioTracks.add(track!!)
             return true
         }
@@ -88,7 +90,9 @@ class SubscriberTest {
         override fun addTrack(track: io.getstream.webrtc.VideoTrack?): Boolean {
             val videoTracksField = MediaStream::class.java.getDeclaredField("videoTracks")
             videoTracksField.isAccessible = true
-            val videoTracks = videoTracksField.get(this) as MutableList<io.getstream.webrtc.VideoTrack>
+            val videoTracks = videoTracksField.get(
+                this,
+            ) as MutableList<io.getstream.webrtc.VideoTrack>
             videoTracks.add(track!!)
             return true
         }

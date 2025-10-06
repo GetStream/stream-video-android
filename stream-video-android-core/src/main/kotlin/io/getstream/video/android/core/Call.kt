@@ -87,6 +87,10 @@ import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RendererCommon
+import io.getstream.webrtc.VideoSink
+import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -101,10 +105,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.threeten.bp.OffsetDateTime
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RendererCommon
-import io.getstream.webrtc.VideoSink
-import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType

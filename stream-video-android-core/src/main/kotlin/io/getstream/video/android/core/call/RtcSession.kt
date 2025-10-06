@@ -92,6 +92,11 @@ import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RTCStatsReport
+import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
+import io.getstream.webrtc.SessionDescription
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -120,11 +125,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
 import org.json.JSONArray
-import io.getstream.webrtc.MediaStreamTrack
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RTCStatsReport
-import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
-import io.getstream.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest

@@ -24,6 +24,12 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.utils.buildAudioConstraints
+import io.getstream.webrtc.DefaultVideoDecoderFactory
+import io.getstream.webrtc.DefaultVideoEncoderFactory
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RTCStats
+import io.getstream.webrtc.VideoCodecInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import okhttp3.Interceptor
@@ -31,12 +37,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.Test
-import io.getstream.webrtc.DefaultVideoDecoderFactory
-import io.getstream.webrtc.DefaultVideoEncoderFactory
-import io.getstream.webrtc.MediaStreamTrack
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RTCStats
-import io.getstream.webrtc.VideoCodecInfo
 import retrofit2.Retrofit
 import retrofit2.converter.wire.WireConverterFactory
 import stream.video.sfu.signal.UpdateMuteStatesRequest

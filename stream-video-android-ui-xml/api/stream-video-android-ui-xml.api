@@ -62,10 +62,10 @@ public final class io/getstream/video/android/xml/databinding/StreamVideoActivit
 }
 
 public final class io/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding : androidx/viewbinding/ViewBinding {
-	public final field participantView Lorg/webrtc/SurfaceViewRenderer;
+	public final field participantView Lio/getstream/webrtc/SurfaceViewRenderer;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Lorg/webrtc/SurfaceViewRenderer;
+	public fun getRoot ()Lio/getstream/webrtc/SurfaceViewRenderer;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
 }
@@ -94,7 +94,7 @@ public final class io/getstream/video/android/xml/databinding/StreamVideoViewCal
 	public final field labelHolder Landroidx/constraintlayout/widget/ConstraintLayout;
 	public final field participantAvatar Lio/getstream/video/android/xml/widget/avatar/AvatarView;
 	public final field participantLabel Landroid/widget/TextView;
-	public final field participantVideoRenderer Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;
+	public final field participantVideoRenderer Lio/getstream/video/android/core/renderer/VideoTextureViewRenderer;
 	public final field soundIndicator Landroid/widget/ImageView;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/StreamVideoViewCallParticipantBinding;
 	public fun getRoot ()Landroid/view/View;
@@ -141,7 +141,7 @@ public final class io/getstream/video/android/xml/databinding/StreamVideoViewOut
 public final class io/getstream/video/android/xml/databinding/StreamVideoViewScreenShareBinding : androidx/viewbinding/ViewBinding {
 	public final field changeOrientationButton Lio/getstream/video/android/xml/widget/control/ControlButtonView;
 	public final field fullscreenButton Lio/getstream/video/android/xml/widget/control/ControlButtonView;
-	public final field screenShare Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;
+	public final field screenShare Lio/getstream/video/android/core/renderer/VideoTextureViewRenderer;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/StreamVideoViewScreenShareBinding;
 	public fun getRoot ()Landroid/view/View;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lio/getstream/video/android/xml/databinding/StreamVideoViewScreenShareBinding;
@@ -752,7 +752,7 @@ public final class io/getstream/video/android/xml/widget/participant/PictureInPi
 }
 
 public abstract interface class io/getstream/video/android/xml/widget/participant/RendererInitializer {
-	public abstract fun initRenderer (Lio/getstream/webrtc/android/ui/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun initRenderer (Lio/getstream/video/android/core/renderer/VideoTextureViewRenderer;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class io/getstream/video/android/xml/widget/screenshare/ScreenShareStyle {

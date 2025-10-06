@@ -31,7 +31,6 @@ import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import kotlinx.coroutines.CoroutineScope
 import io.getstream.webrtc.AudioSource
 import io.getstream.webrtc.AudioTrack
 import io.getstream.webrtc.EglBase
@@ -45,11 +44,11 @@ import io.getstream.webrtc.PeerConnectionFactory
 import io.getstream.webrtc.ResolutionAdjustment
 import io.getstream.webrtc.RtpCapabilities
 import io.getstream.webrtc.SimulcastAlignedVideoEncoderFactory
-import io.getstream.webrtc.SoftwareVideoEncoderFactory
 import io.getstream.webrtc.VideoSource
 import io.getstream.webrtc.VideoTrack
 import io.getstream.webrtc.audio.JavaAudioDeviceModule
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import kotlinx.coroutines.CoroutineScope
 import stream.video.sfu.models.PublishOption
 import java.nio.ByteBuffer
 
