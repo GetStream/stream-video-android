@@ -185,6 +185,9 @@ dependencies {
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
 
+    //permission for telecom
+    implementation(libs.androidx.activity)
+
     //jetpack telecom
     implementation(libs.androidx.telecom)
 

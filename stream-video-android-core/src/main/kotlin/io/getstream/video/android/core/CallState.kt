@@ -106,6 +106,8 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.notifications.IncomingNotificationData
+import io.getstream.video.android.core.notifications.internal.telecom.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
@@ -686,8 +688,17 @@ public class CallState(
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
+    /**
+     * We re-create notification more than 1 times, so we don't want to
+     * overwrite to the notifications builder properties once it is already set
+     */
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
+
+    @InternalStreamVideoApi
+    var jetpackTelecomRepository: JetpackTelecomRepository? = null
+
+    internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }

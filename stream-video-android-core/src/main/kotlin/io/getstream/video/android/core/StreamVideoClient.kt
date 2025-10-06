@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.app.Application
 import android.content.Context
 import android.media.AudioAttributes
 import androidx.collection.LruCache
@@ -96,10 +97,11 @@ import io.getstream.video.android.core.model.toRequest
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
-import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
+import io.getstream.video.android.core.notifications.internal.telecom.StopServiceParam
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
+import io.getstream.video.android.core.notifications.internal.telecom.ui.TelecomPermissionHandler
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -172,6 +174,7 @@ internal class StreamVideoClient internal constructor(
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
+    internal val telecomConfig: TelecomConfig? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -221,7 +224,6 @@ internal class StreamVideoClient internal constructor(
         val callConfig = callServiceConfigRegistry.get(activeCall?.type ?: ANY_MARKER)
         val runCallServiceInForeground = callConfig.runCallServiceInForeground
         if (runCallServiceInForeground) {
-
             safeCall {
                 val serviceIntent = ServiceIntentBuilder().buildStopIntent(
                     context = context,
@@ -233,6 +235,11 @@ internal class StreamVideoClient internal constructor(
             }
         }
         activeCall?.leave()
+
+        val app = (context.applicationContext as Application)
+        with(app) {
+            unregisterActivityLifecycleCallbacks(TelecomPermissionHandler.instance(app))
+        }
     }
 
     /**

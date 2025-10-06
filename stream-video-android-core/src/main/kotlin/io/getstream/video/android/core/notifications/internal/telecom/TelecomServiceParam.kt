@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core.notifications.internal.telecom
 
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.model.StreamCallId
 
 data class StartServiceParam(
@@ -30,10 +32,3 @@ data class StopServiceParam(
     val call: Call? = null,
     val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
 )
-
-sealed class StopForegroundServiceSource(val source: String) {
-    data object CallAccept : StopForegroundServiceSource("accept the call")
-    data object SetActiveCall : StopForegroundServiceSource("set active call")
-    data object RemoveActiveCall : StopForegroundServiceSource("remove active call")
-    data object RemoveRingingCall : StopForegroundServiceSource("remove ringing call")
-}

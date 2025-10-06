@@ -16,9 +16,7 @@
 
 package io.getstream.video.android.core
 
-import android.content.Intent
 import androidx.compose.runtime.Stable
-import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.CallCreatedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.ConnectedEvent
@@ -27,10 +25,8 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
-import io.getstream.video.android.core.notifications.internal.service.StopForegroundServiceSource
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

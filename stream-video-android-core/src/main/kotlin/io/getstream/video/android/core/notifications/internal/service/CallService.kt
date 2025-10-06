@@ -39,7 +39,6 @@ import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
@@ -116,16 +115,15 @@ internal open class CallService : Service() {
          * @param trigger one of [TRIGGER_INCOMING_CALL], [TRIGGER_OUTGOING_CALL] or [TRIGGER_ONGOING_CALL]
          * @param callDisplayName the display name.
          */
-        @Deprecated("",level = DeprecationLevel.WARNING)
+        @Deprecated("", level = DeprecationLevel.WARNING)
         fun buildStartIntent(
             context: Context,
             callId: StreamCallId,
             trigger: String,
             callDisplayName: String? = null,
             callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
-        ): Intent
-        {
-            if(true) throw RuntimeException("Kyun aagaya idhar?")
+        ): Intent {
+            if (true) throw RuntimeException("Kyun aagaya idhar?")
             val serviceClass = callServiceConfiguration.serviceClass
             StreamLog.i(TAG) { "Resolved service class: $serviceClass" }
             val serviceIntent = Intent(context, serviceClass)
@@ -164,7 +162,7 @@ internal open class CallService : Service() {
          *
          * @param context the context.
          */
-        @Deprecated("",level = DeprecationLevel.ERROR)
+        @Deprecated("", level = DeprecationLevel.ERROR)
         fun buildStopIntent(
             context: Context,
             call: Call? = null,
@@ -185,7 +183,7 @@ internal open class CallService : Service() {
             intent.putExtra(EXTRA_STOP_SERVICE, true)
         }
 
-        @Deprecated("",level = DeprecationLevel.ERROR)
+        @Deprecated("", level = DeprecationLevel.ERROR)
         fun showIncomingCall(
             context: Context,
             callId: StreamCallId,
@@ -253,7 +251,7 @@ internal open class CallService : Service() {
             }
         }
 
-        @Deprecated("",level = DeprecationLevel.ERROR)
+        @Deprecated("", level = DeprecationLevel.ERROR)
         fun removeIncomingCall(
             context: Context,
             callId: StreamCallId,
@@ -675,7 +673,10 @@ internal open class CallService : Service() {
 
                     is RingingState.RejectedByAll -> {
                         ClientScope().launch {
-                            call.reject(RejectReason.Decline)
+                            call.reject(
+                                source = "RingingState.RejectedByAll",
+                                RejectReason.Decline,
+                            ) // noob 2
                         }
                         callSoundPlayer?.stopCallSound()
                         stopService()
@@ -890,7 +891,7 @@ internal open class CallService : Service() {
                 if (ringingState is RingingState.Outgoing) {
                     // If I'm calling, end the call for everyone
                     serviceScope.launch {
-                        call.reject(RejectReason.Custom("Android Service Task Removed"))
+                        call.reject("noob", RejectReason.Custom("Android Service Task Removed"))
                         logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
                     }
                 } else if (ringingState is RingingState.Incoming) {
@@ -900,7 +901,7 @@ internal open class CallService : Service() {
                     if (memberCount == 2) {
                         // ...and I'm the only one being called, end the call for both users
                         serviceScope.launch {
-                            call.reject()
+                            call.reject(source = "memberCount == 2")
                             logger.i { "[onTaskRemoved] Ended incoming call for both users." }
                         }
                     } else {

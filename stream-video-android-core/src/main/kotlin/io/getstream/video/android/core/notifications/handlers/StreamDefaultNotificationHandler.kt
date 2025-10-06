@@ -49,6 +49,8 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.IncomingNotificationAction
+import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -56,7 +58,6 @@ import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
@@ -312,6 +313,19 @@ constructor(
                 callId,
                 payload = payload,
             )
+
+            val streamVideo = StreamVideo.instanceOrNull()
+            streamVideo?.let { streamVideoInstance ->
+                val call = streamVideoInstance.call(callId.type, callId.id)
+                val map = HashMap<IncomingNotificationAction, PendingIntent>()
+                acceptCallPendingIntent?.let { pendingIntent ->
+                    map[IncomingNotificationAction.Accept] = pendingIntent
+                }
+                rejectCallPendingIntent?.let { pendingIntent ->
+                    map[IncomingNotificationAction.Reject] = pendingIntent
+                }
+                call.state.incomingNotificationData = IncomingNotificationData(map)
+            }
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                 getIncomingCallNotification(

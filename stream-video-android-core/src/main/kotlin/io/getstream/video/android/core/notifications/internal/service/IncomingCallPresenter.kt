@@ -25,16 +25,13 @@ import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
-import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
+import io.getstream.video.android.core.notifications.internal.telecom.StartServiceParam
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 
 class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuilder) {
-    private val logger by taggedLogger("ServiceTriggers")
+    private val logger by taggedLogger("IncomingCallPresenter")
 
     fun showIncomingCall(
         context: Context,
