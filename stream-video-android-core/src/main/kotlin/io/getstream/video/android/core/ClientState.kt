@@ -25,6 +25,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
@@ -94,6 +95,14 @@ class ClientState(private val client: StreamVideo) {
         val activeOrRingingCall = hasActiveCall || hasRingingCall
         logger.d { "[hasActiveOrRingingCall] active: $hasActiveCall, ringing: $hasRingingCall" }
         activeOrRingingCall
+    }
+
+    fun getTelecomIntegrationType(): TelecomIntegrationType? {
+        return if (streamVideoClient.telecomConfig != null) {
+            streamVideoClient.telecomConfig.integrationType
+        } else {
+            null
+        }
     }
 
     /**

@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import android.app.Application
 import android.content.Context
 import android.media.AudioAttributes
 import androidx.collection.LruCache
@@ -101,7 +100,6 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.telecom.StopServiceParam
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
-import io.getstream.video.android.core.notifications.internal.telecom.ui.TelecomPermissionHandler
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
@@ -235,11 +233,6 @@ internal class StreamVideoClient internal constructor(
             }
         }
         activeCall?.leave()
-
-        val app = (context.applicationContext as Application)
-        with(app) {
-            unregisterActivityLifecycleCallbacks(TelecomPermissionHandler.instance(app))
-        }
     }
 
     /**

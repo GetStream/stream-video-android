@@ -5760,6 +5760,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getServiceLauncher ()Lio/getstream/video/android/core/notifications/internal/service/ServiceLauncher;
+	public final fun getTelecomIntegrationType ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleError (Lio/getstream/result/Error;)V
 	public final fun handleEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
@@ -10446,7 +10447,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 public final class io/getstream/video/android/core/notifications/internal/service/ServiceLauncher {
 	public fun <init> (Landroid/content/Context;)V
 	public final fun getContext ()Landroid/content/Context;
-	public final fun getTelecomPermissions ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomPermissions;
 	public final fun removeIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)V
 	public static synthetic fun removeIncomingCall$default (Lio/getstream/video/android/core/notifications/internal/service/ServiceLauncher;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ILjava/lang/Object;)V
 	public final fun showIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZLjava/util/Map;Lio/getstream/video/android/core/StreamVideo;Landroid/app/Notification;)V
@@ -10552,7 +10552,6 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public final fun getCurrentCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getOnIsCallActive ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnIsCallAnswered ()Lkotlin/jvm/functions/Function2;
-	public final fun getOnIsCallDisconnected ()Lkotlin/jvm/functions/Function2;
 	public final fun getOnIsCallInactive ()Lkotlin/jvm/functions/Function1;
 	public final fun registerCall (Ljava/lang/String;Landroid/net/Uri;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -10798,13 +10797,13 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomConfig {
-	public fun <init> (Ljava/lang/String;Z)V
+	public fun <init> (Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Z
-	public final fun copy (Ljava/lang/String;Z)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;Ljava/lang/String;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;
+	public final fun component2 ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
+	public final fun copy (Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getRequestPermissionOnAppLaunch ()Z
+	public final fun getIntegrationType ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
 	public final fun getSchema ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -10815,38 +10814,20 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public final fun canUseJetpackTelecom ()Z
 }
 
+public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType : java/lang/Enum {
+	public static final field JETPACK_TELECOM Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
+	public static fun values ()[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
+}
+
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomPermissions {
 	public fun <init> ()V
 	public final fun canUseTelecom (Landroid/content/Context;)Z
 	public final fun getRequiredPermissionsArray ()[Ljava/lang/String;
-	public final fun getRequiredPermissionsList ()Ljava/util/List;
+	public final fun getRequiredPermissionsArray (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;)[Ljava/lang/String;
 	public final fun hasPermissions (Landroid/content/Context;)Z
-	public final fun requestPermissions (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function1;)V
 	public final fun supportsTelecom (Landroid/content/Context;)Z
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/ui/ActivityLifecycleCallbacks : android/app/Application$ActivityLifecycleCallbacks {
-	public fun <init> ()V
-	public fun onActivityCreated (Landroid/app/Activity;Landroid/os/Bundle;)V
-	public fun onActivityDestroyed (Landroid/app/Activity;)V
-	public fun onActivityPaused (Landroid/app/Activity;)V
-	public fun onActivityResumed (Landroid/app/Activity;)V
-	public fun onActivitySaveInstanceState (Landroid/app/Activity;Landroid/os/Bundle;)V
-	public fun onActivityStarted (Landroid/app/Activity;)V
-	public fun onActivityStopped (Landroid/app/Activity;)V
-	public fun onFirstActivityStarted (Landroid/app/Activity;)V
-	public fun onLastActivityStopped (Landroid/app/Activity;)V
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/ui/TelecomPermissionHandler : io/getstream/android/push/permissions/ActivityLifecycleCallbacks {
-	public static final field Companion Lio/getstream/video/android/core/notifications/internal/telecom/ui/TelecomPermissionHandler$Companion;
-	public fun onActivityStarted (Landroid/app/Activity;)V
-	public fun onFirstActivityStarted (Landroid/app/Activity;)V
-	public fun onLastActivityStopped (Landroid/app/Activity;)V
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/ui/TelecomPermissionHandler$Companion {
-	public final fun instance (Landroid/app/Application;)Lio/getstream/video/android/core/notifications/internal/telecom/ui/TelecomPermissionHandler;
 }
 
 public final class io/getstream/video/android/core/notifications/medianotifications/MediaNotificationConfig {

@@ -299,7 +299,7 @@ class JetpackTelecomRepository(
     /**
      * Can the call perform a disconnect
      */
-    val onIsCallDisconnected: suspend (cause: DisconnectCause) -> Unit = { cause ->
+    private val onIsCallDisconnected: suspend (cause: DisconnectCause) -> Unit = { cause ->
         logger.d { "[onIsCallDisconnected] with cause $cause" }
         updateCurrentCall {
             TelecomCall.Unregistered(id, callAttributes, cause)

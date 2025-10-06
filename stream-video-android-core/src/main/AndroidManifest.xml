@@ -116,6 +116,5 @@
             android:foregroundServiceType="microphone|shortService"
             android:exported="false" />
 
-        <activity android:name=".notifications.internal.telecom.ui.TelecomPermissionRequestActivity"/>
     </application>
 </manifest>

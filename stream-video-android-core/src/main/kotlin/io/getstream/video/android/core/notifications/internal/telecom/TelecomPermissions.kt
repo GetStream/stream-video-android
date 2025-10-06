@@ -16,35 +16,51 @@
 
 package io.getstream.video.android.core.notifications.internal.telecom
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.telecom.TelecomManager
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.internal.telecom.ui.TelecomPermissionRequestActivity
 
-public class TelecomPermissions {
+class TelecomPermissions {
 
-    private val logger: TaggedLogger by taggedLogger("StreamVideo:TelecomPermissions")
+    private val logger: TaggedLogger by taggedLogger("TelecomPermissions")
     private val telecomHelper = TelecomHelper()
 
-    fun getRequiredPermissionsList(): List<String> {
+    private fun getRequiredPermissionsList(): List<String> {
         val permissions = mutableListOf<String>()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             with(permissions) {
                 add(android.Manifest.permission.MANAGE_OWN_CALLS)
                 if (!telecomHelper.canUseJetpackTelecom()) {
-                    add(android.Manifest.permission.READ_PHONE_NUMBERS)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        add(android.Manifest.permission.READ_PHONE_NUMBERS)
+                    }
+                    add(android.Manifest.permission.CALL_PHONE)
+                }
+            }
+        }
+        return permissions
+    }
+
+    private fun getRequiredPermissionsList(telecomIntegrationType: TelecomIntegrationType): List<String> {
+        val permissions = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            with(permissions) {
+                add(android.Manifest.permission.MANAGE_OWN_CALLS)
+                if (telecomIntegrationType == TelecomIntegrationType.JETPACK_TELECOM) {
+                    // Do nothing
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        add(android.Manifest.permission.READ_PHONE_NUMBERS)
+                    }
+                    add(android.Manifest.permission.CALL_PHONE)
                 }
             }
         }
@@ -55,23 +71,20 @@ public class TelecomPermissions {
         return getRequiredPermissionsList().toTypedArray()
     }
 
+    fun getRequiredPermissionsArray(telecomIntegrationType: TelecomIntegrationType): Array<String> {
+        return getRequiredPermissionsList(telecomIntegrationType).toTypedArray()
+    }
+
     fun hasPermissions(context: Context): Boolean {
         return getRequiredPermissionsArray().all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    internal fun requestPermissions(
-        activity: Activity,
-        launcher: ActivityResultLauncher<Intent>,
-    ) {
-        val intent = Intent(activity, TelecomPermissionRequestActivity::class.java)
-        launcher.launch(intent)
-    }
+    private fun optedForTelecom() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.telecomConfig != null
 
     fun canUseTelecom(context: Context): Boolean {
-        val hasTelecomConfig = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.telecomConfig != null
-        return hasTelecomConfig && supportsTelecom(context) && hasPermissions(context)
+        return optedForTelecom() && supportsTelecom(context) && hasPermissions(context)
     }
 
     fun supportsTelecom(context: Context): Boolean {
@@ -82,33 +95,5 @@ public class TelecomPermissions {
         val hasDefaultDialer = telecomManager?.defaultDialerPackage?.isNotEmpty() == true
 
         return hasTelephony && hasDefaultDialer
-    }
-
-    fun requestPermissions(activity: ComponentActivity, callback: (Boolean) -> Unit) {
-        if (!supportsTelecom(activity)) {
-            logger.d { "Telecom not supported on this device" }
-            callback(false)
-            return
-        }
-
-        if (hasPermissions(activity)) {
-            callback(true)
-            return
-        }
-
-        // Register a launcher on the fly
-        val launcher: ActivityResultLauncher<Intent> =
-            activity.activityResultRegistry.register(
-                "telecom_${System.currentTimeMillis()}",
-                ActivityResultContracts.StartActivityForResult(),
-            ) { result ->
-                val granted = result.resultCode == Activity.RESULT_OK &&
-                    (result.data?.getBooleanExtra(TelecomPermissionRequestActivity.INTENT_EXTRA_TELECOM_PERMISSION_GRANTED, false) ?: false)
-                logger.d { "Telecom Permission granted: $granted" }
-                callback(granted)
-            }
-
-        val intent = Intent(activity, TelecomPermissionRequestActivity::class.java)
-        launcher.launch(intent)
     }
 }

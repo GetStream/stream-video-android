@@ -31,6 +31,7 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.TelecomIntegrationType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
@@ -292,7 +293,10 @@ object StreamVideoInitHelper {
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-            telecomConfig = TelecomConfig(context.packageName, true),
+            telecomConfig = TelecomConfig(
+                context.packageName,
+                TelecomIntegrationType.JETPACK_TELECOM,
+            ),
         ).build()
     }
 }

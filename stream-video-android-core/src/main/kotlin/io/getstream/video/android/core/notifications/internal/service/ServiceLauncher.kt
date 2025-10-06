@@ -63,19 +63,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * TODO Rahul change the name of the class its a decision maker class which will decide which
- * which service to pick
- */
 class ServiceLauncher(val context: Context) {
 
     private val logger by taggedLogger("ServiceTriggers")
     private val serviceIntentBuilder = ServiceIntentBuilder()
     private val incomingCallPresenter = IncomingCallPresenter(serviceIntentBuilder)
     private val telecomHelper = TelecomHelper()
-    val telecomPermissions = TelecomPermissions()
+    private val telecomPermissions = TelecomPermissions()
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "NewApi")
     fun showIncomingCall(
         context: Context,
         callId: StreamCallId,
@@ -96,33 +92,30 @@ class ServiceLauncher(val context: Context) {
         logger.d { "[showIncomingCall] service start result: $result" }
         if (telecomPermissions.canUseTelecom(context)) {
             if (telecomHelper.canUseJetpackTelecom()) {
-                // TODO Rahul, correctly use result to launch telecom
                 when (result) {
-                    ShowIncomingCallResult.FG_SERVICE -> {}
-                    ShowIncomingCallResult.SERVICE -> {}
-                    ShowIncomingCallResult.ONLY_NOTIFICATION -> {}
-                    ShowIncomingCallResult.ERROR -> {}
-                }
+                    ShowIncomingCallResult.FG_SERVICE -> {
+                        updateIncomingCallNotification(notification, streamVideo, callId)
 
-                updateIncomingCallNotification(notification, streamVideo, callId)
+                        val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
 
-                val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
+                        val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
+                        val addressUri = "$appSchema:${callId.id}".toUri()
+                        val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
 
-                val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
-                val addressUri = "$appSchema:${callId.id}".toUri()
-                val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
+                        val call = streamVideo.call(callId.type, callId.id)
 
-                val call = streamVideo.call(callId.type, callId.id)
+                        call.state.jetpackTelecomRepository = (jetpackTelecomRepository)
 
-                call.state.jetpackTelecomRepository = (jetpackTelecomRepository)
-
-                call.scope.launch {
-                    jetpackTelecomRepository.registerCall(
-                        formattedCallDisplayName,
-                        addressUri,
-                        true,
-                        isVideo,
-                    )
+                        call.scope.launch {
+                            jetpackTelecomRepository.registerCall(
+                                formattedCallDisplayName,
+                                addressUri,
+                                true,
+                                isVideo,
+                            )
+                        }
+                    }
+                    else -> {}
                 }
             }
         }
@@ -147,6 +140,7 @@ class ServiceLauncher(val context: Context) {
         ContextCompat.startForegroundService(context, serviceIntent)
     }
 
+    @SuppressLint("NewApi")
     fun showOutgoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
         val callConfig = (streamVideo as StreamVideoClient).callServiceConfigRegistry.get(call.type)
         if (!callConfig.runCallServiceInForeground) {
@@ -164,7 +158,10 @@ class ServiceLauncher(val context: Context) {
 
         ContextCompat.startForegroundService(context, serviceIntent)
 
-        val callDisplayName = "NOT SET YET" // TODO Rahul
+        /**
+         * TODO We don't have api to directly render text as display name. Need more research
+         */
+        val callDisplayName = "NOT SET YET"
 
         val telecomPermissions = TelecomPermissions()
         val telecomHelper = TelecomHelper()

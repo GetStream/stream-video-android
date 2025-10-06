@@ -814,9 +814,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         acceptOrJoinNewCall(call, onSuccess, onError) {
             logger.d { "Join call, ${call.cid}" }
             it.join()
-                .onSuccess {
-                    // TODO Rahul, maybe invoke telecom
-                }
         }
     }
 

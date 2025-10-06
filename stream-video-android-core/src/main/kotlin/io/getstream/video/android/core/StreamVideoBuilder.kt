@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core
 
-import android.app.Application
 import android.app.Notification
 import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -34,7 +33,6 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
-import io.getstream.video.android.core.notifications.internal.telecom.ui.TelecomPermissionHandler
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.common.scope.ClientScope
@@ -303,20 +301,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         scope.launch {
             val location = client.loadLocationAsync().await()
             streamLog { "location initialized: ${location.getOrNull()}" }
-        }
-
-        /**
-         * TODO Rahul Later: Ask telecom permission (maybe not needed at startup because we should have registered it in the Content provider)
-         */
-        telecomConfig?.let {
-            if (it.requestPermissionOnAppLaunch) {
-                val app = (context.applicationContext as Application)
-                with(app) {
-                    registerActivityLifecycleCallbacks(
-                        TelecomPermissionHandler.instance(app),
-                    )
-                }
-            }
         }
 
         // Installs Stream Video instance
