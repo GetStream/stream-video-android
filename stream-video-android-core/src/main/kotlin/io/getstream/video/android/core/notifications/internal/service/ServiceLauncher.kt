@@ -114,13 +114,14 @@ class ServiceLauncher(val context: Context) {
 
                 val call = streamVideo.call(callId.type, callId.id)
 
-                call.state.jetpackTelecomRepository = jetpackTelecomRepository
+                call.state.jetpackTelecomRepository = (jetpackTelecomRepository)
 
                 call.scope.launch {
                     jetpackTelecomRepository.registerCall(
                         formattedCallDisplayName,
                         addressUri,
                         true,
+                        isVideo,
                     )
                 }
             }
@@ -144,40 +145,6 @@ class ServiceLauncher(val context: Context) {
             ),
         )
         ContextCompat.startForegroundService(context, serviceIntent)
-
-//        val callDisplayName = "ON GOING CALL NOT SET" // TODO Rahul Later
-//        val telecomPermissions = TelecomPermissions()
-//        if (telecomPermissions.canUseTelecom(context)) {
-//            if (telecomHelper.canUseJetpackTelecom()) {
-//                /**
-//                 * Do nothing, the logic already handled in [StreamCallActivity.accept()]
-//                 */
-//                val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
-//
-//                val appSchema = streamVideo.telecomConfig?.schema
-//                val addressUri = "$appSchema:${callId.id}".toUri()
-//                val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
-//
-//                call.state.jetpackTelecomRepository = jetpackTelecomRepository
-//
-//                call.scope.launch {
-//                    jetpackTelecomRepository.registerCall(
-//                        formattedCallDisplayName,
-//                        addressUri,
-//                        true,
-//                    )
-//                }
-//            }
-        //            else {
-//                telecomServiceLauncher.addOnGoingCall(
-//                    context,
-//                    callId = StreamCallId(call.type, call.id),
-//                    callDisplayName = callDisplayName,
-//                    isVideo = call.isVideoEnabled(),
-//                    streamVideo = streamVideo,
-//                )
-//            }
-//        }
     }
 
     fun showOutgoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
@@ -218,6 +185,7 @@ class ServiceLauncher(val context: Context) {
                             formattedCallDisplayName,
                             addressUri,
                             false,
+                            call.isVideoEnabled(),
                         )
                     }
                     launch {
@@ -270,7 +238,6 @@ class ServiceLauncher(val context: Context) {
     }
 
     fun stopService(call: Call) {
-//        logger.d { "stopService, call id: ${call.cid}, source: ${stopForegroundServiceSource.source}" }
         stopCallServiceInternal(call)
     }
 

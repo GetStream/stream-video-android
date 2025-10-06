@@ -36,7 +36,7 @@ class TelecomCallController(val context: Context) {
                         DisconnectCause(
                             DisconnectCause.LOCAL,
                         ),
-                        DisconnectSource.PHONE,
+                        InteractionSource.PHONE,
                     ),
                 )
             }

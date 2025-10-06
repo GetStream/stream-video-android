@@ -35,7 +35,7 @@ sealed interface TelecomCallAction : Parcelable {
     @Parcelize
     data class Disconnect(
         val cause: DisconnectCause,
-        val source: DisconnectSource,
+        val source: InteractionSource,
     ) : TelecomCallAction
 
     @Parcelize
@@ -54,6 +54,6 @@ sealed interface TelecomCallAction : Parcelable {
     data class TransferCall(val endpointId: ParcelUuid) : TelecomCallAction
 }
 
-enum class DisconnectSource {
-    PHONE,
+enum class InteractionSource {
+    PHONE, WEARABLE
 }

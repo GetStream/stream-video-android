@@ -10531,18 +10531,19 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/telecom/DisconnectSource : java/lang/Enum {
-	public static final field PHONE Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
-	public static fun values ()[Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/IncomingCallTelecomAction {
 	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/notifications/internal/service/IncomingCallPresenter;)V
 	public final fun onAnswer (Lio/getstream/video/android/model/StreamCallId;)V
 	public final fun onDisconnect (Lio/getstream/video/android/model/StreamCallId;)V
 	public final fun onShowIncomingCallUi (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;)V
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/InteractionSource : java/lang/Enum {
+	public static final field PHONE Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
+	public static final field WEARABLE Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
+	public static fun values ()[Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/JetpackTelecomRepository {
@@ -10553,7 +10554,7 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public final fun getOnIsCallAnswered ()Lkotlin/jvm/functions/Function2;
 	public final fun getOnIsCallDisconnected ()Lkotlin/jvm/functions/Function2;
 	public final fun getOnIsCallInactive ()Lkotlin/jvm/functions/Function1;
-	public final fun registerCall (Ljava/lang/String;Landroid/net/Uri;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun registerCall (Ljava/lang/String;Landroid/net/Uri;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/OutgoingCallTelecomAction {
@@ -10686,15 +10687,15 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;)V
+	public fun <init> (Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;)V
 	public final fun component1 ()Landroid/telecom/DisconnectCause;
-	public final fun component2 ()Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
-	public final fun copy (Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
+	public final fun component2 ()Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
+	public final fun copy (Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCause ()Landroid/telecom/DisconnectCause;
-	public final fun getSource ()Lio/getstream/video/android/core/notifications/internal/telecom/DisconnectSource;
+	public final fun getSource ()Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V

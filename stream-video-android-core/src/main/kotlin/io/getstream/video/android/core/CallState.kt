@@ -1147,8 +1147,10 @@ public class CallState(
         val acceptedBy = _acceptedBy.value
         val isAcceptedByMe = _acceptedBy.value.contains(client.userId)
         val createdBy = _createdBy.value
-        val hasActiveCall = client.state.activeCall.value != null && client.state.activeCall.value?.id == call.id
-        val hasRingingCall = client.state.ringingCall.value != null && client.state.ringingCall.value?.id == call.id
+        val hasActiveCall =
+            client.state.activeCall.value != null && client.state.activeCall.value?.id == call.id
+        val hasRingingCall =
+            client.state.ringingCall.value != null && client.state.ringingCall.value?.id == call.id
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size

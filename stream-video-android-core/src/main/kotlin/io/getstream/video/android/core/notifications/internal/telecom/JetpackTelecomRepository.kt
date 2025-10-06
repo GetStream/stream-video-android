@@ -53,7 +53,12 @@ class JetpackTelecomRepository(
      */
     @RequiresPermission(Manifest.permission.MANAGE_OWN_CALLS)
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun registerCall(displayName: String, address: Uri, isIncoming: Boolean) {
+    suspend fun registerCall(
+        displayName: String,
+        address: Uri,
+        isIncoming: Boolean,
+        isVideoCall: Boolean,
+    ) {
         logger.d { "[registerCall]" }
         // For simplicity we don't support multiple calls
         if (_currentCall.value is TelecomCall.Registered) {
@@ -70,7 +75,11 @@ class JetpackTelecomRepository(
             } else {
                 CallAttributesCompat.DIRECTION_OUTGOING
             },
-            callType = CallAttributesCompat.CALL_TYPE_AUDIO_CALL,
+            callType = if (isVideoCall) {
+                CallAttributesCompat.CALL_TYPE_VIDEO_CALL
+            } else {
+                CallAttributesCompat.CALL_TYPE_AUDIO_CALL
+            },
             callCapabilities = (
                 CallAttributesCompat.SUPPORTS_SET_INACTIVE
                     or CallAttributesCompat.SUPPORTS_STREAM
