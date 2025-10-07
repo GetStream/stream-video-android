@@ -38,12 +38,6 @@ class TelecomPermissions {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             with(permissions) {
                 add(android.Manifest.permission.MANAGE_OWN_CALLS)
-                if (!telecomHelper.canUseJetpackTelecom()) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        add(android.Manifest.permission.READ_PHONE_NUMBERS)
-                    }
-                    add(android.Manifest.permission.CALL_PHONE)
-                }
             }
         }
         return permissions
@@ -55,14 +49,6 @@ class TelecomPermissions {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             with(permissions) {
                 add(android.Manifest.permission.MANAGE_OWN_CALLS)
-                if (telecomIntegrationType == TelecomIntegrationType.JETPACK_TELECOM) {
-                    // Do nothing
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        add(android.Manifest.permission.READ_PHONE_NUMBERS)
-                    }
-                    add(android.Manifest.permission.CALL_PHONE)
-                }
             }
         }
         return permissions
