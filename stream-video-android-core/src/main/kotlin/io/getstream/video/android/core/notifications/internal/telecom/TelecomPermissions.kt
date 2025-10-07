@@ -30,7 +30,6 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 class TelecomPermissions {
 
     private val logger: TaggedLogger by taggedLogger("TelecomPermissions")
-    private val telecomHelper = TelecomHelper()
 
     private fun getRequiredPermissionsList(): List<String> {
         val permissions = mutableListOf<String>()

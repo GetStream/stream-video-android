@@ -35,13 +35,10 @@ package io.getstream.video.android.core.notifications.internal.service
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
@@ -49,10 +46,8 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
-import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
 import io.getstream.video.android.core.utils.safeCallWithResult
@@ -68,6 +63,7 @@ internal class ServiceLauncher(val context: Context) {
     private val incomingCallPresenter = IncomingCallPresenter(serviceIntentBuilder)
     private val telecomHelper = TelecomHelper()
     private val telecomPermissions = TelecomPermissions()
+    private val jetpackTelecomRepositoryProvider = JetpackTelecomRepositoryProvider(context)
 
     @SuppressLint("MissingPermission", "NewApi")
     fun showIncomingCall(
@@ -94,7 +90,7 @@ internal class ServiceLauncher(val context: Context) {
                     ShowIncomingCallResult.FG_SERVICE -> {
                         updateIncomingCallNotification(notification, streamVideo, callId)
 
-                        val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
+                        val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(callId)
 
                         val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
                         val addressUri = "$appSchema:${callId.id}".toUri()
@@ -165,7 +161,7 @@ internal class ServiceLauncher(val context: Context) {
         val telecomHelper = TelecomHelper()
         if (telecomPermissions.canUseTelecom(callConfig, context)) {
             if (telecomHelper.canUseJetpackTelecom()) {
-                val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
+                val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(callId)
 
                 val appSchema = streamVideo.telecomConfig?.schema
                 val addressUri = "$appSchema:${callId.id}".toUri()
@@ -234,22 +230,6 @@ internal class ServiceLauncher(val context: Context) {
 
     fun stopService(call: Call) {
         stopCallServiceInternal(call)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun getJetpackTelecomRepository(callId: StreamCallId): JetpackTelecomRepository {
-        val callsManager = CallsManager(context).apply {
-            registerAppWithTelecom(
-                capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
-                    CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
-            )
-        }
-
-        val streamVideo = StreamVideo.instance()
-        val incomingCallTelecomAction =
-            IncomingCallTelecomAction(streamVideo)
-        logger.d { "[getJetpackTelecomRepository] hashcode callsManager:${callsManager.hashCode()}" }
-        return JetpackTelecomRepository(callsManager, callId, incomingCallTelecomAction)
     }
 
     private fun stopCallServiceInternal(call: Call) {
