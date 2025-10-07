@@ -67,19 +67,4 @@ internal class IncomingCallTelecomAction(
             else -> {}
         }
     }
-
-    fun onShowIncomingCallUi(
-        callId: StreamCallId,
-        callDisplayName: String?,
-        callServiceConfiguration: CallServiceConfig,
-        notification: Notification?,
-    ) {
-        incomingCallPresenter.showIncomingCall(
-            context,
-            callId,
-            callDisplayName,
-            callServiceConfiguration,
-            notification,
-        )
-    }
 }
