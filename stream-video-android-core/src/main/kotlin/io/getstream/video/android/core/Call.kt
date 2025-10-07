@@ -765,7 +765,7 @@ public class Call(
     private var reconnectJob: Job? = null
 
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
-        logger.d { "[schedule] #reconnect; no args" } // noob 4
+        logger.d { "[schedule] #reconnect; no args" }
 
         streamSingleFlightProcessorImpl.run(key, block)
     }

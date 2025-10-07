@@ -486,7 +486,7 @@ internal open class CallService : Service() {
                             call.reject(
                                 source = "RingingState.RejectedByAll",
                                 RejectReason.Decline,
-                            ) // noob 2
+                            )
                         }
                         callSoundPlayer?.stopCallSound()
                         stopService()
