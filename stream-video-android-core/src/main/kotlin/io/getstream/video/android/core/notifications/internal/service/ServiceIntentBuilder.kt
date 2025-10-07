@@ -33,7 +33,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.StopServic
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
 
-class ServiceIntentBuilder {
+internal class ServiceIntentBuilder {
 
     private val logger by taggedLogger("TelecomIntentBuilder")
 

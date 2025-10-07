@@ -28,7 +28,7 @@ import kotlinx.parcelize.Parcelize
  * Note: we are using [Parcelize] to make the actions parcelable so they can be directly used in the
  * call notification.
  */
-sealed interface TelecomCallAction : Parcelable {
+internal sealed interface TelecomCallAction : Parcelable {
     @Parcelize
     data class Answer(val isAudioCall: Boolean) : TelecomCallAction
 
@@ -54,6 +54,6 @@ sealed interface TelecomCallAction : Parcelable {
     data class TransferCall(val endpointId: ParcelUuid) : TelecomCallAction
 }
 
-enum class InteractionSource {
+internal enum class InteractionSource {
     PHONE, WEARABLE
 }

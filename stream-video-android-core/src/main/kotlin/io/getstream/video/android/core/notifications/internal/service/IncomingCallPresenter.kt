@@ -30,7 +30,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.StartServi
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 
-class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuilder) {
+internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuilder) {
     private val logger by taggedLogger("IncomingCallPresenter")
 
     fun showIncomingCall(
@@ -109,6 +109,6 @@ class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuild
     }
 }
 
-enum class ShowIncomingCallResult {
+internal enum class ShowIncomingCallResult {
     FG_SERVICE, SERVICE, ONLY_NOTIFICATION, ERROR
 }

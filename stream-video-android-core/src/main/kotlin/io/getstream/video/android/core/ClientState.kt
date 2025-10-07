@@ -84,7 +84,7 @@ class ClientState(private val client: StreamVideo) {
     public val activeCall: StateFlow<Call?> = _activeCall
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
-    val serviceLauncher = ServiceLauncher(client.context)
+    private val serviceLauncher = ServiceLauncher(client.context)
 
     /**
      * Returns true if there is an active or ringing call

@@ -36,9 +36,9 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class JetpackTelecomRepository(
+internal class JetpackTelecomRepository(
     private val callsManager: CallsManager,
-    val callId: StreamCallId,
+    private val callId: StreamCallId,
     private val incomingCallTelecomAction: IncomingCallTelecomAction,
 ) {
     private val logger by taggedLogger("JetpackTelecomRepository")

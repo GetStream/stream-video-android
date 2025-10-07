@@ -5759,7 +5759,6 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun getCallConfigRegistry ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingCall ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getServiceLauncher ()Lio/getstream/video/android/core/notifications/internal/service/ServiceLauncher;
 	public final fun getTelecomIntegrationType ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleError (Lio/getstream/result/Error;)V
@@ -10433,135 +10432,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun getLivestreamGuestCallServiceConfig ()Ljava/util/Map;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/service/IncomingCallPresenter {
-	public fun <init> (Lio/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder;)V
-	public final fun showIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;)Lio/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/ServiceIntentBuilder {
-	public fun <init> ()V
-	public final fun buildStartIntent (Landroid/content/Context;Lio/getstream/video/android/core/notifications/internal/telecom/StartServiceParam;)Landroid/content/Intent;
-	public final fun buildStopIntent (Landroid/content/Context;Lio/getstream/video/android/core/notifications/internal/telecom/StopServiceParam;)Landroid/content/Intent;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/ServiceLauncher {
-	public fun <init> (Landroid/content/Context;)V
-	public final fun getContext ()Landroid/content/Context;
-	public final fun removeIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)V
-	public static synthetic fun removeIncomingCall$default (Lio/getstream/video/android/core/notifications/internal/service/ServiceLauncher;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ILjava/lang/Object;)V
-	public final fun showIncomingCall (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZLjava/util/Map;Lio/getstream/video/android/core/StreamVideo;Landroid/app/Notification;)V
-	public final fun showOnGoingCall (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lio/getstream/video/android/core/StreamVideo;)V
-	public final fun showOutgoingCall (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lio/getstream/video/android/core/StreamVideo;)V
-	public final fun stopService (Lio/getstream/video/android/core/Call;)V
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult : java/lang/Enum {
-	public static final field ERROR Lio/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult;
-	public static final field FG_SERVICE Lio/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult;
-	public static final field ONLY_NOTIFICATION Lio/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult;
-	public static final field SERVICE Lio/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult;
-	public static fun values ()[Lio/getstream/video/android/core/notifications/internal/service/ShowIncomingCallResult;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/StartServiceParam {
-	public fun <init> (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)V
-	public synthetic fun <init> (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lio/getstream/video/android/model/StreamCallId;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public final fun copy (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)Lio/getstream/video/android/core/notifications/internal/service/StartServiceParam;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/StartServiceParam;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/StartServiceParam;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCallDisplayName ()Ljava/lang/String;
-	public final fun getCallId ()Lio/getstream/video/android/model/StreamCallId;
-	public final fun getCallServiceConfiguration ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public final fun getTrigger ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource {
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getSource ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$CallAccept : io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource {
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$CallAccept;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$RemoveActiveCall : io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource {
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$RemoveActiveCall;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$RemoveRingingCall : io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource {
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$RemoveRingingCall;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$SetActiveCall : io/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource {
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/service/StopForegroundServiceSource$SetActiveCall;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/service/StopServiceParam {
-	public fun <init> ()V
-	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lio/getstream/video/android/core/Call;
-	public final fun component2 ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public final fun copy (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)Lio/getstream/video/android/core/notifications/internal/service/StopServiceParam;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/StopServiceParam;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/StopServiceParam;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCall ()Lio/getstream/video/android/core/Call;
-	public final fun getCallServiceConfiguration ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/IncomingCallTelecomAction {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/notifications/internal/service/IncomingCallPresenter;)V
-	public final fun onAnswer (Lio/getstream/video/android/model/StreamCallId;)V
-	public final fun onDisconnect (Lio/getstream/video/android/model/StreamCallId;)V
-	public final fun onShowIncomingCallUi (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/app/Notification;)V
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/InteractionSource : java/lang/Enum {
-	public static final field PHONE Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
-	public static final field WEARABLE Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
-	public static fun values ()[Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/JetpackTelecomRepository {
-	public fun <init> (Landroidx/core/telecom/CallsManager;Lio/getstream/video/android/model/StreamCallId;Lio/getstream/video/android/core/notifications/internal/telecom/IncomingCallTelecomAction;)V
-	public final fun getCallId ()Lio/getstream/video/android/model/StreamCallId;
-	public final fun getCurrentCall ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getOnIsCallActive ()Lkotlin/jvm/functions/Function1;
-	public final fun getOnIsCallAnswered ()Lkotlin/jvm/functions/Function2;
-	public final fun getOnIsCallInactive ()Lkotlin/jvm/functions/Function1;
-	public final fun registerCall (Ljava/lang/String;Landroid/net/Uri;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/OutgoingCallTelecomAction {
-	public fun <init> (Lio/getstream/video/android/core/StreamVideo;)V
-	public final fun getStreamVideo ()Lio/getstream/video/android/core/StreamVideo;
-	public final fun onDisconnect (Lio/getstream/video/android/model/StreamCallId;)V
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/StartServiceParam {
 	public fun <init> (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;)V
 	public synthetic fun <init> (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -10595,85 +10465,12 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract class io/getstream/video/android/core/notifications/internal/telecom/TelecomCall {
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCall$None : io/getstream/video/android/core/notifications/internal/telecom/TelecomCall {
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCall$None;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Registered : io/getstream/video/android/core/notifications/internal/telecom/TelecomCall {
-	public fun <init> (Landroid/os/ParcelUuid;Landroidx/core/telecom/CallAttributesCompat;ZZZLjava/lang/Integer;Landroidx/core/telecom/CallEndpointCompat;Ljava/util/List;Lkotlinx/coroutines/channels/Channel;)V
-	public final fun component1 ()Landroid/os/ParcelUuid;
-	public final fun component2 ()Landroidx/core/telecom/CallAttributesCompat;
-	public final fun component3 ()Z
-	public final fun component4 ()Z
-	public final fun component5 ()Z
-	public final fun component6 ()Ljava/lang/Integer;
-	public final fun component7 ()Landroidx/core/telecom/CallEndpointCompat;
-	public final fun component8 ()Ljava/util/List;
-	public final fun copy (Landroid/os/ParcelUuid;Landroidx/core/telecom/CallAttributesCompat;ZZZLjava/lang/Integer;Landroidx/core/telecom/CallEndpointCompat;Ljava/util/List;Lkotlinx/coroutines/channels/Channel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Registered;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Registered;Landroid/os/ParcelUuid;Landroidx/core/telecom/CallAttributesCompat;ZZZLjava/lang/Integer;Landroidx/core/telecom/CallEndpointCompat;Ljava/util/List;Lkotlinx/coroutines/channels/Channel;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Registered;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAvailableCallEndpoints ()Ljava/util/List;
-	public final fun getCallAttributes ()Landroidx/core/telecom/CallAttributesCompat;
-	public final fun getCurrentCallEndpoint ()Landroidx/core/telecom/CallEndpointCompat;
-	public final fun getErrorCode ()Ljava/lang/Integer;
-	public final fun getId ()Landroid/os/ParcelUuid;
-	public fun hashCode ()I
-	public final fun isActive ()Z
-	public final fun isIncoming ()Z
-	public final fun isMuted ()Z
-	public final fun isOnHold ()Z
-	public final fun processAction (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction;)Z
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Unregistered : io/getstream/video/android/core/notifications/internal/telecom/TelecomCall {
-	public fun <init> (Landroid/os/ParcelUuid;Landroidx/core/telecom/CallAttributesCompat;Landroid/telecom/DisconnectCause;)V
-	public final fun component1 ()Landroid/os/ParcelUuid;
-	public final fun component2 ()Landroidx/core/telecom/CallAttributesCompat;
-	public final fun component3 ()Landroid/telecom/DisconnectCause;
-	public final fun copy (Landroid/os/ParcelUuid;Landroidx/core/telecom/CallAttributesCompat;Landroid/telecom/DisconnectCause;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Unregistered;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Unregistered;Landroid/os/ParcelUuid;Landroidx/core/telecom/CallAttributesCompat;Landroid/telecom/DisconnectCause;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCall$Unregistered;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCallAttributes ()Landroidx/core/telecom/CallAttributesCompat;
-	public final fun getDisconnectCause ()Landroid/telecom/DisconnectCause;
-	public final fun getId ()Landroid/os/ParcelUuid;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction : android/os/Parcelable {
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate;
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Z)V
-	public final fun component1 ()Z
-	public final fun copy (Z)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public final fun isAudioCall ()Z
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer$Creator : android/os/Parcelable$Creator {
@@ -10684,35 +10481,12 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;)V
-	public final fun component1 ()Landroid/telecom/DisconnectCause;
-	public final fun component2 ()Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
-	public final fun copy (Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;Landroid/telecom/DisconnectCause;Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCause ()Landroid/telecom/DisconnectCause;
-	public final fun getSource ()Lio/getstream/video/android/core/notifications/internal/telecom/InteractionSource;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Hold : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Hold;
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Hold$Creator : android/os/Parcelable$Creator {
@@ -10723,20 +10497,6 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Landroid/os/ParcelUuid;)V
-	public final fun component1 ()Landroid/os/ParcelUuid;
-	public final fun copy (Landroid/os/ParcelUuid;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint;Landroid/os/ParcelUuid;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEndpointId ()Landroid/os/ParcelUuid;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint;
@@ -10745,40 +10505,12 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Z)V
-	public final fun component1 ()Z
-	public final fun copy (Z)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public final fun isMute ()Z
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall : io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Landroid/os/ParcelUuid;)V
-	public final fun component1 ()Landroid/os/ParcelUuid;
-	public final fun copy (Landroid/os/ParcelUuid;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall;Landroid/os/ParcelUuid;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEndpointId ()Landroid/os/ParcelUuid;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall$Creator : android/os/Parcelable$Creator {
@@ -10809,11 +10541,6 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomHelper {
-	public fun <init> ()V
-	public final fun canUseJetpackTelecom ()Z
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType : java/lang/Enum {
 	public static final field JETPACK_TELECOM Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
@@ -10824,9 +10551,7 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomPermissions {
 	public fun <init> ()V
 	public final fun canUseTelecom (Landroid/content/Context;)Z
-	public final fun getRequiredPermissionsArray ()[Ljava/lang/String;
 	public final fun getRequiredPermissionsArray (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;)[Ljava/lang/String;
-	public final fun hasPermissions (Landroid/content/Context;)Z
 	public final fun supportsTelecom (Landroid/content/Context;)Z
 }
 

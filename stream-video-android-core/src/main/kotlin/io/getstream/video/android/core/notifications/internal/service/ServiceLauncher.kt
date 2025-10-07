@@ -63,7 +63,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ServiceLauncher(val context: Context) {
+internal class ServiceLauncher(val context: Context) {
 
     private val logger by taggedLogger("ServiceTriggers")
     private val serviceIntentBuilder = ServiceIntentBuilder()

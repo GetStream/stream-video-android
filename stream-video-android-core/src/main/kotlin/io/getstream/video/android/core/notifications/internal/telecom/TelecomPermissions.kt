@@ -67,7 +67,7 @@ class TelecomPermissions {
         return permissions
     }
 
-    fun getRequiredPermissionsArray(): Array<String> {
+    private fun getRequiredPermissionsArray(): Array<String> {
         return getRequiredPermissionsList().toTypedArray()
     }
 
@@ -75,7 +75,7 @@ class TelecomPermissions {
         return getRequiredPermissionsList(telecomIntegrationType).toTypedArray()
     }
 
-    fun hasPermissions(context: Context): Boolean {
+    private fun hasPermissions(context: Context): Boolean {
         return getRequiredPermissionsArray().all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }

@@ -25,7 +25,7 @@ import kotlinx.coroutines.channels.Channel
 /**
  * Custom representation of a call state.
  */
-sealed class TelecomCall {
+internal sealed class TelecomCall {
 
     /**
      * There is no current or past calls in the stack

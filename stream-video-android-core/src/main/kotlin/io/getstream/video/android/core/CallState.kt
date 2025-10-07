@@ -696,7 +696,7 @@ public class CallState(
         AtomicReference<Notification?>(null)
 
     @InternalStreamVideoApi
-    var jetpackTelecomRepository: JetpackTelecomRepository? = null
+    internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 

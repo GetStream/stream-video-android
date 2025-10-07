@@ -28,7 +28,7 @@ import io.getstream.video.android.core.notifications.internal.service.IncomingCa
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
-class IncomingCallTelecomAction(
+internal class IncomingCallTelecomAction(
     private val context: Context,
     private val streamVideo: StreamVideo,
     private val incomingCallPresenter: IncomingCallPresenter,
