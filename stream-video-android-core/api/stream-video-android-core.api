@@ -10442,13 +10442,6 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType : java/lang/Enum {
-	public static final field JETPACK_TELECOM Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
-	public static fun values ()[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomPermissions {
 	public fun <init> ()V
 	public final fun canUseTelecom (Landroid/content/Context;)Z

@@ -16,8 +16,11 @@
 
 package io.getstream.video.android.core.notifications.internal.telecom
 
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
+
 data class TelecomConfig(val schema: String)
 
+@InternalStreamVideoApi
 enum class TelecomIntegrationType {
     JETPACK_TELECOM,
 }
