@@ -97,9 +97,13 @@ class ClientState(private val client: StreamVideo) {
         activeOrRingingCall
     }
 
+    /**
+     * Hardcoded to [TelecomIntegrationType.JETPACK_TELECOM] for now.
+     * May switch to another later if needed.
+     */
     fun getTelecomIntegrationType(): TelecomIntegrationType? {
         return if (streamVideoClient.telecomConfig != null) {
-            streamVideoClient.telecomConfig.integrationType
+            TelecomIntegrationType.JETPACK_TELECOM
         } else {
             null
         }

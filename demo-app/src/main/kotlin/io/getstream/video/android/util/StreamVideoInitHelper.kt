@@ -40,7 +40,6 @@ import io.getstream.video.android.core.notifications.handlers.CompatibilityStrea
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
@@ -295,7 +294,6 @@ object StreamVideoInitHelper {
             audioProcessing = NoiseCancellation(context),
             telecomConfig = TelecomConfig(
                 context.packageName,
-                TelecomIntegrationType.JETPACK_TELECOM,
             ),
         ).build()
     }

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.telecom
 
-data class TelecomConfig(val schema: String, val integrationType: TelecomIntegrationType)
+data class TelecomConfig(val schema: String)
 
 enum class TelecomIntegrationType {
     JETPACK_TELECOM,

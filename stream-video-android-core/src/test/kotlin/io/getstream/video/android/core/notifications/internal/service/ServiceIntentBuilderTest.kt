@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.content.Context
@@ -37,7 +53,6 @@ class ServiceIntentBuilderTest {
         testCallId = StreamCallId(type = "default", id = "test-call-123")
     }
 
-
     @Test
     fun `buildStartIntent creates correct intent for outgoing call`() {
         // When
@@ -47,7 +62,7 @@ class ServiceIntentBuilderTest {
             StartServiceParam(
                 callId = testCallId,
                 trigger = TRIGGER_OUTGOING_CALL,
-            )
+            ),
         )
 
         // Then
@@ -65,7 +80,7 @@ class ServiceIntentBuilderTest {
             StartServiceParam(
                 callId = testCallId,
                 trigger = TRIGGER_ONGOING_CALL,
-            )
+            ),
         )
 
         // Then
@@ -79,7 +94,7 @@ class ServiceIntentBuilderTest {
         // When
         val intent = ServiceIntentBuilder().buildStartIntent(
             context = context,
-            StartServiceParam(testCallId, TRIGGER_REMOVE_INCOMING_CALL)
+            StartServiceParam(testCallId, TRIGGER_REMOVE_INCOMING_CALL),
         )
 
         // Then
@@ -91,10 +106,11 @@ class ServiceIntentBuilderTest {
     @Test
     fun `buildStartIntent throws exception for invalid trigger`() {
         // When & Then
-    assertThrows(IllegalArgumentException::class.java) {
-        ServiceIntentBuilder().buildStartIntent(
-            context, StartServiceParam(testCallId, "invalid_trigger")
-        )
+        assertThrows(IllegalArgumentException::class.java) {
+            ServiceIntentBuilder().buildStartIntent(
+                context,
+                StartServiceParam(testCallId, "invalid_trigger"),
+            )
         }
     }
 
@@ -106,11 +122,14 @@ class ServiceIntentBuilderTest {
         )
 
         // When
-        val intent = ServiceIntentBuilder().buildStartIntent(context,StartServiceParam(
-            callId = testCallId,
-            trigger = TRIGGER_INCOMING_CALL,
-            callServiceConfiguration = customConfig,
-        ))
+        val intent = ServiceIntentBuilder().buildStartIntent(
+            context,
+            StartServiceParam(
+                callId = testCallId,
+                trigger = TRIGGER_INCOMING_CALL,
+                callServiceConfiguration = customConfig,
+            ),
+        )
 
         // Then
         assertEquals(LivestreamCallService::class.java.name, intent.component?.className)
@@ -125,6 +144,7 @@ class ServiceIntentBuilderTest {
         assertNotNull(intent)
         assertEquals(CallService::class.java.name, intent.component?.className)
     }
+
 //
     @Test
     fun `buildStopIntent uses custom service class from configuration`() {
@@ -134,10 +154,10 @@ class ServiceIntentBuilderTest {
         )
 
         // When
-    val intent = ServiceIntentBuilder().buildStopIntent(
-        context,
-        StopServiceParam(callServiceConfiguration = customConfig),
-    )
+        val intent = ServiceIntentBuilder().buildStopIntent(
+            context,
+            StopServiceParam(callServiceConfiguration = customConfig),
+        )
 
         // Then
         assertNotNull(intent)
@@ -154,11 +174,14 @@ class ServiceIntentBuilderTest {
         )
 
         // When
-        val intent = ServiceIntentBuilder().buildStartIntent(context, StartServiceParam(
-            callId = StreamCallId(type = "livestream", id = "test-123"),
-            trigger = TRIGGER_INCOMING_CALL,
-            callServiceConfiguration = livestreamConfig,
-        ))
+        val intent = ServiceIntentBuilder().buildStartIntent(
+            context,
+            StartServiceParam(
+                callId = StreamCallId(type = "livestream", id = "test-123"),
+                trigger = TRIGGER_INCOMING_CALL,
+                callServiceConfiguration = livestreamConfig,
+            ),
+        )
 
         // Then
         assertEquals(LivestreamCallService::class.java.name, intent.component?.className)
