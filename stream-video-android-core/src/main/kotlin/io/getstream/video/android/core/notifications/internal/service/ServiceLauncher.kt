@@ -51,8 +51,6 @@ import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
 import io.getstream.video.android.core.notifications.internal.telecom.JetpackTelecomRepository
-import io.getstream.video.android.core.notifications.internal.telecom.StartServiceParam
-import io.getstream.video.android.core.notifications.internal.telecom.StopServiceParam
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallAction
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper

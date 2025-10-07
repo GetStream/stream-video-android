@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.telecom
+package io.getstream.video.android.core.notifications.internal.service
 
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.model.StreamCallId
 
 internal data class StartServiceParam(
