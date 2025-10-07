@@ -90,10 +90,19 @@ class TelecomPermissions {
     fun supportsTelecom(context: Context): Boolean {
         val pm = context.packageManager
         val hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
-
-        val telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as? TelecomManager
-        val hasDefaultDialer = telecomManager?.defaultDialerPackage?.isNotEmpty() == true
-
+        val hasDefaultDialer = getSafeTelecomManager(context)?.defaultDialerPackage?.isNotEmpty() == true
         return hasTelephony && hasDefaultDialer
+    }
+
+    private fun getSafeTelecomManager(context: Context): TelecomManager? {
+        try {
+            val telecomManager = context.getSystemService(
+                Context.TELECOM_SERVICE,
+            ) as? TelecomManager
+            return telecomManager
+        } catch (e: AssertionError) {
+            // Paparazzi/Robolectric throws AssertionError: Unsupported Service: telecom
+            return null
+        }
     }
 }
