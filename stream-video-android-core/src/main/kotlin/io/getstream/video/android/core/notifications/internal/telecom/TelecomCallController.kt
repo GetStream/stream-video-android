@@ -49,7 +49,6 @@ class TelecomCallController(val context: Context) {
     fun onAnswer(call: Call) {
         performAction(call) {
             if (it is TelecomCall.Registered) {
-                it.processAction(TelecomCallAction.Activate)
                 it.processAction(TelecomCallAction.Answer(!isVideoCall(call)))
             }
         }
