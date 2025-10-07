@@ -867,7 +867,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         call.state.cancelTimeout()
         call.state.updateRejectedBy(mutableSetOf(StreamVideo.instance().userId))
         appScope.async {
-            val result = call.reject("activity", reason)
+            val result = call.reject(reason)
             if (lifecycleScope.isActive) {
                 lifecycleScope.launch {
                     result.onOutcome(call, onSuccess, onError)

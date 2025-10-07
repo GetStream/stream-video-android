@@ -891,7 +891,10 @@ internal open class CallService : Service() {
                 if (ringingState is RingingState.Outgoing) {
                     // If I'm calling, end the call for everyone
                     serviceScope.launch {
-                        call.reject("noob", RejectReason.Custom("Android Service Task Removed"))
+                        call.reject(
+                            "CallService.EndCall",
+                            RejectReason.Custom("Android Service Task Removed"),
+                        )
                         logger.i { "[onTaskRemoved] Ended outgoing call for all users." }
                     }
                 } else if (ringingState is RingingState.Incoming) {

@@ -1348,9 +1348,18 @@ public class Call(
         return clientImpl.accept(type, id)
     }
 
-    suspend fun reject(source: String = "n/a", reason: RejectReason? = null): Result<RejectCallResponse> {
-        logger.d { "[reject] source: $source, #ringing; rejectReason: $reason, call_id:$id" }
+    suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
+        logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
+    }
+
+    // For debugging
+    internal suspend fun reject(
+        source: String = "n/a",
+        reason: RejectReason? = null,
+    ): Result<RejectCallResponse> {
+        logger.d { "[reject] source: $source" }
+        return reject(reason)
     }
 
     fun processAudioSample(audioSample: AudioSamples) {
