@@ -88,7 +88,7 @@ internal class ServiceLauncher(val context: Context) {
             notification,
         )
         logger.d { "[showIncomingCall] service start result: $result" }
-        if (telecomPermissions.canUseTelecom(context)) {
+        if (telecomPermissions.canUseTelecom(callServiceConfiguration, context)) {
             if (telecomHelper.canUseJetpackTelecom()) {
                 when (result) {
                     ShowIncomingCallResult.FG_SERVICE -> {
@@ -163,7 +163,7 @@ internal class ServiceLauncher(val context: Context) {
 
         val telecomPermissions = TelecomPermissions()
         val telecomHelper = TelecomHelper()
-        if (telecomPermissions.canUseTelecom(context)) {
+        if (telecomPermissions.canUseTelecom(callConfig, context)) {
             if (telecomHelper.canUseJetpackTelecom()) {
                 val jetpackTelecomRepository = getJetpackTelecomRepository(callId)
 

@@ -31,6 +31,7 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
@@ -206,9 +207,11 @@ object StreamVideoInitHelper {
         loggingLevel: LoggingLevel,
     ): StreamVideo {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
-        callServiceConfigRegistry.register(
-            DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
-        )
+        callServiceConfigRegistry.apply {
+            register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
+            register(CallType.AudioCall.name) { enableTelecom(true) }
+        }
+
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,

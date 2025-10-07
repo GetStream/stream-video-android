@@ -334,6 +334,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                                     legacyCallConfig.runCallServiceInForeground,
                                 )
                                 setAudioUsage(legacyCallConfig.audioUsage)
+                                enableTelecom(legacyCallConfig.enableTelecom)
                             }
                         }
                     }

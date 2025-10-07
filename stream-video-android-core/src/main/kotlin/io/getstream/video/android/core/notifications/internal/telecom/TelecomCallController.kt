@@ -20,6 +20,7 @@ import android.content.Context
 import android.telecom.DisconnectCause
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.InteractionSource
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
@@ -59,7 +60,8 @@ class TelecomCallController(val context: Context) {
     }
 
     private fun performAction(call: Call, block: (TelecomCall) -> Unit) {
-        if (telecomPermissions.canUseTelecom(context)) {
+        val callConfig = (call.client as StreamVideoClient).callServiceConfigRegistry.get(call.type)
+        if (telecomPermissions.canUseTelecom(callConfig, context)) {
             if (telecomHelper.canUseJetpackTelecom()) {
                 val telecomCall =
                     call.state.jetpackTelecomRepository?.currentCall?.value
