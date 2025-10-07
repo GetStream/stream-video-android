@@ -74,6 +74,6 @@ internal class ExternalCallRejectionHandler() {
     }
 }
 
-enum class ExternalCallRejectionSource {
+internal enum class ExternalCallRejectionSource {
     NOTIFICATION, WEARABLE
 }

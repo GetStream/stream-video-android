@@ -5871,14 +5871,6 @@ public final class io/getstream/video/android/core/EventSubscription {
 	public final fun setDisposed (Z)V
 }
 
-public final class io/getstream/video/android/core/ExternalCallRejectionSource : java/lang/Enum {
-	public static final field NOTIFICATION Lio/getstream/video/android/core/ExternalCallRejectionSource;
-	public static final field WEARABLE Lio/getstream/video/android/core/ExternalCallRejectionSource;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/ExternalCallRejectionSource;
-	public static fun values ()[Lio/getstream/video/android/core/ExternalCallRejectionSource;
-}
-
 public abstract class io/getstream/video/android/core/GEO {
 }
 
