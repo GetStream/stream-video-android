@@ -21,14 +21,14 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.model.StreamCallId
 
-data class StartServiceParam(
+internal data class StartServiceParam(
     val callId: StreamCallId,
     val trigger: String,
     val callDisplayName: String? = null,
     val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
 )
 
-data class StopServiceParam(
+internal data class StopServiceParam(
     val call: Call? = null,
     val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
 )
