@@ -10424,62 +10424,6 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun getLivestreamGuestCallServiceConfig ()Ljava/util/Map;
 }
 
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Activate;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Answer;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Disconnect;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Hold$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Hold;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$Hold;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$SwitchAudioEndpoint;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$ToggleMute;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/TelecomCallAction$TransferCall;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallController {
 	public fun <init> (Landroid/content/Context;)V
 	public final fun getContext ()Landroid/content/Context;
@@ -10512,6 +10456,62 @@ public final class io/getstream/video/android/core/notifications/internal/teleco
 	public final fun canUseTelecom (Landroid/content/Context;)Z
 	public final fun getRequiredPermissionsArray (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;)[Ljava/lang/String;
 	public final fun supportsTelecom (Landroid/content/Context;)Z
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Activate$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Activate;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Activate;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Answer$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Answer;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Answer;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Disconnect$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Disconnect;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Disconnect;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Hold$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Hold;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Hold;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$SwitchAudioEndpoint$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$SwitchAudioEndpoint;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$SwitchAudioEndpoint;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$ToggleMute$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$ToggleMute;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$ToggleMute;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$TransferCall$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$TransferCall;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$TransferCall;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/notifications/medianotifications/MediaNotificationConfig {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.telecom
+package io.getstream.video.android.core.notifications.internal.telecom.jetpack
 
 import android.Manifest
 import android.net.Uri
@@ -27,6 +27,7 @@ import androidx.core.telecom.CallControlResult
 import androidx.core.telecom.CallControlScope
 import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow

@@ -16,23 +16,15 @@
 
 package io.getstream.video.android.core.notifications.internal.telecom
 
-import android.app.Notification
-import android.content.Context
 import io.getstream.video.android.core.ExternalCallRejectionHandler
 import io.getstream.video.android.core.ExternalCallRejectionSource
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.IncomingCallPresenter
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
-internal class IncomingCallTelecomAction(
-    private val context: Context,
-    private val streamVideo: StreamVideo,
-    private val incomingCallPresenter: IncomingCallPresenter,
-) {
+internal class IncomingCallTelecomAction(private val streamVideo: StreamVideo) {
 
     fun onAnswer(callId: StreamCallId) {
         val pendingIntentMap = streamVideo.call(callId.type, callId.id)

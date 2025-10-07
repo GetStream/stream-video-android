@@ -20,6 +20,9 @@ import android.content.Context
 import android.telecom.DisconnectCause
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.InteractionSource
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
 
 /**
  * Valid disconnected cause: [DisconnectCause.LOCAL, DisconnectCause.REMOTE, DisconnectCause.MISSED, or DisconnectCause.REJECTED]

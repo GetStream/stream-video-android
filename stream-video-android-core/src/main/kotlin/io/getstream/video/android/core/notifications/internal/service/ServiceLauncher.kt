@@ -50,11 +50,11 @@ import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
-import io.getstream.video.android.core.notifications.internal.telecom.JetpackTelecomRepository
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomCall
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallAction
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.Dispatchers
@@ -246,9 +246,8 @@ internal class ServiceLauncher(val context: Context) {
         }
 
         val streamVideo = StreamVideo.instance()
-        val incomingCallPresenter = IncomingCallPresenter(ServiceIntentBuilder())
         val incomingCallTelecomAction =
-            IncomingCallTelecomAction(context, streamVideo, incomingCallPresenter)
+            IncomingCallTelecomAction(streamVideo)
         logger.d { "[getJetpackTelecomRepository] hashcode callsManager:${callsManager.hashCode()}" }
         return JetpackTelecomRepository(callsManager, callId, incomingCallTelecomAction)
     }

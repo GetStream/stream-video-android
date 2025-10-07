@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.telecom
+package io.getstream.video.android.core.notifications.internal.telecom.jetpack
 
 import android.os.ParcelUuid
 import android.telecom.DisconnectCause
