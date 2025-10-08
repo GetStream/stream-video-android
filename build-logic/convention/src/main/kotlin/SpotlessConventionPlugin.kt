@@ -28,7 +28,7 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 }
                 format("openapiGenerated") {
                     target("**/*.kt")
-                    targetExclude("**/build/**/*.kt")
+                    targetExclude("**/build/**/*.kt", "**/generated/**")
                     trimTrailingWhitespace()
                     endWithNewline()
                     licenseHeaderFile(rootProject.file("$rootDir/spotless/copyright.kt"),
