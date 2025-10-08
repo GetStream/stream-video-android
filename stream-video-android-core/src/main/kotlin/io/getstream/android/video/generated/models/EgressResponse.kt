@@ -18,26 +18,36 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class EgressResponse(
+data class EgressResponse (
     @Json(name = "broadcasting")
     val broadcasting: kotlin.Boolean,
 
     @Json(name = "rtmps")
-    val rtmps:
-    kotlin.collections.List<io.getstream.android.video.generated.models.EgressRTMPResponse>,
+    val rtmps: kotlin.collections.List<io.getstream.android.video.generated.models.EgressRTMPResponse> = emptyList(),
+
+    @Json(name = "frame_recording")
+    val frameRecording: io.getstream.android.video.generated.models.FrameRecordingResponse? = null,
 
     @Json(name = "hls")
-    val hls: io.getstream.android.video.generated.models.EgressHLSResponse? = null,
+    val hls: io.getstream.android.video.generated.models.EgressHLSResponse? = null
 )

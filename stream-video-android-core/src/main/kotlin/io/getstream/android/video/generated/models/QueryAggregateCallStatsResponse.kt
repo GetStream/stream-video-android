@@ -18,44 +18,48 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * Basic response information
  */
 
-data class QueryAggregateCallStatsResponse(
+data class QueryAggregateCallStatsResponse (
     @Json(name = "duration")
     val duration: kotlin.String,
 
     @Json(name = "call_duration_report")
-    val callDurationReport: io.getstream.android.video.generated.models.CallDurationReportResponse? =
-        null,
+    val callDurationReport: io.getstream.android.video.generated.models.CallDurationReportResponse? = null,
 
     @Json(name = "call_participant_count_report")
-    val callParticipantCountReport:
-    io.getstream.android.video.generated.models.CallParticipantCountReportResponse? = null,
+    val callParticipantCountReport: io.getstream.android.video.generated.models.CallParticipantCountReportResponse? = null,
 
     @Json(name = "calls_per_day_report")
     val callsPerDayReport: io.getstream.android.video.generated.models.CallsPerDayReportResponse? = null,
 
     @Json(name = "network_metrics_report")
-    val networkMetricsReport:
-    io.getstream.android.video.generated.models.NetworkMetricsReportResponse? = null,
+    val networkMetricsReport: io.getstream.android.video.generated.models.NetworkMetricsReportResponse? = null,
 
     @Json(name = "quality_score_report")
-    val qualityScoreReport: io.getstream.android.video.generated.models.QualityScoreReportResponse? =
-        null,
+    val qualityScoreReport: io.getstream.android.video.generated.models.QualityScoreReportResponse? = null,
 
     @Json(name = "sdk_usage_report")
     val sdkUsageReport: io.getstream.android.video.generated.models.SDKUsageReportResponse? = null,
 
     @Json(name = "user_feedback_report")
-    val userFeedbackReport: io.getstream.android.video.generated.models.UserFeedbackReportResponse? =
-        null,
+    val userFeedbackReport: io.getstream.android.video.generated.models.UserFeedbackReportResponse? = null
 )

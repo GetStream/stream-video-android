@@ -18,19 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class JoinCallResponse(
+data class JoinCallResponse (
     @Json(name = "created")
     val created: kotlin.Boolean,
 
@@ -38,12 +46,10 @@ data class JoinCallResponse(
     val duration: kotlin.String,
 
     @Json(name = "members")
-    val members:
-    kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse>,
+    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse> = emptyList(),
 
     @Json(name = "own_capabilities")
-    val ownCapabilities:
-    kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability>,
+    val ownCapabilities: kotlin.collections.List<io.getstream.android.video.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
@@ -55,5 +61,5 @@ data class JoinCallResponse(
     val statsOptions: io.getstream.android.video.generated.models.StatsOptions,
 
     @Json(name = "membership")
-    val membership: io.getstream.android.video.generated.models.MemberResponse? = null,
+    val membership: io.getstream.android.video.generated.models.MemberResponse? = null
 )
