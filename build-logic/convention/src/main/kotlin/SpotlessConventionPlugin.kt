@@ -14,7 +14,7 @@ class SpotlessConventionPlugin : Plugin<Project> {
                     target("**/*.kt")
                     targetExclude(
                             "**/build/**/*.kt",                  // Build directory
-                            "**/generated/**/*.kt" // OpenAPI generated code
+                            "**/generated/**" // OpenAPI generated code
                     )
                     ktlint()
                         .editorConfigOverride(
