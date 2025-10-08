@@ -19,6 +19,7 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.Box
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import com.android.resources.ScreenOrientation
 import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerOverlay
@@ -29,7 +30,9 @@ import org.junit.Test
 internal class LivestreamTest : BaseComposeTest() {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.NEXUS_5_LAND)
+    val paparazzi = Paparazzi(
+        deviceConfig = DeviceConfig.PIXEL_2.copy(orientation = ScreenOrientation.LANDSCAPE),
+    )
 
     override fun basePaparazzi(): Paparazzi = paparazzi
 
