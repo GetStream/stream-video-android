@@ -26,6 +26,7 @@ import android.media.ImageReader
 import android.os.Build
 import androidx.annotation.RequiresApi
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.log.StreamLog
 
 /**
  * Utility class for applying blur effects to bitmaps.
@@ -44,11 +45,21 @@ public object BlurUtils {
      * @return The blurred bitmap
      */
     public fun blur(bitmap: Bitmap, radius: Int): Bitmap {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val startTime = System.currentTimeMillis()
+        val method = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "HardwareRenderer" else "CPU Fallback"
+        
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             blurWithRenderEffect(bitmap, radius)
         } else {
             blurWithFallback(bitmap, radius)
         }
+        
+        val duration = System.currentTimeMillis() - startTime
+        StreamLog.d("BlurUtils") { 
+            "Blur completed using $method: ${bitmap.width}x${bitmap.height} radius=$radius in ${duration}ms" 
+        }
+        
+        return result
     }
 
     /**
@@ -59,6 +70,7 @@ public object BlurUtils {
     private fun blurWithRenderEffect(bitmap: Bitmap, radius: Int): Bitmap {
         val width = bitmap.width
         val height = bitmap.height
+        val setupStart = System.currentTimeMillis()
 
         // Create RenderNode and apply blur effect
         val renderNode = RenderNode("blur").apply {
@@ -91,10 +103,16 @@ public object BlurUtils {
         hardwareRenderer.setSurface(imageReader.surface)
         hardwareRenderer.setContentRoot(renderNode)
 
+        val setupTime = System.currentTimeMillis() - setupStart
+        val renderStart = System.currentTimeMillis()
+
         // Render and wait for completion
         hardwareRenderer.createRenderRequest()
             .setWaitForPresent(true)
             .syncAndDraw()
+
+        val renderTime = System.currentTimeMillis() - renderStart
+        val extractStart = System.currentTimeMillis()
 
         // Extract the blurred bitmap from the ImageReader
         val image = imageReader.acquireLatestImage()
@@ -110,11 +128,20 @@ public object BlurUtils {
             bitmap.copy(Bitmap.Config.ARGB_8888, false)
         }
 
+        val extractTime = System.currentTimeMillis() - extractStart
+        val cleanupStart = System.currentTimeMillis()
+
         // Cleanup
         image?.close()
         imageReader.close()
         hardwareRenderer.destroy()
         renderNode.discardDisplayList()
+
+        val cleanupTime = System.currentTimeMillis() - cleanupStart
+
+        StreamLog.d("BlurUtils") { 
+            "HardwareRenderer breakdown: setup=${setupTime}ms, render=${renderTime}ms, extract=${extractTime}ms, cleanup=${cleanupTime}ms" 
+        }
 
         val result = blurredBitmap.copy(Bitmap.Config.ARGB_8888, false)
         if (blurredBitmap != result && blurredBitmap.config != Bitmap.Config.HARDWARE) {
@@ -130,14 +157,27 @@ public object BlurUtils {
     private fun blurWithFallback(bitmap: Bitmap, radius: Int): Bitmap {
         val width = bitmap.width
         val height = bitmap.height
+        val pixelExtractStart = System.currentTimeMillis()
+        
         val pixels = IntArray(width * height)
-
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        
+        val pixelExtractTime = System.currentTimeMillis() - pixelExtractStart
+        val blurStart = System.currentTimeMillis()
 
         val blurredPixels = boxBlur(pixels, width, height, radius)
+        
+        val blurTime = System.currentTimeMillis() - blurStart
+        val bitmapCreateStart = System.currentTimeMillis()
 
         val blurredBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         blurredBitmap.setPixels(blurredPixels, 0, width, 0, 0, width, height)
+        
+        val bitmapCreateTime = System.currentTimeMillis() - bitmapCreateStart
+
+        StreamLog.d("BlurUtils") { 
+            "CPU Fallback breakdown: pixelExtract=${pixelExtractTime}ms, blur=${blurTime}ms, bitmapCreate=${bitmapCreateTime}ms" 
+        }
 
         return blurredBitmap
     }
