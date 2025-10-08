@@ -16,7 +16,7 @@ ext.sonar = [
     ]
 ]
 
-sonarqube {
+sonar {
     properties {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.token", "${System.getenv("SONAR_TOKEN")}")
