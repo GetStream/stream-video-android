@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.utils
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.HardwareRenderer
 import android.graphics.PixelFormat
 import android.graphics.RenderEffect
@@ -31,7 +30,7 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
 /**
  * Utility class for applying blur effects to bitmaps.
  * Uses RenderEffect for API 31+ and fallback implementation for older versions.
- * 
+ *
  * This is an internal API for use within Stream Video SDK modules only.
  */
 @InternalStreamVideoApi
