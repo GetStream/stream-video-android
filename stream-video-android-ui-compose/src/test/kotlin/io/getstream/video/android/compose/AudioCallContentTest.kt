@@ -22,6 +22,7 @@ import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.mock.previewCall
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -54,6 +55,7 @@ internal class AudioCallContentTest : BaseComposeTest() {
         }
     }
 
+    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot AudioOnlyCallContent in default state`() {
         snapshot {
@@ -65,6 +67,7 @@ internal class AudioCallContentTest : BaseComposeTest() {
         }
     }
 
+    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot AudioOnlyCallContent without header`() {
         snapshot {
