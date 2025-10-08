@@ -20,15 +20,18 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.annotation.Keep
 import com.google.android.gms.tasks.Tasks
-import com.google.android.renderscript.Toolkit
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
+import java.io.Closeable
 
 /**
  * Applies a blur effect to the background of a video call.
+ *
+ * Important: This filter holds resources that need to be cleaned up. Call [close] when done
+ * or use with Kotlin's `use` function for automatic cleanup.
  *
  * @param blurIntensity The intensity of the blur effect. See [BlurIntensity] for options. Defaults to [BlurIntensity.MEDIUM].
  * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
@@ -37,7 +40,7 @@ import io.getstream.video.android.core.call.video.BitmapVideoFilter
 public class BlurredBackgroundVideoFilter(
     private val blurIntensity: BlurIntensity = BlurIntensity.MEDIUM,
     foregroundThreshold: Double = DEFAULT_FOREGROUND_THRESHOLD,
-) : BitmapVideoFilter() {
+) : BitmapVideoFilter(), Closeable {
     private val options =
         SelfieSegmenterOptions.Builder()
             .setDetectorMode(SelfieSegmenterOptions.STREAM_MODE)
@@ -70,12 +73,22 @@ public class BlurredBackgroundVideoFilter(
         )
 
         // Blur the background bitmap
-        val blurredBackgroundBitmap = Toolkit.blur(backgroundBitmap, blurIntensity.radius)
+        val blurredBackgroundBitmap = VideoBlurUtils.blur(backgroundBitmap, blurIntensity.radius)
 
         // Draw the blurred background bitmap on the original bitmap
         val canvas = Canvas(videoFrameBitmap)
         val matrix = newSegmentationMaskMatrix(videoFrameBitmap, segmentationMask)
         canvas.drawBitmap(blurredBackgroundBitmap, matrix, null)
+    }
+
+    /**
+     * Releases all resources held by this filter.
+     * Call this when the filter is no longer needed to prevent resource leaks.
+     *
+     * After calling this method, the filter should not be used again.
+     */
+    override fun close() {
+        segmenter.close()
     }
 }
 

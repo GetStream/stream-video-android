@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
-import com.google.android.renderscript.Toolkit
 
 /**
  * Originated from [Landscapist](https://github.com/skydoves/landscapist).
@@ -49,7 +48,7 @@ internal fun Painter.rememberBlurPainter(
     }
 
     val blurredBitmap = remember(imageBitmap, radius) {
-        iterativeBlur(androidBitmap, radius)
+        BlurUtils.blur(androidBitmap, radius)
     }
     return remember(this) {
         TransformationPainter(
@@ -57,24 +56,4 @@ internal fun Painter.rememberBlurPainter(
             painter = this,
         )
     }
-}
-
-private fun iterativeBlur(
-    androidBitmap: Bitmap,
-    radius: Int,
-): Bitmap {
-    val iterate = (radius + 1) / 25
-    var bitmap: Bitmap = Toolkit.blur(
-        inputBitmap = androidBitmap,
-        radius = (radius + 1) % 25,
-    )
-
-    for (i in 0 until iterate) {
-        bitmap = Toolkit.blur(
-            inputBitmap = bitmap,
-            radius = 25,
-        )
-    }
-
-    return bitmap
 }

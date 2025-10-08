@@ -68,8 +68,7 @@ dependencies {
     implementation(libs.landscapist.animation)
     implementation(libs.landscapist.placeholder)
 
-    // render scripts
-    compileOnly(files("libs/renderscript-toolkit.aar"))
+    // blur effects now handled by BlurUtils in ui-core
 
     // telephoto
     implementation(libs.telephoto)

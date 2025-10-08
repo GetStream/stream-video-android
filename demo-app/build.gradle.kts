@@ -133,7 +133,7 @@ android {
     }
 
     packaging {
-        jniLibs.pickFirsts.add("lib/*/librenderscript-toolkit.so")
+        // JNI libraries are no longer needed as we use RenderEffect for blur
     }
 
     baselineProfile {
@@ -292,7 +292,6 @@ dependencies {
 
     // Video Filters
     implementation(libs.google.mlkit.selfie.segmentation)
-    implementation(files("libs/renderscript-toolkit.aar"))
 
     // Http
     implementation(libs.okhttp)

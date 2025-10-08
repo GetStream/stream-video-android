@@ -48,5 +48,4 @@ baselineProfile {
 dependencies {
     api(project(":stream-video-android-core"))
     implementation(libs.google.mlkit.selfie.segmentation)
-    compileOnly(files("libs/renderscript-toolkit.aar"))
 }
