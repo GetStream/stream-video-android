@@ -114,14 +114,13 @@ public object BlurUtils {
         image?.close()
         imageReader.close()
         hardwareRenderer.destroy()
+        renderNode.discardDisplayList()
 
-        return blurredBitmap.copy(Bitmap.Config.ARGB_8888, false).also {
-            if (blurredBitmap.config == Bitmap.Config.HARDWARE) {
-                // Don't recycle hardware bitmaps
-            } else {
-                blurredBitmap.recycle()
-            }
+        val result = blurredBitmap.copy(Bitmap.Config.ARGB_8888, false)
+        if (blurredBitmap != result && blurredBitmap.config != Bitmap.Config.HARDWARE) {
+            blurredBitmap.recycle()
         }
+        return result
     }
 
     /**
