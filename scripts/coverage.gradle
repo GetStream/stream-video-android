@@ -119,5 +119,18 @@ kover {
 sonar {
     properties {
         property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/kover/reportCoverage.xml"
+
+        def sources = coverageModulesWithTests.collect { project ->
+            "${project.projectDir}/src/main/kotlin"
+        }.join(",")
+        property "sonar.sources", sources
+
+        def tests = coverageModulesWithTests.collect { project ->
+            [
+                    "${project.projectDir}/src/androidTest/kotlin",
+                    "${project.projectDir}/src/test/kotlin"
+            ]
+        }.flatten().join(",")
+        property "sonar.tests", tests
     }
 }
