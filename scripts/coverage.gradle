@@ -37,7 +37,7 @@ def configureKoverReports(project) {
 def coverageModulesWithTests = subprojects.findAll {
     rootProject.ext.coverageModules.contains(it.name) && file("${it.projectDir}/src/test").exists()
 }
-println("Setting up coverage for:\n${coverageModulesWithTests.join("\n")}")
+println("\nSetting up coverage for:\n${coverageModulesWithTests.join("\n")}\n")
 
 // Configure code coverage for modules with tests
 subprojects {
@@ -52,7 +52,6 @@ subprojects {
 
         afterEvaluate {
             def isAndroidModule = plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")
-            def hasPaparazziPlugin = plugins.hasPlugin("app.cash.paparazzi")
 
             if (isAndroidModule) {
                 android {
@@ -63,17 +62,6 @@ subprojects {
                         }
                     }
                 }
-            }
-
-            // Determine the appropriate test task name based on module type and plugins
-            def testTaskName = isAndroidModule
-                    ? (hasPaparazziPlugin ? "verifyPaparazziDebug" : "testDebugUnitTest")
-                    : "test"
-
-            tasks.register("testCoverage") {
-                group = "verification"
-                description = "Run module-specific tests"
-                dependsOn(testTaskName)
             }
 
             kover {
@@ -104,8 +92,14 @@ tasks.register("testCoverage") {
     group = "verification"
     description = "Run all tests in all modules and generate merged coverage report"
 
-    dependsOn(subprojects.collect { it.tasks.matching { it.name == "testCoverage" } })
-    dependsOn("koverXmlReportCoverage", "koverHtmlReportCoverage")
+    def paparazziTests = coverageModulesWithTests.findAll {
+        project(":${it.name}").plugins.hasPlugin("app.cash.paparazzi")
+    }.collect { ":${it.name}:verifyPaparazziDebug" }
+    // Run Paparazzi tests first (if any) to ensure they run before unit tests
+    dependsOn(paparazziTests)
+
+    // Then run Kover reports which automatically depends on the unit test tasks
+    finalizedBy("koverXmlReportCoverage", "koverHtmlReportCoverage")
 }
 
 kover {
