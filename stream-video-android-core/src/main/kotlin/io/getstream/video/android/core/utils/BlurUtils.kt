@@ -25,8 +25,8 @@ import android.hardware.HardwareBuffer
 import android.media.ImageReader
 import android.os.Build
 import androidx.annotation.RequiresApi
-import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.log.StreamLog
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 /**
  * Utility class for applying blur effects to bitmaps.
@@ -47,18 +47,18 @@ public object BlurUtils {
     public fun blur(bitmap: Bitmap, radius: Int): Bitmap {
         val startTime = System.currentTimeMillis()
         val method = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) "HardwareRenderer" else "CPU Fallback"
-        
+
         val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             blurWithRenderEffect(bitmap, radius)
         } else {
             blurWithFallback(bitmap, radius)
         }
-        
+
         val duration = System.currentTimeMillis() - startTime
-        StreamLog.d("BlurUtils") { 
-            "Blur completed using $method: ${bitmap.width}x${bitmap.height} radius=$radius in ${duration}ms" 
+        StreamLog.d("BlurUtils") {
+            "Blur completed using $method: ${bitmap.width}x${bitmap.height} radius=$radius in ${duration}ms"
         }
-        
+
         return result
     }
 
@@ -139,8 +139,8 @@ public object BlurUtils {
 
         val cleanupTime = System.currentTimeMillis() - cleanupStart
 
-        StreamLog.d("BlurUtils") { 
-            "HardwareRenderer breakdown: setup=${setupTime}ms, render=${renderTime}ms, extract=${extractTime}ms, cleanup=${cleanupTime}ms" 
+        StreamLog.d("BlurUtils") {
+            "HardwareRenderer breakdown: setup=${setupTime}ms, render=${renderTime}ms, extract=${extractTime}ms, cleanup=${cleanupTime}ms"
         }
 
         val result = blurredBitmap.copy(Bitmap.Config.ARGB_8888, false)
@@ -158,25 +158,25 @@ public object BlurUtils {
         val width = bitmap.width
         val height = bitmap.height
         val pixelExtractStart = System.currentTimeMillis()
-        
+
         val pixels = IntArray(width * height)
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-        
+
         val pixelExtractTime = System.currentTimeMillis() - pixelExtractStart
         val blurStart = System.currentTimeMillis()
 
         val blurredPixels = boxBlur(pixels, width, height, radius)
-        
+
         val blurTime = System.currentTimeMillis() - blurStart
         val bitmapCreateStart = System.currentTimeMillis()
 
         val blurredBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         blurredBitmap.setPixels(blurredPixels, 0, width, 0, 0, width, height)
-        
+
         val bitmapCreateTime = System.currentTimeMillis() - bitmapCreateStart
 
-        StreamLog.d("BlurUtils") { 
-            "CPU Fallback breakdown: pixelExtract=${pixelExtractTime}ms, blur=${blurTime}ms, bitmapCreate=${bitmapCreateTime}ms" 
+        StreamLog.d("BlurUtils") {
+            "CPU Fallback breakdown: pixelExtract=${pixelExtractTime}ms, blur=${blurTime}ms, bitmapCreate=${bitmapCreateTime}ms"
         }
 
         return blurredBitmap
