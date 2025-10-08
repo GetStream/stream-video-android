@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.filters.video
+package io.getstream.video.android.core.utils
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.HardwareRenderer
 import android.graphics.PixelFormat
 import android.graphics.RenderEffect
@@ -25,23 +26,25 @@ import android.hardware.HardwareBuffer
 import android.media.ImageReader
 import android.os.Build
 import androidx.annotation.RequiresApi
-import kotlin.math.max
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 /**
- * Utility class for applying blur effects to video frames.
+ * Utility class for applying blur effects to bitmaps.
  * Uses RenderEffect for API 31+ and fallback implementation for older versions.
+ * 
+ * This is an internal API for use within Stream Video SDK modules only.
  */
-internal object VideoBlurUtils {
+@InternalStreamVideoApi
+public object BlurUtils {
 
     /**
      * Applies blur effect to a bitmap using the most appropriate method for the current API level.
-     * Optimized for video processing with better performance characteristics.
      *
      * @param bitmap The input bitmap to blur
      * @param radius The blur radius (1-25)
      * @return The blurred bitmap
      */
-    internal fun blur(bitmap: Bitmap, radius: Int): Bitmap {
+    public fun blur(bitmap: Bitmap, radius: Int): Bitmap {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             blurWithRenderEffect(bitmap, radius)
         } else {
@@ -59,7 +62,7 @@ internal object VideoBlurUtils {
         val height = bitmap.height
 
         // Create RenderNode and apply blur effect
-        val renderNode = RenderNode("videoBlur").apply {
+        val renderNode = RenderNode("blur").apply {
             setPosition(0, 0, width, height)
             setRenderEffect(
                 RenderEffect.createBlurEffect(
@@ -124,7 +127,7 @@ internal object VideoBlurUtils {
 
     /**
      * Fallback blur implementation for API < 31.
-     * Uses an optimized box blur algorithm for video processing.
+     * Uses a simple box blur algorithm.
      */
     private fun blurWithFallback(bitmap: Bitmap, radius: Int): Bitmap {
         val width = bitmap.width
@@ -133,7 +136,7 @@ internal object VideoBlurUtils {
 
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
 
-        val blurredPixels = optimizedBoxBlur(pixels, width, height, radius)
+        val blurredPixels = boxBlur(pixels, width, height, radius)
 
         val blurredBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         blurredBitmap.setPixels(blurredPixels, 0, width, 0, 0, width, height)
@@ -142,14 +145,13 @@ internal object VideoBlurUtils {
     }
 
     /**
-     * Optimized box blur implementation for video processing.
-     * Uses separable filters for better performance.
+     * Simple box blur implementation.
      */
-    private fun optimizedBoxBlur(pixels: IntArray, width: Int, height: Int, radius: Int): IntArray {
-        val radiusClamped = max(1, radius.coerceAtMost(25))
+    private fun boxBlur(pixels: IntArray, width: Int, height: Int, radius: Int): IntArray {
+        val radiusClamped = radius.coerceIn(1, 25)
+        val horizontalResult = IntArray(pixels.size)
 
         // Horizontal pass
-        val horizontalResult = IntArray(pixels.size)
         for (y in 0 until height) {
             for (x in 0 until width) {
                 var r = 0

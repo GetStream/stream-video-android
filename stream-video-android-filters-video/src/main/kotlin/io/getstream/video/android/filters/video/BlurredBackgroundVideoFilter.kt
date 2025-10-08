@@ -25,6 +25,7 @@ import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
+import io.getstream.video.android.core.utils.BlurUtils
 import java.io.Closeable
 
 /**
@@ -73,7 +74,7 @@ public class BlurredBackgroundVideoFilter(
         )
 
         // Blur the background bitmap
-        val blurredBackgroundBitmap = VideoBlurUtils.blur(backgroundBitmap, blurIntensity.radius)
+        val blurredBackgroundBitmap = BlurUtils.blur(backgroundBitmap, blurIntensity.radius)
 
         // Draw the blurred background bitmap on the original bitmap
         val canvas = Canvas(videoFrameBitmap)

@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
+import io.getstream.video.android.core.utils.BlurUtils
 
 /**
  * Originated from [Landscapist](https://github.com/skydoves/landscapist).
