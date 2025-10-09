@@ -357,7 +357,9 @@ class ScreenShareManager(
  */
 class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
+    @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
     val audioUsage: Int,
+    val audioUsageProvider: (() -> Int),
 ) {
     // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
@@ -474,7 +476,7 @@ class MicrophoneManager(
         setupCompleted = false
     }
 
-    fun canHandleDeviceSwitch() = audioUsage != AudioAttributes.USAGE_MEDIA
+    fun canHandleDeviceSwitch() = audioUsageProvider.invoke() != AudioAttributes.USAGE_MEDIA
 
     // Internal logic
     internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
@@ -1005,7 +1007,9 @@ class MediaManagerImpl(
     val call: Call,
     val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context,
+    @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
     val audioUsage: Int = defaultAudioUsage,
+    val audioUsageProvider: (() -> Int) = { audioUsage },
 ) {
     private val filterVideoProcessor =
         FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
@@ -1040,7 +1044,7 @@ class MediaManagerImpl(
 
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
-    internal val microphone = MicrophoneManager(this, audioUsage)
+    internal val microphone = MicrophoneManager(this, audioUsage, audioUsageProvider)
     internal val speaker = SpeakerManager(this, microphone)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
