@@ -14,7 +14,7 @@ class SpotlessConventionPlugin : Plugin<Project> {
                     target("**/*.kt")
                     targetExclude(
                             "**/build/**/*.kt",                  // Build directory
-                            "**/org/openapitools/client/**/*.kt" // OpenAPI generated code
+                            "**/generated/**" // OpenAPI generated code
                     )
                     ktlint()
                         .editorConfigOverride(
@@ -28,7 +28,7 @@ class SpotlessConventionPlugin : Plugin<Project> {
                 }
                 format("openapiGenerated") {
                     target("**/*.kt")
-                    targetExclude("**/build/**/*.kt")
+                    targetExclude("**/build/**/*.kt", "**/generated/**")
                     trimTrailingWhitespace()
                     endWithNewline()
                     licenseHeaderFile(rootProject.file("$rootDir/spotless/copyright.kt"),

@@ -1,6 +1,5 @@
 apply(plugin = "io.github.gradle-nexus.publish-plugin")
 apply(plugin = "org.jetbrains.dokka")
-apply(from = "${rootDir}/scripts/sonar.gradle")
 apply(from = "${rootDir}/scripts/open-api-code-gen.gradle.kts")
 
 buildscript {
@@ -61,8 +60,6 @@ subprojects {
       )
     }
   }
-
-  apply(from = "${rootDir}/scripts/coverage.gradle")
 }
 
 tasks.register("clean")
@@ -77,6 +74,9 @@ apply(from = "${rootDir}/scripts/publish-root.gradle")
 //    val teamPropsDir = file("team-props")
 //    return File(teamPropsDir, propsFile)
 //}
+
+apply(from = "${rootDir}/scripts/sonar.gradle")
+apply(from = "${rootDir}/scripts/coverage.gradle")
 
 afterEvaluate {
     println("Running Add Pre Commit Git Hook Script on Build")
