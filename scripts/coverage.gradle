@@ -52,6 +52,7 @@ subprojects {
 
         afterEvaluate {
             def isAndroidModule = plugins.hasPlugin("com.android.library") || plugins.hasPlugin("com.android.application")
+            def hasPaparazziPlugin = plugins.hasPlugin("app.cash.paparazzi")
 
             if (isAndroidModule) {
                 android {
@@ -62,6 +63,17 @@ subprojects {
                         }
                     }
                 }
+            }
+
+            // Determine the appropriate test task name based on module type and plugins
+            def testTaskName = isAndroidModule
+                    ? (hasPaparazziPlugin ? "verifyPaparazziDebug" : "testDebugUnitTest")
+                    : "test"
+
+            tasks.register("testCoverage") {
+                group = "verification"
+                description = "Run module-specific tests"
+                dependsOn(testTaskName)
             }
 
             kover {
@@ -91,6 +103,9 @@ coverageModulesWithTests.each { project -> dependencies { kover(project) } }
 tasks.register("testCoverage") {
     group = "verification"
     description = "Run all tests in all modules and generate merged coverage report"
+
+    dependsOn coverageModulesWithTests.collect { ":${it.name}:testCoverage" }
+
     finalizedBy("koverXmlReportCoverage", "koverHtmlReportCoverage")
 }
 

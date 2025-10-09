@@ -76,9 +76,6 @@ jobs:
 
       - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
-      - name: Run snapshot tests
-        run: ./gradlew verifyPaparazziDebug --scan --stacktrace
-
       - name: Run unit tests
         run: ./gradlew :testCoverage --scan --stacktrace
 
