@@ -58,13 +58,13 @@ data class IngressSourceRequest (
 
             companion object {
                 fun fromString(s: kotlin.String): Fps = when (s) {
-                    "30" -> `30`
-                    "60" -> `60`
+                    "30" -> Fps30
+                    "60" -> Fps60
                     else -> Unknown(s)
                 }
             }
-            object `30` : Fps("30")
-            object `60` : Fps("60")
+            object Fps30 : Fps("30")
+            object Fps60 : Fps("60")
             data class Unknown(val unknownValue: kotlin.String) : Fps(unknownValue)
         
 

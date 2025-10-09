@@ -54,6 +54,7 @@ object Serializer {
         .add(io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter())
         .add(io.getstream.android.video.generated.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter())
+        .add(io.getstream.android.video.generated.models.VideoEventAdapter())
         .add(io.getstream.android.video.generated.infrastructure.BigDecimalAdapter())
         .add(io.getstream.android.video.generated.infrastructure.BigIntegerAdapter())
         .add(io.getstream.android.video.generated.infrastructure.ByteArrayAdapter())

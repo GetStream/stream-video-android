@@ -58,13 +58,13 @@ data class IngressAudioEncodingOptionsRequest (
 
             companion object {
                 fun fromString(s: kotlin.String): Channels = when (s) {
-                    "1" -> `1`
-                    "2" -> `2`
+                    "1" -> Channels1
+                    "2" -> Channels2
                     else -> Unknown(s)
                 }
             }
-            object `1` : Channels("1")
-            object `2` : Channels("2")
+            object Channels1 : Channels("1")
+            object Channels2 : Channels("2")
             data class Unknown(val unknownValue: kotlin.String) : Channels(unknownValue)
         
 

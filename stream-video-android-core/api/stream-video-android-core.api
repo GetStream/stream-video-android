@@ -2601,28 +2601,28 @@ public abstract class io/getstream/android/video/generated/models/FrameRecording
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$1080p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$1080p;
-}
-
-public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$1440p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$1440p;
-}
-
-public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$360p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$360p;
-}
-
-public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$480p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$480p;
-}
-
-public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$720p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$720p;
-}
-
 public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Companion {
 	public final fun fromString (Ljava/lang/String;)Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality;
+}
+
+public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality1080p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality1080p;
+}
+
+public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality1440p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality1440p;
+}
+
+public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality360p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality360p;
+}
+
+public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality480p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality480p;
+}
+
+public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality720p : io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$Quality720p;
 }
 
 public final class io/getstream/android/video/generated/models/FrameRecordingSettingsRequest$Quality$QualityAdapter : com/squareup/moshi/JsonAdapter {
@@ -3001,12 +3001,12 @@ public abstract class io/getstream/android/video/generated/models/IngressAudioEn
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$1 : io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$1;
+public final class io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$Channels1 : io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$Channels1;
 }
 
-public final class io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$2 : io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$2;
+public final class io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$Channels2 : io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$Channels2;
 }
 
 public final class io/getstream/android/video/generated/models/IngressAudioEncodingOptionsRequest$Channels$ChannelsAdapter : com/squareup/moshi/JsonAdapter {
@@ -3102,16 +3102,16 @@ public abstract class io/getstream/android/video/generated/models/IngressSourceR
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/android/video/generated/models/IngressSourceRequest$Fps$30 : io/getstream/android/video/generated/models/IngressSourceRequest$Fps {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressSourceRequest$Fps$30;
-}
-
-public final class io/getstream/android/video/generated/models/IngressSourceRequest$Fps$60 : io/getstream/android/video/generated/models/IngressSourceRequest$Fps {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressSourceRequest$Fps$60;
-}
-
 public final class io/getstream/android/video/generated/models/IngressSourceRequest$Fps$Companion {
 	public final fun fromString (Ljava/lang/String;)Lio/getstream/android/video/generated/models/IngressSourceRequest$Fps;
+}
+
+public final class io/getstream/android/video/generated/models/IngressSourceRequest$Fps$Fps30 : io/getstream/android/video/generated/models/IngressSourceRequest$Fps {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressSourceRequest$Fps$Fps30;
+}
+
+public final class io/getstream/android/video/generated/models/IngressSourceRequest$Fps$Fps60 : io/getstream/android/video/generated/models/IngressSourceRequest$Fps {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/IngressSourceRequest$Fps$Fps60;
 }
 
 public final class io/getstream/android/video/generated/models/IngressSourceRequest$Fps$FpsAdapter : com/squareup/moshi/JsonAdapter {
@@ -4481,26 +4481,6 @@ public abstract class io/getstream/android/video/generated/models/RTMPBroadcastR
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$1080p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$1080p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$1440p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$1440p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$360p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$360p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$480p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$480p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$720p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$720p;
-}
-
 public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Companion {
 	public final fun fromString (Ljava/lang/String;)Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality;
 }
@@ -4523,6 +4503,26 @@ public final class io/getstream/android/video/generated/models/RTMPBroadcastRequ
 
 public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Portrait720x1280 : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
 	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Portrait720x1280;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality1080p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality1080p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality1440p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality1440p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality360p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality360p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality480p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality480p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality720p : io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$Quality720p;
 }
 
 public final class io/getstream/android/video/generated/models/RTMPBroadcastRequest$Quality$QualityAdapter : com/squareup/moshi/JsonAdapter {
@@ -4577,26 +4577,6 @@ public abstract class io/getstream/android/video/generated/models/RTMPSettingsRe
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$1080p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$1080p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$1440p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$1440p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$360p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$360p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$480p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$480p;
-}
-
-public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$720p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$720p;
-}
-
 public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Companion {
 	public final fun fromString (Ljava/lang/String;)Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality;
 }
@@ -4619,6 +4599,26 @@ public final class io/getstream/android/video/generated/models/RTMPSettingsReque
 
 public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Portrait720x1280 : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
 	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Portrait720x1280;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality1080p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality1080p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality1440p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality1440p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality360p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality360p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality480p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality480p;
+}
+
+public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality720p : io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$Quality720p;
 }
 
 public final class io/getstream/android/video/generated/models/RTMPSettingsRequest$Quality$QualityAdapter : com/squareup/moshi/JsonAdapter {
@@ -4747,26 +4747,6 @@ public abstract class io/getstream/android/video/generated/models/RecordSettings
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$1080p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$1080p;
-}
-
-public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$1440p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$1440p;
-}
-
-public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$360p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$360p;
-}
-
-public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$480p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$480p;
-}
-
-public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$720p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
-	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$720p;
-}
-
 public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Companion {
 	public final fun fromString (Ljava/lang/String;)Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality;
 }
@@ -4789,6 +4769,26 @@ public final class io/getstream/android/video/generated/models/RecordSettingsReq
 
 public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Portrait720x1280 : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
 	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Portrait720x1280;
+}
+
+public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality1080p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality1080p;
+}
+
+public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality1440p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality1440p;
+}
+
+public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality360p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality360p;
+}
+
+public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality480p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality480p;
+}
+
+public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality720p : io/getstream/android/video/generated/models/RecordSettingsRequest$Quality {
+	public static final field INSTANCE Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality$Quality720p;
 }
 
 public final class io/getstream/android/video/generated/models/RecordSettingsRequest$Quality$QualityAdapter : com/squareup/moshi/JsonAdapter {

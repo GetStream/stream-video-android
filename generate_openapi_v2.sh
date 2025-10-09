@@ -14,7 +14,7 @@ API_SERVICE_DIR="apis"
 MOSHI_ADAPTER_DIR="infrastructure"
 MOSHI_ADAPTER_PACKAGE="io.getstream.android.video.generated.infrastructure"
 CLASSES_TO_SKIP="PrivacySettingsResponse,PrivacySettings,StopRTMPBroadcastsRequest"
-ANDROID_SDK="Video"
+ANDROID_SDK="video"
 KEEP_CLASSES="WSAuthMessageRequest.kt"
 OUTPUT_CLIENT_PATH="./stream-video-android-core/src/main/kotlin/io/getstream/android/video/generated/"
 
@@ -75,6 +75,10 @@ for arg in "$@"; do
       ;;
     --classes-to-skip=*)
       CLASSES_TO_SKIP="${arg#*=}"
+      shift
+      ;;
+    --androidSdk=*)
+      ANDROID_SDK="${arg#*=}"
       shift
       ;;
     --keep-classes=*)
