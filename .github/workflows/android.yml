@@ -73,10 +73,11 @@ jobs:
           fetch-depth: 0 # fetch all history for sonar analysis
 
       - uses: GetStream/android-ci-actions/actions/setup-java@main
-        with:
-          java-version: '11'
 
       - uses: GetStream/android-ci-actions/actions/gradle-cache@main
+
+      - name: Run snapshot tests
+        run: ./gradlew verifyPaparazziDebug --scan --stacktrace
 
       - name: Run unit tests
         run: ./gradlew :testCoverage --scan --stacktrace

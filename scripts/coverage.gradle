@@ -91,14 +91,6 @@ coverageModulesWithTests.each { project -> dependencies { kover(project) } }
 tasks.register("testCoverage") {
     group = "verification"
     description = "Run all tests in all modules and generate merged coverage report"
-
-    def paparazziTests = coverageModulesWithTests.findAll {
-        project(":${it.name}").plugins.hasPlugin("app.cash.paparazzi")
-    }.collect { ":${it.name}:verifyPaparazziDebug" }
-    // Run Paparazzi tests first (if any) to ensure they run before unit tests
-    dependsOn(paparazziTests)
-
-    // Then run Kover reports which automatically depends on the unit test tasks
     finalizedBy("koverXmlReportCoverage", "koverHtmlReportCoverage")
 }
 
