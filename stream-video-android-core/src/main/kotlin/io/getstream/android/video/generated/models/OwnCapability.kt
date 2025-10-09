@@ -18,12 +18,17 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -49,12 +54,14 @@ sealed class OwnCapability(val value: kotlin.String) {
             "join-backstage" -> JoinBackstage
             "join-call" -> JoinCall
             "join-ended-call" -> JoinEndedCall
+            "kick-user" -> KickUser
             "mute-users" -> MuteUsers
             "pin-for-everyone" -> PinForEveryone
             "read-call" -> ReadCall
             "remove-call-member" -> RemoveCallMember
             "screenshare" -> Screenshare
             "send-audio" -> SendAudio
+            "send-closed-captions-call" -> SendClosedCaptionsCall
             "send-video" -> SendVideo
             "start-broadcast-call" -> StartBroadcastCall
             "start-closed-captions-call" -> StartClosedCaptionsCall
@@ -82,12 +89,14 @@ sealed class OwnCapability(val value: kotlin.String) {
     object JoinBackstage : OwnCapability("join-backstage")
     object JoinCall : OwnCapability("join-call")
     object JoinEndedCall : OwnCapability("join-ended-call")
+    object KickUser : OwnCapability("kick-user")
     object MuteUsers : OwnCapability("mute-users")
     object PinForEveryone : OwnCapability("pin-for-everyone")
     object ReadCall : OwnCapability("read-call")
     object RemoveCallMember : OwnCapability("remove-call-member")
     object Screenshare : OwnCapability("screenshare")
     object SendAudio : OwnCapability("send-audio")
+    object SendClosedCaptionsCall : OwnCapability("send-closed-captions-call")
     object SendVideo : OwnCapability("send-video")
     object StartBroadcastCall : OwnCapability("start-broadcast-call")
     object StartClosedCaptionsCall : OwnCapability("start-closed-captions-call")
@@ -105,6 +114,7 @@ sealed class OwnCapability(val value: kotlin.String) {
     object UpdateCallSettings : OwnCapability("update-call-settings")
     data class Unknown(val unknownValue: kotlin.String) : OwnCapability(unknownValue)
 
+
     class OwnCapabilityAdapter : JsonAdapter<OwnCapability>() {
         @FromJson
         override fun fromJson(reader: JsonReader): OwnCapability? {
@@ -117,4 +127,5 @@ sealed class OwnCapability(val value: kotlin.String) {
             writer.value(value?.value)
         }
     }
+
 }

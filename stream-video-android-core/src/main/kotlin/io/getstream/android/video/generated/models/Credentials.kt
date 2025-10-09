@@ -18,25 +18,33 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class Credentials(
+data class Credentials (
     @Json(name = "token")
     val token: kotlin.String,
 
     @Json(name = "ice_servers")
-    val iceServers: kotlin.collections.List<io.getstream.android.video.generated.models.ICEServer>,
+    val iceServers: kotlin.collections.List<io.getstream.android.video.generated.models.ICEServer> = emptyList(),
 
     @Json(name = "server")
-    val server: io.getstream.android.video.generated.models.SFUResponse,
+    val server: io.getstream.android.video.generated.models.SFUResponse
 )

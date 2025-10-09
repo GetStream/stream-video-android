@@ -18,20 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
 import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class QueryCallMembersRequest(
+data class QueryCallMembersRequest (
     @Json(name = "id")
     val id: kotlin.String,
 
@@ -48,9 +55,8 @@ data class QueryCallMembersRequest(
     val prev: kotlin.String? = null,
 
     @Json(name = "sort")
-    val sort: kotlin.collections.List<io.getstream.android.video.generated.models.SortParamRequest>? =
-        null,
+    val sort: kotlin.collections.List<io.getstream.android.video.generated.models.SortParamRequest>? = emptyList(),
 
     @Json(name = "filter_conditions")
-    val filterConditions: kotlin.collections.Map<kotlin.String, Any?>? = null,
+    val filterConditions: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
 )

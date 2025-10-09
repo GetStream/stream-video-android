@@ -18,18 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class CallSettingsResponse(
+data class CallSettingsResponse (
     @Json(name = "audio")
     val audio: io.getstream.android.video.generated.models.AudioSettingsResponse,
 
@@ -38,6 +47,9 @@ data class CallSettingsResponse(
 
     @Json(name = "broadcasting")
     val broadcasting: io.getstream.android.video.generated.models.BroadcastSettingsResponse,
+
+    @Json(name = "frame_recording")
+    val frameRecording: io.getstream.android.video.generated.models.FrameRecordingSettingsResponse,
 
     @Json(name = "geofencing")
     val geofencing: io.getstream.android.video.generated.models.GeofenceSettingsResponse,
@@ -65,4 +77,7 @@ data class CallSettingsResponse(
 
     @Json(name = "video")
     val video: io.getstream.android.video.generated.models.VideoSettingsResponse,
+
+    @Json(name = "ingress")
+    val ingress: io.getstream.android.video.generated.models.IngressSettingsResponse? = null
 )

@@ -18,18 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * This event is sent when closed captions are being sent in a call, clients should use this to show the closed captions in the call screen
  */
 
-data class ClosedCaptionEvent(
+data class ClosedCaptionEvent (
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -40,15 +49,16 @@ data class ClosedCaptionEvent(
     val closedCaption: io.getstream.android.video.generated.models.CallClosedCaption,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
-
+    val type: kotlin.String
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }
 
     override fun getCallCID(): kotlin.String {
         return callCid
-    }
+    }    
 }

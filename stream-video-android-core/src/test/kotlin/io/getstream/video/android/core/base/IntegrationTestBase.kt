@@ -25,6 +25,7 @@ import io.getstream.android.video.generated.models.CallIngressResponse
 import io.getstream.android.video.generated.models.CallResponse
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.EgressResponse
+import io.getstream.android.video.generated.models.FrameRecordingSettingsResponse
 import io.getstream.android.video.generated.models.GeofenceSettingsResponse
 import io.getstream.android.video.generated.models.HLSSettingsResponse
 import io.getstream.android.video.generated.models.LimitsSettingsResponse
@@ -33,6 +34,7 @@ import io.getstream.android.video.generated.models.RTMPSettingsResponse
 import io.getstream.android.video.generated.models.RecordSettingsRequest
 import io.getstream.android.video.generated.models.RecordSettingsResponse
 import io.getstream.android.video.generated.models.RingSettingsResponse
+import io.getstream.android.video.generated.models.SRTIngress
 import io.getstream.android.video.generated.models.ScreensharingSettingsResponse
 import io.getstream.android.video.generated.models.SessionSettingsResponse
 import io.getstream.android.video.generated.models.TargetResolution
@@ -41,6 +43,7 @@ import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.android.video.generated.models.VideoSettingsResponse
+import io.getstream.android.video.generated.models.WHIPIngress
 import io.getstream.log.Priority
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.GEO
@@ -208,13 +211,19 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
 // convert a Call object to a CallResponse object
 internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
     val now = OffsetDateTime.now(Clock.systemUTC())
-    val ingress = CallIngressResponse(rtmp = RTMPIngress(address = ""))
+    val ingress =
+        CallIngressResponse(
+            rtmp = RTMPIngress(address = ""),
+            srt = SRTIngress(""),
+            whip = WHIPIngress(""),
+        )
     val audioSettings = AudioSettingsResponse(
         accessRequestEnabled = true,
         micDefaultOn = true,
         opusDtxEnabled = true,
         redundantCodingEnabled = true,
         speakerDefaultOn = true,
+        hifiAudioEnabled = true,
         defaultDevice = AudioSettingsResponse.DefaultDevice.Speaker,
     )
     val settings = CallSettingsResponse(
@@ -256,6 +265,10 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         thumbnails = ThumbnailsSettingsResponse(
             enabled = false,
         ),
+        frameRecording = FrameRecordingSettingsResponse(
+            0,
+            FrameRecordingSettingsResponse.Mode.Available,
+        ),
         session = SessionSettingsResponse(0),
     )
     val response = CallResponse(
@@ -274,6 +287,7 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
         settings = settings,
         egress = EgressResponse(false, emptyList(), null),
         updatedAt = now,
+        translating = false,
         captioning = false,
     )
     return response
