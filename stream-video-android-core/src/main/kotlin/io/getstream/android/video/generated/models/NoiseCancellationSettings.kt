@@ -18,11 +18,15 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -31,32 +35,34 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class NoiseCancellationSettings(
+data class NoiseCancellationSettings (
     @Json(name = "mode")
-    val mode: Mode,
-) {
-
+    val mode: Mode
+)
+{
+    
     /**
-     * Mode Enum
-     */
+    * Mode Enum
+    */
     sealed class Mode(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): Mode = when (s) {
-                "auto-on" -> AutoOn
-                "available" -> Available
-                "disabled" -> Disabled
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): Mode = when (s) {
+                    "auto-on" -> AutoOn
+                    "available" -> Available
+                    "disabled" -> Disabled
+                    else -> Unknown(s)
+                }
             }
-        }
-        object AutoOn : Mode("auto-on")
-        object Available : Mode("available")
-        object Disabled : Mode("disabled")
-        data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+            object AutoOn : Mode("auto-on")
+            object Available : Mode("available")
+            object Disabled : Mode("disabled")
+            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+        
 
         class ModeAdapter : JsonAdapter<Mode>() {
             @FromJson
@@ -70,5 +76,5 @@ data class NoiseCancellationSettings(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }

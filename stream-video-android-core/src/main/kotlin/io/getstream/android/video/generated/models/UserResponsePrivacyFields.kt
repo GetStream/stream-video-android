@@ -18,20 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
 import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class UserResponsePrivacyFields(
+data class UserResponsePrivacyFields (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
@@ -48,13 +55,16 @@ data class UserResponsePrivacyFields(
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "blocked_user_ids")
-    val blockedUserIds: kotlin.collections.List<kotlin.String>,
+    val blockedUserIds: kotlin.collections.List<kotlin.String> = emptyList(),
 
     @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String>,
+    val teams: kotlin.collections.List<kotlin.String> = emptyList(),
 
     @Json(name = "custom")
     val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+
+    @Json(name = "avg_response_time")
+    val avgResponseTime: kotlin.Int? = null,
 
     @Json(name = "deactivated_at")
     val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
@@ -76,4 +86,7 @@ data class UserResponsePrivacyFields(
 
     @Json(name = "revoke_tokens_issued_before")
     val revokeTokensIssuedBefore: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "teams_role")
+    val teamsRole: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
 )

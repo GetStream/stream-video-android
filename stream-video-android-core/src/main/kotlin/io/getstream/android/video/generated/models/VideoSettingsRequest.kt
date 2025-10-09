@@ -18,11 +18,15 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -31,10 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class VideoSettingsRequest(
+data class VideoSettingsRequest (
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean? = null,
 
@@ -48,27 +52,29 @@ data class VideoSettingsRequest(
     val enabled: kotlin.Boolean? = null,
 
     @Json(name = "target_resolution")
-    val targetResolution: io.getstream.android.video.generated.models.TargetResolution? = null,
-) {
-
+    val targetResolution: io.getstream.android.video.generated.models.TargetResolution? = null
+)
+{
+    
     /**
-     * CameraFacing Enum
-     */
+    * CameraFacing Enum
+    */
     sealed class CameraFacing(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): CameraFacing = when (s) {
-                "back" -> Back
-                "external" -> External
-                "front" -> Front
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): CameraFacing = when (s) {
+                    "back" -> Back
+                    "external" -> External
+                    "front" -> Front
+                    else -> Unknown(s)
+                }
             }
-        }
-        object Back : CameraFacing("back")
-        object External : CameraFacing("external")
-        object Front : CameraFacing("front")
-        data class Unknown(val unknownValue: kotlin.String) : CameraFacing(unknownValue)
+            object Back : CameraFacing("back")
+            object External : CameraFacing("external")
+            object Front : CameraFacing("front")
+            data class Unknown(val unknownValue: kotlin.String) : CameraFacing(unknownValue)
+        
 
         class CameraFacingAdapter : JsonAdapter<CameraFacing>() {
             @FromJson
@@ -82,5 +88,5 @@ data class VideoSettingsRequest(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }
