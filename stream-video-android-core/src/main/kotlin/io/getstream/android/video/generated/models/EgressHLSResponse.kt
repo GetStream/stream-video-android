@@ -18,21 +18,30 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class EgressHLSResponse(
+data class EgressHLSResponse (
     @Json(name = "playlist_url")
     val playlistUrl: kotlin.String,
 
     @Json(name = "status")
-    val status: kotlin.String,
+    val status: kotlin.String
 )

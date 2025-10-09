@@ -18,18 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * DeleteCallResponse is the payload for deleting a call.
  */
 
-data class DeleteCallResponse(
+data class DeleteCallResponse (
     @Json(name = "duration")
     val duration: kotlin.String,
 
@@ -37,5 +46,5 @@ data class DeleteCallResponse(
     val call: io.getstream.android.video.generated.models.CallResponse,
 
     @Json(name = "task_id")
-    val taskId: kotlin.String? = null,
+    val taskId: kotlin.String? = null
 )

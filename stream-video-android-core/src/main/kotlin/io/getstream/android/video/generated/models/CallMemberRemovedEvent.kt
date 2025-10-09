@@ -18,19 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * This event is sent when one or more members are removed from a call
  */
 
-data class CallMemberRemovedEvent(
+data class CallMemberRemovedEvent (
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -38,21 +46,22 @@ data class CallMemberRemovedEvent(
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<kotlin.String>,
+    val members: kotlin.collections.List<kotlin.String> = emptyList(),
 
     @Json(name = "call")
     val call: io.getstream.android.video.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
-
+    val type: kotlin.String
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }
 
     override fun getCallCID(): kotlin.String {
         return callCid
-    }
+    }    
 }
