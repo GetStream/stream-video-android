@@ -18,27 +18,39 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * CallTranscription represents a transcription of a call.
  */
 
-data class CallTranscription(
+data class CallTranscription (
     @Json(name = "end_time")
     val endTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "filename")
     val filename: kotlin.String,
 
+    @Json(name = "session_id")
+    val sessionId: kotlin.String,
+
     @Json(name = "start_time")
     val startTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "url")
-    val url: kotlin.String,
+    val url: kotlin.String
 )

@@ -18,20 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
 import kotlin.collections.List
 import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * Represents a call
  */
 
-data class CallResponse(
+data class CallResponse (
     @Json(name = "backstage")
     val backstage: kotlin.Boolean,
 
@@ -56,6 +63,9 @@ data class CallResponse(
     @Json(name = "transcribing")
     val transcribing: kotlin.Boolean,
 
+    @Json(name = "translating")
+    val translating: kotlin.Boolean,
+
     @Json(name = "type")
     val type: kotlin.String,
 
@@ -63,7 +73,7 @@ data class CallResponse(
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "blocked_user_ids")
-    val blockedUserIds: kotlin.collections.List<kotlin.String>,
+    val blockedUserIds: kotlin.collections.List<kotlin.String> = emptyList(),
 
     @Json(name = "created_by")
     val createdBy: io.getstream.android.video.generated.models.UserResponse,
@@ -79,6 +89,9 @@ data class CallResponse(
 
     @Json(name = "settings")
     val settings: io.getstream.android.video.generated.models.CallSettingsResponse,
+
+    @Json(name = "channel_cid")
+    val channelCid: kotlin.String? = null,
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
@@ -96,5 +109,5 @@ data class CallResponse(
     val session: io.getstream.android.video.generated.models.CallSessionResponse? = null,
 
     @Json(name = "thumbnails")
-    val thumbnails: io.getstream.android.video.generated.models.ThumbnailResponse? = null,
+    val thumbnails: io.getstream.android.video.generated.models.ThumbnailResponse? = null
 )

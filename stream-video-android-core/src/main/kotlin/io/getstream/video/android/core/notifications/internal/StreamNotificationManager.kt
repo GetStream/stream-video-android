@@ -57,6 +57,15 @@ internal class StreamNotificationManager private constructor(
     suspend fun registerPushDevice() {
         logger.d { "[registerPushDevice] no args" }
         // first get a push device generator that works for this device
+
+        logger.d {
+            "[registerPushDevice] no args, push device generator: ${notificationConfig.pushDeviceGenerators.size}"
+        }
+        notificationConfig.pushDeviceGenerators.forEach { it ->
+            logger.d {
+                "[registerPushDevice] no args, push device generator name: $it, valid: ${it.isValidForThisDevice()}"
+            }
+        }
         notificationConfig.pushDeviceGenerators
             .firstOrNull { it.isValidForThisDevice() }
             ?.let { generator ->
@@ -87,10 +96,12 @@ internal class StreamNotificationManager private constructor(
             ?.toCreateDeviceRequest()
             ?.flatMapSuspend { createDeviceRequest ->
                 try {
-                    api.createDevice(createDeviceRequest)
+                    val result = api.createDevice(createDeviceRequest)
                     updateDevice(pushDevice.toDevice())
                     Result.Success(newDevice)
                 } catch (e: Exception) {
+                    e.printStackTrace()
+                    logger.e { "Failed to register device for push notifications with ${e.message}" }
                     logger.e(e) {
                         "Failed to register device for push notifications " +
                             "(PN will not work!). Does the push provider key " +

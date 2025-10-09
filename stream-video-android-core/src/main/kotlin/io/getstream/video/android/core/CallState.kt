@@ -62,6 +62,7 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
@@ -140,6 +141,7 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
+import stream.video.sfu.models.ParticipantSource
 import stream.video.sfu.models.TrackType
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -747,6 +749,18 @@ public class CallState(
                 )
             }
 
+            is LocalCallMissedEvent -> {
+                scope.launch {
+                    val newRejectedBySet = _rejectedBy.value.toMutableSet()
+                    StreamVideo.instanceOrNull()?.let {
+                        newRejectedBySet.add(it.user.id)
+                    }
+                    _rejectedBy.value = newRejectedBySet.toSet()
+                    _ringingState.value = RingingState.RejectedByAll
+                    call.leave()
+                }
+            }
+
             is CallEndedEvent -> {
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
@@ -800,7 +814,9 @@ public class CallState(
             }
 
             is UpdatedCallPermissionsEvent -> {
-                _ownCapabilities.value = event.ownCapabilities
+                if (event.user.id == client.userId) {
+                    _ownCapabilities.value = event.ownCapabilities
+                }
             }
 
             is ConnectedEvent -> {
@@ -895,7 +911,7 @@ public class CallState(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session!!.handleEvent(event)
+                call.session?.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -1120,16 +1136,16 @@ public class CallState(
         val acceptedBy = _acceptedBy.value
         val isAcceptedByMe = _acceptedBy.value.contains(client.userId)
         val createdBy = _createdBy.value
-        val hasActiveCall = client.state.activeCall.value != null
-        val hasRingingCall = client.state.ringingCall.value != null
+        val hasActiveCall = client.state.activeCall.value != null && client.state.activeCall.value?.id == call.id
+        val hasRingingCall = client.state.ringingCall.value != null && client.state.ringingCall.value?.id == call.id
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
 
-        Log.d("RingingState", "Current: ${_ringingState.value}")
+        Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
         Log.d(
             "RingingState",
-            "Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
+            "call_id: ${call.cid}, Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
         )
 
         // no members - call is empty, we can join
@@ -1297,7 +1313,12 @@ public class CallState(
             logger.w { "A user [id:${participant.user_id}] is in the call with empty session_id" }
         }
 
-        val participantState = getOrCreateParticipant(participant.session_id, participant.user_id)
+        val participantState = getOrCreateParticipant(
+            participant.session_id,
+            participant.user_id,
+            false,
+            participant.source,
+        )
         participantState.updateFromParticipantInfo(participant)
 
         upsertParticipants(listOf(participantState))
@@ -1309,6 +1330,7 @@ public class CallState(
         sessionId: String,
         userId: String,
         updateFlow: Boolean = false,
+        source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
     ): ParticipantState {
         val participantState = if (internalParticipants.containsKey(sessionId)) {
             internalParticipants[sessionId]!!
@@ -1318,6 +1340,7 @@ public class CallState(
                 scope = scope,
                 callActions = callActions,
                 initialUserId = userId,
+                source = source,
             )
         }
         if (updateFlow) {

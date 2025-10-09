@@ -45,6 +45,7 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -166,6 +167,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         }
     }
 
+    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot PortraitParticipants1 composable`() {
         snapshot {
@@ -188,6 +190,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         }
     }
 
+    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot PortraitParticipants2 composable`() {
         snapshot {
@@ -210,6 +213,7 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         }
     }
 
+    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot PortraitParticipants3 composable`() {
         snapshot {

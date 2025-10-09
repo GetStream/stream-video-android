@@ -286,6 +286,7 @@ public class StreamPeerConnectionFactory(
         onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
         maxPublishingBitrate: Int = 1_200_000,
+        debugText: String = "",
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             type = type,
@@ -296,6 +297,8 @@ public class StreamPeerConnectionFactory(
             maxBitRate = maxPublishingBitrate,
             onRejoinNeeded = { },
             tracer = Tracer(type.toPeerType().name),
+            tag = debugText,
+            onFastReconnectNeeded = {},
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
@@ -316,6 +319,7 @@ public class StreamPeerConnectionFactory(
         tracer: Tracer,
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
         rejoin: () -> Unit,
+        fastReconnect: () -> Unit,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
@@ -324,6 +328,7 @@ public class StreamPeerConnectionFactory(
             tracer = tracer,
             enableStereo = enableStereo,
             rejoin = rejoin,
+            fastReconnect = fastReconnect,
             onIceCandidateRequest = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(
@@ -359,6 +364,7 @@ public class StreamPeerConnectionFactory(
         sessionId: String,
         tracer: Tracer,
         rejoin: () -> Unit = {},
+        fastReconnect: () -> Unit = {},
     ): Publisher {
         val peerConnection = Publisher(
             sessionId = sessionId,
@@ -375,6 +381,7 @@ public class StreamPeerConnectionFactory(
             maxBitRate = maxPublishingBitrate,
             tracer = tracer,
             rejoin = rejoin,
+            fastReconnect = fastReconnect,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,

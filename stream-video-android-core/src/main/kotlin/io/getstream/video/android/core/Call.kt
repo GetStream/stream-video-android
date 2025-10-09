@@ -61,6 +61,8 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.call.video.YuvFrame
@@ -84,6 +86,7 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
+import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -143,6 +146,7 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
+    internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
@@ -258,13 +262,16 @@ public class Call(
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
-            logger.d { "[NetworkStateListener#onConnected] #network; no args" }
+
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
+            logger.d {
+                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMils"
+            }
             if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+                fastReconnect()
             } else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
@@ -275,7 +282,13 @@ public class Call(
 
         override suspend fun onDisconnected() {
             state._connection.value = RealtimeConnection.Reconnecting
+            logger.d {
+                "[NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
+            }
             lastDisconnect = System.currentTimeMillis()
+            logger.d {
+                "[NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect"
+            }
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
                 logger.d {
@@ -295,6 +308,7 @@ public class Call(
     private var monitorSubscriberPCStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
+    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
 
     init {
         scope.launch {
@@ -445,10 +459,18 @@ public class Call(
             }
             delay(retryCount - 1 * 1000L)
         }
-        return Failure(value = Error.GenericError("Join failed after 3 retries"))
+        session = null
+        val errorMessage = "Join failed after 3 retries"
+        state._connection.value = RealtimeConnection.Failed(errorMessage)
+        return Failure(value = Error.GenericError(errorMessage))
     }
 
     internal fun isPermanentError(error: Any): Boolean {
+        if (error is Error.ThrowableError) {
+            if (error.message.contains("Unable to resolve host")) {
+                return false
+            }
+        }
         return true
     }
 
@@ -541,19 +563,6 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = scope.launch {
-            session?.publisher?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.publisher?.restartIce()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
@@ -614,8 +623,8 @@ public class Call(
     /**
      * Fast reconnect to the same SFU with the same participant session.
      */
-    suspend fun fastReconnect() = schedule {
-        logger.d { "[fastReconnect] Reconnecting" }
+    suspend fun fastReconnect() = schedule("fast") {
+        logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
@@ -640,7 +649,7 @@ public class Call(
     /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
-    suspend fun rejoin() = schedule {
+    suspend fun rejoin() = schedule("rejoin") {
         logger.d { "[rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
@@ -696,7 +705,7 @@ public class Call(
     /**
      * Migrate to another SFU.
      */
-    suspend fun migrate() = schedule {
+    suspend fun migrate() = schedule("migrate") {
         logger.d { "[migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
@@ -755,12 +764,10 @@ public class Call(
 
     private var reconnectJob: Job? = null
 
-    private suspend fun schedule(block: suspend () -> Unit) = synchronized(this) {
-        logger.d { "[schedule] #reconnect; no args" }
-        reconnectJob?.cancel()
-        reconnectJob = scope.launch {
-            block()
-        }
+    private suspend fun schedule(key: String, block: suspend () -> Unit) {
+        logger.d { "[schedule] #reconnect; no args" } // noob 4
+
+        streamSingleFlightProcessorImpl.run(key, block)
     }
 
     /** Leave the call, but don't end it for other users */
@@ -785,11 +792,22 @@ public class Call(
         isDestroyed = true
 
         sfuSocketReconnectionTime = null
+
+        /**
+         * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
+         */
         stopScreenSharing()
         camera.disable()
         microphone.disable()
-        client.state.removeActiveCall() // Will also stop CallService
-        client.state.removeRingingCall()
+
+        if (id == client.state.activeCall.value?.id) {
+            client.state.removeActiveCall(this) // Will also stop CallService
+        }
+
+        if (id == client.state.ringingCall.value?.id) {
+            client.state.removeRingingCall(this)
+        }
+
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
     }
@@ -1294,8 +1312,10 @@ public class Call(
         session?.cleanup()
         shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
-        mediaManager.cleanup()
+        mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
         session = null
+        // Cleanup the call's scope provider
+        scopeProvider.cleanup()
     }
 
     // This will allow the Rest APIs to be executed which are in queue before leave
@@ -1320,7 +1340,7 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall()
+        clientImpl.state.removeRingingCall(this)
         clientImpl.state.maybeStopForegroundService(call = this)
         return clientImpl.accept(type, id)
     }

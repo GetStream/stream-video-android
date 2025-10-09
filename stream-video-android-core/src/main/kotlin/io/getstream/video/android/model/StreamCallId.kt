@@ -20,6 +20,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import androidx.core.content.IntentCompat
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.model.mapper.toTypeAndId
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -68,6 +69,10 @@ public data class StreamCallId constructor(
             val (type, id) = cid.toTypeAndId()
             return StreamCallId(type = type.trim(), id = id.trim())
         }
+    }
+
+    fun getNotificationId(notificationType: NotificationType): Int {
+        return (notificationType.type + cid).hashCode()
     }
 }
 

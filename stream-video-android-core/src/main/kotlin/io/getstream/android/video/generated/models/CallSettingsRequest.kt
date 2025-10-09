@@ -18,18 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class CallSettingsRequest(
+data class CallSettingsRequest (
     @Json(name = "audio")
     val audio: io.getstream.android.video.generated.models.AudioSettingsRequest? = null,
 
@@ -39,8 +48,14 @@ data class CallSettingsRequest(
     @Json(name = "broadcasting")
     val broadcasting: io.getstream.android.video.generated.models.BroadcastSettingsRequest? = null,
 
+    @Json(name = "frame_recording")
+    val frameRecording: io.getstream.android.video.generated.models.FrameRecordingSettingsRequest? = null,
+
     @Json(name = "geofencing")
     val geofencing: io.getstream.android.video.generated.models.GeofenceSettingsRequest? = null,
+
+    @Json(name = "ingress")
+    val ingress: io.getstream.android.video.generated.models.IngressSettingsRequest? = null,
 
     @Json(name = "limits")
     val limits: io.getstream.android.video.generated.models.LimitsSettingsRequest? = null,
@@ -64,5 +79,5 @@ data class CallSettingsRequest(
     val transcription: io.getstream.android.video.generated.models.TranscriptionSettingsRequest? = null,
 
     @Json(name = "video")
-    val video: io.getstream.android.video.generated.models.VideoSettingsRequest? = null,
+    val video: io.getstream.android.video.generated.models.VideoSettingsRequest? = null
 )

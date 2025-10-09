@@ -25,7 +25,9 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
+import kotlin.getValue
 
 /**
  * Applies a blur effect to the background of a video call.
@@ -54,6 +56,8 @@ public class BlurredBackgroundVideoFilter(
         )
     }
 
+    private val logger by taggedLogger("BlurredBackgroundVideoFilter")
+
     override fun applyFilter(videoFrameBitmap: Bitmap) {
         // Apply segmentation
         val mlImage = InputImage.fromBitmap(videoFrameBitmap, 0)
@@ -70,7 +74,9 @@ public class BlurredBackgroundVideoFilter(
         )
 
         // Blur the background bitmap
+        val timeBeforeBlur = System.currentTimeMillis()
         val blurredBackgroundBitmap = Toolkit.blur(backgroundBitmap, blurIntensity.radius)
+        logger.d { "Time taken to blur image : ${System.currentTimeMillis() - timeBeforeBlur}" }
 
         // Draw the blurred background bitmap on the original bitmap
         val canvas = Canvas(videoFrameBitmap)

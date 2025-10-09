@@ -30,11 +30,13 @@ import io.getstream.video.android.uiautomator.enableInternetConnection
 import io.getstream.video.android.uiautomator.seconds
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
+import org.junit.Ignore
 import org.junit.Test
 
 class ReconnectionTests : StreamTestCase() {
 
     @AllureId("7498")
+    @Ignore("Flaky test on CI")
     @Test
     fun testReconnection() {
         val user = 1

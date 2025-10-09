@@ -18,11 +18,15 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -31,15 +35,18 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class AudioSettingsRequest(
+data class AudioSettingsRequest (
     @Json(name = "default_device")
     val defaultDevice: DefaultDevice,
 
     @Json(name = "access_request_enabled")
     val accessRequestEnabled: kotlin.Boolean? = null,
+
+    @Json(name = "hifi_audio_enabled")
+    val hifiAudioEnabled: kotlin.Boolean? = null,
 
     @Json(name = "mic_default_on")
     val micDefaultOn: kotlin.Boolean? = null,
@@ -54,25 +61,27 @@ data class AudioSettingsRequest(
     val speakerDefaultOn: kotlin.Boolean? = null,
 
     @Json(name = "noise_cancellation")
-    val noiseCancellation: io.getstream.android.video.generated.models.NoiseCancellationSettings? = null,
-) {
-
+    val noiseCancellation: io.getstream.android.video.generated.models.NoiseCancellationSettings? = null
+)
+{
+    
     /**
-     * DefaultDevice Enum
-     */
+    * DefaultDevice Enum
+    */
     sealed class DefaultDevice(val value: kotlin.String) {
-        override fun toString(): String = value
+            override fun toString(): String = value
 
-        companion object {
-            fun fromString(s: kotlin.String): DefaultDevice = when (s) {
-                "earpiece" -> Earpiece
-                "speaker" -> Speaker
-                else -> Unknown(s)
+            companion object {
+                fun fromString(s: kotlin.String): DefaultDevice = when (s) {
+                    "earpiece" -> Earpiece
+                    "speaker" -> Speaker
+                    else -> Unknown(s)
+                }
             }
-        }
-        object Earpiece : DefaultDevice("earpiece")
-        object Speaker : DefaultDevice("speaker")
-        data class Unknown(val unknownValue: kotlin.String) : DefaultDevice(unknownValue)
+            object Earpiece : DefaultDevice("earpiece")
+            object Speaker : DefaultDevice("speaker")
+            data class Unknown(val unknownValue: kotlin.String) : DefaultDevice(unknownValue)
+        
 
         class DefaultDeviceAdapter : JsonAdapter<DefaultDevice>() {
             @FromJson
@@ -86,5 +95,5 @@ data class AudioSettingsRequest(
                 writer.value(value?.value)
             }
         }
-    }
+    }    
 }
