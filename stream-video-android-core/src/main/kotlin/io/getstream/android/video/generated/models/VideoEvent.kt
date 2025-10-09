@@ -18,20 +18,23 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
 import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 public abstract class VideoEvent {
-    abstract fun getEventType(): kotlin.String
+    abstract fun getEventType(): kotlin.String 
+        
 }
+
 
 class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
@@ -51,9 +54,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
         return eventType?.let {
             peek.use { peekedReader ->
-                io.getstream.android.video.generated.infrastructure.Serializer.moshi.adapter(
-                    getSubclass(eventType),
-                ).fromJson(peekedReader)
+                io.getstream.android.video.generated.infrastructure.Serializer.moshi.adapter(getSubclass(eventType)).fromJson(peekedReader)
             }
         }
     }
@@ -65,6 +66,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
     private fun getSubclass(type: String): Class<out VideoEvent> {
         return when (type) {
+            "app.updated" -> io.getstream.android.video.generated.models.AppUpdatedEvent::class.java
             "call.accepted" -> io.getstream.android.video.generated.models.CallAcceptedEvent::class.java
             "call.blocked_user" -> io.getstream.android.video.generated.models.BlockedUserEvent::class.java
             "call.closed_caption" -> io.getstream.android.video.generated.models.ClosedCaptionEvent::class.java
@@ -74,15 +76,22 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.created" -> io.getstream.android.video.generated.models.CallCreatedEvent::class.java
             "call.deleted" -> io.getstream.android.video.generated.models.CallDeletedEvent::class.java
             "call.ended" -> io.getstream.android.video.generated.models.CallEndedEvent::class.java
+            "call.frame_recording_failed" -> io.getstream.android.video.generated.models.CallFrameRecordingFailedEvent::class.java
+            "call.frame_recording_ready" -> io.getstream.android.video.generated.models.CallFrameRecordingFrameReadyEvent::class.java
+            "call.frame_recording_started" -> io.getstream.android.video.generated.models.CallFrameRecordingStartedEvent::class.java
+            "call.frame_recording_stopped" -> io.getstream.android.video.generated.models.CallFrameRecordingStoppedEvent::class.java
             "call.hls_broadcasting_failed" -> io.getstream.android.video.generated.models.CallHLSBroadcastingFailedEvent::class.java
             "call.hls_broadcasting_started" -> io.getstream.android.video.generated.models.CallHLSBroadcastingStartedEvent::class.java
             "call.hls_broadcasting_stopped" -> io.getstream.android.video.generated.models.CallHLSBroadcastingStoppedEvent::class.java
+            "call.kicked_user" -> io.getstream.android.video.generated.models.KickedUserEvent::class.java
             "call.live_started" -> io.getstream.android.video.generated.models.CallLiveStartedEvent::class.java
             "call.member_added" -> io.getstream.android.video.generated.models.CallMemberAddedEvent::class.java
             "call.member_removed" -> io.getstream.android.video.generated.models.CallMemberRemovedEvent::class.java
             "call.member_updated" -> io.getstream.android.video.generated.models.CallMemberUpdatedEvent::class.java
             "call.member_updated_permission" -> io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent::class.java
             "call.missed" -> io.getstream.android.video.generated.models.CallMissedEvent::class.java
+            "call.moderation_blur" -> io.getstream.android.video.generated.models.CallModerationBlurEvent::class.java
+            "call.moderation_warning" -> io.getstream.android.video.generated.models.CallModerationWarningEvent::class.java
             "call.notification" -> io.getstream.android.video.generated.models.CallNotificationEvent::class.java
             "call.permission_request" -> io.getstream.android.video.generated.models.PermissionRequestEvent::class.java
             "call.permissions_updated" -> io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent::class.java
@@ -101,19 +110,25 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.session_participant_joined" -> io.getstream.android.video.generated.models.CallSessionParticipantJoinedEvent::class.java
             "call.session_participant_left" -> io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent::class.java
             "call.session_started" -> io.getstream.android.video.generated.models.CallSessionStartedEvent::class.java
+            "call.stats_report_ready" -> io.getstream.android.video.generated.models.CallStatsReportReadyEvent::class.java
             "call.transcription_failed" -> io.getstream.android.video.generated.models.CallTranscriptionFailedEvent::class.java
             "call.transcription_ready" -> io.getstream.android.video.generated.models.CallTranscriptionReadyEvent::class.java
             "call.transcription_started" -> io.getstream.android.video.generated.models.CallTranscriptionStartedEvent::class.java
             "call.transcription_stopped" -> io.getstream.android.video.generated.models.CallTranscriptionStoppedEvent::class.java
             "call.unblocked_user" -> io.getstream.android.video.generated.models.UnblockedUserEvent::class.java
             "call.updated" -> io.getstream.android.video.generated.models.CallUpdatedEvent::class.java
+            "call.user_feedback_submitted" -> io.getstream.android.video.generated.models.CallUserFeedbackSubmittedEvent::class.java
             "call.user_muted" -> io.getstream.android.video.generated.models.CallUserMutedEvent::class.java
             "connection.error" -> io.getstream.android.video.generated.models.ConnectionErrorEvent::class.java
             "connection.ok" -> io.getstream.android.video.generated.models.ConnectedEvent::class.java
             "custom" -> io.getstream.android.video.generated.models.CustomVideoEvent::class.java
             "health.check" -> io.getstream.android.video.generated.models.HealthCheckEvent::class.java
+            "user.banned" -> io.getstream.android.video.generated.models.UserBannedEvent::class.java
+            "user.deactivated" -> io.getstream.android.video.generated.models.UserDeactivatedEvent::class.java
+            "user.muted" -> io.getstream.android.video.generated.models.UserMutedEvent::class.java
+            "user.reactivated" -> io.getstream.android.video.generated.models.UserReactivatedEvent::class.java
             "user.updated" -> io.getstream.android.video.generated.models.UserUpdatedEvent::class.java
-            else -> UnsupportedVideoEvent::class.java
+            else -> UnsupportedVideoEvent::class.java       
         }
     }
 }

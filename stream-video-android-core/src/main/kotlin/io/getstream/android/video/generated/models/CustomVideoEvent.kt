@@ -18,19 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
-import com.squareup.moshi.Json
+import kotlin.collections.List
 import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
  * A custom event, this event is used to send custom events to other participants in the call.
  */
 
-data class CustomVideoEvent(
+data class CustomVideoEvent (
     @Json(name = "call_cid")
     val callCid: kotlin.String,
 
@@ -44,15 +52,16 @@ data class CustomVideoEvent(
     val user: io.getstream.android.video.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
-) :
-    io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent {
-
+    val type: kotlin.String
+)
+: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
+{
+    
     override fun getEventType(): kotlin.String {
         return type
     }
 
     override fun getCallCID(): kotlin.String {
         return callCid
-    }
+    }    
 }
