@@ -45,7 +45,6 @@ import org.webrtc.PeerConnectionFactory
 import org.webrtc.ResolutionAdjustment
 import org.webrtc.RtpCapabilities
 import org.webrtc.SimulcastAlignedVideoEncoderFactory
-import org.webrtc.SoftwareVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import org.webrtc.audio.JavaAudioDeviceModule

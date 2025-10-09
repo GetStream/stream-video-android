@@ -321,7 +321,7 @@ internal class Publisher(
             VideoCodecScalabilityChecker.checkVideoCodecScalabilityModes()
 
             logger.d {
-                "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: ${init})"
+                "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: $init)"
             }
             logger.d {
                 "Transceiver init details - captureFormat: ${captureFormat?.let { "${it.width}x${it.height}@${it.framerate}fps" } ?: "null"}, publishOption: ${publishOption.track_type}, encodings count: ${init.size}"
