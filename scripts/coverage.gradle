@@ -37,7 +37,7 @@ def configureKoverReports(project) {
 def coverageModulesWithTests = subprojects.findAll {
     rootProject.ext.coverageModules.contains(it.name) && file("${it.projectDir}/src/test").exists()
 }
-println("Setting up coverage for:\n${coverageModulesWithTests.join("\n")}")
+println("\nSetting up coverage for:\n${coverageModulesWithTests.join("\n")}\n")
 
 // Configure code coverage for modules with tests
 subprojects {
@@ -104,8 +104,9 @@ tasks.register("testCoverage") {
     group = "verification"
     description = "Run all tests in all modules and generate merged coverage report"
 
-    dependsOn(subprojects.collect { it.tasks.matching { it.name == "testCoverage" } })
-    dependsOn("koverXmlReportCoverage", "koverHtmlReportCoverage")
+    dependsOn coverageModulesWithTests.collect { ":${it.name}:testCoverage" }
+
+    finalizedBy("koverXmlReportCoverage", "koverHtmlReportCoverage")
 }
 
 kover {
