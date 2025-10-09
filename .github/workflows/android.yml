@@ -73,6 +73,8 @@ jobs:
           fetch-depth: 0 # fetch all history for sonar analysis
 
       - uses: GetStream/android-ci-actions/actions/setup-java@main
+        with:
+          java-version: '11'
 
       - uses: GetStream/android-ci-actions/actions/gradle-cache@main
 
