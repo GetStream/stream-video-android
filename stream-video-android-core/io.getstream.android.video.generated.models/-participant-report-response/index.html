@@ -1,0 +1,254 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ParticipantReportResponse</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            stream-video-android
+                    </a>            </div>
+            <div class="library-version">1.13.0
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stream-video-android-core:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="stream-video-android-core::io.getstream.android.video.generated.models/ParticipantReportResponse///PointingToDeclaration//-1625990423">
+  <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.android.video.generated.models</a><span class="delimiter">/</span><span class="current">ParticipantReportResponse</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Participant</span><wbr><span>Report</span><wbr><span><span>Response</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">ParticipantReportResponse</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"sum"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>sum<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"unique"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>unique<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"max_concurrent"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>maxConcurrent<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_browser"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>byBrowser<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_country"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>byCountry<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_device"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>byDevice<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_operating_system"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>byOperatingSystem<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"count_over_time"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>countOverTime<span class="token operator">: </span><a href="../-participant-count-over-time-response/index.html">ParticipantCountOverTimeResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"publishers"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>publishers<span class="token operator">: </span><a href="../-publisher-stats-response/index.html">PublisherStatsResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"subscribers"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>subscribers<span class="token operator">: </span><a href="../-subscriber-stats-response/index.html">SubscriberStatsResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-2122783232%2FConstructors%2F-1625990423" anchor-label="ParticipantReportResponse" id="-2122783232%2FConstructors%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-report-response.html"><span>Participant</span><wbr><span>Report</span><wbr><span><span>Response</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2122783232%2FConstructors%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"sum"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>sum<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"unique"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>unique<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"max_concurrent"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>maxConcurrent<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_browser"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>byBrowser<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_country"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>byCountry<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_device"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>byDevice<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"by_operating_system"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>byOperatingSystem<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"count_over_time"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>countOverTime<span class="token operator">: </span><a href="../-participant-count-over-time-response/index.html">ParticipantCountOverTimeResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"publishers"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>publishers<span class="token operator">: </span><a href="../-publisher-stats-response/index.html">PublisherStatsResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"subscribers"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>subscribers<span class="token operator">: </span><a href="../-subscriber-stats-response/index.html">SubscriberStatsResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="915680775%2FProperties%2F-1625990423" anchor-label="byBrowser" id="915680775%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="by-browser.html"><span>by</span><wbr><span><span>Browser</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="915680775%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="by-browser.html">byBrowser</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-148424359%2FProperties%2F-1625990423" anchor-label="byCountry" id="-148424359%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="by-country.html"><span>by</span><wbr><span><span>Country</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-148424359%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="by-country.html">byCountry</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1445592203%2FProperties%2F-1625990423" anchor-label="byDevice" id="-1445592203%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="by-device.html"><span>by</span><wbr><span><span>Device</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1445592203%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="by-device.html">byDevice</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-458672801%2FProperties%2F-1625990423" anchor-label="byOperatingSystem" id="-458672801%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="by-operating-system.html"><span>by</span><wbr><span>Operating</span><wbr><span><span>System</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-458672801%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="by-operating-system.html">byOperatingSystem</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-grouped-stats-response/index.html">GroupedStatsResponse</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-704991160%2FProperties%2F-1625990423" anchor-label="countOverTime" id="-704991160%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="count-over-time.html"><span>count</span><wbr><span>Over</span><wbr><span><span>Time</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-704991160%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="count-over-time.html">countOverTime</a><span class="token operator">: </span><a href="../-participant-count-over-time-response/index.html">ParticipantCountOverTimeResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1308295261%2FProperties%2F-1625990423" anchor-label="maxConcurrent" id="1308295261%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="max-concurrent.html"><span>max</span><wbr><span><span>Concurrent</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1308295261%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="max-concurrent.html">maxConcurrent</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-404228853%2FProperties%2F-1625990423" anchor-label="publishers" id="-404228853%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="publishers.html"><span><span>publishers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-404228853%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="publishers.html">publishers</a><span class="token operator">: </span><a href="../-publisher-stats-response/index.html">PublisherStatsResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="182052429%2FProperties%2F-1625990423" anchor-label="subscribers" id="182052429%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="subscribers.html"><span><span>subscribers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="182052429%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="subscribers.html">subscribers</a><span class="token operator">: </span><a href="../-subscriber-stats-response/index.html">SubscriberStatsResponse</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1265124339%2FProperties%2F-1625990423" anchor-label="sum" id="-1265124339%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="sum.html"><span><span>sum</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1265124339%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="sum.html">sum</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-619910415%2FProperties%2F-1625990423" anchor-label="unique" id="-619910415%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="unique.html"><span><span>unique</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-619910415%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="unique.html">unique</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

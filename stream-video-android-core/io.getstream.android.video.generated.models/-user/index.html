@@ -1,0 +1,374 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>User</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            stream-video-android
+                    </a>            </div>
+            <div class="library-version">1.13.0
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stream-video-android-core:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="stream-video-android-core::io.getstream.android.video.generated.models/User///PointingToDeclaration//-1625990423">
+  <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.android.video.generated.models</a><span class="delimiter">/</span><span class="current">User</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>User</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">User</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"banned"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>banned<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"id"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>id<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"online"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>online<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"role"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>role<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"custom"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>custom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"teams_role"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>teamsRole<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"avg_response_time"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>avgResponseTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"ban_expires"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>banExpires<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"created_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>createdAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"deactivated_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>deactivatedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"deleted_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>deletedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"invisible"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>invisible<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"language"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>language<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"last_active"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>lastActive<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"last_engaged_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>lastEngagedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"revoke_tokens_issued_before"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>revokeTokensIssuedBefore<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"updated_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>updatedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"teams"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span><span class="token keyword">val </span>teams<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1753267218%2FConstructors%2F-1625990423" anchor-label="User" id="1753267218%2FConstructors%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-user.html"><span><span>User</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1753267218%2FConstructors%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"banned"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>banned<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"id"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>id<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"online"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>online<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"role"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>role<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"custom"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>custom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"teams_role"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>teamsRole<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"avg_response_time"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>avgResponseTime<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"ban_expires"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>banExpires<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"created_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>createdAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"deactivated_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>deactivatedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"deleted_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>deletedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"invisible"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>invisible<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"language"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>language<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"last_active"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>lastActive<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"last_engaged_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>lastEngagedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"revoke_tokens_issued_before"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>revokeTokensIssuedBefore<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"updated_at"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>updatedAt<span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><span data-unresolved-link="com.squareup.moshi/Json///PointingToDeclaration/"><span class="token annotation builtin">Json</span></span><span class="token punctuation">(</span><span>name<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"teams"</span></span></span><wbr><span class="token punctuation">)</span>&nbsp;</span>teams<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>emptyList()</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="600140077%2FProperties%2F-1625990423" anchor-label="avgResponseTime" id="600140077%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="avg-response-time.html"><span>avg</span><wbr><span>Response</span><wbr><span><span>Time</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="600140077%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="avg-response-time.html">avgResponseTime</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1158246696%2FProperties%2F-1625990423" anchor-label="banExpires" id="1158246696%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ban-expires.html"><span>ban</span><wbr><span><span>Expires</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1158246696%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="ban-expires.html">banExpires</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-328767409%2FProperties%2F-1625990423" anchor-label="banned" id="-328767409%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="banned.html"><span><span>banned</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-328767409%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="banned.html">banned</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1515606770%2FProperties%2F-1625990423" anchor-label="createdAt" id="1515606770%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="created-at.html"><span>created</span><wbr><span><span>At</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1515606770%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="created-at.html">createdAt</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-804139172%2FProperties%2F-1625990423" anchor-label="custom" id="-804139172%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="custom.html"><span><span>custom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-804139172%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="custom.html">custom</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-655714710%2FProperties%2F-1625990423" anchor-label="deactivatedAt" id="-655714710%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="deactivated-at.html"><span>deactivated</span><wbr><span><span>At</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-655714710%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="deactivated-at.html">deactivatedAt</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1081502497%2FProperties%2F-1625990423" anchor-label="deletedAt" id="1081502497%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="deleted-at.html"><span>deleted</span><wbr><span><span>At</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1081502497%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="deleted-at.html">deletedAt</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-409134862%2FProperties%2F-1625990423" anchor-label="id" id="-409134862%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="id.html"><span><span>id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-409134862%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="id.html">id</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-872201024%2FProperties%2F-1625990423" anchor-label="invisible" id="-872201024%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invisible.html"><span><span>invisible</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-872201024%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="invisible.html">invisible</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-98308779%2FProperties%2F-1625990423" anchor-label="language" id="-98308779%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="language.html"><span><span>language</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-98308779%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="language.html">language</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1012971505%2FProperties%2F-1625990423" anchor-label="lastActive" id="1012971505%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-active.html"><span>last</span><wbr><span><span>Active</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1012971505%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="last-active.html">lastActive</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-830466803%2FProperties%2F-1625990423" anchor-label="lastEngagedAt" id="-830466803%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="last-engaged-at.html"><span>last</span><wbr><span>Engaged</span><wbr><span><span>At</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-830466803%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="last-engaged-at.html">lastEngagedAt</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="66864826%2FProperties%2F-1625990423" anchor-label="online" id="66864826%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="online.html"><span><span>online</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="66864826%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="online.html">online</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1349034237%2FProperties%2F-1625990423" anchor-label="revokeTokensIssuedBefore" id="-1349034237%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="revoke-tokens-issued-before.html"><span>revoke</span><wbr><span>Tokens</span><wbr><span>Issued</span><wbr><span><span>Before</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1349034237%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="revoke-tokens-issued-before.html">revokeTokensIssuedBefore</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1104139767%2FProperties%2F-1625990423" anchor-label="role" id="1104139767%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="role.html"><span><span>role</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1104139767%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="role.html">role</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="726511319%2FProperties%2F-1625990423" anchor-label="teams" id="726511319%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="teams.html"><span><span>teams</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="726511319%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="teams.html">teams</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1410805247%2FProperties%2F-1625990423" anchor-label="teamsRole" id="-1410805247%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="teams-role.html"><span>teams</span><wbr><span><span>Role</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1410805247%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="teams-role.html">teamsRole</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="582116671%2FProperties%2F-1625990423" anchor-label="updatedAt" id="582116671%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="updated-at.html"><span>updated</span><wbr><span><span>At</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="582116671%2FProperties%2F-1625990423"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="updated-at.html">updatedAt</a><span class="token operator">: </span><span data-unresolved-link="org.threeten.bp/OffsetDateTime///PointingToDeclaration/">OffsetDateTime</span><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
