@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.renderer
+package io.getstream.webrtc.android.ui
 
 import android.content.Context
 import android.content.res.Resources
@@ -24,25 +24,22 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.TextureView
-import android.view.TextureView.SurfaceTextureListener
 import org.webrtc.EglBase
 import org.webrtc.EglRenderer
 import org.webrtc.GlRectDrawer
-import org.webrtc.RendererCommon.RendererEvents
-import org.webrtc.RendererCommon.ScalingType
-import org.webrtc.RendererCommon.VideoLayoutMeasure
+import org.webrtc.RendererCommon
 import org.webrtc.ThreadUtils
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
 import java.util.concurrent.CountDownLatch
 
 /**
- * Custom [TextureView] used to render local/incoming videos on the screen.
+ * Custom [android.view.TextureView] used to render local/incoming videos on the screen.
  */
 public open class VideoTextureViewRenderer @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-) : TextureView(context, attrs), VideoSink, SurfaceTextureListener {
+) : TextureView(context, attrs), VideoSink, TextureView.SurfaceTextureListener {
 
     /**
      * Cached resource name.
@@ -52,7 +49,7 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     /**
      * Measuring a video layout.
      */
-    private val videoLayoutMeasure = VideoLayoutMeasure()
+    private val videoLayoutMeasure = RendererCommon.VideoLayoutMeasure()
 
     /**
      * Renderer used to render the video.
@@ -62,7 +59,7 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     /**
      * Callback used for reporting render events.
      */
-    private var rendererEvents: RendererEvents? = null
+    private var rendererEvents: RendererCommon.RendererEvents? = null
 
     /**
      * Handler to access the UI thread.
@@ -75,17 +72,17 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     private var isFirstFrameRendered = false
 
     /**
-     * The rotated [VideoFrame] width.
+     * The rotated [org.webrtc.VideoFrame] width.
      */
     private var rotatedFrameWidth = 0
 
     /**
-     * The rotated [VideoFrame] height.
+     * The rotated [org.webrtc.VideoFrame] height.
      */
     private var rotatedFrameHeight = 0
 
     /**
-     * The rotated [VideoFrame] rotation.
+     * The rotated [org.webrtc.VideoFrame] rotation.
      */
     private var frameRotation = 0
 
@@ -105,7 +102,7 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     /**
      * Set how the video will fill the allowed layout area.
      */
-    public fun setScalingType(scalingType: ScalingType?) {
+    public fun setScalingType(scalingType: RendererCommon.ScalingType?) {
         ThreadUtils.checkIsOnMainThread()
         videoLayoutMeasure.setScalingType(scalingType)
         requestLayout()
@@ -115,8 +112,8 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
      * Set how the video will fill the allowed layout area.
      */
     public fun setScalingType(
-        scalingTypeMatchOrientation: ScalingType?,
-        scalingTypeMismatchOrientation: ScalingType?,
+        scalingTypeMatchOrientation: RendererCommon.ScalingType?,
+        scalingTypeMismatchOrientation: RendererCommon.ScalingType?,
     ) {
         ThreadUtils.checkIsOnMainThread()
         videoLayoutMeasure.setScalingType(
@@ -129,7 +126,7 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     /**
      * Called when a new frame is received. Sends the frame to be rendered.
      *
-     * @param videoFrame The [VideoFrame] received from WebRTC connection to draw on the screen.
+     * @param videoFrame The [org.webrtc.VideoFrame] received from WebRTC connection to draw on the screen.
      */
     override fun onFrame(videoFrame: VideoFrame) {
         eglRenderer.onFrame(videoFrame)
@@ -184,12 +181,12 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     /**
      * Initialise the renderer. Should be called from the main thread.
      *
-     * @param sharedContext [EglBase.Context]
+     * @param sharedContext [org.webrtc.EglBase.Context]
      * @param rendererEvents Sets the render event listener.
      */
     public fun init(
         sharedContext: EglBase.Context,
-        rendererEvents: RendererEvents,
+        rendererEvents: RendererCommon.RendererEvents,
     ) {
         ThreadUtils.checkIsOnMainThread()
         this.rendererEvents = rendererEvents

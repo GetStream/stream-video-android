@@ -1933,7 +1933,7 @@ public final class io/getstream/video/android/compose/ui/components/video/VideoR
 	public static final fun VideoRenderer (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Media;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
-public final class io/getstream/video/android/compose/ui/components/video/VideoRendererView : io/getstream/video/android/core/renderer/VideoTextureViewRenderer {
+public final class io/getstream/video/android/compose/ui/components/video/VideoRendererView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V

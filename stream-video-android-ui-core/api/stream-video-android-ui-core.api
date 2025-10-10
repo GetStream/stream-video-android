@@ -214,7 +214,7 @@ public abstract interface class io/getstream/video/android/ui/common/permission/
 	public abstract fun initPermissionManager ()Lio/getstream/video/android/ui/common/permission/PermissionManager;
 }
 
-public final class io/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer : io/getstream/video/android/core/renderer/VideoTextureViewRenderer {
+public final class io/getstream/video/android/ui/common/renderer/StreamVideoTextureViewRenderer : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
 	public fun <init> (Landroid/content/Context;)V
 	public fun onSurfaceTextureAvailable (Landroid/graphics/SurfaceTexture;II)V
 	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
@@ -254,7 +254,7 @@ public final class io/getstream/video/android/ui/common/view/ParticipantContentV
 	public final fun renderParticipants (Lio/getstream/video/android/core/Call;Ljava/util/List;)V
 }
 
-public final class io/getstream/video/android/ui/common/view/ParticipantItemView : io/getstream/video/android/core/renderer/VideoTextureViewRenderer {
+public final class io/getstream/video/android/ui/common/view/ParticipantItemView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V

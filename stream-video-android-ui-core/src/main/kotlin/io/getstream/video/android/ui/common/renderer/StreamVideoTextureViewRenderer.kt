@@ -19,7 +19,7 @@ package io.getstream.video.android.ui.common.renderer
 import android.content.Context
 import android.graphics.SurfaceTexture
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.renderer.VideoTextureViewRenderer
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 
 public class StreamVideoTextureViewRenderer(
     context: Context,

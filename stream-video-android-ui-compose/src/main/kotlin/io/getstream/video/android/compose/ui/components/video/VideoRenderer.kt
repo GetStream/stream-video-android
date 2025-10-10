@@ -61,11 +61,11 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.utils.ALL_PARTICIPANTS
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.renderer.VideoTextureViewRenderer
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
+import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import java.util.UUID
 
 @Composable
