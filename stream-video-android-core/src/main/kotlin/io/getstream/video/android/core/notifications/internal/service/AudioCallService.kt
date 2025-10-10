@@ -22,5 +22,5 @@ import io.getstream.log.taggedLogger
 
 internal class AudioCallService : CallService() {
     override val logger: TaggedLogger by taggedLogger("AudioCallService")
-    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
 }
