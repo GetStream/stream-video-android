@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GroupRemove
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.PushPin
@@ -298,7 +297,6 @@ private fun ParticipantActionsKickPreview() {
                 participant = previewParticipant,
                 showDialog = true,
             ) {
-
             }
         }
     }

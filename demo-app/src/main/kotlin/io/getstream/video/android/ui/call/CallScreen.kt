@@ -487,7 +487,6 @@ fun CallScreen(
                                             ParticipantAction(
                                                 icon = Icons.Filled.GroupRemove,
                                                 label = "Kick",
-                                                firstToggleAction = false,
                                                 condition = { call, participantState ->
                                                     call.hasCapability(OwnCapability.KickUser)
                                                 },
@@ -495,7 +494,7 @@ fun CallScreen(
                                                     launch {
                                                         call.kickUser(
                                                             participantState.userId.value,
-                                                            false
+                                                            false,
                                                         )
                                                     }
                                                 },
