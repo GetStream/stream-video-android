@@ -53,6 +53,7 @@ streamResult = "1.3.0"
 streamChat = "6.10.0"
 streamLog = "1.3.2"
 streamPush = "1.3.1"
+streamRenderscript = "0.0.1"
 
 androidxTestRunner = "1.6.2"
 androidxTestCore = "1.6.1"
@@ -158,6 +159,7 @@ stream-webrtc = { group = "io.getstream", name = "stream-webrtc-android", versio
 stream-webrtc-ui = { group = "io.getstream", name = "stream-webrtc-android-ui", version.ref = "streamWebRTC" }
 stream-result = { group = "io.getstream", name = "stream-result", version.ref = "streamResult" }
 stream-result-call = { group = "io.getstream", name = "stream-result-call", version.ref = "streamResult" }
+stream-renderscript = { group = "io.getstream", name = "stream-video-renderscript-android", version.ref = "streamRenderscript" }
 
 stream-log = { group = "io.getstream", name = "stream-log", version.ref = "streamLog" }
 stream-push = { group = "io.getstream", name = "stream-android-push", version.ref = "streamPush" }
