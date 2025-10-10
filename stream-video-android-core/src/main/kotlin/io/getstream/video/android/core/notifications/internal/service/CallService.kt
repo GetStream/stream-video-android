@@ -27,6 +27,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
@@ -77,8 +78,19 @@ import kotlinx.coroutines.launch
 internal open class CallService : Service() {
     internal open val logger by taggedLogger("CallService")
 
-    // Service type
-    open val serviceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+    open val serviceType: Int
+        @SuppressLint("InlinedApi")
+        get() = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL or
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+            }
+            else -> {
+                // Existing behavior
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+            }
+        }
 
     // Data
     private var callId: StreamCallId? = null
