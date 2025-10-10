@@ -24,7 +24,6 @@ import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
-import io.getstream.video.android.core.call.connection.utils.VideoCodecScalabilityChecker
 import io.getstream.video.android.core.call.connection.utils.computeTransceiverEncodings
 import io.getstream.video.android.core.call.connection.utils.findOptimalVideoLayers
 import io.getstream.video.android.core.call.connection.utils.isAudioTrackType
@@ -357,8 +356,6 @@ internal class Publisher(
     ) {
         val init = computeTransceiverEncodings(captureFormat, publishOption)
         try {
-            VideoCodecScalabilityChecker.checkVideoCodecScalabilityModes()
-
             logger.d {
                 "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: $init)"
             }

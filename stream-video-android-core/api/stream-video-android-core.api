@@ -8306,15 +8306,6 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun toggleAudioProcessing ()Z
 }
 
-public final class io/getstream/video/android/core/call/connection/utils/VideoCodecScalabilityChecker {
-	public static final field INSTANCE Lio/getstream/video/android/core/call/connection/utils/VideoCodecScalabilityChecker;
-	public final fun checkVideoCodecScalabilityModes ()V
-	public final fun compareCodecCapabilities ()V
-	public final fun getSupportedScalabilityModes (Ljava/lang/String;)Ljava/util/List;
-	public final fun isScalabilityModeSupported (Ljava/lang/String;Ljava/lang/String;)Z
-	public final fun testCommonScalabilityModes ()V
-}
-
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/signal/socket/RTCEventMapper;
 	public final fun mapEvent (Lstream/video/sfu/event/SfuEvent;)Lio/getstream/video/android/core/events/SfuDataEvent;

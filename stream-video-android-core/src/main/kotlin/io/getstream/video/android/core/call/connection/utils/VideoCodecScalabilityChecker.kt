@@ -30,7 +30,7 @@ import org.webrtc.VideoEncoderFactory
  * Utility class to check video codec scalability modes on Android devices
  * This helps debug device-specific codec capabilities
  */
-object VideoCodecScalabilityChecker {
+internal object VideoCodecScalabilityChecker {
     private const val TAG = "VideoCodecScalabilityChecker"
 
     /**
