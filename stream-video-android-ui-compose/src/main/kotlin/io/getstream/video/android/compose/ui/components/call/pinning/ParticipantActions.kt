@@ -56,6 +56,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipant
@@ -133,23 +134,19 @@ internal val participantActions: List<ParticipantAction> = listOf(
             }
         },
     ),
-    ParticipantAction(
-        icon = Icons.Filled.GroupRemove,
-        label = "Kick",
-        firstToggleAction = false,
-        condition = { call, participantState ->
-            call.hasCapability(OwnCapability.KickUser)
-        },
-        action = { call, participantState ->
-            launch {
-                call.kickUser(participantState.userId.value, false)
-            }
-        },
-    ),
 )
 
+/**
+ * Renders a set of actions for a given participant.
+ *
+ * @param modifier Modifier for styling.
+ * @param actions A list of actions to render.
+ * @param call The call that contains all the participants state and tracks.
+ * @param participant The participant to render actions for.
+ */
+@InternalStreamVideoApi
 @Composable
-internal fun BoxScope.ParticipantActions(
+public fun BoxScope.ParticipantActions(
     modifier: Modifier = Modifier,
     actions: List<ParticipantAction>,
     call: Call,

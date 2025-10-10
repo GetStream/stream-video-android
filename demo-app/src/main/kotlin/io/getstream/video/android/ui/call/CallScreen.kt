@@ -46,6 +46,7 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GroupRemove
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.SignalWifiBad
@@ -82,6 +83,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
@@ -103,6 +105,8 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSettingsAction
+import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
+import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
@@ -471,6 +475,34 @@ fun CallScreen(
                                             reactionPosition = Alignment.TopCenter,
                                             reactionDuration = 5000,
                                         ),
+                                    )
+                                },
+                                actionsContent = { actions, call, participant ->
+                                    ParticipantActions(
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(8.dp)
+                                            .testTag("Stream_ParticipantActionsIcon"),
+                                        actions = actions + listOf(
+                                            ParticipantAction(
+                                                icon = Icons.Filled.GroupRemove,
+                                                label = "Kick",
+                                                firstToggleAction = false,
+                                                condition = { call, participantState ->
+                                                    call.hasCapability(OwnCapability.KickUser)
+                                                },
+                                                action = { call, participantState ->
+                                                    launch {
+                                                        call.kickUser(
+                                                            participantState.userId.value,
+                                                            false
+                                                        )
+                                                    }
+                                                },
+                                            ),
+                                        ),
+                                        call = call,
+                                        participant = participant,
                                     )
                                 },
                             )
