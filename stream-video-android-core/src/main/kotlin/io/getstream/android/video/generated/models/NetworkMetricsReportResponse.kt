@@ -18,18 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class NetworkMetricsReportResponse(
+data class NetworkMetricsReportResponse (
     @Json(name = "average_connection_time")
     val averageConnectionTime: kotlin.Float? = null,
 
@@ -40,5 +49,5 @@ data class NetworkMetricsReportResponse(
     val averageLatency: kotlin.Float? = null,
 
     @Json(name = "average_time_to_reconnect")
-    val averageTimeToReconnect: kotlin.Float? = null,
+    val averageTimeToReconnect: kotlin.Float? = null
 )

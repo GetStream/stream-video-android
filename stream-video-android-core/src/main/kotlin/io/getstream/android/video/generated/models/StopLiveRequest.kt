@@ -18,18 +18,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport",
+    "UnusedImport"
 )
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- *
+ * 
  */
 
-data class StopLiveRequest(
+data class StopLiveRequest (
     @Json(name = "continue_closed_caption")
     val continueClosedCaption: kotlin.Boolean? = null,
 
@@ -43,5 +52,5 @@ data class StopLiveRequest(
     val continueRtmpBroadcasts: kotlin.Boolean? = null,
 
     @Json(name = "continue_transcription")
-    val continueTranscription: kotlin.Boolean? = null,
+    val continueTranscription: kotlin.Boolean? = null
 )
