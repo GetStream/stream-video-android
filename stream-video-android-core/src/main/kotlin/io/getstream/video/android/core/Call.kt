@@ -232,7 +232,7 @@ public class Call(
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
 
-    internal val peerConnectionFactory: StreamPeerConnectionFactory =
+    internal var peerConnectionFactory: StreamPeerConnectionFactory =
         StreamPeerConnectionFactory(
             context = clientImpl.context,
             audioProcessing = clientImpl.audioProcessing,
