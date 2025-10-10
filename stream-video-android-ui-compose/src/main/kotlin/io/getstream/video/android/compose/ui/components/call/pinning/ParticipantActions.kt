@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GroupRemove
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.PushPin
@@ -81,7 +82,7 @@ public class ParticipantAction(
 /**
  * Default actions representing local and server side pin/unpin.
  */
-internal val pinUnpinActions: List<ParticipantAction> = listOf(
+internal val participantActions: List<ParticipantAction> = listOf(
     ParticipantAction(
         icon = Icons.Outlined.PushPin,
         label = "Pin",
@@ -129,6 +130,19 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
         action = { call, participantState ->
             launch {
                 call.unpinForEveryone(participantState.sessionId, participantState.userId.value)
+            }
+        },
+    ),
+    ParticipantAction(
+        icon = Icons.Filled.GroupRemove,
+        label = "Kick",
+        firstToggleAction = false,
+        condition = { call, participantState ->
+            call.hasCapability(OwnCapability.KickUser)
+        },
+        action = { call, participantState ->
+            launch {
+                call.kickUser(participantState.userId.value, false)
             }
         },
     ),
@@ -248,7 +262,7 @@ private fun ParticipantActionDialogPreview() {
             ParticipantActionsDialog(
                 call = previewCall,
                 participant = previewParticipant,
-                actions = pinUnpinActions,
+                actions = participantActions,
                 offset = IntOffset(
                     x = 0,
                     y = 50,
@@ -265,11 +279,29 @@ private fun ParticipantActionsPreview() {
     VideoTheme {
         Box {
             ParticipantActionsWithoutState(
-                actions = pinUnpinActions,
+                actions = participantActions,
                 call = previewCall,
                 participant = previewParticipant,
                 showDialog = true,
             ) {
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ParticipantActionsKickPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        Box {
+            ParticipantActionsWithoutState(
+                actions = participantActions,
+                call = previewCall,
+                participant = previewParticipant,
+                showDialog = true,
+            ) {
+
             }
         }
     }

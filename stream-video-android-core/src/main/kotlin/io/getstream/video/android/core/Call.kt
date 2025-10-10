@@ -31,6 +31,8 @@ import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.KickUserRequest
+import io.getstream.android.video.generated.models.KickUserResponse
 import io.getstream.android.video.generated.models.ListRecordingsResponse
 import io.getstream.android.video.generated.models.ListTranscriptionsResponse
 import io.getstream.android.video.generated.models.MemberRequest
@@ -1247,6 +1249,19 @@ public class Call(
     suspend fun listRecordings(sessionId: String? = null): Result<ListRecordingsResponse> {
         return clientImpl.listRecordings(type, id, sessionId)
     }
+
+    /**
+     * Kick a user from the call.
+     *
+     * @param userId - the user to kick
+     * @param block - if true, the user will be blocked from rejoining the call
+     */
+    suspend fun kickUser(userId: String, block: Boolean = false): Result<KickUserResponse> = clientImpl.kickUser(
+        type,
+        id,
+        userId,
+        block,
+    )
 
     suspend fun muteUser(
         userId: String,
