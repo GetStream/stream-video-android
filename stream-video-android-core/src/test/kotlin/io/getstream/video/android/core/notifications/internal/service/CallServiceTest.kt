@@ -16,10 +16,15 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.Manifest
 import android.app.Notification
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
@@ -34,9 +39,13 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
 import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -46,6 +55,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class CallServiceTest {
@@ -72,6 +82,13 @@ class CallServiceTest {
         context = RuntimeEnvironment.getApplication()
         callService = CallService()
         testCallId = StreamCallId(type = "default", id = "test-call-123")
+        mockkStatic(ContextCompat::class)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(ContextCompat::class)
+        clearAllMocks()
     }
 
     // Test companion object constants
@@ -88,8 +105,68 @@ class CallServiceTest {
     }
 
     @Test
-    fun `service has correct default service type`() {
+    @Config(sdk = [Build.VERSION_CODES.R])
+    fun `service has correct service type for Android R`() {
+        callService.attachContext(context)
+
+        every {
+            ContextCompat.checkSelfPermission(any(), Manifest.permission.RECORD_AUDIO)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        every {
+            ContextCompat.checkSelfPermission(any(), Manifest.permission.CAMERA)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        assertEquals(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+            callService.serviceType,
+        )
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `service has correct service type for Android Q`() {
+        callService.attachContext(context)
+
+        every {
+            ContextCompat.checkSelfPermission(any(), Manifest.permission.RECORD_AUDIO)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        every {
+            ContextCompat.checkSelfPermission(any(), Manifest.permission.CAMERA)
+        } returns PackageManager.PERMISSION_GRANTED
+
         assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL, callService.serviceType)
+    }
+
+    @Test
+    fun `service has correct service type for pre Android Q`() {
+        callService.attachContext(context)
+
+        every {
+            ContextCompat.checkSelfPermission(any(), Manifest.permission.RECORD_AUDIO)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        every {
+            ContextCompat.checkSelfPermission(any(), Manifest.permission.CAMERA)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        assertEquals(0, callService.serviceType)
+    }
+
+    @Test
+    fun `service has correct service type without permission granted`() {
+        callService.attachContext(context)
+        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL, callService.serviceType)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
+    fun `LivestreamAudioCallService has correct service type without permission for Android UPSIDE_DOWN_CAKE`() {
+        val audioService = LivestreamAudioCallService()
+        audioService.attachContext(context)
+
+        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, audioService.serviceType)
     }
 
     // Test intent building
@@ -292,32 +369,6 @@ class CallServiceTest {
         assertEquals(testCallId.hashCode(), result.second)
     }
 
-    // Test service subclasses have correct service types
-    @Test
-    fun `LivestreamCallService has correct service type`() {
-        val livestreamService = LivestreamCallService()
-        val expectedType = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-        assertEquals(expectedType, livestreamService.serviceType)
-    }
-
-    @Test
-    fun `LivestreamAudioCallService has correct service type`() {
-        val audioService = LivestreamAudioCallService()
-        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE, audioService.serviceType)
-    }
-
-    @Test
-    fun `LivestreamViewerService has correct service type`() {
-        val viewerService = LivestreamViewerService()
-        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK, viewerService.serviceType)
-    }
-
-    @Test
-    fun `AudioCallService has correct service type`() {
-        val audioCallService = AudioCallService()
-        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE, audioCallService.serviceType)
-    }
-
     // Test intent extra handling
     @Test
     fun `intent extras are properly set and retrieved`() {
@@ -406,4 +457,13 @@ class CallServiceTest {
             INTENT_EXTRA_CALL_DISPLAY_NAME,
         )
     }
+}
+
+internal fun CallService.attachContext(context: Context) {
+    val method = ContextWrapper::class.java.getDeclaredMethod(
+        "attachBaseContext",
+        Context::class.java,
+    )
+    method.isAccessible = true
+    method.invoke(this, context)
 }

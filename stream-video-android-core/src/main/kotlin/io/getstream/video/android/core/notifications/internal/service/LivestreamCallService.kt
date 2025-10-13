@@ -18,6 +18,8 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.annotation.SuppressLint
 import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.annotation.RequiresApi
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 
@@ -58,4 +60,9 @@ internal class LivestreamViewerService : LivestreamCallService() {
         get() = setOf(
             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
         )
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun androidQServiceType(): Int {
+        return ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+    }
 }
