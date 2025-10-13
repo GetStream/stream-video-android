@@ -29,6 +29,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -78,19 +79,89 @@ import kotlinx.coroutines.launch
 internal open class CallService : Service() {
     internal open val logger by taggedLogger("CallService")
 
+    @SuppressLint("InlinedApi")
+    internal open val requiredForegroundTypes: Set<Int> = setOf(
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
+    )
+
+    /**
+     * Map each service type to the permission it requires (if any).
+     * Subclasses can reuse or extend this mapping.
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK] requires Q
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL] requires Q
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA] requires R
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE] requires R
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE] requires UPSIDE_DOWN_CAKE
+     */
+
+    @SuppressLint("InlinedApi")
+    internal open val foregroundTypePermissionsMap: Map<Int, String?> = mapOf(
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA to Manifest.permission.CAMERA,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE to Manifest.permission.RECORD_AUDIO,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK to null, // playback doesn’t need permission
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL to null,
+    )
+
     open val serviceType: Int
         @SuppressLint("InlinedApi")
-        get() = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL or
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-            }
-            else -> {
-                // Existing behavior
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+        get() {
+            return if (hasAllPermission(baseContext)) {
+                hasAllPermissionServiceType()
+            } else {
+                noPermissionServiceType()
             }
         }
+
+    private fun hasAllPermissionServiceType(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // or of all requiredForegroundTypes types
+            requiredForegroundTypes.reduce { acc, type -> acc or type }
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            androidQServiceType()
+        } else {
+            /**
+             * Android Pre-Q Service Type (no need to bother)
+             * We don't start foreground service with type
+             */
+            0
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    internal fun noPermissionServiceType(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+        } else {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    internal open fun androidQServiceType() = if (requiredForegroundTypes.contains(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+        )
+    ) {
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+    } else {
+        /**
+         *  Existing behavior
+         *  [ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE] requires [Build.VERSION_CODES.UPSIDE_DOWN_CAKE]
+         */
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    internal fun hasAllPermission(context: Context): Boolean {
+        return requiredForegroundTypes.all { type ->
+            val permission = foregroundTypePermissionsMap[type]
+            permission == null || ContextCompat.checkSelfPermission(
+                context,
+                permission,
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
 
     // Data
     private var callId: StreamCallId? = null
@@ -242,9 +313,11 @@ internal open class CallService : Service() {
                 StreamLog.i(TAG) { "Notification: $notification" }
                 if (hasPermission && notification != null) {
                     StreamLog.d(TAG) {
-                        "[showIncomingCall] Showing notification fallback with ID: ${callId.getNotificationId(
-                            NotificationType.Incoming,
-                        )}"
+                        "[showIncomingCall] Showing notification fallback with ID: ${
+                            callId.getNotificationId(
+                                NotificationType.Incoming,
+                            )
+                        }"
                     }
                     StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
                         callId,
