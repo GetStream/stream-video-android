@@ -472,11 +472,22 @@ internal open class CallService : Service() {
             val call = streamVideo.call(type, id)
 
             val permissionCheckPass =
-                streamVideo.permissionCheck.checkAndroidPermissions(applicationContext, call)
-            if (!permissionCheckPass) {
+                streamVideo.permissionCheck.checkAndroidPermissionsV2(applicationContext, call)
+            if (!permissionCheckPass.first) {
                 // Crash early with a meaningful message if Call is used without system permissions.
+                val missingPermissions = permissionCheckPass.second.joinToString(",")
                 val exception = IllegalStateException(
-                    "\nCallService attempted to start without required permissions (e.g. android.manifest.permission.RECORD_AUDIO).\n" + "This can happen if you call [Call.join()] without the required permissions being granted by the user.\n" + "If you are using compose and [LaunchCallPermissions] ensure that you rely on the [onRequestResult] callback\n" + "to ensure that the permission is granted prior to calling [Call.join()] or similar.\n" + "Optionally you can use [LaunchPermissionRequest] to ensure permissions are granted.\n" + "If you are not using the [stream-video-android-ui-compose] library,\n" + "ensure that permissions are granted prior calls to [Call.join()].\n" + "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n",
+                    """
+                        CallService attempted to start without required permissions $missingPermissions.
+                        Details: call_id:$callId, trigger:$trigger,
+                        This can happen if you call [Call.join()] without the required permissions being granted by the user.
+                        If you are using compose and [LaunchCallPermissions] ensure that you rely on the [onRequestResult] callback
+                        to ensure that the permission is granted prior to calling [Call.join()] or similar.
+                        Optionally you can use [LaunchPermissionRequest] to ensure permissions are granted.
+                        If you are not using the [stream-video-android-ui-compose] library,
+                        ensure that permissions are granted prior calls to [Call.join()].
+                        You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]
+                    """.trimIndent(),
                 )
                 if (streamVideo.crashOnMissingPermission) {
                     throw exception

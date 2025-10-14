@@ -408,9 +408,9 @@ public class Call(
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
         val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
+            clientImpl.permissionCheck.checkAndroidPermissionsV2(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass) {
+        if (!permissionPass.first) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
                     "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +

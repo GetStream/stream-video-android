@@ -50,8 +50,22 @@ interface StreamPermissionCheck {
      * e.g. if the user granted the android.Manifest.permission.RECORD_AUDIO and the Call.state.ownCapability has "SendAudio"
      * then we are safe to join and use the [call] since the permission for recording audio is granted and the user can stream the audio track.
      */
+    @Deprecated("Use checkAndroidPermissionsV2 instead")
     fun checkAndroidPermissions(
         context: Context,
         call: Call,
     ): Boolean
+
+    /**
+     *  @return A [Pair] where:
+     *  - `first` indicates whether all required permissions are granted (`true` if granted, `false` otherwise).
+     *  - `second` contains a [Set] of missing permissions (empty if all permissions are granted).
+     *
+     * e.g. if the user granted the android.Manifest.permission.RECORD_AUDIO and the Call.state.ownCapability has "SendAudio"
+     * then we are safe to join and use the [call] since the permission for recording audio is granted and the user can stream the audio track.
+     */
+    fun checkAndroidPermissionsV2(
+        context: Context,
+        call: Call,
+    ): Pair<Boolean, Set<String>>
 }

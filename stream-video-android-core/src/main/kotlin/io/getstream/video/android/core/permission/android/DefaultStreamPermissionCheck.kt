@@ -23,8 +23,17 @@ import io.getstream.video.android.core.Call
  * Default stream permission check.
  */
 internal class DefaultStreamPermissionCheck : StreamPermissionCheck {
+
+    @Deprecated("Use checkAndroidPermissionsV2 instead")
     override fun checkAndroidPermissions(
         context: Context,
         call: Call,
-    ): Boolean = checkPermissionsExpectations(context, call)
+    ) = checkAndroidPermissionsV2(context, call).first
+
+    override fun checkAndroidPermissionsV2(
+        context: Context,
+        call: Call,
+    ): Pair<Boolean, Set<String>> {
+        return checkPermissionsExpectations(context, call)
+    }
 }
