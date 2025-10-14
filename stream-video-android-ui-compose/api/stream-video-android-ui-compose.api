@@ -1286,10 +1286,12 @@ public final class io/getstream/video/android/compose/ui/components/call/pinning
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-4 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/pinning/ParticipantAction {
@@ -1301,6 +1303,10 @@ public final class io/getstream/video/android/compose/ui/components/call/pinning
 	public final fun getFirstToggleAction ()Z
 	public final fun getIcon ()Landroidx/compose/ui/graphics/vector/ImageVector;
 	public final fun getLabel ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/ui/components/call/pinning/ParticipantActionsKt {
+	public static final fun ParticipantActions (Landroidx/compose/foundation/layout/BoxScope;Landroidx/compose/ui/Modifier;Ljava/util/List;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$FloatingParticipantVideoKt {
