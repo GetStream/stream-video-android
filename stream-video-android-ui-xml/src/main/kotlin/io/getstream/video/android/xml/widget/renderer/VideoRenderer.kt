@@ -17,8 +17,6 @@
 package io.getstream.video.android.xml.widget.renderer
 
 import io.getstream.video.android.xml.widget.participant.RendererInitializer
-import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-
 /**
  * Interface used to identify any container that had a video renderer inside of it. Used so we can easily initialise
  * the renderer for [VideoTextureViewRenderer].
