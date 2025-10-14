@@ -65,4 +65,13 @@ internal class LivestreamViewerService : LivestreamCallService() {
     override fun androidQServiceType(): Int {
         return ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
     }
+
+    @SuppressLint("InlinedApi")
+    override fun noPermissionServiceType(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        } else {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+        }
+    }
 }

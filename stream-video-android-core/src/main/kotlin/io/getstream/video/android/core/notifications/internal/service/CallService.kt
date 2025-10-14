@@ -104,6 +104,13 @@ internal open class CallService : Service() {
         ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL to null,
     )
 
+    private fun getServiceTypeForStartingFGService(trigger: String): Int {
+        return when (trigger) {
+            CallService.TRIGGER_ONGOING_CALL -> { serviceType }
+            else -> noPermissionServiceType()
+        }
+    }
+
     open val serviceType: Int
         @SuppressLint("InlinedApi")
         get() {
@@ -130,7 +137,7 @@ internal open class CallService : Service() {
     }
 
     @SuppressLint("InlinedApi")
-    internal fun noPermissionServiceType(): Int {
+    internal open fun noPermissionServiceType(): Int {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
         } else {
@@ -506,7 +513,7 @@ internal open class CallService : Service() {
                         intentCallId.hashCode(),
                         notification,
                         trigger,
-                        serviceType,
+                        getServiceTypeForStartingFGService(trigger),
                     )
                 }
                 true
@@ -660,7 +667,7 @@ internal open class CallService : Service() {
                     notificationId,
                     notification,
                     trigger,
-                    serviceType,
+                    getServiceTypeForStartingFGService(trigger),
                 )
             }
         }
@@ -706,7 +713,7 @@ internal open class CallService : Service() {
                 notificationId,
                 notification,
                 TRIGGER_INCOMING_CALL,
-                serviceType,
+                getServiceTypeForStartingFGService(TRIGGER_INCOMING_CALL),
             ).onError {
                 logger.e {
                     "[showIncomingCall] Failed to start foreground service, falling back to justNotify: $it"
@@ -947,7 +954,7 @@ internal open class CallService : Service() {
                                 callId.hashCode(),
                                 notification,
                                 TRIGGER_ONGOING_CALL,
-                                serviceType,
+                                getServiceTypeForStartingFGService(TRIGGER_ONGOING_CALL),
                             )
                         }
 
@@ -957,7 +964,7 @@ internal open class CallService : Service() {
                                 callId.getNotificationId(NotificationType.Incoming),
                                 notification,
                                 TRIGGER_OUTGOING_CALL,
-                                serviceType,
+                                getServiceTypeForStartingFGService(TRIGGER_OUTGOING_CALL),
                             )
                         }
 
@@ -967,7 +974,7 @@ internal open class CallService : Service() {
                                 callId.getNotificationId(NotificationType.Incoming),
                                 notification,
                                 TRIGGER_INCOMING_CALL,
-                                serviceType,
+                                getServiceTypeForStartingFGService(TRIGGER_INCOMING_CALL),
                             )
                         }
 
