@@ -55,6 +55,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipant
@@ -81,7 +82,7 @@ public class ParticipantAction(
 /**
  * Default actions representing local and server side pin/unpin.
  */
-internal val pinUnpinActions: List<ParticipantAction> = listOf(
+internal val participantActions: List<ParticipantAction> = listOf(
     ParticipantAction(
         icon = Icons.Outlined.PushPin,
         label = "Pin",
@@ -134,8 +135,17 @@ internal val pinUnpinActions: List<ParticipantAction> = listOf(
     ),
 )
 
+/**
+ * Renders a set of actions for a given participant.
+ *
+ * @param modifier Modifier for styling.
+ * @param actions A list of actions to render.
+ * @param call The call that contains all the participants state and tracks.
+ * @param participant The participant to render actions for.
+ */
+@InternalStreamVideoApi
 @Composable
-internal fun BoxScope.ParticipantActions(
+public fun BoxScope.ParticipantActions(
     modifier: Modifier = Modifier,
     actions: List<ParticipantAction>,
     call: Call,
@@ -248,7 +258,7 @@ private fun ParticipantActionDialogPreview() {
             ParticipantActionsDialog(
                 call = previewCall,
                 participant = previewParticipant,
-                actions = pinUnpinActions,
+                actions = participantActions,
                 offset = IntOffset(
                     x = 0,
                     y = 50,
@@ -265,7 +275,24 @@ private fun ParticipantActionsPreview() {
     VideoTheme {
         Box {
             ParticipantActionsWithoutState(
-                actions = pinUnpinActions,
+                actions = participantActions,
+                call = previewCall,
+                participant = previewParticipant,
+                showDialog = true,
+            ) {
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ParticipantActionsKickPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        Box {
+            ParticipantActionsWithoutState(
+                actions = participantActions,
                 call = previewCall,
                 participant = previewParticipant,
                 showDialog = true,

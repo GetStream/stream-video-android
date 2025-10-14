@@ -78,7 +78,7 @@ import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPrevie
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
-import io.getstream.video.android.compose.ui.components.call.pinning.pinUnpinActions
+import io.getstream.video.android.compose.ui.components.call.pinning.participantActions
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
@@ -206,7 +206,7 @@ public fun ParticipantVideo(
             videoFallbackContent = videoFallbackContent,
         )
 
-        actionsContent.invoke(this, pinUnpinActions, call, participant)
+        actionsContent.invoke(this, participantActions, call, participant)
 
         if (style.isShowingParticipantLabel) {
             labelContent.invoke(this, participant)
