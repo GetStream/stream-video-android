@@ -408,7 +408,7 @@ public class Call(
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
         val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissionsV2(clientImpl.context, this)
+            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
         if (!permissionPass.first) {
             logger.w {

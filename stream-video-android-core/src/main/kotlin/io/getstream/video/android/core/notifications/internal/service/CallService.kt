@@ -472,7 +472,7 @@ internal open class CallService : Service() {
             val call = streamVideo.call(type, id)
 
             val permissionCheckPass =
-                streamVideo.permissionCheck.checkAndroidPermissionsV2(applicationContext, call)
+                streamVideo.permissionCheck.checkAndroidPermissionsGroup(applicationContext, call)
             if (!permissionCheckPass.first) {
                 // Crash early with a meaningful message if Call is used without system permissions.
                 val missingPermissions = permissionCheckPass.second.joinToString(",")
