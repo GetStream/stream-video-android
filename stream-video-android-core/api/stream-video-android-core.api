@@ -14589,6 +14589,26 @@ public final class io/getstream/video/android/model/mapper/StreamCallCidMapperKt
 	public static final fun toTypeAndId (Ljava/lang/String;)Lkotlin/Pair;
 }
 
+public class io/getstream/webrtc/android/ui/VideoTextureViewRenderer : android/view/TextureView, android/view/TextureView$SurfaceTextureListener, org/webrtc/VideoSink {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun init (Lorg/webrtc/EglBase$Context;Lorg/webrtc/RendererCommon$RendererEvents;)V
+	protected fun onDetachedFromWindow ()V
+	public fun onFrame (Lorg/webrtc/VideoFrame;)V
+	protected fun onLayout (ZIIII)V
+	protected fun onMeasure (II)V
+	public fun onSurfaceTextureAvailable (Landroid/graphics/SurfaceTexture;II)V
+	public fun onSurfaceTextureDestroyed (Landroid/graphics/SurfaceTexture;)Z
+	public fun onSurfaceTextureSizeChanged (Landroid/graphics/SurfaceTexture;II)V
+	public fun onSurfaceTextureUpdated (Landroid/graphics/SurfaceTexture;)V
+	public final fun pauseVideo ()V
+	public final fun resumeVideo ()V
+	public final fun setMirror (Z)V
+	public final fun setScalingType (Lorg/webrtc/RendererCommon$ScalingType;)V
+	public final fun setScalingType (Lorg/webrtc/RendererCommon$ScalingType;Lorg/webrtc/RendererCommon$ScalingType;)V
+}
+
 public final class stream/video/sfu/event/AudioLevel : com/squareup/wire/Message {
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/event/AudioLevel$Companion;
