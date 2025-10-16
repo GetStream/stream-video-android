@@ -31,6 +31,7 @@ import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.KickUserResponse
 import io.getstream.android.video.generated.models.ListRecordingsResponse
 import io.getstream.android.video.generated.models.ListTranscriptionsResponse
 import io.getstream.android.video.generated.models.MemberRequest
@@ -407,9 +408,9 @@ public class Call(
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
         val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
+            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass) {
+        if (!permissionPass.first) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
                     "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
@@ -1250,6 +1251,22 @@ public class Call(
     suspend fun listRecordings(sessionId: String? = null): Result<ListRecordingsResponse> {
         return clientImpl.listRecordings(type, id, sessionId)
     }
+
+    /**
+     * Kick a user from the call.
+     *
+     * @param userId - the user to kick
+     * @param block - if true, the user will be blocked from rejoining the call
+     */
+    suspend fun kickUser(
+        userId: String,
+        block: Boolean = false,
+    ): Result<KickUserResponse> = clientImpl.kickUser(
+        type,
+        id,
+        userId,
+        block,
+    )
 
     suspend fun muteUser(
         userId: String,

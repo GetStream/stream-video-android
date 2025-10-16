@@ -137,7 +137,6 @@ baselineProfile {
 dependencies {
     // webrtc
     api(libs.stream.webrtc)
-    api(libs.stream.webrtc.ui)
 
     implementation(libs.audioswitch)
 

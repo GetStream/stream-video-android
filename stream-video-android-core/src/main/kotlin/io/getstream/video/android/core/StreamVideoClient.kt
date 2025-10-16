@@ -38,6 +38,7 @@ import io.getstream.android.video.generated.models.GoLiveRequest
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.JoinCallRequest
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.KickUserRequest
 import io.getstream.android.video.generated.models.ListRecordingsResponse
 import io.getstream.android.video.generated.models.ListTranscriptionsResponse
 import io.getstream.android.video.generated.models.MemberRequest
@@ -962,6 +963,14 @@ internal class StreamVideoClient internal constructor(
         }
 
         return result.map { it.toQueriedCalls() }
+    }
+
+    suspend fun kickUser(type: String, id: String, userId: String, block: Boolean = false) = apiCall {
+        coordinatorConnectionModule.api.kickUser(
+            type,
+            id,
+            KickUserRequest(userId, block),
+        )
     }
 
     suspend fun requestPermissions(
