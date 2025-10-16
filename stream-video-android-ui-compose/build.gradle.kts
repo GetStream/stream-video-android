@@ -68,8 +68,8 @@ dependencies {
     implementation(libs.landscapist.animation)
     implementation(libs.landscapist.placeholder)
 
-    // render scripts
-    compileOnly(files("libs/renderscript-toolkit.aar"))
+    // renderscript-toolkit
+    implementation(libs.stream.renderscript)
 
     // telephoto
     implementation(libs.telephoto)
