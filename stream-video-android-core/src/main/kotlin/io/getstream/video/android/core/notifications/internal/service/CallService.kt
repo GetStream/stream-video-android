@@ -20,6 +20,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -29,6 +30,7 @@ import android.os.IBinder
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.media.session.MediaButtonReceiver
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
