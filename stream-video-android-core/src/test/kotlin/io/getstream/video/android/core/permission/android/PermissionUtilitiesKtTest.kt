@@ -65,7 +65,7 @@ class PermissionUtilitiesKtTest {
         })
 
         // Then
-        assertTrue(actual)
+        assertTrue(actual.first)
     }
 
     @Test
@@ -81,7 +81,7 @@ class PermissionUtilitiesKtTest {
         })
 
         // Then
-        assertFalse(actual)
+        assertFalse(actual.first)
     }
 
     @Test
@@ -106,6 +106,6 @@ class PermissionUtilitiesKtTest {
         // Then
         // We expect false because the mock system check returns GRANTED for all permissions,
         // where we expect granted only for the RECORD_AUDIO
-        assertFalse(actual)
+        assertFalse(actual.first)
     }
 }

@@ -12215,8 +12215,13 @@ public final class io/getstream/video/android/core/permission/PermissionRequest 
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/permission/android/PermissionUtilitiesKt {
+	public static final field TAG Ljava/lang/String;
+}
+
 public abstract interface class io/getstream/video/android/core/permission/android/StreamPermissionCheck {
 	public abstract fun checkAndroidPermissions (Landroid/content/Context;Lio/getstream/video/android/core/Call;)Z
+	public abstract fun checkAndroidPermissionsGroup (Landroid/content/Context;Lio/getstream/video/android/core/Call;)Lkotlin/Pair;
 }
 
 public final class io/getstream/video/android/core/socket/ErrorResponse : java/lang/Throwable {
