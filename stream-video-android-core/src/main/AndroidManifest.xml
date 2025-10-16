@@ -91,19 +91,19 @@
         </receiver>
 
         <service android:name=".notifications.internal.service.CallService"
-            android:foregroundServiceType="shortService|phoneCall"/>
+            android:foregroundServiceType="camera|microphone|phoneCall|shortService"/>
 
         <service android:name=".screenshare.StreamScreenShareService"
             android:foregroundServiceType="mediaProjection"/>
 
         <service
             android:name=".notifications.internal.service.LivestreamCallService"
-            android:foregroundServiceType="camera|microphone"
+            android:foregroundServiceType="camera|microphone|shortService"
             android:exported="false" />
 
         <service
             android:name=".notifications.internal.service.LivestreamAudioCallService"
-            android:foregroundServiceType="microphone"
+            android:foregroundServiceType="microphone|shortService"
             android:exported="false" />
 
         <service
@@ -113,7 +113,7 @@
 
         <service
             android:name=".notifications.internal.service.AudioCallService"
-            android:foregroundServiceType="microphone|shortService"
+            android:foregroundServiceType="microphone|phoneCall|shortService"
             android:exported="false" />
     </application>
 </manifest>
