@@ -41,8 +41,6 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
 
     private var vibration: Vibrator? = null
 
-    private val handler = Handler(context.mainLooper)
-
     private var vibrating = AtomicBoolean(false)
 
     fun vibrate(pattern: LongArray) = safeCall {
