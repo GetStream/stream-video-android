@@ -16,7 +16,10 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.annotation.SuppressLint
 import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.annotation.RequiresApi
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 
@@ -25,7 +28,13 @@ import io.getstream.log.taggedLogger
  */
 internal open class LivestreamCallService : CallService() {
     override val logger: TaggedLogger by taggedLogger("LivestreamHostCallService")
-    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+
+    override val requiredForegroundTypes: Set<Int>
+        @SuppressLint("InlinedApi")
+        get() = setOf(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
+        )
 }
 
 /**
@@ -33,7 +42,12 @@ internal open class LivestreamCallService : CallService() {
  */
 internal open class LivestreamAudioCallService : CallService() {
     override val logger: TaggedLogger by taggedLogger("LivestreamAudioCallService")
-    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+
+    override val requiredForegroundTypes: Set<Int>
+        @SuppressLint("InlinedApi")
+        get() = setOf(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
+        )
 }
 
 /**
@@ -41,5 +55,23 @@ internal open class LivestreamAudioCallService : CallService() {
  */
 internal class LivestreamViewerService : LivestreamCallService() {
     override val logger: TaggedLogger by taggedLogger("LivestreamViewerService")
-    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+    override val requiredForegroundTypes: Set<Int>
+        @SuppressLint("InlinedApi")
+        get() = setOf(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
+        )
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun androidQServiceType(): Int {
+        return ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+    }
+
+    @SuppressLint("InlinedApi")
+    override fun noPermissionServiceType(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+        } else {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+        }
+    }
 }
