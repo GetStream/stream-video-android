@@ -16,11 +16,18 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.annotation.SuppressLint
 import android.content.pm.ServiceInfo
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 
 internal class AudioCallService : CallService() {
     override val logger: TaggedLogger by taggedLogger("AudioCallService")
-    override val serviceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+
+    override val requiredForegroundTypes: Set<Int>
+        @SuppressLint("InlinedApi")
+        get() = setOf(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
+        )
 }

@@ -27,7 +27,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -77,8 +79,96 @@ import kotlinx.coroutines.launch
 internal open class CallService : Service() {
     internal open val logger by taggedLogger("CallService")
 
-    // Service type
-    open val serviceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+    @SuppressLint("InlinedApi")
+    internal open val requiredForegroundTypes: Set<Int> = setOf(
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
+    )
+
+    /**
+     * Map each service type to the permission it requires (if any).
+     * Subclasses can reuse or extend this mapping.
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK] requires Q
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL] requires Q
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA] requires R
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE] requires R
+     * [ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE] requires UPSIDE_DOWN_CAKE
+     */
+
+    @SuppressLint("InlinedApi")
+    internal open val foregroundTypePermissionsMap: Map<Int, String?> = mapOf(
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA to Manifest.permission.CAMERA,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE to Manifest.permission.RECORD_AUDIO,
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK to null, // playback doesn’t need permission
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL to null,
+    )
+
+    private fun getServiceTypeForStartingFGService(trigger: String): Int {
+        return when (trigger) {
+            CallService.TRIGGER_ONGOING_CALL -> { serviceType }
+            else -> noPermissionServiceType()
+        }
+    }
+
+    open val serviceType: Int
+        @SuppressLint("InlinedApi")
+        get() {
+            return if (hasAllPermission(baseContext)) {
+                hasAllPermissionServiceType()
+            } else {
+                noPermissionServiceType()
+            }
+        }
+
+    private fun hasAllPermissionServiceType(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // or of all requiredForegroundTypes types
+            requiredForegroundTypes.reduce { acc, type -> acc or type }
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            androidQServiceType()
+        } else {
+            /**
+             * Android Pre-Q Service Type (no need to bother)
+             * We don't start foreground service with type
+             */
+            0
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    internal open fun noPermissionServiceType(): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+        } else {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    internal open fun androidQServiceType() = if (requiredForegroundTypes.contains(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+        )
+    ) {
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+    } else {
+        /**
+         *  Existing behavior
+         *  [ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE] requires [Build.VERSION_CODES.UPSIDE_DOWN_CAKE]
+         */
+        ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    internal fun hasAllPermission(context: Context): Boolean {
+        return requiredForegroundTypes.all { type ->
+            val permission = foregroundTypePermissionsMap[type]
+            permission == null || ContextCompat.checkSelfPermission(
+                context,
+                permission,
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
 
     // Data
     private var callId: StreamCallId? = null
@@ -230,9 +320,11 @@ internal open class CallService : Service() {
                 StreamLog.i(TAG) { "Notification: $notification" }
                 if (hasPermission && notification != null) {
                     StreamLog.d(TAG) {
-                        "[showIncomingCall] Showing notification fallback with ID: ${callId.getNotificationId(
-                            NotificationType.Incoming,
-                        )}"
+                        "[showIncomingCall] Showing notification fallback with ID: ${
+                            callId.getNotificationId(
+                                NotificationType.Incoming,
+                            )
+                        }"
                     }
                     StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
                         callId,
@@ -380,11 +472,22 @@ internal open class CallService : Service() {
             val call = streamVideo.call(type, id)
 
             val permissionCheckPass =
-                streamVideo.permissionCheck.checkAndroidPermissions(applicationContext, call)
-            if (!permissionCheckPass) {
+                streamVideo.permissionCheck.checkAndroidPermissionsGroup(applicationContext, call)
+            if (!permissionCheckPass.first) {
                 // Crash early with a meaningful message if Call is used without system permissions.
+                val missingPermissions = permissionCheckPass.second.joinToString(",")
                 val exception = IllegalStateException(
-                    "\nCallService attempted to start without required permissions (e.g. android.manifest.permission.RECORD_AUDIO).\n" + "This can happen if you call [Call.join()] without the required permissions being granted by the user.\n" + "If you are using compose and [LaunchCallPermissions] ensure that you rely on the [onRequestResult] callback\n" + "to ensure that the permission is granted prior to calling [Call.join()] or similar.\n" + "Optionally you can use [LaunchPermissionRequest] to ensure permissions are granted.\n" + "If you are not using the [stream-video-android-ui-compose] library,\n" + "ensure that permissions are granted prior calls to [Call.join()].\n" + "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n",
+                    """
+                        CallService attempted to start without required permissions $missingPermissions.
+                        Details: call_id:$callId, trigger:$trigger,
+                        This can happen if you call [Call.join()] without the required permissions being granted by the user.
+                        If you are using compose and [LaunchCallPermissions] ensure that you rely on the [onRequestResult] callback
+                        to ensure that the permission is granted prior to calling [Call.join()] or similar.
+                        Optionally you can use [LaunchPermissionRequest] to ensure permissions are granted.
+                        If you are not using the [stream-video-android-ui-compose] library,
+                        ensure that permissions are granted prior calls to [Call.join()].
+                        You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]
+                    """.trimIndent(),
                 )
                 if (streamVideo.crashOnMissingPermission) {
                     throw exception
@@ -421,7 +524,7 @@ internal open class CallService : Service() {
                         intentCallId.hashCode(),
                         notification,
                         trigger,
-                        serviceType,
+                        getServiceTypeForStartingFGService(trigger),
                     )
                 }
                 true
@@ -575,7 +678,7 @@ internal open class CallService : Service() {
                     notificationId,
                     notification,
                     trigger,
-                    serviceType,
+                    getServiceTypeForStartingFGService(trigger),
                 )
             }
         }
@@ -621,7 +724,7 @@ internal open class CallService : Service() {
                 notificationId,
                 notification,
                 TRIGGER_INCOMING_CALL,
-                serviceType,
+                getServiceTypeForStartingFGService(TRIGGER_INCOMING_CALL),
             ).onError {
                 logger.e {
                     "[showIncomingCall] Failed to start foreground service, falling back to justNotify: $it"
@@ -867,7 +970,7 @@ internal open class CallService : Service() {
                                 callId.hashCode(),
                                 notification,
                                 TRIGGER_ONGOING_CALL,
-                                serviceType,
+                                getServiceTypeForStartingFGService(TRIGGER_ONGOING_CALL),
                             )
                         }
 
@@ -877,7 +980,7 @@ internal open class CallService : Service() {
                                 callId.getNotificationId(NotificationType.Incoming),
                                 notification,
                                 TRIGGER_OUTGOING_CALL,
-                                serviceType,
+                                getServiceTypeForStartingFGService(TRIGGER_OUTGOING_CALL),
                             )
                         }
 
@@ -887,7 +990,7 @@ internal open class CallService : Service() {
                                 callId.getNotificationId(NotificationType.Incoming),
                                 notification,
                                 TRIGGER_INCOMING_CALL,
-                                serviceType,
+                                getServiceTypeForStartingFGService(TRIGGER_INCOMING_CALL),
                             )
                         }
 
