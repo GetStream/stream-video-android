@@ -51,7 +51,8 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
             vibrating.set(true)
             vibration = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             vibration?.vibrate(
-                pattern, 0
+                pattern,
+                0,
             )
         }
     }
