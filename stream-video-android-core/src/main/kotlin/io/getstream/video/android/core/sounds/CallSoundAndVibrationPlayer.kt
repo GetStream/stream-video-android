@@ -47,7 +47,8 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
 
     fun vibrate(pattern: LongArray) = safeCall {
         logger.d { "[vibrate] Vibration pattern: $pattern" }
-        if (vibrating.compareAndSet(false, true)) {
+        if (!vibrating.get()) {
+            vibrating.set(true)
             vibration = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             vibration?.vibrate(
                 pattern, 0

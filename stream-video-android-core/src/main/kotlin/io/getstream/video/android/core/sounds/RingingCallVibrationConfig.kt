@@ -35,7 +35,7 @@ public data class RingingCallVibrationConfig(
 /**
  * Returns a default ringing call vibration config.
  */
-fun enableRingingCallVibrationConfig() = RingingCallVibrationConfig()
+fun enableRingingCallVibrationConfig() = RingingCallVibrationConfig(enabled = true)
 
 /**
  * Returns a ringing call vibration config that mutes (disables) vibration.

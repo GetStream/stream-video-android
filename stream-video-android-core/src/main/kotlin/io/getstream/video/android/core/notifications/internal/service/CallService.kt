@@ -696,6 +696,7 @@ internal open class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
+                            logger.d { "[vibrate] Vibration config: ${streamVideo.vibrationConfig}" }
                             if(streamVideo.vibrationConfig.enabled) {
                                 val pattern = streamVideo.vibrationConfig.vibratePattern
                                 callSoundAndVibrationPlayer?.vibrate(pattern)
