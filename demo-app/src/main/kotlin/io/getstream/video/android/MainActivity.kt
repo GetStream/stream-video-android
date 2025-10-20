@@ -130,16 +130,18 @@ class MainActivity : ComponentActivity() {
                 }
                 .collectLatest { ringingState ->
                     val currentCall = StreamVideo.instanceState.value?.state?.ringingCall?.value
-
-                    /**
-                     * This activity is re-launched once StreamCallActivity is finished
-                     * So we just need to check if the call is rejected by self previously
-                     */
-                    val self = StreamVideo.instanceOrNull()?.userId
-                    val rejectedBySelf = currentCall?.state?.rejectedBy?.value?.contains(self) == true
-                    if (ringingState is RingingState.Incoming && !rejectedBySelf) {
-                        currentCall?.let {
-                            startIncomingCallActivity(it)
+                    val activeCall = StreamVideo.instanceState.value?.state?.activeCall?.value
+                    if (activeCall == null) {
+                        /**
+                         * This activity is re-launched once StreamCallActivity is finished
+                         * So we just need to check if the call is rejected by self previously
+                         */
+                        val self = StreamVideo.instanceOrNull()?.userId
+                        val rejectedBySelf = currentCall?.state?.rejectedBy?.value?.contains(self) == true
+                        if (ringingState is RingingState.Incoming && !rejectedBySelf) {
+                            currentCall?.let {
+                                startIncomingCallActivity(it)
+                            }
                         }
                     }
                 }
