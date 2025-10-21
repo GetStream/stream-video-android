@@ -51,7 +51,7 @@ import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.sounds.CallSoundPlayer
+import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
@@ -179,7 +179,7 @@ internal open class CallService : Service() {
     private var isToggleCameraBroadcastReceiverRegistered = false
 
     // Call sounds
-    private var callSoundPlayer: CallSoundPlayer? = null
+    private var callSoundPlayer: CallSoundAndVibrationPlayer? = null
     private val serviceNotificationRetriever = ServiceNotificationRetriever()
 
     internal companion object {
@@ -377,10 +377,10 @@ internal open class CallService : Service() {
                 updateRingingCall(streamVideo, intentCallId, RingingState.Incoming())
             }
 
-            callSoundPlayer = streamVideo.callSoundPlayer
+            callSoundAndVibrationPlayer = streamVideo.callSoundAndVibrationPlayer
 
             logger.d {
-                "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
+                "[onStartCommand]. callSoundPlayer's hashcode: ${callSoundAndVibrationPlayer?.hashCode()}, Callservice hashcode: ${hashCode()}"
             }
             observeCall(intentCallId, streamVideo)
             registerToggleCameraBroadcastReceiver()
@@ -558,30 +558,35 @@ internal open class CallService : Service() {
                 when (it) {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
-                            callSoundPlayer?.playCallSound(
+                            logger.d { "[vibrate] Vibration config: ${streamVideo.vibrationConfig}" }
+                            if (streamVideo.vibrationConfig.enabled) {
+                                val pattern = streamVideo.vibrationConfig.vibratePattern
+                                callSoundAndVibrationPlayer?.vibrate(pattern)
+                            }
+                            callSoundAndVibrationPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.incomingCallSoundUri,
                                 streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted
                                     ?: false,
                             )
                         } else {
-                            callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
+                            callSoundAndVibrationPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
 
                     is RingingState.Outgoing -> {
                         if (!it.acceptedByCallee) {
-                            callSoundPlayer?.playCallSound(
+                            callSoundAndVibrationPlayer?.playCallSound(
                                 streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
                                 streamVideo.sounds.mutedRingingConfig?.playOutgoingSoundIfMuted
                                     ?: false,
                             )
                         } else {
-                            callSoundPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
+                            callSoundAndVibrationPlayer?.stopCallSound() // Stops sound sooner than Active. More responsive.
                         }
                     }
 
                     is RingingState.Active -> { // Handle Active to make it more reliable
-                        callSoundPlayer?.stopCallSound()
+                        callSoundAndVibrationPlayer?.stopCallSound()
                     }
 
                     is RingingState.RejectedByAll -> {
@@ -591,16 +596,16 @@ internal open class CallService : Service() {
                                 RejectReason.Decline,
                             )
                         }
-                        callSoundPlayer?.stopCallSound()
+                        callSoundAndVibrationPlayer?.stopCallSound()
                         stopService()
                     }
 
                     is RingingState.TimeoutNoAnswer -> {
-                        callSoundPlayer?.stopCallSound()
+                        callSoundAndVibrationPlayer?.stopCallSound()
                     }
 
                     else -> {
-                        callSoundPlayer?.stopCallSound()
+                        callSoundAndVibrationPlayer?.stopCallSound()
                     }
                 }
             }
@@ -837,7 +842,7 @@ internal open class CallService : Service() {
     override fun onDestroy() {
         logger.d { "[onDestroy], Callservice hashcode: ${hashCode()}, call_cid: ${callId?.cid}" }
         stopService()
-        callSoundPlayer?.cleanUpAudioResources()
+        callSoundAndVibrationPlayer?.cleanUpAudioResources()
         super.onDestroy()
     }
 
@@ -882,7 +887,7 @@ internal open class CallService : Service() {
          * Temp Fix!! The observeRingingState scope was getting cancelled and as a result,
          * ringing state was not properly updated
          */
-        callSoundPlayer?.stopCallSound()
+        callSoundAndVibrationPlayer?.stopCallSound()
 
         // Stop any jobs
         serviceScope.cancel()

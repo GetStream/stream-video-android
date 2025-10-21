@@ -39,8 +39,10 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
+import io.getstream.video.android.core.sounds.disableVibrationConfig
 import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
@@ -126,6 +128,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val callServiceConfigRegistry: CallServiceConfigRegistry? = null,
     private val localSfuAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
+    private val vibrationConfig: RingingCallVibrationConfig = disableVibrationConfig(),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     @Deprecated(
@@ -266,6 +269,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
+            vibrationConfig = vibrationConfig,
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
         )

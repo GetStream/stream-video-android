@@ -25,15 +25,44 @@ import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.utils.safeCall
+import java.util.concurrent.atomic.AtomicBoolean
 
-internal class CallSoundPlayer(private val context: Context) {
+internal class CallSoundAndVibrationPlayer(private val context: Context) {
     private val logger by taggedLogger("CallSoundPlayer")
     private val mediaPlayer: MediaPlayer by lazy { MediaPlayer() }
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
     private var ringtone: Ringtone? = null
+
+    private var vibration: Vibrator? = null
+
+    private var vibrating = AtomicBoolean(false)
+
+    fun vibrate(pattern: LongArray) = safeCall {
+        logger.d { "[vibrate] Vibration pattern: $pattern" }
+        if (!vibrating.get()) {
+            vibrating.set(true)
+            vibration = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            vibration?.vibrate(
+                pattern,
+                0,
+            )
+        }
+    }
+
+    fun stopVibration() = safeCall {
+        if (!vibrating.get()) {
+            logger.d { "[stopVibration] Vibration not started" }
+            return@safeCall
+        }
+        logger.d { "[stopVibration] Stopping vibration" }
+        vibrating.set(false)
+        vibration?.cancel()
+    }
 
     fun playCallSound(soundUri: Uri?, playIfMuted: Boolean = false) {
         try {
@@ -123,6 +152,7 @@ internal class CallSoundPlayer(private val context: Context) {
 
     fun stopCallSound() {
         synchronized(this) {
+            stopVibration()
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     logger.d { "[stopCallSound] Stopping RingtoneManager sound" }
