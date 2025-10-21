@@ -179,7 +179,7 @@ internal open class CallService : Service() {
     private var isToggleCameraBroadcastReceiverRegistered = false
 
     // Call sounds
-    private var callSoundPlayer: CallSoundAndVibrationPlayer? = null
+    private var callSoundAndVibrationPlayer: CallSoundAndVibrationPlayer? = null
     private val serviceNotificationRetriever = ServiceNotificationRetriever()
 
     internal companion object {
