@@ -19,7 +19,7 @@ import java.util.*
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("io.getstream.android.library")
+    id("io.getstream.video.android.library")
     id("io.getstream.video.generateServices")
     id("io.getstream.spotless")
     id(libs.plugins.kotlin.serialization.get().pluginId)

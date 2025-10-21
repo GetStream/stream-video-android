@@ -20,19 +20,19 @@ dependencies {
 gradlePlugin {
   plugins {
     register("androidApplicationCompose") {
-      id = "io.getstream.android.application.compose"
+      id = "io.getstream.video.android.application.compose"
       implementationClass = "AndroidApplicationComposeConventionPlugin"
     }
     register("androidApplication") {
-      id = "io.getstream.android.application"
+      id = "io.getstream.video.android.application"
       implementationClass = "AndroidApplicationConventionPlugin"
     }
     register("androidLibraryCompose") {
-      id = "io.getstream.android.library.compose"
+      id = "io.getstream.video.android.library.compose"
       implementationClass = "AndroidLibraryComposeConventionPlugin"
     }
     register("androidLibrary") {
-      id = "io.getstream.android.library"
+      id = "io.getstream.video.android.library"
       implementationClass = "AndroidLibraryConventionPlugin"
     }
     register("spotless") {

@@ -1,7 +1,7 @@
 import io.getstream.video.android.Configuration
 
 plugins {
-    id("io.getstream.android.application")
+    id("io.getstream.video.android.application")
 }
 
 android {

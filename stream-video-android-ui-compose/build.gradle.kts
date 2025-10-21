@@ -17,7 +17,7 @@ import io.getstream.video.android.Configuration
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("io.getstream.android.library.compose")
+    id("io.getstream.video.android.library.compose")
     id("io.getstream.spotless")
 }
 
