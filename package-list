@@ -59,6 +59,7 @@ io.getstream.video.android.datastore.delegate
 io.getstream.video.android.datastore.model
 io.getstream.video.android.model
 io.getstream.video.android.model.mapper
+io.getstream.webrtc.android.ui
 module:stream-video-android-filters-video
 io.getstream.video.android.filters.video
 module:stream-video-android-previewdata
