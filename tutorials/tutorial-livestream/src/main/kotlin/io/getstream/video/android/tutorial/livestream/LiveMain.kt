@@ -54,7 +54,8 @@ fun LiveMain(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            var callId by remember { mutableStateOf(TextFieldValue("dE8AsD5Qxqrt")) }
+//            var callId by remember { mutableStateOf(TextFieldValue("dE8AsD5Qxqrt")) }
+            var callId by remember { mutableStateOf(TextFieldValue("test_video")) }
             StreamTextField(
                 modifier = Modifier.width(300.dp),
                 value = callId,
@@ -96,6 +97,23 @@ fun LiveMain(
                 },
             ) {
                 Text(text = "guest", color = VideoTheme.colors.basePrimary)
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(64.dp),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = VideoTheme.colors.brandPrimary,
+                    backgroundColor = VideoTheme.colors.brandPrimary,
+                ),
+                onClick = {
+                    navController.navigate(LiveScreens.OutgoingCall.destination(callId.text))
+                },
+            ) {
+                Text(text = "outgoing", color = VideoTheme.colors.basePrimary)
             }
         }
     }

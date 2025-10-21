@@ -7184,6 +7184,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun fireEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAudioFilter ()Lio/getstream/video/android/core/call/audio/InputAudioFilter;
+	public final fun getCallConfig ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public final fun getCamera ()Lio/getstream/video/android/core/CameraManager;
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getEvents ()Lkotlinx/coroutines/flow/MutableSharedFlow;
@@ -12086,17 +12087,19 @@ public final class io/getstream/video/android/core/notifications/internal/receiv
 
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfig {
 	public fun <init> ()V
-	public fun <init> (ZILjava/util/Map;Ljava/lang/Class;)V
-	public synthetic fun <init> (ZILjava/util/Map;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZILjava/util/Map;Ljava/lang/Class;Landroid/app/PictureInPictureParams;)V
+	public synthetic fun <init> (ZILjava/util/Map;Ljava/lang/Class;Landroid/app/PictureInPictureParams;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()I
 	public final fun component3 ()Ljava/util/Map;
 	public final fun component4 ()Ljava/lang/Class;
-	public final fun copy (ZILjava/util/Map;Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/lang/Class;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public final fun component5 ()Landroid/app/PictureInPictureParams;
+	public final fun copy (ZILjava/util/Map;Ljava/lang/Class;Landroid/app/PictureInPictureParams;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/lang/Class;Landroid/app/PictureInPictureParams;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioUsage ()I
 	public final fun getCallServicePerType ()Ljava/util/Map;
+	public final fun getPictureInPictureParams ()Landroid/app/PictureInPictureParams;
 	public final fun getRunCallServiceInForeground ()Z
 	public final fun getServiceClass ()Ljava/lang/Class;
 	public fun hashCode ()I
@@ -12107,6 +12110,7 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public fun <init> ()V
 	public final fun build ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public final fun setAudioUsage (I)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
+	public final fun setPictureInPictureParams (Landroid/app/PictureInPictureParams;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setRunCallServiceInForeground (Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setServiceClass (Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 }

@@ -21,6 +21,7 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +42,8 @@ import io.getstream.video.android.core.Call
  *
  * @param call The call includes states and will be rendered with participants.
  */
+private const val TAG = "MediaPiPLifecycle"
+
 @Composable
 public fun MediaPiPLifecycle(
     call: Call,
@@ -72,6 +75,10 @@ public fun MediaPiPLifecycle(
             }
 
             override fun onActivityPaused(activity: Activity) {
+                Log.d(
+                    TAG,
+                    "[onActivityPaused], call_id: ${call.id}, ringingState: ${call.state.ringingState.value}",
+                )
                 if (activity == currentActivity) {
                     val isInPictureInPicture = context.isInPictureInPictureMode
                     if (!isInPictureInPicture && !enableInPictureInPicture) {

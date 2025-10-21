@@ -16,12 +16,14 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.app.PictureInPictureParams
 import android.media.AudioAttributes
 
 class CallServiceConfigBuilder {
     private var serviceClass: Class<*> = CallService::class.java
     private var runCallServiceInForeground: Boolean = true
     private var audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION
+    private var pictureInPictureParams: PictureInPictureParams? = null
 
     fun setServiceClass(serviceClass: Class<*>): CallServiceConfigBuilder = apply {
         this.serviceClass = serviceClass
@@ -35,11 +37,16 @@ class CallServiceConfigBuilder {
         this.audioUsage = audioUsage
     }
 
+    fun setPictureInPictureParams(pictureInPictureParams: PictureInPictureParams): CallServiceConfigBuilder = apply {
+        this.pictureInPictureParams = pictureInPictureParams
+    }
+
     fun build(): CallServiceConfig {
         return CallServiceConfig(
             serviceClass = serviceClass,
             runCallServiceInForeground = runCallServiceInForeground,
             audioUsage = audioUsage,
+            pictureInPictureParams = pictureInPictureParams,
         )
     }
 }

@@ -52,8 +52,13 @@ internal fun enterPictureInPicture(context: Context, call: Call) {
 
             val params = PictureInPictureParams.Builder()
             params.setAspectRatio(aspect).apply {
+                var defaultAutoEnterEnabled = true
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    defaultAutoEnterEnabled =
+                        call.getCallConfig().pictureInPictureParams?.isAutoEnterEnabled ?: true
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    setAutoEnterEnabled(true)
+                    setAutoEnterEnabled(defaultAutoEnterEnabled)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     setTitle("Video Player")

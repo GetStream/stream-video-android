@@ -82,6 +82,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
@@ -1517,6 +1518,10 @@ public class Call(
         targetTracks
             .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
             .forEach { it.enableAudio(enabled) }
+    }
+
+    public fun getCallConfig(): CallServiceConfig {
+        return client.state.callConfigRegistry.get(type)
     }
 
     @InternalStreamVideoApi

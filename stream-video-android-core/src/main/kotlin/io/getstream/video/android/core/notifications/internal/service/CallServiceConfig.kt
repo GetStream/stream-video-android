@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.app.PictureInPictureParams
 import android.media.AudioAttributes
 import io.getstream.video.android.model.StreamCallId
 
@@ -46,6 +47,7 @@ public data class CallServiceConfig(
         Pair(ANY_MARKER, CallService::class.java),
     ),
     val serviceClass: Class<*> = CallService::class.java,
+    val pictureInPictureParams: PictureInPictureParams? = null,
 )
 
 /**

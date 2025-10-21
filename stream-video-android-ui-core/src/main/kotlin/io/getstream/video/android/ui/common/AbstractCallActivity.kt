@@ -142,8 +142,13 @@ public abstract class AbstractCallActivity : ComponentActivity() {
 
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                    var defaultAutoEnterEnabled = true
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        defaultAutoEnterEnabled =
+                            call.getCallConfig().pictureInPictureParams?.isAutoEnterEnabled ?: true
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        this.setAutoEnterEnabled(true)
+                        this.setAutoEnterEnabled(defaultAutoEnterEnabled)
                     }
                 }.build(),
             )

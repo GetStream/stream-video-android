@@ -48,7 +48,8 @@ fun LiveNavHost(
     startDestination: String = LiveScreens.Main.destination,
 ) {
     val context = LocalContext.current
-    val userId = "Darth_Krayt"
+//    val userId = "Darth_Krayt"
+    val userId = "rahul" // noob change 1
     val userToken = StreamVideo.devToken(userId)
 
     // step1 - create a user.
@@ -101,6 +102,13 @@ fun LiveNavHost(
                 client,
             )
         }
+        composable(LiveScreens.OutgoingCall.destination, LiveScreens.OutgoingCall.args) {
+            OutgoingCallScreen(
+                navController,
+                callId = LiveScreens.OutgoingCall.getCallId(it),
+                client,
+            ) // Noob 2
+        }
     }
 }
 
@@ -124,6 +132,11 @@ sealed class LiveScreens(val destination: String) {
     data object Guest : HasCallId(destination = "guest/{call_id}") {
         fun destination(callId: String): String {
             return "guest/$callId"
+        }
+    }
+    data object OutgoingCall : HasCallId(destination = "outgoing/{call_id}") {
+        fun destination(callId: String): String {
+            return "outgoing/$callId"
         }
     }
 }

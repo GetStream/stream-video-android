@@ -527,6 +527,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             else -> {
+                // Join Video Room
                 logger.w {
                     "[onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
                 }
@@ -710,8 +711,13 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                    var defaultAutoEnterEnabled = true
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        defaultAutoEnterEnabled =
+                            call.getCallConfig().pictureInPictureParams?.isAutoEnterEnabled ?: true
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        this.setAutoEnterEnabled(true)
+                        this.setAutoEnterEnabled(defaultAutoEnterEnabled)
                     }
                 }.build(),
             )
