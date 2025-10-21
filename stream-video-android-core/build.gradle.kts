@@ -15,7 +15,7 @@
  */
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -64,10 +64,8 @@ apiValidation {
 
 android {
     namespace = "io.getstream.video.android.core"
-    compileSdk = Configuration.compileSdk
 
     defaultConfig {
-        minSdk = Configuration.minSdk
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
         buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")

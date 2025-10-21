@@ -23,7 +23,7 @@ import io.getstream.video.VideoDemoFlavor
 import io.getstream.video.android.Configuration
 import io.getstream.video.configureFlavors
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -40,12 +40,9 @@ plugins {
 
 android {
     namespace = "io.getstream.video.android"
-    compileSdk = Configuration.compileSdk
 
     defaultConfig {
         applicationId = "io.getstream.video.android"
-        minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
         versionCode = 1
         versionName = Configuration.streamVideoCallGooglePlayVersion
         testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"

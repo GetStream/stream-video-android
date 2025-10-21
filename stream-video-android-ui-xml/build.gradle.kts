@@ -31,12 +31,6 @@ apply(from ="${rootDir}/scripts/publish-module.gradle")
 
 android {
     namespace = "io.getstream.video.android.xml"
-    compileSdk = Configuration.compileSdk
-
-    defaultConfig {
-        minSdk = Configuration.minSdk
-    }
-
     resourcePrefix = "stream_video_"
 
     buildFeatures {

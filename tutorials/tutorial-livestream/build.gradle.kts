@@ -15,10 +15,6 @@
  */
 @file:Suppress("UnstableApiUsage")
 
-import io.getstream.video.android.Configuration
-import java.io.FileInputStream
-import java.util.*
-
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.video.android.application.compose")
@@ -27,12 +23,9 @@ plugins {
 
 android {
     namespace = "io.getstream.video.android.tutorial.livestream"
-    compileSdk = Configuration.compileSdk
 
     defaultConfig {
         applicationId = "io.getstream.video.android.tutorial.livestream"
-        minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
         versionCode = 1
         versionName = "1.0"
     }

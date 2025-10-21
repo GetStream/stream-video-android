@@ -31,11 +31,6 @@ apply(from = "${rootDir}/scripts/publish-module.gradle")
 
 android {
     namespace = "io.getstream.video.android.compose"
-    compileSdk = Configuration.compileSdk
-
-    defaultConfig {
-        minSdk = Configuration.minSdk
-    }
 }
 
 baselineProfile {

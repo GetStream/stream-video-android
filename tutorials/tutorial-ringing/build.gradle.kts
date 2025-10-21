@@ -15,8 +15,6 @@
  */
 @file:Suppress("UnstableApiUsage")
 
-import io.getstream.video.android.Configuration
-
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.video.android.application.compose")
@@ -29,14 +27,11 @@ android {
     //namespace = "io.getstream.video.android.tutorial.video"
     namespace = "io.getstream.android.samples.ringingcall"
     //namespace = "io.getstream.video.android"
-    compileSdk = Configuration.compileSdk
 
     defaultConfig {
         //applicationId = "io.getstream.video.android.tutorial.video"
         applicationId = "io.getstream.android.samples.ringingcall"
         //applicationId = "io.getstream.video.android"
-        minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
         versionCode = 1
         versionName = "1.0"
     }
