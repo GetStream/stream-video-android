@@ -11,6 +11,7 @@ ksp = "1.9.25-1.0.20"
 kotlinSerialization = "1.6.3"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.9.0"
+cameraCore = "1.4.2"
 
 kotlinDokka = "1.9.20"
 jvmTarget = "11"
@@ -221,10 +222,10 @@ android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", ver
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
-androidx-camera-core = { group = "androidx.camera", name = "camera-core", version = "1.3.0" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraCore" }
 play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version = "18.3.0" }
-androidx-camera-view = { group = "androidx.camera", name = "camera-view", version = "1.3.0" }
-androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version = "1.3.0" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraCore" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraCore" }
 zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.2" }
 
 [plugins]
