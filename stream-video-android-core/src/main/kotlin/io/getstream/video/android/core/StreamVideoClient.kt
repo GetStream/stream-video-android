@@ -38,6 +38,7 @@ import io.getstream.android.video.generated.models.GoLiveRequest
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.JoinCallRequest
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.KickUserRequest
 import io.getstream.android.video.generated.models.ListRecordingsResponse
 import io.getstream.android.video.generated.models.ListTranscriptionsResponse
 import io.getstream.android.video.generated.models.MemberRequest
@@ -105,7 +106,8 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
-import io.getstream.video.android.core.sounds.CallSoundPlayer
+import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
+import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
@@ -161,6 +163,7 @@ internal class StreamVideoClient internal constructor(
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
     internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
+    internal val vibrationConfig: RingingCallVibrationConfig,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     internal val crashOnMissingPermission: Boolean = false,
     internal val appName: String? = null,
@@ -193,7 +196,7 @@ internal class StreamVideoClient internal constructor(
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
     private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
-    internal val callSoundPlayer = CallSoundPlayer(context)
+    internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
 
     val socketImpl = coordinatorConnectionModule.socketConnection
 
@@ -957,6 +960,14 @@ internal class StreamVideoClient internal constructor(
         }
 
         return result.map { it.toQueriedCalls() }
+    }
+
+    suspend fun kickUser(type: String, id: String, userId: String, block: Boolean = false) = apiCall {
+        coordinatorConnectionModule.api.kickUser(
+            type,
+            id,
+            KickUserRequest(userId, block),
+        )
     }
 
     suspend fun requestPermissions(
