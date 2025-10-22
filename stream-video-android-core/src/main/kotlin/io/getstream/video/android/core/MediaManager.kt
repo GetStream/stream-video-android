@@ -527,6 +527,7 @@ class MicrophoneManager(
                 audioHandler.start()
             } else {
                 logger.d { "[MediaManager#setup] Usage is MEDIA or audioHandle is already initialized" }
+                capturedOnAudioDevicesUpdate?.invoke()
             }
         }
     }
