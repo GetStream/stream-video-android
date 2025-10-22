@@ -12225,6 +12225,31 @@ public abstract interface class io/getstream/video/android/core/permission/andro
 	public abstract fun checkAndroidPermissionsGroup (Landroid/content/Context;Lio/getstream/video/android/core/Call;)Lkotlin/Pair;
 }
 
+public final class io/getstream/video/android/core/pip/PictureInPictureConfiguration : android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (ZZ)V
+	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun copy (ZZ)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;ZZILjava/lang/Object;)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoEnterEnabled ()Z
+	public final fun getEnable ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class io/getstream/video/android/core/pip/PictureInPictureConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class io/getstream/video/android/core/socket/ErrorResponse : java/lang/Throwable {
 	public static final field Companion Lio/getstream/video/android/core/socket/ErrorResponse$Companion;
 	public fun <init> ()V

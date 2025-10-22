@@ -163,10 +163,7 @@ public fun CallContent(
 
     DefaultPermissionHandler(videoPermission = permissions)
 
-    MediaPiPLifecycle(
-        call = call,
-        enableInPictureInPicture = pictureInPictureConfiguration.enable,
-    )
+    MediaPiPLifecycle(call = call, pictureInPictureConfiguration)
 
     BackHandler {
         if (pictureInPictureConfiguration.enable) {

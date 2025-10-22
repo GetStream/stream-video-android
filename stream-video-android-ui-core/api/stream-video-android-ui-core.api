@@ -5,6 +5,7 @@ public abstract class io/getstream/video/android/ui/common/AbstractCallActivity 
 	public final fun enterPictureInPicture ()V
 	public final fun exitFullscreen ()V
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	protected fun getPictureInPictureConfiguration ()Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
 	protected fun handleBackPressed ()V
 	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
 	protected fun onDestroy ()V
@@ -144,16 +145,17 @@ public final class io/getstream/video/android/ui/common/StreamCallActivity$Compa
 
 public final class io/getstream/video/android/ui/common/StreamCallActivityConfiguration {
 	public fun <init> ()V
-	public fun <init> (ZZZZZLandroid/os/Bundle;)V
-	public synthetic fun <init> (ZZZZZLandroid/os/Bundle;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZZZZZLandroid/os/Bundle;Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;)V
+	public synthetic fun <init> (ZZZZZLandroid/os/Bundle;Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Z
 	public final fun component3 ()Z
 	public final fun component4 ()Z
 	public final fun component5 ()Z
 	public final fun component6 ()Landroid/os/Bundle;
-	public final fun copy (ZZZZZLandroid/os/Bundle;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
-	public static synthetic fun copy$default (Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ZZZZZLandroid/os/Bundle;ILjava/lang/Object;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public final fun component7 ()Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public final fun copy (ZZZZZLandroid/os/Bundle;Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
+	public static synthetic fun copy$default (Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ZZZZZLandroid/os/Bundle;Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;ILjava/lang/Object;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCanKeepScreenOn ()Z
 	public final fun getCanSkiPermissionRationale ()Z
@@ -161,6 +163,7 @@ public final class io/getstream/video/android/ui/common/StreamCallActivityConfig
 	public final fun getCloseScreenOnCallEnded ()Z
 	public final fun getCloseScreenOnError ()Z
 	public final fun getCustom ()Landroid/os/Bundle;
+	public final fun getPictureInPictureConfiguration ()Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
