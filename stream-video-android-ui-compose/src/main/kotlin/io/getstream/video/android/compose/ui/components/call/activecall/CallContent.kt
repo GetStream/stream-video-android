@@ -241,7 +241,7 @@ public fun CallContent(
     }
 }
 
-@Deprecated("Use CallContentV2 instead")
+@Deprecated("Use CallContent  with pictureInPictureConfiguration argument")
 @Composable
 public fun CallContent(
     call: Call,
