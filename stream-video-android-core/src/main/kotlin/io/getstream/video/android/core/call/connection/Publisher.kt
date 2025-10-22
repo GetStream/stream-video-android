@@ -80,6 +80,7 @@ internal class Publisher(
     private val sessionId: String,
     private val rejoin: () -> Unit,
     private val fastReconnect: () -> Unit,
+    private val isHifiAudioEnabled: Boolean = false,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
     private val tracer: Tracer,
     private val restartIceJobDelegate: RestartIceJobDelegate =
@@ -612,7 +613,7 @@ internal class Publisher(
             layers = toVideoLayers(layers ?: emptyList()),
             track_type = publishOption.track_type,
             mid = extractMid(transceiver, transceiverCache.indexOf(publishOption), sdp),
-            stereo = false,
+            stereo = isAudio && isHifiAudioEnabled,
             muted = !isTrackLive,
             codec = publishOption.codec,
             publish_option_id = publishOption.id,

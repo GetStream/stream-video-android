@@ -365,6 +365,7 @@ public class StreamPeerConnectionFactory(
         tracer: Tracer,
         rejoin: () -> Unit = {},
         fastReconnect: () -> Unit = {},
+        isHifiAudioEnabled: Boolean = false,
     ): Publisher {
         val peerConnection = Publisher(
             sessionId = sessionId,
@@ -382,6 +383,7 @@ public class StreamPeerConnectionFactory(
             tracer = tracer,
             rejoin = rejoin,
             fastReconnect = fastReconnect,
+            isHifiAudioEnabled = isHifiAudioEnabled,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
