@@ -62,7 +62,7 @@ import java.nio.ByteBuffer
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
-    @Deprecated("Use audioUsageProvider instead", level = DeprecationLevel.ERROR)
+    @Deprecated("Use audioUsageProvider instead")
     private val audioUsage: Int = defaultAudioUsage,
     private val audioUsageProvider: (() -> Int) = { audioUsage },
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
