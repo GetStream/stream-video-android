@@ -356,6 +356,17 @@ internal class Publisher(
     ) {
         val init = computeTransceiverEncodings(captureFormat, publishOption)
         try {
+            logger.d {
+                "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: $init)"
+            }
+            logger.d {
+                "Transceiver init details - captureFormat: ${captureFormat?.let { "${it.width}x${it.height}@${it.framerate}fps" } ?: "null"}, publishOption: ${publishOption.track_type}, encodings count: ${init.size}"
+            }
+            init.forEachIndexed { index, encoding ->
+                logger.d {
+                    "  Encoding[$index]: ${encoding.stringify()}"
+                }
+            }
             val transceiver = connection.addTransceiver(
                 track,
                 RtpTransceiverInit(
