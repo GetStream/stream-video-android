@@ -11,7 +11,7 @@ ksp = "1.9.25-1.0.20"
 kotlinSerialization = "1.6.3"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.9.0"
-cameraCore = "1.4.0"
+cameraCore = "1.4.2"
 
 kotlinDokka = "1.9.20"
 jvmTarget = "11"
