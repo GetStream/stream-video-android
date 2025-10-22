@@ -18,6 +18,7 @@ package io.getstream.video.android.core.permission.android
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.Call
@@ -76,15 +77,19 @@ internal fun List<OwnCapability>.mapPermissions(mapper: (OwnCapability) -> Strin
 internal fun List<String>.checkAllPermissions(
     systemPermissionCheck: (String) -> Int,
     permissionExpectation: (String) -> Int = defaultPermissionExpectation,
-): Boolean {
+): Pair<Boolean, Set<String>> {
+    val permissionMissingSet = hashSetOf<String>()
     for (permission in this) {
         if (systemPermissionCheck.invoke(permission) != permissionExpectation.invoke(permission)) {
-            // If any permission is not according to expectation
-            return false
+            Log.e(TAG, "permission check failed for $permission")
+            permissionMissingSet.add(permission)
         }
     }
     // If all permission are according to expectation function, assume true.
-    return true
+    if (permissionMissingSet.isNotEmpty()) {
+        return Pair(false, permissionMissingSet)
+    }
+    return Pair(true, emptySet())
 }
 
 /**
@@ -100,5 +105,10 @@ internal fun checkPermissionsExpectations(
     call: Call,
     permissionMapper: (OwnCapability) -> String? = defaultPermissionMapper,
     permissionExpectation: (String) -> Int = defaultPermissionExpectation,
-) = call.state.ownCapabilities.value.mapPermissions(permissionMapper)
-    .checkAllPermissions(defaultPermissionSystemCheck(context), permissionExpectation)
+): Pair<Boolean, Set<String>> {
+    val a = call.state.ownCapabilities.value.mapPermissions(permissionMapper)
+        .checkAllPermissions(defaultPermissionSystemCheck(context), permissionExpectation)
+    return a
+}
+
+const val TAG = "PermissionUtilities"

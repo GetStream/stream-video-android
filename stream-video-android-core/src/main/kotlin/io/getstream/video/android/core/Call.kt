@@ -233,11 +233,13 @@ public class Call(
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
 
-    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
-        context = clientImpl.context,
-        audioProcessing = clientImpl.audioProcessing,
-        audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-    )
+    internal var peerConnectionFactory: StreamPeerConnectionFactory =
+        StreamPeerConnectionFactory(
+            context = clientImpl.context,
+            audioProcessing = clientImpl.audioProcessing,
+            audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+            audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
+        )
 
     internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
         put(
@@ -256,7 +258,7 @@ public class Call(
                 scope,
                 peerConnectionFactory.eglBase.eglBaseContext,
                 clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-            )
+            ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
         }
     }
 
@@ -408,9 +410,9 @@ public class Call(
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
         val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissions(clientImpl.context, this)
+            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass) {
+        if (!permissionPass.first) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
                     "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +

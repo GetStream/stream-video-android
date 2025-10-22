@@ -40,6 +40,7 @@ import io.getstream.video.android.core.notifications.handlers.CompatibilityStrea
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.sounds.enableRingingCallVibrationConfig
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -216,6 +217,7 @@ object StreamVideoInitHelper {
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             callServiceConfigRegistry = callServiceConfigRegistry,
+            vibrationConfig = enableRingingCallVibrationConfig(),
             notificationConfig = testNotificationConfig ?: NotificationConfig(
                 pushDeviceGenerators = listOf(
                     FirebasePushDeviceGenerator(
