@@ -233,11 +233,13 @@ public class Call(
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
 
-    internal var peerConnectionFactory: StreamPeerConnectionFactory = StreamPeerConnectionFactory(
-        context = clientImpl.context,
-        audioProcessing = clientImpl.audioProcessing,
-        audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-    )
+    internal var peerConnectionFactory: StreamPeerConnectionFactory =
+        StreamPeerConnectionFactory(
+            context = clientImpl.context,
+            audioProcessing = clientImpl.audioProcessing,
+            audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+            audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
+        )
 
     internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
         put(
@@ -256,7 +258,7 @@ public class Call(
                 scope,
                 peerConnectionFactory.eglBase.eglBaseContext,
                 clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-            )
+            ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
         }
     }
 
