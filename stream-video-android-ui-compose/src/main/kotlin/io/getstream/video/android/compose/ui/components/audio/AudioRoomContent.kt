@@ -63,7 +63,7 @@ import io.getstream.video.android.mock.previewCall
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param audioRenderer A single audio renderer renders each individual participant.
  * @param onLeaveRoom A lambda that will be invoked when the leave quietly button was clicked.
- * @param enableInPictureInPicture If the user has engaged in Picture-In-Picture mode.
+ * @param pictureInPictureConfiguration User can provide Picture-In-Picture configuration.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param audioContent Content is shown by rendering audio when we're connected to a call successfully.
  */
@@ -177,7 +177,6 @@ public fun AudioRoomContent(
 
 @Deprecated(
     "Use AudioRoomContent with pictureInPictureConfiguration",
-    level = DeprecationLevel.ERROR,
 )
 @Composable
 public fun AudioRoomContent(
