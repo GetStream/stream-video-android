@@ -23,14 +23,14 @@ import io.getstream.video.android.core.notifications.internal.service.callServic
 import io.getstream.video.android.model.User
 import io.mockk.every
 import io.mockk.mockk
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 @RunWith(RobolectricTestRunner::class)
 class StreamVideoBuilderTest : TestBase() {
@@ -133,7 +133,7 @@ class StreamVideoBuilderTest : TestBase() {
         val buildResult = try {
             assertTrue(
                 "Timeout waiting for cleanup to start",
-                cleanupStarted.await(5, TimeUnit.SECONDS)
+                cleanupStarted.await(5, TimeUnit.SECONDS),
             )
 
             runCatching {
