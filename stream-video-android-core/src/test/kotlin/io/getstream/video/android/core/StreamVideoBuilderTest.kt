@@ -21,7 +21,13 @@ import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
 import io.getstream.video.android.model.User
+import io.mockk.every
+import io.mockk.mockk
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -103,5 +109,52 @@ class StreamVideoBuilderTest : TestBase() {
 
         assertEquals(client.coordinatorConnectionModule.apiUrl, customApiUrl)
         assertEquals(client.coordinatorConnectionModule.wssUrl, customWssUrl)
+    }
+
+    @Test
+    fun build_afterRemovingClientDuringCleanup_doesNotThrow() {
+        StreamVideo.removeClient()
+
+        val cleanupStarted = CountDownLatch(1)
+        val cleanupRelease = CountDownLatch(1)
+        val blockingClient = mockk<StreamVideo>(relaxed = true)
+
+        every { blockingClient.cleanup() } answers {
+            cleanupStarted.countDown()
+            cleanupRelease.await(5, TimeUnit.SECONDS)
+        }
+
+        StreamVideo.install(blockingClient)
+
+        val removeThread = thread(start = true) {
+            StreamVideo.removeClient()
+        }
+
+        val buildResult = try {
+            assertTrue(
+                "Timeout waiting for cleanup to start",
+                cleanupStarted.await(5, TimeUnit.SECONDS)
+            )
+
+            runCatching {
+                StreamVideoBuilder(
+                    ensureSingleInstance = true,
+                    context = context,
+                    apiKey = authData!!.apiKey,
+                    user = User.anonymous(),
+                    token = "anonymous-token",
+                ).build()
+            }
+        } catch (it: Exception) {
+            it.printStackTrace()
+            throw it
+        } finally {
+            cleanupRelease.countDown()
+            removeThread.join(TimeUnit.SECONDS.toMillis(5))
+            StreamVideo.removeClient()
+        }
+
+        println("buildResult: $buildResult")
+        assertTrue("Expected builder to succeed after removeClient", buildResult.isSuccess)
     }
 }
