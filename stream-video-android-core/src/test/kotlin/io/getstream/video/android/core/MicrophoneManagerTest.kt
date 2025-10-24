@@ -34,12 +34,13 @@ import org.junit.Test
 class MicrophoneManagerTest {
 
     private val audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
+    private val audioUsageProvider = { AudioAttributes.USAGE_VOICE_COMMUNICATION }
 
     @Test
     fun `Ensure setup is called prior to any action onto the microphone manager`() = runTest {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, audioUsage)
+        val actual = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
         val context = mockk<Context>(relaxed = true)
         every { mediaManager.context } returns context
         every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
@@ -86,6 +87,7 @@ class MicrophoneManagerTest {
             MicrophoneManager(
                 mediaManager,
                 audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
+                audioUsageProvider = { AudioAttributes.USAGE_VOICE_COMMUNICATION },
             )
         val context = mockk<Context>(relaxed = true)
         val microphoneManager = spyk(actual)
@@ -106,7 +108,7 @@ class MicrophoneManagerTest {
     fun `Ensure setup if ever the manager was cleaned`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, audioUsage)
+        val actual = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
         val context = mockk<Context>(relaxed = true)
         val microphoneManager = spyk(actual)
         every { mediaManager.context } returns context
@@ -137,7 +139,7 @@ class MicrophoneManagerTest {
     fun `Resume will call enable only if prior status was DeviceStatus#enabled`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
         val spyMicrophoneManager = spyk(microphoneManager)
         val mockContext = mockk<Context>(relaxed = true)
         val mockCallState = mockk<CallState>(relaxed = true)

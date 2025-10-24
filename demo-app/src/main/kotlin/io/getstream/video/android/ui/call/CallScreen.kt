@@ -117,6 +117,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.core.model.PreferredVideoResolution
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.core.utils.isEnabled
 import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
 import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
@@ -145,6 +146,7 @@ import kotlinx.coroutines.launch
 fun CallScreen(
     call: Call,
     showDebugOptions: Boolean = false,
+    pictureInPictureConfiguration: PictureInPictureConfiguration? = null,
     onCallDisconnected: () -> Unit = {},
     onUserLeaveCall: () -> Unit = {},
 ) {
@@ -316,7 +318,8 @@ fun CallScreen(
                             ),
                         call = call,
                         layout = layout,
-                        enableInPictureInPicture = true,
+                        pictureInPictureConfiguration = pictureInPictureConfiguration
+                            ?: PictureInPictureConfiguration(true),
                         enableDiagnostics = BuildConfig.DEBUG || StreamBuildFlavorUtil.isDevelopment,
                         onCallAction = {
                             when (it) {
@@ -831,6 +834,29 @@ fun CallScreen(
             )
         }
     }
+}
+
+@Deprecated(
+    "Use CallScreen with pictureInPictureConfiguration argument",
+    ReplaceWith(
+        "CallScreen(call, showDebugOptions, pictureInPictureConfiguration, onCallDisconnected, onUserLeaveCall)",
+    ),
+)
+@OptIn(FlowPreview::class)
+@Composable
+fun CallScreen(
+    call: Call,
+    showDebugOptions: Boolean = false,
+    onCallDisconnected: () -> Unit = {},
+    onUserLeaveCall: () -> Unit = {},
+) {
+    CallScreen(
+        call,
+        showDebugOptions,
+        PictureInPictureConfiguration(true),
+        onCallDisconnected,
+        onUserLeaveCall,
+    )
 }
 
 /**

@@ -7619,12 +7619,13 @@ public final class io/getstream/video/android/core/LocalStats {
 }
 
 public final class io/getstream/video/android/core/MediaManagerImpl {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/EglBase$Context;I)V
-	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/EglBase$Context;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/EglBase$Context;ILkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lorg/webrtc/EglBase$Context;ILkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun cleanup ()V
 	public final fun getAudioSource ()Lorg/webrtc/AudioSource;
 	public final fun getAudioTrack ()Lorg/webrtc/AudioTrack;
 	public final fun getAudioUsage ()I
+	public final fun getAudioUsageProvider ()Lkotlin/jvm/functions/Function0;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getContext ()Landroid/content/Context;
 	public final fun getEglBaseContext ()Lorg/webrtc/EglBase$Context;
@@ -7695,12 +7696,13 @@ public final class io/getstream/video/android/core/MemberState {
 }
 
 public final class io/getstream/video/android/core/MicrophoneManager {
-	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;I)V
+	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;ILkotlin/jvm/functions/Function0;)V
 	public final fun canHandleDeviceSwitch ()Z
 	public final fun cleanup ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun getAudioUsage ()I
+	public final fun getAudioUsageProvider ()Lkotlin/jvm/functions/Function0;
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
@@ -8294,8 +8296,8 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
-	public fun <init> (Landroid/content/Context;ILorg/webrtc/ManagedAudioProcessingFactory;)V
-	public synthetic fun <init> (Landroid/content/Context;ILorg/webrtc/ManagedAudioProcessingFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;)V
+	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getSenderCapabilities (Lorg/webrtc/MediaStreamTrack$MediaType;)Lorg/webrtc/RtpCapabilities;
 	public final fun isAudioProcessingEnabled ()Z
@@ -12309,6 +12311,31 @@ public final class io/getstream/video/android/core/permission/android/Permission
 public abstract interface class io/getstream/video/android/core/permission/android/StreamPermissionCheck {
 	public abstract fun checkAndroidPermissions (Landroid/content/Context;Lio/getstream/video/android/core/Call;)Z
 	public abstract fun checkAndroidPermissionsGroup (Landroid/content/Context;Lio/getstream/video/android/core/Call;)Lkotlin/Pair;
+}
+
+public final class io/getstream/video/android/core/pip/PictureInPictureConfiguration : android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (ZZ)V
+	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun copy (ZZ)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;ZZILjava/lang/Object;)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoEnterEnabled ()Z
+	public final fun getEnable ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class io/getstream/video/android/core/pip/PictureInPictureConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/socket/ErrorResponse : java/lang/Throwable {

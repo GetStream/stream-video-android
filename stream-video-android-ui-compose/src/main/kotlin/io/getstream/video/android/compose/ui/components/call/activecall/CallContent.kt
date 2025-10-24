@@ -73,6 +73,7 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -93,7 +94,7 @@ import io.getstream.video.android.mock.previewCall
  * @param videoContent Content is shown that renders all participants' videos.
  * @param videoOverlayContent Content is shown that will be drawn over the [videoContent], excludes [controlsContent].
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
- * @param enableInPictureInPicture If the user has engaged in Picture-In-Picture mode.
+ * @param pictureInPictureConfiguration User can provide Picture-In-Picture configuration.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param closedCaptionUi You can pass your composable lambda here to render Closed Captions
  */
@@ -148,7 +149,10 @@ public fun CallContent(
             onCallAction = onCallAction,
         )
     },
-    enableInPictureInPicture: Boolean = true,
+    pictureInPictureConfiguration: PictureInPictureConfiguration = PictureInPictureConfiguration(
+        true,
+        true,
+    ),
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     enableDiagnostics: Boolean = false,
     closedCaptionUi: @Composable (Call) -> Unit = {},
@@ -159,15 +163,12 @@ public fun CallContent(
 
     DefaultPermissionHandler(videoPermission = permissions)
 
-    MediaPiPLifecycle(
-        call = call,
-        enableInPictureInPicture = enableInPictureInPicture,
-    )
+    MediaPiPLifecycle(call = call, pictureInPictureConfiguration)
 
     BackHandler {
-        if (enableInPictureInPicture) {
+        if (pictureInPictureConfiguration.enable) {
             try {
-                enterPictureInPicture(context = context, call = call)
+                enterPictureInPicture(context = context, call = call, pictureInPictureConfiguration)
             } catch (e: Exception) {
                 StreamLog.e(tag = "CallContent") { e.stackTraceToString() }
                 call.leave()
@@ -177,7 +178,7 @@ public fun CallContent(
         }
     }
 
-    if (isInPictureInPicture && enableInPictureInPicture) {
+    if (isInPictureInPicture && pictureInPictureConfiguration.enable) {
         pictureInPictureContent(call)
     } else {
         Scaffold(
@@ -238,6 +239,74 @@ public fun CallContent(
             },
         )
     }
+}
+
+@Deprecated("Use CallContent  with pictureInPictureConfiguration argument")
+@Composable
+public fun CallContent(
+    call: Call,
+    modifier: Modifier = Modifier,
+    layout: LayoutType = LayoutType.DYNAMIC,
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
+    onBackPressed: () -> Unit = {},
+    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
+    appBarContent: @Composable (call: Call) -> Unit = {
+        CallAppBar(
+            call = call,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+        )
+    },
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle,
+    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
+        ParticipantVideo(
+            modifier = videoModifier,
+            call = videoCall,
+            participant = videoParticipant,
+            style = videoStyle,
+        )
+    },
+    floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
+    videoContent: @Composable RowScope.(call: Call) -> Unit = {
+        ParticipantsLayout(
+            layoutType = layout,
+            call = call,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(bottom = VideoTheme.dimens.spacingXXs),
+            style = style,
+            videoRenderer = videoRenderer,
+            floatingVideoRenderer = floatingVideoRenderer,
+        )
+    },
+    videoOverlayContent: @Composable (call: Call) -> Unit = {},
+    controlsContent: @Composable (call: Call) -> Unit = {
+        ControlActions(
+            modifier = Modifier.wrapContentWidth(),
+            call = call,
+            onCallAction = onCallAction,
+        )
+    },
+    enableInPictureInPicture: Boolean,
+    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
+    enableDiagnostics: Boolean = false,
+    closedCaptionUi: @Composable (Call) -> Unit = {},
+) {
+    CallContent(
+        call, modifier, layout, permissions, onBackPressed, onCallAction, appBarContent, style,
+        videoRenderer, floatingVideoRenderer, videoContent, videoOverlayContent, controlsContent,
+        PictureInPictureConfiguration(
+            enableInPictureInPicture,
+            true,
+        ),
+        pictureInPictureContent, enableDiagnostics, closedCaptionUi,
+    )
 }
 
 /**

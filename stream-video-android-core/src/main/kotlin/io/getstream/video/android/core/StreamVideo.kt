@@ -219,9 +219,13 @@ public interface StreamVideo : NotificationHandler {
          * Uninstall a previous [StreamVideo] instance.
          */
         public fun removeClient() {
-            isInstalled = false
-            internalStreamVideo?.cleanup()
-            internalStreamVideo = null
+            val client = synchronized(this) {
+                internalStreamVideo?.also {
+                    isInstalled = false
+                    internalStreamVideo = null
+                }
+            } ?: return
+            client.cleanup()
         }
 
         /**
