@@ -17,6 +17,7 @@
 package io.getstream.video.android.ui.common
 
 import android.os.Bundle
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 
 internal object StreamCallActivityConfigStrings {
     const val EXTRA_STREAM_CONFIG = "stream-activity-config"
@@ -50,6 +51,9 @@ public data class StreamCallActivityConfiguration(
      * Can be used same as normal extras.
      */
     val custom: Bundle? = null,
+
+    val pictureInPictureConfiguration: PictureInPictureConfiguration =
+        PictureInPictureConfiguration(true),
 )
 
 /**

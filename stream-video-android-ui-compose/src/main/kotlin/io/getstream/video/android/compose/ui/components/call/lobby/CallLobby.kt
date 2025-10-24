@@ -55,6 +55,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.model.User
@@ -131,7 +132,7 @@ public fun CallLobby(
 ) {
     DefaultPermissionHandler(videoPermission = permissions)
 
-    MediaPiPLifecycle(call = call)
+    MediaPiPLifecycle(call = call, PictureInPictureConfiguration(false, false))
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     val screenHeightDp = configuration.screenHeightDp

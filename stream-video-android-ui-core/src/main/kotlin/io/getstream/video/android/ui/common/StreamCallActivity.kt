@@ -157,7 +157,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 extraData?.also {
                     putAll(it)
                 }
-
                 logger.d { "Created Bundle. -> $this" }
             }
         }
@@ -527,6 +526,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             else -> {
+                // Join Video Room
                 logger.w {
                     "[onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
                 }
@@ -710,8 +710,19 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                    var defaultAutoEnterEnabled = true
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        var configuration = StreamCallActivityConfiguration()
+                        if (!::cachedCall.isInitialized && configurationMap.containsKey(cachedCall.id)) {
+                            configuration =
+                                configurationMap[cachedCall.id] ?: StreamCallActivityConfiguration()
+                        }
+
+                        defaultAutoEnterEnabled =
+                            configuration.pictureInPictureConfiguration.autoEnterEnabled
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        this.setAutoEnterEnabled(true)
+                        this.setAutoEnterEnabled(defaultAutoEnterEnabled)
                     }
                 }.build(),
             )
