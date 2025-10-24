@@ -76,7 +76,7 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
                 }
             }
         } catch (e: Exception) {
-            logger.d { "[playCallSound] Error playing call sound: ${e.message}" }
+            logger.e(e) { "[playCallSound] Error playing call sound: ${e.message}" }
         }
     }
 
@@ -162,7 +162,7 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
                     if (mediaPlayer.isPlaying == true) mediaPlayer.stop()
                 }
             } catch (e: Exception) {
-                logger.d { "[stopCallSound] Error stopping call sound: ${e.message}" }
+                logger.e(e) { "[stopCallSound] Error stopping call sound: ${e.message}" }
             } finally {
                 abandonAudioFocus()
             }

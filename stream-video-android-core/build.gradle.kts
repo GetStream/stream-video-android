@@ -184,6 +184,9 @@ dependencies {
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
 
+    //jetpack telecom
+    implementation(libs.androidx.telecom)
+
 
     // datastore
     api(libs.androidx.datastore)

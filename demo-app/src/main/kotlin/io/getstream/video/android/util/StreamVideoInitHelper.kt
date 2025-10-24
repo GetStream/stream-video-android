@@ -31,6 +31,7 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.app
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
@@ -39,6 +40,7 @@ import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.enableRingingCallVibrationConfig
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
@@ -206,14 +208,17 @@ object StreamVideoInitHelper {
         loggingLevel: LoggingLevel,
     ): StreamVideo {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
-        callServiceConfigRegistry.register(
-            DefaultCallConfigurations.getLivestreamGuestCallServiceConfig(),
-        )
+        callServiceConfigRegistry.apply {
+            register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
+            register(CallType.AudioCall.name) { enableTelecom(true) }
+        }
+
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
             user = user,
             token = token,
+            connectionTimeoutInMs = 12_000L,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             callServiceConfigRegistry = callServiceConfigRegistry,
@@ -292,6 +297,9 @@ object StreamVideoInitHelper {
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
+            telecomConfig = TelecomConfig(
+                context.packageName,
+            ),
         ).build()
     }
 }
