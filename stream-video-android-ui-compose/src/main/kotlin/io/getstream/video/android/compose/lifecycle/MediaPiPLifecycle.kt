@@ -31,6 +31,7 @@ import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.findActivity
 import io.getstream.video.android.compose.pip.isInPictureInPictureMode
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 
 /**
  * Register a call media lifecycle that controls camera and microphone depending on lifecycles.
@@ -44,7 +45,8 @@ import io.getstream.video.android.core.Call
 @Composable
 public fun MediaPiPLifecycle(
     call: Call,
-    enableInPictureInPicture: Boolean = false,
+    pictureInPictureConfiguration: PictureInPictureConfiguration =
+        PictureInPictureConfiguration(true),
 ) {
     val context = LocalContext.current
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
@@ -64,7 +66,7 @@ public fun MediaPiPLifecycle(
             override fun onActivityResumed(activity: Activity) {
                 if (activity == currentActivity) {
                     val isInPictureInPicture = context.isInPictureInPictureMode
-                    if (!isInPictureInPicture && !enableInPictureInPicture) {
+                    if (!isInPictureInPicture && !pictureInPictureConfiguration.enable) {
                         call.camera.resume(fromUser = false)
                         call.microphone.resume(fromUser = false)
                     }
@@ -74,13 +76,17 @@ public fun MediaPiPLifecycle(
             override fun onActivityPaused(activity: Activity) {
                 if (activity == currentActivity) {
                     val isInPictureInPicture = context.isInPictureInPictureMode
-                    if (!isInPictureInPicture && !enableInPictureInPicture) {
+                    if (!isInPictureInPicture && !pictureInPictureConfiguration.enable) {
                         call.camera.pause(fromUser = false)
                         call.microphone.pause(fromUser = false)
                     } else if (!isInPictureInPicture) {
                         Handler(Looper.getMainLooper()).post {
                             try {
-                                enterPictureInPicture(context = context, call = call)
+                                enterPictureInPicture(
+                                    context = context,
+                                    call = call,
+                                    pictureInPictureConfiguration,
+                                )
                             } catch (e: Exception) {
                                 StreamLog.d("MediaPiPLifecycle") { e.stackTraceToString() }
                             }
@@ -102,4 +108,16 @@ public fun MediaPiPLifecycle(
             application?.unregisterActivityLifecycleCallbacks(callbackListener)
         }
     }
+}
+
+@Deprecated(
+    "Use MediaPiPLifecycle with pictureInPictureConfiguration",
+    ReplaceWith("MediaPiPLifecycle(call, pictureInPictureConfiguration"),
+)
+@Composable
+public fun MediaPiPLifecycle(
+    call: Call,
+    enableInPictureInPicture: Boolean = false,
+) {
+    MediaPiPLifecycle(call, PictureInPictureConfiguration(enableInPictureInPicture))
 }
