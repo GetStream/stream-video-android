@@ -119,5 +119,8 @@ public fun MediaPiPLifecycle(
     call: Call,
     enableInPictureInPicture: Boolean = false,
 ) {
-    MediaPiPLifecycle(call, PictureInPictureConfiguration(enableInPictureInPicture))
+    MediaPiPLifecycle(
+        call,
+        PictureInPictureConfiguration(enableInPictureInPicture),
+    )
 }

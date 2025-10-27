@@ -106,10 +106,8 @@ public fun AudioRoomContent(
     },
     onLeaveRoom: (() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
-    pictureInPictureConfiguration: PictureInPictureConfiguration = PictureInPictureConfiguration(
-        true,
-        true,
-    ),
+    pictureInPictureConfiguration: PictureInPictureConfiguration =
+        PictureInPictureConfiguration(true),
     pictureInPictureContent: @Composable (
         call: Call,
         orientation: Int,
@@ -234,9 +232,7 @@ public fun AudioRoomContent(
 ) {
     AudioRoomContent(
         modifier, call, isShowingAppBar, permissions, title, appBarContent, style, audioRenderer, audioContent, onLeaveRoom, onBackPressed,
-        PictureInPictureConfiguration(
-            enableInPictureInPicture,
-        ),
+        PictureInPictureConfiguration(enableInPictureInPicture),
         pictureInPictureContent, controlsContent,
     )
 }

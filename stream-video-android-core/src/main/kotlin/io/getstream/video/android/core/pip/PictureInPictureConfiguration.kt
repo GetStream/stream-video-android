@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.pip
 
+import android.os.Build
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
@@ -36,5 +37,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 public data class PictureInPictureConfiguration(
     val enable: Boolean,
-    val autoEnterEnabled: Boolean = true,
+    val autoEnterEnabled: Boolean = Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM,
 ) : Parcelable
