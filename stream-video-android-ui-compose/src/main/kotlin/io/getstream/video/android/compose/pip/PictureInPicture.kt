@@ -57,7 +57,9 @@ internal fun enterPictureInPicture(
 
             val params = PictureInPictureParams.Builder()
             params.setAspectRatio(aspect).apply {
-                var defaultAutoEnterEnabled = true
+                var defaultAutoEnterEnabled =
+                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     defaultAutoEnterEnabled = pictureInPictureConfiguration.autoEnterEnabled
                 }
