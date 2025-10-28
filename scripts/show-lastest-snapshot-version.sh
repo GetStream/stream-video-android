@@ -7,10 +7,8 @@ URL="https://central.sonatype.com/repository/maven-snapshots/io/getstream/stream
 echo "Fetching maven metadata..."
 latest_version=$(curl -s "$URL" | sed -n 's/.*<latest>\(.*\)<\/latest>.*/\1/p')
 
-# Check if we got a result
-if [ -z "$latest_version" ]; then
-    echo "Error: Could not extract latest version"
-    exit 1
+if [ -n "$latest_version" ]; then
+    echo "$latest_version"
+else
+    echo "No version found for $artifact"
 fi
-
-echo "Latest version: $latest_version"
