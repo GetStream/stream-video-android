@@ -149,10 +149,8 @@ public fun CallContent(
             onCallAction = onCallAction,
         )
     },
-    pictureInPictureConfiguration: PictureInPictureConfiguration = PictureInPictureConfiguration(
-        true,
-        true,
-    ),
+    pictureInPictureConfiguration: PictureInPictureConfiguration =
+        PictureInPictureConfiguration(true),
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     enableDiagnostics: Boolean = false,
     closedCaptionUi: @Composable (Call) -> Unit = {},
@@ -301,10 +299,7 @@ public fun CallContent(
     CallContent(
         call, modifier, layout, permissions, onBackPressed, onCallAction, appBarContent, style,
         videoRenderer, floatingVideoRenderer, videoContent, videoOverlayContent, controlsContent,
-        PictureInPictureConfiguration(
-            enableInPictureInPicture,
-            true,
-        ),
+        PictureInPictureConfiguration(enableInPictureInPicture),
         pictureInPictureContent, enableDiagnostics, closedCaptionUi,
     )
 }
