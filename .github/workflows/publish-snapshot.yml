@@ -42,3 +42,7 @@ jobs:
         run: ./scripts/show-last-snapshot-update.sh
         env:
           SNAPSHOT: true
+      - name: Show latest snapshot version
+        run: ./scripts/show-lastest-snapshot-version.sh
+        env:
+          SNAPSHOT: true
