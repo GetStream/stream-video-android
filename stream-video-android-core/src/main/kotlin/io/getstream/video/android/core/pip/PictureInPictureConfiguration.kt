@@ -33,6 +33,7 @@ import kotlinx.parcelize.Parcelize
  * when configuring the PiP parameters. When `true`, the system automatically enters PiP mode
  * when the user presses the home button or performs an equivalent action. Set this to `false`
  * if you prefer to manually control when PiP mode should be entered.
+ * It should be set to `false` for Android 16
  */
 @Parcelize
 public data class PictureInPictureConfiguration(
