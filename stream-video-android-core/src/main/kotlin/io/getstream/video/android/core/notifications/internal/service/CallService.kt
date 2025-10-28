@@ -27,6 +27,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.media.AudioManager
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
@@ -800,7 +801,19 @@ internal open class CallService : Service() {
                     is RingingState.Incoming -> {
                         if (!it.acceptedByMe) {
                             logger.d { "[vibrate] Vibration config: ${streamVideo.vibrationConfig}" }
-                            if (streamVideo.vibrationConfig.enabled) {
+                            val allowVibrations = try {
+                                val audioManager = this@CallService.getSystemService(
+                                    Context.AUDIO_SERVICE,
+                                ) as AudioManager
+                                when (audioManager.ringerMode) {
+                                    AudioManager.RINGER_MODE_NORMAL, AudioManager.RINGER_MODE_VIBRATE -> true
+                                    else -> false
+                                }
+                            } catch (e: Exception) {
+                                logger.e { "Failed to get audio manager: ${e.message}" }
+                                false
+                            }
+                            if (allowVibrations && streamVideo.vibrationConfig.enabled) {
                                 val pattern = streamVideo.vibrationConfig.vibratePattern
                                 callSoundAndVibrationPlayer?.vibrate(pattern)
                             }
