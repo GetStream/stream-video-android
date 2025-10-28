@@ -28,7 +28,7 @@ if (secretPropsFile.exists()) {
   ext["snapshot"] = System.getenv('SNAPSHOT')
 }
 
-def timestamp = new SimpleDateFormat('MMddHHmm').with {
+def timestamp = new SimpleDateFormat('yyyyMMddHHmm').with {
     timeZone = TimeZone.getTimeZone('UTC')               // keep CI & local builds identical
     format(new Date())
 }
