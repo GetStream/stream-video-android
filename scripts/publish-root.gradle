@@ -33,8 +33,7 @@ def timestamp = new SimpleDateFormat('yyyyMMddHHmm').with {
     format(new Date())
 }
 if (snapshot) {
-    ext['rootVersionName'] = "${Configuration.snapshotBasedVersionName}-" +
-            "${timestamp}-SNAPSHOT"
+    ext['rootVersionName'] = "${Configuration.snapshotBasedVersionName}-SNAPSHOT"
     println "Noob Enter snapshot version = ${ext['rootVersionName']}"
 } else {
     ext['rootVersionName'] = Configuration.versionName
