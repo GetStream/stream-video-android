@@ -10,7 +10,7 @@
     url="https://central.sonatype.com/repository/maven-snapshots/io/getstream/stream-video-android-bom/maven-metadata.xml"
 
     # Fetch the maven-metadata.xml using curl and extract the latest release version using sed
-    latest_version=$(curl -s "url" | sed -n 's/.*<latest>\(.*\)<\/latest>.*/\1/p')
+    latest_version=$(curl -s "$url" | sed -n 's/.*<latest>\(.*\)<\/latest>.*/\1/p')
 
     # Print the result with the latest stable version
     if [ -n "$latest_version" ]; then
