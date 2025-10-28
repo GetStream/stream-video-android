@@ -773,6 +773,7 @@ public class CallState(
             }
 
             is CallEndedEvent -> {
+                call.state.cancelTimeout()
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
