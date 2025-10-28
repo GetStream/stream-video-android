@@ -6,6 +6,11 @@ on:
       - develop
   workflow_dispatch:
 
+# 👇 This line ensures only one snapshot publish runs at a time.
+concurrency:
+  group: snapshot-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Snapshot build and publish
