@@ -28,12 +28,13 @@ if (secretPropsFile.exists()) {
   ext["snapshot"] = System.getenv('SNAPSHOT')
 }
 
-def timestamp = new SimpleDateFormat('yyyyMMddHHmm').with {
+def timestamp = new SimpleDateFormat('MMddHHmm').with {
     timeZone = TimeZone.getTimeZone('UTC')               // keep CI & local builds identical
     format(new Date())
 }
 if (snapshot) {
-    ext['rootVersionName'] = "${Configuration.snapshotBasedVersionName}-SNAPSHOT"
+    ext['rootVersionName'] = "${Configuration.snapshotBasedVersionName}-" +
+            "${timestamp}-SNAPSHOT"
     println "Noob Enter snapshot version = ${ext['rootVersionName']}"
 } else {
     ext['rootVersionName'] = Configuration.versionName
