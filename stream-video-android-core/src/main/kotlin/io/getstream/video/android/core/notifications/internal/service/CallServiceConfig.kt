@@ -46,6 +46,7 @@ public data class CallServiceConfig(
         Pair(ANY_MARKER, CallService::class.java),
     ),
     val serviceClass: Class<*> = CallService::class.java,
+    val enableTelecom: Boolean = false,
 )
 
 /**
