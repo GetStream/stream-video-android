@@ -7476,6 +7476,7 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun getCallConfigRegistry ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getRingingCall ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getTelecomIntegrationType ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun handleError (Lio/getstream/result/Error;)V
 	public final fun handleEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
@@ -8057,7 +8058,8 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingCallVibrationConfig;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;JZ)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingCallVibrationConfig;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;JZZ)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingCallVibrationConfig;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;JZZZ)V
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingCallVibrationConfig;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;JZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingCallVibrationConfig;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;JZZZLio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/String;Lio/getstream/video/android/core/GEO;Lio/getstream/video/android/model/User;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/video/android/core/notifications/NotificationConfig;Lkotlin/jvm/functions/Function1;JZLjava/lang/String;ZLio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;Ljava/lang/String;Lio/getstream/video/android/core/sounds/Sounds;Lio/getstream/video/android/core/sounds/RingingCallVibrationConfig;ZLio/getstream/video/android/core/permission/android/StreamPermissionCheck;ILjava/lang/String;Lorg/webrtc/ManagedAudioProcessingFactory;JZZZLio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 }
 
@@ -12088,17 +12090,19 @@ public final class io/getstream/video/android/core/notifications/internal/receiv
 
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfig {
 	public fun <init> ()V
-	public fun <init> (ZILjava/util/Map;Ljava/lang/Class;)V
-	public synthetic fun <init> (ZILjava/util/Map;Ljava/lang/Class;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZILjava/util/Map;Ljava/lang/Class;Z)V
+	public synthetic fun <init> (ZILjava/util/Map;Ljava/lang/Class;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()I
 	public final fun component3 ()Ljava/util/Map;
 	public final fun component4 ()Ljava/lang/Class;
-	public final fun copy (ZILjava/util/Map;Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/lang/Class;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public final fun component5 ()Z
+	public final fun copy (ZILjava/util/Map;Ljava/lang/Class;Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/lang/Class;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioUsage ()I
 	public final fun getCallServicePerType ()Ljava/util/Map;
+	public final fun getEnableTelecom ()Z
 	public final fun getRunCallServiceInForeground ()Z
 	public final fun getServiceClass ()Ljava/lang/Class;
 	public fun hashCode ()I
@@ -12108,6 +12112,7 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder {
 	public fun <init> ()V
 	public final fun build ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public final fun enableTelecom (Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setAudioUsage (I)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setRunCallServiceInForeground (Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setServiceClass (Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
@@ -12140,6 +12145,87 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun getLivestreamCallServiceConfig ()Ljava/util/Map;
 	public final fun getLivestreamGuestCall ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public final fun getLivestreamGuestCallServiceConfig ()Ljava/util/Map;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomCallController {
+	public fun <init> (Landroid/content/Context;)V
+	public final fun getContext ()Landroid/content/Context;
+	public final fun leaveCall (Lio/getstream/video/android/core/Call;)V
+	public final fun onAnswer (Lio/getstream/video/android/core/Call;)V
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomConfig {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/telecom/TelecomConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSchema ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/TelecomPermissions {
+	public fun <init> ()V
+	public final fun canUseTelecom (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;Landroid/content/Context;)Z
+	public final fun getRequiredPermissionsArray (Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;)[Ljava/lang/String;
+	public final fun supportsTelecom (Landroid/content/Context;)Z
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Activate$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Activate;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Activate;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Answer$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Answer;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Answer;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Disconnect$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Disconnect;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Disconnect;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Hold$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Hold;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$Hold;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$SwitchAudioEndpoint$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$SwitchAudioEndpoint;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$SwitchAudioEndpoint;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$ToggleMute$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$ToggleMute;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$ToggleMute;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class io/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$TransferCall$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$TransferCall;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lio/getstream/video/android/core/notifications/internal/telecom/jetpack/TelecomCallAction$TransferCall;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/notifications/medianotifications/MediaNotificationConfig {
