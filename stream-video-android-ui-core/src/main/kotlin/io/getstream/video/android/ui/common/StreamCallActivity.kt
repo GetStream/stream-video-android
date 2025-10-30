@@ -59,6 +59,7 @@ import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.ui.common.models.StreamCallActivityException
@@ -844,11 +845,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
             val result = call.acceptThenJoin()
-            result.onError { error ->
-                lifecycleScope.launch {
-                    onError?.invoke(Exception(error.message))
+                .onSuccess {
+                    TelecomCallController(applicationContext)
+                        .onAnswer(call)
                 }
-            }
+                .onError { error ->
+                    lifecycleScope.launch {
+                        onError?.invoke(Exception(error.message))
+                    }
+                }
             result
         }
     }

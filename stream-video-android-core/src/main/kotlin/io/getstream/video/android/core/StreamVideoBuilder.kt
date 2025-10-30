@@ -32,6 +32,7 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.common.scope.ClientScope
@@ -142,6 +143,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val enableStatsReporting: Boolean = true,
     @InternalStreamVideoApi
     private val enableStereoForSubscriber: Boolean = true,
+    private val telecomConfig: TelecomConfig? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -269,6 +271,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStatsCollection = enableStatsReporting,
             vibrationConfig = vibrationConfig,
             enableStereoForSubscriber = enableStereoForSubscriber,
+            telecomConfig = telecomConfig,
         )
 
         if (user.type == UserType.Guest) {
@@ -335,6 +338,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                                     legacyCallConfig.runCallServiceInForeground,
                                 )
                                 setAudioUsage(legacyCallConfig.audioUsage)
+                                enableTelecom(legacyCallConfig.enableTelecom)
                             }
                         }
                     }
