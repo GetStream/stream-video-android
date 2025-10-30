@@ -20,8 +20,10 @@ buildscript {
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+  alias(libs.plugins.stream.project)
   alias(libs.plugins.stream.android.application) apply false
   alias(libs.plugins.stream.android.library) apply false
+  alias(libs.plugins.stream.android.test) apply false
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.kotlin.android) apply false
   // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
@@ -40,6 +42,10 @@ plugins {
   alias(libs.plugins.baseline.profile) apply false
   alias(libs.plugins.sonarqube) apply false
   alias(libs.plugins.kover) apply false
+}
+
+streamProject {
+    spotlessExcludePatterns = setOf("**/generated/**")
 }
 
 subprojects {

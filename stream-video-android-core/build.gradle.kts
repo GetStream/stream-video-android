@@ -17,11 +17,9 @@ import io.getstream.video.android.Configuration
 import java.io.FileInputStream
 import java.util.Properties
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.video.android.library")
     id("io.getstream.video.generateServices")
-    id("io.getstream.spotless")
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
