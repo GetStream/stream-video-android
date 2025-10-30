@@ -15,26 +15,15 @@
  */
 import io.getstream.video.configureFlavors
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id(libs.plugins.android.test.get().pluginId)
-    id(libs.plugins.kotlin.android.get().pluginId)
-    id(libs.plugins.baseline.profile.get().pluginId)
+    alias(libs.plugins.stream.android.test)
+    alias(libs.plugins.baseline.profile)
     id("io.getstream.spotless")
 }
 
 android {
     namespace = "io.getstream.video.android.benchmark"
     compileSdk = libs.versions.compileSdk.get().toInt()
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
