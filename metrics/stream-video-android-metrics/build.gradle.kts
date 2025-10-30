@@ -1,15 +1,13 @@
-import io.getstream.video.android.Configuration
-
 plugins {
-    id("io.getstream.android.application")
+    id("io.getstream.video.android.application")
 }
 
 android {
     namespace = "io.getstream.video.android.metrics"
-    compileSdk = Configuration.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = Configuration.minSdk
+        minSdk = libs.versions.minSdk.get().toInt()
         versionCode = 1
         ndk {
             abiFilters += "armeabi-v7a"

@@ -15,24 +15,20 @@
  */
 @file:Suppress("UnstableApiUsage")
 
-import io.getstream.video.android.Configuration
-import java.io.FileInputStream
-import java.util.*
-
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("io.getstream.android.application.compose")
+    id("io.getstream.video.android.application.compose")
     id("io.getstream.spotless")
 }
 
 android {
     namespace = "io.getstream.video.android.tutorial.audio"
-    compileSdk = Configuration.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "io.getstream.video.android.tutorial.audio"
-        minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
     }
