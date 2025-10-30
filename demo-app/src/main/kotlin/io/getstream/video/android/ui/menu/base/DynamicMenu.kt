@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
@@ -51,8 +50,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
-import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.AudioUsageVoiceCommunicationUiState
+import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.debugSubmenu
 import io.getstream.video.android.ui.menu.defaultStreamMenu
 import io.getstream.video.android.ui.menu.reconnectMenu
@@ -141,9 +140,9 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
                     }
                 } else {
                     val currentSubMenu = items.firstOrNull {
-                        it is SubMenuItem && it.title == subMenu.title 
+                        it is SubMenuItem && it.title == subMenu.title
                     } as? SubMenuItem ?: subMenu
-                    
+
                     if (currentSubMenu.items.isEmpty()) {
                         noItems()
                     } else {

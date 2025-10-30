@@ -50,4 +50,3 @@ fun getAudioUsageUiState(currentAudioUsage: Int): AudioUsageUiState {
         else -> AudioUsageVoiceCommunicationUiState // default
     }
 }
-

@@ -133,7 +133,7 @@ public class StreamPeerConnectionFactory(
      */
     private val factory: PeerConnectionFactory by lazy { createFactory() }
 
-    var adm : JavaAudioDeviceModule? = null
+    var adm: JavaAudioDeviceModule? = null
 
     private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
@@ -175,7 +175,7 @@ public class StreamPeerConnectionFactory(
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
             .setAudioDeviceModule(
-                adm
+                adm,
             )
             .createPeerConnectionFactory()
     }

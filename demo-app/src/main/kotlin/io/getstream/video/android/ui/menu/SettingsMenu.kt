@@ -20,6 +20,7 @@ import android.Manifest
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Context.DOWNLOAD_SERVICE
+import android.media.AudioAttributes
 import android.media.MediaCodecList
 import android.net.Uri
 import android.os.Build
@@ -68,7 +69,6 @@ import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
-import android.media.AudioAttributes
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import java.nio.ByteBuffer
 

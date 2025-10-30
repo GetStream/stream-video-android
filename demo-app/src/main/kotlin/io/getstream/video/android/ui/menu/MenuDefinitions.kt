@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.ui.menu
 
-import android.media.AudioAttributes
 import android.media.MediaCodecInfo
 import android.os.Build
 import androidx.compose.material.icons.Icons
@@ -32,8 +31,6 @@ import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
