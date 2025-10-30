@@ -25,10 +25,8 @@ import io.getstream.video.configureFlavors
 import java.io.FileInputStream
 import java.util.Properties
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.video.android.application.compose")
-    id("io.getstream.spotless")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
