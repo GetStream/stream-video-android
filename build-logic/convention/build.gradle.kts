@@ -34,9 +34,9 @@ gradlePlugin {
       id = "io.getstream.video.android.library"
       implementationClass = "AndroidLibraryConventionPlugin"
     }
-    register("spotless") {
-      id = "io.getstream.spotless"
-      implementationClass = "SpotlessConventionPlugin"
+    register("demoFlavorConvention") {
+      id = "io.getstream.video.android.demoflavor"
+      implementationClass = "DemoFlavorConventionPlugin"
     }
   }
 }
