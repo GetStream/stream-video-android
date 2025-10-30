@@ -21,12 +21,12 @@ import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import io.getstream.video.FlavorDimension
 import io.getstream.video.VideoDemoFlavor
 import io.getstream.video.android.Configuration
-import io.getstream.video.configureFlavors
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
     id("io.getstream.video.android.application.compose")
+    id("io.getstream.video.android.demoflavor")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
@@ -90,8 +90,6 @@ android {
             storePassword = "android"
         }
     }
-
-    configureFlavors(this)
 
     buildTypes {
         getByName("debug") {
