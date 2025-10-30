@@ -10,7 +10,7 @@ import org.gradle.kotlin.dsl.dependencies
 class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("com.android.library")
+            pluginManager.apply("io.getstream.android.library")
             pluginManager.apply("org.jetbrains.kotlin.android")
             pluginManager.apply("binary-compatibility-validator")
             pluginManager.apply("org.jetbrains.dokka")

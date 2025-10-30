@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import io.getstream.video.android.Configuration
 import io.getstream.video.configureFlavors
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -26,7 +25,7 @@ plugins {
 
 android {
     namespace = "io.getstream.video.android.benchmark"
-    compileSdk = Configuration.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -38,8 +37,8 @@ android {
     }
 
     defaultConfig {
-        minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "EMULATOR"
     }
