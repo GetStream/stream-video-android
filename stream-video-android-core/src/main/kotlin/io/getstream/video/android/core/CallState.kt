@@ -106,6 +106,8 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.notifications.IncomingNotificationData
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
@@ -686,8 +688,17 @@ public class CallState(
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
+    /**
+     * We re-create notification more than 1 times, so we don't want to
+     * overwrite to the notifications builder properties once it is already set
+     */
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
+
+    @InternalStreamVideoApi
+    internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
+
+    internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
@@ -762,6 +773,7 @@ public class CallState(
             }
 
             is CallEndedEvent -> {
+                call.state.cancelTimeout()
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
@@ -1136,8 +1148,10 @@ public class CallState(
         val acceptedBy = _acceptedBy.value
         val isAcceptedByMe = _acceptedBy.value.contains(client.userId)
         val createdBy = _createdBy.value
-        val hasActiveCall = client.state.activeCall.value != null && client.state.activeCall.value?.id == call.id
-        val hasRingingCall = client.state.ringingCall.value != null && client.state.ringingCall.value?.id == call.id
+        val hasActiveCall =
+            client.state.activeCall.value != null && client.state.activeCall.value?.id == call.id
+        val hasRingingCall =
+            client.state.ringingCall.value != null && client.state.ringingCall.value?.id == call.id
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size

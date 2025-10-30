@@ -59,6 +59,7 @@ import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 import io.getstream.video.android.ui.common.models.StreamCallActivityException
@@ -157,7 +158,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 extraData?.also {
                     putAll(it)
                 }
-
                 logger.d { "Created Bundle. -> $this" }
             }
         }
@@ -527,6 +527,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             else -> {
+                // Join Video Room
                 logger.w {
                     "[onIntentAction] #ringing; No action provided to the intent will try to join call by default [action: $action], [cid: ${call.cid}]"
                 }
@@ -710,8 +711,21 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                    var defaultAutoEnterEnabled =
+                        Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        var configuration = StreamCallActivityConfiguration()
+                        if (!::cachedCall.isInitialized && configurationMap.containsKey(cachedCall.id)) {
+                            configuration =
+                                configurationMap[cachedCall.id] ?: StreamCallActivityConfiguration()
+                        }
+
+                        defaultAutoEnterEnabled =
+                            configuration.pictureInPictureConfiguration.autoEnterEnabled
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        this.setAutoEnterEnabled(true)
+                        this.setAutoEnterEnabled(defaultAutoEnterEnabled)
                     }
                 }.build(),
             )
@@ -831,11 +845,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         logger.d { "[accept] #ringing; call.cid: ${call.cid}" }
         acceptOrJoinNewCall(call, onSuccess, onError) {
             val result = call.acceptThenJoin()
-            result.onError { error ->
-                lifecycleScope.launch {
-                    onError?.invoke(Exception(error.message))
+                .onSuccess {
+                    TelecomCallController(applicationContext)
+                        .onAnswer(call)
                 }
-            }
+                .onError { error ->
+                    lifecycleScope.launch {
+                        onError?.invoke(Exception(error.message))
+                    }
+                }
             result
         }
     }

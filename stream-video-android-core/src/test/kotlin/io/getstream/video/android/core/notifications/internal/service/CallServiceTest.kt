@@ -29,7 +29,6 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
-import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_KEY
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
@@ -42,14 +41,11 @@ import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -169,206 +165,6 @@ class CallServiceTest {
         assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, audioService.serviceType)
     }
 
-    // Test intent building
-    @Test
-    fun `buildStartIntent creates correct intent for incoming call`() {
-        // When
-        val intent = CallService.buildStartIntent(
-            context = context,
-            callId = testCallId,
-            trigger = TRIGGER_INCOMING_CALL,
-            callDisplayName = "John Doe",
-        )
-
-        // Then
-        assertEquals(CallService::class.java.name, intent.component?.className)
-        assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
-        assertEquals("John Doe", intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME))
-        assertEquals(TRIGGER_INCOMING_CALL, intent.getStringExtra(TRIGGER_KEY))
-    }
-
-    @Test
-    fun `buildStartIntent creates correct intent for outgoing call`() {
-        // When
-        val intent = CallService.buildStartIntent(
-            context = context,
-            callId = testCallId,
-            trigger = TRIGGER_OUTGOING_CALL,
-        )
-
-        // Then
-        assertEquals(CallService::class.java.name, intent.component?.className)
-        assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
-        assertEquals(TRIGGER_OUTGOING_CALL, intent.getStringExtra(TRIGGER_KEY))
-        assertNull(intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME))
-    }
-
-    @Test
-    fun `buildStartIntent creates correct intent for ongoing call`() {
-        // When
-        val intent = CallService.buildStartIntent(
-            context = context,
-            callId = testCallId,
-            trigger = TRIGGER_ONGOING_CALL,
-        )
-
-        // Then
-        assertEquals(CallService::class.java.name, intent.component?.className)
-        assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
-        assertEquals(TRIGGER_ONGOING_CALL, intent.getStringExtra(TRIGGER_KEY))
-    }
-
-    @Test
-    fun `buildStartIntent creates correct intent for remove incoming call`() {
-        // When
-        val intent = CallService.buildStartIntent(
-            context = context,
-            callId = testCallId,
-            trigger = TRIGGER_REMOVE_INCOMING_CALL,
-        )
-
-        // Then
-        assertEquals(CallService::class.java.name, intent.component?.className)
-        assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
-        assertEquals(TRIGGER_REMOVE_INCOMING_CALL, intent.getStringExtra(TRIGGER_KEY))
-    }
-
-    @Test
-    fun `buildStartIntent throws exception for invalid trigger`() {
-        // When & Then
-        assertThrows(IllegalArgumentException::class.java) {
-            CallService.buildStartIntent(
-                context = context,
-                callId = testCallId,
-                trigger = "invalid_trigger",
-            )
-        }
-    }
-
-    @Test
-    fun `buildStartIntent uses custom service class from configuration`() {
-        // Given
-        val customConfig = CallServiceConfig(
-            serviceClass = LivestreamCallService::class.java,
-        )
-
-        // When
-        val intent = CallService.buildStartIntent(
-            context = context,
-            callId = testCallId,
-            trigger = TRIGGER_INCOMING_CALL,
-            callServiceConfiguration = customConfig,
-        )
-
-        // Then
-        assertEquals(LivestreamCallService::class.java.name, intent.component?.className)
-    }
-
-    @Test
-    fun `buildStopIntent creates correct intent`() {
-        // When
-        val intent = CallService.buildStopIntent(context)
-
-        // Then
-        assertNotNull(intent)
-        assertEquals(CallService::class.java.name, intent.component?.className)
-    }
-
-    @Test
-    fun `buildStopIntent uses custom service class from configuration`() {
-        // Given
-        val customConfig = CallServiceConfig(
-            serviceClass = LivestreamCallService::class.java,
-        )
-
-        // When
-        val intent = CallService.buildStopIntent(
-            context = context,
-            callServiceConfiguration = customConfig,
-        )
-
-        // Then
-        assertNotNull(intent)
-        // Note: The actual implementation has some complex logic for running services
-        // so we just verify the intent is created
-    }
-
-    // Test notification generation logic
-    @Test
-    fun `getNotificationPair returns correct data for ongoing call`() {
-        // Given
-        every {
-            mockStreamVideoClient.getOngoingCallNotification(any(), any(), payload = any())
-        } returns mockNotification
-
-        // When
-        val result = callService.getNotificationPair(
-            trigger = TRIGGER_ONGOING_CALL,
-            streamVideo = mockStreamVideoClient,
-            streamCallId = testCallId,
-            intentCallDisplayName = "John Doe",
-        )
-
-        // Then
-        assertEquals(mockNotification, result.first)
-        assertEquals(testCallId.hashCode(), result.second)
-    }
-
-    @Test
-    fun `getNotificationPair returns correct data for incoming call`() {
-        // Given
-        val mockState = mockk<io.getstream.video.android.core.ClientState>()
-        every { mockStreamVideoClient.state } returns mockState
-        every { mockState.activeCall } returns mockk {
-            every { value } returns null
-        }
-        every {
-            mockStreamVideoClient.getRingingCallNotification(any(), any(), any(), any(), any())
-        } returns mockNotification
-
-        // When
-        val result = callService.getNotificationPair(
-            trigger = TRIGGER_INCOMING_CALL,
-            streamVideo = mockStreamVideoClient,
-            streamCallId = testCallId,
-            intentCallDisplayName = "John Doe",
-        )
-
-        // Then
-        assertEquals(mockNotification, result.first)
-        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
-    }
-
-    @Test
-    fun `getNotificationPair returns null notification for remove incoming call`() {
-        // When
-        val result = callService.getNotificationPair(
-            trigger = TRIGGER_REMOVE_INCOMING_CALL,
-            streamVideo = mockStreamVideoClient,
-            streamCallId = testCallId,
-            intentCallDisplayName = null,
-        )
-
-        // Then
-        assertNull(result.first)
-        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
-    }
-
-    @Test
-    fun `getNotificationPair returns null notification for unknown trigger`() {
-        // When
-        val result = callService.getNotificationPair(
-            trigger = "unknown_trigger",
-            streamVideo = mockStreamVideoClient,
-            streamCallId = testCallId,
-            intentCallDisplayName = null,
-        )
-
-        // Then
-        assertNull(result.first)
-        assertEquals(testCallId.hashCode(), result.second)
-    }
-
     // Test intent extra handling
     @Test
     fun `intent extras are properly set and retrieved`() {
@@ -399,46 +195,6 @@ class CallServiceTest {
         // Then
         assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
         assertNull(intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME))
-    }
-
-    // Test service configuration integration
-    @Test
-    fun `service respects configuration for different call types`() {
-        // Given
-        val livestreamConfig = CallServiceConfig(
-            serviceClass = LivestreamCallService::class.java,
-            runCallServiceInForeground = true,
-        )
-
-        // When
-        val intent = CallService.buildStartIntent(
-            context = context,
-            callId = StreamCallId(type = "livestream", id = "test-123"),
-            trigger = TRIGGER_INCOMING_CALL,
-            callServiceConfiguration = livestreamConfig,
-        )
-
-        // Then
-        assertEquals(LivestreamCallService::class.java.name, intent.component?.className)
-    }
-
-    // Test error handling
-    @Test
-    fun `service handles missing StreamVideo instance gracefully in notification generation`() {
-        // Given - Using a real CallService instance but with mocked dependencies
-        val service = CallService()
-
-        // When - Call getNotificationPair with minimal valid parameters
-        val result = service.getNotificationPair(
-            trigger = TRIGGER_REMOVE_INCOMING_CALL, // This trigger doesn't need StreamVideo methods
-            streamVideo = mockStreamVideoClient,
-            streamCallId = testCallId,
-            intentCallDisplayName = null,
-        )
-
-        // Then - Should handle gracefully and return expected result
-        assertNull(result.first) // No notification for remove trigger
-        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 
     // Test constants consistency

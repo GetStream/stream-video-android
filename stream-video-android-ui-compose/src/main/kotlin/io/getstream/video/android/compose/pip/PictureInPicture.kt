@@ -35,9 +35,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.PictureInPictureModeChangedInfo
 import androidx.core.util.Consumer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 
 @Suppress("DEPRECATION")
-internal fun enterPictureInPicture(context: Context, call: Call) {
+internal fun enterPictureInPicture(
+    context: Context,
+    call: Call,
+    pictureInPictureConfiguration: PictureInPictureConfiguration,
+) {
     if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val currentOrientation = context.resources.configuration.orientation
@@ -52,8 +57,14 @@ internal fun enterPictureInPicture(context: Context, call: Call) {
 
             val params = PictureInPictureParams.Builder()
             params.setAspectRatio(aspect).apply {
+                var defaultAutoEnterEnabled =
+                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    defaultAutoEnterEnabled = pictureInPictureConfiguration.autoEnterEnabled
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    setAutoEnterEnabled(true)
+                    setAutoEnterEnabled(defaultAutoEnterEnabled)
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     setTitle("Video Player")

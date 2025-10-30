@@ -31,6 +31,7 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.model.StreamCallId
 
 /**
@@ -128,6 +129,10 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         }
     }
 
+    protected open fun getPictureInPictureConfiguration(): PictureInPictureConfiguration {
+        return PictureInPictureConfiguration(true)
+    }
+
     public fun enterPictureInPicture() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val currentOrientation = resources.configuration.orientation
@@ -142,8 +147,15 @@ public abstract class AbstractCallActivity : ComponentActivity() {
 
             enterPictureInPictureMode(
                 PictureInPictureParams.Builder().setAspectRatio(aspect).apply {
+                    var defaultAutoEnterEnabled =
+                        Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        defaultAutoEnterEnabled =
+                            getPictureInPictureConfiguration().autoEnterEnabled
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        this.setAutoEnterEnabled(true)
+                        this.setAutoEnterEnabled(defaultAutoEnterEnabled)
                     }
                 }.build(),
             )

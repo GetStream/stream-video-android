@@ -625,7 +625,7 @@ public class RtcSession internal constructor(
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
 
-                        val track = publisher?.publishStream( // noob 9
+                        val track = publisher?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
@@ -1048,7 +1048,7 @@ public class RtcSession internal constructor(
                                 call.state.getOrCreateParticipant(it)
                             }
                             call.state.replaceParticipants(participantStates)
-                            sfuConnectionModule.socketConnection.whenConnected { // noob 3
+                            sfuConnectionModule.socketConnection.whenConnected {
                                 logger.d { "JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
                                 if (publisher == null) {
                                     publisher = createPublisher(event.publishOptions)

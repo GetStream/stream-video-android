@@ -48,6 +48,7 @@ import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -62,7 +63,7 @@ import io.getstream.video.android.mock.previewCall
  * @param controlsContent Content is shown that allows users to trigger different actions to control a joined call.
  * @param audioRenderer A single audio renderer renders each individual participant.
  * @param onLeaveRoom A lambda that will be invoked when the leave quietly button was clicked.
- * @param enableInPictureInPicture If the user has engaged in Picture-In-Picture mode.
+ * @param pictureInPictureConfiguration User can provide Picture-In-Picture configuration.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param audioContent Content is shown by rendering audio when we're connected to a call successfully.
  */
@@ -105,7 +106,8 @@ public fun AudioRoomContent(
     },
     onLeaveRoom: (() -> Unit)? = null,
     onBackPressed: () -> Unit = {},
-    enableInPictureInPicture: Boolean = true,
+    pictureInPictureConfiguration: PictureInPictureConfiguration =
+        PictureInPictureConfiguration(true),
     pictureInPictureContent: @Composable (
         call: Call,
         orientation: Int,
@@ -128,13 +130,13 @@ public fun AudioRoomContent(
 
     MediaPiPLifecycle(
         call = call,
-        enableInPictureInPicture = enableInPictureInPicture,
+        pictureInPictureConfiguration,
     )
 
     BackHandler {
-        if (enableInPictureInPicture) {
+        if (pictureInPictureConfiguration.enable) {
             try {
-                enterPictureInPicture(context = context, call = call)
+                enterPictureInPicture(context = context, call = call, pictureInPictureConfiguration)
             } catch (e: Exception) {
                 StreamLog.e(tag = "AudioRoomContent") { e.stackTraceToString() }
                 call.leave()
@@ -144,7 +146,7 @@ public fun AudioRoomContent(
         }
     }
 
-    if (isInPictureInPicture && enableInPictureInPicture) {
+    if (isInPictureInPicture && pictureInPictureConfiguration.enable) {
         pictureInPictureContent(call, orientation)
     } else {
         Scaffold(
@@ -169,6 +171,70 @@ public fun AudioRoomContent(
             },
         )
     }
+}
+
+@Deprecated(
+    "Use AudioRoomContent with pictureInPictureConfiguration",
+)
+@Composable
+public fun AudioRoomContent(
+    modifier: Modifier = Modifier,
+    call: Call,
+    isShowingAppBar: Boolean = true,
+    permissions: VideoPermissionsState = rememberMicrophonePermissionState(call = call),
+    title: String =
+        stringResource(
+            id = io.getstream.video.android.ui.common.R.string.stream_video_audio_room_title,
+        ),
+    appBarContent: @Composable (call: Call) -> Unit = {
+        AudioAppBar(
+            modifier = Modifier.fillMaxWidth(),
+            title = title,
+        )
+    },
+    style: AudioRendererStyle = RegularAudioRendererStyle(),
+    audioRenderer: @Composable (
+        participant: ParticipantState,
+        style: AudioRendererStyle,
+    ) -> Unit = { audioParticipant, audioStyle ->
+        ParticipantAudio(
+            participant = audioParticipant,
+            style = audioStyle,
+        )
+    },
+    audioContent: @Composable BoxScope.(call: Call) -> Unit = {
+        val participants by call.state.participants.collectAsStateWithLifecycle()
+        AudioParticipantsGrid(
+            modifier = Modifier
+                .testTag("audio_content")
+                .fillMaxSize(),
+            participants = participants,
+            style = style,
+            audioRenderer = audioRenderer,
+        )
+    },
+    onLeaveRoom: (() -> Unit)? = null,
+    onBackPressed: () -> Unit = {},
+    enableInPictureInPicture: Boolean,
+    pictureInPictureContent: @Composable (
+        call: Call,
+        orientation: Int,
+    ) -> Unit = { call, _ -> DefaultPictureInPictureContent(call, audioContent) },
+    controlsContent: @Composable (call: Call) -> Unit = {
+        AudioControlActions(
+            modifier = Modifier
+                .testTag("audio_controls_content")
+                .fillMaxWidth(),
+            call = call,
+            onLeaveRoom = onLeaveRoom,
+        )
+    },
+) {
+    AudioRoomContent(
+        modifier, call, isShowingAppBar, permissions, title, appBarContent, style, audioRenderer, audioContent, onLeaveRoom, onBackPressed,
+        PictureInPictureConfiguration(enableInPictureInPicture),
+        pictureInPictureContent, controlsContent,
+    )
 }
 
 @Composable
