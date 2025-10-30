@@ -20,20 +20,24 @@ enum class VideoDemoFlavor(val dimension: FlavorDimension, val applicationIdSuff
     production(FlavorDimension.contentType),
 }
 
-fun configureFlavors(
+internal fun configureFlavors(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
-    flavorConfigurationBlock: ProductFlavor.(flavor: VideoDemoFlavor) -> Unit = {}
 ) {
     commonExtension.apply {
         flavorDimensions += "environment"
         productFlavors {
-            VideoDemoFlavor.values().forEach {
-                create(it.name) {
+            VideoDemoFlavor.values().forEach { flavor ->
+                create(flavor.name) {
                     dimension = "environment"
-                    flavorConfigurationBlock(this, it)
+                    buildConfigField(
+                        "String",
+                        "APP_FLAVOR_SUFFIX",
+                        "\"${flavor.applicationIdSuffix.orEmpty()}\"",
+                    )
+
                     if (this@apply is ApplicationExtension && this is ApplicationProductFlavor) {
-                        if (it.applicationIdSuffix != null) {
-                            applicationIdSuffix = it.applicationIdSuffix
+                        if (flavor.applicationIdSuffix != null) {
+                            applicationIdSuffix = flavor.applicationIdSuffix
                         }
                     }
                     proguardFiles("benchmark-rules.pro")
