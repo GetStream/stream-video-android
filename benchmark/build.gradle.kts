@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import io.getstream.video.configureFlavors
-
 plugins {
     alias(libs.plugins.stream.android.test)
     alias(libs.plugins.baseline.profile)
-    id("io.getstream.spotless")
+    id("io.getstream.video.android.demoflavor")
 }
 
 android {
@@ -49,17 +47,6 @@ android {
             matchingFallbacks.add("release")
             proguardFiles("benchmark-rules.pro")
         }
-    }
-
-    // Use the same flavor dimensions as the application to allow generating Baseline Profiles on prod,
-    // which is more close to what will be shipped to users (no fake data), but has ability to run the
-    // benchmarks on demo, so we benchmark on stable data.
-    configureFlavors(this) { flavor ->
-        buildConfigField(
-            "String",
-            "APP_FLAVOR_SUFFIX",
-            "\"${flavor.applicationIdSuffix ?: ""}\""
-        )
     }
 
     targetProjectPath = ":demo-app"
