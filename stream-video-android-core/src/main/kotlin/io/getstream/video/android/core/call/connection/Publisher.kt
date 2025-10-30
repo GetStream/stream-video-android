@@ -613,7 +613,7 @@ internal class Publisher(
             layers = toVideoLayers(layers ?: emptyList()),
             track_type = publishOption.track_type,
             mid = extractMid(transceiver, transceiverCache.indexOf(publishOption), sdp),
-            stereo = isAudio && isHifiAudioEnabled,
+            stereo = false,
             muted = !isTrackLive,
             codec = publishOption.codec,
             publish_option_id = publishOption.id,
