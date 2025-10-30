@@ -68,6 +68,7 @@ import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
+import android.media.AudioAttributes
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import java.nio.ByteBuffer
 
@@ -94,6 +95,19 @@ internal fun SettingsMenu(
 ) {
     val context = LocalContext.current
     val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
+    val currentAudioUsage by call.speaker.audioUsage.collectAsStateWithLifecycle()
+
+    val audioUsageUiState = remember(currentAudioUsage) {
+        getAudioUsageUiState(currentAudioUsage)
+    }
+
+    val onToggleAudioUsage: suspend () -> Unit = {
+        val newAudioUsage = when (audioUsageUiState) {
+            AudioUsageMediaUiState -> AudioAttributes.USAGE_VOICE_COMMUNICATION
+            AudioUsageVoiceCommunicationUiState -> AudioAttributes.USAGE_MEDIA
+        }
+        call.speaker.setAudioUsage(newAudioUsage)
+    }
 
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
@@ -303,6 +317,8 @@ internal fun SettingsMenu(
                 onToggleTranscription = onToggleTranscription,
                 loadTranscriptions = onLoadTranscriptions,
                 audioDeviceUiStateList = audioDeviceUiStateList,
+                audioUsageUiState = audioUsageUiState,
+                onToggleAudioUsage = onToggleAudioUsage,
             ),
         )
     }
@@ -374,6 +390,8 @@ private fun SettingsMenuPreview() {
                 onToggleTranscription = {},
                 loadTranscriptions = { emptyList() },
                 audioDeviceUiStateList = emptyList(),
+                audioUsageUiState = AudioUsageVoiceCommunicationUiState,
+                onToggleAudioUsage = {},
             ),
         )
     }

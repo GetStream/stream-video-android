@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui.menu
 
+import android.media.AudioAttributes
 import android.media.MediaCodecInfo
 import android.os.Build
 import androidx.compose.material.icons.Icons
@@ -31,6 +32,8 @@ import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
@@ -87,6 +90,8 @@ fun defaultStreamMenu(
     onToggleClosedCaptions: () -> Unit = {},
     closedCaptionUiState: ClosedCaptionUiState,
     audioDeviceUiStateList: List<AudioDeviceUiState> = emptyList(),
+    audioUsageUiState: AudioUsageUiState = AudioUsageVoiceCommunicationUiState,
+    onToggleAudioUsage: suspend () -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -161,6 +166,8 @@ fun defaultStreamMenu(
                     isIncomingVideoEnabled,
                     onToggleIncomingVideoEnabled,
                     loadTranscriptions,
+                    audioUsageUiState,
+                    onToggleAudioUsage,
                 ),
             ),
         )
@@ -288,6 +295,8 @@ fun debugSubmenu(
     isIncomingVideoEnabled: Boolean,
     onToggleIncomingVideoEnabled: (Boolean) -> Unit,
     loadTranscriptions: suspend () -> List<MenuItem>,
+    audioUsageUiState: AudioUsageUiState,
+    onToggleAudioUsage: suspend () -> Unit,
 ) = listOf(
     DynamicSubMenuItem(
         title = "List Transcriptions",
@@ -367,6 +376,16 @@ fun debugSubmenu(
         title = "Toggle audio filter",
         icon = Icons.Default.Audiotrack,
         action = onToggleAudioFilterClick,
+    ),
+    ActionMenuItem(
+        title = audioUsageUiState.text,
+        icon = audioUsageUiState.icon,
+        highlight = audioUsageUiState.highlight,
+        action = {
+            GlobalScope.launch {
+                onToggleAudioUsage.invoke()
+            }
+        },
     ),
     ActionMenuItem(
         title = "Start/stop recording",
