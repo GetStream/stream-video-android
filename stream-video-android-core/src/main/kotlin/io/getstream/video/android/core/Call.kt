@@ -206,7 +206,6 @@ public class Call(
     /**
      * Contains stats events for observation.
      */
-    @InternalStreamVideoApi
     val statsReport: MutableStateFlow<CallStatsReport?> = MutableStateFlow(null)
 
     /**
