@@ -30,7 +30,6 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
-import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
@@ -993,6 +992,7 @@ public class RtcSession internal constructor(
                     }
                 }
             },
+            isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
         )
     }
 

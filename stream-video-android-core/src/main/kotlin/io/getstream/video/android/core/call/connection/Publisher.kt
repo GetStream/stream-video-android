@@ -80,6 +80,7 @@ internal class Publisher(
     private val sessionId: String,
     private val rejoin: () -> Unit,
     private val fastReconnect: () -> Unit,
+    private val isHifiAudioEnabled: Boolean = false,
     private val transceiverCache: TransceiverCache = TransceiverCache(),
     private val tracer: Tracer,
     private val restartIceJobDelegate: RestartIceJobDelegate =

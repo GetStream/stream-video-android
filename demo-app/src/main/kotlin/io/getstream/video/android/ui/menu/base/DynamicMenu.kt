@@ -50,6 +50,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
+import io.getstream.video.android.ui.menu.AudioUsageVoiceCommunicationUiState
 import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.debugSubmenu
 import io.getstream.video.android.ui.menu.defaultStreamMenu
@@ -138,10 +139,14 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
                         noItems()
                     }
                 } else {
-                    if (subMenu.items.isEmpty()) {
+                    val currentSubMenu = items.firstOrNull {
+                        it is SubMenuItem && it.title == subMenu.title
+                    } as? SubMenuItem ?: subMenu
+
+                    if (currentSubMenu.items.isEmpty()) {
                         noItems()
                     } else {
-                        menuItems(subMenu.items) {
+                        menuItems(currentSubMenu.items) {
                             history.add(Pair(it.title, it))
                         }
                     }
@@ -240,6 +245,8 @@ private fun DynamicMenuPreview() {
                 loadTranscriptions = { emptyList() },
                 onToggleClosedCaptions = {},
                 closedCaptionUiState = ClosedCaptionUiState.Available,
+                audioUsageUiState = AudioUsageVoiceCommunicationUiState,
+                onToggleAudioUsage = {},
             ),
         )
     }
@@ -276,6 +283,8 @@ private fun DynamicMenuDebugOptionPreview() {
                 transcriptionUiState = TranscriptionAvailableUiState,
                 onToggleTranscription = {},
                 loadTranscriptions = { emptyList() },
+                audioUsageUiState = AudioUsageVoiceCommunicationUiState,
+                onToggleAudioUsage = {},
             ),
         )
     }
@@ -303,6 +312,8 @@ private fun DynamicMenuDebugPreview() {
                 isIncomingVideoEnabled = true,
                 onToggleIncomingVideoEnabled = { },
                 loadTranscriptions = { emptyList() },
+                audioUsageUiState = AudioUsageVoiceCommunicationUiState,
+                onToggleAudioUsage = {},
             ),
         )
     }

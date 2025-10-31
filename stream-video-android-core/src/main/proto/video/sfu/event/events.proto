@@ -167,6 +167,10 @@ message TrackUnpublished {
 message JoinRequest {
   string token = 1;
   string session_id = 2;
+  // user_session id can change during reconnects, this helps us to
+  // identify the user across reconnects and should remain consistent until the user explicitly
+  // disconnects, is kicked or the call is ended.
+  string unified_session_id = 13;
   // dumb SDP that allow us to extract subscriber's decode codecs
   string subscriber_sdp = 3;
   string publisher_sdp = 8;

@@ -87,6 +87,8 @@ fun defaultStreamMenu(
     onToggleClosedCaptions: () -> Unit = {},
     closedCaptionUiState: ClosedCaptionUiState,
     audioDeviceUiStateList: List<AudioDeviceUiState> = emptyList(),
+    audioUsageUiState: AudioUsageUiState = AudioUsageVoiceCommunicationUiState,
+    onToggleAudioUsage: suspend () -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -161,6 +163,8 @@ fun defaultStreamMenu(
                     isIncomingVideoEnabled,
                     onToggleIncomingVideoEnabled,
                     loadTranscriptions,
+                    audioUsageUiState,
+                    onToggleAudioUsage,
                 ),
             ),
         )
@@ -288,6 +292,8 @@ fun debugSubmenu(
     isIncomingVideoEnabled: Boolean,
     onToggleIncomingVideoEnabled: (Boolean) -> Unit,
     loadTranscriptions: suspend () -> List<MenuItem>,
+    audioUsageUiState: AudioUsageUiState,
+    onToggleAudioUsage: suspend () -> Unit,
 ) = listOf(
     DynamicSubMenuItem(
         title = "List Transcriptions",
@@ -367,6 +373,16 @@ fun debugSubmenu(
         title = "Toggle audio filter",
         icon = Icons.Default.Audiotrack,
         action = onToggleAudioFilterClick,
+    ),
+    ActionMenuItem(
+        title = audioUsageUiState.text,
+        icon = audioUsageUiState.icon,
+        highlight = audioUsageUiState.highlight,
+        action = {
+            GlobalScope.launch {
+                onToggleAudioUsage.invoke()
+            }
+        },
     ),
     ActionMenuItem(
         title = "Start/stop recording",

@@ -81,6 +81,7 @@ class SpeakerManager(
     val mediaManager: MediaManagerImpl,
     val microphoneManager: MicrophoneManager,
     val initialVolume: Int? = null,
+    val audioUsageProvider: (() -> Int) = { defaultAudioUsage },
 ) {
 
     private val logger by taggedLogger("Media:SpeakerManager")
@@ -95,6 +96,10 @@ class SpeakerManager(
 
     /** Represents whether the speakerphone is enabled */
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
+
+    /** The current audio usage value (USAGE_MEDIA or USAGE_VOICE_COMMUNICATION) */
+    private val _audioUsage = MutableStateFlow(audioUsageProvider.invoke())
+    val audioUsage: StateFlow<Int> = _audioUsage
 
     val selectedDevice: StateFlow<StreamAudioDevice?> = microphoneManager.selectedDevice
 
@@ -208,6 +213,37 @@ class SpeakerManager(
             if (it > 0) {
                 setVolume(it)
             }
+        }
+    }
+
+    /**
+     * Set the audio usage value.
+     * This allows toggling between USAGE_MEDIA and USAGE_VOICE_COMMUNICATION.
+     * Updates the StateFlow immediately for responsive UI, then attempts to update the ADM.
+     * If the ADM update fails, the StateFlow is rolled back to the previous value.
+     *
+     * @param audioUsage The audio usage value to set (e.g., AudioAttributes.USAGE_MEDIA or AudioAttributes.USAGE_VOICE_COMMUNICATION)
+     * @return true if the update was successful, false otherwise
+     */
+    fun setAudioUsage(audioUsage: Int): Boolean {
+        logger.i { "setAudioUsage: $audioUsage" }
+
+        val adm = mediaManager.call.peerConnectionFactory.adm
+        if (adm != null) {
+            val success = adm.updateAudioTrackUsage(audioUsage)
+            if (success) {
+                _audioUsage.value = audioUsage
+                logger.d { "setAudioUsage: successfully updated audio usage to $audioUsage" }
+                return true
+            } else {
+                // Rollback to previous value if ADM update failed
+                logger.w { "setAudioUsage: failed to update audio usage to $audioUsage" }
+                return false
+            }
+        } else {
+            logger.w { "setAudioUsage: ADM not available, cannot update audio usage" }
+            // Rollback to previous value if ADM is not available
+            return false
         }
     }
 }
@@ -529,6 +565,7 @@ class MicrophoneManager(
                 audioHandler.start()
             } else {
                 logger.d { "[MediaManager#setup] Usage is MEDIA or audioHandle is already initialized" }
+                capturedOnAudioDevicesUpdate?.invoke()
             }
         }
     }
@@ -1045,7 +1082,7 @@ class MediaManagerImpl(
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
     internal val microphone = MicrophoneManager(this, audioUsage, audioUsageProvider)
-    internal val speaker = SpeakerManager(this, microphone)
+    internal val speaker = SpeakerManager(this, microphone, audioUsageProvider = audioUsageProvider)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
     fun cleanup() {
