@@ -36,6 +36,7 @@ io.getstream.video.android.core.notifications.extractor
 io.getstream.video.android.core.notifications.handlers
 io.getstream.video.android.core.notifications.internal.receivers
 io.getstream.video.android.core.notifications.internal.service
+io.getstream.video.android.core.notifications.internal.telecom
 io.getstream.video.android.core.notifications.medianotifications
 io.getstream.video.android.core.permission
 io.getstream.video.android.core.permission.android
