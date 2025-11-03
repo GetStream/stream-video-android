@@ -7195,6 +7195,7 @@ public final class io/getstream/video/android/core/Call {
 	public final fun getSpeaker ()Lio/getstream/video/android/core/SpeakerManager;
 	public final fun getStatLatencyHistory ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun getState ()Lio/getstream/video/android/core/CallState;
+	public final fun getStatsReport ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public final fun getType ()Ljava/lang/String;
 	public final fun getUser ()Lio/getstream/video/android/model/User;
 	public final fun getVideoFilter ()Lio/getstream/video/android/core/call/video/VideoFilter;
