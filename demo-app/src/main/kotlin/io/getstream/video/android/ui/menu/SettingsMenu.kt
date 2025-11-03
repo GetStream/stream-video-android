@@ -101,7 +101,7 @@ internal fun SettingsMenu(
         getAudioUsageUiState(currentAudioUsage)
     }
 
-    val onToggleAudioUsage: suspend () -> Unit = {
+    val onToggleAudioUsage: () -> Unit = {
         val newAudioUsage = when (audioUsageUiState) {
             AudioUsageMediaUiState -> AudioAttributes.USAGE_VOICE_COMMUNICATION
             AudioUsageVoiceCommunicationUiState -> AudioAttributes.USAGE_MEDIA
