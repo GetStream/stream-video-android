@@ -82,6 +82,7 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
@@ -205,7 +206,6 @@ public class Call(
     /**
      * Contains stats events for observation.
      */
-    @InternalStreamVideoApi
     val statsReport: MutableStateFlow<CallStatsReport?> = MutableStateFlow(null)
 
     /**
@@ -767,7 +767,7 @@ public class Call(
     private var reconnectJob: Job? = null
 
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
-        logger.d { "[schedule] #reconnect; no args" } // noob 4
+        logger.d { "[schedule] #reconnect; no args" }
 
         streamSingleFlightProcessorImpl.run(key, block)
     }
@@ -809,6 +809,9 @@ public class Call(
         if (id == client.state.ringingCall.value?.id) {
             client.state.removeRingingCall(this)
         }
+
+        TelecomCallController(client.context)
+            .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
         cleanup()
@@ -1366,6 +1369,15 @@ public class Call(
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
+    }
+
+    // For debugging
+    internal suspend fun reject(
+        source: String = "n/a",
+        reason: RejectReason? = null,
+    ): Result<RejectCallResponse> {
+        logger.d { "[reject] source: $source" }
+        return reject(reason)
     }
 
     fun processAudioSample(audioSample: AudioSamples) {

@@ -160,6 +160,7 @@ class CallServiceConfigRegistry {
             setServiceClass(existingConfig.serviceClass)
             setRunCallServiceInForeground(existingConfig.runCallServiceInForeground)
             setAudioUsage(existingConfig.audioUsage)
+            enableTelecom(existingConfig.enableTelecom)
             updater()
         }
     }

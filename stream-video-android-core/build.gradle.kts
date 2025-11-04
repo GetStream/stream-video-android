@@ -15,11 +15,11 @@
  */
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("io.getstream.android.library")
+    id("io.getstream.video.android.library")
     id("io.getstream.video.generateServices")
     id("io.getstream.spotless")
     id(libs.plugins.kotlin.serialization.get().pluginId)
@@ -64,10 +64,10 @@ apiValidation {
 
 android {
     namespace = "io.getstream.video.android.core"
-    compileSdk = Configuration.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = Configuration.minSdk
+        minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
         buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
@@ -183,6 +183,9 @@ dependencies {
     implementation(libs.stream.push)
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
+
+    //jetpack telecom
+    implementation(libs.androidx.telecom)
 
 
     // datastore

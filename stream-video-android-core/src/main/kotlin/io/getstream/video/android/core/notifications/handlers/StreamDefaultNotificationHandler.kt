@@ -49,6 +49,8 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.IncomingNotificationAction
+import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
@@ -56,7 +58,7 @@ import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -146,6 +148,7 @@ constructor(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Video:StreamNotificationHandler")
+    private val serviceLauncher = ServiceLauncher(application)
 
     // START REGION : On push arrived
     override fun onRingingCall(
@@ -154,11 +157,15 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        CallService.showIncomingCall(
+        val streamVideo = StreamVideo.instance()
+        serviceLauncher.showIncomingCall(
             application,
             callId,
             callDisplayName,
-            StreamVideo.instance().state.callConfigRegistry.get(callId.type),
+            streamVideo.state.callConfigRegistry.get(callId.type),
+            isVideo = isVideoCall(callId, payload),
+            payload = payload,
+            streamVideo,
             notification = getRingingCallNotification(
                 RingingState.Incoming(),
                 callId,
@@ -306,6 +313,19 @@ constructor(
                 callId,
                 payload = payload,
             )
+
+            val streamVideo = StreamVideo.instanceOrNull()
+            streamVideo?.let { streamVideoInstance ->
+                val call = streamVideoInstance.call(callId.type, callId.id)
+                val map = HashMap<IncomingNotificationAction, PendingIntent>()
+                acceptCallPendingIntent?.let { pendingIntent ->
+                    map[IncomingNotificationAction.Accept] = pendingIntent
+                }
+                rejectCallPendingIntent?.let { pendingIntent ->
+                    map[IncomingNotificationAction.Reject] = pendingIntent
+                }
+                call.state.incomingNotificationData = IncomingNotificationData(map)
+            }
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                 getIncomingCallNotification(
@@ -1148,5 +1168,13 @@ constructor(
     @OptIn(ExperimentalStreamVideoApi::class)
     internal fun clearMediaSession(callId: StreamCallId?) = safeCall {
         callId?.let { mediaSessionController.clear(it) }
+    }
+
+    internal fun isVideoCall(callId: StreamCallId, payload: Map<String, Any?>): Boolean {
+        if (payload.containsKey("video")) {
+            return payload["video"] == true
+        }
+        val call = StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
+        return call?.isVideoEnabled() == true
     }
 }

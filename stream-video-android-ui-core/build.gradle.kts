@@ -17,7 +17,7 @@ import io.getstream.video.android.Configuration
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("io.getstream.android.library")
+    id("io.getstream.video.android.library")
     id("io.getstream.spotless")
 }
 
@@ -31,10 +31,10 @@ apply(from ="${rootDir}/scripts/publish-module.gradle")
 
 android {
     namespace = "io.getstream.video.android.ui.common"
-    compileSdk = Configuration.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = Configuration.minSdk
+        minSdk = libs.versions.minSdk.get().toInt()
     }
 
     resourcePrefix = "stream_video_"

@@ -23,11 +23,11 @@ import io.getstream.video.VideoDemoFlavor
 import io.getstream.video.android.Configuration
 import io.getstream.video.configureFlavors
 import java.io.FileInputStream
-import java.util.*
+import java.util.Properties
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id("io.getstream.android.application.compose")
+    id("io.getstream.video.android.application.compose")
     id("io.getstream.spotless")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
@@ -40,12 +40,12 @@ plugins {
 
 android {
     namespace = "io.getstream.video.android"
-    compileSdk = Configuration.compileSdk
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "io.getstream.video.android"
-        minSdk = Configuration.minSdk
-        targetSdk = Configuration.targetSdk
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = Configuration.streamVideoCallGooglePlayVersion
         testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
