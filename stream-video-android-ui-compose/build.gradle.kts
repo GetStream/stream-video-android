@@ -77,4 +77,13 @@ dependencies {
     // preview
     compileOnly(project(":stream-video-android-previewdata"))
     testImplementation(project(":stream-video-android-previewdata"))
+
+    // unit tests
+    testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlin.test.junit)
+
 }
