@@ -53,6 +53,13 @@ public data class ToggleMicrophone(
 ) : CallAction
 
 /**
+ * Action to toggle audio bitrate profile between VOICE_STANDARD_UNSPECIFIED and MUSIC_HIGH_QUALITY.
+ */
+public data class ToggleHifiAudio(
+    val isHifiAudioEnabled: Boolean,
+) : CallAction
+
+/**
  * Action to flip the active camera.
  */
 public data object FlipCamera : CallAction

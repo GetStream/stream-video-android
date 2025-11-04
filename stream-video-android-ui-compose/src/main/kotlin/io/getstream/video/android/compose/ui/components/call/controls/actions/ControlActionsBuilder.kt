@@ -26,8 +26,10 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleHifiAudio
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
+import stream.video.sfu.models.AudioBitrateProfile
 
 /**
  * Builds the default set of Call Control actions based on the call devices.
@@ -110,6 +112,14 @@ public object DefaultOnCallActionHandler {
             is ToggleMicrophone -> call.microphone.setEnabled(callAction.isEnabled)
             is ToggleSpeakerphone -> call.speaker.setEnabled(callAction.isEnabled)
             is FlipCamera -> call.camera.flip()
+            is ToggleHifiAudio -> {
+                val newProfile = if (callAction.isHifiAudioEnabled) {
+                    AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+                } else {
+                    AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
+                }
+                call.microphone.setAudioBitrateProfile(newProfile)
+            }
             else -> Unit
         }
     }

@@ -20,6 +20,7 @@ import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import org.webrtc.CameraEnumerationAndroid.CaptureFormat
 import org.webrtc.RtpParameters
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
@@ -174,9 +175,25 @@ internal fun CaptureFormat.toVideoDimension(): VideoDimension {
 internal fun computeTransceiverEncodings(
     captureFormat: CaptureFormat?,
     publishOption: PublishOption,
+    audioBitrateProfileProvider: (() -> AudioBitrateProfile)? = null,
 ): List<RtpParameters.Encoding> {
     if (isAudioTrackType(publishOption.track_type)) {
-        return emptyList()
+        val audioEncoding = RtpParameters.Encoding(null, true, null)
+
+        // Get the selected audio bitrate profile from microphone manager
+        val selectedProfile = audioBitrateProfileProvider?.invoke()
+
+        // Find the matching profile in publishOption.audio_bitrate_profiles
+        if (selectedProfile != null) {
+            val matchingAudioBitrate = publishOption.audio_bitrate_profiles
+                .firstOrNull { it.profile == selectedProfile }
+
+            matchingAudioBitrate?.let {
+                audioEncoding.maxBitrateBps = it.bitrate
+            }
+        }
+
+        return listOf(audioEncoding)
     }
     val settings =
         captureFormat?.toVideoDimension() ?: publishOption.video_dimension ?: VideoDimension(
