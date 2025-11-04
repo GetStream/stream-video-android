@@ -59,7 +59,7 @@ import java.nio.ByteBuffer
  * @property audioUsage signal to the system how the audio tracks are used.
  * @property audioProcessing Factory that provides audio processing capabilities.
  * Set this to [AudioAttributes.USAGE_MEDIA] if you want the audio track to behave like media, useful for livestreaming scenarios.
- * @property sharedEglBase Optional EGL base context. If not provided, will create its own.
+ * @property eglBase Optional EGL base context. If not provided, will create its own.
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
