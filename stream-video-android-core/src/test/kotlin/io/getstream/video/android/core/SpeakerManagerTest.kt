@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core
 
+import android.media.AudioAttributes
 import com.twilio.audioswitch.AudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -25,6 +27,7 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.webrtc.audio.JavaAudioDeviceModule
 
 class SpeakerManagerTest {
 
@@ -193,5 +196,123 @@ class SpeakerManagerTest {
         // Since we only have speakers available, verify we selected the first one
         verify { microphoneManager.select(any()) } // Verify the select method was called
         assertEquals(false, speakerManager.speakerPhoneEnabled.value)
+    }
+
+    @Test
+    fun `audioUsage initializes with value from audioUsageProvider`() = runTest {
+        // Given
+        val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
+        val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
+        val initialAudioUsage = AudioAttributes.USAGE_MEDIA
+        val audioUsageProvider = { initialAudioUsage }
+
+        // When
+        val speakerManager = SpeakerManager(
+            mediaManager,
+            microphoneManager,
+            audioUsageProvider = audioUsageProvider,
+        )
+
+        // Then
+        assertEquals(initialAudioUsage, speakerManager.audioUsage.value)
+    }
+
+    @Test
+    fun `setAudioUsage updates StateFlow when ADM update succeeds`() = runTest {
+        // Given
+        val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
+        val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
+        val initialAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
+        val newAudioUsage = AudioAttributes.USAGE_MEDIA
+        val audioUsageProvider = { initialAudioUsage }
+
+        val call = mockk<Call>(relaxed = true)
+        val peerConnectionFactory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+
+        every { mediaManager.call } returns call
+        every { call.peerConnectionFactory } returns peerConnectionFactory
+        every { peerConnectionFactory.adm } returns adm
+        every { adm.updateAudioTrackUsage(newAudioUsage) } returns true
+
+        val speakerManager = SpeakerManager(
+            mediaManager,
+            microphoneManager,
+            audioUsageProvider = audioUsageProvider,
+        )
+        assertEquals(initialAudioUsage, speakerManager.audioUsage.value)
+
+        // When
+        val result = speakerManager.setAudioUsage(newAudioUsage)
+
+        // Then
+        assertEquals(true, result)
+        assertEquals(newAudioUsage, speakerManager.audioUsage.value)
+        verify { adm.updateAudioTrackUsage(newAudioUsage) }
+    }
+
+    @Test
+    fun `setAudioUsage does not update StateFlow when ADM update fails`() = runTest {
+        // Given
+        val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
+        val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
+        val initialAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
+        val newAudioUsage = AudioAttributes.USAGE_MEDIA
+        val audioUsageProvider = { initialAudioUsage }
+
+        val call = mockk<Call>(relaxed = true)
+        val peerConnectionFactory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+
+        every { mediaManager.call } returns call
+        every { call.peerConnectionFactory } returns peerConnectionFactory
+        every { peerConnectionFactory.adm } returns adm
+        every { adm.updateAudioTrackUsage(newAudioUsage) } returns false
+
+        val speakerManager = SpeakerManager(
+            mediaManager,
+            microphoneManager,
+            audioUsageProvider = audioUsageProvider,
+        )
+        assertEquals(initialAudioUsage, speakerManager.audioUsage.value)
+
+        // When
+        val result = speakerManager.setAudioUsage(newAudioUsage)
+
+        // Then
+        assertEquals(false, result)
+        assertEquals(initialAudioUsage, speakerManager.audioUsage.value) // Should remain unchanged
+        verify { adm.updateAudioTrackUsage(newAudioUsage) }
+    }
+
+    @Test
+    fun `setAudioUsage does not update StateFlow when ADM is null`() = runTest {
+        // Given
+        val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
+        val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
+        val initialAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
+        val newAudioUsage = AudioAttributes.USAGE_MEDIA
+        val audioUsageProvider = { initialAudioUsage }
+
+        val call = mockk<Call>(relaxed = true)
+        val peerConnectionFactory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+
+        every { mediaManager.call } returns call
+        every { call.peerConnectionFactory } returns peerConnectionFactory
+        every { peerConnectionFactory.adm } returns null
+
+        val speakerManager = SpeakerManager(
+            mediaManager,
+            microphoneManager,
+            audioUsageProvider = audioUsageProvider,
+        )
+        assertEquals(initialAudioUsage, speakerManager.audioUsage.value)
+
+        // When
+        val result = speakerManager.setAudioUsage(newAudioUsage)
+
+        // Then
+        assertEquals(false, result)
+        assertEquals(initialAudioUsage, speakerManager.audioUsage.value) // Should remain unchanged
     }
 }

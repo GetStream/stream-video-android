@@ -20,6 +20,7 @@ import android.Manifest
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Context.DOWNLOAD_SERVICE
+import android.media.AudioAttributes
 import android.media.MediaCodecList
 import android.net.Uri
 import android.os.Build
@@ -94,6 +95,19 @@ internal fun SettingsMenu(
 ) {
     val context = LocalContext.current
     val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
+    val currentAudioUsage by call.speaker.audioUsage.collectAsStateWithLifecycle()
+
+    val audioUsageUiState = remember(currentAudioUsage) {
+        getAudioUsageUiState(currentAudioUsage)
+    }
+
+    val onToggleAudioUsage: () -> Unit = {
+        val newAudioUsage = when (audioUsageUiState) {
+            AudioUsageMediaUiState -> AudioAttributes.USAGE_VOICE_COMMUNICATION
+            AudioUsageVoiceCommunicationUiState -> AudioAttributes.USAGE_MEDIA
+        }
+        call.speaker.setAudioUsage(newAudioUsage)
+    }
 
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
@@ -303,6 +317,8 @@ internal fun SettingsMenu(
                 onToggleTranscription = onToggleTranscription,
                 loadTranscriptions = onLoadTranscriptions,
                 audioDeviceUiStateList = audioDeviceUiStateList,
+                audioUsageUiState = audioUsageUiState,
+                onToggleAudioUsage = onToggleAudioUsage,
             ),
         )
     }
@@ -374,6 +390,8 @@ private fun SettingsMenuPreview() {
                 onToggleTranscription = {},
                 loadTranscriptions = { emptyList() },
                 audioDeviceUiStateList = emptyList(),
+                audioUsageUiState = AudioUsageVoiceCommunicationUiState,
+                onToggleAudioUsage = {},
             ),
         )
     }
