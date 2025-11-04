@@ -1,13 +1,11 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinJvm
 import io.getstream.video.android.Configuration
 
 plugins {
-  kotlin("jvm")
-}
-
-rootProject.extra.apply {
-  set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
-  set("PUBLISH_ARTIFACT_ID", "stream-video-android-bom")
-  set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.dokka)
+    kotlin("jvm")
 }
 
 dependencies {
@@ -21,4 +19,16 @@ dependencies {
   }
 }
 
-apply(from ="${rootDir}/scripts/publish-module.gradle")
+mavenPublishing {
+    coordinates(
+        groupId = Configuration.artifactGroup,
+        artifactId = "stream-video-android-bom",
+        version = rootProject.version.toString(),
+    )
+    configure(
+        KotlinJvm(
+            javadocJar = JavadocJar.Dokka("dokkaJavadoc"),
+            sourcesJar = true,
+        ),
+    )
+}
