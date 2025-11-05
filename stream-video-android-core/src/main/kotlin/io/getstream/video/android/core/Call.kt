@@ -244,7 +244,7 @@ public class Call(
     // peerConnectionFactory is nullable and recreated when audioBitrateProfile changes (before joining)
     private var _peerConnectionFactory: StreamPeerConnectionFactory? = null
 
-    internal val peerConnectionFactory: StreamPeerConnectionFactory
+    internal var peerConnectionFactory: StreamPeerConnectionFactory
         get() {
             if (_peerConnectionFactory == null) {
                 _peerConnectionFactory = StreamPeerConnectionFactory(
@@ -257,6 +257,9 @@ public class Call(
                 )
             }
             return _peerConnectionFactory!!
+        }
+        set(value) {
+            _peerConnectionFactory = value
         }
 
     /**
