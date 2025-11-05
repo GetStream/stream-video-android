@@ -253,7 +253,7 @@ public class Call(
                     audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
                     audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
                     audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
-                    sharedEglBase = eglBase,
+                    sharedEglBaseProvider = { eglBase },
                 )
             }
             return _peerConnectionFactory!!

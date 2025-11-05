@@ -68,11 +68,18 @@ class StreamPeerConnectionFactoryTest {
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
-        // Mock EglBase to avoid GLException in unit tests
-        val mockEglBase = mockk<EglBase>(relaxed = true)
-        // Create a spied factory so we can intercept internal calls
-        // Pass mockEglBase to avoid EglBase.create() being called
-        factory = spyk(StreamPeerConnectionFactory(mockContext, sharedEglBase = mockEglBase))
+        // Create a spied factory with a provider that returns a mock EglBase
+        // Using a provider means EglBase.create() won't be called during construction
+        // The mock will only be created when the provider is invoked (lazy evaluation)
+        val mockEglBaseProvider: () -> EglBase = {
+            // This will be called lazily when eglBase is accessed
+            // Since we're using relaxed mocks, MockK should be able to create it
+            // even if Android classes aren't available, as long as we don't call methods
+            // that require those classes
+            mockk(relaxed = true)
+        }
+        
+        factory = spyk(StreamPeerConnectionFactory(mockContext, sharedEglBaseProvider = mockEglBaseProvider))
         // Mock the internal WebRTC PeerConnectionFactory
         mockInternalFactory = mockk(relaxed = true)
 

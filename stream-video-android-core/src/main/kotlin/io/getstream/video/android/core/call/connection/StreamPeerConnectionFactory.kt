@@ -59,7 +59,8 @@ import java.nio.ByteBuffer
  * @property audioUsage signal to the system how the audio tracks are used.
  * @property audioProcessing Factory that provides audio processing capabilities.
  * Set this to [AudioAttributes.USAGE_MEDIA] if you want the audio track to behave like media, useful for livestreaming scenarios.
- * @property sharedEglBase Optional EGL base context.
+ * @property sharedEglBaseProvider Provider function that returns the EGL base context. This is lazy-evaluated to avoid
+ * creating EglBase during construction, which is useful for unit testing.
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
@@ -68,7 +69,7 @@ public class StreamPeerConnectionFactory(
     private val audioUsageProvider: (() -> Int) = { audioUsage },
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
     private val audioBitrateProfileProvider: (() -> stream.video.sfu.models.AudioBitrateProfile)? = null,
-    private val sharedEglBase: EglBase = EglBase.create(),
+    private val sharedEglBaseProvider: () -> EglBase = { EglBase.create() },
 ) {
     /**
      * The audio bitrate profile that was used when this factory was created.
@@ -115,14 +116,14 @@ public class StreamPeerConnectionFactory(
      * Todo : Remove this with the next major release
      */
     public val eglBase: EglBase by lazy {
-        sharedEglBase
+        sharedEglBaseProvider()
     }
 
     /**
      * Default video decoder factory used to unpack video from the remote tracks.
      */
     private val videoDecoderFactory by lazy {
-        SelectiveVideoDecoderFactory(sharedEglBase.eglBaseContext)
+        SelectiveVideoDecoderFactory(sharedEglBaseProvider().eglBaseContext)
     }
 
     /**
@@ -130,7 +131,7 @@ public class StreamPeerConnectionFactory(
      */
     private val videoEncoderFactory by lazy {
         SimulcastAlignedVideoEncoderFactory(
-            sharedEglBase.eglBaseContext,
+            sharedEglBaseProvider().eglBaseContext,
             true,
             true,
             ResolutionAdjustment.MULTIPLE_OF_16,
@@ -178,9 +179,17 @@ public class StreamPeerConnectionFactory(
 
         adm = initAudioDeviceModule()
 
+        // Capture the audio bitrate profile when creating the factory
+        val currentAudioBitrateProfile = audioBitrateProfileProvider?.invoke()
+        val isMusicHighQuality = currentAudioBitrateProfile ==
+            stream.video.sfu.models.AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
         return PeerConnectionFactory.builder()
             .apply {
-                audioProcessing?.also { setAudioProcessingFactory(it) }
+                // Disable audio processing (noise cancellation) when MUSIC_HIGH_QUALITY is enabled
+                if (!isMusicHighQuality) {
+                    audioProcessing?.also { setAudioProcessingFactory(it) }
+                }
             }
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
