@@ -114,7 +114,7 @@ android {
     resourcePrefix = "stream_video_"
 
     sourceSets.configureEach {
-        kotlin.srcDir("build/generated/source/services")
+        kotlin.srcDir("${project.buildDir}/generated/source/services")
     }
 
     packaging {
