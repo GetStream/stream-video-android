@@ -78,7 +78,7 @@ class StreamPeerConnectionFactoryTest {
             // that require those classes
             mockk(relaxed = true)
         }
-        
+
         factory = spyk(StreamPeerConnectionFactory(mockContext, sharedEglBaseProvider = mockEglBaseProvider))
         // Mock the internal WebRTC PeerConnectionFactory
         mockInternalFactory = mockk(relaxed = true)

@@ -233,21 +233,14 @@ class SpeakerManager(
     fun setAudioUsage(audioUsage: Int): Boolean {
         logger.i { "setAudioUsage: $audioUsage" }
 
-        val adm = mediaManager.call.peerConnectionFactory.adm
-        if (adm != null) {
-            val success = adm.updateAudioTrackUsage(audioUsage)
-            if (success) {
-                _audioUsage.value = audioUsage
-                logger.d { "setAudioUsage: successfully updated audio usage to $audioUsage" }
-                return true
-            } else {
-                // Rollback to previous value if ADM update failed
-                logger.w { "setAudioUsage: failed to update audio usage to $audioUsage" }
-                return false
-            }
+        val success = mediaManager.call.peerConnectionFactory.updateAudioTrackUsage(audioUsage)
+        if (success) {
+            _audioUsage.value = audioUsage
+            logger.d { "setAudioUsage: successfully updated audio usage to $audioUsage" }
+            return true
         } else {
-            logger.w { "setAudioUsage: ADM not available, cannot update audio usage" }
-            // Rollback to previous value if ADM is not available
+            // Rollback to previous value if ADM update failed
+            logger.w { "setAudioUsage: failed to update audio usage to $audioUsage" }
             return false
         }
     }

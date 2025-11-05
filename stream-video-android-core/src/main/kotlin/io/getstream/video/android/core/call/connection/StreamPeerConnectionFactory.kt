@@ -144,7 +144,7 @@ public class StreamPeerConnectionFactory(
      */
     private val factory: PeerConnectionFactory by lazy { createFactory() }
 
-    var adm: JavaAudioDeviceModule? = null
+    private var adm: JavaAudioDeviceModule? = null
 
     private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
@@ -189,6 +189,8 @@ public class StreamPeerConnectionFactory(
                 // Disable audio processing (noise cancellation) when MUSIC_HIGH_QUALITY is enabled
                 if (!isMusicHighQuality) {
                     audioProcessing?.also { setAudioProcessingFactory(it) }
+                } else {
+                    setAudioProcessingEnabled(false)
                 }
             }
             .setVideoDecoderFactory(videoDecoderFactory)
@@ -543,6 +545,17 @@ public class StreamPeerConnectionFactory(
             it.isEnabled = !it.isEnabled
             it.isEnabled
         } ?: false
+    }
+
+    /**
+     * Updates the audio track usage for the audio device module.
+     * This allows toggling between different audio usage types (e.g., USAGE_MEDIA vs USAGE_VOICE_COMMUNICATION).
+     *
+     * @param audioUsage The audio usage value to set (e.g., AudioAttributes.USAGE_MEDIA or AudioAttributes.USAGE_VOICE_COMMUNICATION)
+     * @return true if the update was successful, false if the ADM is not available or the update failed
+     */
+    public fun updateAudioTrackUsage(audioUsage: Int): Boolean {
+        return adm?.updateAudioTrackUsage(audioUsage) ?: false
     }
 
     /**
