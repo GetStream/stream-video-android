@@ -7635,6 +7635,9 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun getScreenShareVideoSource ()Lorg/webrtc/VideoSource;
 	public final fun getVideoSource ()Lorg/webrtc/VideoSource;
 	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
+	public final fun setAudioTrack (Lorg/webrtc/AudioTrack;)V
+	public final fun setScreenShareTrack (Lorg/webrtc/VideoTrack;)V
+	public final fun setVideoTrack (Lorg/webrtc/VideoTrack;)V
 }
 
 public final class io/getstream/video/android/core/MediaManagerKt {
@@ -8303,6 +8306,7 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lorg/webrtc/EglBase;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun dispose ()V
 	public final fun getAdm ()Lorg/webrtc/audio/JavaAudioDeviceModule;
+	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getSenderCapabilities (Lorg/webrtc/MediaStreamTrack$MediaType;)Lorg/webrtc/RtpCapabilities;
 	public final fun isAudioProcessingEnabled ()Z
 	public final fun makeAudioSource (Lorg/webrtc/MediaConstraints;)Lorg/webrtc/AudioSource;

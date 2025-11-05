@@ -59,7 +59,7 @@ import java.nio.ByteBuffer
  * @property audioUsage signal to the system how the audio tracks are used.
  * @property audioProcessing Factory that provides audio processing capabilities.
  * Set this to [AudioAttributes.USAGE_MEDIA] if you want the audio track to behave like media, useful for livestreaming scenarios.
- * @property eglBase Optional EGL base context. If not provided, will create its own.
+ * @property sharedEglBase Optional EGL base context.
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
@@ -68,7 +68,7 @@ public class StreamPeerConnectionFactory(
     private val audioUsageProvider: (() -> Int) = { audioUsage },
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
     private val audioBitrateProfileProvider: (() -> stream.video.sfu.models.AudioBitrateProfile)? = null,
-    private val eglBase: EglBase,
+    private val sharedEglBase: EglBase = EglBase.create(),
 ) {
     /**
      * The audio bitrate profile that was used when this factory was created.
@@ -111,10 +111,18 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
+     * Represents the EGL rendering context.
+     * Todo : Remove this with the next major release
+     */
+    public val eglBase: EglBase by lazy {
+        sharedEglBase
+    }
+
+    /**
      * Default video decoder factory used to unpack video from the remote tracks.
      */
     private val videoDecoderFactory by lazy {
-        SelectiveVideoDecoderFactory(eglBase.eglBaseContext)
+        SelectiveVideoDecoderFactory(sharedEglBase.eglBaseContext)
     }
 
     /**
@@ -122,7 +130,7 @@ public class StreamPeerConnectionFactory(
      */
     private val videoEncoderFactory by lazy {
         SimulcastAlignedVideoEncoderFactory(
-            eglBase.eglBaseContext,
+            sharedEglBase.eglBaseContext,
             true,
             true,
             ResolutionAdjustment.MULTIPLE_OF_16,

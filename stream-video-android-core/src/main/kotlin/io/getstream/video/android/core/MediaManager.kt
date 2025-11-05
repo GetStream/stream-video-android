@@ -1133,7 +1133,8 @@ class MediaManagerImpl(
         }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val videoTrack: VideoTrack
+    // Todo : make videoTrack val in next major release and also move it out of MediaManager
+    var videoTrack: VideoTrack
         get() {
             if (_videoTrack == null) {
                 _videoTrack = call.peerConnectionFactory.makeVideoTrack(
@@ -1143,8 +1144,12 @@ class MediaManagerImpl(
             }
             return _videoTrack!!
         }
+        set(value) {
+            _videoTrack = value
+        }
 
-    val screenShareTrack: VideoTrack
+    // Todo : make screenShareTrack val in next major release and also move it out of MediaManager
+    var screenShareTrack: VideoTrack
         get() {
             if (_screenShareTrack == null) {
                 _screenShareTrack = call.peerConnectionFactory.makeVideoTrack(
@@ -1153,6 +1158,9 @@ class MediaManagerImpl(
                 )
             }
             return _screenShareTrack!!
+        }
+        set(value) {
+            _screenShareTrack = value
         }
 
     // audioSource and audioTrack are nullable and recreated when profile changes (before joining)
@@ -1170,7 +1178,8 @@ class MediaManagerImpl(
         }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    val audioTrack: AudioTrack
+    // Todo : make audioTrack val in next major release and also move it out of MediaManager
+    var audioTrack: AudioTrack
         get() {
             if (_audioTrack == null) {
                 _audioTrack = call.peerConnectionFactory.makeAudioTrack(
@@ -1179,6 +1188,9 @@ class MediaManagerImpl(
                 )
             }
             return _audioTrack!!
+        }
+        set(value) {
+            _audioTrack = value
         }
 
     /**
