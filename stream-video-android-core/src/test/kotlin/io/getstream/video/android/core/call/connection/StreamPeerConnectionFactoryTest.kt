@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.webrtc.EglBase
 import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
@@ -67,8 +68,11 @@ class StreamPeerConnectionFactoryTest {
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
+        // Mock EglBase to avoid GLException in unit tests
+        val mockEglBase = mockk<EglBase>(relaxed = true)
         // Create a spied factory so we can intercept internal calls
-        factory = spyk(StreamPeerConnectionFactory(mockContext))
+        // Pass mockEglBase to avoid EglBase.create() being called
+        factory = spyk(StreamPeerConnectionFactory(mockContext, sharedEglBase = mockEglBase))
         // Mock the internal WebRTC PeerConnectionFactory
         mockInternalFactory = mockk(relaxed = true)
 
