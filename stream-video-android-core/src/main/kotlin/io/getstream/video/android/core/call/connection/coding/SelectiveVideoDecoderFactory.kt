@@ -27,9 +27,11 @@ internal class SelectiveVideoDecoderFactory(
     sharedContext: EglBase.Context?,
     private var forceSWCodec: Boolean = false,
     private var forceSWCodecs: List<String> = listOf("VP9", "AV1"),
+    private val softwareVideoDecoderFactory: SoftwareVideoDecoderFactory =
+        SoftwareVideoDecoderFactory(),
+    private val wrappedVideoDecoderFactory: WrappedVideoDecoderFactory =
+        WrappedVideoDecoderFactory(sharedContext),
 ) : VideoDecoderFactory {
-    private val softwareVideoDecoderFactory = SoftwareVideoDecoderFactory()
-    private val wrappedVideoDecoderFactory = WrappedVideoDecoderFactory(sharedContext)
 
     /**
      * Set to true to force software codecs.
