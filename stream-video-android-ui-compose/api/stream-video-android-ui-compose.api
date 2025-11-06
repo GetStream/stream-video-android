@@ -1303,7 +1303,7 @@ public final class io/getstream/video/android/compose/ui/components/call/lobby/C
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/lobby/LobbyControlsActionsKt {
-	public static final fun buildDefaultLobbyControlActions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;ZZLandroidx/compose/runtime/Composer;II)Ljava/util/List;
+	public static final fun buildDefaultLobbyControlActions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;ZZZLandroidx/compose/runtime/Composer;II)Ljava/util/List;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/pinning/ComposableSingletons$ParticipantActionsKt {

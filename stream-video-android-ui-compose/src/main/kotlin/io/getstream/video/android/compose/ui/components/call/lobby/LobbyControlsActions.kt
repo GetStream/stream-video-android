@@ -51,6 +51,7 @@ public fun buildDefaultLobbyControlActions(
     } else {
         call.microphone.isEnabled.value
     },
+    showHifiAudioToggle: Boolean = false,
 ): List<@Composable () -> Unit> {
     val audioBitrateProfile by if (LocalInspectionMode.current) {
         remember {
@@ -63,7 +64,7 @@ public fun buildDefaultLobbyControlActions(
     }
     val isMusicHighQuality = audioBitrateProfile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
 
-    return listOf(
+    val actions = mutableListOf<@Composable () -> Unit>(
         {
             ToggleMicrophoneAction(
                 modifier = Modifier
@@ -80,13 +81,18 @@ public fun buildDefaultLobbyControlActions(
                 onCallAction = onCallAction,
             )
         },
-        {
+    )
+
+    if (showHifiAudioToggle) {
+        actions.add {
             ToggleHifiAudioAction(
                 modifier = Modifier
                     .testTag("Stream_HifiAudioToggle_IsMusicHighQuality_$isMusicHighQuality"),
                 isMusicHighQuality = isMusicHighQuality,
                 onCallAction = onCallAction,
             )
-        },
-    )
+        }
+    }
+
+    return actions
 }

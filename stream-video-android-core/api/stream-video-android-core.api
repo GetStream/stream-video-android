@@ -7716,7 +7716,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun resume (Z)V
 	public static synthetic fun resume$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun select (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
-	public final fun setAudioBitrateProfile (Lstream/video/sfu/models/AudioBitrateProfile;)Z
+	public final fun setAudioBitrateProfile-gIAlu-s (Lstream/video/sfu/models/AudioBitrateProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
 }

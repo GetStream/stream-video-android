@@ -29,6 +29,10 @@ import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleHifiAudio
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import stream.video.sfu.models.AudioBitrateProfile
 
 /**
@@ -118,7 +122,11 @@ public object DefaultOnCallActionHandler {
                 } else {
                     AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
                 }
-                call.microphone.setAudioBitrateProfile(newProfile)
+                // Launch in a coroutine scope since setAudioBitrateProfile is suspend
+                // Using SupervisorJob to prevent cancellation of other coroutines on failure
+                CoroutineScope(SupervisorJob() + Dispatchers.Main).launch {
+                    call.microphone.setAudioBitrateProfile(newProfile)
+                }
             }
             else -> Unit
         }

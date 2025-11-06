@@ -32,6 +32,7 @@ import androidx.core.content.getSystemService
 import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
+import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
@@ -523,32 +524,49 @@ class MicrophoneManager(
      *   - The call is already joined and the change was ignored
      *   - HiFi audio is not enabled in dashboard settings when trying to use MUSIC_HIGH_QUALITY
      */
-    fun setAudioBitrateProfile(profile: AudioBitrateProfile): Boolean {
+    suspend fun setAudioBitrateProfile(profile: AudioBitrateProfile): Result<Unit> {
         val connectionState = mediaManager.call.state.connection.value
         val isJoined = connectionState is RealtimeConnection.Joined || connectionState is RealtimeConnection.Connected
+
+        // get the call settings if they are not present
+        if (mediaManager.call.state.settings.value == null) {
+            val result = mediaManager.call.get()
+            if (result.isFailure) {
+                logger.w {
+                    "[setAudioBitrateProfile] call.get() returned error: ${result.errorOrNull()?.extractCause()}"
+                }
+                return Result.failure(IllegalStateException(result.errorOrNull()?.extractCause()))
+            }
+        }
 
         // Check if HiFi audio is enabled in dashboard
         val hifiAudioEnabled = mediaManager.call.state.settings.value?.audio?.hifiAudioEnabled ?: false
         if (!hifiAudioEnabled) {
             logger.w {
-                "setAudioBitrateProfile called with MUSIC_HIGH_QUALITY but HiFi audio is not enabled " +
-                    "in dashboard settings. Ignoring the change."
+                "[setAudioBitrateProfile] called but HiFi audio is not enabled " +
+                    "in dashboard settings. ."
             }
-            return false
+            return Result.failure(
+                IllegalArgumentException("Hi-fi audio is not enabled on dashboard settings"),
+            )
         }
 
         if (isJoined) {
             logger.w {
-                "setAudioBitrateProfile called after call is joined. " +
+                "[setAudioBitrateProfile] called after call is joined. " +
                     "Audio bitrate profile can only be set before joining the call. " +
                     "Ignoring the change."
             }
-            return false
+            return Result.failure(
+                IllegalStateException(
+                    "Cannot call setAudioBitrateProfile after call has been joined",
+                ),
+            )
         }
 
-        logger.i { "Setting audio bitrate profile to: $profile" }
+        logger.i { "[setAudioBitrateProfile] Setting audio bitrate profile to: $profile" }
         _audioBitrateProfile.value = profile
-        return true
+        return Result.success(Unit)
     }
 
     fun cleanup() {
