@@ -25,6 +25,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Rational
 import androidx.activity.ComponentActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.PictureInPictureModeChangedInfo
 import androidx.core.util.Consumer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 
 @Suppress("DEPRECATION")
@@ -47,36 +49,50 @@ internal fun enterPictureInPicture(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val currentOrientation = context.resources.configuration.orientation
             val screenSharing = call.state.screenSharingSession.value
-
-            val aspect =
-                if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && (screenSharing == null || screenSharing.participant.isLocal)) {
-                    Rational(9, 16)
-                } else {
-                    Rational(16, 9)
-                }
-
-            val params = PictureInPictureParams.Builder()
-            params.setAspectRatio(aspect).apply {
-                var defaultAutoEnterEnabled =
-                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    defaultAutoEnterEnabled = pictureInPictureConfiguration.autoEnterEnabled
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    setAutoEnterEnabled(defaultAutoEnterEnabled)
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    setTitle("Video Player")
-                    setSeamlessResizeEnabled(true)
-                }
-            }
+            val params =
+                getPictureInPictureParams(
+                    getAspect(currentOrientation, screenSharing),
+                    pictureInPictureConfiguration,
+                )
 
             context.findActivity()?.enterPictureInPictureMode(params.build())
         } else {
             context.findActivity()?.enterPictureInPictureMode()
         }
     }
+}
+
+internal fun getAspect(currentOrientation: Int, screenSharing: ScreenSharingSession?): Rational {
+    return if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && (screenSharing == null || screenSharing.participant.isLocal)) {
+        Rational(9, 16)
+    } else {
+        Rational(16, 9)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+internal fun getPictureInPictureParams(
+    aspect: Rational,
+    pictureInPictureConfiguration: PictureInPictureConfiguration,
+): PictureInPictureParams.Builder {
+    val params = PictureInPictureParams.Builder()
+    params.setAspectRatio(aspect).apply {
+        var defaultAutoEnterEnabled =
+            Build.VERSION.SDK_INT <= Build.VERSION_CODES.VANILLA_ICE_CREAM
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            defaultAutoEnterEnabled = pictureInPictureConfiguration.autoEnterEnabled
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            setAutoEnterEnabled(defaultAutoEnterEnabled)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            setTitle("Video Player")
+            setSeamlessResizeEnabled(true)
+        }
+    }
+    params.build()
+    return params
 }
 
 /**
