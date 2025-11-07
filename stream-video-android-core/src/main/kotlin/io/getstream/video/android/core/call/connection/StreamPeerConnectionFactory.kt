@@ -554,7 +554,7 @@ public class StreamPeerConnectionFactory(
      * @param audioUsage The audio usage value to set (e.g., AudioAttributes.USAGE_MEDIA or AudioAttributes.USAGE_VOICE_COMMUNICATION)
      * @return true if the update was successful, false if the ADM is not available or the update failed
      */
-    public fun updateAudioTrackUsage(audioUsage: Int): Boolean {
+    internal fun updateAudioTrackUsage(audioUsage: Int): Boolean {
         return adm?.updateAudioTrackUsage(audioUsage) ?: false
     }
 
@@ -562,7 +562,7 @@ public class StreamPeerConnectionFactory(
      * Disposes the factory and releases resources.
      * This should only be called when no active peer connections are using it.
      */
-    public fun dispose() {
+    internal fun dispose() {
         try {
             factory.dispose()
         } catch (e: Exception) {
