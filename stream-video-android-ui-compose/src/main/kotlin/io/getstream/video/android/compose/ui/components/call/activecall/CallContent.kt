@@ -168,8 +168,6 @@ public fun CallContent(
     val orientation = LocalConfiguration.current.orientation
     val isInPictureInPicture = rememberIsInPipMode()
 
-
-
     DefaultPermissionHandler(videoPermission = permissions)
 
     MediaPiPLifecycle(call = call, pictureInPictureConfiguration)
