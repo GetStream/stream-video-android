@@ -77,7 +77,6 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     testImplementation(libs.kotlin.test.junit)
-
 }
 
 mavenPublishing {
