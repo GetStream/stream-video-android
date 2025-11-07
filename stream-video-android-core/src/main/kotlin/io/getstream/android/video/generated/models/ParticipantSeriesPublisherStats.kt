@@ -39,8 +39,17 @@ import com.squareup.moshi.ToJson
  */
 
 data class ParticipantSeriesPublisherStats (
+    @Json(name = "global_metrics_order")
+    val globalMetricsOrder: kotlin.collections.List<kotlin.String>? = emptyList(),
+
     @Json(name = "global")
     val global: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.collections.List<kotlin.Float>>>? = emptyMap(),
+
+    @Json(name = "global_meta")
+    val globalMeta: kotlin.collections.Map<kotlin.String, io.getstream.android.video.generated.models.MetricDescriptor>? = emptyMap(),
+
+    @Json(name = "global_thresholds")
+    val globalThresholds: kotlin.collections.Map<kotlin.String, kotlin.collections.List<io.getstream.android.video.generated.models.MetricThreshold>>? = emptyMap(),
 
     @Json(name = "tracks")
     val tracks: kotlin.collections.Map<kotlin.String, kotlin.collections.List<io.getstream.android.video.generated.models.ParticipantSeriesTrackMetrics>>? = emptyMap()

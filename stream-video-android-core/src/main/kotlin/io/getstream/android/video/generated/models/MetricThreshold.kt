@@ -35,33 +35,22 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * This event is sent when a moderation blur action is applied to a user's video stream
+ * 
  */
 
-data class CallModerationBlurEvent (
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+data class MetricThreshold (
+    @Json(name = "level")
+    val level: kotlin.String,
 
-    @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    @Json(name = "operator")
+    val operator: kotlin.String,
 
-    @Json(name = "user_id")
-    val userId: kotlin.String,
+    @Json(name = "value")
+    val value: kotlin.Float,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+    @Json(name = "value_unit")
+    val valueUnit: kotlin.String? = null,
 
-    @Json(name = "type")
-    val type: kotlin.String
+    @Json(name = "window_seconds")
+    val windowSeconds: kotlin.Int? = null
 )
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
-    
-    override fun getEventType(): kotlin.String {
-        return type
-    }
-
-    override fun getCallCID(): kotlin.String {
-        return callCid
-    }    
-}

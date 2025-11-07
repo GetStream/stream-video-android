@@ -33,6 +33,8 @@ import io.getstream.android.video.generated.models.CallMemberAddedEvent
 import io.getstream.android.video.generated.models.CallMemberRemovedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.CallModerationBlurEvent
+import io.getstream.android.video.generated.models.CallModerationWarningEvent
 import io.getstream.android.video.generated.models.CallParticipantResponse
 import io.getstream.android.video.generated.models.CallReactionEvent
 import io.getstream.android.video.generated.models.CallRecordingStartedEvent
@@ -80,7 +82,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
-import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
@@ -106,6 +107,7 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.moderation.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -685,6 +687,10 @@ public class CallState(
      *  - [ClosedCaptionMode.Unknown]: Represents an unrecognized or unsupported mode.
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
+
+    private val moderationManager = ModerationManager()
+    val moderationWarning: StateFlow<CallModerationWarningEvent?> = moderationManager.moderationWarning
+    val moderationBlur: StateFlow<CallModerationBlurEvent?> = moderationManager.moderationBlur
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
@@ -1618,6 +1624,10 @@ public class CallState(
 
     fun updateNotification(notification: Notification) {
         atomicNotification.set(notification)
+    }
+
+    fun resetModeration() {
+        moderationManager.resetModerationBlur()
     }
 }
 

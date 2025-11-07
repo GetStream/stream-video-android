@@ -58,6 +58,7 @@ import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.moderation.CallModerationConstants
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
@@ -1012,6 +1013,14 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     public open fun onCallEvent(call: Call, event: VideoEvent) {
         when (event) {
             is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent, is LocalCallMissedEvent -> {
+                when (event) {
+                    is CallEndedEvent -> {
+                        if (event.reason == CallModerationConstants.POLICY_VIOLATION) {
+                            // TODO Rahul
+                        }
+                    }
+                    else -> {}
+                }
                 // In any case finish the activity, the call is done for
                 leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
             }

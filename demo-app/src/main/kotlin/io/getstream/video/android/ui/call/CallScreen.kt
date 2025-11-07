@@ -132,6 +132,7 @@ import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsDefaults
 import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
+import io.getstream.video.android.ui.moderation.ModerationWarningUiContainer
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -568,6 +569,9 @@ fun CallScreen(
                                     closedCaptionUiState,
                                 )
                             }
+                        },
+                        moderationWarningUi = { call ->
+                            ModerationWarningUiContainer(call)
                         },
                     )
                     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {

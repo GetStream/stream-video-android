@@ -35,10 +35,12 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,9 +75,13 @@ import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.moderation.ModerationBlurConfig
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
+import io.getstream.video.android.filters.video.BlurIntensity
+import io.getstream.video.android.filters.video.SimpleBlurVideoFilter
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import kotlinx.coroutines.delay
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -97,6 +103,7 @@ import io.getstream.video.android.mock.previewCall
  * @param pictureInPictureConfiguration User can provide Picture-In-Picture configuration.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param closedCaptionUi You can pass your composable lambda here to render Closed Captions
+ * @param moderationWarningUi Todo Rahul
  */
 @Composable
 public fun CallContent(
@@ -153,11 +160,15 @@ public fun CallContent(
         PictureInPictureConfiguration(true),
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     enableDiagnostics: Boolean = false,
+    moderationBlurConfig: ModerationBlurConfig = ModerationBlurConfig(),
     closedCaptionUi: @Composable (Call) -> Unit = {},
+    moderationWarningUi: @Composable (Call) -> Unit = {},
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
     val isInPictureInPicture = rememberIsInPipMode()
+
+
 
     DefaultPermissionHandler(videoPermission = permissions)
 
@@ -234,8 +245,29 @@ public fun CallContent(
                     }
                 }
                 closedCaptionUi(call)
+                ModerationVideoBlur(call, moderationBlurConfig)
+                moderationWarningUi(call)
             },
         )
+    }
+}
+
+@Composable
+internal fun ModerationVideoBlur(call: Call, moderationBlurConfig: ModerationBlurConfig) {
+    val moderationBlur by call.state.moderationBlur.collectAsStateWithLifecycle()
+    var isVideoBlur by rememberSaveable { mutableStateOf(false) }
+    if (moderationBlur != null) {
+        LaunchedEffect(Unit) {
+            if (!isVideoBlur) {
+                call.videoFilter =
+                    SimpleBlurVideoFilter(blurIntensity = BlurIntensity.CUSTOM(moderationBlurConfig.blurIntensity))
+                isVideoBlur = true
+                delay(moderationBlurConfig.visibilityDurationMs)
+                call.videoFilter = null
+                call.state.resetModeration()
+                isVideoBlur = false
+            }
+        }
     }
 }
 
@@ -300,7 +332,7 @@ public fun CallContent(
         call, modifier, layout, permissions, onBackPressed, onCallAction, appBarContent, style,
         videoRenderer, floatingVideoRenderer, videoContent, videoOverlayContent, controlsContent,
         PictureInPictureConfiguration(enableInPictureInPicture),
-        pictureInPictureContent, enableDiagnostics, closedCaptionUi,
+        pictureInPictureContent, enableDiagnostics, ModerationBlurConfig(), closedCaptionUi,
     )
 }
 
