@@ -1,6 +1,3 @@
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import io.getstream.video.android.Configuration
-
 apply(from = "${rootDir}/scripts/open-api-code-gen.gradle.kts")
 
 buildscript {
@@ -19,7 +16,6 @@ buildscript {
   }
 }
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   alias(libs.plugins.stream.project)
   alias(libs.plugins.stream.android.application) apply false
@@ -32,7 +28,6 @@ plugins {
   alias(libs.plugins.kotlin.compatibility.validator) apply false
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.wire) apply false
-  alias(libs.plugins.maven.publish)
   alias(libs.plugins.google.gms) apply false
   alias(libs.plugins.dokka) apply false
   alias(libs.plugins.spotless) apply false
@@ -48,6 +43,13 @@ plugins {
 streamProject {
     spotless {
         excludePatterns = setOf("**/generated/**")
+    }
+
+    publishing {
+        description = "Stream Video official Android SDK"
+        moduleArtifactIdOverrides = mapOf(
+            "stream-video-android-ui-xml" to "stream-video-android-xml"
+        )
     }
 }
 
@@ -77,100 +79,6 @@ tasks.register("clean")
   .configure {
     delete(rootProject.buildDir)
   }
-
-private val isSnapshot = System.getenv("SNAPSHOT")?.toBoolean() == true
-version = if (isSnapshot) Configuration.snapshotVersionName else Configuration.versionName
-
-subprojects {
-  plugins.withId("com.vanniktech.maven.publish") {
-    extensions.configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(automaticRelease = true)
-
-      pom {
-        name.set(project.name)
-        description.set("Stream Video official Android SDK")
-        url.set("https://github.com/getstream/stream-video-android")
-
-        licenses {
-          license {
-            name.set("Stream License")
-            url.set("https://github.com/GetStream/stream-video-android/blob/main/LICENSE")
-          }
-        }
-
-        developers {
-          developer {
-            id = "aleksandar-apostolov"
-            name = "Aleksandar Apostolov"
-            email = "aleksandar.apostolov@getstream.io"
-          }
-          developer {
-            id = "VelikovPetar"
-            name = "Petar Velikov"
-            email = "petar.velikov@getstream.io"
-          }
-          developer {
-            id = "andremion"
-            name = "André Mion"
-            email = "andre.rego@getstream.io"
-          }
-          developer {
-            id = "rahul-lohra"
-            name = "Rahul Kumar Lohra"
-            email = "rahul.lohra@getstream.io"
-          }
-          developer {
-            id = "gpunto"
-            name = "Gianmarco David"
-            email = "gianmarco.david@getstream.io"
-          }
-          developer {
-            id = "filbabic"
-            name = "Filip Babic"
-            email = "filip.babic@getstream.io"
-          }
-          developer {
-            id = "skydoves"
-            name = "Jaewoong Eum"
-            email = "jaewoong.eum@getstream.io"
-          }
-          developer {
-            id = "kanat"
-            name = "Kanat Kiialbaev"
-            email = "kanat.kiialbaev@getstream.io"
-          }
-          developer {
-            id = "TGazica"
-            name = "Tomislav Gazica"
-            email = "tomislav.gazica@getstream.io"
-          }
-        }
-
-        scm {
-          connection.set("scm:git:github.com/getstream/stream-video-android.git")
-          developerConnection.set("scm:git:ssh://github.com/getstream/stream-video-android.git")
-          url.set("https://github.com/getstream/stream-video-android/tree/main")
-        }
-      }
-    }
-  }
-}
-
-tasks.register("printAllArtifacts") {
-  group = "publishing"
-  description = "Prints all artifacts that will be published"
-
-  doLast {
-    subprojects.forEach { subproject ->
-      subproject.plugins.withId("com.vanniktech.maven.publish") {
-        subproject.extensions.findByType(PublishingExtension::class.java)
-          ?.publications
-          ?.filterIsInstance<MavenPublication>()
-          ?.forEach { println("${it.groupId}:${it.artifactId}:${it.version}") }
-      }
-    }
-  }
-}
 
 //apply(from = teamPropsFile("git-hooks.gradle.kts"))
 //
