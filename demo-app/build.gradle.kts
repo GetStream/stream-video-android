@@ -105,7 +105,7 @@ android {
             baselineProfile.automaticGenerationDuringBuild = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("release")
         }
@@ -140,7 +140,9 @@ android {
     }
 
     playConfigs {
-        val serviceAccountCredentialsFile: File = rootProject.file(".sign/service-account-credentials.json")
+        val serviceAccountCredentialsFile: File = rootProject.file(
+            ".sign/service-account-credentials.json",
+        )
         if (serviceAccountCredentialsFile.exists()) {
             register("productionRelease") {
                 enabled.set(true)
@@ -196,7 +198,7 @@ androidComponents {
                 it.versionName.set(
                     it.versionCode.map { playVersionCode ->
                         "${Configuration.streamVideoCallGooglePlayVersion} ($playVersionCode)"
-                    }
+                    },
                 )
             }
 
@@ -214,9 +216,7 @@ dependencies {
     implementation(project(":stream-video-android-filters-video"))
     compileOnly(project(":stream-video-android-previewdata"))
 
-
     implementation(libs.androidx.media.media)
-
 
     implementation(libs.androidx.media.media)
 
@@ -278,7 +278,9 @@ dependencies {
     implementation(libs.moshi.kotlin)
 
     // Play
-    implementation(libs.play.install.referrer) // Used to extract the meeting link from demo flow after install
+    implementation(
+        libs.play.install.referrer,
+    ) // Used to extract the meeting link from demo flow after install
     implementation(libs.play.auth)
     implementation(libs.play.app.update.ktx)
 
