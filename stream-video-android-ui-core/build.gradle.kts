@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import io.getstream.video.android.Configuration
 
 plugins {
+    alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
 }
-
-rootProject.extra.apply {
-    set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
-    set("PUBLISH_ARTIFACT_ID", "stream-video-android-ui-core")
-    set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
-}
-
-apply(from = "$rootDir/scripts/publish-module.gradle")
 
 android {
     namespace = "io.getstream.video.android.ui.common"
@@ -58,4 +52,19 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime)
 
     implementation(libs.stream.log)
+}
+
+mavenPublishing {
+    coordinates(
+        groupId = Configuration.artifactGroup,
+        artifactId = "stream-video-android-ui-core",
+        version = rootProject.version.toString(),
+    )
+    configure(
+        AndroidSingleVariantLibrary(
+            variant = "release",
+            sourcesJar = true,
+            publishJavadocJar = true,
+        ),
+    )
 }
