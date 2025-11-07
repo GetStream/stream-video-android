@@ -355,15 +355,19 @@ internal class Publisher(
         track: MediaStreamTrack,
         publishOption: PublishOption,
     ) {
-        val init = computeTransceiverEncodings(captureFormat, publishOption)
+        val rtpParametersEncodings = computeTransceiverEncodings(
+            captureFormat,
+            publishOption,
+            audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
+        )
         try {
             logger.d {
-                "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: $init)"
+                "Adding ${publishOption.track_type} transceiver. (trackID: ${track.id()}, sendEncodings: $rtpParametersEncodings)"
             }
             logger.d {
-                "Transceiver init details - captureFormat: ${captureFormat?.let { "${it.width}x${it.height}@${it.framerate}fps" } ?: "null"}, publishOption: ${publishOption.track_type}, encodings count: ${init.size}"
+                "Transceiver init details - captureFormat: ${captureFormat?.let { "${it.width}x${it.height}@${it.framerate}fps" } ?: "null"}, publishOption: ${publishOption.track_type}, encodings count: ${rtpParametersEncodings.size}"
             }
-            init.forEachIndexed { index, encoding ->
+            rtpParametersEncodings.forEachIndexed { index, encoding ->
                 logger.d {
                     "  Encoding[$index]: ${encoding.stringify()}"
                 }
@@ -373,7 +377,7 @@ internal class Publisher(
                 RtpTransceiverInit(
                     RtpTransceiverDirection.SEND_ONLY,
                     streamIdList,
-                    init,
+                    rtpParametersEncodings,
                 ),
             )
             logger.d {

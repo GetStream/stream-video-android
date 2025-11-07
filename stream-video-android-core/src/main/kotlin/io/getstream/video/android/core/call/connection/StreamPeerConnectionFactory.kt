@@ -59,6 +59,8 @@ import java.nio.ByteBuffer
  * @property audioUsage signal to the system how the audio tracks are used.
  * @property audioProcessing Factory that provides audio processing capabilities.
  * Set this to [AudioAttributes.USAGE_MEDIA] if you want the audio track to behave like media, useful for livestreaming scenarios.
+ * @property sharedEglBaseProvider Provider function that returns the EGL base context. This is lazy-evaluated to avoid
+ * creating EglBase during construction, which is useful for unit testing.
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
@@ -66,7 +68,15 @@ public class StreamPeerConnectionFactory(
     private val audioUsage: Int = defaultAudioUsage,
     private val audioUsageProvider: (() -> Int) = { audioUsage },
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
+    private val audioBitrateProfileProvider: (() -> stream.video.sfu.models.AudioBitrateProfile)? = null,
+    private val sharedEglBaseProvider: () -> EglBase = { EglBase.create() },
 ) {
+    /**
+     * The audio bitrate profile that was used when this factory was created.
+     * This is captured when initAudioDeviceModule() is called and is used to detect
+     * if the factory needs to be recreated when the profile changes during join
+     */
+    internal var audioBitrateProfile: stream.video.sfu.models.AudioBitrateProfile? = null
 
     private val webRtcLogger by taggedLogger("Call:WebRTC")
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
@@ -103,16 +113,17 @@ public class StreamPeerConnectionFactory(
 
     /**
      * Represents the EGL rendering context.
+     * Todo : Remove this with the next major release
      */
     public val eglBase: EglBase by lazy {
-        EglBase.create()
+        sharedEglBaseProvider()
     }
 
     /**
      * Default video decoder factory used to unpack video from the remote tracks.
      */
     private val videoDecoderFactory by lazy {
-        SelectiveVideoDecoderFactory(eglBase.eglBaseContext)
+        SelectiveVideoDecoderFactory(sharedEglBaseProvider().eglBaseContext)
     }
 
     /**
@@ -120,7 +131,7 @@ public class StreamPeerConnectionFactory(
      */
     private val videoEncoderFactory by lazy {
         SimulcastAlignedVideoEncoderFactory(
-            eglBase.eglBaseContext,
+            sharedEglBaseProvider().eglBaseContext,
             true,
             true,
             ResolutionAdjustment.MULTIPLE_OF_16,
@@ -133,7 +144,7 @@ public class StreamPeerConnectionFactory(
      */
     private val factory: PeerConnectionFactory by lazy { createFactory() }
 
-    var adm: JavaAudioDeviceModule? = null
+    private var adm: JavaAudioDeviceModule? = null
 
     private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
@@ -168,9 +179,19 @@ public class StreamPeerConnectionFactory(
 
         adm = initAudioDeviceModule()
 
+        // Capture the audio bitrate profile when creating the factory
+        val currentAudioBitrateProfile = audioBitrateProfileProvider?.invoke()
+        val isMusicHighQuality = currentAudioBitrateProfile ==
+            stream.video.sfu.models.AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
         return PeerConnectionFactory.builder()
             .apply {
-                audioProcessing?.also { setAudioProcessingFactory(it) }
+                // Disable audio processing (noise cancellation) when MUSIC_HIGH_QUALITY is enabled
+                if (!isMusicHighQuality) {
+                    audioProcessing?.also { setAudioProcessingFactory(it) }
+                } else {
+                    setAudioProcessingEnabled(false)
+                }
             }
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(videoEncoderFactory)
@@ -181,11 +202,26 @@ public class StreamPeerConnectionFactory(
     }
 
     private fun initAudioDeviceModule(): JavaAudioDeviceModule? {
+        // Capture the audio bitrate profile when initializing the audio device module
+        audioBitrateProfile = audioBitrateProfileProvider?.invoke()
+
+        val isMusicHighQuality = audioBitrateProfile ==
+            stream.video.sfu.models.AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+        val useHardwareAcousticEchoCanceler = if (isMusicHighQuality) {
+            false
+        } else {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        }
+        val useHardwareNoiseSuppressor = if (isMusicHighQuality) {
+            false
+        } else {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        }
+
         adm = JavaAudioDeviceModule
             .builder(context)
-            .setUseHardwareAcousticEchoCanceler(
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q,
-            ).apply {
+            .setUseHardwareAcousticEchoCanceler(useHardwareAcousticEchoCanceler)
+            .apply {
                 if (audioUsageProvider.invoke() != defaultAudioUsage) {
                     setAudioAttributes(
                         AudioAttributes.Builder().setUsage(audioUsageProvider.invoke())
@@ -193,7 +229,7 @@ public class StreamPeerConnectionFactory(
                     )
                 }
             }
-            .setUseHardwareNoiseSuppressor(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            .setUseHardwareNoiseSuppressor(useHardwareNoiseSuppressor)
             .setAudioRecordErrorCallback(object :
                 JavaAudioDeviceModule.AudioRecordErrorCallback {
                 override fun onWebRtcAudioRecordInitError(p0: String?) {
@@ -509,5 +545,30 @@ public class StreamPeerConnectionFactory(
             it.isEnabled = !it.isEnabled
             it.isEnabled
         } ?: false
+    }
+
+    /**
+     * Updates the audio track usage for the audio device module.
+     * This allows toggling between different audio usage types (e.g., USAGE_MEDIA vs USAGE_VOICE_COMMUNICATION).
+     *
+     * @param audioUsage The audio usage value to set (e.g., AudioAttributes.USAGE_MEDIA or AudioAttributes.USAGE_VOICE_COMMUNICATION)
+     * @return true if the update was successful, false if the ADM is not available or the update failed
+     */
+    internal fun updateAudioTrackUsage(audioUsage: Int): Boolean {
+        return adm?.updateAudioTrackUsage(audioUsage) ?: false
+    }
+
+    /**
+     * Disposes the factory and releases resources.
+     * This should only be called when no active peer connections are using it.
+     */
+    internal fun dispose() {
+        try {
+            factory.dispose()
+        } catch (e: Exception) {
+            webRtcLogger.w { "Error disposing factory: ${e.message}" }
+        }
+        adm?.release()
+        adm = null
     }
 }
