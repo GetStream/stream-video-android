@@ -79,4 +79,13 @@ dependencies {
     testImplementation(project(":stream-video-android-previewdata"))
 
     implementation(project(":stream-video-android-filters-video"))
+
+    // unit tests
+    testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlin.test.junit)
+
 }
