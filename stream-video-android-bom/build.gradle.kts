@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.dokka)
-    kotlin("jvm")
+    alias(libs.plugins.stream.java.platform)
 }
 
 dependencies {

@@ -45,7 +45,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
-        versionName = Configuration.streamVideoCallGooglePlayVersion
+        versionName = rootProject.version.toString()
         testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
         missingDimensionStrategy(FlavorDimension.contentType.name, VideoDemoFlavor.development.name)
@@ -197,7 +197,7 @@ androidComponents {
             applicationVariant.outputs.forEach {
                 it.versionName.set(
                     it.versionCode.map { playVersionCode ->
-                        "${Configuration.streamVideoCallGooglePlayVersion} ($playVersionCode)"
+                        "${rootProject.version} ($playVersionCode)"
                     },
                 )
             }

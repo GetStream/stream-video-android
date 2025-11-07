@@ -60,10 +60,14 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
-        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${Configuration.majorVersion}")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
+
+        val versionParts = version.toString().split(".").mapNotNull(String::toIntOrNull).also {
+            require(it.size == 3) { "Unexpected version format: $version. Expected: M.m.p" }
+        }
+        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"$version\"")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${versionParts[0]}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${versionParts[1]}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${versionParts[2]}")
         buildConfigField(
             "String",
             "STREAM_WEBRTC_VERSION",

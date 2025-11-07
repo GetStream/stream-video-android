@@ -21,6 +21,8 @@ plugins {
   alias(libs.plugins.stream.android.application) apply false
   alias(libs.plugins.stream.android.library) apply false
   alias(libs.plugins.stream.android.test) apply false
+  alias(libs.plugins.stream.java.library) apply false
+  alias(libs.plugins.stream.java.platform) apply false
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.kotlin.android) apply false
   // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
@@ -44,7 +46,6 @@ streamProject {
     spotless {
         excludePatterns = setOf("**/generated/**")
     }
-
     publishing {
         description = "Stream Video official Android SDK"
         moduleArtifactIdOverrides = mapOf(
