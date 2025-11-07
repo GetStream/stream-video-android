@@ -25,7 +25,7 @@ rootProject.extra.apply {
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
-apply(from ="${rootDir}/scripts/publish-module.gradle")
+apply(from = "$rootDir/scripts/publish-module.gradle")
 
 android {
     namespace = "io.getstream.video.android.xml"
@@ -65,5 +65,4 @@ dependencies {
     implementation(libs.landscapist.coil)
 
     implementation(libs.stream.log)
-
 }

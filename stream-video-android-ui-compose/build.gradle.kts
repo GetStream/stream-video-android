@@ -25,7 +25,7 @@ rootProject.extra.apply {
     set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
 }
 
-apply(from = "${rootDir}/scripts/publish-module.gradle")
+apply(from = "$rootDir/scripts/publish-module.gradle")
 
 android {
     namespace = "io.getstream.video.android.compose"
@@ -83,5 +83,4 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     testImplementation(libs.kotlin.test.junit)
-
 }
