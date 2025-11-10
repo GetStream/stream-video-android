@@ -1,34 +1,25 @@
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.KotlinJvm
-import io.getstream.video.android.Configuration
-
 plugins {
-    alias(libs.plugins.maven.publish)
     alias(libs.plugins.dokka)
-    kotlin("jvm")
+    alias(libs.plugins.stream.java.platform)
+}
+
+spotless {
+    // Point to non-existent file pattern because this module has no source files
+    java {
+        target("no-files-to-format")
+    }
+    kotlin {
+        target("no-files-to-format")
+    }
 }
 
 dependencies {
-  constraints {
-    api(project(":stream-video-android-core"))
-    api(project(":stream-video-android-ui-core"))
-    api(project(":stream-video-android-ui-xml"))
-    api(project(":stream-video-android-ui-compose"))
-    api(project(":stream-video-android-filters-video"))
-    api(project(":stream-video-android-previewdata"))
-  }
-}
-
-mavenPublishing {
-    coordinates(
-        groupId = Configuration.artifactGroup,
-        artifactId = "stream-video-android-bom",
-        version = rootProject.version.toString(),
-    )
-    configure(
-        KotlinJvm(
-            javadocJar = JavadocJar.Dokka("dokkaJavadoc"),
-            sourcesJar = true,
-        ),
-    )
+    constraints {
+        api(project(":stream-video-android-core"))
+        api(project(":stream-video-android-ui-core"))
+        api(project(":stream-video-android-ui-xml"))
+        api(project(":stream-video-android-ui-compose"))
+        api(project(":stream-video-android-filters-video"))
+        api(project(":stream-video-android-previewdata"))
+    }
 }

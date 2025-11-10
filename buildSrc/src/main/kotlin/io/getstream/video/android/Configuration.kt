@@ -1,14 +1,5 @@
 package io.getstream.video.android
 
 object Configuration {
-    const val majorVersion = 1
-    const val minorVersion = 18
-    const val patchVersion = 2
-    const val versionName = "$majorVersion.$minorVersion.$patchVersion"
-    const val versionCode = 57
-    const val snapshotBasedVersionName = "$majorVersion.$minorVersion.${patchVersion + 1}"
-    const val snapshotVersionName = "$majorVersion.$minorVersion.${patchVersion + 1}-SNAPSHOT"
-    const val artifactGroup = "io.getstream"
-    const val streamVideoCallGooglePlayVersion = versionName
     const val streamWebRtcVersionName = "1.3.6"
 }
