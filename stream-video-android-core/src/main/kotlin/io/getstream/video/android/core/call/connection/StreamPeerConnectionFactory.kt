@@ -287,13 +287,14 @@ public class StreamPeerConnectionFactory(
             .setSamplesReadyCallback {
                 audioSampleCallback?.invoke(it)
             }
-            .setAudioRecordDataCallback { audioFormat, channelCount, sampleRate, audioBuffer ->
+            .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, _, captureTimeNs ->
                 audioRecordDataCallback?.invoke(
                     audioFormat,
                     channelCount,
                     sampleRate,
                     audioBuffer,
                 )
+                captureTimeNs
             }
             .setUseStereoOutput(true)
             .createAudioDeviceModule().also {
