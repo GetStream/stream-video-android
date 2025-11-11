@@ -957,9 +957,7 @@ private fun ModerationWarningRootUi(call: Call) {
     }
     warningEvent?.let { event ->
         val moderationText = ModerationText(
-            LocalContext.current.getString(
-                io.getstream.video.android.compose.R.string.stream_moderation_warning_title,
-            ),
+            LocalContext.current.getString(R.string.moderation_warning_title),
             event.message,
         )
         ModerationWarningUiContainer(
