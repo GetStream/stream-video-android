@@ -78,8 +78,6 @@ dependencies {
     compileOnly(project(":stream-video-android-previewdata"))
     testImplementation(project(":stream-video-android-previewdata"))
 
-    implementation(project(":stream-video-android-filters-video"))
-
     // unit tests
     testImplementation(libs.junit)
     testImplementation(libs.truth)

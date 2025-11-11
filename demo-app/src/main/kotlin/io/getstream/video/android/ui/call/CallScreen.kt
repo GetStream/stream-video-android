@@ -118,9 +118,12 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.core.model.PreferredVideoResolution
+import io.getstream.video.android.core.moderation.ModerationBlurConfig
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.core.utils.isEnabled
+import io.getstream.video.android.filters.video.BlurIntensity
 import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
+import io.getstream.video.android.filters.video.SimpleBlurVideoFilter
 import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -570,6 +573,9 @@ fun CallScreen(
                                 )
                             }
                         },
+                        moderationBlurUi = { call ->
+                            ModerationVideoBlur(call, ModerationBlurConfig())
+                        },
                         moderationWarningUi = { call ->
                             ModerationWarningUiContainer(call)
                         },
@@ -926,6 +932,22 @@ private fun BadNetworkLabel(
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
             )
+        }
+    }
+}
+
+@Composable
+internal fun ModerationVideoBlur(call: Call, moderationBlurConfig: ModerationBlurConfig) {
+    var isVideoBlur by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!isVideoBlur) {
+            call.videoFilter =
+                SimpleBlurVideoFilter(blurIntensity = BlurIntensity.ULTRA)
+            isVideoBlur = true
+            delay(moderationBlurConfig.visibilityDurationMs)
+            call.videoFilter = null
+            call.state.resetModeration()
+            isVideoBlur = false
         }
     }
 }
