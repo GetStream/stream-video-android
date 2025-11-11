@@ -11792,16 +11792,6 @@ public final class io/getstream/video/android/core/moderation/ModerationBlurConf
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/moderation/ModerationManager {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
-	public final fun getModerationBlur ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getModerationWarning ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
-	public final fun handleEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
-	public final fun resetModerationBlur ()V
-	public final fun resetModerationWarning ()V
-}
-
 public final class io/getstream/video/android/core/moderation/ModerationText {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
