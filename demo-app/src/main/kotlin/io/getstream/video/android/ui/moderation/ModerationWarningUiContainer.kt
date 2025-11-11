@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.moderation
+package io.getstream.video.android.ui.moderation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInCubic
@@ -47,26 +47,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.R
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.moderation.ModerationText
-import io.getstream.video.android.core.moderation.ModerationWarningAnimationConfig
 import kotlinx.coroutines.delay
 
 @Composable
-public fun ModerationWarningUiContainer(
+internal fun ModerationWarningUiContainer(
     call: Call,
     config: ModerationThemeConfig = ModerationDefaults.defaultTheme,
     moderationWarningAnimationConfig: ModerationWarningAnimationConfig =
         ModerationWarningAnimationConfig(),
-    moderationText: ModerationText? = null,
+    moderationText: ModerationText,
 ) {
     if (LocalInspectionMode.current) {
         Box(
@@ -80,21 +75,14 @@ public fun ModerationWarningUiContainer(
             ModerationWarningUiContentDemo()
         }
     } else {
-        val moderationWarning by call.state.moderationWarning.collectAsStateWithLifecycle()
-        moderationWarning?.let {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .offset(y = config.yOffset)
-                    .padding(horizontal = config.horizontalMargin),
-                contentAlignment = Alignment.BottomCenter,
-            ) {
-                val finalModerationText = moderationText ?: ModerationText(
-                    LocalContext.current.getString(R.string.stream_moderation_warning_title),
-                    it.message,
-                )
-                ModerationUi(config, moderationWarningAnimationConfig, finalModerationText)
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(y = config.yOffset)
+                .padding(horizontal = config.horizontalMargin),
+            contentAlignment = Alignment.BottomCenter,
+        ) {
+            ModerationUi(config, moderationWarningAnimationConfig, moderationText)
         }
     }
 }

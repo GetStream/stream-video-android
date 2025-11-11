@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.moderation
+package io.getstream.video.android.ui.moderation
 
-import io.getstream.video.android.core.moderation.CallModerationConstants.DEFAULT_BLUR_AUTO_DISMISS_TIME_MS
+import io.getstream.video.android.ui.moderation.CallModerationConstants.DEFAULT_BLUR_AUTO_DISMISS_TIME_MS
 
 data class ModerationBlurConfig(
     val visibilityDurationMs: Long = DEFAULT_BLUR_AUTO_DISMISS_TIME_MS,

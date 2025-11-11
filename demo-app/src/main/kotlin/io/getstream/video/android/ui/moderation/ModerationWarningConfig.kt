@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.moderation
+package io.getstream.video.android.ui.moderation
 
 /**
  * Configuration for the animation and visibility behavior of the Moderation Warning UI.
@@ -23,7 +23,7 @@ package io.getstream.video.android.core.moderation
  * @param slideInDuration The duration (in milliseconds) of the slide-in animation when the warning UI appears.
  * @param slideOutDuration The duration (in milliseconds) of the slide-out animation when the warning UI disappears.
  *
- * See [io.getstream.video.android.compose.ui.components.call.moderation.ModerationUi] for implementation details.
+ * See [io.getstream.video.android.ui.moderation.ModerationUi] for implementation details.
  */
 data class ModerationWarningAnimationConfig(
     val displayTime: Long = CallModerationConstants.DEFAULT_MODERATION_DISPLAY_TIME_MS,

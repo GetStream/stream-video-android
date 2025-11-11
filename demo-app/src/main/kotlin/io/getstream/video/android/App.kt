@@ -22,10 +22,10 @@ import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.moderation.CallModerationConstants
 import io.getstream.video.android.data.model.PolicyViolationUiData
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
+import io.getstream.video.android.ui.moderation.CallModerationConstants
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

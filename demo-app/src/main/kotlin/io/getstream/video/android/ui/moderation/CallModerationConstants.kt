@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.moderation
+package io.getstream.video.android.ui.moderation
 
 object CallModerationConstants {
     const val POLICY_VIOLATION = "PolicyViolationModeration"

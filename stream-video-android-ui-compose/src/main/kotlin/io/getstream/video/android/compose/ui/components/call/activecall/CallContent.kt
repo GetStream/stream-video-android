@@ -97,7 +97,6 @@ import io.getstream.video.android.mock.previewCall
  * @param pictureInPictureConfiguration User can provide Picture-In-Picture configuration.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param closedCaptionUi You can pass your composable lambda here to render Closed Captions
- * @param moderationWarningUi Pass your composable lambda here to render Moderation Warning UI
  */
 @Composable
 public fun CallContent(
@@ -155,8 +154,6 @@ public fun CallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     enableDiagnostics: Boolean = false,
     closedCaptionUi: @Composable (Call) -> Unit = {},
-    moderationBlurUi: @Composable (Call) -> Unit = {},
-    moderationWarningUi: @Composable (Call) -> Unit = {},
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
@@ -169,11 +166,7 @@ public fun CallContent(
     BackHandler {
         if (pictureInPictureConfiguration.enable) {
             try {
-                enterPictureInPicture(
-                    context = context,
-                    call = call,
-                    pictureInPictureConfiguration,
-                )
+                enterPictureInPicture(context = context, call = call, pictureInPictureConfiguration)
             } catch (e: Exception) {
                 StreamLog.e(tag = "CallContent") { e.stackTraceToString() }
                 call.leave()
@@ -226,8 +219,7 @@ public fun CallContent(
                         },
                 ) {
                     BoxWithConstraints {
-                        val contentSize =
-                            IntSize(constraints.maxWidth, constraints.maxHeight)
+                        val contentSize = IntSize(constraints.maxWidth, constraints.maxHeight)
 
                         CompositionLocalProvider(LocalVideoContentSize provides contentSize) {
                             videoContent.invoke(this@Row, call)
@@ -242,16 +234,6 @@ public fun CallContent(
                     }
                 }
                 closedCaptionUi(call)
-
-                val moderationBlur by call.state.moderationBlur.collectAsStateWithLifecycle()
-                moderationBlur?.let {
-                    moderationBlurUi(call)
-                }
-
-                val moderationWarning by call.state.moderationWarning.collectAsStateWithLifecycle()
-                moderationWarning?.let {
-                    moderationWarningUi(call)
-                }
             },
         )
     }

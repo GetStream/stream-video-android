@@ -83,6 +83,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.video.generated.models.CallModerationBlurEvent
+import io.getstream.android.video.generated.models.CallModerationWarningEvent
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
@@ -105,7 +107,6 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSettingsAction
-import io.getstream.video.android.compose.ui.components.call.moderation.ModerationWarningUiContainer
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
@@ -118,7 +119,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.core.model.PreferredVideoResolution
-import io.getstream.video.android.core.moderation.ModerationBlurConfig
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.core.utils.isEnabled
 import io.getstream.video.android.filters.video.BlurIntensity
@@ -136,6 +136,12 @@ import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsDefaults
 import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
+import io.getstream.video.android.ui.moderation.CallModerationConstants
+import io.getstream.video.android.ui.moderation.ModerationBlurConfig
+import io.getstream.video.android.ui.moderation.ModerationDefaults
+import io.getstream.video.android.ui.moderation.ModerationText
+import io.getstream.video.android.ui.moderation.ModerationWarningAnimationConfig
+import io.getstream.video.android.ui.moderation.ModerationWarningUiContainer
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -573,12 +579,6 @@ fun CallScreen(
                                 )
                             }
                         },
-                        moderationBlurUi = { call ->
-                            ModerationVideoBlur(call, ModerationBlurConfig())
-                        },
-                        moderationWarningUi = { call ->
-                            ModerationWarningUiContainer(call)
-                        },
                     )
                     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                         StreamIconToggleButton(
@@ -601,6 +601,8 @@ fun CallScreen(
                             }
                         }
                     }
+                    ModerationBlurRootUi(call)
+                    ModerationWarningRootUi(call)
                 }
             },
             updateUnreadCount = { unreadCount = it },
@@ -937,17 +939,54 @@ private fun BadNetworkLabel(
 }
 
 @Composable
-internal fun ModerationVideoBlur(call: Call, moderationBlurConfig: ModerationBlurConfig) {
-    var isVideoBlur by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        if (!isVideoBlur) {
-            call.videoFilter =
-                SimpleBlurVideoFilter(blurIntensity = BlurIntensity.ULTRA)
-            isVideoBlur = true
-            delay(moderationBlurConfig.visibilityDurationMs)
-            call.videoFilter = null
-            call.state.resetModeration()
-            isVideoBlur = false
+private fun ModerationWarningRootUi(call: Call) {
+    var warningEvent by remember { mutableStateOf<CallModerationWarningEvent?>(null) }
+    val moderationThemeConfig = ModerationDefaults.defaultTheme
+    val moderationWarningAnimationConfig = ModerationWarningAnimationConfig()
+
+    LaunchedEffect(call) {
+        call.events.collect { event ->
+            when (event) {
+                is CallModerationWarningEvent -> {
+                    warningEvent = event
+                    delay(CallModerationConstants.DEFAULT_MODERATION_AUTO_DISMISS_TIME_MS)
+                    warningEvent = null // auto-dismiss after config duration
+                }
+            }
+        }
+    }
+    warningEvent?.let { event ->
+        val moderationText = ModerationText(
+            LocalContext.current.getString(
+                io.getstream.video.android.compose.R.string.stream_moderation_warning_title,
+            ),
+            event.message,
+        )
+        ModerationWarningUiContainer(
+            call,
+            moderationThemeConfig,
+            moderationWarningAnimationConfig,
+            moderationText,
+        )
+    }
+}
+
+@Composable
+private fun ModerationBlurRootUi(call: Call) {
+    var blurEvent by remember { mutableStateOf<CallModerationBlurEvent?>(null) }
+    val moderationBlurConfig = ModerationBlurConfig()
+    LaunchedEffect(call) {
+        call.events.collect { event ->
+            when (event) {
+                is CallModerationBlurEvent -> {
+                    blurEvent = event
+                    call.videoFilter =
+                        SimpleBlurVideoFilter(blurIntensity = BlurIntensity.ULTRA)
+                    delay(moderationBlurConfig.visibilityDurationMs)
+                    blurEvent = null // auto-dismiss after config duration
+                    call.videoFilter = null
+                }
+            }
         }
     }
 }

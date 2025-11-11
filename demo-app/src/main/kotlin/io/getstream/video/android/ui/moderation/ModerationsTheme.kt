@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.call.moderation
+package io.getstream.video.android.ui.moderation
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
  * which serves as the default styling configuration for the Moderation Warning UI.
  */
 
-public object ModerationDefaults {
+internal object ModerationDefaults {
     public val defaultTheme: ModerationThemeConfig = ModerationThemeConfig()
 }
 
@@ -44,7 +44,7 @@ public object ModerationDefaults {
  * @param roundedCornerShape A shape used for the  caption container.
  *
  */
-public data class ModerationThemeConfig(
+internal data class ModerationThemeConfig(
     val yOffset: Dp = -100.dp,
     val horizontalMargin: Dp = 16.dp,
     val backgroundColor: Color = Color.White,
