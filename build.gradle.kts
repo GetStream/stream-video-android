@@ -112,29 +112,14 @@ subprojects {
             email = "rahul.lohra@getstream.io"
           }
           developer {
+            id = "PratimMallick"
+            name = "Pratim Mallick"
+            email = "pratim.mallick@getstream.io"
+          }
+          developer {
             id = "gpunto"
             name = "Gianmarco David"
             email = "gianmarco.david@getstream.io"
-          }
-          developer {
-            id = "filbabic"
-            name = "Filip Babic"
-            email = "filip.babic@getstream.io"
-          }
-          developer {
-            id = "skydoves"
-            name = "Jaewoong Eum"
-            email = "jaewoong.eum@getstream.io"
-          }
-          developer {
-            id = "kanat"
-            name = "Kanat Kiialbaev"
-            email = "kanat.kiialbaev@getstream.io"
-          }
-          developer {
-            id = "TGazica"
-            name = "Tomislav Gazica"
-            email = "tomislav.gazica@getstream.io"
           }
         }
 
