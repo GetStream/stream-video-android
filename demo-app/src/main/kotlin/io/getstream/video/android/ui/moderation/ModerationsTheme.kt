@@ -17,88 +17,38 @@
 package io.getstream.video.android.ui.moderation
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.StreamColors
 
 /**
- * Provides default configurations for the Closed Captions UI.
+ * Provides default configurations for the Moderation Warning UI.
  *
  * The [ModerationDefaults] object contains a predefined instance of [ModerationThemeConfig],
- * which serves as the default styling and behavior configuration for the closed captions UI.
- * Developers can use this default configuration or provide a custom one to override specific values.
+ * which serves as the default styling configuration for the Moderation Warning UI.
  */
 
 public object ModerationDefaults {
-    /**
-     * The default configuration for closed captions, defining layout, styling, and behavior.
-     *
-     * - `yOffset`: Vertical offset for positioning the closed captions container.
-     * - `horizontalMargin`: Horizontal margin around the container.
-     * - `boxAlpha`: Opacity of the background box containing the captions.
-     * - `boxPadding`: Padding inside the background box.
-     * - `textColor`: Color used for the caption text.
-     * - `roundedCornerShape`: The corner radius of the background box.
-     */
-    public val config: ModerationThemeConfig = ModerationThemeConfig(
-        yOffset = -100.dp,
-        horizontalMargin = 16.dp,
-        boxAlpha = 0.5f,
-        boxPadding = 12.dp,
-        textColor = Color.Black,
-        roundedCornerShape = RoundedCornerShape(16.dp),
-    )
-
-    @Composable
-    public fun streamModerationThemeConfig(): ModerationThemeConfig {
-        val colors = StreamColors.defaultColors()
-        return config.copy(
-            backgroundColor = colors.baseSheetPrimary,
-            textColor = colors.basePrimary,
-        )
-    }
+    public val defaultTheme: ModerationThemeConfig = ModerationThemeConfig()
 }
 
 /**
- * Defines the configuration for Closed Captions UI, allowing customization of its layout, styling, and behavior.
- *
- * This configuration can be used to style the closed captions container and its contents. Developers can
- * customize the appearance by overriding specific values as needed.
+ * Defines the configuration for Moderation Warning UI, allowing customization of its layout & styling
  *
  * @param yOffset Vertical offset for the closed captions container. Negative values move the container upwards.
  * @param horizontalMargin Horizontal margin around the container.
- * @param boxAlpha Background opacity of the closed captions container, where `0.0f` is fully transparent
- *                 and `1.0f` is fully opaque.
- * @param boxPadding Padding inside the background box of the closed captions container.
  * @param backgroundColor Color used for rendering the background box of the closed captions container.
- * @param textColor Color used for rendering the caption text.
- *                           Must be less than or equal to [ClosedCaptionsConfig.maxCaptions] to ensure consistency.
+ * @param titleColor Color used for rendering the caption text.
+ * @param messageColor Color used for rendering the caption text.
  * @param roundedCornerShape A shape used for the  caption container.
  *
- * Example Usage:
- * ```
- * val customConfig = ClosedCaptionsThemeConfig(
- *     yOffset = -100.dp,
- *     horizontalMargin = 20.dp,
- *     boxAlpha = 0.7f,
- *     boxPadding = 16.dp,
- *     backgroundColor = Color.Black,
- *     speakerColor = Color.Cyan,
- *     textColor = Color.Green,
- *     maxVisibleCaptions = 5,
- *     roundedCornerShape = RounderCornerShape(12.dp),
- * )
- * ```
  */
 public data class ModerationThemeConfig(
-    val yOffset: Dp = -50.dp,
-    val horizontalMargin: Dp = 0.dp,
-    val boxAlpha: Float = 1f,
-    val boxPadding: Dp = 0.dp,
-    val backgroundColor: Color = Color.Black,
-    val textColor: Color = Color.White,
-    val roundedCornerShape: Shape? = null,
+    val yOffset: Dp = -100.dp,
+    val horizontalMargin: Dp = 16.dp,
+    val backgroundColor: Color = Color.White,
+    val titleColor: Color = Color.Black,
+    val messageColor: Color = Color.Gray,
+    val roundedCornerShape: Shape? = RoundedCornerShape(16.dp),
 )

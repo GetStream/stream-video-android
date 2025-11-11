@@ -107,7 +107,7 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
-import io.getstream.video.android.core.moderation.ModerationManager
+import io.getstream.video.android.core.moderation.CallModerationConstants
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -688,9 +688,13 @@ public class CallState(
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
 
-    private val moderationManager = ModerationManager()
-    val moderationWarning: StateFlow<CallModerationWarningEvent?> = moderationManager.moderationWarning
-    val moderationBlur: StateFlow<CallModerationBlurEvent?> = moderationManager.moderationBlur
+    private val _moderationWarning: MutableStateFlow<CallModerationWarningEvent?> =
+        MutableStateFlow(null)
+    val moderationWarning: StateFlow<CallModerationWarningEvent?> = _moderationWarning.asStateFlow()
+
+    private val _moderationBlur: MutableStateFlow<CallModerationBlurEvent?> =
+        MutableStateFlow(null)
+    val moderationBlur: StateFlow<CallModerationBlurEvent?> = _moderationBlur.asStateFlow()
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
@@ -1131,6 +1135,20 @@ public class CallState(
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
             -> closedCaptionManager.handleEvent(event)
+            is CallModerationWarningEvent -> {
+                _moderationWarning.value = event
+                scope.launch {
+                    delay(CallModerationConstants.DEFAULT_MODERATION_AUTO_DISMISS_TIME_MS)
+                    _moderationWarning.value = null
+                }
+            }
+            is CallModerationBlurEvent -> {
+                _moderationBlur.value = event
+                scope.launch {
+                    delay(CallModerationConstants.DEFAULT_BLUR_AUTO_DISMISS_TIME_MS)
+                    _moderationWarning.value = null
+                }
+            }
         }
     }
 
@@ -1627,7 +1645,7 @@ public class CallState(
     }
 
     fun resetModeration() {
-        moderationManager.resetModerationBlur()
+        _moderationBlur.value = null
     }
 }
 

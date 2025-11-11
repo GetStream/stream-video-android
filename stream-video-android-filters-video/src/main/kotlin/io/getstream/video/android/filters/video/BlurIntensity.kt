@@ -27,6 +27,5 @@ public sealed class BlurIntensity(public val radius: Int) {
     public data object LIGHT : BlurIntensity(7)
     public data object MEDIUM : BlurIntensity(11)
     public data object HEAVY : BlurIntensity(16)
-    public data object ULTRA : BlurIntensity(40)
-    public data class CUSTOM(val customRadius: Int) : BlurIntensity(customRadius)
+    public data object ULTRA : BlurIntensity(25)
 }

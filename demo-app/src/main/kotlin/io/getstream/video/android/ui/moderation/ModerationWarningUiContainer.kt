@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,16 +43,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.R
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.moderation.ModerationText
 import io.getstream.video.android.core.moderation.ModerationWarningAnimationConfig
@@ -62,7 +63,9 @@ import kotlinx.coroutines.delay
 @Composable
 internal fun ModerationWarningUiContainer(
     call: Call,
-    config: ModerationThemeConfig = ModerationDefaults.config,
+    config: ModerationThemeConfig = ModerationDefaults.defaultTheme,
+    moderationWarningAnimationConfig: ModerationWarningAnimationConfig =
+        ModerationWarningAnimationConfig(),
 ) {
     if (LocalInspectionMode.current) {
         Box(
@@ -77,21 +80,7 @@ internal fun ModerationWarningUiContainer(
         }
     } else {
         val moderationWarning by call.state.moderationWarning.collectAsStateWithLifecycle()
-        // Track which warning was already shown
-        var lastShownId by rememberSaveable { mutableStateOf<String?>(null) }
-
-        // Only show UI if we have a new warning
-        val currentWarning = moderationWarning?.takeIf {
-            val id = "${it.callCid}_${it.createdAt}"
-            if (id != lastShownId) {
-                lastShownId = id
-                true
-            } else {
-                false
-            }
-        }
-
-        if (currentWarning != null) {
+        moderationWarning?.let {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -99,22 +88,30 @@ internal fun ModerationWarningUiContainer(
                     .padding(horizontal = config.horizontalMargin),
                 contentAlignment = Alignment.BottomCenter,
             ) {
-                val moderationText = ModerationText("Warning", currentWarning.message)
-                ModerationUi(config, moderationText)
+                val moderationText = ModerationText(
+                    LocalContext.current.getString(R.string.stream_moderation_warning_title),
+                    it.message,
+                )
+                ModerationUi(config, moderationWarningAnimationConfig, moderationText)
             }
         }
     }
 }
 
 @Composable
-internal fun ModerationUi(config: ModerationThemeConfig, moderationText: ModerationText) {
-    SlideInOutMessage(moderationText, ModerationWarningAnimationConfig())
+internal fun ModerationUi(
+    moderationThemeConfig: ModerationThemeConfig,
+    moderationWarningAnimationConfig: ModerationWarningAnimationConfig,
+    moderationText: ModerationText,
+) {
+    SlideInOutMessage(moderationThemeConfig, moderationWarningAnimationConfig, moderationText)
 }
 
 @Composable
 fun SlideInOutMessage(
-    moderationText: ModerationText,
+    moderationThemeConfig: ModerationThemeConfig,
     moderationWarningAnimationConfig: ModerationWarningAnimationConfig,
+    moderationText: ModerationText,
 ) {
     var visible by remember { mutableStateOf(false) }
 
@@ -144,13 +141,16 @@ fun SlideInOutMessage(
                 animationSpec = tween(durationMillis = 500),
             ),
         ) {
-            ModerationWarningUiContent(moderationText)
+            ModerationWarningUiContent(moderationThemeConfig, moderationText)
         }
     }
 }
 
 @Composable
-internal fun ModerationWarningUiContent(moderationText: ModerationText) {
+internal fun ModerationWarningUiContent(
+    moderationThemeConfig: ModerationThemeConfig,
+    moderationText: ModerationText,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -171,7 +171,7 @@ internal fun ModerationWarningUiContent(moderationText: ModerationText) {
             // Orange column on the left
             Box(
                 modifier = Modifier
-                    .width(8.dp)
+                    .width(12.dp)
                     .fillMaxHeight()
                     .background(
                         Color(0xFFFFA500),
@@ -179,17 +179,16 @@ internal fun ModerationWarningUiContent(moderationText: ModerationText) {
                     ),
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(Modifier.padding(vertical = 12.dp)) {
+            Column(Modifier.padding(vertical = 12.dp, horizontal = 12.dp)) {
                 Text(
                     text = moderationText.title,
-                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    color = moderationThemeConfig.titleColor,
                     fontSize = 16.sp,
                 )
                 Text(
                     text = moderationText.message,
-                    color = Color.Gray,
+                    color = moderationThemeConfig.messageColor,
                     fontSize = 16.sp,
                 )
             }
@@ -200,5 +199,8 @@ internal fun ModerationWarningUiContent(moderationText: ModerationText) {
 @Preview
 @Composable
 internal fun ModerationWarningUiContentDemo() {
-    ModerationWarningUiContent(ModerationText("Warning title", "Warning Message"))
+    ModerationWarningUiContent(
+        ModerationThemeConfig(),
+        ModerationText("Warning title", "Warning Message"),
+    )
 }

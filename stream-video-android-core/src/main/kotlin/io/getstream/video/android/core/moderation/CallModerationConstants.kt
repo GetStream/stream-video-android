@@ -19,5 +19,6 @@ package io.getstream.video.android.core.moderation
 object CallModerationConstants {
     const val POLICY_VIOLATION = "PolicyViolationModeration"
     const val DEFAULT_MODERATION_DISPLAY_TIME_MS = 5_000L
+    const val DEFAULT_MODERATION_AUTO_DISMISS_TIME_MS = DEFAULT_MODERATION_DISPLAY_TIME_MS + 3_000L
     const val DEFAULT_BLUR_AUTO_DISMISS_TIME_MS = 10_000L
 }

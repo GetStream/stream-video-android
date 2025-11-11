@@ -175,7 +175,11 @@ public fun CallContent(
     BackHandler {
         if (pictureInPictureConfiguration.enable) {
             try {
-                enterPictureInPicture(context = context, call = call, pictureInPictureConfiguration)
+                enterPictureInPicture(
+                    context = context,
+                    call = call,
+                    pictureInPictureConfiguration,
+                )
             } catch (e: Exception) {
                 StreamLog.e(tag = "CallContent") { e.stackTraceToString() }
                 call.leave()
@@ -228,7 +232,8 @@ public fun CallContent(
                         },
                 ) {
                     BoxWithConstraints {
-                        val contentSize = IntSize(constraints.maxWidth, constraints.maxHeight)
+                        val contentSize =
+                            IntSize(constraints.maxWidth, constraints.maxHeight)
 
                         CompositionLocalProvider(LocalVideoContentSize provides contentSize) {
                             videoContent.invoke(this@Row, call)
@@ -258,7 +263,7 @@ internal fun ModerationVideoBlur(call: Call, moderationBlurConfig: ModerationBlu
         LaunchedEffect(Unit) {
             if (!isVideoBlur) {
                 call.videoFilter =
-                    SimpleBlurVideoFilter(blurIntensity = BlurIntensity.CUSTOM(moderationBlurConfig.blurIntensity))
+                    SimpleBlurVideoFilter(blurIntensity = BlurIntensity.ULTRA)
                 isVideoBlur = true
                 delay(moderationBlurConfig.visibilityDurationMs)
                 call.videoFilter = null
