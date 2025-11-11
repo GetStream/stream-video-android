@@ -20,6 +20,7 @@ import io.getstream.video.android.core.model.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
+import stream.video.sfu.models.AudioBitrateProfile
 
 data class RtpMapAttribute(val index: Int, val number: String, val codec: String, val line: String)
 
@@ -194,28 +195,34 @@ internal val iceRestartConstraints = MediaConstraints().apply {
 }
 
 @JvmSynthetic
-internal fun buildAudioConstraints(): MediaConstraints {
+internal fun buildAudioConstraints(
+    audioBitrateProfileProvider: (() -> AudioBitrateProfile)? = null,
+): MediaConstraints {
     val mediaConstraints = MediaConstraints()
+    val isMusicHighQuality = audioBitrateProfileProvider?.invoke() ==
+        AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+    val constraintValue = if (isMusicHighQuality) false else true
+
     val items = listOf(
         MediaConstraints.KeyValuePair(
             "googEchoCancellation",
-            true.toString(),
+            constraintValue.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googAutoGainControl",
-            true.toString(),
+            constraintValue.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googHighpassFilter",
-            true.toString(),
+            constraintValue.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googNoiseSuppression",
-            true.toString(),
+            constraintValue.toString(),
         ),
         MediaConstraints.KeyValuePair(
             "googTypingNoiseDetection",
-            true.toString(),
+            constraintValue.toString(),
         ),
     )
 

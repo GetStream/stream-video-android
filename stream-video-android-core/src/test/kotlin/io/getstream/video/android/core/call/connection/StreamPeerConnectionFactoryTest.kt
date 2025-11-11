@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.webrtc.EglBase
 import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
@@ -67,8 +68,18 @@ class StreamPeerConnectionFactoryTest {
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
-        // Create a spied factory so we can intercept internal calls
-        factory = spyk(StreamPeerConnectionFactory(mockContext))
+        // Create a spied factory with a provider that returns a mock EglBase
+        // Using a provider means EglBase.create() won't be called during construction
+        // The mock will only be created when the provider is invoked (lazy evaluation)
+        val mockEglBaseProvider: () -> EglBase = {
+            // This will be called lazily when eglBase is accessed
+            // Since we're using relaxed mocks, MockK should be able to create it
+            // even if Android classes aren't available, as long as we don't call methods
+            // that require those classes
+            mockk(relaxed = true)
+        }
+
+        factory = spyk(StreamPeerConnectionFactory(mockContext, sharedEglBaseProvider = mockEglBaseProvider))
         // Mock the internal WebRTC PeerConnectionFactory
         mockInternalFactory = mockk(relaxed = true)
 

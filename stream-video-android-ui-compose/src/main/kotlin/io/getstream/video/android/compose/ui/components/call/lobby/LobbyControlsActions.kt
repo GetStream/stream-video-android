@@ -17,13 +17,19 @@
 package io.getstream.video.android.compose.ui.components.call.lobby
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleHifiAudioAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
+import stream.video.sfu.models.AudioBitrateProfile
 
 /**
  * Builds the default set of Lobby Control actions based on the call device states.
@@ -45,8 +51,20 @@ public fun buildDefaultLobbyControlActions(
     } else {
         call.microphone.isEnabled.value
     },
+    showHifiAudioToggle: Boolean = false,
 ): List<@Composable () -> Unit> {
-    return listOf(
+    val audioBitrateProfile by if (LocalInspectionMode.current) {
+        remember {
+            mutableStateOf(
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            )
+        }
+    } else {
+        call.microphone.audioBitrateProfile.collectAsStateWithLifecycle()
+    }
+    val isMusicHighQuality = audioBitrateProfile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
+    val actions = mutableListOf<@Composable () -> Unit>(
         {
             ToggleMicrophoneAction(
                 modifier = Modifier
@@ -64,4 +82,17 @@ public fun buildDefaultLobbyControlActions(
             )
         },
     )
+
+    if (showHifiAudioToggle) {
+        actions.add {
+            ToggleHifiAudioAction(
+                modifier = Modifier
+                    .testTag("Stream_HifiAudioToggle_IsMusicHighQuality_$isMusicHighQuality"),
+                isMusicHighQuality = isMusicHighQuality,
+                onCallAction = onCallAction,
+            )
+        }
+    }
+
+    return actions
 }

@@ -80,6 +80,7 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleHifiAudio
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -97,9 +98,13 @@ fun CallLobbyScreen(
     val isLoading by callLobbyViewModel.isLoading.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by callLobbyViewModel.microphoneEnabled.collectAsStateWithLifecycle()
     val isCameraEnabled by callLobbyViewModel.cameraEnabled.collectAsStateWithLifecycle()
+    val hifiAudioEnabled by callLobbyViewModel.hifiAudioEnabled.collectAsStateWithLifecycle()
+    val settingsLoaded by callLobbyViewModel.settingsLoaded.collectAsStateWithLifecycle()
     val call by remember {
         mutableStateOf(callLobbyViewModel.call)
     }
+
+    val showHifiAudioToggle = settingsLoaded && hifiAudioEnabled
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -124,11 +129,15 @@ fun CallLobbyScreen(
                     .weight(1f),
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 isCameraEnabled = isCameraEnabled,
+                showHifiAudioToggle = showHifiAudioToggle,
                 onToggleCamera = {
                     callLobbyViewModel.enableCamera(it)
                 },
                 onToggleMicrophone = {
                     callLobbyViewModel.enableMicrophone(it)
+                },
+                onToggleHifiAudio = {
+                    callLobbyViewModel.setAudioBitrateProfile(it)
                 },
                 call = call,
             ) {
@@ -226,8 +235,10 @@ private fun CallLobbyBodyResponsive(
     call: Call,
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
+    showHifiAudioToggle: Boolean = false,
     onToggleCamera: (Boolean) -> Unit,
     onToggleMicrophone: (Boolean) -> Unit,
+    onToggleHifiAudio: (Boolean) -> Unit,
     description: @Composable () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
@@ -238,8 +249,10 @@ private fun CallLobbyBodyResponsive(
             call,
             isCameraEnabled,
             isMicrophoneEnabled,
+            showHifiAudioToggle,
             onToggleCamera,
             onToggleMicrophone,
+            onToggleHifiAudio,
             description,
         )
     } else {
@@ -248,8 +261,10 @@ private fun CallLobbyBodyResponsive(
             call,
             isCameraEnabled,
             isMicrophoneEnabled,
+            showHifiAudioToggle,
             onToggleCamera,
             onToggleMicrophone,
+            onToggleHifiAudio,
             description,
         )
     }
@@ -262,8 +277,10 @@ private fun CallLobbyBodyPortrait(
     call: Call,
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
+    showHifiAudioToggle: Boolean = false,
     onToggleCamera: (Boolean) -> Unit,
     onToggleMicrophone: (Boolean) -> Unit,
+    onToggleHifiAudio: (Boolean) -> Unit,
     description: @Composable () -> Unit,
 ) {
     Column(
@@ -290,6 +307,14 @@ private fun CallLobbyBodyPortrait(
             text = "Set up your test call",
             style = VideoTheme.typography.titleS,
         )
+        val onCallAction: (CallAction) -> Unit = { action ->
+            when (action) {
+                is ToggleCamera -> onToggleCamera(action.isEnabled)
+                is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
+                is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
+                else -> Unit
+            }
+        }
         CallLobby(
             call = call,
             modifier = Modifier
@@ -317,12 +342,19 @@ private fun CallLobbyBodyPortrait(
                     videoRendererConfig = videoRendererConfig,
                 )
             },
-            onCallAction = { action ->
-                when (action) {
-                    is ToggleCamera -> onToggleCamera(action.isEnabled)
-                    is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
-                    else -> Unit
-                }
+            onCallAction = onCallAction,
+            lobbyControlsContent = { modifier, _ ->
+                ControlActions(
+                    modifier = modifier,
+                    call = call,
+                    actions = buildDefaultLobbyControlActions(
+                        call = call,
+                        onCallAction = onCallAction,
+                        isCameraEnabled = isCameraEnabled,
+                        isMicrophoneEnabled = isMicrophoneEnabled,
+                        showHifiAudioToggle = showHifiAudioToggle,
+                    ),
+                )
             },
         )
         if (BuildConfig.BUILD_TYPE == "benchmark") {
@@ -343,8 +375,10 @@ private fun CallLobbyBodyLandscape(
     call: Call,
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
+    showHifiAudioToggle: Boolean = false,
     onToggleCamera: (Boolean) -> Unit,
     onToggleMicrophone: (Boolean) -> Unit,
+    onToggleHifiAudio: (Boolean) -> Unit,
     description: @Composable () -> Unit,
 ) {
     Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
@@ -360,6 +394,7 @@ private fun CallLobbyBodyLandscape(
                     when (action) {
                         is ToggleCamera -> onToggleCamera(action.isEnabled)
                         is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
+                        is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
                         else -> Unit
                     }
                 }
@@ -409,6 +444,7 @@ private fun CallLobbyBodyLandscape(
                                 onCallAction = onCallAction,
                                 isCameraEnabled = isCameraEnabled,
                                 isMicrophoneEnabled = isMicrophoneEnabled,
+                                showHifiAudioToggle = showHifiAudioToggle,
                             ),
                         )
                     },
@@ -576,6 +612,7 @@ private fun CallLobbyBodyPortraitPreview() {
             call = previewCall,
             onToggleMicrophone = {},
             onToggleCamera = {},
+            onToggleHifiAudio = {},
         ) {
             LobbyDescriptionContent(participantCounts = ParticipantCount(1, 1)) {}
         }
@@ -598,6 +635,7 @@ private fun CallLobbyBodyLandscapePreview() {
             call = previewCall,
             onToggleMicrophone = {},
             onToggleCamera = {},
+            onToggleHifiAudio = {},
         ) {
             LobbyDescriptionContent(participantCounts = ParticipantCount(1, 1)) {}
         }

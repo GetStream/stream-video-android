@@ -1195,6 +1195,13 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ToggleHifiAudioActionKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ToggleHifiAudioActionKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ToggleMicrophoneActionKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/controls/actions/ComposableSingletons$ToggleMicrophoneActionKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -1252,6 +1259,11 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 	public static final fun ToggleCameraActionPreview (Landroidx/compose/runtime/Composer;I)V
 }
 
+public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleHifiAudioActionKt {
+	public static final fun ToggleHifiAudioAction-m_EyDiA (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lio/getstream/video/android/compose/ui/components/base/styling/StreamFixedSizeButtonStyle;Lio/getstream/video/android/compose/ui/components/base/styling/StreamFixedSizeButtonStyle;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;III)V
+	public static final fun ToggleHifiAudioActionPreview (Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleMicrophoneActionKt {
 	public static final fun ToggleMicrophoneAction-m_EyDiA (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lio/getstream/video/android/compose/ui/components/base/styling/StreamFixedSizeButtonStyle;Lio/getstream/video/android/compose/ui/components/base/styling/StreamFixedSizeButtonStyle;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;III)V
 	public static final fun ToggleMicrophoneActionPreview (Landroidx/compose/runtime/Composer;I)V
@@ -1293,7 +1305,7 @@ public final class io/getstream/video/android/compose/ui/components/call/lobby/C
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/lobby/LobbyControlsActionsKt {
-	public static final fun buildDefaultLobbyControlActions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;ZZLandroidx/compose/runtime/Composer;II)Ljava/util/List;
+	public static final fun buildDefaultLobbyControlActions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;ZZZLandroidx/compose/runtime/Composer;II)Ljava/util/List;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/moderation/ModerationDefaults {

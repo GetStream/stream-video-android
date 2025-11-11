@@ -7812,6 +7812,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun cleanup ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
+	public final fun getAudioBitrateProfile ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioUsage ()I
 	public final fun getAudioUsageProvider ()Lkotlin/jvm/functions/Function0;
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
@@ -7825,6 +7826,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun resume (Z)V
 	public static synthetic fun resume$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun select (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
+	public final fun setAudioBitrateProfile-gIAlu-s (Lstream/video/sfu/models/AudioBitrateProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
 }
@@ -8410,9 +8412,8 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
-	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;)V
-	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getAdm ()Lorg/webrtc/audio/JavaAudioDeviceModule;
+	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getSenderCapabilities (Lorg/webrtc/MediaStreamTrack$MediaType;)Lorg/webrtc/RtpCapabilities;
 	public final fun isAudioProcessingEnabled ()Z
@@ -8422,7 +8423,6 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun makePeerConnection (Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/String;)Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public static synthetic fun makePeerConnection$default (Lio/getstream/video/android/core/call/connection/StreamPeerConnectionFactory;Lorg/webrtc/PeerConnection$RTCConfiguration;Lio/getstream/video/android/core/model/StreamPeerType;Lorg/webrtc/MediaConstraints;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/call/connection/StreamPeerConnection;
 	public final fun makeVideoTrack (Lorg/webrtc/VideoSource;Ljava/lang/String;)Lorg/webrtc/VideoTrack;
-	public final fun setAdm (Lorg/webrtc/audio/JavaAudioDeviceModule;)V
 	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setAudioRecordDataCallback (Lkotlin/jvm/functions/Function4;)V
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
@@ -8559,6 +8559,17 @@ public final class io/getstream/video/android/core/call/state/ToggleCamera : io/
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public final fun isEnabled ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/call/state/ToggleHifiAudio : io/getstream/video/android/core/call/state/CallAction {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lio/getstream/video/android/core/call/state/ToggleHifiAudio;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/call/state/ToggleHifiAudio;ZILjava/lang/Object;)Lio/getstream/video/android/core/call/state/ToggleHifiAudio;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun isHifiAudioEnabled ()Z
 	public fun toString ()Ljava/lang/String;
 }
 

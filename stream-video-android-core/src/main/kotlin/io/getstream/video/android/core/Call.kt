@@ -106,6 +106,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.threeten.bp.OffsetDateTime
+import org.webrtc.EglBase
 import org.webrtc.PeerConnection
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
@@ -233,13 +234,97 @@ public class Call(
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
 
-    internal var peerConnectionFactory: StreamPeerConnectionFactory =
-        StreamPeerConnectionFactory(
-            context = clientImpl.context,
-            audioProcessing = clientImpl.audioProcessing,
-            audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-            audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
-        )
+    /**
+     * EGL base context shared between peerConnectionFactory and mediaManager
+     * to break circular dependency.
+     */
+    internal val eglBase: EglBase by lazy {
+        EglBase.create()
+    }
+
+    // peerConnectionFactory is nullable and recreated when audioBitrateProfile changes (before joining)
+    private var _peerConnectionFactory: StreamPeerConnectionFactory? = null
+
+    internal var peerConnectionFactory: StreamPeerConnectionFactory
+        get() {
+            if (_peerConnectionFactory == null) {
+                _peerConnectionFactory = StreamPeerConnectionFactory(
+                    context = clientImpl.context,
+                    audioProcessing = clientImpl.audioProcessing,
+                    audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+                    audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
+                    audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
+                    sharedEglBaseProvider = { eglBase },
+                )
+            }
+            return _peerConnectionFactory!!
+        }
+        set(value) {
+            _peerConnectionFactory = value
+        }
+
+    /**
+     * Checks if the audioBitrateProfile has changed since the factory was created,
+     * and recreates the factory if needed. This should only be called before joining.
+     *
+     * If the factory hasn't been created yet, it will be created with the current profile
+     * when first accessed, so no recreation is needed.
+     */
+    internal fun ensureFactoryMatchesAudioProfile() {
+        val factory = _peerConnectionFactory
+
+        // If factory hasn't been created yet, it will be created with current profile automatically
+        if (factory == null) {
+            return
+        }
+
+        // Check if current profile differs from the profile used to create the factory
+        val factoryProfile = factory.audioBitrateProfile
+        val currentProfile = mediaManager.microphone.audioBitrateProfile.value
+
+        if (factoryProfile != null && currentProfile != factoryProfile) {
+            logger.i {
+                "Audio bitrate profile changed from $factoryProfile to $currentProfile. " +
+                    "Recreating factory before joining."
+            }
+            recreateFactoryAndAudioTracks()
+        }
+    }
+
+    /**
+     * Recreates peerConnectionFactory, audioSource, audioTrack, videoSource and videoTrack
+     * with the current audioBitrateProfile. This should only be called before the call is joined.
+     */
+    internal fun recreateFactoryAndAudioTracks() {
+        val wasMicrophoneEnabled = microphone.status.value is DeviceStatus.Enabled
+        val wasCameraEnabled = camera.status.value is DeviceStatus.Enabled
+
+        // Dispose all tracks and sources first
+        mediaManager.disposeTracksAndSources()
+
+        // Recreate the factory (which will use the new audioBitrateProfile)
+        recreatePeerConnectionFactory()
+
+        // Re-enable tracks if they were enabled
+        if (wasMicrophoneEnabled) {
+            // audioTrack will be recreated on next access, then we enable it
+            microphone.enable(fromUser = false)
+        }
+        if (wasCameraEnabled) {
+            // videoTrack will be recreated on next access, then we enable it
+            camera.enable(fromUser = false)
+        }
+    }
+
+    /**
+     * Recreates peerConnectionFactory with the current audioBitrateProfile.
+     * This should only be called before the call is joined.
+     */
+    internal fun recreatePeerConnectionFactory() {
+        _peerConnectionFactory?.dispose()
+        _peerConnectionFactory = null
+        // Next access to peerConnectionFactory will recreate it with current profile
+    }
 
     internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
         put(
@@ -256,7 +341,7 @@ public class Call(
                 clientImpl.context,
                 this,
                 scope,
-                peerConnectionFactory.eglBase.eglBaseContext,
+                eglBase.eglBaseContext,
                 clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
         }
@@ -424,6 +509,10 @@ public class Call(
         }
         // if we are a guest user, make sure we wait for the token before running the join flow
         clientImpl.guestUserJob?.await()
+
+        // Ensure factory is created with the current audioBitrateProfile before joining
+        ensureFactoryMatchesAudioProfile()
+
         // the join flow should retry up to 3 times
         // if the error is not permanent
         // and fail immediately on permanent errors
@@ -941,9 +1030,9 @@ public class Call(
     ) {
         logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
 
-        // Note this comes from peerConnectionFactory.eglBase
+        // Note this comes from the shared eglBase
         videoRenderer.init(
-            peerConnectionFactory.eglBase.eglBaseContext,
+            eglBase.eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     val width = videoRenderer.measuredWidth

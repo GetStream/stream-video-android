@@ -43,7 +43,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import stream.video.sfu.models.AudioBitrateProfile
 import javax.inject.Inject
 
 @HiltViewModel
@@ -83,6 +85,13 @@ class CallLobbyViewModel @Inject constructor(
     val isLoggedOut = dataStore.user.map { it == null }
     val cameraEnabled: StateFlow<Boolean> = call.camera.isEnabled
     val microphoneEnabled: StateFlow<Boolean> = call.microphone.isEnabled
+    val hifiAudioEnabled: StateFlow<Boolean> = call.state.settings
+        .map { it?.audio?.hifiAudioEnabled ?: false }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val settingsLoaded: StateFlow<Boolean> = call.state.settings
+        .map { it != null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
         // for demo we set the default state for mic and camera to be on
@@ -168,6 +177,23 @@ class CallLobbyViewModel @Inject constructor(
 
     fun enableMicrophone(enabled: Boolean) {
         call.microphone.setEnabled(enabled)
+    }
+
+    fun setAudioBitrateProfile(isHifiAudioEnabled: Boolean) {
+        viewModelScope.launch {
+            val newProfile = if (isHifiAudioEnabled) {
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+            } else {
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
+            }
+            val result = call.microphone.setAudioBitrateProfile(newProfile)
+            if (result.isFailure) {
+                Log.e(
+                    "CallLobbyViewModel",
+                    "Failed to set audio bitrate profile: ${result.exceptionOrNull()?.message}",
+                )
+            }
+        }
     }
 
     fun signOut() {

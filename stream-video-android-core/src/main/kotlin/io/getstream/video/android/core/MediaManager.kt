@@ -32,6 +32,7 @@ import androidx.core.content.getSystemService
 import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
+import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
@@ -51,6 +52,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.webrtc.AudioSource
+import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
@@ -59,6 +62,9 @@ import org.webrtc.EglBase
 import org.webrtc.MediaStreamTrack
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SurfaceTextureHelper
+import org.webrtc.VideoSource
+import org.webrtc.VideoTrack
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.VideoDimension
 import java.util.UUID
 import kotlin.coroutines.resumeWithException
@@ -228,21 +234,14 @@ class SpeakerManager(
     fun setAudioUsage(audioUsage: Int): Boolean {
         logger.i { "setAudioUsage: $audioUsage" }
 
-        val adm = mediaManager.call.peerConnectionFactory.adm
-        if (adm != null) {
-            val success = adm.updateAudioTrackUsage(audioUsage)
-            if (success) {
-                _audioUsage.value = audioUsage
-                logger.d { "setAudioUsage: successfully updated audio usage to $audioUsage" }
-                return true
-            } else {
-                // Rollback to previous value if ADM update failed
-                logger.w { "setAudioUsage: failed to update audio usage to $audioUsage" }
-                return false
-            }
+        val success = mediaManager.call.peerConnectionFactory.updateAudioTrackUsage(audioUsage)
+        if (success) {
+            _audioUsage.value = audioUsage
+            logger.d { "setAudioUsage: successfully updated audio usage to $audioUsage" }
+            return true
         } else {
-            logger.w { "setAudioUsage: ADM not available, cannot update audio usage" }
-            // Rollback to previous value if ADM is not available
+            // Rollback to previous value if ADM update failed
+            logger.w { "setAudioUsage: failed to update audio usage to $audioUsage" }
             return false
         }
     }
@@ -425,6 +424,14 @@ class MicrophoneManager(
     /** List of available devices. */
     val devices: StateFlow<List<StreamAudioDevice>> = _devices
 
+    private val _audioBitrateProfile =
+        MutableStateFlow<AudioBitrateProfile>(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        )
+
+    /** The current audio bitrate profile */
+    val audioBitrateProfile: StateFlow<AudioBitrateProfile> = _audioBitrateProfile
+
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
@@ -505,6 +512,61 @@ class MicrophoneManager(
     fun listDevices(): StateFlow<List<StreamAudioDevice>> {
         setup()
         return devices
+    }
+
+    /**
+     * Set the audio bitrate profile.
+     * This can only be set before joining the call. Once the call is joined,
+     * changes to the audio bitrate profile will be ignored.
+     *
+     * @param profile The audio bitrate profile to use
+     * @return true if the profile was successfully set, false if:
+     *   - The call is already joined and the change was ignored
+     *   - HiFi audio is not enabled in dashboard settings when trying to use MUSIC_HIGH_QUALITY
+     */
+    suspend fun setAudioBitrateProfile(profile: AudioBitrateProfile): Result<Unit> {
+        val connectionState = mediaManager.call.state.connection.value
+        val isJoined = connectionState is RealtimeConnection.Joined || connectionState is RealtimeConnection.Connected
+
+        // get the call settings if they are not present
+        if (mediaManager.call.state.settings.value == null) {
+            val result = mediaManager.call.get()
+            if (result.isFailure) {
+                logger.w {
+                    "[setAudioBitrateProfile] call.get() returned error: ${result.errorOrNull()?.extractCause()}"
+                }
+                return Result.failure(IllegalStateException(result.errorOrNull()?.extractCause()))
+            }
+        }
+
+        // Check if HiFi audio is enabled in dashboard
+        val hifiAudioEnabled = mediaManager.call.state.settings.value?.audio?.hifiAudioEnabled ?: false
+        if (!hifiAudioEnabled) {
+            logger.w {
+                "[setAudioBitrateProfile] called but HiFi audio is not enabled " +
+                    "in dashboard settings. ."
+            }
+            return Result.failure(
+                IllegalArgumentException("Hi-fi audio is not enabled on dashboard settings"),
+            )
+        }
+
+        if (isJoined) {
+            logger.w {
+                "[setAudioBitrateProfile] called after call is joined. " +
+                    "Audio bitrate profile can only be set before joining the call. " +
+                    "Ignoring the change."
+            }
+            return Result.failure(
+                IllegalStateException(
+                    "Cannot call setAudioBitrateProfile after call has been joined",
+                ),
+            )
+        }
+
+        logger.i { "[setAudioBitrateProfile] Setting audio bitrate profile to: $profile" }
+        _audioBitrateProfile.value = profile
+        return Result.success(Unit)
     }
 
     fun cleanup() {
@@ -1048,49 +1110,125 @@ class MediaManagerImpl(
     val audioUsage: Int = defaultAudioUsage,
     val audioUsageProvider: (() -> Int) = { audioUsage },
 ) {
-    private val filterVideoProcessor =
-        FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
-    private val screenShareFilterVideoProcessor =
-        FilterVideoProcessor({ null }, { screenShare.surfaceTextureHelper })
-
-    // source & tracks
-    val videoSource =
-        call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
-
-    val screenShareVideoSource =
-        call.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
-
-    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    var videoTrack = call.peerConnectionFactory.makeVideoTrack(
-        source = videoSource,
-        trackId = UUID.randomUUID().toString(),
-    )
-
-    var screenShareTrack = call.peerConnectionFactory.makeVideoTrack(
-        source = screenShareVideoSource,
-        trackId = UUID.randomUUID().toString(),
-    )
-
-    val audioSource = call.peerConnectionFactory.makeAudioSource(buildAudioConstraints())
-
-    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    var audioTrack = call.peerConnectionFactory.makeAudioTrack(
-        source = audioSource,
-        trackId = UUID.randomUUID().toString(),
-    )
-
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
     internal val microphone = MicrophoneManager(this, audioUsage, audioUsageProvider)
     internal val speaker = SpeakerManager(this, microphone, audioUsageProvider = audioUsageProvider)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
+    private val filterVideoProcessor =
+        FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
+    private val screenShareFilterVideoProcessor =
+        FilterVideoProcessor({ null }, { screenShare.surfaceTextureHelper })
+
+    // videoSource and videoTrack are nullable and recreated when factory changes (before joining)
+    private var _videoSource: VideoSource? = null
+    private var _screenShareVideoSource: VideoSource? = null
+    private var _videoTrack: VideoTrack? = null
+    private var _screenShareTrack: VideoTrack? = null
+
+    val videoSource: VideoSource
+        get() {
+            if (_videoSource == null) {
+                _videoSource = call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
+            }
+            return _videoSource!!
+        }
+
+    val screenShareVideoSource: VideoSource
+        get() {
+            if (_screenShareVideoSource == null) {
+                _screenShareVideoSource = call.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
+            }
+            return _screenShareVideoSource!!
+        }
+
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
+    // Todo : make videoTrack val in next major release and also move it out of MediaManager
+    var videoTrack: VideoTrack
+        get() {
+            if (_videoTrack == null) {
+                _videoTrack = call.peerConnectionFactory.makeVideoTrack(
+                    source = videoSource,
+                    trackId = UUID.randomUUID().toString(),
+                )
+            }
+            return _videoTrack!!
+        }
+        set(value) {
+            _videoTrack = value
+        }
+
+    // Todo : make screenShareTrack val in next major release and also move it out of MediaManager
+    var screenShareTrack: VideoTrack
+        get() {
+            if (_screenShareTrack == null) {
+                _screenShareTrack = call.peerConnectionFactory.makeVideoTrack(
+                    source = screenShareVideoSource,
+                    trackId = UUID.randomUUID().toString(),
+                )
+            }
+            return _screenShareTrack!!
+        }
+        set(value) {
+            _screenShareTrack = value
+        }
+
+    // audioSource and audioTrack are nullable and recreated when profile changes (before joining)
+    private var _audioSource: AudioSource? = null
+    private var _audioTrack: AudioTrack? = null
+
+    val audioSource: AudioSource
+        get() {
+            if (_audioSource == null) {
+                _audioSource = call.peerConnectionFactory.makeAudioSource(
+                    buildAudioConstraints { microphone.audioBitrateProfile.value },
+                )
+            }
+            return _audioSource!!
+        }
+
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
+    // Todo : make audioTrack val in next major release and also move it out of MediaManager
+    var audioTrack: AudioTrack
+        get() {
+            if (_audioTrack == null) {
+                _audioTrack = call.peerConnectionFactory.makeAudioTrack(
+                    source = audioSource,
+                    trackId = UUID.randomUUID().toString(),
+                )
+            }
+            return _audioTrack!!
+        }
+        set(value) {
+            _audioTrack = value
+        }
+
+    /**
+     * Disposes all tracks and sources without cleaning up camera/microphone infrastructure.
+     * This is used when recreating the factory before joining.
+     */
+    internal fun disposeTracksAndSources() {
+        _audioTrack?.dispose()
+        _audioSource?.dispose()
+        _videoTrack?.dispose()
+        _videoSource?.dispose()
+        _screenShareTrack?.dispose()
+        _screenShareVideoSource?.dispose()
+
+        // Clear references
+        _audioTrack = null
+        _audioSource = null
+        _videoTrack = null
+        _videoSource = null
+        _screenShareTrack = null
+        _screenShareVideoSource = null
+    }
+
     fun cleanup() {
-        videoSource.dispose()
-        screenShareVideoSource.dispose()
-        videoTrack.dispose()
-        audioSource.dispose()
-        audioTrack.dispose()
+        // Dispose all tracks and sources
+        disposeTracksAndSources()
+        // Cleanup camera and microphone infrastructure
         camera.cleanup()
         microphone.cleanup()
     }

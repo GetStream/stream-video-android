@@ -59,6 +59,7 @@ import org.webrtc.SessionDescription
 import org.webrtc.VideoTrack
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
@@ -148,6 +149,11 @@ class PublisherTest {
 
         // Stub out the PeerConnection, e.g. do nothing on close().
         every { mockPeerConnection.close() } just runs
+
+        // Mock mediaManager.microphone.audioBitrateProfile.value to avoid extra mock interactions
+        // that interfere with coVerifySequence verification
+        every { mockMediaManager.microphone.audioBitrateProfile.value } returns
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
 
         // Construct a "real" Publisher but spy it, so we can mock or verify inherited calls.
         publisher = spyk(

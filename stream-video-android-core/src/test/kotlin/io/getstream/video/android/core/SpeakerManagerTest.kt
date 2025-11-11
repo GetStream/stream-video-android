@@ -27,7 +27,6 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.webrtc.audio.JavaAudioDeviceModule
 
 class SpeakerManagerTest {
 
@@ -228,12 +227,10 @@ class SpeakerManagerTest {
 
         val call = mockk<Call>(relaxed = true)
         val peerConnectionFactory = mockk<StreamPeerConnectionFactory>(relaxed = true)
-        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
 
         every { mediaManager.call } returns call
         every { call.peerConnectionFactory } returns peerConnectionFactory
-        every { peerConnectionFactory.adm } returns adm
-        every { adm.updateAudioTrackUsage(newAudioUsage) } returns true
+        every { peerConnectionFactory.updateAudioTrackUsage(newAudioUsage) } returns true
 
         val speakerManager = SpeakerManager(
             mediaManager,
@@ -248,7 +245,7 @@ class SpeakerManagerTest {
         // Then
         assertEquals(true, result)
         assertEquals(newAudioUsage, speakerManager.audioUsage.value)
-        verify { adm.updateAudioTrackUsage(newAudioUsage) }
+        verify { peerConnectionFactory.updateAudioTrackUsage(newAudioUsage) }
     }
 
     @Test
@@ -262,12 +259,10 @@ class SpeakerManagerTest {
 
         val call = mockk<Call>(relaxed = true)
         val peerConnectionFactory = mockk<StreamPeerConnectionFactory>(relaxed = true)
-        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
 
         every { mediaManager.call } returns call
         every { call.peerConnectionFactory } returns peerConnectionFactory
-        every { peerConnectionFactory.adm } returns adm
-        every { adm.updateAudioTrackUsage(newAudioUsage) } returns false
+        every { peerConnectionFactory.updateAudioTrackUsage(newAudioUsage) } returns false
 
         val speakerManager = SpeakerManager(
             mediaManager,
@@ -282,7 +277,7 @@ class SpeakerManagerTest {
         // Then
         assertEquals(false, result)
         assertEquals(initialAudioUsage, speakerManager.audioUsage.value) // Should remain unchanged
-        verify { adm.updateAudioTrackUsage(newAudioUsage) }
+        verify { peerConnectionFactory.updateAudioTrackUsage(newAudioUsage) }
     }
 
     @Test
@@ -299,7 +294,7 @@ class SpeakerManagerTest {
 
         every { mediaManager.call } returns call
         every { call.peerConnectionFactory } returns peerConnectionFactory
-        every { peerConnectionFactory.adm } returns null
+        every { peerConnectionFactory.updateAudioTrackUsage(newAudioUsage) } returns false
 
         val speakerManager = SpeakerManager(
             mediaManager,
