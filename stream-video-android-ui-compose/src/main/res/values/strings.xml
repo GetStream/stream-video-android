@@ -22,5 +22,6 @@
     <string name="stream_default_call_ui_not_now_button">Not now</string>
     <string name="stream_default_policy_violation_title">Policy Violated</string>
     <string name="stream_default_policy_violation_message">We have to end your call as we have detected policy violation</string>
-    <string name="stream_default_policy_violation_action_button">Ok</string>
+    <string name="stream_default_policy_violation_action_button">OK</string>
+    <string name="stream_moderation_warning_title">Warning</string>
 </resources>

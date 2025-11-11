@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.ui.moderation
+package io.getstream.video.android.compose.ui.components.call.moderation
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
@@ -50,5 +50,7 @@ public data class ModerationThemeConfig(
     val backgroundColor: Color = Color.White,
     val titleColor: Color = Color.Black,
     val messageColor: Color = Color.Gray,
+    val warningStripColor: Color = Color(0xFFFFA500),
+    val warningStripWidth: Dp = 12.dp,
     val roundedCornerShape: Shape? = RoundedCornerShape(16.dp),
 )

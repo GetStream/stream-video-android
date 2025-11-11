@@ -105,6 +105,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSettingsAction
+import io.getstream.video.android.compose.ui.components.call.moderation.ModerationWarningUiContainer
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
@@ -132,7 +133,6 @@ import io.getstream.video.android.ui.closedcaptions.ClosedCaptionsDefaults
 import io.getstream.video.android.ui.menu.SettingsMenu
 import io.getstream.video.android.ui.menu.VideoFilter
 import io.getstream.video.android.ui.menu.availableVideoFilters
-import io.getstream.video.android.ui.moderation.ModerationWarningUiContainer
 import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay

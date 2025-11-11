@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.ui.moderation
+package io.getstream.video.android.compose.ui.components.call.moderation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInCubic
@@ -54,18 +54,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.R
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.moderation.ModerationText
 import io.getstream.video.android.core.moderation.ModerationWarningAnimationConfig
 import kotlinx.coroutines.delay
 
 @Composable
-internal fun ModerationWarningUiContainer(
+public fun ModerationWarningUiContainer(
     call: Call,
     config: ModerationThemeConfig = ModerationDefaults.defaultTheme,
     moderationWarningAnimationConfig: ModerationWarningAnimationConfig =
         ModerationWarningAnimationConfig(),
+    moderationText: ModerationText? = null,
 ) {
     if (LocalInspectionMode.current) {
         Box(
@@ -88,11 +89,11 @@ internal fun ModerationWarningUiContainer(
                     .padding(horizontal = config.horizontalMargin),
                 contentAlignment = Alignment.BottomCenter,
             ) {
-                val moderationText = ModerationText(
+                val finalModerationText = moderationText ?: ModerationText(
                     LocalContext.current.getString(R.string.stream_moderation_warning_title),
                     it.message,
                 )
-                ModerationUi(config, moderationWarningAnimationConfig, moderationText)
+                ModerationUi(config, moderationWarningAnimationConfig, finalModerationText)
             }
         }
     }
@@ -108,7 +109,7 @@ internal fun ModerationUi(
 }
 
 @Composable
-fun SlideInOutMessage(
+private fun SlideInOutMessage(
     moderationThemeConfig: ModerationThemeConfig,
     moderationWarningAnimationConfig: ModerationWarningAnimationConfig,
     moderationText: ModerationText,
@@ -171,10 +172,10 @@ internal fun ModerationWarningUiContent(
             // Orange column on the left
             Box(
                 modifier = Modifier
-                    .width(12.dp)
+                    .width(moderationThemeConfig.warningStripWidth)
                     .fillMaxHeight()
                     .background(
-                        Color(0xFFFFA500),
+                        moderationThemeConfig.warningStripColor,
                         shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
                     ),
             )

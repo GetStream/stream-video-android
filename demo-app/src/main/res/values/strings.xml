@@ -56,7 +56,6 @@
     <string name="in_app_update_canceled">Please consider installing the update.\nIt contains important features or bug fixes.</string>
     <string name="in_app_update_failed">App update failed. Try again later</string>
     <string name="you_are_offline">You are offline. Check your internet connection.</string>
-    <string name="stream_moderation_warning_title">Warning</string>
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>
         <item quantity="other">%s and %d more are typing</item>
