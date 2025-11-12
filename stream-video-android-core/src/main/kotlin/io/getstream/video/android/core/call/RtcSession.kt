@@ -315,6 +315,34 @@ public class RtcSession internal constructor(
     }
 
     /**
+     * Creates and publishes an audio track for transmitting audio.
+     * This is used both when microphone is enabled and when screen sharing starts with muted microphone.
+     */
+    private suspend fun createAndPublishAudioTrack() {
+        val canUserSendAudio = call.state.ownCapabilities.value.contains(
+            OwnCapability.SendAudio,
+        )
+        if (!canUserSendAudio) {
+            return
+        }
+
+        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
+        val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
+        val track = publisher?.publishStream(
+            streamId,
+            TrackType.TRACK_TYPE_AUDIO,
+        )
+
+        setLocalTrack(
+            TrackType.TRACK_TYPE_AUDIO,
+            AudioTrack(
+                streamId = streamId,
+                audio = track as org.webrtc.AudioTrack,
+            ),
+        )
+    }
+
+    /**
      * Connection and WebRTC.
      */
 
@@ -665,22 +693,7 @@ public class RtcSession internal constructor(
                 )
 
                 if (it == DeviceStatus.Enabled) {
-                    if (canUserSendAudio) {
-                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
-                        val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
-                        val track = publisher?.publishStream(
-                            streamId,
-                            TrackType.TRACK_TYPE_AUDIO,
-                        )
-
-                        setLocalTrack(
-                            TrackType.TRACK_TYPE_AUDIO,
-                            AudioTrack(
-                                streamId = streamId,
-                                audio = track as org.webrtc.AudioTrack,
-                            ),
-                        )
-                    }
+                    createAndPublishAudioTrack()
                 } else {
                     // Only unpublish audio stream if screen sharing is not active
                     // If screen sharing is active, keep the stream published so screen audio can be transmitted
@@ -719,6 +732,15 @@ public class RtcSession internal constructor(
                                 video = track as org.webrtc.VideoTrack,
                             ),
                         )
+
+                        // If microphone is muted, we need to create and publish audio track for screen audio
+                        val isMicrophoneMuted = call.mediaManager.microphone.status.value == DeviceStatus.Disabled
+                        val existingAudioTrack = getLocalTrack(TrackType.TRACK_TYPE_AUDIO)
+
+                        if (isMicrophoneMuted && existingAudioTrack == null) {
+                            // Audio track doesn't exist (user joined muted), create and publish it for screen audio
+                            createAndPublishAudioTrack()
+                        }
                     }
                 } else {
                     setMuteState(false, TrackType.TRACK_TYPE_SCREEN_SHARE)
