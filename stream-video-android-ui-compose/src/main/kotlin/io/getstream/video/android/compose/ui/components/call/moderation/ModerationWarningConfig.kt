@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.moderation
+package io.getstream.video.android.compose.ui.components.call.moderation
 
 /**
  * Configuration for the animation and visibility behavior of the Moderation Warning UI.
@@ -25,8 +25,8 @@ package io.getstream.video.android.core.moderation
  *
  * See [io.getstream.video.android.compose.ui.components.call.moderation.ModerationUi] for implementation details.
  */
-data class ModerationWarningAnimationConfig(
-    val displayTime: Long = CallModerationConstants.DEFAULT_MODERATION_DISPLAY_TIME_MS,
+internal data class ModerationWarningAnimationConfig(
+    val displayTime: Long = 5_000L,
     val slideInDuration: Int = 500,
     val slideOutDuration: Int = slideInDuration,
 )
@@ -37,4 +37,4 @@ data class ModerationWarningAnimationConfig(
  * @param title The title text shown at the top of the moderation warning.
  * @param message The message text displayed below the title, providing additional context.
  */
-data class ModerationText(val title: String, val message: String)
+internal data class ModerationText(val title: String, val message: String)

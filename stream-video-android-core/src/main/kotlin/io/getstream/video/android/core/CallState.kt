@@ -33,8 +33,6 @@ import io.getstream.android.video.generated.models.CallMemberAddedEvent
 import io.getstream.android.video.generated.models.CallMemberRemovedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
-import io.getstream.android.video.generated.models.CallModerationBlurEvent
-import io.getstream.android.video.generated.models.CallModerationWarningEvent
 import io.getstream.android.video.generated.models.CallParticipantResponse
 import io.getstream.android.video.generated.models.CallReactionEvent
 import io.getstream.android.video.generated.models.CallRecordingStartedEvent
@@ -82,6 +80,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
+import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
@@ -107,7 +106,7 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
-import io.getstream.video.android.core.moderation.CallModerationConstants
+import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -662,6 +661,8 @@ public class CallState(
      */
     internal val closedCaptionManager = ClosedCaptionManager()
 
+    public val moderationManager = ModerationManager(call)
+
     /**
      * Tracks whether closed captioning is currently active for the call.
      * True if captioning is ongoing, false otherwise.
@@ -687,14 +688,6 @@ public class CallState(
      *  - [ClosedCaptionMode.Unknown]: Represents an unrecognized or unsupported mode.
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
-
-    private val _moderationWarning: MutableStateFlow<CallModerationWarningEvent?> =
-        MutableStateFlow(null)
-    val moderationWarning: StateFlow<CallModerationWarningEvent?> = _moderationWarning.asStateFlow()
-
-    private val _moderationBlur: MutableStateFlow<CallModerationBlurEvent?> =
-        MutableStateFlow(null)
-    val moderationBlur: StateFlow<CallModerationBlurEvent?> = _moderationBlur.asStateFlow()
 
     private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
 
@@ -1135,20 +1128,6 @@ public class CallState(
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
             -> closedCaptionManager.handleEvent(event)
-            is CallModerationWarningEvent -> {
-                _moderationWarning.value = event
-                scope.launch {
-                    delay(CallModerationConstants.DEFAULT_MODERATION_AUTO_DISMISS_TIME_MS)
-                    _moderationWarning.value = null
-                }
-            }
-            is CallModerationBlurEvent -> {
-                _moderationBlur.value = event
-                scope.launch {
-                    delay(CallModerationConstants.DEFAULT_BLUR_AUTO_DISMISS_TIME_MS)
-                    _moderationWarning.value = null
-                }
-            }
         }
     }
 
@@ -1642,10 +1621,6 @@ public class CallState(
 
     fun updateNotification(notification: Notification) {
         atomicNotification.set(notification)
-    }
-
-    fun resetModeration() {
-        _moderationBlur.value = null
     }
 }
 

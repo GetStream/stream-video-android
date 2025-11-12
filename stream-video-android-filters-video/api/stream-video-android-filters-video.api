@@ -1,34 +1,12 @@
-public abstract class io/getstream/video/android/filters/video/BlurIntensity {
-	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+public final class io/getstream/video/android/filters/video/BlurIntensity : java/lang/Enum {
+	public static final field HEAVY Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static final field LIGHT Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static final field MEDIUM Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static final field ULTRA Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getRadius ()I
-}
-
-public final class io/getstream/video/android/filters/video/BlurIntensity$HEAVY : io/getstream/video/android/filters/video/BlurIntensity {
-	public static final field INSTANCE Lio/getstream/video/android/filters/video/BlurIntensity$HEAVY;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/filters/video/BlurIntensity$LIGHT : io/getstream/video/android/filters/video/BlurIntensity {
-	public static final field INSTANCE Lio/getstream/video/android/filters/video/BlurIntensity$LIGHT;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/filters/video/BlurIntensity$MEDIUM : io/getstream/video/android/filters/video/BlurIntensity {
-	public static final field INSTANCE Lio/getstream/video/android/filters/video/BlurIntensity$MEDIUM;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/filters/video/BlurIntensity$ULTRA : io/getstream/video/android/filters/video/BlurIntensity {
-	public static final field INSTANCE Lio/getstream/video/android/filters/video/BlurIntensity$ULTRA;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static fun values ()[Lio/getstream/video/android/filters/video/BlurIntensity;
 }
 
 public final class io/getstream/video/android/filters/video/BlurredBackgroundVideoFilter : io/getstream/video/android/core/call/video/BitmapVideoFilter {

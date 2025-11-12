@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.filters.video
+package io.getstream.video.android.core.moderations
 
-import androidx.annotation.Keep
-
-/**
- * The intensity of the background blur effect. Used in [BlurredBackgroundVideoFilter].
- * The class names are in capital letter to maintain backward-compatibility
- */
-@Keep
-public sealed class BlurIntensity(public val radius: Int) {
-    public data object LIGHT : BlurIntensity(7)
-    public data object MEDIUM : BlurIntensity(11)
-    public data object HEAVY : BlurIntensity(16)
-    public data object ULTRA : BlurIntensity(25)
+object CallModerationConstants {
+    const val POLICY_VIOLATION = "PolicyViolationModeration"
 }

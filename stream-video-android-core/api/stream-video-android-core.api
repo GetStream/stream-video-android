@@ -7441,8 +7441,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getMe ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMember (Ljava/lang/String;)Lio/getstream/video/android/core/MemberState;
 	public final fun getMembers ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getModerationBlur ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getModerationWarning ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getModerationManager ()Lio/getstream/video/android/core/moderations/ModerationManager;
 	public final fun getOrCreateParticipant (Ljava/lang/String;Ljava/lang/String;ZLstream/video/sfu/models/ParticipantSource;)Lio/getstream/video/android/core/ParticipantState;
 	public static synthetic fun getOrCreateParticipant$default (Lio/getstream/video/android/core/CallState;Ljava/lang/String;Ljava/lang/String;ZLstream/video/sfu/models/ParticipantSource;ILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState;
 	public final fun getOwnCapabilities ()Lkotlinx/coroutines/flow/StateFlow;
@@ -7477,7 +7476,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun markSpeakingAsMuted ()V
 	public final fun pin (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun replaceParticipants (Ljava/util/List;)V
-	public final fun resetModeration ()V
 	public final fun unpin (Ljava/lang/String;)V
 	public final fun updateFromResponse (Lio/getstream/android/video/generated/models/CallResponse;)V
 	public final fun updateFromResponse (Lio/getstream/android/video/generated/models/CallStateResponseFields;)V
@@ -11782,53 +11780,43 @@ public final class io/getstream/video/android/core/model/VisibilityOnScreenState
 	public static fun values ()[Lio/getstream/video/android/core/model/VisibilityOnScreenState;
 }
 
-public final class io/getstream/video/android/core/moderation/CallModerationConstants {
-	public static final field DEFAULT_BLUR_AUTO_DISMISS_TIME_MS J
-	public static final field DEFAULT_MODERATION_AUTO_DISMISS_TIME_MS J
-	public static final field DEFAULT_MODERATION_DISPLAY_TIME_MS J
-	public static final field INSTANCE Lio/getstream/video/android/core/moderation/CallModerationConstants;
+public final class io/getstream/video/android/core/moderations/CallModerationConstants {
+	public static final field INSTANCE Lio/getstream/video/android/core/moderations/CallModerationConstants;
 	public static final field POLICY_VIOLATION Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/moderation/ModerationBlurConfig {
-	public fun <init> ()V
-	public fun <init> (J)V
-	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()J
-	public final fun copy (J)Lio/getstream/video/android/core/moderation/ModerationBlurConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/moderation/ModerationBlurConfig;JILjava/lang/Object;)Lio/getstream/video/android/core/moderation/ModerationBlurConfig;
+public final class io/getstream/video/android/core/moderations/ModerationBlurConfig {
+	public fun <init> (ZJLio/getstream/video/android/core/call/video/BitmapVideoFilter;)V
+	public synthetic fun <init> (ZJLio/getstream/video/android/core/call/video/BitmapVideoFilter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()J
+	public final fun component3 ()Lio/getstream/video/android/core/call/video/BitmapVideoFilter;
+	public final fun copy (ZJLio/getstream/video/android/core/call/video/BitmapVideoFilter;)Lio/getstream/video/android/core/moderations/ModerationBlurConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/moderations/ModerationBlurConfig;ZJLio/getstream/video/android/core/call/video/BitmapVideoFilter;ILjava/lang/Object;)Lio/getstream/video/android/core/moderations/ModerationBlurConfig;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getVisibilityDurationMs ()J
+	public final fun getBitmapVideoFilter ()Lio/getstream/video/android/core/call/video/BitmapVideoFilter;
+	public final fun getBlurDuration ()J
+	public final fun getEnable ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/moderation/ModerationText {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/moderation/ModerationText;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/moderation/ModerationText;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/moderation/ModerationText;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMessage ()Ljava/lang/String;
-	public final fun getTitle ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+public final class io/getstream/video/android/core/moderations/ModerationManager {
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun disableVideoModeration ()V
+	public final fun enableVideoModeration (Lio/getstream/video/android/core/call/video/BitmapVideoFilter;)V
+	public static synthetic fun enableVideoModeration$default (Lio/getstream/video/android/core/moderations/ModerationManager;Lio/getstream/video/android/core/call/video/BitmapVideoFilter;ILjava/lang/Object;)V
 }
 
-public final class io/getstream/video/android/core/moderation/ModerationWarningAnimationConfig {
-	public fun <init> ()V
-	public fun <init> (JII)V
-	public synthetic fun <init> (JIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()J
-	public final fun component2 ()I
-	public final fun component3 ()I
-	public final fun copy (JII)Lio/getstream/video/android/core/moderation/ModerationWarningAnimationConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/moderation/ModerationWarningAnimationConfig;JIIILjava/lang/Object;)Lio/getstream/video/android/core/moderation/ModerationWarningAnimationConfig;
+public final class io/getstream/video/android/core/moderations/ModerationWarningConfig {
+	public fun <init> (ZJ)V
+	public final fun component1 ()Z
+	public final fun component2 ()J
+	public final fun copy (ZJ)Lio/getstream/video/android/core/moderations/ModerationWarningConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/moderations/ModerationWarningConfig;ZJILjava/lang/Object;)Lio/getstream/video/android/core/moderations/ModerationWarningConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDisplayTime ()J
-	public final fun getSlideInDuration ()I
-	public final fun getSlideOutDuration ()I
+	public final fun getEnable ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -12268,19 +12256,23 @@ public final class io/getstream/video/android/core/notifications/internal/receiv
 
 public final class io/getstream/video/android/core/notifications/internal/service/CallServiceConfig {
 	public fun <init> ()V
-	public fun <init> (ZILjava/util/Map;Ljava/lang/Class;Z)V
-	public synthetic fun <init> (ZILjava/util/Map;Ljava/lang/Class;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZILjava/util/Map;Ljava/lang/Class;ZLio/getstream/video/android/core/moderations/ModerationWarningConfig;Lio/getstream/video/android/core/moderations/ModerationBlurConfig;)V
+	public synthetic fun <init> (ZILjava/util/Map;Ljava/lang/Class;ZLio/getstream/video/android/core/moderations/ModerationWarningConfig;Lio/getstream/video/android/core/moderations/ModerationBlurConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()I
 	public final fun component3 ()Ljava/util/Map;
 	public final fun component4 ()Ljava/lang/Class;
 	public final fun component5 ()Z
-	public final fun copy (ZILjava/util/Map;Ljava/lang/Class;Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/lang/Class;ZILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public final fun component6 ()Lio/getstream/video/android/core/moderations/ModerationWarningConfig;
+	public final fun component7 ()Lio/getstream/video/android/core/moderations/ModerationBlurConfig;
+	public final fun copy (ZILjava/util/Map;Ljava/lang/Class;ZLio/getstream/video/android/core/moderations/ModerationWarningConfig;Lio/getstream/video/android/core/moderations/ModerationBlurConfig;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;ZILjava/util/Map;Ljava/lang/Class;ZLio/getstream/video/android/core/moderations/ModerationWarningConfig;Lio/getstream/video/android/core/moderations/ModerationBlurConfig;ILjava/lang/Object;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioUsage ()I
 	public final fun getCallServicePerType ()Ljava/util/Map;
 	public final fun getEnableTelecom ()Z
+	public final fun getModerationBlurConfig ()Lio/getstream/video/android/core/moderations/ModerationBlurConfig;
+	public final fun getModerationWarningConfig ()Lio/getstream/video/android/core/moderations/ModerationWarningConfig;
 	public final fun getRunCallServiceInForeground ()Z
 	public final fun getServiceClass ()Ljava/lang/Class;
 	public fun hashCode ()I
@@ -12292,6 +12284,8 @@ public final class io/getstream/video/android/core/notifications/internal/servic
 	public final fun build ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfig;
 	public final fun enableTelecom (Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setAudioUsage (I)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
+	public final fun setModerationBlurConfig (Lio/getstream/video/android/core/moderations/ModerationBlurConfig;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
+	public final fun setModerationWarningConfig (Lio/getstream/video/android/core/moderations/ModerationWarningConfig;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setRunCallServiceInForeground (Z)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 	public final fun setServiceClass (Ljava/lang/Class;)Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigBuilder;
 }

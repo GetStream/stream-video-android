@@ -17,6 +17,8 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.media.AudioAttributes
+import io.getstream.video.android.core.moderations.ModerationBlurConfig
+import io.getstream.video.android.core.moderations.ModerationWarningConfig
 import io.getstream.video.android.model.StreamCallId
 
 // Constants
@@ -47,6 +49,14 @@ public data class CallServiceConfig(
     ),
     val serviceClass: Class<*> = CallService::class.java,
     val enableTelecom: Boolean = false,
+    val moderationWarningConfig: ModerationWarningConfig = ModerationWarningConfig(
+        true,
+        5_000L,
+    ),
+    val moderationBlurConfig: ModerationBlurConfig = ModerationBlurConfig(
+        true,
+        15_000L,
+    ),
 )
 
 /**
