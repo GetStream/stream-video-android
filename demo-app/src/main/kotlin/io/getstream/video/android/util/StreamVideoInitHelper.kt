@@ -215,10 +215,18 @@ object StreamVideoInitHelper {
             register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
             register(CallType.AudioCall.name) { enableTelecom(true) }
             register(CallType.AnyMarker.name) {
-                setModerationConfig(ModerationConfig(
-                    moderationWarningConfig = ModerationWarningConfig(enable = true, displayTime =  5_000L,),
-                    videoModerationConfig = VideoModerationConfig(enable = true, blurDuration = 25_000L)
-                ))
+                setModerationConfig(
+                    ModerationConfig(
+                        moderationWarningConfig = ModerationWarningConfig(
+                            enable = true,
+                            displayTime = 5_000L,
+                        ),
+                        videoModerationConfig = VideoModerationConfig(
+                            enable = true,
+                            blurDuration = 25_000L,
+                        ),
+                    ),
+                )
             }
         }
 

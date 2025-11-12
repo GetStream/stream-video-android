@@ -19,14 +19,44 @@ package io.getstream.video.android.core.moderations
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
 import io.getstream.video.android.core.call.video.DefaultModerationVideoFilter
 
+/**
+ * Configuration for displaying moderation warnings during a call.
+ *
+ * @property enable Whether moderation warnings are enabled.
+ * @property displayTime The duration (in milliseconds) for which the moderation warning should be visible.
+ */
 data class ModerationWarningConfig(val enable: Boolean, val displayTime: Long)
 
+/**
+ * Configuration for video moderation behavior during policy violations.
+ *
+ * @property enable Whether video moderation (e.g., blurring) is enabled.
+ * @property blurDuration The duration (in milliseconds) for which the blur effect should remain active.
+ * @property bitmapVideoFilter The [BitmapVideoFilter] used to apply the moderation effect.
+ * By default, [DefaultModerationVideoFilter] is used.
+ */
 data class VideoModerationConfig(
     val enable: Boolean,
     val blurDuration: Long,
     val bitmapVideoFilter: BitmapVideoFilter = DefaultModerationVideoFilter(),
 )
 
+/**
+ * Top-level configuration for all moderation features.
+ *
+ * This class allows customizing both warning and video moderation behavior.
+ *
+ * @property moderationWarningConfig Configuration for moderation warnings displayed to the user.
+ * @property videoModerationConfig Configuration for video moderation (e.g., applying blur effects).
+ *
+ * Example usage:
+ * ```
+ * val moderationConfig = ModerationConfig(
+ *     moderationWarningConfig = ModerationWarningConfig(enable = true, displayTime = 5000L),
+ *     videoModerationConfig = VideoModerationConfig(enable = true, blurDuration = 20000L)
+ * )
+ * ```
+ */
 data class ModerationConfig(
     val moderationWarningConfig: ModerationWarningConfig = ModerationWarningConfig(
         true,
