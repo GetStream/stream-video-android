@@ -40,6 +40,8 @@ import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
+import io.getstream.video.android.core.notifications.internal.service.ModerationBlurConfig
+import io.getstream.video.android.core.notifications.internal.service.ModerationWarningConfig
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.enableRingingCallVibrationConfig
@@ -211,6 +213,10 @@ object StreamVideoInitHelper {
         callServiceConfigRegistry.apply {
             register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
             register(CallType.AudioCall.name) { enableTelecom(true) }
+            register(CallType.AnyMarker.name) {
+                setModerationBlurConfig(ModerationBlurConfig(true, 10_000L))
+                setModerationWarningConfig(ModerationWarningConfig(true, 5_000L, "Warning"))
+            }
         }
 
         return StreamVideoBuilder(

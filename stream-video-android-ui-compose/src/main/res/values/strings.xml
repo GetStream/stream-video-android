@@ -20,4 +20,6 @@
     <string name="stream_default_call_ui_permission_rationale">Please grant the necessary permissions.</string>
     <string name="stream_default_call_ui_settings_button">Settings</string>
     <string name="stream_default_call_ui_not_now_button">Not now</string>
+    <string name="stream_default_moderation_warning_title">Warning</string>
+    <string name="stream_default_moderation_warning_message">We have detected policy violation</string>
 </resources>
