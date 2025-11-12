@@ -105,6 +105,8 @@ import kotlinx.coroutines.delay
  * @param pictureInPictureConfiguration User can provide Picture-In-Picture configuration.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param closedCaptionUi You can pass your composable lambda here to render Closed Captions
+ * @param videoModerationBlurUi You can pass your composable lambda here to render your own UI on top of Blurry video
+ * @param videoModerationWarningUi You can pass your composable lambda here to render your own video moderation warning UI
  */
 @Composable
 public fun CallContent(
