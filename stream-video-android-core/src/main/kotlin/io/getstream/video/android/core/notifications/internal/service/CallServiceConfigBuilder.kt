@@ -16,9 +16,8 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
-import android.graphics.Bitmap
 import android.media.AudioAttributes
-import io.getstream.video.android.core.call.video.BitmapVideoFilter
+import io.getstream.video.android.core.call.video.DefaultModerationVideoFilter
 import io.getstream.video.android.core.moderations.ModerationBlurConfig
 import io.getstream.video.android.core.moderations.ModerationWarningConfig
 
@@ -32,13 +31,8 @@ class CallServiceConfigBuilder {
     private var moderationBlurConfig: ModerationBlurConfig =
         ModerationBlurConfig(
             true,
-            10_000L,
-            object :
-                BitmapVideoFilter() {
-                override fun applyFilter(videoFrameBitmap: Bitmap) {
-                    TODO("Not yet implemented")
-                }
-            },
+            15_000L,
+            DefaultModerationVideoFilter(),
         )
 
     fun setServiceClass(serviceClass: Class<*>): CallServiceConfigBuilder = apply {

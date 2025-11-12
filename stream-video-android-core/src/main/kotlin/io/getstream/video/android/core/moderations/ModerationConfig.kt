@@ -17,11 +17,12 @@
 package io.getstream.video.android.core.moderations
 
 import io.getstream.video.android.core.call.video.BitmapVideoFilter
+import io.getstream.video.android.core.call.video.DefaultModerationVideoFilter
 
 data class ModerationWarningConfig(val enable: Boolean, val displayTime: Long)
 
 data class ModerationBlurConfig(
     val enable: Boolean,
     val blurDuration: Long,
-    val bitmapVideoFilter: BitmapVideoFilter,
+    val bitmapVideoFilter: BitmapVideoFilter = DefaultModerationVideoFilter(),
 )

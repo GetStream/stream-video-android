@@ -11787,6 +11787,7 @@ public final class io/getstream/video/android/core/moderations/CallModerationCon
 
 public final class io/getstream/video/android/core/moderations/ModerationBlurConfig {
 	public fun <init> (ZJLio/getstream/video/android/core/call/video/BitmapVideoFilter;)V
+	public synthetic fun <init> (ZJLio/getstream/video/android/core/call/video/BitmapVideoFilter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()J
 	public final fun component3 ()Lio/getstream/video/android/core/call/video/BitmapVideoFilter;
