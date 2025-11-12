@@ -23,6 +23,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDecoderFactory
+import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
@@ -47,7 +48,6 @@ import org.webrtc.RtpCapabilities
 import org.webrtc.SimulcastAlignedVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
-import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.PublishOption
@@ -87,20 +87,21 @@ public class StreamPeerConnectionFactory(
     private var audioRecordDataCallback: (
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
-    
+
     // Audio configuration parameters from JavaAudioDeviceModule
     private var inputNumOfChannels: Int = 1 // Default to mono input (WebRTC standard)
     private var outputNumOfChannels: Int = 2 // Default to stereo output (setUseStereoOutput(true))
     private var inputSampleRate: Int = 48000 // Standard WebRTC sample rate
     private var inputBitsPerSample: Int = 16 // 16-bit PCM
-    
+
     companion object {
         // Requested size of each recorded buffer provided to the client.
         private const val CALLBACK_BUFFER_SIZE_MS = 10
+
         // Average number of callbacks per second.
         private const val BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS
     }
-    
+
     // Provider function to get screen audio bytes from MediaManager on demand
     private var screenAudioBytesProvider: ((Int) -> ByteBuffer?)? = null
 
@@ -329,12 +330,12 @@ public class StreamPeerConnectionFactory(
                     sampleRate,
                     audioBuffer,
                 )
-                
+
                 // Mix screen audio with microphone audio if screen sharing is active
                 if (bytesRead > 0) {
                     // Request screen audio bytes from MediaManager on demand
                     val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
-                    
+
                     if (screenAudioBuffer != null && screenAudioBuffer.remaining() > 0) {
                         screenAudioBuffer.position(0)
                         audioBuffer.position(0)
@@ -364,7 +365,6 @@ public class StreamPeerConnectionFactory(
                     // If screenAudioBuffer is null or empty, just use microphone audio (no mixing needed)
                 }
 
-                
                 captureTimeNs
             }
             .setUseStereoOutput(true)
@@ -378,7 +378,7 @@ public class StreamPeerConnectionFactory(
         // Output is stereo (2 channels) when setUseStereoOutput(true) is set
         outputNumOfChannels = 2 // Stereo output as configured above
         // Input channels are typically 1 (mono) for WebRTC, but we'll capture it from the callback
-        
+
         return adm
     }
 

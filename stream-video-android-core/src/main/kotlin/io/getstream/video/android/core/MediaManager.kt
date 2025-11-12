@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import android.Manifest
-import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -32,7 +31,6 @@ import android.media.AudioPlaybackCaptureConfiguration
 import android.media.AudioRecord
 import android.media.AudioRecord.READ_BLOCKING
 import android.media.projection.MediaProjection
-import java.nio.ByteBuffer
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
@@ -75,6 +73,7 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.VideoDimension
+import java.nio.ByteBuffer
 import java.util.UUID
 import kotlin.coroutines.resumeWithException
 
@@ -268,10 +267,13 @@ class ScreenShareManager(
         internal val screenShareFps = 15
         private const val INPUT_NUM_OF_CHANNELS = 1 // 1 for mono, 2 for stereo output
         private const val OUTPUT_NUM_OF_CHANNELS = 1 // 1 for mono, 2 for stereo output
+
         // Requested size of each recorded buffer provided to the client.
         private const val CALLBACK_BUFFER_SIZE_MS = 10
+
         // Average number of callbacks per second.
         private const val BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS
+
         // Bits per sample (16-bit PCM)
         private const val INPUT_BITS_PER_SAMPLE = 16
     }
@@ -291,7 +293,7 @@ class ScreenShareManager(
     private var mediaProjection: MediaProjection? = null
     private var screenAudioRecord: AudioRecord? = null
     private val inputSampleRate = 48000 // Standard WebRTC sample rate
-    
+
     // ByteBuffer for reading screen audio on demand
     private var screenAudioBuffer: ByteBuffer? = null
 
@@ -333,7 +335,7 @@ class ScreenShareManager(
                 screenShareResolution.height,
                 0,
             )
-            
+
             // Get MediaProjection from ScreenCapturerAndroid
             mediaProjection = screenCapturerAndroid.mediaProjection
 
@@ -381,25 +383,25 @@ class ScreenShareManager(
      */
     internal fun getScreenAudioBytes(bytesRequested: Int): ByteBuffer? {
         val record = screenAudioRecord ?: return null
-        
+
         if (bytesRequested <= 0) return null
-        
+
         // Ensure buffer has enough capacity
         val buffer = screenAudioBuffer?.takeIf { it.capacity() >= bytesRequested }
             ?: ByteBuffer.allocateDirect(bytesRequested).also { screenAudioBuffer = it }
-        
+
         buffer.clear()
         buffer.limit(bytesRequested)
-        
+
         // Read directly from AudioRecord using READ_BLOCKING mode
         val bytesRead = record.read(buffer, bytesRequested, READ_BLOCKING)
-        
+
         if (bytesRead > 0) {
             buffer.limit(bytesRead)
             // Return a duplicate to avoid position/limit conflicts with concurrent access
             return buffer
         }
-        
+
         return null
     }
 
@@ -430,7 +432,7 @@ class ScreenShareManager(
             // Calculate buffer size using the correct formula
             val bytesPerFrame: Int = INPUT_NUM_OF_CHANNELS * (INPUT_BITS_PER_SAMPLE / 8)
             val capacity = bytesPerFrame * (inputSampleRate / BUFFERS_PER_SECOND)
-            
+
             // Create ByteBuffer for reading audio on demand
             screenAudioBuffer = ByteBuffer.allocateDirect(capacity)
 
