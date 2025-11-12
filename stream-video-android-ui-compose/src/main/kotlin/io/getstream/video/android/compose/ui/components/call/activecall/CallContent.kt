@@ -162,8 +162,8 @@ public fun CallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     enableDiagnostics: Boolean = false,
     closedCaptionUi: @Composable (Call) -> Unit = {},
-    moderationBlurUi: @Composable (Call) -> Unit = {},
-    moderationWarningUi: @Composable (Call, String?) -> Unit = { _, message ->
+    videoModerationBlurUi: @Composable (Call) -> Unit = {},
+    videoModerationWarningUi: @Composable (Call, String?) -> Unit = { _, message ->
         val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
         val displayTime = callServiceConfig.moderationConfig.moderationWarningConfig.displayTime
         DefaultModerationWarningUiContainer(
@@ -252,8 +252,8 @@ public fun CallContent(
                     }
                 }
                 closedCaptionUi(call)
-                ModerationBlurUi(call, moderationBlurUi)
-                ModerationWarningRootUi(call, moderationWarningUi)
+                ModerationBlurUi(call, videoModerationBlurUi)
+                ModerationWarningRootUi(call, videoModerationWarningUi)
             },
         )
     }
