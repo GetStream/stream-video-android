@@ -88,22 +88,11 @@ public class StreamPeerConnectionFactory(
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
 
-    // Audio configuration parameters from JavaAudioDeviceModule
-    private var inputNumOfChannels: Int = 1 // Default to mono input (WebRTC standard)
-    private var outputNumOfChannels: Int = 2 // Default to stereo output (setUseStereoOutput(true))
-    private var inputSampleRate: Int = 48000 // Standard WebRTC sample rate
-    private var inputBitsPerSample: Int = 16 // 16-bit PCM
-
-    companion object {
-        // Requested size of each recorded buffer provided to the client.
-        private const val CALLBACK_BUFFER_SIZE_MS = 10
-
-        // Average number of callbacks per second.
-        private const val BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS
-    }
-
     // Provider function to get screen audio bytes from MediaManager on demand
     private var screenAudioBytesProvider: ((Int) -> ByteBuffer?)? = null
+
+    // Provider function to check if microphone is enabled
+    private var microphoneEnabledProvider: (() -> Boolean)? = null
 
     /**
      * Set to get callbacks when audio input from microphone is received.
@@ -138,6 +127,14 @@ public class StreamPeerConnectionFactory(
      */
     internal fun setScreenAudioBytesProvider(provider: ((Int) -> ByteBuffer?)?) {
         screenAudioBytesProvider = provider
+    }
+
+    /**
+     * Sets a provider function that returns whether the microphone is enabled.
+     * This is used to determine if microphone audio should be included when mixing with screen audio.
+     */
+    internal fun setMicrophoneEnabledProvider(provider: (() -> Boolean)?) {
+        microphoneEnabledProvider = provider
     }
 
     /**
@@ -317,13 +314,6 @@ public class StreamPeerConnectionFactory(
                 audioSampleCallback?.invoke(it)
             }
             .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, bytesRead, captureTimeNs ->
-                // Capture the actual input channel count and sample rate from the callback
-                // This ensures we use the real values from WebRTC
-                if (inputNumOfChannels != channelCount || inputSampleRate != sampleRate) {
-                    inputNumOfChannels = channelCount
-                    inputSampleRate = sampleRate
-                }
-
                 audioRecordDataCallback?.invoke(
                     audioFormat,
                     channelCount,
@@ -335,34 +325,46 @@ public class StreamPeerConnectionFactory(
                 if (bytesRead > 0) {
                     // Request screen audio bytes from MediaManager on demand
                     val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
+                    val isMicrophoneEnabled = microphoneEnabledProvider?.invoke() ?: true
 
                     if (screenAudioBuffer != null && screenAudioBuffer.remaining() > 0) {
                         screenAudioBuffer.position(0)
                         audioBuffer.position(0)
-                        // Convert microphone audio (ByteBuffer) to ShortArray
-                        val micSamples = ShortArray(audioBuffer.limit() / 2)
-                        audioBuffer.order(ByteOrder.LITTLE_ENDIAN)
-                        audioBuffer.asShortBuffer().get(micSamples)
 
                         // Convert screen audio (ByteBuffer) to ShortArray
                         val screenSamples = ShortArray(screenAudioBuffer.limit() / 2)
                         screenAudioBuffer.order(ByteOrder.LITTLE_ENDIAN)
                         screenAudioBuffer.asShortBuffer().get(screenSamples)
 
-                        // Mix the audio buffers
-                        val mixedAudio = addAndConvertBuffers(
-                            micSamples,
-                            micSamples.size,
-                            screenSamples,
-                            screenSamples.size,
-                        )
+                        val mixedAudio = if (isMicrophoneEnabled) {
+                            // Convert microphone audio (ByteBuffer) to ShortArray
+                            val micSamples = ShortArray(audioBuffer.limit() / 2)
+                            audioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+                            audioBuffer.asShortBuffer().get(micSamples)
+
+                            // Mix the audio buffers
+                            addAndConvertBuffers(
+                                micSamples,
+                                micSamples.size,
+                                screenSamples,
+                                screenSamples.size,
+                            )
+                        } else {
+                            // Microphone is disabled, only send screen audio
+                            // Create silent microphone samples (all zeros) and mix with screen audio
+                            val silentMicSamples = ShortArray(audioBuffer.limit() / 2) { 0 }
+                            addAndConvertBuffers(
+                                silentMicSamples,
+                                silentMicSamples.size,
+                                screenSamples,
+                                screenSamples.size,
+                            )
+                        }
 
                         // Put the mixed audio back into the buffer
                         audioBuffer.clear()
                         audioBuffer.put(mixedAudio)
-//                            audioBuffer.flip()
                     }
-                    // If screenAudioBuffer is null or empty, just use microphone audio (no mixing needed)
                 }
 
                 captureTimeNs
@@ -372,12 +374,6 @@ public class StreamPeerConnectionFactory(
                 it.setMicrophoneMute(false)
                 it.setSpeakerMute(false)
             }
-
-        // Store the actual channel configuration
-        // Input is typically mono (1 channel) for WebRTC recording
-        // Output is stereo (2 channels) when setUseStereoOutput(true) is set
-        outputNumOfChannels = 2 // Stereo output as configured above
-        // Input channels are typically 1 (mono) for WebRTC, but we'll capture it from the callback
 
         return adm
     }

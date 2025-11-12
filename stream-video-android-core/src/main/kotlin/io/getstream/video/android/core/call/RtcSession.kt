@@ -404,6 +404,11 @@ public class RtcSession internal constructor(
         call.peerConnectionFactory.setScreenAudioBytesProvider { bytesRequested ->
             call.mediaManager.screenShare.getScreenAudioBytes(bytesRequested)
         }
+
+        // Set up microphone enabled provider to check if microphone should be included in mixing
+        call.peerConnectionFactory.setMicrophoneEnabledProvider {
+            call.mediaManager.microphone.isEnabled.value
+        }
     }
 
     private var participantsMonitoringJob: Job? = null
@@ -677,8 +682,17 @@ public class RtcSession internal constructor(
                         )
                     }
                 } else {
-                    setMuteState(isEnabled = false, TrackType.TRACK_TYPE_AUDIO)
-                    publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
+                    // Only unpublish audio stream if screen sharing is not active
+                    // If screen sharing is active, keep the stream published so screen audio can be transmitted
+                    val isScreenSharingActive = call.mediaManager.screenShare.isEnabled.value
+                    if (!isScreenSharingActive) {
+                        setMuteState(isEnabled = false, TrackType.TRACK_TYPE_AUDIO)
+                        publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
+                    } else {
+                        // Screen sharing is active, keep stream published and keep mute state as enabled
+                        // so the SFU continues to forward audio. The mixing logic will handle sending only screen audio
+                        // Don't call setMuteState here - we want the SFU to think audio is still enabled
+                    }
                 }
             }
         }
@@ -709,6 +723,13 @@ public class RtcSession internal constructor(
                 } else {
                     setMuteState(false, TrackType.TRACK_TYPE_SCREEN_SHARE)
                     publisher?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE)
+
+                    // If microphone is already muted, perform the normal mute actions now that screen sharing is stopped
+                    val isMicrophoneMuted = call.mediaManager.microphone.status.value == DeviceStatus.Disabled
+                    if (isMicrophoneMuted) {
+                        setMuteState(isEnabled = false, TrackType.TRACK_TYPE_AUDIO)
+                        publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
+                    }
                 }
             }
         }
@@ -771,7 +792,9 @@ public class RtcSession internal constructor(
             participant._videoPaused.value = paused
         }
         track?.enableVideo(videoEnabled)
-        track?.enableAudio(audioEnabled)
+        if (!call.mediaManager.screenShare.isEnabled.value) {
+            track?.enableAudio(audioEnabled)
+        }
     }
 
     private val atomicCleanup = AtomicUnitCall()

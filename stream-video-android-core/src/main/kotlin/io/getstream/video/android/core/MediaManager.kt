@@ -599,13 +599,21 @@ class MicrophoneManager(
     }
 
     /** Disable the audio track. Audio is still captured, but not send.
-     * This allows for the "you are muted" toast to indicate you are talking while muted */
+     * This allows for the "you are muted" toast to indicate you are talking while muted.
+     *
+     * Note: If screen sharing audio is enabled, the audio track will remain enabled
+     * to allow screen audio to continue being transmitted even when the microphone is muted.
+     */
     fun disable(fromUser: Boolean = true) {
         enforceSetup {
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            mediaManager.audioTrack.trySetEnabled(false)
+            // Only disable the audio track if screen sharing is not active
+            // This allows screen share audio to continue when microphone is muted
+            if (!mediaManager.screenShare.isEnabled.value) {
+                mediaManager.audioTrack.trySetEnabled(false)
+            }
         }
     }
 

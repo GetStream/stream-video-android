@@ -8302,7 +8302,6 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
-	public static final field Companion Lio/getstream/video/android/core/call/connection/StreamPeerConnectionFactory$Companion;
 	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
@@ -8318,9 +8317,6 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun setAudioRecordDataCallback (Lkotlin/jvm/functions/Function4;)V
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
 	public final fun toggleAudioProcessing ()Z
-}
-
-public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory$Companion {
 }
 
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
