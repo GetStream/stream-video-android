@@ -399,6 +399,11 @@ public class RtcSession internal constructor(
                 sampleData = sampleData,
             )
         }
+
+        // Set up screen audio bytes provider for mixing with microphone audio during screen sharing
+        call.peerConnectionFactory.setScreenAudioBytesProvider { bytesRequested ->
+            call.mediaManager.screenShare.getScreenAudioBytes(bytesRequested)
+        }
     }
 
     private var participantsMonitoringJob: Job? = null

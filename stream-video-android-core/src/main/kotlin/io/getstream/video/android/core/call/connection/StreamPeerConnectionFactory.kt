@@ -47,10 +47,12 @@ import org.webrtc.RtpCapabilities
 import org.webrtc.SimulcastAlignedVideoEncoderFactory
 import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
+import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.PublishOption
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -85,6 +87,22 @@ public class StreamPeerConnectionFactory(
     private var audioRecordDataCallback: (
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
+    
+    // Audio configuration parameters from JavaAudioDeviceModule
+    private var inputNumOfChannels: Int = 1 // Default to mono input (WebRTC standard)
+    private var outputNumOfChannels: Int = 2 // Default to stereo output (setUseStereoOutput(true))
+    private var inputSampleRate: Int = 48000 // Standard WebRTC sample rate
+    private var inputBitsPerSample: Int = 16 // 16-bit PCM
+    
+    companion object {
+        // Requested size of each recorded buffer provided to the client.
+        private const val CALLBACK_BUFFER_SIZE_MS = 10
+        // Average number of callbacks per second.
+        private const val BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS
+    }
+    
+    // Provider function to get screen audio bytes from MediaManager on demand
+    private var screenAudioBytesProvider: ((Int) -> ByteBuffer?)? = null
 
     /**
      * Set to get callbacks when audio input from microphone is received.
@@ -109,6 +127,16 @@ public class StreamPeerConnectionFactory(
         ) -> Unit,
     ) {
         audioRecordDataCallback = callback
+    }
+
+    /**
+     * Sets a provider function that returns screen audio bytes on demand.
+     * The provider will be called with the number of bytes requested and should return
+     * a ByteBuffer containing the requested bytes (may have fewer bytes if not enough data is available).
+     * This should return null when screen sharing is not active.
+     */
+    internal fun setScreenAudioBytesProvider(provider: ((Int) -> ByteBuffer?)?) {
+        screenAudioBytesProvider = provider
     }
 
     /**
@@ -287,13 +315,56 @@ public class StreamPeerConnectionFactory(
             .setSamplesReadyCallback {
                 audioSampleCallback?.invoke(it)
             }
-            .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, _, captureTimeNs ->
+            .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, bytesRead, captureTimeNs ->
+                // Capture the actual input channel count and sample rate from the callback
+                // This ensures we use the real values from WebRTC
+                if (inputNumOfChannels != channelCount || inputSampleRate != sampleRate) {
+                    inputNumOfChannels = channelCount
+                    inputSampleRate = sampleRate
+                }
+
                 audioRecordDataCallback?.invoke(
                     audioFormat,
                     channelCount,
                     sampleRate,
                     audioBuffer,
                 )
+                
+                // Mix screen audio with microphone audio if screen sharing is active
+                if (bytesRead > 0) {
+                    // Request screen audio bytes from MediaManager on demand
+                    val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
+                    
+                    if (screenAudioBuffer != null && screenAudioBuffer.remaining() > 0) {
+                        screenAudioBuffer.position(0)
+                        audioBuffer.position(0)
+                        // Convert microphone audio (ByteBuffer) to ShortArray
+                        val micSamples = ShortArray(audioBuffer.limit() / 2)
+                        audioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+                        audioBuffer.asShortBuffer().get(micSamples)
+
+                        // Convert screen audio (ByteBuffer) to ShortArray
+                        val screenSamples = ShortArray(screenAudioBuffer.limit() / 2)
+                        screenAudioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+                        screenAudioBuffer.asShortBuffer().get(screenSamples)
+
+                        // Mix the audio buffers
+                        val mixedAudio = addAndConvertBuffers(
+                            micSamples,
+                            micSamples.size,
+                            screenSamples,
+                            screenSamples.size,
+                        )
+
+                        // Put the mixed audio back into the buffer
+                        audioBuffer.clear()
+                        audioBuffer.put(mixedAudio)
+//                            audioBuffer.flip()
+                    }
+                    // If screenAudioBuffer is null or empty, just use microphone audio (no mixing needed)
+                }
+
+                
                 captureTimeNs
             }
             .setUseStereoOutput(true)
@@ -302,6 +373,12 @@ public class StreamPeerConnectionFactory(
                 it.setSpeakerMute(false)
             }
 
+        // Store the actual channel configuration
+        // Input is typically mono (1 channel) for WebRTC recording
+        // Output is stereo (2 channels) when setUseStereoOutput(true) is set
+        outputNumOfChannels = 2 // Stereo output as configured above
+        // Input channels are typically 1 (mono) for WebRTC, but we'll capture it from the callback
+        
         return adm
     }
 
