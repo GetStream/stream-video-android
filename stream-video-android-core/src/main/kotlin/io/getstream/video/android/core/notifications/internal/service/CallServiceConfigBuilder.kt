@@ -17,23 +17,14 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.media.AudioAttributes
-import io.getstream.video.android.core.call.video.DefaultModerationVideoFilter
-import io.getstream.video.android.core.moderations.ModerationBlurConfig
-import io.getstream.video.android.core.moderations.ModerationWarningConfig
+import io.getstream.video.android.core.moderations.ModerationConfig
 
 class CallServiceConfigBuilder {
     private var serviceClass: Class<*> = CallService::class.java
     private var runCallServiceInForeground: Boolean = true
     private var audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION
     private var enableTelecom: Boolean = false
-    private var moderationWarningConfig: ModerationWarningConfig =
-        ModerationWarningConfig(true, 5_000L)
-    private var moderationBlurConfig: ModerationBlurConfig =
-        ModerationBlurConfig(
-            true,
-            15_000L,
-            DefaultModerationVideoFilter(),
-        )
+    private var moderationConfig: ModerationConfig = ModerationConfig()
 
     fun setServiceClass(serviceClass: Class<*>): CallServiceConfigBuilder = apply {
         this.serviceClass = serviceClass
@@ -51,12 +42,8 @@ class CallServiceConfigBuilder {
         this.enableTelecom = enableTelecom
     }
 
-    fun setModerationWarningConfig(moderationWarningConfig: ModerationWarningConfig): CallServiceConfigBuilder = apply {
-        this.moderationWarningConfig = moderationWarningConfig
-    }
-
-    fun setModerationBlurConfig(moderationBlurConfig: ModerationBlurConfig): CallServiceConfigBuilder = apply {
-        this.moderationBlurConfig = moderationBlurConfig
+    fun setModerationConfig(moderationConfig: ModerationConfig): CallServiceConfigBuilder = apply {
+        this.moderationConfig = moderationConfig
     }
 
     fun build(): CallServiceConfig {
@@ -65,8 +52,7 @@ class CallServiceConfigBuilder {
             runCallServiceInForeground = runCallServiceInForeground,
             audioUsage = audioUsage,
             enableTelecom = enableTelecom,
-            moderationWarningConfig = moderationWarningConfig,
-            moderationBlurConfig = moderationBlurConfig,
+            moderationConfig = moderationConfig,
         )
     }
 }

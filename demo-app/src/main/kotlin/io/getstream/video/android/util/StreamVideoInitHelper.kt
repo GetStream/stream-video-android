@@ -34,8 +34,7 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.moderations.ModerationBlurConfig
-import io.getstream.video.android.core.moderations.ModerationWarningConfig
+import io.getstream.video.android.core.moderations.ModerationConfig
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -214,8 +213,7 @@ object StreamVideoInitHelper {
             register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
             register(CallType.AudioCall.name) { enableTelecom(true) }
             register(CallType.AnyMarker.name) {
-                setModerationBlurConfig(ModerationBlurConfig(true, 10_000L))
-                setModerationWarningConfig(ModerationWarningConfig(true, 5_000L))
+                setModerationConfig(ModerationConfig())
             }
         }
 

@@ -165,7 +165,7 @@ public fun CallContent(
     moderationBlurUi: @Composable (Call) -> Unit = {},
     moderationWarningUi: @Composable (Call, String?) -> Unit = { _, message ->
         val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
-        val displayTime = callServiceConfig.moderationWarningConfig.displayTime
+        val displayTime = callServiceConfig.moderationConfig.moderationWarningConfig.displayTime
         DefaultModerationWarningUiContainer(
             call,
             message,
@@ -269,7 +269,7 @@ private fun ModerationBlurUi(call: Call, moderationBlurUi: @Composable (Call) ->
                 is CallModerationBlurEvent -> {
                     blurEvent = event
                     call.state.moderationManager.enableVideoModeration()
-                    delay(callServiceConfig.moderationBlurConfig.blurDuration)
+                    delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
                     blurEvent = null // auto-dismiss after config duration
                     call.state.moderationManager.disableVideoModeration()
                 }
@@ -294,7 +294,7 @@ private fun ModerationWarningRootUi(
             when (event) {
                 is CallModerationWarningEvent -> {
                     warningEvent = event
-                    delay(callServiceConfig.moderationWarningConfig.displayTime)
+                    delay(callServiceConfig.moderationConfig.moderationWarningConfig.displayTime)
                     warningEvent = null // auto-dismiss after config duration
                 }
             }
