@@ -10,15 +10,14 @@ cameraCamera2 = "1.3.4"
 kover = "0.8.3"
 sonarqube = "6.0.1.5171"
 spotless = "6.21.0"
-nexusPlugin = "1.3.0"
 streamConventions = "0.2.0"
+mavenPublish = "0.34.0"
 kotlin = "1.9.25"
 ksp = "1.9.25-1.0.20"
 kotlinSerialization = "1.6.3"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.9.0"
 cameraCore = "1.4.2"
-
 kotlinDokka = "1.9.20"
 
 androidxMaterial = "1.12.0"
@@ -250,8 +249,8 @@ sonarqube = { id = "org.sonarqube", version.ref = "sonarqube"}
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 stream-android-application = { id = "io.getstream.android.application", version.ref = "streamConventions" }
 stream-android-library = { id = "io.getstream.android.library", version.ref = "streamConventions" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish"}
 dokka = { id = "org.jetbrains.dokka", version.ref = "kotlinDokka" }
-nexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusPlugin" }
 google-gms = { id = "com.google.gms.google-services", version.ref = "googleService" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }
