@@ -291,7 +291,7 @@ fun CallScreen(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = {
             if (it.resultCode == Activity.RESULT_OK && it.data != null) {
-                call.startScreenSharing(it.data!!)
+                call.startScreenSharing(it.data!!, includeAudio = true)
             }
         },
     )

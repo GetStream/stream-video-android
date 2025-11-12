@@ -321,9 +321,10 @@ public class StreamPeerConnectionFactory(
                     audioBuffer,
                 )
 
-                // Mix screen audio with microphone audio if screen sharing is active
+                // Mix screen audio with microphone audio if screen share audio is enabled
                 if (bytesRead > 0) {
                     // Request screen audio bytes from MediaManager on demand
+                    // Returns null if screen share audio is not enabled
                     val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
                     val isMicrophoneEnabled = microphoneEnabledProvider?.invoke() ?: true
 

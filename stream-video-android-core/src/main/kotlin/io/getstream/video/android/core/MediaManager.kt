@@ -266,7 +266,6 @@ class ScreenShareManager(
         internal val screenShareBitrate = 1_000_000
         internal val screenShareFps = 15
         private const val INPUT_NUM_OF_CHANNELS = 1 // 1 for mono, 2 for stereo output
-        private const val OUTPUT_NUM_OF_CHANNELS = 1 // 1 for mono, 2 for stereo output
 
         // Requested size of each recorded buffer provided to the client.
         private const val CALLBACK_BUFFER_SIZE_MS = 10
@@ -284,6 +283,11 @@ class ScreenShareManager(
     val status: StateFlow<DeviceStatus> = _status
 
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
+
+    private val _audioEnabled = MutableStateFlow<Boolean>(false)
+
+    /** Represents whether screen share audio is enabled */
+    public val audioEnabled: StateFlow<Boolean> = _audioEnabled
 
     private lateinit var screenCapturerAndroid: ScreenCapturerAndroid
     internal lateinit var surfaceTextureHelper: SurfaceTextureHelper
@@ -339,8 +343,10 @@ class ScreenShareManager(
             // Get MediaProjection from ScreenCapturerAndroid
             mediaProjection = screenCapturerAndroid.mediaProjection
 
-            // Start screen audio capture
-            startScreenAudioCapture()
+            // Start screen audio capture only if audio is enabled
+            if (_audioEnabled.value) {
+                startScreenAudioCapture()
+            }
 
             isScreenSharing = true
         }
@@ -348,11 +354,12 @@ class ScreenShareManager(
         override fun onServiceDisconnected(name: ComponentName) {}
     }
 
-    fun enable(mediaProjectionPermissionResultData: Intent, fromUser: Boolean = true) {
+    fun enable(mediaProjectionPermissionResultData: Intent, fromUser: Boolean = true, includeAudio: Boolean = false) {
         mediaManager.screenShareTrack.setEnabled(true)
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
+        _audioEnabled.value = includeAudio
         setup()
         startScreenShare(mediaProjectionPermissionResultData)
     }
@@ -361,6 +368,7 @@ class ScreenShareManager(
         if (fromUser) {
             _status.value = DeviceStatus.Disabled
         }
+        _audioEnabled.value = false
 
         if (isScreenSharing) {
             mediaManager.screenShareTrack.setEnabled(false)
@@ -609,9 +617,9 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            // Only disable the audio track if screen sharing is not active
+            // Only disable the audio track if screen sharing audio is not enabled
             // This allows screen share audio to continue when microphone is muted
-            if (!mediaManager.screenShare.isEnabled.value) {
+            if (!mediaManager.screenShare.audioEnabled.value) {
                 mediaManager.audioTrack.trySetEnabled(false)
             }
         }
