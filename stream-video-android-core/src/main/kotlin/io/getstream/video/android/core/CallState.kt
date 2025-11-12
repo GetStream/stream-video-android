@@ -106,6 +106,7 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -659,6 +660,8 @@ public class CallState(
      * This includes processing events related to closed captions and maintaining their state.
      */
     internal val closedCaptionManager = ClosedCaptionManager()
+
+    public val moderationManager = ModerationManager(call)
 
     /**
      * Tracks whether closed captioning is currently active for the call.

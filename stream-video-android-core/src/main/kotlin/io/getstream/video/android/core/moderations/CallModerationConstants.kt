@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.ui.moderation
+package io.getstream.video.android.core.moderations
 
-// import io.getstream.video.android.compose.ui.components.call.moderation.CallModerationConstants.DEFAULT_BLUR_AUTO_DISMISS_TIME_MS
-//
-// data class ModerationBlurConfig(
-//    val visibilityDurationMs: Long = DEFAULT_BLUR_AUTO_DISMISS_TIME_MS,
-// )
+object CallModerationConstants {
+    const val POLICY_VIOLATION = "PolicyViolationModeration"
+}

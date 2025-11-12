@@ -7441,6 +7441,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getMe ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMember (Ljava/lang/String;)Lio/getstream/video/android/core/MemberState;
 	public final fun getMembers ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getModerationManager ()Lio/getstream/video/android/core/moderations/ModerationManager;
 	public final fun getOrCreateParticipant (Ljava/lang/String;Ljava/lang/String;ZLstream/video/sfu/models/ParticipantSource;)Lio/getstream/video/android/core/ParticipantState;
 	public static synthetic fun getOrCreateParticipant$default (Lio/getstream/video/android/core/CallState;Ljava/lang/String;Ljava/lang/String;ZLstream/video/sfu/models/ParticipantSource;ILjava/lang/Object;)Lio/getstream/video/android/core/ParticipantState;
 	public final fun getOwnCapabilities ()Lkotlinx/coroutines/flow/StateFlow;
@@ -11779,6 +11780,11 @@ public final class io/getstream/video/android/core/model/VisibilityOnScreenState
 	public static fun values ()[Lio/getstream/video/android/core/model/VisibilityOnScreenState;
 }
 
+public final class io/getstream/video/android/core/moderations/CallModerationConstants {
+	public static final field INSTANCE Lio/getstream/video/android/core/moderations/CallModerationConstants;
+	public static final field POLICY_VIOLATION Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/moderations/ModerationBlurConfig {
 	public fun <init> (ZJLio/getstream/video/android/core/call/video/BitmapVideoFilter;)V
 	public final fun component1 ()Z
@@ -11792,6 +11798,13 @@ public final class io/getstream/video/android/core/moderations/ModerationBlurCon
 	public final fun getEnable ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/moderations/ModerationManager {
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun disableVideoModeration ()V
+	public final fun enableVideoModeration (Lio/getstream/video/android/core/call/video/BitmapVideoFilter;)V
+	public static synthetic fun enableVideoModeration$default (Lio/getstream/video/android/core/moderations/ModerationManager;Lio/getstream/video/android/core/call/video/BitmapVideoFilter;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/core/moderations/ModerationWarningConfig {

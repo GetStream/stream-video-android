@@ -268,10 +268,10 @@ private fun ModerationBlurUi(call: Call, moderationBlurUi: @Composable (Call) ->
             when (event) {
                 is CallModerationBlurEvent -> {
                     blurEvent = event
-                    call.videoFilter = callServiceConfig.moderationBlurConfig.bitmapVideoFilter
+                    call.state.moderationManager.enableVideoModeration()
                     delay(callServiceConfig.moderationBlurConfig.blurDuration)
                     blurEvent = null // auto-dismiss after config duration
-                    call.videoFilter = null
+                    call.state.moderationManager.disableVideoModeration()
                 }
             }
         }
