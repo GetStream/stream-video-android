@@ -59,7 +59,7 @@ class ModerationManagerTest {
         val customFilter = mockk<BitmapVideoFilter>()
 
         // When
-        moderationManager.enableVideoModeration(customFilter)
+        moderationManager.applyVideoModeration(customFilter)
 
         // Then
         verify { call.videoFilter = customFilter }
@@ -89,7 +89,7 @@ class ModerationManagerTest {
         every { mockCallConfigRegistry.get(any()) } returns callServiceConfig
 
         // When
-        moderationManager.enableVideoModeration()
+        moderationManager.applyVideoModeration()
 
         // Then
         verify { call.videoFilter = ofType(DefaultModerationVideoFilter::class) }
@@ -101,7 +101,7 @@ class ModerationManagerTest {
         every { StreamVideo.instanceOrNull() } returns null
 
         // When
-        moderationManager.enableVideoModeration()
+        moderationManager.applyVideoModeration()
 
         // Then
         verify { call.videoFilter = any() }
@@ -110,7 +110,7 @@ class ModerationManagerTest {
     @Test
     fun `disableVideoModeration sets videoFilter to null`() {
         // When
-        moderationManager.disableVideoModeration()
+        moderationManager.clearVideoModeration()
 
         // Then
         verify { call.videoFilter = null }

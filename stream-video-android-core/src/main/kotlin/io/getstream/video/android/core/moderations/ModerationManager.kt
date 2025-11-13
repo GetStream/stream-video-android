@@ -23,7 +23,7 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 
 class ModerationManager(private val call: Call) {
 
-    fun enableVideoModeration(bitmapVideoFilter: BitmapVideoFilter? = null) {
+    fun applyVideoModeration(bitmapVideoFilter: BitmapVideoFilter? = null) {
         if (bitmapVideoFilter != null) {
             call.videoFilter = bitmapVideoFilter
         } else {
@@ -34,7 +34,7 @@ class ModerationManager(private val call: Call) {
         }
     }
 
-    fun disableVideoModeration() {
+    fun clearVideoModeration() {
         call.videoFilter = null
     }
 }

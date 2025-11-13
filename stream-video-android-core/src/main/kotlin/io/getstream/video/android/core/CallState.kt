@@ -1135,9 +1135,9 @@ public class CallState(
                 scope.launch {
                     val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
                     if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
-                        call.state.moderationManager.enableVideoModeration()
+                        call.state.moderationManager.applyVideoModeration()
                         delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
-                        call.state.moderationManager.disableVideoModeration()
+                        call.state.moderationManager.clearVideoModeration()
                     }
                 }
             }

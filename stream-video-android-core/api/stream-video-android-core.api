@@ -11802,9 +11802,9 @@ public final class io/getstream/video/android/core/moderations/ModerationConfig 
 
 public final class io/getstream/video/android/core/moderations/ModerationManager {
 	public fun <init> (Lio/getstream/video/android/core/Call;)V
-	public final fun disableVideoModeration ()V
-	public final fun enableVideoModeration (Lio/getstream/video/android/core/call/video/BitmapVideoFilter;)V
-	public static synthetic fun enableVideoModeration$default (Lio/getstream/video/android/core/moderations/ModerationManager;Lio/getstream/video/android/core/call/video/BitmapVideoFilter;ILjava/lang/Object;)V
+	public final fun applyVideoModeration (Lio/getstream/video/android/core/call/video/BitmapVideoFilter;)V
+	public static synthetic fun applyVideoModeration$default (Lio/getstream/video/android/core/moderations/ModerationManager;Lio/getstream/video/android/core/call/video/BitmapVideoFilter;ILjava/lang/Object;)V
+	public final fun clearVideoModeration ()V
 }
 
 public final class io/getstream/video/android/core/moderations/ModerationWarningConfig {
