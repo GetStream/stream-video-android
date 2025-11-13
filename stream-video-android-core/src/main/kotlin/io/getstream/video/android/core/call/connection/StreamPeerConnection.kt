@@ -36,25 +36,25 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.stringify
+import io.getstream.webrtc.CandidatePairChangeEvent
+import io.getstream.webrtc.DataChannel
+import io.getstream.webrtc.IceCandidateErrorEvent
+import io.getstream.webrtc.MediaConstraints
+import io.getstream.webrtc.MediaStream
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RtpParameters
+import io.getstream.webrtc.RtpReceiver
+import io.getstream.webrtc.RtpTransceiver
+import io.getstream.webrtc.RtpTransceiver.RtpTransceiverInit
+import io.getstream.webrtc.SessionDescription
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.webrtc.CandidatePairChangeEvent
-import org.webrtc.DataChannel
-import org.webrtc.IceCandidateErrorEvent
-import org.webrtc.MediaConstraints
-import org.webrtc.MediaStream
-import org.webrtc.MediaStreamTrack
-import org.webrtc.PeerConnection
-import org.webrtc.RtpParameters
-import org.webrtc.RtpReceiver
-import org.webrtc.RtpTransceiver
-import org.webrtc.RtpTransceiver.RtpTransceiverInit
-import org.webrtc.SessionDescription
 import stream.video.sfu.models.TrackType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import org.webrtc.IceCandidate as RtcIceCandidate
+import io.getstream.webrtc.IceCandidate as RtcIceCandidate
 
 /**
  * Wrapper around the WebRTC connection that contains tracks.
@@ -596,7 +596,7 @@ open class StreamPeerConnection(
         logger.i { "[onIceGatheringChange] #sfu; #$typeTag; newState: $newState" }
     }
 
-    override fun onIceCandidatesRemoved(iceCandidates: Array<out org.webrtc.IceCandidate>?) {
+    override fun onIceCandidatesRemoved(iceCandidates: Array<out io.getstream.webrtc.IceCandidate>?) {
         logger.i { "[onIceCandidatesRemoved] #sfu; #$typeTag; iceCandidates: $iceCandidates" }
     }
 

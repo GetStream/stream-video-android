@@ -330,7 +330,7 @@ private fun VideoRendererPreview() {
         VideoRenderer(
             call = previewCall,
             video = ParticipantState.Video(
-                track = VideoTrack("", org.webrtc.VideoTrack(123)),
+                track = VideoTrack("", io.getstream.webrtc.VideoTrack(123)),
                 enabled = true,
                 sessionId = "",
                 paused = false,
@@ -347,7 +347,7 @@ private fun VideoRendererPausedPreview() {
         VideoRenderer(
             call = previewCall,
             video = ParticipantState.Video(
-                track = VideoTrack("", org.webrtc.VideoTrack(123)),
+                track = VideoTrack("", io.getstream.webrtc.VideoTrack(123)),
                 enabled = true,
                 sessionId = "",
                 paused = true,

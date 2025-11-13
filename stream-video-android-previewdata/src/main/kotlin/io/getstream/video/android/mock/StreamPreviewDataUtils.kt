@@ -24,8 +24,8 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.model.User
+import io.getstream.webrtc.VideoTrack
 import org.threeten.bp.OffsetDateTime
-import org.webrtc.VideoTrack
 import java.util.UUID
 
 /**

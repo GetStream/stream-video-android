@@ -20,12 +20,12 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.opengl.GLES20
 import android.opengl.GLUtils
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.TextureBufferImpl
-import org.webrtc.VideoFrame
-import org.webrtc.VideoProcessor
-import org.webrtc.VideoSink
-import org.webrtc.YuvConverter
+import io.getstream.webrtc.SurfaceTextureHelper
+import io.getstream.webrtc.TextureBufferImpl
+import io.getstream.webrtc.VideoFrame
+import io.getstream.webrtc.VideoProcessor
+import io.getstream.webrtc.VideoSink
+import io.getstream.webrtc.YuvConverter
 
 internal class FilterVideoProcessor(
     val filter: () -> VideoFilter?,

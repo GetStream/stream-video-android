@@ -23,6 +23,13 @@ import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
+import io.getstream.webrtc.MediaStream
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RtpReceiver
+import io.getstream.webrtc.RtpTransceiver
+import io.getstream.webrtc.SessionDescription
+import io.getstream.webrtc.VideoTrack
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -45,18 +52,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.robolectric.shadows.ShadowTrace.setEnabled
-import org.webrtc.MediaStream
-import org.webrtc.MediaStreamTrack
-import org.webrtc.PeerConnection
-import org.webrtc.RtpReceiver
-import org.webrtc.RtpTransceiver
-import org.webrtc.SessionDescription
-import org.webrtc.VideoTrack
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
-import org.webrtc.AudioTrack as RtcAudioTrack
+import io.getstream.webrtc.AudioTrack as RtcAudioTrack
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubscriberTest {
@@ -77,18 +77,22 @@ class SubscriberTest {
         override fun getId(): String {
             return mockedId
         }
-        override fun addTrack(track: org.webrtc.AudioTrack?): Boolean {
+        override fun addTrack(track: io.getstream.webrtc.AudioTrack?): Boolean {
             val audioTracksField = MediaStream::class.java.getDeclaredField("audioTracks")
             audioTracksField.isAccessible = true
-            val audioTracks = audioTracksField.get(this) as MutableList<org.webrtc.AudioTrack>
+            val audioTracks = audioTracksField.get(
+                this,
+            ) as MutableList<io.getstream.webrtc.AudioTrack>
             audioTracks.add(track!!)
             return true
         }
 
-        override fun addTrack(track: org.webrtc.VideoTrack?): Boolean {
+        override fun addTrack(track: io.getstream.webrtc.VideoTrack?): Boolean {
             val videoTracksField = MediaStream::class.java.getDeclaredField("videoTracks")
             videoTracksField.isAccessible = true
-            val videoTracks = videoTracksField.get(this) as MutableList<org.webrtc.VideoTrack>
+            val videoTracks = videoTracksField.get(
+                this,
+            ) as MutableList<io.getstream.webrtc.VideoTrack>
             videoTracks.add(track!!)
             return true
         }
@@ -310,7 +314,7 @@ class SubscriberTest {
     @Test
     fun `onNewStream adds audio and video tracks to internal maps`() = runTest {
         val sessionId = "session-id"
-        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        val audioTrack = mockk<io.getstream.webrtc.AudioTrack>(relaxed = true)
         val videoTrack = mockk<VideoTrack>(relaxed = true)
         subscriber.setTrackLookupPrefixes(
             mapOf(
@@ -365,7 +369,7 @@ class SubscriberTest {
     @Test
     fun `onNewStream populates trackIdToParticipant correctly`() = runTest {
         val sessionId = "session-id"
-        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true) {
+        val audioTrack = mockk<io.getstream.webrtc.AudioTrack>(relaxed = true) {
             every { id() } returns "audio-id"
         }
         val videoTrack = mockk<VideoTrack>(relaxed = true) {

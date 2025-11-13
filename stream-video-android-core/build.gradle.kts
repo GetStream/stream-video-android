@@ -123,13 +123,14 @@ baselineProfile {
         include("io.getstream.video.android.datastore.**")
         include("io.getstream.video.android.model.**")
         include("io.getstream.android.video.generated.**")
-        include("org.webrtc.**")
+        include("io.getstream.webrtc.**")
     }
 }
 
 dependencies {
     // webrtc
-    api(libs.stream.webrtc)
+//    api(libs.stream.webrtc)
+    api(group = "", name = "libwebrtc_repackaged", version = "", ext = "aar")
 
     implementation(libs.audioswitch)
 

@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.webrtc.PeerConnection
 import kotlinx.coroutines.CoroutineScope
-import org.webrtc.PeerConnection
 
 /**
  * Monitors
