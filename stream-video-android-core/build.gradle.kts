@@ -130,7 +130,7 @@ baselineProfile {
 dependencies {
     // webrtc
 //    api(libs.stream.webrtc)
-    api(group = "", name = "libwebrtc_repackaged", version = "", ext = "aar")
+      api(project(":stream-video-android-repackaged-webrtc"))
 
     implementation(libs.audioswitch)
 

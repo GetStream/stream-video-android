@@ -41,6 +41,7 @@ plugins {
   alias(libs.plugins.baseline.profile) apply false
   alias(libs.plugins.sonarqube) apply false
   alias(libs.plugins.kover) apply false
+    alias(libs.plugins.android.library) apply false
 }
 
 subprojects {

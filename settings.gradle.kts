@@ -17,9 +17,6 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
-        flatDir {
-            dirs("stream-video-android-core/libs")
-        }
     }
 }
 
@@ -41,6 +38,7 @@ include(":stream-video-android-ui-compose")
 include(":stream-video-android-filters-video")
 include(":stream-video-android-previewdata")
 include(":stream-video-android-bom")
+include(":stream-video-android-repackaged-webrtc")
 
 // Tutorials
 include(":tutorials:tutorial-video")
