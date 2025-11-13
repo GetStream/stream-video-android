@@ -27,7 +27,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.getstream",
         artifactId = "stream-video-android-repackaged-webrtc",
-        version = project.version.toString()
+        version = rootProject.version.toString()
     )
 
 }
