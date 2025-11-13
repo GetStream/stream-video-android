@@ -1,5 +1,8 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import io.getstream.video.android.Configuration
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.TimeZone
 
 apply(from = "${rootDir}/scripts/open-api-code-gen.gradle.kts")
 
@@ -71,7 +74,16 @@ tasks.register("clean")
   }
 
 private val isSnapshot = System.getenv("SNAPSHOT")?.toBoolean() == true
-version = if (isSnapshot) Configuration.snapshotVersionName else Configuration.versionName
+
+version = if (isSnapshot) {
+    val timestamp = SimpleDateFormat("yyyyMMddHHmm").run {
+        timeZone = TimeZone.getTimeZone("UTC")
+        format(Date())
+    }
+    "${Configuration.snapshotBasedVersionName}-${timestamp}-SNAPSHOT"
+} else {
+    Configuration.versionName
+}
 
 subprojects {
   plugins.withId("com.vanniktech.maven.publish") {
