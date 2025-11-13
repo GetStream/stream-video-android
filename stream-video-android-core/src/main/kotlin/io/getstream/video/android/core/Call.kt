@@ -95,6 +95,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -1434,6 +1435,7 @@ public class Call(
             supervisorJob.children.forEach { it.join() }
             supervisorJob.cancel()
         }
+        scope.cancel()
     }
 
     suspend fun ring(): Result<GetCallResponse> {

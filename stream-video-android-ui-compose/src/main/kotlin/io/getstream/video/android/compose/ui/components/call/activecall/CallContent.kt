@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +52,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.video.generated.models.CallModerationBlurEvent
+import io.getstream.android.video.generated.models.CallModerationWarningEvent
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
@@ -63,6 +66,8 @@ import io.getstream.video.android.compose.ui.components.call.activecall.internal
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.diagnostics.CallDiagnosticsContent
+import io.getstream.video.android.compose.ui.components.call.moderation.DefaultModerationWarningUiContainer
+import io.getstream.video.android.compose.ui.components.call.moderation.ModerationWarningAnimationConfig
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsLayout
@@ -72,10 +77,13 @@ import io.getstream.video.android.compose.ui.components.call.renderer.internal.L
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import kotlinx.coroutines.delay
 
 /**
  * Represents the UI in an Active call that shows participants and their video, as well as some
@@ -97,6 +105,8 @@ import io.getstream.video.android.mock.previewCall
  * @param pictureInPictureConfiguration User can provide Picture-In-Picture configuration.
  * @param pictureInPictureContent Content shown when the user enters Picture in Picture mode, if it's been enabled in the app.
  * @param closedCaptionUi You can pass your composable lambda here to render Closed Captions
+ * @param videoModerationBlurUi You can pass your composable lambda here to render your own UI on top of Blurry video
+ * @param videoModerationWarningUi You can pass your composable lambda here to render your own video moderation warning UI
  */
 @Composable
 public fun CallContent(
@@ -154,6 +164,16 @@ public fun CallContent(
     pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
     enableDiagnostics: Boolean = false,
     closedCaptionUi: @Composable (Call) -> Unit = {},
+    videoModerationBlurUi: @Composable (Call) -> Unit = {},
+    videoModerationWarningUi: @Composable (Call, String?) -> Unit = { _, message ->
+        val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
+        val displayTime = callServiceConfig.moderationConfig.moderationWarningConfig.displayTime
+        DefaultModerationWarningUiContainer(
+            call,
+            message,
+            moderationWarningAnimationConfig = ModerationWarningAnimationConfig(displayTime),
+        )
+    },
 ) {
     val context = LocalContext.current
     val orientation = LocalConfiguration.current.orientation
@@ -234,8 +254,59 @@ public fun CallContent(
                     }
                 }
                 closedCaptionUi(call)
+                ModerationBlurUi(call, videoModerationBlurUi)
+                ModerationWarningRootUi(call, videoModerationWarningUi)
             },
         )
+    }
+}
+
+@Composable
+private fun ModerationBlurUi(call: Call, moderationBlurUi: @Composable (Call) -> Unit) {
+    val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
+    if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
+        var blurEvent by remember { mutableStateOf<CallModerationBlurEvent?>(null) }
+        LaunchedEffect(call) {
+            call.events.collect { event ->
+                when (event) {
+                    is CallModerationBlurEvent -> {
+                        blurEvent = event
+                        delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
+                        blurEvent = null // auto-dismiss after config duration
+                    }
+                }
+            }
+        }
+        blurEvent?.let {
+            moderationBlurUi(call)
+        }
+    }
+}
+
+@Composable
+private fun ModerationWarningRootUi(
+    call: Call,
+    moderationWarningUi: @Composable (Call, String?) -> Unit,
+) {
+    val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
+    if (callServiceConfig.moderationConfig.moderationWarningConfig.enable) {
+        var warningEvent by remember { mutableStateOf<CallModerationWarningEvent?>(null) }
+        LaunchedEffect(call) {
+            call.events.collect { event ->
+                when (event) {
+                    is CallModerationWarningEvent -> {
+                        warningEvent = event
+                        delay(
+                            callServiceConfig.moderationConfig.moderationWarningConfig.displayTime,
+                        )
+                        warningEvent = null // auto-dismiss after config duration
+                    }
+                }
+            }
+        }
+        warningEvent?.let { event ->
+            moderationWarningUi(call, event.message)
+        }
     }
 }
 

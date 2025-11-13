@@ -93,6 +93,7 @@ public enum class BlurIntensity(public val radius: Int) {
     LIGHT(7),
     MEDIUM(11),
     HEAVY(16),
+    ULTRA(25),
 }
 
 private const val DEFAULT_FOREGROUND_THRESHOLD: Double = 0.999 // 1 is max confidence that pixel is in the foreground

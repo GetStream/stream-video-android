@@ -74,6 +74,12 @@ object AppConfig {
             displayName = "Pronto Staging",
             sharelink = "https://pronto-staging.getstream.io/join/",
         ),
+        StreamEnvironment(
+            env = "video-moderation",
+            aliases = emptyList(),
+            displayName = "Video Moderation",
+            sharelink = "https://pronto.getstream.io/join/",
+        ),
     )
     val currentEnvironment = MutableStateFlow(availableEnvironments.default(BuildConfig.FLAVOR))
 

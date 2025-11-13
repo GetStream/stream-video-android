@@ -42,12 +42,27 @@ data class ParticipantSeriesTrackMetrics (
     @Json(name = "track_id")
     val trackId: kotlin.String,
 
+    @Json(name = "codec")
+    val codec: kotlin.String? = null,
+
     @Json(name = "label")
     val label: kotlin.String? = null,
+
+    @Json(name = "rid")
+    val rid: kotlin.String? = null,
 
     @Json(name = "track_type")
     val trackType: kotlin.String? = null,
 
+    @Json(name = "metrics_order")
+    val metricsOrder: kotlin.collections.List<kotlin.String>? = emptyList(),
+
     @Json(name = "metrics")
-    val metrics: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.collections.List<kotlin.Float>>>? = emptyMap()
+    val metrics: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.collections.List<kotlin.Float>>>? = emptyMap(),
+
+    @Json(name = "metrics_meta")
+    val metricsMeta: kotlin.collections.Map<kotlin.String, io.getstream.android.video.generated.models.MetricDescriptor>? = emptyMap(),
+
+    @Json(name = "thresholds")
+    val thresholds: kotlin.collections.Map<kotlin.String, kotlin.collections.List<io.getstream.android.video.generated.models.MetricThreshold>>? = emptyMap()
 )

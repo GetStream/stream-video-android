@@ -90,6 +90,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.R
+import io.getstream.video.android.app
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
@@ -101,6 +102,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
+import io.getstream.video.android.ui.SingleButtonDialog
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
@@ -171,6 +173,13 @@ fun CallJoinScreen(
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
             navigateUpToLogin.invoke(callJoinViewModel.autoLogInAfterLogOut)
+        }
+    }
+    val appContext = LocalContext.current.applicationContext
+    val policyViolation by appContext.app.policyViolationUiData.collectAsStateWithLifecycle()
+    policyViolation?.let {
+        SingleButtonDialog(it.title, it.message, it.actionButtonText) {
+            appContext.app.policyViolationUiData.value = null
         }
     }
 }
