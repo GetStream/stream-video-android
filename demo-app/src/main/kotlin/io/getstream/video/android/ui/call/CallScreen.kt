@@ -928,7 +928,6 @@ private fun BadNetworkLabel(
 
 @Composable
 fun isTablet(): Boolean {
-    return true
     val configuration = LocalConfiguration.current
     return if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         configuration.screenWidthDp > 840
