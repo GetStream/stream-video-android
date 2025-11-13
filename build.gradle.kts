@@ -65,11 +65,6 @@ subprojects {
   }
 }
 
-tasks.register("clean")
-  .configure {
-    delete(rootProject.buildDir)
-  }
-
 private val isSnapshot = System.getenv("SNAPSHOT")?.toBoolean() == true
 version = if (isSnapshot) Configuration.snapshotVersionName else Configuration.versionName
 
