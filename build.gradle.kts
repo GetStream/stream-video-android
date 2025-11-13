@@ -72,7 +72,7 @@ subprojects {
 private val isSnapshot = System.getenv("SNAPSHOT")?.toBoolean() == true
 
 version = if (isSnapshot) {
-    val timestamp = SimpleDateFormat("yyyyMMddHHmm").apply {
+    val timestamp = SimpleDateFormat("yyyyMMddHHmm").run {
         timeZone = TimeZone.getTimeZone("UTC")
         format(Date())
     }
