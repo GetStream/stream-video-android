@@ -263,23 +263,25 @@ public fun CallContent(
 
 @Composable
 private fun ModerationBlurUi(call: Call, moderationBlurUi: @Composable (Call) -> Unit) {
-    var blurEvent by remember { mutableStateOf<CallModerationBlurEvent?>(null) }
     val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
-    LaunchedEffect(call) {
-        call.events.collect { event ->
-            when (event) {
-                is CallModerationBlurEvent -> {
-                    blurEvent = event
-                    call.state.moderationManager.enableVideoModeration()
-                    delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
-                    blurEvent = null // auto-dismiss after config duration
-                    call.state.moderationManager.disableVideoModeration()
+    if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
+        var blurEvent by remember { mutableStateOf<CallModerationBlurEvent?>(null) }
+        LaunchedEffect(call) {
+            call.events.collect { event ->
+                when (event) {
+                    is CallModerationBlurEvent -> {
+                        blurEvent = event
+                        call.state.moderationManager.enableVideoModeration()
+                        delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
+                        blurEvent = null // auto-dismiss after config duration
+                        call.state.moderationManager.disableVideoModeration()
+                    }
                 }
             }
         }
-    }
-    blurEvent?.let {
-        moderationBlurUi(call)
+        blurEvent?.let {
+            moderationBlurUi(call)
+        }
     }
 }
 
@@ -288,22 +290,25 @@ private fun ModerationWarningRootUi(
     call: Call,
     moderationWarningUi: @Composable (Call, String?) -> Unit,
 ) {
-    var warningEvent by remember { mutableStateOf<CallModerationWarningEvent?>(null) }
     val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
-
-    LaunchedEffect(call) {
-        call.events.collect { event ->
-            when (event) {
-                is CallModerationWarningEvent -> {
-                    warningEvent = event
-                    delay(callServiceConfig.moderationConfig.moderationWarningConfig.displayTime)
-                    warningEvent = null // auto-dismiss after config duration
+    if (callServiceConfig.moderationConfig.moderationWarningConfig.enable) {
+        var warningEvent by remember { mutableStateOf<CallModerationWarningEvent?>(null) }
+        LaunchedEffect(call) {
+            call.events.collect { event ->
+                when (event) {
+                    is CallModerationWarningEvent -> {
+                        warningEvent = event
+                        delay(
+                            callServiceConfig.moderationConfig.moderationWarningConfig.displayTime,
+                        )
+                        warningEvent = null // auto-dismiss after config duration
+                    }
                 }
             }
         }
-    }
-    warningEvent?.let { event ->
-        moderationWarningUi(call, event.message)
+        warningEvent?.let { event ->
+            moderationWarningUi(call, event.message)
+        }
     }
 }
 
