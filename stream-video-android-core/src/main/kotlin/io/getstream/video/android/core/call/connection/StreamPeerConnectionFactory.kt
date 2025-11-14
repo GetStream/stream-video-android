@@ -23,6 +23,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDecoderFactory
+import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
 import io.getstream.video.android.core.model.IceCandidate
@@ -51,6 +52,7 @@ import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.models.PublishOption
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -86,6 +88,12 @@ public class StreamPeerConnectionFactory(
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
 
+    // Provider function to get screen audio bytes from MediaManager on demand
+    private var screenAudioBytesProvider: ((Int) -> ByteBuffer?)? = null
+
+    // Provider function to check if microphone is enabled
+    private var microphoneEnabledProvider: (() -> Boolean)? = null
+
     /**
      * Set to get callbacks when audio input from microphone is received.
      * This can be example used to detect whether a person is speaking
@@ -109,6 +117,24 @@ public class StreamPeerConnectionFactory(
         ) -> Unit,
     ) {
         audioRecordDataCallback = callback
+    }
+
+    /**
+     * Sets a provider function that returns screen audio bytes on demand.
+     * The provider will be called with the number of bytes requested and should return
+     * a ByteBuffer containing the requested bytes (may have fewer bytes if not enough data is available).
+     * This should return null when screen sharing is not active.
+     */
+    internal fun setScreenAudioBytesProvider(provider: ((Int) -> ByteBuffer?)?) {
+        screenAudioBytesProvider = provider
+    }
+
+    /**
+     * Sets a provider function that returns whether the microphone is enabled.
+     * This is used to determine if microphone audio should be included when mixing with screen audio.
+     */
+    internal fun setMicrophoneEnabledProvider(provider: (() -> Boolean)?) {
+        microphoneEnabledProvider = provider
     }
 
     /**
@@ -287,13 +313,61 @@ public class StreamPeerConnectionFactory(
             .setSamplesReadyCallback {
                 audioSampleCallback?.invoke(it)
             }
-            .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, _, captureTimeNs ->
+            .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, bytesRead, captureTimeNs ->
                 audioRecordDataCallback?.invoke(
                     audioFormat,
                     channelCount,
                     sampleRate,
                     audioBuffer,
                 )
+
+                // Mix screen audio with microphone audio if screen share audio is enabled
+                if (bytesRead > 0) {
+                    // Request screen audio bytes from MediaManager on demand
+                    // Returns null if screen share audio is not enabled
+                    val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
+                    val isMicrophoneEnabled = microphoneEnabledProvider?.invoke() ?: true
+
+                    if (screenAudioBuffer != null && screenAudioBuffer.remaining() > 0) {
+                        screenAudioBuffer.position(0)
+                        audioBuffer.position(0)
+
+                        // Convert screen audio (ByteBuffer) to ShortArray
+                        val screenSamples = ShortArray(screenAudioBuffer.limit() / 2)
+                        screenAudioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+                        screenAudioBuffer.asShortBuffer().get(screenSamples)
+
+                        val mixedAudio = if (isMicrophoneEnabled) {
+                            // Convert microphone audio (ByteBuffer) to ShortArray
+                            val micSamples = ShortArray(audioBuffer.limit() / 2)
+                            audioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+                            audioBuffer.asShortBuffer().get(micSamples)
+
+                            // Mix the audio buffers
+                            addAndConvertBuffers(
+                                micSamples,
+                                micSamples.size,
+                                screenSamples,
+                                screenSamples.size,
+                            )
+                        } else {
+                            // Microphone is disabled, only send screen audio
+                            // Create silent microphone samples (all zeros) and mix with screen audio
+                            val silentMicSamples = ShortArray(audioBuffer.limit() / 2) { 0 }
+                            addAndConvertBuffers(
+                                silentMicSamples,
+                                silentMicSamples.size,
+                                screenSamples,
+                                screenSamples.size,
+                            )
+                        }
+
+                        // Put the mixed audio back into the buffer
+                        audioBuffer.clear()
+                        audioBuffer.put(mixedAudio)
+                    }
+                }
+
                 captureTimeNs
             }
             .setUseStereoOutput(true)

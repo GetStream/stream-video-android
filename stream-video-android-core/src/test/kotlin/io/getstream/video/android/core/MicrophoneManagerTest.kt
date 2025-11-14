@@ -50,6 +50,11 @@ class MicrophoneManagerTest {
         every { speakerManager.isEnabled } returns isEnabledStateFlow
         every { mediaManager.speaker } returns speakerManager
 
+        val screenShareManager = mockk<ScreenShareManager>(relaxed = true)
+        val audioEnabledStateFlow = MutableStateFlow(false)
+        every { screenShareManager.audioEnabled } returns audioEnabledStateFlow
+        every { mediaManager.screenShare } returns screenShareManager
+
         val microphoneManager = spyk(actual)
         val slot = slot<() -> Unit>()
         every { microphoneManager.setup(any(), capture(slot)) } answers { slot.captured.invoke() }
