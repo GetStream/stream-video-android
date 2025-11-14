@@ -59,7 +59,6 @@ dependencies {
     implementation(libs.landscapist.coil)
 
     implementation(libs.stream.log)
-
 }
 
 mavenPublishing {
