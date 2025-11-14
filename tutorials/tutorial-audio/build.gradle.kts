@@ -15,10 +15,8 @@
  */
 @file:Suppress("UnstableApiUsage")
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.video.android.application.compose")
-    id("io.getstream.spotless")
 }
 
 android {

@@ -9,7 +9,6 @@ java {
   targetCompatibility = JavaVersion.VERSION_17
 }
 
-@Suppress("DSL_SCOPE_VIOLATION")
 dependencies {
   compileOnly(libs.android.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin)
@@ -35,9 +34,9 @@ gradlePlugin {
       id = "io.getstream.video.android.library"
       implementationClass = "AndroidLibraryConventionPlugin"
     }
-    register("spotless") {
-      id = "io.getstream.spotless"
-      implementationClass = "SpotlessConventionPlugin"
+    register("demoFlavorConvention") {
+      id = "io.getstream.video.android.demoflavor"
+      implementationClass = "DemoFlavorConventionPlugin"
     }
   }
 }
