@@ -35,33 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * This event is sent when a moderation blur action is applied to a user's video stream
+ * Request to resolve SIP inbound routing using challenge authentication
  */
 
-data class CallModerationBlurEvent (
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+data class ResolveSipInboundRequest (
+    @Json(name = "sip_caller_number")
+    val sipCallerNumber: kotlin.String,
 
-    @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    @Json(name = "sip_trunk_number")
+    val sipTrunkNumber: kotlin.String,
 
-    @Json(name = "user_id")
-    val userId: kotlin.String,
+    @Json(name = "challenge")
+    val challenge: io.getstream.android.video.generated.models.SIPChallenge,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
-
-    @Json(name = "type")
-    val type: kotlin.String
+    @Json(name = "sip_headers")
+    val sipHeaders: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
 )
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
-    
-    override fun getEventType(): kotlin.String {
-        return type
-    }
-
-    override fun getCallCID(): kotlin.String {
-        return callCid
-    }    
-}
