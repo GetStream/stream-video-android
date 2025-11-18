@@ -58,6 +58,7 @@ import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
@@ -121,6 +122,7 @@ object StreamVideoInitHelper {
                 authData = StreamService.instance.getAuthData(
                     environment = AppConfig.currentEnvironment.value!!.env,
                     userId = userId,
+                    StreamService.TOKEN_EXPIRY_TIME,
                 )
 
                 loggedInUser = User(id = authData.userId, role = "admin")
@@ -137,6 +139,7 @@ object StreamVideoInitHelper {
                     authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = loggedInUser.id,
+                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                 }
 
@@ -194,7 +197,24 @@ object StreamVideoInitHelper {
 
         chatClient.connectUser(
             user = chatUser,
-            token = token,
+            tokenProvider = object : io.getstream.chat.android.client.token.TokenProvider {
+                override fun loadToken(): String {
+                    return runBlocking {
+                        Log.d("TokenProvider", "[loadToken] Chat token provider START")
+                        val email = user.custom?.get("email")
+                        val authData = StreamService.instance.getAuthData(
+                            environment = AppConfig.currentEnvironment.value!!.env,
+                            userId = email,
+                            StreamService.TOKEN_EXPIRY_TIME,
+                        )
+                        Log.d(
+                            "TokenProvider",
+                            "[loadToken] Chat token provider END, token: ${authData.token}",
+                        )
+                        authData.token
+                    }
+                }
+            },
         ).enqueue()
     }
 
@@ -286,10 +306,18 @@ object StreamVideoInitHelper {
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {
-                    val email = user.custom?.get("email")
+                    val userEmail = user.custom?.get("email")
+                    val userId = user.id
+                    val userIdForTokenRenewal = if (userEmail.isNullOrEmpty()) userId else userEmail
+                    Log.d("TokenProvider", "[loadToken] Video token provider START")
                     val authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
-                        userId = email,
+                        userId = userIdForTokenRenewal,
+                        StreamService.TOKEN_EXPIRY_TIME,
+                    )
+                    Log.d(
+                        "TokenProvider",
+                        "[loadToken] Video token provider END: ${authData.token}",
                     )
                     return authData.token
                 }

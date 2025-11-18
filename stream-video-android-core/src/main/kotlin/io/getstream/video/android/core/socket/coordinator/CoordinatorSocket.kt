@@ -278,6 +278,15 @@ internal open class CoordinatorSocket(
             tokenManager.expireToken()
         }
 
+        if (error.serverErrorCode == VideoErrorCode.TOKEN_EXPIRED.code) {
+            logger.d { "[onVideoNetworkError] load sync START" }
+            tokenManager.expireToken()
+            val token = tokenManager.loadSync()
+            if (token.isNotEmpty()) {
+                logger.d { "[onVideoNetworkError] load sync END: $token" }
+            }
+        }
+
         when (error.serverErrorCode) {
             VideoErrorCode.UNDEFINED_TOKEN.code,
             VideoErrorCode.INVALID_TOKEN.code,

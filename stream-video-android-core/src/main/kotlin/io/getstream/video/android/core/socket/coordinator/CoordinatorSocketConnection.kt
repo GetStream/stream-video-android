@@ -126,7 +126,9 @@ public open class CoordinatorSocketConnection(
     // Extension opportunity for subclasses
     override fun onCreated() {
         super.onCreated()
-        logger.d { "[onCreated] Socket is created" }
+        logger.d {
+            "[onCreated] Socket is created, initial token: $token, tokenManager.getToken() = ${tokenManager.getToken()}"
+        }
         scope.launch {
             logger.d { "[onConnected] Video socket created, user: $user" }
             if (token.isEmpty()) {
@@ -134,7 +136,7 @@ public open class CoordinatorSocketConnection(
                 disconnect()
             } else {
                 val authRequest = WSAuthMessageRequest(
-                    token = token,
+                    token = tokenManager.getToken().ifEmpty { token },
                     userDetails = ConnectUserDetailsRequest(
                         id = user.id,
                         name = user.name.takeUnless { it.isWhitespaceOnly() },
