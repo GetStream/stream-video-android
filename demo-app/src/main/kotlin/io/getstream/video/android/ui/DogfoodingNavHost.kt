@@ -101,6 +101,7 @@ fun AppNavHost(
                             leaveWhenLastInCall = true,
                             context = context,
                             cid = cid,
+                            joinAndRing = joinAndRing,
                             members = members.split(","),
                             clazz = CallActivity::class.java,
                         ),

@@ -59,6 +59,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
@@ -560,17 +561,23 @@ public class Call(
     }
 
     suspend fun joinAndRing(
-        callId: String,
         members: List<String>,
         createOptions: CreateCallOptions? = CreateCallOptions(members),
         video: Boolean = isVideoEnabled(),
-    ): Result<RingCallResponse> {
-        val joinResult = join(create = false, ring = false, createOptions = createOptions)
-
-        return if (joinResult.isSuccess) {
-            ring(RingCallRequest(isVideoEnabled(), members))
-        } else {
-            Result.Failure(Error.GenericError("Unable to join call_id: $callId"))
+    ): Result<RtcSession> {
+        logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
+        state.toggleRingingStateUpdates(true)
+        return join(ring = false, createOptions = createOptions).flatMap { rtcSession ->
+            logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
+            ring(RingCallRequest(isVideoEnabled(), members)).map {
+                logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
+                clientImpl.state._ringingCall.value = this
+                rtcSession
+            }.onError {
+                logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
+                state.toggleRingingStateUpdates(false)
+                leave()
+            }
         }
     }
 

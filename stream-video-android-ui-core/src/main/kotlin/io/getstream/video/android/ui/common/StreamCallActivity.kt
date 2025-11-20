@@ -110,6 +110,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             action: String? = null,
             clazz: Class<T>,
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
+            joinAndRing: Boolean = false,
             extraData: Bundle? = null,
         ): Intent {
             return Intent(context, clazz).apply {
@@ -123,6 +124,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // Add the generated call ID and other params
                 putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, cid)
                 putExtra(EXTRA_LEAVE_WHEN_LAST, leaveWhenLastInCall)
+                putExtra(EXTRA_JOIN_AND_RING, joinAndRing)
                 // Setup the members to transfer to the new activity
                 val membersArrayList = ArrayList<String>()
                 members.forEach { membersArrayList.add(it) }
@@ -524,7 +526,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                         call,
                         members = members,
                         ring = false,
-                        onSuccess = onSuccess,
+                        onSuccess = {
+                            join(call, onSuccess = onSuccess, onError = onError)
+                        },
                         onError = onError,
                     )
                 } else {
@@ -836,9 +840,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        acceptOrJoinNewCall(call, onSuccess, onError) {
+        acceptOrJoinNewCall(call, onSuccess, onError) { availableCall ->
             logger.d { "Join call, ${call.cid}" }
-            it.join()
+            val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false)
+            if (joinAndRing) {
+                logger.d { "[joinAndRing] Join and ring call, ${call.cid}" }
+                availableCall.joinAndRing(call.state.members.value.map { it.user.id })
+            } else {
+                availableCall.join()
+            }
         }
     }
 

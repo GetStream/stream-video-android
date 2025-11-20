@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -155,16 +156,22 @@ private fun Body(
                         .align(Alignment.TopStart)
                         .padding(bottom = 80.dp),
                 ) {
+                    Row(
+                        verticalAlignment = CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text("Join First", color = Color.White)
+                        Checkbox(callerJoinsFirst, onCheckedChange = {
+                            callerJoinsFirst = !callerJoinsFirst
+                        })
+                    }
                     UserList(
                         entries = users,
                         onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
                     )
-                }
-                Row {
-                    Text("Join First")
-                    Checkbox(callerJoinsFirst, onCheckedChange = {
-                        callerJoinsFirst = !callerJoinsFirst
-                    })
                 }
                 Row(
                     Modifier
