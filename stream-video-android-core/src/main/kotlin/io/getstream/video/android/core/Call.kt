@@ -39,6 +39,8 @@ import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PinResponse
 import io.getstream.android.video.generated.models.RejectCallResponse
+import io.getstream.android.video.generated.models.RingCallRequest
+import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionResponse
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
@@ -95,6 +97,7 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -554,6 +557,21 @@ public class Call(
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
         return Failure(value = Error.GenericError(errorMessage))
+    }
+
+    suspend fun joinAndRing(
+        callId: String,
+        members: List<String>,
+        createOptions: CreateCallOptions? = CreateCallOptions(members),
+        video: Boolean = isVideoEnabled(),
+    ): Result<RingCallResponse> {
+        val joinResult = join(create = false, ring = false, createOptions = createOptions)
+
+        return if (joinResult.isSuccess) {
+            ring(RingCallRequest(isVideoEnabled(), members))
+        } else {
+            Result.Failure(Error.GenericError("Unable to join call_id: $callId"))
+        }
     }
 
     internal fun isPermanentError(error: Any): Boolean {
@@ -1434,11 +1452,17 @@ public class Call(
             supervisorJob.children.forEach { it.join() }
             supervisorJob.cancel()
         }
+        scope.cancel()
     }
 
     suspend fun ring(): Result<GetCallResponse> {
         logger.d { "[ring] #ringing; no args" }
         return clientImpl.ring(type, id)
+    }
+
+    suspend fun ring(ringCallRequest: RingCallRequest): Result<RingCallResponse> {
+        logger.d { "[ring] #ringing ringCallRequest: $ringCallRequest" }
+        return clientImpl.ring(type, id, ringCallRequest)
     }
 
     suspend fun notify(): Result<GetCallResponse> {
