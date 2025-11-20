@@ -137,8 +137,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 }
 
 public final class io/getstream/video/android/ui/common/StreamCallActivity$Companion {
-	public final fun callIntent (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;)Landroid/content/Intent;
-	public static synthetic fun callIntent$default (Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;ILjava/lang/Object;)Landroid/content/Intent;
+	public final fun callIntent (Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ZLandroid/os/Bundle;)Landroid/content/Intent;
+	public static synthetic fun callIntent$default (Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;Landroid/content/Context;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLjava/lang/String;Ljava/lang/Class;Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;ZLandroid/os/Bundle;ILjava/lang/Object;)Landroid/content/Intent;
 	public final fun callIntentBundle (Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;)Landroid/os/Bundle;
 	public static synthetic fun callIntentBundle$default (Lio/getstream/video/android/ui/common/StreamCallActivity$Companion;Lio/getstream/video/android/model/StreamCallId;Ljava/util/List;ZLio/getstream/video/android/ui/common/StreamCallActivityConfiguration;Landroid/os/Bundle;ILjava/lang/Object;)Landroid/os/Bundle;
 }

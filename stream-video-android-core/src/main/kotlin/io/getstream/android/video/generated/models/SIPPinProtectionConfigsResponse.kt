@@ -35,33 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * This event is sent when a moderation blur action is applied to a user's video stream
+ * PIN protection configuration response
  */
 
-data class CallModerationBlurEvent (
-    @Json(name = "call_cid")
-    val callCid: kotlin.String,
+data class SIPPinProtectionConfigsResponse (
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean,
 
-    @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    @Json(name = "default_pin")
+    val defaultPin: kotlin.String? = null,
 
-    @Json(name = "user_id")
-    val userId: kotlin.String,
+    @Json(name = "max_attempts")
+    val maxAttempts: kotlin.Int? = null,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
-
-    @Json(name = "type")
-    val type: kotlin.String
+    @Json(name = "required_pin_digits")
+    val requiredPinDigits: kotlin.Int? = null
 )
-: io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
-{
-    
-    override fun getEventType(): kotlin.String {
-        return type
-    }
-
-    override fun getCallCID(): kotlin.String {
-        return callCid
-    }    
-}

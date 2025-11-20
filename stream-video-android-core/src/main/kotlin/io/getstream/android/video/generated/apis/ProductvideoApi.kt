@@ -389,6 +389,27 @@ interface ProductvideoApi {
     ): io.getstream.android.video.generated.models.RequestPermissionResponse
     
     /**
+     * Ring Call Users
+     * Sends a ring notification to the provided users who are not already in the call. All users should be members of the call
+     */
+    @POST("/video/call/{type}/{id}/ring")
+    suspend fun ringCall(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String ,
+        @Body ringCallRequest: io.getstream.android.video.generated.models.RingCallRequest
+    ): io.getstream.android.video.generated.models.RingCallResponse
+    
+    /**
+     * Ring Call Users
+     * Sends a ring notification to the provided users who are not already in the call. All users should be members of the call
+     */
+    @POST("/video/call/{type}/{id}/ring")
+    suspend fun ringCall(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String
+    ): io.getstream.android.video.generated.models.RingCallResponse
+    
+    /**
      * Start RTMP broadcasts
      * Starts RTMP broadcasts for the provided RTMP destinations
      */
@@ -777,6 +798,15 @@ interface ProductvideoApi {
     @GET("/video/longpoll")
     suspend fun videoConnect(
     )
+    
+    /**
+     * Resolve SIP Inbound Routing
+     * Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication
+     */
+    @POST("/video/sip/resolve")
+    suspend fun resolveSipInbound(
+        @Body resolveSipInboundRequest: io.getstream.android.video.generated.models.ResolveSipInboundRequest
+    ): io.getstream.android.video.generated.models.ResolveSipInboundResponse
     
     /**
      * Query Aggregate call Stats

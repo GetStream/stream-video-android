@@ -941,7 +941,11 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
-                updateRingingState()
+                if (!ringingStateUpdatesStopped) {
+                    updateRingingState()
+                } else {
+                    _ringingState.value = RingingState.Outgoing(acceptedByCallee = true)
+                }
                 updateServerSidePins(
                     event.callState.pins.map {
                         PinUpdate(it.user_id, it.session_id)
@@ -1163,7 +1167,7 @@ public class CallState(
         )
 
         // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall) {
+        val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
             cancelTimeout()
             RingingState.Active
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
@@ -1188,6 +1192,7 @@ public class CallState(
             }
         } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
+            logger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
             if (acceptedBy.isEmpty()) {
                 // no one accepted the call
                 RingingState.Outgoing(acceptedByCallee = false)
@@ -1196,6 +1201,7 @@ public class CallState(
                 RingingState.Outgoing(acceptedByCallee = true)
             } else {
                 // call is accepted and we are already in the call
+                ringingStateUpdatesStopped = false
                 cancelTimeout()
                 RingingState.Active
             }
@@ -1277,6 +1283,7 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
+                    ringingStateUpdatesStopped = false
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
                     call.leave()
                 }
@@ -1523,6 +1530,12 @@ public class CallState(
         logger.v { "[updateFromResponse] newEgress: $newEgress" }
         _egress.value = newEgress
         _broadcasting.value = true
+    }
+
+    private var ringingStateUpdatesStopped = false
+
+    internal fun toggleRingingStateUpdates(stopped: Boolean) {
+        ringingStateUpdatesStopped = stopped
     }
 
     /**
