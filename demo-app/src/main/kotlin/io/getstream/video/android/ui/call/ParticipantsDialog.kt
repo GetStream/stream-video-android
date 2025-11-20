@@ -217,18 +217,3 @@ private fun ParticipantsDialogPreview() {
         ParticipantsListContent(call = previewCall, participants = previewParticipantsList)
     }
 }
-
-internal data class PeopleUiState(
-    val name: String,
-    val callState: CallState,
-    val videoEnabled: Boolean,
-    val audioEnabled: Boolean,
-    val image: String,
-    val userId: String,
-)
-
-internal enum class CallState {
-    NOT_IN_CALL,
-    IN_CALL,
-    CALLING,
-}

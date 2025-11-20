@@ -72,8 +72,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
-import io.getstream.video.android.ui.call.CallState
-import io.getstream.video.android.ui.call.PeopleUiState
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
@@ -355,4 +353,19 @@ fun DemoList1() {
             )
         }
     }
+}
+
+internal data class PeopleUiState(
+    val name: String,
+    val callState: CallState,
+    val videoEnabled: Boolean,
+    val audioEnabled: Boolean,
+    val image: String,
+    val userId: String,
+)
+
+internal enum class CallState {
+    NOT_IN_CALL,
+    IN_CALL,
+    CALLING,
 }
