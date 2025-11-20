@@ -259,7 +259,6 @@ dependencies {
     implementation(libs.accompanist.permission)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.coil.compose)
-    implementation(libs.androidx.compose.material3)
 
     // QR code
     implementation(libs.androidx.camera.core)

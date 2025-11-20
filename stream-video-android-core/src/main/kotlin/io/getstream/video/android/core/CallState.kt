@@ -1228,6 +1228,7 @@ public class CallState(
             // stop the call ringing timer if it's running
         }
         Log.d("RingingState", "Update: $state")
+
         _ringingState.value = state
     }
 

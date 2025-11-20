@@ -19,7 +19,6 @@ package io.getstream.video.android.ui.call
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -30,23 +29,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,9 +53,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.android.video.generated.models.RingCallRequest
-import io.getstream.video.android.PeopleUiCallState
-import io.getstream.video.android.PeopleUiState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.Call
@@ -70,7 +61,6 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.util.config.AppConfig
-import kotlinx.coroutines.launch
 
 @Composable
 public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
@@ -146,226 +136,76 @@ fun ParticipantsListContent(
             Spacer(modifier = Modifier.size(16.dp))
         }
 
-        ParticipantListRowContent(participants)
-    }
-}
-
-private fun LazyListScope.ParticipantListRowContent(participants: List<ParticipantState>) {
-    items(count = participants.size, key = { index -> participants[index].sessionId }) {
-        val participant = participants[it]
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = VideoTheme.dimens.spacingM),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-                val userImage by participant.image.collectAsStateWithLifecycle()
-                UserAvatar(
-                    modifier = Modifier
-                        .size(VideoTheme.dimens.genericXxl)
-                        .testTag("Stream_ParticipantsListUserAvatar"),
-                    userImage = userImage,
-                    userName = userName,
-                    isShowingOnlineIndicator = false,
-                )
-                Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                Text(
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .testTag("Stream_ParticipantsListUserName"),
-                    text = userName,
-                    style = VideoTheme.typography.bodyM,
-                    color = VideoTheme.colors.basePrimary,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                )
-            }
-
+        items(count = participants.size, key = { index -> participants[index].sessionId }) {
+            val participant = participants[it]
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = VideoTheme.dimens.spacingM),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-                val iconAudio = if (audioEnabled) {
-                    Icons.Default.Mic
-                } else {
-                    Icons.Default.MicOff
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+                    val userImage by participant.image.collectAsStateWithLifecycle()
+                    UserAvatar(
+                        modifier = Modifier
+                            .size(VideoTheme.dimens.genericXxl)
+                            .testTag("Stream_ParticipantsListUserAvatar"),
+                        userImage = userImage,
+                        userName = userName,
+                        isShowingOnlineIndicator = false,
+                    )
+                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .testTag("Stream_ParticipantsListUserName"),
+                        text = userName,
+                        style = VideoTheme.typography.bodyM,
+                        color = VideoTheme.colors.basePrimary,
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    modifier = Modifier
-                        .testTag("Stream_ParticipantsListUserMicrophone_Enabled_$audioEnabled"),
-                    tint = VideoTheme.colors.basePrimary,
-                    imageVector = iconAudio,
-                    contentDescription = null,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
 
-                val videoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
-                val iconVideo = if (videoEnabled) {
-                    Icons.Default.Videocam
-                } else {
-                    Icons.Default.VideocamOff
-                }
-                Icon(
-                    modifier = Modifier
-                        .testTag("Stream_ParticipantsListUserCamera_Enabled_$videoEnabled"),
-                    tint = VideoTheme.colors.basePrimary,
-                    imageVector = iconVideo,
-                    contentDescription = null,
-                )
-            }
-        }
-        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-    }
-}
-
-@Composable
-private fun LazyListScope.MemberListRowContent(call: Call, participants: List<ParticipantState>) {
-    val members by call.state.members.collectAsStateWithLifecycle()
-    val localCallingList = remember { mutableListOf<PeopleUiState>() }
-
-    val peopleNotInCallList = arrayListOf<PeopleUiState>()
-    peopleNotInCallList.addAll(
-        members.map {
-            PeopleUiState(
-                it.user.userNameOrId,
-                PeopleUiCallState.NOT_IN_CALL,
-                false,
-                false,
-                it.user.image ?: "",
-                it.user.userNameOrId,
-            )
-        },
-    )
-
-    val peopleInCallList = arrayListOf<PeopleUiState>()
-    participants.forEach { participant ->
-        val personInCall = peopleNotInCallList.filter { it.userId == participant.userId.value }
-        if (personInCall.isNotEmpty()) {
-            peopleNotInCallList.remove(personInCall.first())
-            peopleInCallList.add(
-                personInCall.first().copy(peopleUiCallState = PeopleUiCallState.IN_CALL),
-            )
-        }
-    }
-    val peopleList = remember { mutableStateListOf<PeopleUiState>() }
-    peopleList.addAll(peopleNotInCallList)
-    peopleList.addAll(peopleInCallList)
-    localCallingList.forEach { localCalling ->
-        peopleList.forEachIndexed { index, people ->
-            if (localCalling.userId == people.userId) {
-                peopleList[index] = people.copy(peopleUiCallState = PeopleUiCallState.CALLING)
-            }
-        }
-    }
-
-    items(count = peopleList.size, key = { index -> peopleList[index].userId }) { index ->
-        val people = peopleList[index]
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = VideoTheme.dimens.spacingM),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val userName = people.name
-                val userImage = people.image
-
-                UserAvatar(
-                    modifier = Modifier
-                        .size(VideoTheme.dimens.genericXxl)
-                        .testTag("Stream_ParticipantsListUserAvatar"),
-                    userImage = userImage,
-                    userName = userName,
-                    isShowingOnlineIndicator = false,
-                )
-                Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                Text(
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .testTag("Stream_ParticipantsListUserName"),
-                    text = userName,
-                    style = VideoTheme.typography.bodyM,
-                    color = VideoTheme.colors.basePrimary,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                when (people.peopleUiCallState) {
-                    PeopleUiCallState.NOT_IN_CALL -> {
-                        val scope = rememberCoroutineScope()
-                        Icon(
-                            modifier = Modifier.clickable {
-                                scope.launch {
-                                    call.ring(
-                                        RingCallRequest(
-                                            call.isVideoEnabled(),
-                                            listOf(people.userId),
-                                        ),
-                                    )
-                                    localCallingList.add(people)
-                                }
-                            },
-                            tint = VideoTheme.colors.basePrimary,
-                            imageVector = Icons.Default.Call,
-                            contentDescription = null,
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
+                    val iconAudio = if (audioEnabled) {
+                        Icons.Default.Mic
+                    } else {
+                        Icons.Default.MicOff
                     }
-                    PeopleUiCallState.CALLING -> {
-                        Icon(
-                            modifier = Modifier,
-                            tint = VideoTheme.colors.basePrimary,
-                            imageVector = Icons.Default.MoreHoriz,
-                            contentDescription = null,
-                        )
-                    }
-                    PeopleUiCallState.IN_CALL -> {
-                        val audioEnabled = people.audioEnabled
-                        val iconAudio = if (audioEnabled) {
-                            Icons.Default.Mic
-                        } else {
-                            Icons.Default.MicOff
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            modifier = Modifier
-                                .testTag(
-                                    "Stream_ParticipantsListUserMicrophone_Enabled_$audioEnabled",
-                                ),
-                            tint = VideoTheme.colors.basePrimary,
-                            imageVector = iconAudio,
-                            contentDescription = null,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        modifier = Modifier
+                            .testTag("Stream_ParticipantsListUserMicrophone_Enabled_$audioEnabled"),
+                        tint = VideoTheme.colors.basePrimary,
+                        imageVector = iconAudio,
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                        val videoEnabled = people.videoEnabled
-                        val iconVideo = if (videoEnabled) {
-                            Icons.Default.Videocam
-                        } else {
-                            Icons.Default.VideocamOff
-                        }
-                        Icon(
-                            modifier = Modifier
-                                .testTag("Stream_ParticipantsListUserCamera_Enabled_$videoEnabled"),
-                            tint = VideoTheme.colors.basePrimary,
-                            imageVector = iconVideo,
-                            contentDescription = null,
-                        )
+                    val videoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
+                    val iconVideo = if (videoEnabled) {
+                        Icons.Default.Videocam
+                    } else {
+                        Icons.Default.VideocamOff
                     }
+                    Icon(
+                        modifier = Modifier
+                            .testTag("Stream_ParticipantsListUserCamera_Enabled_$videoEnabled"),
+                        tint = VideoTheme.colors.basePrimary,
+                        imageVector = iconVideo,
+                        contentDescription = null,
+                    )
                 }
             }
+            Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
         }
-        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
     }
 }
 
