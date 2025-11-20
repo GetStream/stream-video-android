@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Checkbox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
@@ -40,6 +41,9 @@ import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,7 +66,7 @@ import java.util.UUID
 @Composable
 fun DirectCallJoinScreen(
     viewModel: DirectCallJoinViewModel = hiltViewModel(),
-    navigateToDirectCall: (cid: StreamCallId, memberList: String) -> Unit,
+    navigateToDirectCall: (cid: StreamCallId, memberList: String, joinAndRing: Boolean) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -128,8 +132,10 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    onStartCallClick: (cid: StreamCallId, membersList: String) -> Unit,
+    onStartCallClick: (cid: StreamCallId, membersList: String, joinAndRing: Boolean) -> Unit,
 ) {
+    var callerJoinsFirst by rememberSaveable { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -145,7 +151,8 @@ private fun Body(
         } else {
             uiState.otherUsers?.let { users ->
                 Column(
-                    modifier = Modifier.align(Alignment.TopStart)
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
                         .padding(bottom = 80.dp),
                 ) {
                     UserList(
@@ -153,7 +160,12 @@ private fun Body(
                         onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
                     )
                 }
-
+                Row {
+                    Text("Join First")
+                    Checkbox(callerJoinsFirst, onCheckedChange = {
+                        callerJoinsFirst = !callerJoinsFirst
+                    })
+                }
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -178,6 +190,7 @@ private fun Body(
                                 users
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
+                                callerJoinsFirst,
                             )
                         },
                     )
@@ -198,6 +211,7 @@ private fun Body(
                                 users
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
+                                callerJoinsFirst,
                             )
                         },
                     )
@@ -294,7 +308,7 @@ private fun HeaderPreview() {
                 },
             ),
             toggleUserSelection = {},
-        ) { _, _ ->
+        ) { _, _, _ ->
         }
     }
 }

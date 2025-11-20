@@ -19,7 +19,6 @@ package io.getstream.video.android
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -157,7 +155,7 @@ class CallActivity : ComposeStreamCallActivity() {
 
         @Composable
         override fun StreamCallActivity.AudioCallContent(call: Call) {
-            AudioRootContent(call) {
+            RingingRootContent(call) {
                 val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
                 AudioOnlyCallContent(
                     call = call,
@@ -182,7 +180,7 @@ class CallActivity : ComposeStreamCallActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AudioRootContent(call: Call, bodyContent: @Composable () -> Unit) {
+fun RingingRootContent(call: Call, bodyContent: @Composable () -> Unit) {
     Box {
         bodyContent()
         var showBottomPopUp by rememberSaveable { mutableStateOf(false) }
@@ -219,15 +217,13 @@ private fun MemberListRowContent(call: Call) {
     val members by call.state.members.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
     val localCallingList = remember { mutableListOf<PeopleUiState>() }
-    val memberIds = members.map { it.user.id + "_" + it.user.name }
-        .joinToString(",")
-    Log.d("Noob", "[MemberListRowContent] memberIds:$memberIds")
+
     val peopleNotInCallList = arrayListOf<PeopleUiState>()
     peopleNotInCallList.addAll(
         members.filter { it.user.id !== StreamVideo.instance().userId }.map {
             PeopleUiState(
                 it.user.userNameOrId,
-                CallState.NOT_IN_CALL,
+                PeopleUiCallState.NOT_IN_CALL,
                 false,
                 false,
                 it.user.image ?: "",
@@ -241,7 +237,9 @@ private fun MemberListRowContent(call: Call) {
         val personInCall = peopleNotInCallList.filter { it.userId == participant.userId.value }
         if (personInCall.isNotEmpty()) {
             peopleNotInCallList.remove(personInCall.first())
-            peopleInCallList.add(personInCall.first().copy(callState = CallState.IN_CALL))
+            peopleInCallList.add(
+                personInCall.first().copy(peopleUiCallState = PeopleUiCallState.IN_CALL),
+            )
         }
     }
     val peopleList = remember { mutableStateListOf<PeopleUiState>() }
@@ -252,7 +250,7 @@ private fun MemberListRowContent(call: Call) {
     localCallingList.forEach { localCalling ->
         peopleList.forEachIndexed { index, people ->
             if (localCalling.userId == people.userId) {
-                peopleList[index] = people.copy(callState = CallState.CALLING)
+                peopleList[index] = people.copy(peopleUiCallState = PeopleUiCallState.CALLING)
             }
         }
     }
@@ -296,8 +294,8 @@ private fun MemberListRowContent(call: Call) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    when (people.callState) {
-                        CallState.NOT_IN_CALL -> {
+                    when (people.peopleUiCallState) {
+                        PeopleUiCallState.NOT_IN_CALL -> {
                             val scope = rememberCoroutineScope()
                             Icon(
                                 modifier = Modifier.clickable {
@@ -316,7 +314,7 @@ private fun MemberListRowContent(call: Call) {
                                 contentDescription = null,
                             )
                         }
-                        CallState.CALLING -> {
+                        PeopleUiCallState.CALLING -> {
                             Icon(
                                 modifier = Modifier,
                                 tint = VideoTheme.colors.basePrimary,
@@ -324,7 +322,7 @@ private fun MemberListRowContent(call: Call) {
                                 contentDescription = null,
                             )
                         }
-                        CallState.IN_CALL -> {}
+                        PeopleUiCallState.IN_CALL -> {}
                     }
                 }
             }
@@ -333,38 +331,16 @@ private fun MemberListRowContent(call: Call) {
     }
 }
 
-@Preview
-@Composable
-fun DemoList1() {
-    VideoTheme {
-        Box {
-            Icon(
-                imageVector = Icons.Default.People,
-                tint = VideoTheme.colors.iconDefault,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(12.dp)
-                    .background(
-                        color = VideoTheme.colors.baseSenary, // choose your color
-                        shape = CircleShape,
-                    )
-                    .padding(12.dp)
-                    .align(Alignment.TopEnd),
-            )
-        }
-    }
-}
-
 internal data class PeopleUiState(
     val name: String,
-    val callState: CallState,
+    val peopleUiCallState: PeopleUiCallState,
     val videoEnabled: Boolean,
     val audioEnabled: Boolean,
     val image: String,
     val userId: String,
 )
 
-internal enum class CallState {
+internal enum class PeopleUiCallState {
     NOT_IN_CALL,
     IN_CALL,
     CALLING,
