@@ -146,80 +146,10 @@ fun ParticipantsListContent(
             Spacer(modifier = Modifier.size(16.dp))
         }
 
-        items(count = participants.size, key = { index -> participants[index].sessionId }) {
-            val participant = participants[it]
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = VideoTheme.dimens.spacingM),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-                    val userImage by participant.image.collectAsStateWithLifecycle()
-                    UserAvatar(
-                        modifier = Modifier
-                            .size(VideoTheme.dimens.genericXxl)
-                            .testTag("Stream_ParticipantsListUserAvatar"),
-                        userImage = userImage,
-                        userName = userName,
-                        isShowingOnlineIndicator = false,
-                    )
-                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .testTag("Stream_ParticipantsListUserName"),
-                        text = userName,
-                        style = VideoTheme.typography.bodyM,
-                        color = VideoTheme.colors.basePrimary,
-                        fontSize = 16.sp,
-                        maxLines = 1,
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-                    val iconAudio = if (audioEnabled) {
-                        Icons.Default.Mic
-                    } else {
-                        Icons.Default.MicOff
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        modifier = Modifier
-                            .testTag("Stream_ParticipantsListUserMicrophone_Enabled_$audioEnabled"),
-                        tint = VideoTheme.colors.basePrimary,
-                        imageVector = iconAudio,
-                        contentDescription = null,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    val videoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
-                    val iconVideo = if (videoEnabled) {
-                        Icons.Default.Videocam
-                    } else {
-                        Icons.Default.VideocamOff
-                    }
-                    Icon(
-                        modifier = Modifier
-                            .testTag("Stream_ParticipantsListUserCamera_Enabled_$videoEnabled"),
-                        tint = VideoTheme.colors.basePrimary,
-                        imageVector = iconVideo,
-                        contentDescription = null,
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
-        }
+        ParticipantListRowContent(participants)
     }
 }
 
-@Composable
 private fun LazyListScope.ParticipantListRowContent(participants: List<ParticipantState>) {
     items(count = participants.size, key = { index -> participants[index].sessionId }) {
         val participant = participants[it]
