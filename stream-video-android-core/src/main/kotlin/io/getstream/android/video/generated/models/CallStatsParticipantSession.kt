@@ -69,6 +69,9 @@ data class CallStatsParticipantSession (
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
+    @Json(name = "os")
+    val os: kotlin.String? = null,
+
     @Json(name = "publisher_type")
     val publisherType: kotlin.String? = null,
 

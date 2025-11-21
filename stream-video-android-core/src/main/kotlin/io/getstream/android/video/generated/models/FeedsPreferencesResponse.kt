@@ -38,28 +38,22 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class CallStatsLocation (
-    @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+data class FeedsPreferencesResponse (
+    @Json(name = "comment")
+    val comment: kotlin.String? = null,
 
-    @Json(name = "city")
-    val city: kotlin.String? = null,
+    @Json(name = "comment_reaction")
+    val commentReaction: kotlin.String? = null,
 
-    @Json(name = "continent")
-    val continent: kotlin.String? = null,
+    @Json(name = "follow")
+    val follow: kotlin.String? = null,
 
-    @Json(name = "country")
-    val country: kotlin.String? = null,
+    @Json(name = "mention")
+    val mention: kotlin.String? = null,
 
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
+    @Json(name = "reaction")
+    val reaction: kotlin.String? = null,
 
-    @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
-
-    @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
-
-    @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    @Json(name = "custom_activity_types")
+    val customActivityTypes: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
 )

@@ -35,31 +35,31 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * SIP trunk information
  */
 
-data class CallStatsLocation (
-    @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+data class SIPTrunkResponse (
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "city")
-    val city: kotlin.String? = null,
+    @Json(name = "id")
+    val id: kotlin.String,
 
-    @Json(name = "continent")
-    val continent: kotlin.String? = null,
+    @Json(name = "name")
+    val name: kotlin.String,
 
-    @Json(name = "country")
-    val country: kotlin.String? = null,
+    @Json(name = "password")
+    val password: kotlin.String,
 
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
+    @Json(name = "updated_at")
+    val updatedAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
+    @Json(name = "uri")
+    val uri: kotlin.String,
 
-    @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
+    @Json(name = "username")
+    val username: kotlin.String,
 
-    @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    @Json(name = "numbers")
+    val numbers: kotlin.collections.List<kotlin.String> = emptyList()
 )

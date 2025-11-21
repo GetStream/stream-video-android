@@ -35,31 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Response containing resolved SIP inbound routing information
  */
 
-data class CallStatsLocation (
-    @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+data class ResolveSipInboundResponse (
+    @Json(name = "duration")
+    val duration: kotlin.String,
 
-    @Json(name = "city")
-    val city: kotlin.String? = null,
+    @Json(name = "credentials")
+    val credentials: io.getstream.android.video.generated.models.SipInboundCredentials,
 
-    @Json(name = "continent")
-    val continent: kotlin.String? = null,
+    @Json(name = "sip_routing_rule")
+    val sipRoutingRule: io.getstream.android.video.generated.models.SIPInboundRoutingRuleResponse? = null,
 
-    @Json(name = "country")
-    val country: kotlin.String? = null,
-
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
-
-    @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
-
-    @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
-
-    @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    @Json(name = "sip_trunk")
+    val sipTrunk: io.getstream.android.video.generated.models.SIPTrunkResponse? = null
 )

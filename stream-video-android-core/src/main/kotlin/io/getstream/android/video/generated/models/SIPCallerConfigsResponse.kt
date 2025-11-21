@@ -35,31 +35,13 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * SIP caller configuration response
  */
 
-data class CallStatsLocation (
-    @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+data class SIPCallerConfigsResponse (
+    @Json(name = "id")
+    val id: kotlin.String,
 
-    @Json(name = "city")
-    val city: kotlin.String? = null,
-
-    @Json(name = "continent")
-    val continent: kotlin.String? = null,
-
-    @Json(name = "country")
-    val country: kotlin.String? = null,
-
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
-
-    @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
-
-    @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
-
-    @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    @Json(name = "custom_data")
+    val customData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap()
 )

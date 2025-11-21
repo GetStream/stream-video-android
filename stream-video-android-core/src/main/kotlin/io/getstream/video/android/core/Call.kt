@@ -39,6 +39,8 @@ import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PinResponse
 import io.getstream.android.video.generated.models.RejectCallResponse
+import io.getstream.android.video.generated.models.RingCallRequest
+import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionResponse
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
@@ -57,6 +59,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
@@ -555,6 +558,27 @@ public class Call(
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
         return Failure(value = Error.GenericError(errorMessage))
+    }
+
+    suspend fun joinAndRing(
+        members: List<String>,
+        createOptions: CreateCallOptions? = CreateCallOptions(members),
+        video: Boolean = isVideoEnabled(),
+    ): Result<RtcSession> {
+        logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
+        state.toggleRingingStateUpdates(true)
+        return join(ring = false, createOptions = createOptions).flatMap { rtcSession ->
+            logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
+            ring(RingCallRequest(isVideoEnabled(), members)).map {
+                logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
+                clientImpl.state._ringingCall.value = this
+                rtcSession
+            }.onError {
+                logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
+                state.toggleRingingStateUpdates(false)
+                leave()
+            }
+        }
     }
 
     internal fun isPermanentError(error: Any): Boolean {
@@ -1441,6 +1465,11 @@ public class Call(
     suspend fun ring(): Result<GetCallResponse> {
         logger.d { "[ring] #ringing; no args" }
         return clientImpl.ring(type, id)
+    }
+
+    suspend fun ring(ringCallRequest: RingCallRequest): Result<RingCallResponse> {
+        logger.d { "[ring] #ringing ringCallRequest: $ringCallRequest" }
+        return clientImpl.ring(type, id, ringCallRequest)
     }
 
     suspend fun notify(): Result<GetCallResponse> {

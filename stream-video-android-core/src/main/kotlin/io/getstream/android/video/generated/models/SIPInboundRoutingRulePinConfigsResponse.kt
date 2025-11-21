@@ -35,31 +35,22 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * PIN routing rule call configuration response
  */
 
-data class CallStatsLocation (
-    @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+data class SIPInboundRoutingRulePinConfigsResponse (
+    @Json(name = "custom_webhook_url")
+    val customWebhookUrl: kotlin.String? = null,
 
-    @Json(name = "city")
-    val city: kotlin.String? = null,
+    @Json(name = "pin_failed_attempt_prompt")
+    val pinFailedAttemptPrompt: kotlin.String? = null,
 
-    @Json(name = "continent")
-    val continent: kotlin.String? = null,
+    @Json(name = "pin_hangup_prompt")
+    val pinHangupPrompt: kotlin.String? = null,
 
-    @Json(name = "country")
-    val country: kotlin.String? = null,
+    @Json(name = "pin_prompt")
+    val pinPrompt: kotlin.String? = null,
 
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
-
-    @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
-
-    @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
-
-    @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    @Json(name = "pin_success_prompt")
+    val pinSuccessPrompt: kotlin.String? = null
 )

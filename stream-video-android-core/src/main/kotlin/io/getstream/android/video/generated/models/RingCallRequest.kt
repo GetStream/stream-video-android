@@ -38,28 +38,10 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class CallStatsLocation (
-    @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+data class RingCallRequest (
+    @Json(name = "video")
+    val video: kotlin.Boolean? = null,
 
-    @Json(name = "city")
-    val city: kotlin.String? = null,
-
-    @Json(name = "continent")
-    val continent: kotlin.String? = null,
-
-    @Json(name = "country")
-    val country: kotlin.String? = null,
-
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
-
-    @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
-
-    @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
-
-    @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    @Json(name = "members_ids")
+    val membersIds: kotlin.collections.List<kotlin.String>? = emptyList()
 )

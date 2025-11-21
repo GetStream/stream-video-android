@@ -35,31 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * PIN protection configuration response
  */
 
-data class CallStatsLocation (
-    @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+data class SIPPinProtectionConfigsResponse (
+    @Json(name = "enabled")
+    val enabled: kotlin.Boolean,
 
-    @Json(name = "city")
-    val city: kotlin.String? = null,
+    @Json(name = "default_pin")
+    val defaultPin: kotlin.String? = null,
 
-    @Json(name = "continent")
-    val continent: kotlin.String? = null,
+    @Json(name = "max_attempts")
+    val maxAttempts: kotlin.Int? = null,
 
-    @Json(name = "country")
-    val country: kotlin.String? = null,
-
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
-
-    @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
-
-    @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
-
-    @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    @Json(name = "required_pin_digits")
+    val requiredPinDigits: kotlin.Int? = null
 )
