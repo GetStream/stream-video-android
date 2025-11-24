@@ -33,6 +33,7 @@ import io.getstream.android.video.generated.models.CallMemberAddedEvent
 import io.getstream.android.video.generated.models.CallMemberRemovedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.CallModerationBlurEvent
 import io.getstream.android.video.generated.models.CallParticipantResponse
 import io.getstream.android.video.generated.models.CallReactionEvent
 import io.getstream.android.video.generated.models.CallRecordingStartedEvent
@@ -106,7 +107,9 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
@@ -660,6 +663,8 @@ public class CallState(
      */
     internal val closedCaptionManager = ClosedCaptionManager()
 
+    public val moderationManager = ModerationManager(call)
+
     /**
      * Tracks whether closed captioning is currently active for the call.
      * True if captioning is ongoing, false otherwise.
@@ -1129,6 +1134,17 @@ public class CallState(
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
             -> closedCaptionManager.handleEvent(event)
+
+            is CallModerationBlurEvent -> {
+                scope.launch {
+                    val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
+                    if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
+                        call.state.moderationManager.applyVideoModeration()
+                        delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
+                        call.state.moderationManager.clearVideoModeration()
+                    }
+                }
+            }
         }
     }
 
