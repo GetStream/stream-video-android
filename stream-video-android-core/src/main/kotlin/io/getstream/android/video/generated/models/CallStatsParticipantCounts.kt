@@ -45,6 +45,12 @@ data class CallStatsParticipantCounts (
     @Json(name = "participants")
     val participants: kotlin.Int,
 
+    @Json(name = "peak_concurrent_sessions")
+    val peakConcurrentSessions: kotlin.Int,
+
+    @Json(name = "peak_concurrent_users")
+    val peakConcurrentUsers: kotlin.Int,
+
     @Json(name = "publishers")
     val publishers: kotlin.Int,
 
