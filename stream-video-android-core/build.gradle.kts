@@ -22,7 +22,6 @@ plugins {
     alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
     id("io.getstream.video.generateServices")
-    id("io.getstream.spotless")
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
