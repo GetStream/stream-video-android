@@ -66,7 +66,11 @@ android {
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${Configuration.majorVersion}")
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
-        buildConfigField("String", "STREAM_WEBRTC_VERSION", "\"${Configuration.streamWebRtcVersionName}\"")
+        buildConfigField(
+            "String",
+            "STREAM_WEBRTC_VERSION",
+            "\"${Configuration.streamWebRtcVersionName}\"",
+        )
     }
 
     buildFeatures {
@@ -176,9 +180,8 @@ dependencies {
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
 
-    //jetpack telecom
+    // jetpack telecom
     implementation(libs.androidx.telecom)
-
 
     // datastore
     api(libs.androidx.datastore)
