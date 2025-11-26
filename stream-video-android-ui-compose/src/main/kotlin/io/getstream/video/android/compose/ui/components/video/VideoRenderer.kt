@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -269,20 +271,14 @@ internal fun DefaultMediaTrackFallbackContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetTertiary)
-            .testTag("video_renderer_fallback"),
+            .background(VideoTheme.colors.baseSheetTertiary),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            modifier = Modifier.padding(30.dp),
-            text = stringResource(
-                id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
-                call.sessionId,
-            ),
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(48.dp),
             color = VideoTheme.colors.basePrimary,
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
         )
     }
 }
