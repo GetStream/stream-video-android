@@ -23,6 +23,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.jvm.Throws
 
 /**
  * Implementation of [ScopeProvider] that manages coroutine scopes for RTC sessions.
@@ -41,7 +42,9 @@ internal class ScopeProviderImpl(
     private var executor: ExecutorService? = null
     private var isCleanedUp = false
 
+    @Throws(IllegalStateException::class)
     override fun getCoroutineScope(supervisorJob: CompletableJob): CoroutineScope {
+        // Future: We should not throw exception. Instead return Result.Fail
         check(!isCleanedUp) { "ScopeProvider has been cleaned up" }
         logger.d { "Creating coroutine scope for RTC session main" }
         return CoroutineScope(
@@ -51,7 +54,9 @@ internal class ScopeProviderImpl(
         )
     }
 
+    @Throws(IllegalStateException::class)
     override fun getRtcSessionScope(supervisorJob: CompletableJob, callId: String): CoroutineScope {
+        // Future: We should not throw exception. Instead return Result.Fail
         check(!isCleanedUp) { "ScopeProvider has been cleaned up" }
         logger.d { "Creating RTC session scope for callId: $callId" }
 
