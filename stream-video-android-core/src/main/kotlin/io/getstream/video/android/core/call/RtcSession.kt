@@ -816,9 +816,7 @@ public class RtcSession internal constructor(
             participant._videoPaused.value = paused
         }
         track?.enableVideo(videoEnabled)
-        if (!call.mediaManager.screenShare.audioEnabled.value) {
-            track?.enableAudio(audioEnabled)
-        }
+        track?.enableAudio(audioEnabled)
     }
 
     private val atomicCleanup = AtomicUnitCall()
