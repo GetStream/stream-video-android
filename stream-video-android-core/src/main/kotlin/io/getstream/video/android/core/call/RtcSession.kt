@@ -316,6 +316,34 @@ public class RtcSession internal constructor(
     }
 
     /**
+     * Creates and publishes an audio track for transmitting audio.
+     * This is used both when microphone is enabled and when screen sharing starts with muted microphone.
+     */
+    private suspend fun createAndPublishAudioTrack() {
+        val canUserSendAudio = call.state.ownCapabilities.value.contains(
+            OwnCapability.SendAudio,
+        )
+        if (!canUserSendAudio) {
+            return
+        }
+
+        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
+        val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
+        val track = publisher?.publishStream(
+            streamId,
+            TrackType.TRACK_TYPE_AUDIO,
+        )
+
+        setLocalTrack(
+            TrackType.TRACK_TYPE_AUDIO,
+            AudioTrack(
+                streamId = streamId,
+                audio = track as org.webrtc.AudioTrack,
+            ),
+        )
+    }
+
+    /**
      * Connection and WebRTC.
      */
 
@@ -399,6 +427,16 @@ public class RtcSession internal constructor(
                 sampleRate = sampleRate,
                 sampleData = sampleData,
             )
+        }
+
+        // Set up screen audio bytes provider for mixing with microphone audio during screen sharing
+        call.peerConnectionFactory.setScreenAudioBytesProvider { bytesRequested ->
+            call.mediaManager.screenShare.getScreenAudioBytes(bytesRequested)
+        }
+
+        // Set up microphone enabled provider to check if microphone should be included in mixing
+        call.peerConnectionFactory.setMicrophoneEnabledProvider {
+            call.mediaManager.microphone.isEnabled.value
         }
     }
 
@@ -651,27 +689,8 @@ public class RtcSession internal constructor(
 
         coroutineScope.launch {
             call.mediaManager.microphone.status.collectLatest {
-                val canUserSendAudio = call.state.ownCapabilities.value.contains(
-                    OwnCapability.SendAudio,
-                )
-
                 if (it == DeviceStatus.Enabled) {
-                    if (canUserSendAudio) {
-                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
-                        val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
-                        val track = publisher?.publishStream(
-                            streamId,
-                            TrackType.TRACK_TYPE_AUDIO,
-                        )
-
-                        setLocalTrack(
-                            TrackType.TRACK_TYPE_AUDIO,
-                            AudioTrack(
-                                streamId = streamId,
-                                audio = track as org.webrtc.AudioTrack,
-                            ),
-                        )
-                    }
+                    createAndPublishAudioTrack()
                 } else {
                     setMuteState(isEnabled = false, TrackType.TRACK_TYPE_AUDIO)
                     publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
