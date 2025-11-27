@@ -16,17 +16,24 @@
 
 package io.getstream.video.android.core
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioAttributes
+import android.media.AudioFormat
 import android.media.AudioManager
+import android.media.AudioPlaybackCaptureConfiguration
+import android.media.AudioRecord
+import android.media.AudioRecord.READ_BLOCKING
 import android.media.projection.MediaProjection
 import android.os.Build
 import android.os.IBinder
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.twilio.audioswitch.AudioDevice
@@ -66,6 +73,7 @@ import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.VideoDimension
+import java.nio.ByteBuffer
 import java.util.UUID
 import kotlin.coroutines.resumeWithException
 
@@ -257,6 +265,16 @@ class ScreenShareManager(
         internal val screenShareResolution = VideoDimension(1920, 1080)
         internal val screenShareBitrate = 1_000_000
         internal val screenShareFps = 15
+        private const val INPUT_NUM_OF_CHANNELS = 1 // 1 for mono, 2 for stereo output
+
+        // Requested size of each recorded buffer provided to the client.
+        private const val CALLBACK_BUFFER_SIZE_MS = 10
+
+        // Average number of callbacks per second.
+        private const val BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS
+
+        // Bits per sample (16-bit PCM)
+        private const val INPUT_BITS_PER_SAMPLE = 16
     }
 
     private val logger by taggedLogger("Media:ScreenShareManager")
@@ -266,11 +284,22 @@ class ScreenShareManager(
 
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
+    private val _audioEnabled = MutableStateFlow<Boolean>(false)
+
+    /** Represents whether screen share audio is enabled */
+    public val audioEnabled: StateFlow<Boolean> = _audioEnabled
+
     private lateinit var screenCapturerAndroid: ScreenCapturerAndroid
     internal lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private var setupCompleted = false
     private var isScreenSharing = false
     private var mediaProjectionPermissionResultData: Intent? = null
+    private var mediaProjection: MediaProjection? = null
+    private var screenAudioRecord: AudioRecord? = null
+    private val inputSampleRate = 48000 // Standard WebRTC sample rate
+
+    // ByteBuffer for reading screen audio on demand
+    private var screenAudioBuffer: ByteBuffer? = null
 
     /**
      * The [ServiceConnection.onServiceConnected] is called when our [StreamScreenShareService]
@@ -311,17 +340,26 @@ class ScreenShareManager(
                 0,
             )
 
+            // Get MediaProjection from ScreenCapturerAndroid
+            mediaProjection = screenCapturerAndroid.mediaProjection
+
+            // Start screen audio capture only if audio is enabled
+            if (_audioEnabled.value) {
+                startScreenAudioCapture()
+            }
+
             isScreenSharing = true
         }
 
         override fun onServiceDisconnected(name: ComponentName) {}
     }
 
-    fun enable(mediaProjectionPermissionResultData: Intent, fromUser: Boolean = true) {
+    fun enable(mediaProjectionPermissionResultData: Intent, fromUser: Boolean = true, includeAudio: Boolean = false) {
         mediaManager.screenShareTrack.setEnabled(true)
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
+        _audioEnabled.value = includeAudio
         setup()
         startScreenShare(mediaProjectionPermissionResultData)
     }
@@ -330,15 +368,122 @@ class ScreenShareManager(
         if (fromUser) {
             _status.value = DeviceStatus.Disabled
         }
+        _audioEnabled.value = false
 
         if (isScreenSharing) {
             mediaManager.screenShareTrack.setEnabled(false)
             screenCapturerAndroid.stopCapture()
+            stopScreenAudioCapture()
             mediaManager.context.stopService(
                 Intent(mediaManager.context, StreamScreenShareService::class.java),
             )
             isScreenSharing = false
         }
+    }
+
+    /**
+     * Gets the next set of screen audio bytes on demand by reading directly from AudioRecord.
+     * Returns null if screen audio capture is not active.
+     * This method is called from the AudioBufferCallback in StreamPeerConnectionFactory when mixing is needed.
+     *
+     * @param bytesRequested The number of bytes requested
+     * @return ByteBuffer containing the requested bytes (may have fewer bytes if not enough data is available), or null if no data
+     */
+    internal fun getScreenAudioBytes(bytesRequested: Int): ByteBuffer? {
+        val record = screenAudioRecord ?: return null
+
+        if (bytesRequested <= 0) return null
+
+        // Ensure buffer has enough capacity
+        val buffer = screenAudioBuffer?.takeIf { it.capacity() >= bytesRequested }
+            ?: ByteBuffer.allocateDirect(bytesRequested).also { screenAudioBuffer = it }
+
+        buffer.clear()
+        buffer.limit(bytesRequested)
+
+        // Read directly from AudioRecord using READ_BLOCKING mode
+        val bytesRead = record.read(buffer, bytesRequested, READ_BLOCKING)
+
+        if (bytesRead > 0) {
+            buffer.limit(bytesRead)
+            // Return a duplicate to avoid position/limit conflicts with concurrent access
+            return buffer
+        }
+
+        return null
+    }
+
+    /**
+     * Starts capturing screen audio using AudioRecord with AudioPlaybackCaptureConfiguration.
+     */
+    private fun startScreenAudioCapture() {
+        val mediaProj = mediaProjection ?: run {
+            logger.e { "MediaProjection is null, cannot start screen audio capture" }
+            return
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            logger.w { "Screen audio capture requires Android Q (API 29) or higher" }
+            return
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                mediaManager.context,
+                Manifest.permission.RECORD_AUDIO,
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            logger.w { "RECORD_AUDIO permission not granted, cannot capture screen audio" }
+            return
+        }
+
+        try {
+            // Calculate buffer size using the correct formula
+            val bytesPerFrame: Int = INPUT_NUM_OF_CHANNELS * (INPUT_BITS_PER_SAMPLE / 8)
+            val capacity = bytesPerFrame * (inputSampleRate / BUFFERS_PER_SECOND)
+
+            // Create ByteBuffer for reading audio on demand
+            screenAudioBuffer = ByteBuffer.allocateDirect(capacity)
+
+            val format = AudioFormat.Builder()
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setSampleRate(inputSampleRate)
+                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                .build()
+
+            val playbackConfig = AudioPlaybackCaptureConfiguration.Builder(mediaProj)
+                .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+                .build()
+
+            screenAudioRecord = AudioRecord.Builder()
+                .setAudioFormat(format)
+                .setAudioPlaybackCaptureConfig(playbackConfig)
+                .build()
+
+            screenAudioRecord?.startRecording()
+
+            logger.d { "Screen audio capture started" }
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to start screen audio capture" }
+        }
+    }
+
+    /**
+     * Stops capturing screen audio and releases resources.
+     */
+    private fun stopScreenAudioCapture() {
+        try {
+            screenAudioRecord?.stop()
+            screenAudioRecord?.release()
+            screenAudioRecord = null
+            logger.d { "Screen audio capture stopped" }
+        } catch (e: Exception) {
+            logger.e(e) { "Error stopping screen audio capture" }
+        }
+
+        // Note: MediaProjection is managed by ScreenCapturerAndroid and will be stopped
+        // when screenCapturerAndroid.stopCapture() is called, so we don't need to stop it here
+        mediaProjection = null
+        screenAudioBuffer = null
     }
 
     private fun startScreenShare(mediaProjectionPermissionResultData: Intent) {
