@@ -35,7 +35,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * This event is sent when a moderation warning is issued to a user
  */
 
 data class CallModerationWarningEvent (

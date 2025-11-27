@@ -1,0 +1,118 @@
+/*
+ * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.getstream.video.android.core.moderations
+
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ClientState
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.video.BitmapVideoFilter
+import io.getstream.video.android.core.call.video.DefaultModerationVideoFilter
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
+import io.mockk.verify
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+
+class ModerationManagerTest {
+
+    private lateinit var call: Call
+    private lateinit var moderationManager: ModerationManager
+
+    @Before
+    fun setup() {
+        mockkObject(StreamVideo)
+
+        call = mockk(relaxed = true)
+        every { call.type } returns "default"
+
+        moderationManager = ModerationManager(call)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
+
+    @Test
+    fun `enableVideoModeration sets custom filter when provided`() {
+        // Given
+        val customFilter = mockk<BitmapVideoFilter>()
+
+        // When
+        moderationManager.applyVideoModeration(customFilter)
+
+        // Then
+        verify { call.videoFilter = customFilter }
+    }
+
+    @Test
+    fun `enableVideoModeration sets default filter when no custom filter provided`() {
+        // Given
+        val defaultFilter = DefaultModerationVideoFilter()
+        val moderationConfig = ModerationConfig(
+            videoModerationConfig = VideoModerationConfig(
+                enable = true,
+                blurDuration = 20_000L,
+                bitmapVideoFilter = defaultFilter,
+            ),
+        )
+
+        val callServiceConfig = CallServiceConfig(moderationConfig = moderationConfig)
+
+        val mockStreamVideo = mockk<StreamVideoClient>(relaxed = true)
+        val mockStateStreamVideo = mockk<ClientState>(relaxed = true)
+        val mockCallConfigRegistry = mockk<CallServiceConfigRegistry>(relaxed = true)
+
+        every { StreamVideo.instance() } returns mockStreamVideo
+        every { mockStreamVideo.state } returns mockStateStreamVideo
+        every { mockStateStreamVideo.callConfigRegistry } returns mockCallConfigRegistry
+        every { mockCallConfigRegistry.get(any()) } returns callServiceConfig
+
+        // When
+        moderationManager.applyVideoModeration()
+
+        // Then
+        verify { call.videoFilter = ofType(DefaultModerationVideoFilter::class) }
+    }
+
+    @Test
+    fun `enableVideoModeration falls back to empty CallServiceConfig when instance is null`() {
+        // Given
+        every { StreamVideo.instanceOrNull() } returns null
+
+        // When
+        moderationManager.applyVideoModeration()
+
+        // Then
+        verify { call.videoFilter = any() }
+    }
+
+    @Test
+    fun `disableVideoModeration sets videoFilter to null`() {
+        // When
+        moderationManager.clearVideoModeration()
+
+        // Then
+        verify { call.videoFilter = null }
+    }
+}
