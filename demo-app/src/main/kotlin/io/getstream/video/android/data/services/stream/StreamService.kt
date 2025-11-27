@@ -17,11 +17,14 @@
 package io.getstream.video.android.data.services.stream
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import io.getstream.log.streamLog
 import io.getstream.video.android.model.User
 import io.getstream.video.android.models.UserCredentials
 import io.getstream.video.android.models.builtInCredentials
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.create
 import retrofit2.http.GET
@@ -32,23 +35,32 @@ fun interface StreamService {
     suspend fun getAuthData(
         @Query("environment") environment: String,
         @Query("user_id") userId: String?,
+        @Query("exp") exp: Int,
     ): GetAuthDataResponse
 
     companion object {
         private const val BASE_URL = "https://pronto.getstream.io/"
+        public const val TOKEN_EXPIRY_TIME = 20
 
         private val json = Json { ignoreUnknownKeys = true }
-
+        private val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor {
+                streamLog(tag = "Video:Http") { it }
+            }.apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .build()
         private val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .client(okHttpClient)
             .build()
 
         private val serviceInstance = retrofit.create<StreamService>()
 
-        val instance = StreamService { environment, userId ->
+        val instance = StreamService { environment, userId, exp ->
             User.builtInCredentials[userId]?.toAuthDataResponse()
-                ?: serviceInstance.getAuthData(environment, userId)
+                ?: serviceInstance.getAuthData(environment, userId, exp)
         }
     }
 }

@@ -92,6 +92,7 @@ class LoginViewModel @Inject constructor(
                     val authData = StreamService.instance.getAuthData(
                         environment = it.env,
                         userId = userId,
+                        StreamService.TOKEN_EXPIRY_TIME
                     )
                     val loggedInGoogleUser =
                         if (autoLogIn) null else googleAccountRepository.getCurrentUser()
@@ -128,6 +129,7 @@ class LoginViewModel @Inject constructor(
                     val authData = StreamService.instance.getAuthData(
                         environment = it.env,
                         userId = user.id,
+                        StreamService.TOKEN_EXPIRY_TIME
                     )
                     // Store the data in the demo app
                     dataStore.updateUser(user)
