@@ -321,51 +321,8 @@ public class StreamPeerConnectionFactory(
                     audioBuffer,
                 )
 
-                // Mix screen audio with microphone audio if screen share audio is enabled
                 if (bytesRead > 0) {
-                    // Request screen audio bytes from MediaManager on demand
-                    // Returns null if screen share audio is not enabled
-                    val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
-                    val isMicrophoneEnabled = microphoneEnabledProvider?.invoke() ?: true
-
-                    if (screenAudioBuffer != null && screenAudioBuffer.remaining() > 0) {
-                        screenAudioBuffer.position(0)
-                        audioBuffer.position(0)
-
-                        // Convert screen audio (ByteBuffer) to ShortArray
-                        val screenSamples = ShortArray(screenAudioBuffer.limit() / 2)
-                        screenAudioBuffer.order(ByteOrder.LITTLE_ENDIAN)
-                        screenAudioBuffer.asShortBuffer().get(screenSamples)
-
-                        val mixedAudio = if (isMicrophoneEnabled) {
-                            // Convert microphone audio (ByteBuffer) to ShortArray
-                            val micSamples = ShortArray(audioBuffer.limit() / 2)
-                            audioBuffer.order(ByteOrder.LITTLE_ENDIAN)
-                            audioBuffer.asShortBuffer().get(micSamples)
-
-                            // Mix the audio buffers
-                            addAndConvertBuffers(
-                                micSamples,
-                                micSamples.size,
-                                screenSamples,
-                                screenSamples.size,
-                            )
-                        } else {
-                            // Microphone is disabled, only send screen audio
-                            // Create silent microphone samples (all zeros) and mix with screen audio
-                            val silentMicSamples = ShortArray(audioBuffer.limit() / 2) { 0 }
-                            addAndConvertBuffers(
-                                silentMicSamples,
-                                silentMicSamples.size,
-                                screenSamples,
-                                screenSamples.size,
-                            )
-                        }
-
-                        // Put the mixed audio back into the buffer
-                        audioBuffer.clear()
-                        audioBuffer.put(mixedAudio)
-                    }
+                    mixAudioBuffers(bytesRead, audioBuffer)
                 }
 
                 captureTimeNs
@@ -377,6 +334,70 @@ public class StreamPeerConnectionFactory(
             }
 
         return adm
+    }
+
+    /**
+     * Mixes screen share audio with microphone audio before sending to the peer connection.
+     *
+     *  When screen sharing with audio is active, it retrieves screen audio bytes and mixes
+     *  them with the microphone audio (or silence if the microphone is disabled) to create a
+     *  combined audio stream.
+     *
+     * The mixing process:
+     * 1. Retrieves screen audio bytes from the [screenAudioBytesProvider] if available
+     * 2. Converts both audio buffers from ByteBuffer to ShortArray (PCM 16-bit format)
+     * 3. If microphone is enabled: mixes microphone audio with screen audio, if any
+     * 4. If microphone is disabled: mixes silent microphone samples with screen audio, if any
+     * 5. Writes the mixed audio back into the [audioBuffer] for transmission
+     *
+     * @param bytesRead The number of bytes read from the microphone audio buffer
+     * @param audioBuffer The microphone audio buffer that will be modified in-place with the mixed audio.
+     *                    Expected to be in PCM 16-bit little-endian format.
+     */
+    internal fun mixAudioBuffers(bytesRead: Int, audioBuffer: ByteBuffer) {
+        // Request screen audio bytes from MediaManager on demand
+        // Returns null if screen share audio is not enabled
+        val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
+
+        if (screenAudioBuffer != null && screenAudioBuffer.remaining() > 0) {
+            screenAudioBuffer.position(0)
+            audioBuffer.position(0)
+
+            // Convert screen audio (ByteBuffer) to ShortArray
+            val screenSamples = ShortArray(screenAudioBuffer.limit() / 2)
+            screenAudioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+            screenAudioBuffer.asShortBuffer()[screenSamples]
+
+            val isMicrophoneEnabled = microphoneEnabledProvider?.invoke() ?: true
+            val mixedAudio = if (isMicrophoneEnabled) {
+                // Convert microphone audio (ByteBuffer) to ShortArray
+                val micSamples = ShortArray(audioBuffer.limit() / 2)
+                audioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+                audioBuffer.asShortBuffer()[micSamples]
+
+                // Mix the audio buffers
+                addAndConvertBuffers(
+                    micSamples,
+                    micSamples.size,
+                    screenSamples,
+                    screenSamples.size,
+                )
+            } else {
+                // Microphone is disabled, only send screen audio
+                // Create silent microphone samples (all zeros) and mix with screen audio
+                val silentMicSamples = ShortArray(audioBuffer.limit() / 2) { 0 }
+                addAndConvertBuffers(
+                    silentMicSamples,
+                    silentMicSamples.size,
+                    screenSamples,
+                    screenSamples.size,
+                )
+            }
+
+            // Put the mixed audio back into the buffer
+            audioBuffer.clear()
+            audioBuffer.put(mixedAudio)
+        }
     }
 
     /**
