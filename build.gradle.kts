@@ -22,7 +22,6 @@ buildscript {
   }
 }
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   alias(libs.plugins.stream.project)
   alias(libs.plugins.stream.android.application) apply false
@@ -44,13 +43,28 @@ plugins {
   alias(libs.plugins.hilt) apply false
   alias(libs.plugins.play.publisher) apply false
   alias(libs.plugins.baseline.profile) apply false
-  alias(libs.plugins.sonarqube) apply false
-  alias(libs.plugins.kover) apply false
 }
 
 streamProject {
     spotless {
         excludePatterns = setOf("**/generated/**")
+    }
+
+    coverage {
+        includedModules = setOf(
+            "stream-video-android-core",
+            "stream-video-android-ui-compose",
+        )
+        sonarCoverageExclusions = listOf(
+            "**/*.mp3",
+            "**/*.webp",
+            "**/generated/**",
+            "**/io/getstream/video/android/core/model/**"
+        )
+        koverClassExclusions = listOf(
+            "io.getstream.android.video.generated.*",
+            "io.getstream.video.android.core.model.*"
+        )
     }
 }
 
@@ -170,9 +184,6 @@ tasks.register("printAllArtifacts") {
 //    val teamPropsDir = file("team-props")
 //    return File(teamPropsDir, propsFile)
 //}
-
-apply(from = "${rootDir}/scripts/sonar.gradle")
-apply(from = "${rootDir}/scripts/coverage.gradle")
 
 afterEvaluate {
     println("Running Add Pre Commit Git Hook Script on Build")
