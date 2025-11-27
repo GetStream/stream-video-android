@@ -88,7 +88,7 @@ data class OwnUserResponse (
     val blockedUserIds: kotlin.collections.List<kotlin.String>? = emptyList(),
 
     @Json(name = "push_preferences")
-    val pushPreferences: io.getstream.android.video.generated.models.PushPreferences? = null,
+    val pushPreferences: io.getstream.android.video.generated.models.PushPreferencesResponse? = null,
 
     @Json(name = "teams_role")
     val teamsRole: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()

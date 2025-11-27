@@ -13,21 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import io.getstream.video.android.Configuration
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+    alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
-    id("io.getstream.spotless")
 }
-
-rootProject.extra.apply {
-    set("PUBLISH_GROUP_ID", Configuration.artifactGroup)
-    set("PUBLISH_ARTIFACT_ID", "stream-video-android-previewdata")
-    set("PUBLISH_VERSION", rootProject.extra.get("rootVersionName"))
-}
-
-apply(from ="${rootDir}/scripts/publish-module.gradle")
 
 android {
     namespace = "io.getstream.video.android.mock"
@@ -49,4 +41,19 @@ baselineProfile {
 
 dependencies {
     api(project(":stream-video-android-core"))
+}
+
+mavenPublishing {
+    coordinates(
+        groupId = Configuration.artifactGroup,
+        artifactId = "stream-video-android-previewdata",
+        version = rootProject.version.toString(),
+    )
+    configure(
+        AndroidSingleVariantLibrary(
+            variant = "release",
+            sourcesJar = true,
+            publishJavadocJar = true,
+        ),
+    )
 }

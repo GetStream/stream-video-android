@@ -17,12 +17,14 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.media.AudioAttributes
+import io.getstream.video.android.core.moderations.ModerationConfig
 
 class CallServiceConfigBuilder {
     private var serviceClass: Class<*> = CallService::class.java
     private var runCallServiceInForeground: Boolean = true
     private var audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION
     private var enableTelecom: Boolean = false
+    private var moderationConfig: ModerationConfig = ModerationConfig()
 
     fun setServiceClass(serviceClass: Class<*>): CallServiceConfigBuilder = apply {
         this.serviceClass = serviceClass
@@ -40,12 +42,17 @@ class CallServiceConfigBuilder {
         this.enableTelecom = enableTelecom
     }
 
+    fun setModerationConfig(moderationConfig: ModerationConfig): CallServiceConfigBuilder = apply {
+        this.moderationConfig = moderationConfig
+    }
+
     fun build(): CallServiceConfig {
         return CallServiceConfig(
             serviceClass = serviceClass,
             runCallServiceInForeground = runCallServiceInForeground,
             audioUsage = audioUsage,
             enableTelecom = enableTelecom,
+            moderationConfig = moderationConfig,
         )
     }
 }

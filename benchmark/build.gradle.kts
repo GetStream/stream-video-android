@@ -13,28 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import io.getstream.video.configureFlavors
-
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    id(libs.plugins.android.test.get().pluginId)
-    id(libs.plugins.kotlin.android.get().pluginId)
-    id(libs.plugins.baseline.profile.get().pluginId)
-    id("io.getstream.spotless")
+    alias(libs.plugins.stream.android.test)
+    alias(libs.plugins.baseline.profile)
+    id("io.getstream.video.android.demoflavor")
 }
 
 android {
     namespace = "io.getstream.video.android.benchmark"
     compileSdk = libs.versions.compileSdk.get().toInt()
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
-    }
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
@@ -60,17 +47,6 @@ android {
             matchingFallbacks.add("release")
             proguardFiles("benchmark-rules.pro")
         }
-    }
-
-    // Use the same flavor dimensions as the application to allow generating Baseline Profiles on prod,
-    // which is more close to what will be shipped to users (no fake data), but has ability to run the
-    // benchmarks on demo, so we benchmark on stable data.
-    configureFlavors(this) { flavor ->
-        buildConfigField(
-            "String",
-            "APP_FLAVOR_SUFFIX",
-            "\"${flavor.applicationIdSuffix ?: ""}\""
-        )
     }
 
     targetProjectPath = ":demo-app"
