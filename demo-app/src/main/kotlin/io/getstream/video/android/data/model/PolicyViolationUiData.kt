@@ -14,3 +14,6 @@
  * limitations under the License.
  */
 
+package io.getstream.video.android.data.model
+
+internal data class PolicyViolationUiData(val title: String, val message: String, val actionButtonText: String)

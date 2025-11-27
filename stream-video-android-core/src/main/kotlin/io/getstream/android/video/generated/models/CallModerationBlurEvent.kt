@@ -35,7 +35,7 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * This event is sent when a moderation blur action is applied to a user's video stream
  */
 
 data class CallModerationBlurEvent (

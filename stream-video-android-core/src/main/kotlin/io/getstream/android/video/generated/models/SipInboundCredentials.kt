@@ -35,22 +35,25 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Credentials for SIP inbound call authentication
  */
 
-data class PushPreferences (
-    @Json(name = "call_level")
-    val callLevel: kotlin.String? = null,
+data class SipInboundCredentials (
+    @Json(name = "call_id")
+    val callId: kotlin.String,
 
-    @Json(name = "chat_level")
-    val chatLevel: kotlin.String? = null,
+    @Json(name = "call_type")
+    val callType: kotlin.String,
 
-    @Json(name = "disabled_until")
-    val disabledUntil: org.threeten.bp.OffsetDateTime? = null,
+    @Json(name = "token")
+    val token: kotlin.String,
 
-    @Json(name = "feeds_level")
-    val feedsLevel: kotlin.String? = null,
+    @Json(name = "user_id")
+    val userId: kotlin.String,
 
-    @Json(name = "feeds_preferences")
-    val feedsPreferences: io.getstream.android.video.generated.models.FeedsPreferences? = null
+    @Json(name = "call_custom_data")
+    val callCustomData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+
+    @Json(name = "user_custom_data")
+    val userCustomData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap()
 )
