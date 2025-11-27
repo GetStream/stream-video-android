@@ -143,16 +143,11 @@ public val previewMemberListState: List<MemberState>
         val participants = arrayListOf<MemberState>()
         previewCall.state.clearParticipants()
         previewUsers.forEach { user ->
-            val sessionId = if (user == previewUsers.first()) {
-                previewCall.sessionId
-            } else {
-                UUID.randomUUID().toString()
-            }
             participants.add(
                 MemberState(
                     user = user,
-                    createdAt = OffsetDateTime.now(),
-                    updatedAt = OffsetDateTime.now(),
+                    createdAt = OffsetDateTime.MIN,
+                    updatedAt = OffsetDateTime.MIN,
                     custom = emptyMap(),
                     role = "admin",
                 ),
