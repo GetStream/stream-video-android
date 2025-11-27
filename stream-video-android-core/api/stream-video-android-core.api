@@ -7652,7 +7652,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun startClosedCaptions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun startRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun startScreenSharing (Landroid/content/Intent;)V
+	public final fun startScreenSharing (Landroid/content/Intent;Z)V
+	public static synthetic fun startScreenSharing$default (Lio/getstream/video/android/core/Call;Landroid/content/Intent;ZILjava/lang/Object;)V
 	public final fun startTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopClosedCaptions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopHLS (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -8359,8 +8360,9 @@ public final class io/getstream/video/android/core/ScreenShareManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lorg/webrtc/EglBase$Context;)V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/ScreenShareManager;ZILjava/lang/Object;)V
-	public final fun enable (Landroid/content/Intent;Z)V
-	public static synthetic fun enable$default (Lio/getstream/video/android/core/ScreenShareManager;Landroid/content/Intent;ZILjava/lang/Object;)V
+	public final fun enable (Landroid/content/Intent;ZZ)V
+	public static synthetic fun enable$default (Lio/getstream/video/android/core/ScreenShareManager;Landroid/content/Intent;ZZILjava/lang/Object;)V
+	public final fun getAudioEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEglBaseContext ()Lorg/webrtc/EglBase$Context;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;

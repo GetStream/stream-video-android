@@ -1174,10 +1174,13 @@ public class Call(
      * MediaProjectionManager.createScreenCaptureIntent().
      * See https://developer.android.com/guide/topics/large-screens/media-projection#recommended_approach
      */
-    fun startScreenSharing(mediaProjectionPermissionResultData: Intent) {
+    fun startScreenSharing(
+        mediaProjectionPermissionResultData: Intent,
+        includeAudio: Boolean = false,
+    ) {
         if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
             session?.setScreenShareTrack()
-            screenShare.enable(mediaProjectionPermissionResultData)
+            screenShare.enable(mediaProjectionPermissionResultData, includeAudio = includeAudio)
         } else {
             logger.w { "Can't start screen sharing - user doesn't have wnCapability.Screenshare permission" }
         }
