@@ -23,6 +23,7 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -277,12 +278,35 @@ internal open class CoordinatorSocket(
         if (VideoErrorCode.isAuthenticationError(error.serverErrorCode)) {
             tokenManager.expireToken()
         }
+        //Noob
+        when(error.serverErrorCode){
+            VideoErrorCode.VALIDATION_ERROR.code,
+            VideoErrorCode.TOKEN_EXPIRED.code -> {
+                StreamVideo.instanceOrNull()?.let {
+                    val result = (it as StreamVideoClient).getEdges()
+                    result.onSuccess {
+                        logger.d { "edges success result: $result" }
+                    }.onError {
+                        logger.d { "edges fail result: $result" }
+                    }
+
+                }
+                tokenManager.expireToken()
+                logger.d { "load sync START" }
+                val token = tokenManager.loadSync()
+                tokenManager.updateToken(token)
+                if (token.isNotEmpty()) {
+                    logger.d { "load sync END: $token" }
+                    return
+                }
+            }
+            else->{}
+        }
 
         when (error.serverErrorCode) {
             VideoErrorCode.UNDEFINED_TOKEN.code,
             VideoErrorCode.INVALID_TOKEN.code,
             VideoErrorCode.API_KEY_NOT_FOUND.code,
-            VideoErrorCode.VALIDATION_ERROR.code,
             -> {
                 logger.d {
                     "One unrecoverable error happened. Error: $error. Error code: ${error.serverErrorCode}"
@@ -290,7 +314,9 @@ internal open class CoordinatorSocket(
                 coordinatorSocketStateService.onUnrecoverableError(error)
             }
 
-            else -> coordinatorSocketStateService.onNetworkError(error)
+            else -> {
+                coordinatorSocketStateService.onNetworkError(error)
+            }
         }
     }
 

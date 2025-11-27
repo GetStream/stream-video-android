@@ -26,6 +26,7 @@ import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.model.ApiKey
@@ -47,6 +48,7 @@ internal class CoordinatorConnectionModule(
     context: Context,
     tokenProvider: TokenProvider,
     user: User,
+    tokenRepository: TokenRepository,
     override val scope: CoroutineScope,
     // Common API
     override val apiUrl: String,
@@ -59,7 +61,7 @@ internal class CoordinatorConnectionModule(
     override val tracer: Tracer = Tracer("coordinator"),
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
     // Internals
-    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
+    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder().baseUrl(apiUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
@@ -102,11 +104,12 @@ internal class CoordinatorConnectionModule(
         scope = scope,
         lifecycle = lifecycle,
         tokenProvider = tokenProvider,
+        tokenRepository = tokenRepository
     )
 
     override fun updateToken(token: UserToken) {
         socketConnection.updateToken(token)
-        authInterceptor.token = token
+//        authInterceptor.token = token
     }
 
     override fun updateAuthType(authType: String) {

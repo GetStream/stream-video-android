@@ -38,6 +38,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.core.utils.mapState
@@ -81,12 +82,13 @@ public open class CoordinatorSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
+    private val tokenRepository: TokenRepository
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
     SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
 
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
-    private val tokenManager = TokenManagerImpl()
+    private val tokenManager = TokenManagerImpl(tokenRepository)
 
     // Internal state
     private val logger by taggedLogger("Video:Socket")
@@ -120,13 +122,13 @@ public open class CoordinatorSocketConnection(
 
     // Init
     init {
-        tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
+        tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider, tokenRepository))
     }
 
     // Extension opportunity for subclasses
     override fun onCreated() {
         super.onCreated()
-        logger.d { "[onCreated] Socket is created" }
+        logger.d { "[onCreated] Socket is created, initial token: $token, tokenManager.getToken() = ${tokenManager.getToken()}" }
         scope.launch {
             logger.d { "[onConnected] Video socket created, user: $user" }
             if (token.isEmpty()) {
@@ -134,7 +136,7 @@ public open class CoordinatorSocketConnection(
                 disconnect()
             } else {
                 val authRequest = WSAuthMessageRequest(
-                    token = token,
+                    token = tokenManager.getToken().ifEmpty { token },
                     userDetails = ConnectUserDetailsRequest(
                         id = user.id,
                         name = user.name.takeUnless { it.isWhitespaceOnly() },
@@ -197,6 +199,7 @@ public open class CoordinatorSocketConnection(
         connectionTimeout: Long,
         connected: suspend (connectionId: String) -> Unit,
     ) {
+        logger.d {"[whenConnected]"}
         scope.launch {
             internalSocket.awaitConnection(connectionTimeout)
             internalSocket.connectionIdOrError().also {
@@ -215,16 +218,19 @@ public open class CoordinatorSocketConnection(
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
     override suspend fun connect(connectData: User) {
+        logger.d {"[connect]"}
         internalSocket.connectUser(connectData, connectData.isAnonymous())
     }
 
     override suspend fun reconnect(data: User, force: Boolean) {
+        logger.d {"[reconnect]"}
         internalSocket.reconnectUser(data, data.isAnonymous(), force)
     }
 
     override suspend fun disconnect() = internalSocket.disconnect()
 
     override fun updateToken(token: UserToken) {
+        logger.d {"[updateToken]"}
         tokenManager.updateToken(token)
     }
 }

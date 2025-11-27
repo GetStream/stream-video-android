@@ -78,6 +78,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
@@ -241,6 +242,7 @@ public class RtcSession internal constructor(
                 call.debug.fastReconnect()
             },
             tracer = sfuTracer,
+            tokenRepository = TokenRepository(sfuToken)
         )
     },
 ) {

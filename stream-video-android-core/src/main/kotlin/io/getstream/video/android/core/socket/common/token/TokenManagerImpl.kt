@@ -16,13 +16,12 @@
 
 package io.getstream.video.android.core.socket.common.token
 
-internal class TokenManagerImpl : TokenManager {
-    @Volatile
-    private var token: String = EMPTY_TOKEN
+internal class TokenManagerImpl(private val tokenRepository: TokenRepository) : TokenManager {
+
     private lateinit var provider: TokenProvider
 
     override fun updateToken(token: String) {
-        this.token = token
+        this.tokenRepository.updateToken(token)
     }
 
     override suspend fun ensureTokenLoaded() {
@@ -33,27 +32,27 @@ internal class TokenManagerImpl : TokenManager {
 
     override suspend fun loadSync(): String {
         return provider.loadToken().also {
-            this.token = it
+            this.tokenRepository.updateToken(it)
         }
     }
 
     override fun setTokenProvider(provider: CacheableTokenProvider) {
         this.provider = provider
-        this.token = provider.getCachedToken()
+        this.tokenRepository.updateToken(provider.getCachedToken())
     }
 
     override fun hasTokenProvider(): Boolean {
         return this::provider.isInitialized
     }
 
-    override fun getToken(): String = token
+    override fun getToken(): String = tokenRepository.getToken()
 
     override fun hasToken(): Boolean {
-        return token != EMPTY_TOKEN
+        return tokenRepository.getToken() != EMPTY_TOKEN
     }
 
     override fun expireToken() {
-        token = EMPTY_TOKEN
+        tokenRepository.updateToken(EMPTY_TOKEN)
     }
 
     companion object {
