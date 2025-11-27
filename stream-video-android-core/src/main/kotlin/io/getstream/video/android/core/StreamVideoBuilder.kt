@@ -229,7 +229,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
-            tokenRepository = tokenRepository
+            tokenRepository = tokenRepository,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -274,7 +274,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             vibrationConfig = vibrationConfig,
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
-            tokenRepository = tokenRepository
+            tokenRepository = tokenRepository,
         )
 
         if (user.type == UserType.Guest) {

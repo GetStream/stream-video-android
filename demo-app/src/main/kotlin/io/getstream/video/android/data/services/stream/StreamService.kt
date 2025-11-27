@@ -44,11 +44,13 @@ fun interface StreamService {
 
         private val json = Json { ignoreUnknownKeys = true }
         private val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(HttpLoggingInterceptor {
-                streamLog(tag = "Video:Http") { it }
-            }.apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
+            .addInterceptor(
+                HttpLoggingInterceptor {
+                    streamLog(tag = "Video:Http") { it }
+                }.apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                },
+            )
             .build()
         private val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)

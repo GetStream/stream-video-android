@@ -278,10 +278,11 @@ internal open class CoordinatorSocket(
         if (VideoErrorCode.isAuthenticationError(error.serverErrorCode)) {
             tokenManager.expireToken()
         }
-        //Noob
-        when(error.serverErrorCode){
+        // Noob
+        when (error.serverErrorCode) {
             VideoErrorCode.VALIDATION_ERROR.code,
-            VideoErrorCode.TOKEN_EXPIRED.code -> {
+            VideoErrorCode.TOKEN_EXPIRED.code,
+            -> {
                 StreamVideo.instanceOrNull()?.let {
                     val result = (it as StreamVideoClient).getEdges()
                     result.onSuccess {
@@ -289,7 +290,6 @@ internal open class CoordinatorSocket(
                     }.onError {
                         logger.d { "edges fail result: $result" }
                     }
-
                 }
                 tokenManager.expireToken()
                 logger.d { "load sync START" }
@@ -300,7 +300,7 @@ internal open class CoordinatorSocket(
                     return
                 }
             }
-            else->{}
+            else -> {}
         }
 
         when (error.serverErrorCode) {

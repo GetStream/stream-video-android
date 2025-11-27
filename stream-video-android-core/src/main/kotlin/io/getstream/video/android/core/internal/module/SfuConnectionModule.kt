@@ -98,7 +98,7 @@ internal class SfuConnectionModule(
         tokenProvider = ConstantTokenProvider(tokenRepository),
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
-        tokenRepository = tokenRepository
+        tokenRepository = tokenRepository,
     )
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 

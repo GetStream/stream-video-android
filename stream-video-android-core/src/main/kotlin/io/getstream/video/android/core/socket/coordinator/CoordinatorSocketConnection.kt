@@ -82,7 +82,7 @@ public open class CoordinatorSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
-    private val tokenRepository: TokenRepository
+    private val tokenRepository: TokenRepository,
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
     SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
 
@@ -128,7 +128,9 @@ public open class CoordinatorSocketConnection(
     // Extension opportunity for subclasses
     override fun onCreated() {
         super.onCreated()
-        logger.d { "[onCreated] Socket is created, initial token: $token, tokenManager.getToken() = ${tokenManager.getToken()}" }
+        logger.d {
+            "[onCreated] Socket is created, initial token: $token, tokenManager.getToken() = ${tokenManager.getToken()}"
+        }
         scope.launch {
             logger.d { "[onConnected] Video socket created, user: $user" }
             if (token.isEmpty()) {
@@ -199,7 +201,7 @@ public open class CoordinatorSocketConnection(
         connectionTimeout: Long,
         connected: suspend (connectionId: String) -> Unit,
     ) {
-        logger.d {"[whenConnected]"}
+        logger.d { "[whenConnected]" }
         scope.launch {
             internalSocket.awaitConnection(connectionTimeout)
             internalSocket.connectionIdOrError().also {
@@ -218,19 +220,19 @@ public open class CoordinatorSocketConnection(
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
     override suspend fun connect(connectData: User) {
-        logger.d {"[connect]"}
+        logger.d { "[connect]" }
         internalSocket.connectUser(connectData, connectData.isAnonymous())
     }
 
     override suspend fun reconnect(data: User, force: Boolean) {
-        logger.d {"[reconnect]"}
+        logger.d { "[reconnect]" }
         internalSocket.reconnectUser(data, data.isAnonymous(), force)
     }
 
     override suspend fun disconnect() = internalSocket.disconnect()
 
     override fun updateToken(token: UserToken) {
-        logger.d {"[updateToken]"}
+        logger.d { "[updateToken]" }
         tokenManager.updateToken(token)
     }
 }

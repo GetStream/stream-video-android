@@ -125,7 +125,7 @@ object StreamVideoInitHelper {
                 authData = StreamService.instance.getAuthData(
                     environment = AppConfig.currentEnvironment.value!!.env,
                     userId = userId,
-                    StreamService.TOKEN_EXPIRY_TIME
+                    StreamService.TOKEN_EXPIRY_TIME,
                 )
 
                 loggedInUser = User(id = authData.userId, role = "admin")
@@ -142,7 +142,7 @@ object StreamVideoInitHelper {
                     authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = loggedInUser.id,
-                        StreamService.TOKEN_EXPIRY_TIME
+                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                 }
 
@@ -208,17 +208,16 @@ object StreamVideoInitHelper {
             tokenProvider = object : io.getstream.chat.android.client.token.TokenProvider {
                 override fun loadToken(): String {
                     return runBlocking {
-                        Log.d("Noob","Chat token provider")
+                        Log.d("Noob", "Chat token provider")
                         val email = user.custom?.get("email")
                         val authData = StreamService.instance.getAuthData(
                             environment = AppConfig.currentEnvironment.value!!.env,
                             userId = email,
-                            StreamService.TOKEN_EXPIRY_TIME
+                            StreamService.TOKEN_EXPIRY_TIME,
                         )
                         authData.token
                     }
                 }
-
             },
         ).enqueue()
     }
@@ -328,13 +327,13 @@ object StreamVideoInitHelper {
                     val userEmail = user.custom?.get("email")
                     val userId = user.id
                     val userIdForTokenRenewal = if (userEmail.isNullOrEmpty()) userId else userEmail
-                    Log.d("Noob","Video token provider START")
+                    Log.d("Noob", "Video token provider START")
                     val authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = userIdForTokenRenewal,
-                        StreamService.TOKEN_EXPIRY_TIME
+                        StreamService.TOKEN_EXPIRY_TIME,
                     )
-                    Log.d("Noob","Video token provider END: ${authData.token}")
+                    Log.d("Noob", "Video token provider END: ${authData.token}")
                     return authData.token
                 }
             },

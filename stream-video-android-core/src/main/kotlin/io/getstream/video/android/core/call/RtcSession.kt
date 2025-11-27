@@ -242,7 +242,7 @@ public class RtcSession internal constructor(
                 call.debug.fastReconnect()
             },
             tracer = sfuTracer,
-            tokenRepository = TokenRepository(sfuToken)
+            tokenRepository = TokenRepository(sfuToken),
         )
     },
 ) {

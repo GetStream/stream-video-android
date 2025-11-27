@@ -27,7 +27,9 @@ internal class CacheableTokenProvider(
     private val tokenRepository: TokenRepository,
 ) : TokenProvider {
 
-    override suspend fun loadToken(): String = tokenProvider.loadToken().also { tokenRepository.updateToken(it) }
+    override suspend fun loadToken(): String = tokenProvider.loadToken().also {
+        tokenRepository.updateToken(it)
+    }
 
     /**
      * Obtain the cached token.
