@@ -197,6 +197,7 @@ data class TrackDimensions(
  * * Or when the UI layout changes
  * * The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
  *
+ * For developers: RtcSession throws [IllegalStateException] because its [coroutineScope] & [rtcSessionScope] throws it
  */
 public class RtcSession internal constructor(
     client: StreamVideo,
