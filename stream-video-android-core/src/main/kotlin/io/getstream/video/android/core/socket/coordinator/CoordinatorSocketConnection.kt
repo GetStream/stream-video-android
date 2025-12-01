@@ -47,6 +47,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.model.User.Companion.isAnonymous
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -111,7 +112,7 @@ public open class CoordinatorSocketConnection(
             parser,
             httpClient,
         ),
-        scope as? UserScope ?: UserScope(ClientScope()),
+        scope as? UserScope ?: UserScope(ClientScope(), Dispatchers.IO.limitedParallelism(1)),
         StreamLifecycleObserver(scope, lifecycle),
         networkStateProvider,
     ).also {
