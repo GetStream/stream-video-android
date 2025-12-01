@@ -25,6 +25,7 @@ import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
@@ -33,6 +34,7 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -101,7 +103,7 @@ internal class CoordinatorConnectionModule(
         token = userToken,
         httpClient = http,
         networkStateProvider = networkStateProvider,
-        scope = scope,
+        scope = UserScope(context = scope.coroutineContext + Dispatchers.IO.limitedParallelism(1)),
         lifecycle = lifecycle,
         tokenProvider = tokenProvider,
         tokenRepository = tokenRepository,
