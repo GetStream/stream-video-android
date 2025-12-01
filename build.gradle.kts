@@ -36,7 +36,7 @@ plugins {
   alias(libs.plugins.wire) apply false
   alias(libs.plugins.maven.publish)
   alias(libs.plugins.google.gms) apply false
-  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.dokka)
   alias(libs.plugins.spotless) apply false
   alias(libs.plugins.paparazzi) apply false
   alias(libs.plugins.firebase.crashlytics) apply false
