@@ -35,7 +35,7 @@ import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.PersistingTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
@@ -129,7 +129,7 @@ public open class CoordinatorSocketConnection(
 
     // Init
     init {
-        tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider, tokenRepository))
+        tokenManager.setTokenProvider(PersistingTokenProvider(tokenProvider, tokenRepository))
     }
 
     // Extension opportunity for subclasses

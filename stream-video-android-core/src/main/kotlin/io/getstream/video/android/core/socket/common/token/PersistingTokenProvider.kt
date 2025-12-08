@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2025 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 
 package io.getstream.video.android.core.socket.common.token
 
-internal class ConstantTokenProvider(private val token: String) : TokenProvider {
-    override suspend fun loadToken(): String = token
+internal class PersistingTokenProvider(
+    private val tokenProvider: TokenProvider,
+    private val tokenRepository: TokenRepository,
+) : CacheableTokenProvider(tokenProvider) {
+    override suspend fun loadToken(): String = tokenProvider.loadToken().also {
+        cachedToken = it
+        tokenRepository.updateToken(it)
+    }
 }

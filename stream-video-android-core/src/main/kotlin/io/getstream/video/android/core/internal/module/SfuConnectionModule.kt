@@ -94,7 +94,7 @@ internal class SfuConnectionModule(
         apiKey = apiKey,
         scope = scope,
         httpClient = http,
-        tokenProvider = ConstantTokenProvider(tokenRepository),
+        tokenProvider = ConstantTokenProvider(tokenRepository.getToken()),
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
         tokenRepository = tokenRepository,

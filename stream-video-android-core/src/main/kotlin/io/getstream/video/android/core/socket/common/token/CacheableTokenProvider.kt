@@ -22,19 +22,16 @@ package io.getstream.video.android.core.socket.common.token
  *
  * @property tokenProvider The [TokenProvider] used to obtain new tokens.
  */
-internal class CacheableTokenProvider(
+internal open class CacheableTokenProvider(
     private val tokenProvider: TokenProvider,
-    private val tokenRepository: TokenRepository,
 ) : TokenProvider {
-
-    override suspend fun loadToken(): String = tokenProvider.loadToken().also {
-        tokenRepository.updateToken(it)
-    }
+    internal var cachedToken = ""
+    override suspend fun loadToken(): String = tokenProvider.loadToken().also { cachedToken = it }
 
     /**
      * Obtain the cached token.
      *
      * @return The cached token.
      */
-    fun getCachedToken(): String = tokenRepository.getToken()
+    fun getCachedToken(): String = cachedToken
 }
