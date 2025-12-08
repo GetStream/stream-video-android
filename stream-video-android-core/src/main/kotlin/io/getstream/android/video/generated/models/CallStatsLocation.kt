@@ -51,6 +51,9 @@ data class CallStatsLocation (
     @Json(name = "country")
     val country: kotlin.String? = null,
 
+    @Json(name = "country_iso_code")
+    val countryIsoCode: kotlin.String? = null,
+
     @Json(name = "latitude")
     val latitude: kotlin.Float? = null,
 

@@ -35,25 +35,25 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Credentials for SIP inbound call authentication
  */
 
-data class FeedsPreferences (
-    @Json(name = "comment")
-    val comment: kotlin.String? = null,
+data class SipInboundCredentials (
+    @Json(name = "call_id")
+    val callId: kotlin.String,
 
-    @Json(name = "comment_reaction")
-    val commentReaction: kotlin.String? = null,
+    @Json(name = "call_type")
+    val callType: kotlin.String,
 
-    @Json(name = "follow")
-    val follow: kotlin.String? = null,
+    @Json(name = "token")
+    val token: kotlin.String,
 
-    @Json(name = "mention")
-    val mention: kotlin.String? = null,
+    @Json(name = "user_id")
+    val userId: kotlin.String,
 
-    @Json(name = "reaction")
-    val reaction: kotlin.String? = null,
+    @Json(name = "call_custom_data")
+    val callCustomData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
-    @Json(name = "custom_activity_types")
-    val customActivityTypes: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
+    @Json(name = "user_custom_data")
+    val userCustomData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap()
 )

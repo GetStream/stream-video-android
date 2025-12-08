@@ -50,6 +50,8 @@ import io.getstream.android.video.generated.models.QueryCallsRequest
 import io.getstream.android.video.generated.models.RejectCallRequest
 import io.getstream.android.video.generated.models.RejectCallResponse
 import io.getstream.android.video.generated.models.RequestPermissionRequest
+import io.getstream.android.video.generated.models.RingCallRequest
+import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventRequest
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionRequest
@@ -1175,6 +1177,12 @@ internal class StreamVideoClient internal constructor(
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
             coordinatorConnectionModule.api.getCall(type = type, id = id, ring = true)
+        }
+    }
+
+    internal suspend fun ring(type: String, id: String, ringCallRequest: RingCallRequest): Result<RingCallResponse> {
+        return apiCall {
+            coordinatorConnectionModule.api.ringCall(type = type, id = id, ringCallRequest)
         }
     }
 

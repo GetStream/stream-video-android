@@ -22,7 +22,6 @@ plugins {
     alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
     id("io.getstream.video.generateServices")
-    id("io.getstream.spotless")
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
@@ -67,7 +66,11 @@ android {
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${Configuration.majorVersion}")
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
         buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
-        buildConfigField("String", "STREAM_WEBRTC_VERSION", "\"${Configuration.streamWebRtcVersionName}\"")
+        buildConfigField(
+            "String",
+            "STREAM_WEBRTC_VERSION",
+            "\"${Configuration.streamWebRtcVersionName}\"",
+        )
     }
 
     buildFeatures {
@@ -177,9 +180,8 @@ dependencies {
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
 
-    //jetpack telecom
+    // jetpack telecom
     implementation(libs.androidx.telecom)
-
 
     // datastore
     api(libs.androidx.datastore)

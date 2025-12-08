@@ -39,6 +39,8 @@ import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PinResponse
 import io.getstream.android.video.generated.models.RejectCallResponse
+import io.getstream.android.video.generated.models.RingCallRequest
+import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionResponse
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
@@ -57,6 +59,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
@@ -557,6 +560,27 @@ public class Call(
         return Failure(value = Error.GenericError(errorMessage))
     }
 
+    suspend fun joinAndRing(
+        members: List<String>,
+        createOptions: CreateCallOptions? = CreateCallOptions(members),
+        video: Boolean = isVideoEnabled(),
+    ): Result<RtcSession> {
+        logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
+        state.toggleRingingStateUpdates(true)
+        return join(ring = false, createOptions = createOptions).flatMap { rtcSession ->
+            logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
+            ring(RingCallRequest(isVideoEnabled(), members)).map {
+                logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
+                clientImpl.state._ringingCall.value = this
+                rtcSession
+            }.onError {
+                logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
+                state.toggleRingingStateUpdates(false)
+                leave()
+            }
+        }
+    }
+
     internal fun isPermanentError(error: Any): Boolean {
         if (error is Error.ThrowableError) {
             if (error.message.contains("Unable to resolve host")) {
@@ -607,29 +631,28 @@ public class Call(
         val sfuUrl = result.value.credentials.server.url
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-
-        session = if (testInstanceProvider.rtcSessionCreator != null) {
-            testInstanceProvider.rtcSessionCreator!!.invoke()
-        } else {
-            RtcSession(
-                sessionId = this.sessionId,
-                apiKey = clientImpl.apiKey,
-                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                client = client,
-                call = this,
-                sfuUrl = sfuUrl,
-                sfuWsUrl = sfuWsUrl,
-                sfuToken = sfuToken,
-                remoteIceServers = iceServers,
-                powerManager = powerManager,
-            )
-        }
-
-        session?.let {
-            state._connection.value = RealtimeConnection.Joined(it)
-        }
-
         try {
+            session = if (testInstanceProvider.rtcSessionCreator != null) {
+                testInstanceProvider.rtcSessionCreator!!.invoke()
+            } else {
+                RtcSession(
+                    sessionId = this.sessionId,
+                    apiKey = clientImpl.apiKey,
+                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+                    client = client,
+                    call = this,
+                    sfuUrl = sfuUrl,
+                    sfuWsUrl = sfuWsUrl,
+                    sfuToken = sfuToken,
+                    remoteIceServers = iceServers,
+                    powerManager = powerManager,
+                )
+            }
+
+            session?.let {
+                state._connection.value = RealtimeConnection.Joined(it)
+            }
+
             session?.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
@@ -767,24 +790,31 @@ public class Call(
                 )
                 this.state.removeParticipant(prevSessionId)
                 session.prepareRejoin()
-                this.session = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                this.session?.connect(reconnectDetails, currentOptions)
-                session.cleanup()
-                monitorSession(joinResponse.value)
+                try {
+                    this.session = RtcSession(
+                        clientImpl,
+                        reconnectAttepmts,
+                        powerManager,
+                        this,
+                        sessionId,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    this.session?.connect(reconnectDetails, currentOptions)
+                    session.cleanup()
+                    monitorSession(joinResponse.value)
+                } catch (ex: Exception) {
+                    logger.e(ex) {
+                        "[rejoin] Failed to join response with ex: ${ex.message}"
+                    }
+                    state._connection.value = RealtimeConnection.Failed(ex)
+                }
             } else {
                 logger.e {
                     "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
@@ -823,27 +853,35 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
-                val newSession = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                val oldSession = this.session
-                this.session = newSession
-                this.session?.connect(reconnectDetails, currentOptions)
-                monitorSession(joinResponse.value)
-                oldSession?.leaveWithReason("migrating")
-                oldSession?.cleanup()
+                try {
+                    val newSession = RtcSession(
+                        clientImpl,
+                        reconnectAttepmts,
+                        powerManager,
+                        this,
+                        sessionId,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    val oldSession = this.session
+                    this.session = newSession
+                    this.session?.connect(reconnectDetails, currentOptions)
+                    monitorSession(joinResponse.value)
+                    oldSession?.leaveWithReason("migrating")
+                    oldSession?.cleanup()
+                } catch (ex: Exception) {
+                    logger.e(ex) {
+                        "[switchSfu] Failed to join during " +
+                            "migration - Error ${ex.message}"
+                    }
+                    state._connection.value = RealtimeConnection.Failed(ex)
+                }
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
@@ -1150,10 +1188,13 @@ public class Call(
      * MediaProjectionManager.createScreenCaptureIntent().
      * See https://developer.android.com/guide/topics/large-screens/media-projection#recommended_approach
      */
-    fun startScreenSharing(mediaProjectionPermissionResultData: Intent) {
+    fun startScreenSharing(
+        mediaProjectionPermissionResultData: Intent,
+        includeAudio: Boolean = false,
+    ) {
         if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
             session?.setScreenShareTrack()
-            screenShare.enable(mediaProjectionPermissionResultData)
+            screenShare.enable(mediaProjectionPermissionResultData, includeAudio = includeAudio)
         } else {
             logger.w { "Can't start screen sharing - user doesn't have wnCapability.Screenshare permission" }
         }
@@ -1441,6 +1482,11 @@ public class Call(
     suspend fun ring(): Result<GetCallResponse> {
         logger.d { "[ring] #ringing; no args" }
         return clientImpl.ring(type, id)
+    }
+
+    suspend fun ring(ringCallRequest: RingCallRequest): Result<RingCallResponse> {
+        logger.d { "[ring] #ringing ringCallRequest: $ringCallRequest" }
+        return clientImpl.ring(type, id, ringCallRequest)
     }
 
     suspend fun notify(): Result<GetCallResponse> {

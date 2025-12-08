@@ -84,6 +84,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         // Extra keys
         private const val EXTRA_LEAVE_WHEN_LAST: String = "leave_when_last"
         private const val EXTRA_MEMBERS_ARRAY: String = "members_extra"
+        private const val EXTRA_JOIN_AND_RING: String = "join_and_ring"
 
         // Extra default values
         private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = false
@@ -109,6 +110,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             action: String? = null,
             clazz: Class<T>,
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
+            joinAndRing: Boolean = false,
             extraData: Bundle? = null,
         ): Intent {
             return Intent(context, clazz).apply {
@@ -122,6 +124,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // Add the generated call ID and other params
                 putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, cid)
                 putExtra(EXTRA_LEAVE_WHEN_LAST, leaveWhenLastInCall)
+                putExtra(EXTRA_JOIN_AND_RING, joinAndRing)
                 // Setup the members to transfer to the new activity
                 val membersArrayList = ArrayList<String>()
                 members.forEach { membersArrayList.add(it) }
@@ -517,13 +520,26 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 logger.v { "[onIntentAction] #ringing; Action OUTGOING_CALL, ${call.cid}" }
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
-                create(
-                    call,
-                    members = members,
-                    ring = true,
-                    onSuccess = onSuccess,
-                    onError = onError,
-                )
+                val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false)
+                if (joinAndRing) {
+                    create(
+                        call,
+                        members = members,
+                        ring = false,
+                        onSuccess = {
+                            join(call, onSuccess = onSuccess, onError = onError)
+                        },
+                        onError = onError,
+                    )
+                } else {
+                    create(
+                        call,
+                        members = members,
+                        ring = true,
+                        onSuccess = onSuccess,
+                        onError = onError,
+                    )
+                }
             }
 
             else -> {
@@ -824,9 +840,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        acceptOrJoinNewCall(call, onSuccess, onError) {
+        acceptOrJoinNewCall(call, onSuccess, onError) { availableCall ->
             logger.d { "Join call, ${call.cid}" }
-            it.join()
+            val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false)
+            if (joinAndRing) {
+                logger.d { "[joinAndRing] Join and ring call, ${call.cid}" }
+                availableCall.joinAndRing(call.state.members.value.map { it.user.id })
+            } else {
+                availableCall.join()
+            }
         }
     }
 

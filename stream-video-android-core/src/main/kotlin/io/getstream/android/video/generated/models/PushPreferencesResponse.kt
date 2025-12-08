@@ -38,7 +38,7 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class PushPreferences (
+data class PushPreferencesResponse (
     @Json(name = "call_level")
     val callLevel: kotlin.String? = null,
 
@@ -52,5 +52,5 @@ data class PushPreferences (
     val feedsLevel: kotlin.String? = null,
 
     @Json(name = "feeds_preferences")
-    val feedsPreferences: io.getstream.android.video.generated.models.FeedsPreferences? = null
+    val feedsPreferences: io.getstream.android.video.generated.models.FeedsPreferencesResponse? = null
 )

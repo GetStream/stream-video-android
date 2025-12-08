@@ -1,5 +1,8 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import io.getstream.video.android.Configuration
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.TimeZone
 
 apply(from = "${rootDir}/scripts/open-api-code-gen.gradle.kts")
 
@@ -19,10 +22,11 @@ buildscript {
   }
 }
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+  alias(libs.plugins.stream.project)
   alias(libs.plugins.stream.android.application) apply false
   alias(libs.plugins.stream.android.library) apply false
+  alias(libs.plugins.stream.android.test) apply false
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.kotlin.android) apply false
   // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
@@ -32,15 +36,36 @@ plugins {
   alias(libs.plugins.wire) apply false
   alias(libs.plugins.maven.publish)
   alias(libs.plugins.google.gms) apply false
-  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.dokka)
   alias(libs.plugins.spotless) apply false
   alias(libs.plugins.paparazzi) apply false
   alias(libs.plugins.firebase.crashlytics) apply false
   alias(libs.plugins.hilt) apply false
   alias(libs.plugins.play.publisher) apply false
   alias(libs.plugins.baseline.profile) apply false
-  alias(libs.plugins.sonarqube) apply false
-  alias(libs.plugins.kover) apply false
+}
+
+streamProject {
+    spotless {
+        excludePatterns = setOf("**/generated/**")
+    }
+
+    coverage {
+        includedModules = setOf(
+            "stream-video-android-core",
+            "stream-video-android-ui-compose",
+        )
+        sonarCoverageExclusions = listOf(
+            "**/*.mp3",
+            "**/*.webp",
+            "**/generated/**",
+            "**/io/getstream/video/android/core/model/**"
+        )
+        koverClassExclusions = listOf(
+            "io.getstream.android.video.generated.*",
+            "io.getstream.video.android.core.model.*"
+        )
+    }
 }
 
 subprojects {
@@ -65,13 +90,17 @@ subprojects {
   }
 }
 
-tasks.register("clean")
-  .configure {
-    delete(rootProject.buildDir)
-  }
-
 private val isSnapshot = System.getenv("SNAPSHOT")?.toBoolean() == true
-version = if (isSnapshot) Configuration.snapshotVersionName else Configuration.versionName
+
+version = if (isSnapshot) {
+    val timestamp = SimpleDateFormat("yyyyMMddHHmm").run {
+        timeZone = TimeZone.getTimeZone("UTC")
+        format(Date())
+    }
+    "${Configuration.snapshotBasedVersionName}-${timestamp}-SNAPSHOT"
+} else {
+    Configuration.versionName
+}
 
 subprojects {
   plugins.withId("com.vanniktech.maven.publish") {
@@ -155,9 +184,6 @@ tasks.register("printAllArtifacts") {
 //    val teamPropsDir = file("team-props")
 //    return File(teamPropsDir, propsFile)
 //}
-
-apply(from = "${rootDir}/scripts/sonar.gradle")
-apply(from = "${rootDir}/scripts/coverage.gradle")
 
 afterEvaluate {
     println("Running Add Pre Commit Git Hook Script on Build")

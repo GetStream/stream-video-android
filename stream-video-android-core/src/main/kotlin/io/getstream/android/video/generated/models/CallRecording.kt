@@ -45,6 +45,9 @@ data class CallRecording (
     @Json(name = "filename")
     val filename: kotlin.String,
 
+    @Json(name = "recording_type")
+    val recordingType: kotlin.String,
+
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 

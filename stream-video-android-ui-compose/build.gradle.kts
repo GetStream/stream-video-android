@@ -19,7 +19,6 @@ import io.getstream.video.android.Configuration
 plugins {
     alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library.compose")
-    id("io.getstream.spotless")
 }
 
 android {
@@ -78,7 +77,6 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
     testImplementation(libs.kotlin.test.junit)
-
 }
 
 mavenPublishing {

@@ -19,7 +19,6 @@ import io.getstream.video.android.Configuration
 plugins {
     alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
-    id("io.getstream.spotless")
 }
 
 android {
@@ -60,7 +59,6 @@ dependencies {
     implementation(libs.landscapist.coil)
 
     implementation(libs.stream.log)
-
 }
 
 mavenPublishing {
