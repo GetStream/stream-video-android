@@ -197,7 +197,9 @@ public open class CoordinatorSocketConnection(
 
     override fun onDisconnected(cause: DisconnectCause) {
         super.onDisconnected(cause)
-        logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
+        logger.d {
+            "[onDisconnected] Socket disconnected. Cause: ${(cause as? DisconnectCause.Error)?.error}"
+        }
     }
 
     // API
