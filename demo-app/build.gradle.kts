@@ -292,7 +292,7 @@ dependencies {
 
     implementation(libs.audioswitch)
 
-    //Logging
+    // Logging
     implementation(libs.okhttp.logging)
 
     // Also Leak Canary added in the previous block
