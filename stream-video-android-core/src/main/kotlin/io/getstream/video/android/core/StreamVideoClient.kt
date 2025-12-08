@@ -446,7 +446,6 @@ internal class StreamVideoClient internal constructor(
         return Failure(Error.GenericError("failed to select location"))
     }
 
-    // Noob
     override suspend fun connectAsync(): Deferred<Result<Long>> {
         return scope.async {
             // wait for the guest user setup if we're using guest users
@@ -467,7 +466,6 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
-    // Noob
     private suspend fun refreshToken(error: Throwable) {
         tokenProvider?.let {
             val newToken = tokenProvider.loadToken()

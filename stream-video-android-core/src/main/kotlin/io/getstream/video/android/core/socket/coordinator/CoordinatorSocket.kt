@@ -277,7 +277,7 @@ internal open class CoordinatorSocket(
         if (VideoErrorCode.isAuthenticationError(error.serverErrorCode)) {
             tokenManager.expireToken()
         }
-        // Noob
+
         when (error.serverErrorCode) {
             VideoErrorCode.TOKEN_EXPIRED.code,
             -> {
