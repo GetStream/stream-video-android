@@ -38,7 +38,10 @@ internal class TokenManagerImpl(private val tokenRepository: TokenRepository) : 
 
     override fun setTokenProvider(provider: CacheableTokenProvider) {
         this.provider = provider
-        this.tokenRepository.updateToken(provider.getCachedToken())
+    }
+
+    override fun setTokenProvider(provider: PersistingTokenProvider) {
+        this.provider = provider
     }
 
     override fun hasTokenProvider(): Boolean {

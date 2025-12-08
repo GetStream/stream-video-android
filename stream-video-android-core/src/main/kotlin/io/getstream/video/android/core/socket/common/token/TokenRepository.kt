@@ -24,5 +24,7 @@ class TokenRepository(@Volatile private var token: String = EMPTY_TOKEN) {
         this.token = token
     }
 
-    fun getToken(): String = token
+    fun getToken(): String {
+        return token
+    }
 }

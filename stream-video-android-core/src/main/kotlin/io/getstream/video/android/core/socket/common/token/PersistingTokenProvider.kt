@@ -19,9 +19,8 @@ package io.getstream.video.android.core.socket.common.token
 internal class PersistingTokenProvider(
     private val tokenProvider: TokenProvider,
     private val tokenRepository: TokenRepository,
-) : CacheableTokenProvider(tokenProvider) {
+) : TokenProvider {
     override suspend fun loadToken(): String = tokenProvider.loadToken().also {
-        cachedToken = it
         tokenRepository.updateToken(it)
     }
 }
