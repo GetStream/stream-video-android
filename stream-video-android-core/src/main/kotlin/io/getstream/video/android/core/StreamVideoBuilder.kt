@@ -226,7 +226,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             user = user,
             apiKey = apiKey,
-            userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             tokenRepository = tokenRepository,

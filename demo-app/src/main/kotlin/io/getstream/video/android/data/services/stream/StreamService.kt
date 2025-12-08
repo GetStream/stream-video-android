@@ -40,7 +40,7 @@ fun interface StreamService {
 
     companion object {
         private const val BASE_URL = "https://pronto.getstream.io/"
-        const val TOKEN_EXPIRY_TIME = 7 * 24 * 60 * 60 //7d * 24 hrs * 60 mins * 60 sec
+        const val TOKEN_EXPIRY_TIME = 7 * 24 * 60 * 60 // 7d * 24 hrs * 60 mins * 60 sec
 
         private val json = Json { ignoreUnknownKeys = true }
         private val okHttpClient = OkHttpClient.Builder()

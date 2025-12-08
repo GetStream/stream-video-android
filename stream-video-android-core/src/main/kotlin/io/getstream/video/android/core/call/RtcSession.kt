@@ -237,7 +237,6 @@ public class RtcSession internal constructor(
             apiUrl = sfuUrl,
             wssUrl = sfuWsUrl,
             connectionTimeoutInMs = 2000L,
-            userToken = sfuToken,
             lifecycle = lifecycle,
             onSignalingLost = { error ->
                 call.debug.fastReconnect()

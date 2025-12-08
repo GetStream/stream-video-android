@@ -74,7 +74,10 @@ public open class CoordinatorSocketConnection(
     /** The  user to connect. */
     private val user: User,
     /** The initial token. */
-    @Deprecated("token is not used", ReplaceWith("Use tokenManager or tokenRepository.getToken() instead"))
+    @Deprecated(
+        "token is not used",
+        ReplaceWith("Use tokenManager or tokenRepository.getToken() instead"),
+    )
     private val token: String,
     /** Inject your http client */
     private val httpClient: OkHttpClient,
@@ -142,7 +145,7 @@ public open class CoordinatorSocketConnection(
                 disconnect()
             } else {
                 val authRequest = WSAuthMessageRequest(
-                    token = tokenManager.getToken().ifEmpty { token },
+                    token = tokenManager.getToken().ifEmpty { tokenRepository.getToken() },
                     userDetails = ConnectUserDetailsRequest(
                         id = user.id,
                         name = user.name.takeUnless { it.isWhitespaceOnly() },
