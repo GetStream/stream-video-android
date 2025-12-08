@@ -13118,9 +13118,17 @@ public abstract interface class io/getstream/video/android/core/socket/common/to
 	public abstract fun loadToken (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class io/getstream/video/android/core/socket/common/token/TokenRepository {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getToken ()Ljava/lang/String;
+	public final fun updateToken (Ljava/lang/String;)V
+}
+
 public class io/getstream/video/android/core/socket/coordinator/CoordinatorSocketConnection : io/getstream/video/android/core/socket/common/SocketListener, io/getstream/video/android/core/socket/common/SocketActions {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/socket/common/token/TokenRepository;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/socket/common/token/TokenRepository;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun connect (Lio/getstream/video/android/model/User;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public synthetic fun connect (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun connectionId ()Lkotlinx/coroutines/flow/StateFlow;
@@ -13327,8 +13335,8 @@ public final class io/getstream/video/android/core/socket/coordinator/state/Vide
 
 public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnection : io/getstream/video/android/core/socket/common/SocketListener, io/getstream/video/android/core/socket/common/SocketActions {
 	public static final field Companion Lio/getstream/video/android/core/socket/sfu/SfuSocketConnection$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/socket/common/token/TokenRepository;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/socket/common/token/TokenRepository;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun connect (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun connect (Lstream/video/sfu/event/JoinRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun connectionId ()Lkotlinx/coroutines/flow/StateFlow;
