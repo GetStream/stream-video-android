@@ -50,7 +50,7 @@ internal class CoordinatorConnectionModule(
     context: Context,
     tokenProvider: TokenProvider,
     user: User,
-    tokenRepository: TokenRepository,
+    val tokenRepository: TokenRepository,
     override val scope: CoroutineScope,
     // Common API
     override val apiUrl: String,
@@ -58,7 +58,6 @@ internal class CoordinatorConnectionModule(
     override val connectionTimeoutInMs: Long,
     override val loggingLevel: LoggingLevel = LoggingLevel(),
     override val apiKey: ApiKey,
-    override val userToken: UserToken,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer = Tracer("coordinator"),
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
@@ -100,7 +99,7 @@ internal class CoordinatorConnectionModule(
         apiKey = apiKey,
         url = wssUrl,
         user = user,
-        token = userToken,
+        token = tokenRepository.getToken(),
         httpClient = http,
         networkStateProvider = networkStateProvider,
         scope = UserScope(context = scope.coroutineContext + Dispatchers.IO.limitedParallelism(1)),
@@ -110,8 +109,7 @@ internal class CoordinatorConnectionModule(
     )
 
     override fun updateToken(token: UserToken) {
-        socketConnection.updateToken(token)
-//        authInterceptor.token = token
+        tokenRepository.updateToken(token)
     }
 
     override fun updateAuthType(authType: String) {

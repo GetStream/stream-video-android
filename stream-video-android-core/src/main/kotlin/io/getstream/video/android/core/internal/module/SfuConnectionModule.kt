@@ -43,7 +43,6 @@ internal class SfuConnectionModule(
     override val apiUrl: String,
     override val wssUrl: String,
     override val connectionTimeoutInMs: Long,
-    override val userToken: SfuToken,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer,
     val onSignalingLost: (Error) -> Unit,

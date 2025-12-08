@@ -64,6 +64,8 @@ import okhttp3.OkHttpClient
  * - Raises the error if there is a permanent failure
  * - Flow to avoid concurrency related bugs
  * - Ability to wait till the socket is connected (important to prevent race conditions)
+ *
+ * This should be internal
  */
 public open class CoordinatorSocketConnection(
     private val apiKey: ApiKey,
@@ -72,6 +74,7 @@ public open class CoordinatorSocketConnection(
     /** The  user to connect. */
     private val user: User,
     /** The initial token. */
+    @Deprecated("token is not used", ReplaceWith("Use tokenManager or tokenRepository.getToken() instead"))
     private val token: String,
     /** Inject your http client */
     private val httpClient: OkHttpClient,
@@ -134,7 +137,7 @@ public open class CoordinatorSocketConnection(
         }
         scope.launch {
             logger.d { "[onConnected] Video socket created, user: $user" }
-            if (token.isEmpty()) {
+            if (tokenManager.getToken().isEmpty()) {
                 logger.e { "[onConnected] Token is empty. Disconnecting." }
                 disconnect()
             } else {
