@@ -44,7 +44,7 @@ import androidx.compose.material.icons.filled.VideoSettings
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VideocamOff
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
-import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.audio.CustomAudioDevice
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
@@ -75,11 +75,11 @@ fun defaultStreamMenu(
     onSelectIncomingVideoResolution: (PreferredVideoResolution?) -> Unit,
     isIncomingVideoEnabled: Boolean,
     onToggleIncomingVideoEnabled: (Boolean) -> Unit,
-    onDeviceSelected: (StreamAudioDevice) -> Unit,
+    onDeviceSelected: (CustomAudioDevice) -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
-    availableDevices: List<StreamAudioDevice>,
+    availableDevices: List<CustomAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
     transcriptionUiState: TranscriptionUiState,
     onToggleTranscription: suspend () -> Unit,

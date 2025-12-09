@@ -17,7 +17,6 @@
 package io.getstream.video.android.core
 
 import android.media.AudioAttributes
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.mockk.every
@@ -37,9 +36,8 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val audioDevice = mockk<AudioDevice>()
-        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker", audioDevice)
-        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece", audioDevice)
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
 
         val devices = listOf(speakerDevice, earpieceDevice)
         val deviceSlot = slot<StreamAudioDevice>()
@@ -69,9 +67,8 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val audioDevice = mockk<AudioDevice>()
-        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker", audioDevice)
-        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece", audioDevice)
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
 
         speakerManager.selectedBeforeSpeaker = earpieceDevice
 
@@ -102,9 +99,8 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val audioDevice = mockk<AudioDevice>()
-        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker", audioDevice)
-        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece", audioDevice)
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
         val devices = listOf(speakerDevice, earpieceDevice)
 
         speakerManager.selectedBeforeSpeaker = null
@@ -135,10 +131,9 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val audioDevice = mockk<AudioDevice>()
-        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker", audioDevice)
-        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece", audioDevice)
-        val wiredHeadsetDevice = StreamAudioDevice.WiredHeadset("test-wired", audioDevice)
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
+        val wiredHeadsetDevice = StreamAudioDevice.WiredHeadset("test-wired")
 
         val devices = listOf(speakerDevice, earpieceDevice, wiredHeadsetDevice)
         val deviceSlot = slot<StreamAudioDevice>()
@@ -167,9 +162,8 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val audioDevice = mockk<AudioDevice>()
-        val speakerDevice1 = StreamAudioDevice.Speakerphone("test-speaker-1", audioDevice)
-        val speakerDevice2 = StreamAudioDevice.Speakerphone("test-speaker-2", audioDevice)
+        val speakerDevice1 = StreamAudioDevice.Speakerphone("test-speaker-1")
+        val speakerDevice2 = StreamAudioDevice.Speakerphone("test-speaker-2")
 
         // Only speaker devices are available
         val devices = listOf(speakerDevice1, speakerDevice2)

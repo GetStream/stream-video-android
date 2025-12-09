@@ -134,8 +134,6 @@ dependencies {
     // webrtc
     api(libs.stream.webrtc)
 
-    implementation(libs.audioswitch)
-
     // video filter dependencies
     implementation(libs.libyuv)
 
@@ -191,6 +189,8 @@ dependencies {
     implementation(libs.tink)
 
     implementation(libs.androidx.media.media)
+    // Twilio AudioSwitch - use api() so it's available to consumers who need to access audio property
+    api(libs.audioswitch)
 
     // unit tests
     testImplementation(libs.stream.result)

@@ -36,15 +36,14 @@ import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioHandler
-import io.getstream.video.android.core.audio.AudioSwitchHandler
+import io.getstream.video.android.core.audio.AudioHandlerFactory
+import io.getstream.video.android.core.audio.CustomAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
 import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValidator
@@ -559,15 +558,25 @@ class MicrophoneManager(
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
     private val _selectedDevice = MutableStateFlow<StreamAudioDevice?>(null)
+    private val _selectedNativeDevice = MutableStateFlow<CustomAudioDevice?>(null)
+
     internal var nonHeadsetFallbackDevice: StreamAudioDevice? = null
+
+    internal var nonHeadsetFallbackCustomeAudioDevice: CustomAudioDevice? = null
 
     /** Currently selected device */
     val selectedDevice: StateFlow<StreamAudioDevice?> = _selectedDevice
+    val selectedCustomAudioDevice: StateFlow<CustomAudioDevice?> = _selectedNativeDevice
 
     private val _devices = MutableStateFlow<List<StreamAudioDevice>>(emptyList())
 
     /** List of available devices. */
     val devices: StateFlow<List<StreamAudioDevice>> = _devices
+
+    private val _nativeDevices = MutableStateFlow<List<CustomAudioDevice>>(emptyList())
+
+    /** List of available devices. */
+    val customAudioDevices: StateFlow<List<CustomAudioDevice>> = _nativeDevices
 
     private val _audioBitrateProfile =
         MutableStateFlow<AudioBitrateProfile>(
@@ -635,7 +644,7 @@ class MicrophoneManager(
      */
     fun select(device: StreamAudioDevice?) {
         logger.i { "selecting device $device" }
-        ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
+        ifAudioHandlerInitialized { it.selectDevice(device) }
         _selectedDevice.value = device
 
         if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
@@ -648,6 +657,27 @@ class MicrophoneManager(
 
         if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
             nonHeadsetFallbackDevice = device
+        }
+    }
+
+    /**
+     * Select a specific device
+     */
+    fun select(device: CustomAudioDevice?) {
+        logger.i { "selecting device $device" }
+        ifAudioHandlerInitialized { it.selectCustomAudioDevice(device) }
+        _selectedNativeDevice.value = device
+
+        if (device !is CustomAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+            mediaManager.speaker._status.value = DeviceStatus.Disabled
+        }
+
+        if (device is CustomAudioDevice.Speakerphone) {
+            mediaManager.speaker._status.value = DeviceStatus.Enabled
+        }
+
+        if (device !is CustomAudioDevice.BluetoothHeadset && device !is CustomAudioDevice.WiredHeadset) {
+            nonHeadsetFallbackCustomeAudioDevice = device
         }
     }
 
@@ -739,22 +769,42 @@ class MicrophoneManager(
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
-                audioHandler = AudioSwitchHandler(
+                // Use default priority (Bluetooth -> Wired -> Earpiece -> Speakerphone)
+                // unless preferSpeaker is true, then prioritize speakerphone over earpiece
+                val preferredDeviceList = listOf(
+                    StreamAudioDevice.BluetoothHeadset::class.java,
+                    StreamAudioDevice.WiredHeadset::class.java,
+                ) + if (preferSpeaker) {
+                    listOf(
+                        StreamAudioDevice.Speakerphone::class.java,
+                        StreamAudioDevice.Earpiece::class.java,
+                    )
+                } else {
+                    listOf(
+                        StreamAudioDevice.Earpiece::class.java,
+                        StreamAudioDevice.Speakerphone::class.java,
+                    )
+                }
+
+                val preferredNativeDeviceList = listOf(
+                    CustomAudioDevice.BluetoothHeadset::class.java,
+                    CustomAudioDevice.WiredHeadset::class.java,
+                ) + if (preferSpeaker) {
+                    listOf(
+                        CustomAudioDevice.Speakerphone::class.java,
+                        CustomAudioDevice.Earpiece::class.java,
+                    )
+                } else {
+                    listOf(
+                        CustomAudioDevice.Earpiece::class.java,
+                        CustomAudioDevice.Speakerphone::class.java,
+                    )
+                }
+
+                audioHandler = AudioHandlerFactory.create(
                     context = mediaManager.context,
-                    preferredDeviceList = listOf(
-                        AudioDevice.BluetoothHeadset::class.java,
-                        AudioDevice.WiredHeadset::class.java,
-                    ) + if (preferSpeaker) {
-                        listOf(
-                            AudioDevice.Speakerphone::class.java,
-                            AudioDevice.Earpiece::class.java,
-                        )
-                    } else {
-                        listOf(
-                            AudioDevice.Earpiece::class.java,
-                            AudioDevice.Speakerphone::class.java,
-                        )
-                    },
+                    preferredDeviceList = preferredDeviceList,
+                    preferredNativeDeviceList = preferredNativeDeviceList,
                     audioDeviceChangeListener = { devices, selected ->
                         logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
@@ -766,6 +816,17 @@ class MicrophoneManager(
                         capturedOnAudioDevicesUpdate?.invoke()
                         capturedOnAudioDevicesUpdate = null
                     },
+                    audioNativeDeviceListener = { devices, selected ->
+                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
+                        _nativeDevices.value = devices
+                        _selectedNativeDevice.value = selected
+
+                        setupCompleted = true
+
+                        capturedOnAudioDevicesUpdate?.invoke()
+                        capturedOnAudioDevicesUpdate = null
+                    },
+                    useCustomAudioSwitch = mediaManager.useCustomAudioSwitch,
                 )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
@@ -782,9 +843,9 @@ class MicrophoneManager(
         onAudioDevicesUpdate = actual,
     )
 
-    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
+    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
-            then(this.audioHandler as AudioSwitchHandler)
+            then(this.audioHandler)
         } else {
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
         }
@@ -1254,6 +1315,7 @@ class MediaManagerImpl(
     @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
     val audioUsage: Int = defaultAudioUsage,
     val audioUsageProvider: (() -> Int) = { audioUsage },
+    val useCustomAudioSwitch: Boolean = false,
 ) {
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())

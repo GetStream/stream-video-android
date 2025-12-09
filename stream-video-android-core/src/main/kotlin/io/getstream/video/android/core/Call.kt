@@ -341,12 +341,14 @@ public class Call(
             testInstanceProvider.mediaManagerCreator!!.invoke()
         } else {
             MediaManagerImpl(
-                clientImpl.context,
-                this,
-                scope,
-                eglBase.eglBaseContext,
-                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-            ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
+                context = clientImpl.context,
+                call = this,
+                scope = scope,
+                eglBaseContext = eglBase.eglBaseContext,
+                audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+                audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
+                useCustomAudioSwitch = clientImpl.useCustomAudioSwitch,
+            )
         }
     }
 
@@ -1300,7 +1302,13 @@ public class Call(
     private fun monitorHeadset() {
         microphone.devices.onEach { availableDevices ->
             logger.d {
-                "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
+                "[monitorHeadset] new available devices, prev selected: ${
+                    if (clientImpl.useCustomAudioSwitch) {
+                        microphone.nonHeadsetFallbackCustomeAudioDevice
+                    } else {
+                        microphone.nonHeadsetFallbackDevice
+                    }
+                }"
             }
 
             val bluetoothHeadset =
@@ -1316,9 +1324,16 @@ public class Call(
             } else {
                 logger.d { "[monitorHeadset] no headset found" }
 
-                microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
-                    logger.d { "[monitorHeadset] before device selected" }
-                    microphone.select(deviceBeforeHeadset)
+                if (clientImpl.useCustomAudioSwitch) {
+                    microphone.nonHeadsetFallbackCustomeAudioDevice?.let { deviceBeforeHeadset ->
+                        logger.d { "[monitorHeadset] before device selected" }
+                        microphone.select(deviceBeforeHeadset)
+                    }
+                } else {
+                    microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
+                        logger.d { "[monitorHeadset] before device selected" }
+                        microphone.select(deviceBeforeHeadset)
+                    }
                 }
             }
         }.launchIn(scope)

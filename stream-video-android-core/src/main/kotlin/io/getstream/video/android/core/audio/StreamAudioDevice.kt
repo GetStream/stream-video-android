@@ -17,35 +17,80 @@
 package io.getstream.video.android.core.audio
 
 import com.twilio.audioswitch.AudioDevice
+import kotlin.DeprecationLevel
+import kotlin.ReplaceWith
 
-sealed class StreamAudioDevice {
+/**
+ * Represents an audio device for Twilio's AudioSwitch implementation.
+ *
+ * @deprecated This class is deprecated. Use [AudioDevice] when [useCustomAudioSwitch] is true.
+ * This class will be removed in a future version. For new code, use [AudioDevice] instead.
+ *
+ * @see AudioDevice
+ */
+@Deprecated(
+    message = "StreamAudioDevice is deprecated. Use NativeStreamAudioDevice when useCustomAudioSwitch is true. " +
+        "This class is kept for backward compatibility with Twilio's AudioSwitch.",
+    replaceWith = ReplaceWith(
+        "NativeStreamAudioDevice",
+        "io.getstream.video.android.core.audio.NativeStreamAudioDevice",
+    ),
+    level = DeprecationLevel.WARNING,
+)
+public sealed class StreamAudioDevice {
 
     /** The friendly name of the device.*/
     abstract val name: String
 
+    /**
+     * The Twilio AudioDevice instance.
+     * This is always non-null since StreamAudioDevice is only used with Twilio's AudioSwitch.
+     * For custom audio switch implementation, use [AudioDevice] instead.
+     * @see com.twilio.audioswitch.AudioDevice
+     */
     abstract val audio: AudioDevice
 
     /** An [StreamAudioDevice] representing a Bluetooth Headset.*/
     data class BluetoothHeadset constructor(
         override val name: String = "Bluetooth",
+        /**
+         * The Twilio AudioDevice instance.
+         * This is always non-null since StreamAudioDevice is only used with Twilio's AudioSwitch.
+         * @see com.twilio.audioswitch.AudioDevice
+         */
         override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing a Wired Headset.*/
     data class WiredHeadset constructor(
         override val name: String = "Wired Headset",
+        /**
+         * The Twilio AudioDevice instance.
+         * This is always non-null since StreamAudioDevice is only used with Twilio's AudioSwitch.
+         * @see com.twilio.audioswitch.AudioDevice
+         */
         override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing the Earpiece.*/
     data class Earpiece constructor(
         override val name: String = "Earpiece",
+        /**
+         * The Twilio AudioDevice instance.
+         * This is always non-null since StreamAudioDevice is only used with Twilio's AudioSwitch.
+         * @see com.twilio.audioswitch.AudioDevice
+         */
         override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
     /** An [StreamAudioDevice] representing the Speakerphone.*/
     data class Speakerphone constructor(
         override val name: String = "Speakerphone",
+        /**
+         * The Twilio AudioDevice instance.
+         * This is always non-null since StreamAudioDevice is only used with Twilio's AudioSwitch.
+         * @see com.twilio.audioswitch.AudioDevice
+         */
         override val audio: AudioDevice,
     ) : StreamAudioDevice()
 
