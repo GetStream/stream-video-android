@@ -23,6 +23,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * A user aware implementation of [CoroutineScope].
@@ -38,22 +40,29 @@ internal interface UserScope : CoroutineScope {
      * Cancels all children of the [UserJob] in this scope's context connected to the specified [userId].
      */
     fun cancelChildren(userId: UserId? = null)
+
+    operator fun plus(context: CoroutineContext): UserScope
 }
 
 /**
  * Creates a user aware [CoroutineScope].
  */
-internal fun UserScope(clientScope: ClientScope): UserScope = UserScopeImpl(clientScope)
+internal fun UserScope(
+    clientScope: ClientScope = ClientScope(),
+    context: CoroutineContext = EmptyCoroutineContext,
+): UserScope = UserScopeImpl(clientScope, context)
 
 /**
  * Inherits [ClientScope] and adds elements such as [UserIdentifier] and [UserJob].
  */
 private class UserScopeImpl(
-    clientScope: ClientScope,
-    userIdentifier: UserIdentifier = UserIdentifier(),
+    val clientScope: ClientScope,
+    additionalContext: CoroutineContext,
+    val userIdentifier: UserIdentifier = UserIdentifier(),
 ) : UserScope,
     CoroutineScope by (
-        clientScope + userIdentifier + UserJob(clientScope.coroutineContext.job) { userIdentifier.value }
+        clientScope + userIdentifier + UserJob(clientScope.coroutineContext.job) { userIdentifier.value } +
+            additionalContext
         ) {
 
     /**
@@ -68,4 +77,7 @@ private class UserScopeImpl(
     override fun cancelChildren(userId: UserId?) {
         (coroutineContext[Job] as UserJob).cancelChildren(userId)
     }
+
+    override fun plus(context: CoroutineContext): UserScope =
+        UserScopeImpl(clientScope, this.coroutineContext + context, userIdentifier)
 }
