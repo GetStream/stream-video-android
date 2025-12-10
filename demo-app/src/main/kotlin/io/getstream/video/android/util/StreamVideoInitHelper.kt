@@ -125,7 +125,6 @@ object StreamVideoInitHelper {
                 authData = StreamService.instance.getAuthData(
                     environment = AppConfig.currentEnvironment.value!!.env,
                     userId = userId,
-                    StreamService.TOKEN_EXPIRY_TIME,
                 )
 
                 loggedInUser = User(id = authData.userId, role = "admin")
@@ -142,7 +141,6 @@ object StreamVideoInitHelper {
                     authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = loggedInUser.id,
-                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                 }
 
@@ -207,7 +205,6 @@ object StreamVideoInitHelper {
                         val authData = StreamService.instance.getAuthData(
                             environment = AppConfig.currentEnvironment.value!!.env,
                             userId = email,
-                            StreamService.TOKEN_EXPIRY_TIME,
                         )
                         authData.token
                     }
@@ -324,7 +321,6 @@ object StreamVideoInitHelper {
                     val authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = userIdForTokenRenewal,
-                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                     return authData.token
                 }

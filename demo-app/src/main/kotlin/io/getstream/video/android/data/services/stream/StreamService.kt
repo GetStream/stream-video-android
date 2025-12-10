@@ -35,12 +35,10 @@ fun interface StreamService {
     suspend fun getAuthData(
         @Query("environment") environment: String,
         @Query("user_id") userId: String?,
-        @Query("exp") exp: Int,
     ): GetAuthDataResponse
 
     companion object {
         private const val BASE_URL = "https://pronto.getstream.io/"
-        const val TOKEN_EXPIRY_TIME = 7 * 24 * 60 * 60 // 7d * 24 hrs * 60 mins * 60 sec
 
         private val json = Json { ignoreUnknownKeys = true }
         private val okHttpClient = OkHttpClient.Builder()
@@ -60,9 +58,9 @@ fun interface StreamService {
 
         private val serviceInstance = retrofit.create<StreamService>()
 
-        val instance = StreamService { environment, userId, exp ->
+        val instance = StreamService { environment, userId ->
             User.builtInCredentials[userId]?.toAuthDataResponse()
-                ?: serviceInstance.getAuthData(environment, userId, exp)
+                ?: serviceInstance.getAuthData(environment, userId)
         }
     }
 }
