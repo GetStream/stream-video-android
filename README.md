@@ -48,15 +48,9 @@ If you're interested in customizing the UI components for the Video SDK, check o
 Stream Video SDK provides production-ready UI components built with Jetpack Compose. All screenshots are generated using Paparazzi snapshot testing to ensure UI consistency.
 
 <p align="center">
-<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_CallContentTest_snapshot CallContent with multiple participants composable.png" alt="Video Call" width="32%"/>
-<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_AudioRoomTest_snapshot AudioRoom composable.png" alt="Audio Room" width="32%"/>
-<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_LivestreamTest_snapshot Livestream Player composable.png" alt="Livestream" width="32%"/>
-</p>
-
-<p align="center">
-<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_CallControlsTest_snapshot CallControls Actions composable.png" alt="Call Controls" width="32%"/>
-<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_ParticipantsPortraitTest_snapshot ParticipantInformation composable.png" alt="Participants" width="32%"/>
-<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_CallLobbyTest_snapshot CallLobby composable.png" alt="Call Lobby" width="32%"/>
+<img src="https://github.com/GetStream/stream-video-android/assets/24237865/b7ffc91c-10c5-4d02-8714-d18a5b4c9e00" width="32%"/>
+<img src="https://github.com/GetStream/stream-video-android/assets/24237865/a5741658-8f51-4506-92b7-c0e8098725f3" width="32%"/>
+<img src="https://github.com/GetStream/stream-video-android/assets/24237865/3cc08121-c8c8-4b71-8a96-0cf33b9f2c68" width="32%"/>
 </p>
 
 ## 👔 Sample Projects
