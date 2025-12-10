@@ -282,13 +282,8 @@ internal open class CoordinatorSocket(
             VideoErrorCode.TOKEN_EXPIRED.code,
             -> {
                 tokenManager.expireToken()
-                logger.d { "load sync START" }
                 val token = tokenManager.loadSync()
                 tokenManager.updateToken(token)
-                if (token.isNotEmpty()) {
-                    logger.d { "load sync END: $token" }
-                    return
-                }
             }
             else -> {}
         }
