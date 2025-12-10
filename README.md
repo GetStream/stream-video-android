@@ -43,12 +43,20 @@ With Stream's video components, you can use their SDK to build in-app video call
 
 If you're interested in customizing the UI components for the Video SDK, check out the **[UI Cookbook](https://getstream.io/video/docs/android/ui-cookbook/overview?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss)**.
 
-## 📱 Previews
+## 📱 UI Components
+
+Stream Video SDK provides production-ready UI components built with Jetpack Compose. All screenshots are generated using Paparazzi snapshot testing to ensure UI consistency.
 
 <p align="center">
-<img src="https://github.com/GetStream/stream-video-android/assets/24237865/b7ffc91c-10c5-4d02-8714-d18a5b4c9e00" width="32%"/>
-<img src="https://github.com/GetStream/stream-video-android/assets/24237865/a5741658-8f51-4506-92b7-c0e8098725f3" width="32%"/>
-<img src="https://github.com/GetStream/stream-video-android/assets/24237865/3cc08121-c8c8-4b71-8a96-0cf33b9f2c68" width="32%"/>
+<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_CallContentTest_snapshot CallContent with multiple participants composable.png" alt="Video Call" width="32%"/>
+<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_AudioRoomTest_snapshot AudioRoom composable.png" alt="Audio Room" width="32%"/>
+<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_LivestreamTest_snapshot Livestream Player composable.png" alt="Livestream" width="32%"/>
+</p>
+
+<p align="center">
+<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_CallControlsTest_snapshot CallControls Actions composable.png" alt="Call Controls" width="32%"/>
+<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_ParticipantsPortraitTest_snapshot ParticipantInformation composable.png" alt="Participants" width="32%"/>
+<img src="stream-video-android-ui-compose/src/test/snapshots/images/io.getstream.video.android.compose_CallLobbyTest_snapshot CallLobby composable.png" alt="Call Lobby" width="32%"/>
 </p>
 
 ## 👔 Sample Projects
@@ -67,117 +75,98 @@ You can find sample projects below that demonstrates use cases of Stream Video S
 Stream is free for most side and hobby projects. To qualify, your project/company needs to have < 5 team members and < $10k in monthly revenue. Makers get $100 in monthly credit for video for free.
 For more details, check out the [Maker Account](https://getstream.io/maker-account?utm_source=Github&utm_medium=Github_Repo_Content_Ad&utm_content=Developer&utm_campaign=Github_Android_Video_SDK&utm_term=DevRelOss).
 
-## 💡Supported Features💡
+## 💡 Key Features
 
-Here are some of the features we support:
+### Core Video Capabilities
+- **Video & Audio Calling**: 1:1 and group video/audio calls with automatic quality adaptation
+- **Audio Rooms**: Clubhouse-style audio experiences with speaker management
+- **Live Streaming**: RTMP/HLS broadcasting with real-time viewer engagement
+- **Screen Sharing**: Share your screen with audio support from mobile and desktop
 
-* Developer experience: Great SDKs, docs, tutorials and support so you can build quickly
-* Edge network: Servers around the world ensure optimal latency and reliability
-* Chat: Stored chat, reactions, threads, typing indicators, URL previews etc
-* Security & Privacy: Based in USA and EU, Soc2 certified, GDPR compliant
-* Dynascale: Automatically switch resolutions, fps, bitrate, codecs and paginate video on large calls
-* Screensharing
-* Picture in picture support
-* Active speaker
-* Custom events
-* Geofencing
-* Notifications and ringing calls
-* Opus DTX & Red for reliable audio
-* Webhooks & SQS
-* Backstage mode
-* Flexible permissions system
-* Joining calls by ID, link or invite
-* Enabling and disabling audio and video when in calls
-* Flipping, Enabling and disabling camera in calls
-* Enabling and disabling speakerphone in calls
-* Push notification providers support
-* Call recording
-* Broadcasting to HLS
+### Quality & Performance
+- **Dynascale™**: Automatically adjusts resolution, FPS, and bitrate based on network conditions
+- **Active Speaker Detection**: Highlights the current speaker in real-time
+- **Picture-in-Picture**: Native Android PiP support for calls
+- **Noise Cancellation**: AI-powered audio filtering for clear conversations
+- **Blur & Virtual Backgrounds**: AI video filters for privacy and customization
 
-## 🗺️ Roadmap
+### Developer Experience
+- **Jetpack Compose UI**: Modern, customizable Compose components out of the box
+- **XML Views**: Legacy XML view support for existing codebases
+- **Kotlin Coroutines**: Async operations with structured concurrency
+- **Type-Safe APIs**: Fully typed Kotlin APIs with comprehensive documentation
+- **WebRTC Integration**: Built on Google's WebRTC with Stream's global edge network
 
-Video roadmap and changelog is available [here](https://github.com/GetStream/protocol/discussions/127). 
+### Call Management
+- **Ringing & Notifications**: Push notifications and in-app ringing for incoming calls
+- **Call Recording**: Server-side recording with transcription support
+- **Closed Captions**: Real-time transcription and captioning
+- **Reactions**: Send emoji reactions during calls
+- **Custom Events**: Extensible event system for custom interactions
 
-### 0.2.0 milestone
+### Enterprise Features
+- **Flexible Permissions**: Granular control over call features and participant capabilities
+- **Backstage Mode**: Prepare before going live with hosts-only mode
+- **Geofencing**: Route calls through specific regions for compliance
+- **Security**: SOC2 certified, GDPR compliant, end-to-end encryption ready
 
-- [X] Publish app on play store
-- [X] Example Button to switch speakerphone/earpiece (Jaewoong)
-- [X] Chat Integration (Jaewoong)
-- [X] Automatically handle pagination and sorting on > 6 participants in the sample app (Daniel)
-- [X] Buttons to simulate ice restart and SFU switching (Jaewoong)
-- [X] Bug: java.net.UnknownHostException: Unable to resolve host "hint.stream-io-video.com" isn't throw but instead logged as INFO (Daniel)
-- [X] Bug: Call.join will throw an exception if error is other than HttpException
-- [X] Report version number of SDK on all API calls (Daniel)
-- [X] Bug: screensharing is broken. android doesn’t receive/render (not sure) the screenshare. video shows up as the gray avatar
-- [X] support settings.audio.default_device (Daniel)
-- [X] Bug: Sample app has a bug where we don't subscribe to call changes, we need to use call.get in the preview screen so we know the number of participants (Daniel)
-- [X] Buttons to simulate ice restart and SFU switching (Jaewoong)
-- [X] Local Video disconnects sometimes (ICE restarts issue for the publisher. we're waiting for the backend support) (Thierry)
-- [X] Deeplink support for video call demo & dogfooding app (skip auth for the video demo, keep it for dogfooding) (Jaewoong)
-- [X] XML version of VideoRenderer (Jaewoong)
-- [X] sortedParticipants stateflow doesn't update accurately (Thierry)
-- [X] Reactions
-- [X] Bug: screenshare is not removed after it stops when a participant leaves the call (Thierry) (probably just dont update the state when the participant leaves)
-- [X] Speaking while muted stateflow (Daniel)
-- [X] Bluetooth reliability
-- [X] Cleanup the retry behaviour in the RtcSession
-- [X] SDK development guide for all teams
+## 🚀 Quick Start
 
-### 0.3.0 milestone
+### Installation
 
-- [X] Finish usability testing with design team on chat integration (Jaewoong)
-- [X] Pagination on query members & query call endpoints (Daniel)
-- [X] Livestream tutorial (depends on RTMP support) (Thierry)
-- [X] local version of audioLevel(s) for lower latency audio visualizations(Daniel)
-- [X] Complete integration with the video demo flow
-- [X] Pagination on query members & query call endpoints (Daniel)
-- [X] Enable ice restarts for publisher and subscriber
-- [X] Ringing: Finish it, make testing easy and write docs for common changes (Daniel)
-- [X] Bug: Screensharing on Firefox has some issues when rendering on android (Daniel)
-- [X] Bug: Screensharing scaling and zoom doesn't work (Daniel)
+Add the SDK to your `build.gradle.kts`:
 
-### 0.4.0 milestone
+```kotlin
+// Video SDK with Compose UI - check Maven Central badge above for latest version
+implementation("io.getstream:stream-video-android-ui-compose:$stream_version")
+```
 
-- [X] Screensharing from mobile
-- [X] Picture of the video stream at the highest resolution + docs on how to add a button for this (Daniel)
-- [X] Audio & Video filters. Support  (Daniel)
-- [X] Implement Chat overlay for Dogfooding (Jaewoong)
-- [X] Migrate Stream Chat SDK v6 stable (Jaewoong)
-- [X] Add Dogfooding instructions + directs Google Play (Jaewoong)
-- [X] Support participant.custom field which was previously ignored. ParticipantState line 216 (Daniel)
-- [X] Default livestream player UI + docs (Jaewoong)
-- [X] Reaction dialog API for Compose (Jaewoong)
-- [X] Android SDK development.md cleanup (Jaewoong)
-- [X] Upgrade to more recent versions of webrtc (Jaewoong/Kanat)
-- [X] Review foreground service vs backend for audio rooms etc. (Aleks)
-- [X] Enable SFU switching
-- [X] Support R8 full mode
-- [ ] Logging is too verbose (rtc is very noisy), clean it up to focus on the essential for info and higher (Daniel)
+### Initialize the SDK
 
-### 0.5.0 milestone
+```kotlin
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
 
-- [X] Improve Compose UI SDK performance by marking WebRTC models as stable.
-- [X] Development token to support a development environment
+        val client = StreamVideoBuilder(
+            context = this,
+            apiKey = "YOUR_API_KEY",
+            user = User(
+                id = "user-id",
+                name = "User Name",
+                image = "https://...",
+            ),
+            token = "USER_TOKEN",
+        ).build()
+    }
+}
+```
 
-### 1.0.0 milestone
+### Join a Video Call
 
-- [X] Blur & AI video filters
-- [X] Analytics and stats for calls
-- [X] New `StreamCallActivity` for easier integration 
+```kotlin
+@Composable
+fun VideoCallScreen() {
+    val call = StreamVideo.instance().call("default", "call-id")
 
-### 1.1.0 milestone
-- [X] Noise cancelling support
-- [X] Session timers
-- [X] Transcriptions
-- [X] Manual quality selection
+    LaunchedEffect(Unit) {
+        call.join(create = true)
+    }
 
-### After 1.1.x release
-- [ ] Test coverage
-- [ ] Support for closed captions
-- [ ] Android Telecom framework integration
-- [ ] Codec negotiation
-- [ ] Setup testing infrastructure (more devices)
-- [ ] Camera controls
+    CallContent(
+        call = call,
+        onCallAction = { action ->
+            when (action) {
+                is LeaveCall -> call.leave()
+                is ToggleCamera -> call.camera.setEnabled(action.isEnabled)
+                is ToggleMicrophone -> call.microphone.setEnabled(action.isEnabled)
+            }
+        }
+    )
+}
+```
+
+For detailed tutorials, visit our [documentation](https://getstream.io/video/docs/android/).
 
 ## 💼 We are hiring!
 
