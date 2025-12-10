@@ -76,8 +76,8 @@ internal class CoordinatorConnectionModule(
         HeadersInterceptor(HeadersUtil()),
     )
         .addInterceptor(authInterceptor).addInterceptor(
-            HttpLoggingInterceptor {
-                streamLog(tag = "Video:Http") { it }
+            HttpLoggingInterceptor { message->
+                println(message)
             }.apply {
                 level = loggingLevel.httpLoggingLevel.level
             },

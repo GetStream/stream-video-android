@@ -67,7 +67,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 object IntegrationTestState {
+    @Volatile
     var client: StreamVideo? = null
+    @Volatile
     var call: Call? = null
 }
 
@@ -99,7 +101,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData?.token!!,
-            loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BASIC),
+            loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BODY),
         )
 //        if (BuildConfig.CORE_TEST_LOCAL == "1") {
 //            builder.videoDomain = "localhost"
