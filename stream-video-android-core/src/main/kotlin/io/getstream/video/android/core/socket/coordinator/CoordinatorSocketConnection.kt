@@ -135,9 +135,7 @@ public open class CoordinatorSocketConnection(
     // Extension opportunity for subclasses
     override fun onCreated() {
         super.onCreated()
-        logger.d {
-            "[onCreated] Socket is created, initial token: $token, tokenManager.getToken() = ${tokenManager.getToken()}"
-        }
+        logger.d { "[onCreated] Socket is created" }
         scope.launch {
             logger.d { "[onConnected] Video socket created, user: $user" }
             if (tokenManager.getToken().isEmpty()) {
@@ -166,6 +164,7 @@ public open class CoordinatorSocketConnection(
 
     override fun onConnecting() {
         super.onConnecting()
+        connectionId.value = null
         logger.d { "[onConnecting] Socket is connecting" }
     }
 
@@ -197,6 +196,7 @@ public open class CoordinatorSocketConnection(
 
     override fun onDisconnected(cause: DisconnectCause) {
         super.onDisconnected(cause)
+        connectionId.value = null
         logger.d {
             "[onDisconnected] Socket disconnected. Cause: ${(cause as? DisconnectCause.Error)?.error}"
         }
@@ -210,7 +210,6 @@ public open class CoordinatorSocketConnection(
         connectionTimeout: Long,
         connected: suspend (connectionId: String) -> Unit,
     ) {
-        logger.d { "[whenConnected]" }
         scope.launch {
             internalSocket.awaitConnection(connectionTimeout)
             internalSocket.connectionIdOrError().also {
@@ -229,19 +228,16 @@ public open class CoordinatorSocketConnection(
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
     override suspend fun connect(connectData: User) {
-        logger.d { "[connect]" }
         internalSocket.connectUser(connectData, connectData.isAnonymous())
     }
 
     override suspend fun reconnect(data: User, force: Boolean) {
-        logger.d { "[reconnect]" }
         internalSocket.reconnectUser(data, data.isAnonymous(), force)
     }
 
     override suspend fun disconnect() = internalSocket.disconnect()
 
     override fun updateToken(token: UserToken) {
-        logger.d { "[updateToken]" }
         tokenManager.updateToken(token)
     }
 }
