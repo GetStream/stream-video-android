@@ -21,7 +21,6 @@ import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.infrastructure.Serializer
-import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -76,7 +75,7 @@ internal class CoordinatorConnectionModule(
         HeadersInterceptor(HeadersUtil()),
     )
         .addInterceptor(authInterceptor).addInterceptor(
-            HttpLoggingInterceptor { message->
+            HttpLoggingInterceptor { message ->
                 println(message)
             }.apply {
                 level = loggingLevel.httpLoggingLevel.level

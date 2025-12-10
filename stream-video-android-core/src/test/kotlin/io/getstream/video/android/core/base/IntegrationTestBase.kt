@@ -69,6 +69,7 @@ import kotlin.coroutines.suspendCoroutine
 object IntegrationTestState {
     @Volatile
     var client: StreamVideo? = null
+
     @Volatile
     var call: Call? = null
 }
