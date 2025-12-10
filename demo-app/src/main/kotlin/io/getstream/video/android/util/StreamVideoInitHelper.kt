@@ -198,17 +198,11 @@ object StreamVideoInitHelper {
             image = user.image.orEmpty(),
         )
 
-//        chatClient.connectUser(
-//            user = chatUser,
-//            token = token,
-//        ).enqueue()
-
         chatClient.connectUser(
             user = chatUser,
             tokenProvider = object : io.getstream.chat.android.client.token.TokenProvider {
                 override fun loadToken(): String {
                     return runBlocking {
-                        Log.d("Noob", "Chat token provider")
                         val email = user.custom?.get("email")
                         val authData = StreamService.instance.getAuthData(
                             environment = AppConfig.currentEnvironment.value!!.env,
@@ -327,13 +321,11 @@ object StreamVideoInitHelper {
                     val userEmail = user.custom?.get("email")
                     val userId = user.id
                     val userIdForTokenRenewal = if (userEmail.isNullOrEmpty()) userId else userEmail
-                    Log.d("Noob", "Video token provider START")
                     val authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = userIdForTokenRenewal,
                         StreamService.TOKEN_EXPIRY_TIME,
                     )
-                    Log.d("Noob", "Video token provider END: ${authData.token}")
                     return authData.token
                 }
             },
