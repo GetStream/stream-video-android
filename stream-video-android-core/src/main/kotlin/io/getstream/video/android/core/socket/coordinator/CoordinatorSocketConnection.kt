@@ -35,9 +35,10 @@ import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.PersistingTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.core.utils.mapState
@@ -63,6 +64,8 @@ import okhttp3.OkHttpClient
  * - Raises the error if there is a permanent failure
  * - Flow to avoid concurrency related bugs
  * - Ability to wait till the socket is connected (important to prevent race conditions)
+ *
+ * This should be internal
  */
 public open class CoordinatorSocketConnection(
     private val apiKey: ApiKey,
@@ -71,6 +74,10 @@ public open class CoordinatorSocketConnection(
     /** The  user to connect. */
     private val user: User,
     /** The initial token. */
+    @Deprecated(
+        "token is not used",
+        ReplaceWith("Use tokenManager or tokenRepository.getToken() instead"),
+    )
     private val token: String,
     /** Inject your http client */
     private val httpClient: OkHttpClient,
@@ -82,12 +89,13 @@ public open class CoordinatorSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
+    private val tokenRepository: TokenRepository,
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
     SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
 
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
-    private val tokenManager = TokenManagerImpl()
+    private val tokenManager = TokenManagerImpl(tokenRepository)
 
     // Internal state
     private val logger by taggedLogger("Video:Socket")
@@ -121,7 +129,7 @@ public open class CoordinatorSocketConnection(
 
     // Init
     init {
-        tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
+        tokenManager.setTokenProvider(PersistingTokenProvider(tokenProvider, tokenRepository))
     }
 
     // Extension opportunity for subclasses
@@ -130,12 +138,12 @@ public open class CoordinatorSocketConnection(
         logger.d { "[onCreated] Socket is created" }
         scope.launch {
             logger.d { "[onConnected] Video socket created, user: $user" }
-            if (token.isEmpty()) {
+            if (tokenManager.getToken().isEmpty()) {
                 logger.e { "[onConnected] Token is empty. Disconnecting." }
                 disconnect()
             } else {
                 val authRequest = WSAuthMessageRequest(
-                    token = token,
+                    token = tokenManager.getToken().ifEmpty { tokenRepository.getToken() },
                     userDetails = ConnectUserDetailsRequest(
                         id = user.id,
                         name = user.name.takeUnless { it.isWhitespaceOnly() },
@@ -189,7 +197,9 @@ public open class CoordinatorSocketConnection(
     override fun onDisconnected(cause: DisconnectCause) {
         super.onDisconnected(cause)
         connectionId.value = null
-        logger.d { "[onDisconnected] Socket disconnected. Cause: $cause" }
+        logger.d {
+            "[onDisconnected] Socket disconnected. Cause: ${(cause as? DisconnectCause.Error)?.error}"
+        }
     }
 
     // API

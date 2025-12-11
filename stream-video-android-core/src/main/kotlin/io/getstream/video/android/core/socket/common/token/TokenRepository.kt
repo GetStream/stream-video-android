@@ -16,22 +16,15 @@
 
 package io.getstream.video.android.core.socket.common.token
 
-/**
- * An implementation of [TokenProvider] that keeps previous values of the loaded token.
- * This implementation delegate the process to obtain a new token to another tokenProvider.
- *
- * @property tokenProvider The [TokenProvider] used to obtain new tokens.
- */
-internal class CacheableTokenProvider(
-    private val tokenProvider: TokenProvider,
-) : TokenProvider {
-    internal var cachedToken = ""
-    override suspend fun loadToken(): String = tokenProvider.loadToken().also { cachedToken = it }
+import io.getstream.video.android.core.socket.common.token.TokenManagerImpl.Companion.EMPTY_TOKEN
 
-    /**
-     * Obtain the cached token.
-     *
-     * @return The cached token.
-     */
-    fun getCachedToken(): String = cachedToken
+class TokenRepository(@Volatile private var token: String = EMPTY_TOKEN) {
+
+    fun updateToken(token: String) {
+        this.token = token
+    }
+
+    fun getToken(): String {
+        return token
+    }
 }

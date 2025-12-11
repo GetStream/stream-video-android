@@ -25,13 +25,16 @@ import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -47,6 +50,7 @@ internal class CoordinatorConnectionModule(
     context: Context,
     tokenProvider: TokenProvider,
     user: User,
+    val tokenRepository: TokenRepository,
     override val scope: CoroutineScope,
     // Common API
     override val apiUrl: String,
@@ -54,12 +58,11 @@ internal class CoordinatorConnectionModule(
     override val connectionTimeoutInMs: Long,
     override val loggingLevel: LoggingLevel = LoggingLevel(),
     override val apiKey: ApiKey,
-    override val userToken: UserToken,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer = Tracer("coordinator"),
 ) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
     // Internals
-    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
+    private val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder().baseUrl(apiUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
@@ -96,17 +99,17 @@ internal class CoordinatorConnectionModule(
         apiKey = apiKey,
         url = wssUrl,
         user = user,
-        token = userToken,
+        token = tokenRepository.getToken(),
         httpClient = http,
         networkStateProvider = networkStateProvider,
-        scope = scope,
+        scope = UserScope(context = scope.coroutineContext + Dispatchers.IO.limitedParallelism(1)),
         lifecycle = lifecycle,
         tokenProvider = tokenProvider,
+        tokenRepository = tokenRepository,
     )
 
     override fun updateToken(token: UserToken) {
-        socketConnection.updateToken(token)
-        authInterceptor.token = token
+        tokenRepository.updateToken(token)
     }
 
     override fun updateAuthType(authType: String) {
