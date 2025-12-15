@@ -187,7 +187,7 @@ class SpeakerManagerTest {
         // Then
         verify { microphoneManager.enforceSetup(preferSpeaker = false, any()) }
         // Since we only have speakers available, verify we selected the first one
-        verify { microphoneManager.select(any()) } // Verify the select method was called
+        verify { microphoneManager.select(any<StreamAudioDevice>()) } // Verify the select method was called
         assertEquals(false, speakerManager.speakerPhoneEnabled.value)
     }
 
