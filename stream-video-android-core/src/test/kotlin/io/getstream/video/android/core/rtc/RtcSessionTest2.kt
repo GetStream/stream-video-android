@@ -56,11 +56,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.webrtc.SessionDescription
 import stream.video.sfu.models.ParticipantCount
@@ -281,7 +279,8 @@ class RtcSessionTest2 {
         // Given an RtcSession with no publisher set (publisher = null by default until fully joined)
         val mockSocket = mockk<SfuSocketConnection>()
         val mockConnectedEvent = mockk<JoinCallResponseEvent>(relaxed = true)
-        val socketStateFlow = MutableStateFlow<SfuSocketState>(SfuSocketState.Connected(mockConnectedEvent))
+        val socketStateFlow =
+            MutableStateFlow<SfuSocketState>(SfuSocketState.Connected(mockConnectedEvent))
         every { mockSocket.state() } returns socketStateFlow
         val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
             every { socketConnection } returns mockSocket
@@ -459,7 +458,8 @@ class RtcSessionTest2 {
     private fun createRtcSessionSpyWithMockSocket(): Pair<RtcSession, Publisher> {
         val mockSocket = mockk<SfuSocketConnection>()
         val mockConnectedEvent = mockk<JoinCallResponseEvent>(relaxed = true)
-        val socketStateFlow = MutableStateFlow<SfuSocketState>(SfuSocketState.Connected(mockConnectedEvent))
+        val socketStateFlow =
+            MutableStateFlow<SfuSocketState>(SfuSocketState.Connected(mockConnectedEvent))
         every { mockSocket.state() } returns socketStateFlow
         every { mockSocket.whenConnected(any<Long>(), any()) } answers {
             val callback = secondArg<suspend (String) -> Unit>()
