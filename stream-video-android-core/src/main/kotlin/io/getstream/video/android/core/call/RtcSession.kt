@@ -743,8 +743,9 @@ public class RtcSession internal constructor(
             }
         }
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
-        listenToMediaChanges()
-
+        publisher?.let {
+            listenToMediaChanges()
+        }
         // subscribe to the tracks of other participants
         setVideoSubscriptions(true)
         return
@@ -817,6 +818,15 @@ public class RtcSession internal constructor(
         supervisorJob.cancel()
 
         // Note: Executor cleanup is handled by Call cleanup
+    }
+
+    private fun hasPublishCapability(): Boolean {
+        val capabilities = call.state.ownCapabilities.value
+        return capabilities.any {
+            it == OwnCapability.SendAudio ||
+                it == OwnCapability.SendVideo ||
+                it == OwnCapability.Screenshare
+        }
     }
 
     internal val muteState = MutableStateFlow(
@@ -1070,12 +1080,14 @@ public class RtcSession internal constructor(
                             call.state.replaceParticipants(participantStates)
                             sfuConnectionModule.socketConnection.whenConnected {
                                 logger.d { "JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
-                                if (publisher == null) {
+                                if (publisher == null && hasPublishCapability()) {
                                     publisher = createPublisher(event.publishOptions)
                                 }
                                 connectRtc()
                                 processPendingSubscriberEvents()
-                                processPendingPublisherEvents()
+                                publisher?.let {
+                                    processPendingPublisherEvents()
+                                }
                             }
                         }
 
