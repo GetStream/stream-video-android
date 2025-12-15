@@ -25,6 +25,7 @@ import io.mockk.every
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -32,6 +33,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
+@Ignore(
+    "Because it installs a anonymous user StreamVideo Client. However we will run it via isolatedTest (check build.gradle.kts)",
+)
 @RunWith(RobolectricTestRunner::class)
 class StreamVideoBuilderTest : TestBase() {
 
@@ -109,6 +113,7 @@ class StreamVideoBuilderTest : TestBase() {
 
         assertEquals(client.coordinatorConnectionModule.apiUrl, customApiUrl)
         assertEquals(client.coordinatorConnectionModule.wssUrl, customWssUrl)
+        StreamVideo.removeClient()
     }
 
     @Test

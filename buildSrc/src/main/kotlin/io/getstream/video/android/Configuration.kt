@@ -2,8 +2,8 @@ package io.getstream.video.android
 
 object Configuration {
     const val majorVersion = 1
-    const val minorVersion = 17
-    const val patchVersion = 0
+    const val minorVersion = 18
+    const val patchVersion = 1
     const val versionName = "$majorVersion.$minorVersion.$patchVersion"
     const val versionCode = 57
     const val snapshotBasedVersionName = "$majorVersion.$minorVersion.${patchVersion + 1}"

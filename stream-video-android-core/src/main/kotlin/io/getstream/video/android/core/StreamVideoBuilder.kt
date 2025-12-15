@@ -37,8 +37,9 @@ import io.getstream.video.android.core.permission.android.DefaultStreamPermissio
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
@@ -95,6 +96,7 @@ import java.net.ConnectException
  * @see ClientState.connection
  *
  */
+
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     private val apiKey: ApiKey,
@@ -106,7 +108,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         object : TokenProvider {
             override suspend fun loadToken(): String = legacy.invoke(null)
         }
-    } ?: ConstantTokenProvider(token),
+    } ?: RepositoryTokenProvider(tokenRepository),
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
@@ -219,7 +221,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // Android JSR-310 backport backport
         AndroidThreeTen.init(context)
-
+        tokenRepository.updateToken(token)
         // This connection module class exposes the connections to the various retrofit APIs.
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
@@ -230,9 +232,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             user = user,
             apiKey = apiKey,
-            userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
+            tokenRepository = tokenRepository,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -277,6 +279,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             vibrationConfig = vibrationConfig,
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
+            tokenRepository = tokenRepository,
             useCustomAudioSwitch = useCustomAudioSwitch,
         )
 
@@ -353,6 +356,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
     }
 }
+
+/**
+ * Refactor Later
+ */
+internal val tokenRepository = TokenRepository("")
 
 sealed class GEO {
     /** Run calls over our global edge network, this is the default and right for most applications */

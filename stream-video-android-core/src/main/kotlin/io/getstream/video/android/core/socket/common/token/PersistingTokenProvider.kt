@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2025 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,11 @@
 
 package io.getstream.video.android.core.socket.common.token
 
-/**
- * An implementation of [TokenProvider] that keeps previous values of the loaded token.
- * This implementation delegate the process to obtain a new token to another tokenProvider.
- *
- * @property tokenProvider The [TokenProvider] used to obtain new tokens.
- */
-internal class CacheableTokenProvider(
+internal class PersistingTokenProvider(
     private val tokenProvider: TokenProvider,
+    private val tokenRepository: TokenRepository,
 ) : TokenProvider {
-    internal var cachedToken = ""
-    override suspend fun loadToken(): String = tokenProvider.loadToken().also { cachedToken = it }
-
-    /**
-     * Obtain the cached token.
-     *
-     * @return The cached token.
-     */
-    fun getCachedToken(): String = cachedToken
+    override suspend fun loadToken(): String = tokenProvider.loadToken().also {
+        tokenRepository.updateToken(it)
+    }
 }

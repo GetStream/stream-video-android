@@ -633,29 +633,28 @@ public class Call(
         val sfuUrl = result.value.credentials.server.url
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-
-        session = if (testInstanceProvider.rtcSessionCreator != null) {
-            testInstanceProvider.rtcSessionCreator!!.invoke()
-        } else {
-            RtcSession(
-                sessionId = this.sessionId,
-                apiKey = clientImpl.apiKey,
-                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                client = client,
-                call = this,
-                sfuUrl = sfuUrl,
-                sfuWsUrl = sfuWsUrl,
-                sfuToken = sfuToken,
-                remoteIceServers = iceServers,
-                powerManager = powerManager,
-            )
-        }
-
-        session?.let {
-            state._connection.value = RealtimeConnection.Joined(it)
-        }
-
         try {
+            session = if (testInstanceProvider.rtcSessionCreator != null) {
+                testInstanceProvider.rtcSessionCreator!!.invoke()
+            } else {
+                RtcSession(
+                    sessionId = this.sessionId,
+                    apiKey = clientImpl.apiKey,
+                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+                    client = client,
+                    call = this,
+                    sfuUrl = sfuUrl,
+                    sfuWsUrl = sfuWsUrl,
+                    sfuToken = sfuToken,
+                    remoteIceServers = iceServers,
+                    powerManager = powerManager,
+                )
+            }
+
+            session?.let {
+                state._connection.value = RealtimeConnection.Joined(it)
+            }
+
             session?.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
@@ -793,24 +792,31 @@ public class Call(
                 )
                 this.state.removeParticipant(prevSessionId)
                 session.prepareRejoin()
-                this.session = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                this.session?.connect(reconnectDetails, currentOptions)
-                session.cleanup()
-                monitorSession(joinResponse.value)
+                try {
+                    this.session = RtcSession(
+                        clientImpl,
+                        reconnectAttepmts,
+                        powerManager,
+                        this,
+                        sessionId,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    this.session?.connect(reconnectDetails, currentOptions)
+                    session.cleanup()
+                    monitorSession(joinResponse.value)
+                } catch (ex: Exception) {
+                    logger.e(ex) {
+                        "[rejoin] Failed to join response with ex: ${ex.message}"
+                    }
+                    state._connection.value = RealtimeConnection.Failed(ex)
+                }
             } else {
                 logger.e {
                     "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
@@ -849,27 +855,35 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
-                val newSession = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                val oldSession = this.session
-                this.session = newSession
-                this.session?.connect(reconnectDetails, currentOptions)
-                monitorSession(joinResponse.value)
-                oldSession?.leaveWithReason("migrating")
-                oldSession?.cleanup()
+                try {
+                    val newSession = RtcSession(
+                        clientImpl,
+                        reconnectAttepmts,
+                        powerManager,
+                        this,
+                        sessionId,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    val oldSession = this.session
+                    this.session = newSession
+                    this.session?.connect(reconnectDetails, currentOptions)
+                    monitorSession(joinResponse.value)
+                    oldSession?.leaveWithReason("migrating")
+                    oldSession?.cleanup()
+                } catch (ex: Exception) {
+                    logger.e(ex) {
+                        "[switchSfu] Failed to join during " +
+                            "migration - Error ${ex.message}"
+                    }
+                    state._connection.value = RealtimeConnection.Failed(ex)
+                }
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +

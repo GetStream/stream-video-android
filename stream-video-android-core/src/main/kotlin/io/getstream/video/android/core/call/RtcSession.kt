@@ -78,6 +78,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
@@ -197,6 +198,7 @@ data class TrackDimensions(
  * * Or when the UI layout changes
  * * The SFU tells us what resolution to publish using the ChangePublishQualityEvent event
  *
+ * For developers: RtcSession throws [IllegalStateException] because its [coroutineScope] & [rtcSessionScope] throws it
  */
 public class RtcSession internal constructor(
     client: StreamVideo,
@@ -235,12 +237,12 @@ public class RtcSession internal constructor(
             apiUrl = sfuUrl,
             wssUrl = sfuWsUrl,
             connectionTimeoutInMs = 2000L,
-            userToken = sfuToken,
             lifecycle = lifecycle,
             onSignalingLost = { error ->
                 call.debug.fastReconnect()
             },
             tracer = sfuTracer,
+            tokenRepository = TokenRepository(sfuToken),
         )
     },
 ) {

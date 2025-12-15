@@ -107,8 +107,9 @@ import io.getstream.video.android.core.permission.android.DefaultStreamPermissio
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
@@ -161,7 +162,8 @@ internal class StreamVideoClient internal constructor(
     internal var token: String,
     private val lifecycle: Lifecycle,
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
-    internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
+    internal val tokenRepository: TokenRepository,
+    internal val tokenProvider: TokenProvider = RepositoryTokenProvider(tokenRepository),
     internal val streamNotificationManager: StreamNotificationManager,
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
@@ -274,6 +276,7 @@ internal class StreamVideoClient internal constructor(
             // Retry once with a new token if the token is expired
             if (e.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
+                tokenRepository.updateToken(newToken)
                 token = newToken
                 coordinatorConnectionModule.updateToken(newToken)
                 apiCall()

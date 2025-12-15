@@ -77,11 +77,6 @@ internal interface ConnectionModuleDeclaration<Api, SocketConnection, Http : OkH
     val loggingLevel: LoggingLevel get() = LoggingLevel()
 
     /**
-     * The user token.
-     */
-    val userToken: Token
-
-    /**
      * The lifecycle of the application.
      */
     val lifecycle: Lifecycle
