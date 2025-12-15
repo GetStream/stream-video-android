@@ -31,9 +31,10 @@ import io.getstream.video.android.core.socket.common.SocketListener
 import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.PersistingTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.ApiKey
@@ -62,6 +63,7 @@ class SfuSocketConnection(
     private val lifecycle: Lifecycle,
     /** Token provider */
     private val tokenProvider: TokenProvider,
+    private val tokenRepository: TokenRepository,
 ) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
     SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken, JoinRequest> {
 
@@ -70,7 +72,7 @@ class SfuSocketConnection(
     }
 
     private val logger by taggedLogger("Video:SfuSocket")
-    private val tokenManager = TokenManagerImpl()
+    private val tokenManager = TokenManagerImpl(tokenRepository)
     private val internalSocket: SfuSocket = SfuSocket(
         wssUrl = url,
         apiKey = apiKey,
@@ -100,7 +102,7 @@ class SfuSocketConnection(
 
     // Initialization
     init {
-        tokenManager.setTokenProvider(CacheableTokenProvider(tokenProvider))
+        tokenManager.setTokenProvider(PersistingTokenProvider(tokenProvider, tokenRepository))
     }
 
     override fun onCreated() {

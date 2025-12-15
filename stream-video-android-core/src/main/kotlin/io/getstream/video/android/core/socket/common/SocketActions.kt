@@ -41,6 +41,7 @@ interface SocketActions<EventIn, EventOut, Error, State, Token, ConnectData> {
 
     /**
      * Send raw data to the socket. If you already have a parsed event that can be sent.
+     * Refactor later to return bool
      */
     fun sendData(data: String)
 

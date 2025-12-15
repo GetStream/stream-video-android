@@ -51,6 +51,8 @@ internal interface TokenManager {
      */
     fun setTokenProvider(provider: CacheableTokenProvider)
 
+    fun setTokenProvider(provider: PersistingTokenProvider)
+
     /**
      * Obtain last token loaded.
      *

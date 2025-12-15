@@ -240,3 +240,27 @@ mavenPublishing {
         ),
     )
 }
+
+afterEvaluate {
+    tasks.named("testDebugUnitTest") {
+        dependsOn("isolatedTest")
+    }
+}
+
+tasks.register<Test>("isolatedTest") {
+
+    description = "Runs StreamVideoBuilderTest in an isolation"
+    group = "verification"
+
+    // Only this class
+    include("**/StreamVideoBuilderTest.class")
+
+    // Force new JVM
+    forkEvery = 1
+
+    // Reuse Android's debug unit test configuration
+    val androidTestTask = tasks.named<Test>("testDebugUnitTest").get()
+
+    testClassesDirs = androidTestTask.testClassesDirs
+    classpath = androidTestTask.classpath
+}

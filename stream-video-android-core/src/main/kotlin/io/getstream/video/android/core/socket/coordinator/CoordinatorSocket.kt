@@ -279,10 +279,19 @@ internal open class CoordinatorSocket(
         }
 
         when (error.serverErrorCode) {
+            VideoErrorCode.TOKEN_EXPIRED.code,
+            -> {
+                tokenManager.expireToken()
+                val token = tokenManager.loadSync()
+                tokenManager.updateToken(token)
+            }
+            else -> {}
+        }
+
+        when (error.serverErrorCode) {
             VideoErrorCode.UNDEFINED_TOKEN.code,
             VideoErrorCode.INVALID_TOKEN.code,
             VideoErrorCode.API_KEY_NOT_FOUND.code,
-            VideoErrorCode.VALIDATION_ERROR.code,
             -> {
                 logger.d {
                     "One unrecoverable error happened. Error: $error. Error code: ${error.serverErrorCode}"
@@ -290,7 +299,9 @@ internal open class CoordinatorSocket(
                 coordinatorSocketStateService.onUnrecoverableError(error)
             }
 
-            else -> coordinatorSocketStateService.onNetworkError(error)
+            else -> {
+                coordinatorSocketStateService.onNetworkError(error)
+            }
         }
     }
 
