@@ -387,6 +387,30 @@ public class RtcSession internal constructor(
         }
     }
 
+    /**
+     * Cleans up a specific orphaned track when the underlying WebRTC track is removed.
+     * This handles the case where a WebRTC stream is removed while the track is still orphaned
+     * (before participant info arrived). Matches JS SDK's track.addEventListener('ended') cleanup.
+     *
+     * @param sessionId The session ID of the participant.
+     * @param trackType The specific track type to cleanup.
+     */
+    private fun cleanupOrphanedTracksForSessionAndType(sessionId: String, trackType: TrackType) {
+        synchronized(orphanedTracks) {
+            val trackToRemove = orphanedTracks.find {
+                it.sessionId == sessionId && it.trackType == trackType
+            }
+            if (trackToRemove != null) {
+                orphanedTracks.remove(trackToRemove)
+                logger.i {
+                    "[cleanupOrphanedTracksForSessionAndType] #orphaned-track; Removed orphaned track " +
+                        "for sessionId=$sessionId, trackType=$trackType due to stream removal, " +
+                        "remaining orphaned=${orphanedTracks.size}"
+                }
+            }
+        }
+    }
+
     private fun getLocalTrack(type: TrackType): MediaTrack? {
         return getTrack(sessionId, type)
     }
@@ -495,6 +519,19 @@ public class RtcSession internal constructor(
                 setTrack(sessionId, trackType, track)
             }
         }
+
+        // Listen for removed streams to cleanup orphaned tracks
+        coroutineScope.launch {
+            subscriber?.removedStreams()?.collect { removed ->
+                val (sessionId, trackType) = removed
+                logger.i {
+                    "[removedStreams] #sfu; #track; #orphaned-track; Cleaning up orphaned tracks for " +
+                        "sessionId=$sessionId, trackType=$trackType"
+                }
+                cleanupOrphanedTracksForSessionAndType(sessionId, trackType)
+            }
+        }
+
         listenToSfuSocket()
 
         call.peerConnectionFactory.setAudioSampleCallback { it ->
@@ -893,6 +930,17 @@ public class RtcSession internal constructor(
 
         subscriber = null
         publisher = null
+
+        // cleanup orphaned tracks to prevent memory leaks
+        synchronized(orphanedTracks) {
+            if (orphanedTracks.isNotEmpty()) {
+                logger.w {
+                    "[cleanup] #orphaned-track; Clearing ${orphanedTracks.size} orphaned tracks " +
+                        "that were never reconciled"
+                }
+                orphanedTracks.clear()
+            }
+        }
 
         // cleanup all non-local tracks
         supervisorJob.cancel()

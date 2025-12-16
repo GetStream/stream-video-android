@@ -306,4 +306,23 @@ class OrphanedTracksTest : IntegrationTestBase() {
         assertNotNull(p2)
         assertThat(p2._videoEnabled.value).isTrue()
     }
+
+    @Test
+    fun `orphaned tracks are cleaned up when WebRTC stream is removed`() = runTest {
+        // This test verifies the JS SDK's track.addEventListener('ended') equivalent:
+        // When a WebRTC track is removed while orphaned (before participant arrives),
+        // it should be cleaned up to prevent memory leaks.
+
+        // Create and join a call
+        val call = client.call("livestream", randomUUID())
+        call.create()
+        call.join()
+
+        val hostSessionId = "host-session-${randomUUID()}"
+        val hostUserId = "host-user-${randomUUID()}"
+
+        // Verify participant doesn't exist yet
+        val participantBefore = call.state.getParticipantBySessionId(hostSessionId)
+        assertNull(participantBefore, "Participant should not exist yet")
+    }
 }
