@@ -276,6 +276,15 @@ class PublisherTest {
     }
 
     @Test
+    fun `negotiate skips setPublisher when no tracks are announced`() = runTest(coroutineContext) {
+        every { publisher.getAnnouncedTracks(any(), any()) } returns emptyList()
+
+        publisher.negotiate()
+
+        coVerify(exactly = 0) { mockSignalServerService.setPublisher(any()) }
+    }
+
+    @Test
     fun `close with stopTracks = true stops publishing and closes connection`() = runTest {
         val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
