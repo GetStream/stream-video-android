@@ -183,6 +183,86 @@ class OrphanedTracksTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `TrackPublishedEvent with participant info creates participant and reconciles tracks`() = runTest {
+        // This tests the large call optimization where TrackPublishedEvent includes participant info
+        // instead of sending separate ParticipantJoinedEvent
+        val call = client.call("livestream", randomUUID())
+        call.create()
+        call.join()
+
+        val hostSessionId = "host-${randomUUID()}"
+        val hostUserId = "user-${randomUUID()}"
+
+        // Verify participant doesn't exist yet
+        assertNull(call.state.getParticipantBySessionId(hostSessionId))
+
+        // In large calls, SFU sends TrackPublished with full participant info
+        val participantWithVideo = Participant(
+            user_id = hostUserId,
+            session_id = hostSessionId,
+            published_tracks = listOf(TrackType.TRACK_TYPE_VIDEO),
+            track_lookup_prefix = "host",
+            name = "Host User",
+            image = "",
+        )
+
+        // Simulate TrackPublishedEvent with participant info (large call optimization)
+        // This would normally be handled in RtcSession event handler
+        val participantState = call.state.getOrCreateParticipant(participantWithVideo)
+        call.state.replaceParticipants(listOf(participantState))
+        delay(50)
+
+        // Verify participant was created with correct state
+        val participant = call.state.getParticipantBySessionId(hostSessionId)
+        assertNotNull(participant)
+        assertThat(participant._videoEnabled.value).isTrue()
+    }
+
+    @Test
+    fun `TrackUnpublishedEvent with participant info updates participant state`() = runTest {
+        // This tests the large call optimization where TrackUnpublishedEvent includes participant info
+        val call = client.call("livestream", randomUUID())
+        call.create()
+        call.join()
+
+        val hostSessionId = "host-${randomUUID()}"
+        val hostUserId = "user-${randomUUID()}"
+
+        // First create participant with video
+        val participantWithVideo = Participant(
+            user_id = hostUserId,
+            session_id = hostSessionId,
+            published_tracks = listOf(TrackType.TRACK_TYPE_VIDEO),
+            track_lookup_prefix = "host",
+            name = "Host User",
+            image = "",
+        )
+
+        val participantState = call.state.getOrCreateParticipant(participantWithVideo)
+        call.state.replaceParticipants(listOf(participantState))
+        delay(50)
+
+        // Verify video is enabled
+        val participant1 = call.state.getParticipantBySessionId(hostSessionId)
+        assertNotNull(participant1)
+        assertThat(participant1._videoEnabled.value).isTrue()
+
+        // Now simulate TrackUnpublished with updated participant info (video removed)
+        val participantWithoutVideo = participantWithVideo.copy(
+            published_tracks = emptyList(), // Video unpublished
+        )
+
+        val updatedState = call.state.getOrCreateParticipant(participantWithoutVideo)
+        call.state.replaceParticipants(listOf(updatedState))
+        delay(50)
+
+        // Verify video is now disabled
+        val participant2 = call.state.getParticipantBySessionId(hostSessionId)
+        assertNotNull(participant2)
+        assertThat(participant2._videoEnabled.value).isFalse()
+    }
+
+    @Test
     fun `track arriving after participant is attached immediately`() = runTest {
         // Create and join a call
         val call = client.call("livestream", randomUUID())

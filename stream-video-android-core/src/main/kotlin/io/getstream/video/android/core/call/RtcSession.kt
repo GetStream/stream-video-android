@@ -1191,6 +1191,20 @@ public class RtcSession internal constructor(
                         }
 
                         is TrackPublishedEvent -> {
+                            // In large calls, TrackPublishedEvent may include participant info
+                            // instead of sending separate ParticipantJoinedEvent
+                            if (event.participant != null) {
+                                logger.i {
+                                    "[TrackPublishedEvent] #orphaned-track; Participant info included, " +
+                                        "creating/updating participant for sessionId=${event.sessionId}"
+                                }
+                                val participantState = call.state.getOrCreateParticipant(
+                                    event.participant,
+                                )
+                                // Reconcile any orphaned tracks that arrived before this event
+                                reconcileOrphanedTracks(event.sessionId)
+                            }
+
                             updatePublishState(
                                 userId = event.userId,
                                 sessionId = event.sessionId,
@@ -1199,6 +1213,7 @@ public class RtcSession internal constructor(
                                 audioEnabled = true,
                                 paused = false,
                             )
+
                             // Reconcile orphaned tracks for this participant
                             // The track might have arrived before the participant was created
                             reconcileOrphanedTracks(event.sessionId)
@@ -1218,6 +1233,20 @@ public class RtcSession internal constructor(
                         }
 
                         is TrackUnpublishedEvent -> {
+                            // In large calls, TrackUnpublishedEvent may include participant info
+                            // instead of sending separate events
+                            if (event.participant != null) {
+                                logger.i {
+                                    "[TrackUnpublishedEvent] #orphaned-track; Participant info included, " +
+                                        "updating participant for sessionId=${event.sessionId}"
+                                }
+                                val participantState = call.state.getOrCreateParticipant(
+                                    event.participant,
+                                )
+                                // Note: For unpublish, we don't need to reconcile orphaned tracks
+                                // since tracks are being removed, not added
+                            }
+
                             updatePublishState(
                                 userId = event.userId,
                                 sessionId = event.sessionId,
