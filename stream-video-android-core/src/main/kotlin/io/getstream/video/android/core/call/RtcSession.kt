@@ -264,7 +264,6 @@ public class RtcSession internal constructor(
 
     /**
      * Data class representing a track that arrived before its participant existed.
-     * Based on the JS SDK's orphaned track pattern.
      *
      * These tracks are stored temporarily until the participant information arrives,
      * at which point they can be reconciled and attached to the participant.
@@ -341,7 +340,6 @@ public class RtcSession internal constructor(
      * The track will be stored until the participant is created, at which point
      * it can be reconciled and attached via [takeOrphanedTracks].
      *
-     * Based on the JS SDK's orphaned track pattern.
      */
     private fun registerOrphanedTrack(sessionId: String, trackType: TrackType, track: MediaTrack) {
         synchronized(orphanedTracks) {
@@ -356,8 +354,6 @@ public class RtcSession internal constructor(
     /**
      * Retrieves and removes all orphaned tracks for a specific sessionId.
      * Returns a list of track type to track pairs that can be attached to the participant.
-     *
-     * Based on the JS SDK's takeOrphanedTracks pattern.
      */
     private fun takeOrphanedTracks(sessionId: String): List<Pair<TrackType, MediaTrack>> {
         return synchronized(orphanedTracks) {
@@ -376,8 +372,6 @@ public class RtcSession internal constructor(
     /**
      * Reconciles orphaned tracks for a participant by attaching any tracks
      * that arrived before the participant was created.
-     *
-     * Based on the JS SDK's reconcileOrphanedTracks pattern.
      */
     private fun reconcileOrphanedTracks(sessionId: String) {
         val tracks = takeOrphanedTracks(sessionId)
