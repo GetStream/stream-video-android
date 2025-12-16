@@ -198,7 +198,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException("The API key cannot be blank")
         }
 
-        if (token.isBlank()) {
+        if (user.type != UserType.Guest && token.isBlank()) {
             throw IllegalArgumentException("The token cannot be blank")
         }
 
