@@ -18,13 +18,11 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
-import io.getstream.video.android.core.events.JoinCallResponseEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import stream.video.sfu.models.CallState
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
 import kotlin.test.assertNotNull
