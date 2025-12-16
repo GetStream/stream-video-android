@@ -342,12 +342,10 @@ public class RtcSession internal constructor(
      *
      */
     private fun registerOrphanedTrack(sessionId: String, trackType: TrackType, track: MediaTrack) {
-        synchronized(orphanedTracks) {
-            orphanedTracks.add(OrphanedTrack(sessionId, trackType, track))
-            logger.i {
-                "[registerOrphanedTrack] #orphaned-track; Registered track for sessionId=$sessionId, " +
-                    "type=$trackType, total orphaned=${orphanedTracks.size}"
-            }
+        orphanedTracks.add(OrphanedTrack(sessionId, trackType, track))
+        logger.i {
+            "[registerOrphanedTrack] #orphaned-track; Registered track for sessionId=$sessionId, " +
+                "type=$trackType, total orphaned=${orphanedTracks.size}"
         }
     }
 
@@ -356,17 +354,15 @@ public class RtcSession internal constructor(
      * Returns a list of track type to track pairs that can be attached to the participant.
      */
     private fun takeOrphanedTracks(sessionId: String): List<Pair<TrackType, MediaTrack>> {
-        return synchronized(orphanedTracks) {
-            val tracks = orphanedTracks.filter { it.sessionId == sessionId }
-            if (tracks.isNotEmpty()) {
-                orphanedTracks.removeAll(tracks)
-                logger.i {
-                    "[takeOrphanedTracks] #orphaned-track; Retrieved ${tracks.size} orphaned tracks " +
-                        "for sessionId=$sessionId, remaining orphaned=${orphanedTracks.size}"
-                }
+        val tracks = orphanedTracks.filter { it.sessionId == sessionId }
+        if (tracks.isNotEmpty()) {
+            orphanedTracks.removeAll(tracks)
+            logger.i {
+                "[takeOrphanedTracks] #orphaned-track; Retrieved ${tracks.size} orphaned tracks " +
+                    "for sessionId=$sessionId, remaining orphaned=${orphanedTracks.size}"
             }
-            tracks.map { it.trackType to it.track }
         }
+        return tracks.map { it.trackType to it.track }
     }
 
     /**
@@ -396,17 +392,15 @@ public class RtcSession internal constructor(
      * @param trackType The specific track type to cleanup.
      */
     private fun cleanupOrphanedTracksForSessionAndType(sessionId: String, trackType: TrackType) {
-        synchronized(orphanedTracks) {
-            val trackToRemove = orphanedTracks.find {
-                it.sessionId == sessionId && it.trackType == trackType
-            }
-            if (trackToRemove != null) {
-                orphanedTracks.remove(trackToRemove)
-                logger.i {
-                    "[cleanupOrphanedTracksForSessionAndType] #orphaned-track; Removed orphaned track " +
-                        "for sessionId=$sessionId, trackType=$trackType due to stream removal, " +
-                        "remaining orphaned=${orphanedTracks.size}"
-                }
+        val trackToRemove = orphanedTracks.find {
+            it.sessionId == sessionId && it.trackType == trackType
+        }
+        if (trackToRemove != null) {
+            orphanedTracks.remove(trackToRemove)
+            logger.i {
+                "[cleanupOrphanedTracksForSessionAndType] #orphaned-track; Removed orphaned track " +
+                    "for sessionId=$sessionId, trackType=$trackType due to stream removal, " +
+                    "remaining orphaned=${orphanedTracks.size}"
             }
         }
     }
