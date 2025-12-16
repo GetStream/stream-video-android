@@ -261,6 +261,26 @@ public class RtcSession internal constructor(
 
     private val logger by taggedLogger("Video:RtcSession")
     private val parser: VideoParser = MoshiVideoParser()
+
+    /**
+     * Data class representing a track that arrived before its participant existed.
+     * Based on the JS SDK's orphaned track pattern.
+     *
+     * These tracks are stored temporarily until the participant information arrives,
+     * at which point they can be reconciled and attached to the participant.
+     */
+    private data class OrphanedTrack(
+        val sessionId: String,
+        val trackType: TrackType,
+        val track: MediaTrack,
+    )
+
+    /**
+     * Storage for tracks that arrived before their participants.
+     * Synchronized list to handle concurrent access from different coroutines.
+     */
+    private val orphanedTracks = mutableListOf<OrphanedTrack>()
+
     internal val _peerConnectionStates =
         MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
             null,
@@ -286,24 +306,90 @@ public class RtcSession internal constructor(
     }
 
     private fun setTrack(sessionId: String, type: TrackType, track: MediaTrack) {
+        val participant = call.state.getParticipantBySessionId(sessionId)
+
+        if (participant == null) {
+            logger.w {
+                "[setTrack] #orphaned-track; Participant not found for sessionId=$sessionId, " +
+                    "registering orphaned track (type=$type)"
+            }
+            registerOrphanedTrack(sessionId, type, track)
+            return
+        }
+
         when (type) {
             TrackType.TRACK_TYPE_VIDEO -> {
-                call.state.getParticipantBySessionId(sessionId)?.setVideoTrack(track.asVideoTrack())
+                participant.setVideoTrack(track.asVideoTrack())
             }
 
             TrackType.TRACK_TYPE_AUDIO -> {
-                call.state.getParticipantBySessionId(sessionId)?._audioTrack?.value =
-                    track.asAudioTrack()
+                participant._audioTrack.value = track.asAudioTrack()
             }
 
             TrackType.TRACK_TYPE_SCREEN_SHARE, TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> {
-                call.state.getParticipantBySessionId(sessionId)?._screenSharingTrack?.value =
-                    track.asVideoTrack()
+                participant._screenSharingTrack.value = track.asVideoTrack()
             }
 
             TrackType.TRACK_TYPE_UNSPECIFIED -> {
                 logger.w { "Unspecified track type" }
             }
+        }
+    }
+
+    /**
+     * Registers a track that arrived before its participant existed.
+     * The track will be stored until the participant is created, at which point
+     * it can be reconciled and attached via [takeOrphanedTracks].
+     *
+     * Based on the JS SDK's orphaned track pattern.
+     */
+    private fun registerOrphanedTrack(sessionId: String, trackType: TrackType, track: MediaTrack) {
+        synchronized(orphanedTracks) {
+            orphanedTracks.add(OrphanedTrack(sessionId, trackType, track))
+            logger.i {
+                "[registerOrphanedTrack] #orphaned-track; Registered track for sessionId=$sessionId, " +
+                    "type=$trackType, total orphaned=${orphanedTracks.size}"
+            }
+        }
+    }
+
+    /**
+     * Retrieves and removes all orphaned tracks for a specific sessionId.
+     * Returns a list of track type to track pairs that can be attached to the participant.
+     *
+     * Based on the JS SDK's takeOrphanedTracks pattern.
+     */
+    private fun takeOrphanedTracks(sessionId: String): List<Pair<TrackType, MediaTrack>> {
+        return synchronized(orphanedTracks) {
+            val tracks = orphanedTracks.filter { it.sessionId == sessionId }
+            if (tracks.isNotEmpty()) {
+                orphanedTracks.removeAll(tracks)
+                logger.i {
+                    "[takeOrphanedTracks] #orphaned-track; Retrieved ${tracks.size} orphaned tracks " +
+                        "for sessionId=$sessionId, remaining orphaned=${orphanedTracks.size}"
+                }
+            }
+            tracks.map { it.trackType to it.track }
+        }
+    }
+
+    /**
+     * Reconciles orphaned tracks for a participant by attaching any tracks
+     * that arrived before the participant was created.
+     *
+     * Based on the JS SDK's reconcileOrphanedTracks pattern.
+     */
+    private fun reconcileOrphanedTracks(sessionId: String) {
+        val tracks = takeOrphanedTracks(sessionId)
+        if (tracks.isEmpty()) return
+
+        logger.i {
+            "[reconcileOrphanedTracks] #orphaned-track; Reconciling ${tracks.size} orphaned tracks " +
+                "for sessionId=$sessionId"
+        }
+
+        tracks.forEach { (trackType, track) ->
+            setTrack(sessionId, trackType, track)
         }
     }
 
@@ -1069,6 +1155,12 @@ public class RtcSession internal constructor(
                                 call.state.getOrCreateParticipant(it)
                             }
                             call.state.replaceParticipants(participantStates)
+
+                            // Reconcile orphaned tracks for all participants
+                            participantStates.forEach { participant ->
+                                reconcileOrphanedTracks(participant.sessionId)
+                            }
+
                             sfuConnectionModule.socketConnection.whenConnected {
                                 logger.d { "JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
                                 if (publisher == null) {
@@ -1107,6 +1199,9 @@ public class RtcSession internal constructor(
                                 audioEnabled = true,
                                 paused = false,
                             )
+                            // Reconcile orphaned tracks for this participant
+                            // The track might have arrived before the participant was created
+                            reconcileOrphanedTracks(event.sessionId)
                         }
 
                         is InboundStateNotificationEvent -> {
@@ -1134,6 +1229,9 @@ public class RtcSession internal constructor(
                         }
 
                         is ParticipantJoinedEvent -> {
+                            // Reconcile orphaned tracks for the participant that just joined
+                            // CallState will create the participant, then we attach any orphaned tracks
+                            reconcileOrphanedTracks(event.participant.session_id)
                             // the UI layer will automatically trigger updateParticipantsSubscriptions
                         }
 
