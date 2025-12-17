@@ -276,9 +276,17 @@ public class RtcSession internal constructor(
 
     /**
      * Storage for tracks that arrived before their participants.
-     * Synchronized list to handle concurrent access from different coroutines.
+     * ConcurrentHashMap for thread-safe put/remove operations.
+     * Compound operations (takeOrphanedTracks) require additional synchronization.
+     * Key format: "$sessionId:${trackType.value}"
      */
-    private val orphanedTracks = mutableListOf<OrphanedTrack>()
+    private val orphanedTracks = java.util.concurrent.ConcurrentHashMap<String, OrphanedTrack>()
+
+    /**
+     * Generates a unique key for the orphaned tracks map.
+     */
+    private fun orphanedTrackKey(sessionId: String, trackType: TrackType): String =
+        "$sessionId:${trackType.value}"
 
     internal val _peerConnectionStates =
         MutableStateFlow<Pair<PeerConnection.PeerConnectionState?, PeerConnection.PeerConnectionState?>?>(
@@ -339,10 +347,11 @@ public class RtcSession internal constructor(
      * Registers a track that arrived before its participant existed.
      * The track will be stored until the participant is created, at which point
      * it can be reconciled and attached via [takeOrphanedTracks].
-     *
+     * Thread-safe: ConcurrentHashMap.put() is atomic.
      */
     private fun registerOrphanedTrack(sessionId: String, trackType: TrackType, track: MediaTrack) {
-        orphanedTracks.add(OrphanedTrack(sessionId, trackType, track))
+        val key = orphanedTrackKey(sessionId, trackType)
+        orphanedTracks[key] = OrphanedTrack(sessionId, trackType, track)
         logger.i {
             "[registerOrphanedTrack] #orphaned-track; Registered track for sessionId=$sessionId, " +
                 "type=$trackType, total orphaned=${orphanedTracks.size}"
@@ -352,17 +361,31 @@ public class RtcSession internal constructor(
     /**
      * Retrieves and removes all orphaned tracks for a specific sessionId.
      * Returns a list of track type to track pairs that can be attached to the participant.
+     * Synchronized to prevent concurrent reconciliation of the same tracks.
      */
-    private fun takeOrphanedTracks(sessionId: String): List<Pair<TrackType, MediaTrack>> {
-        val tracks = orphanedTracks.filter { it.sessionId == sessionId }
+    private fun takeOrphanedTracks(
+        sessionId: String,
+    ): List<Pair<TrackType, MediaTrack>> = synchronized(orphanedTracks) {
+        val tracks = mutableListOf<Pair<TrackType, MediaTrack>>()
+
+        // Remove all tracks for this sessionId
+        val iterator = orphanedTracks.entries.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            if (entry.value.sessionId == sessionId) {
+                tracks.add(entry.value.trackType to entry.value.track)
+                iterator.remove()
+            }
+        }
+
         if (tracks.isNotEmpty()) {
-            orphanedTracks.removeAll(tracks)
             logger.i {
                 "[takeOrphanedTracks] #orphaned-track; Retrieved ${tracks.size} orphaned tracks " +
                     "for sessionId=$sessionId, remaining orphaned=${orphanedTracks.size}"
             }
         }
-        return tracks.map { it.trackType to it.track }
+
+        tracks
     }
 
     /**
@@ -387,16 +410,15 @@ public class RtcSession internal constructor(
      * Cleans up a specific orphaned track when the underlying WebRTC track is removed.
      * This handles the case where a WebRTC stream is removed while the track is still orphaned
      * (before participant info arrived). Matches JS SDK's track.addEventListener('ended') cleanup.
+     * Thread-safe: ConcurrentHashMap.remove() is atomic.
      *
      * @param sessionId The session ID of the participant.
      * @param trackType The specific track type to cleanup.
      */
     private fun cleanupOrphanedTracksForSessionAndType(sessionId: String, trackType: TrackType) {
-        val trackToRemove = orphanedTracks.find {
-            it.sessionId == sessionId && it.trackType == trackType
-        }
-        if (trackToRemove != null) {
-            orphanedTracks.remove(trackToRemove)
+        val key = orphanedTrackKey(sessionId, trackType)
+        val removed = orphanedTracks.remove(key)
+        if (removed != null) {
             logger.i {
                 "[cleanupOrphanedTracksForSessionAndType] #orphaned-track; Removed orphaned track " +
                     "for sessionId=$sessionId, trackType=$trackType due to stream removal, " +
@@ -927,14 +949,13 @@ public class RtcSession internal constructor(
         publisher = null
 
         // cleanup orphaned tracks to prevent memory leaks
-        synchronized(orphanedTracks) {
-            if (orphanedTracks.isNotEmpty()) {
-                logger.w {
-                    "[cleanup] #orphaned-track; Clearing ${orphanedTracks.size} orphaned tracks " +
-                        "that were never reconciled"
-                }
-                orphanedTracks.clear()
+        // Thread-safe: ConcurrentHashMap.clear() is atomic
+        if (orphanedTracks.isNotEmpty()) {
+            logger.w {
+                "[cleanup] #orphaned-track; Clearing ${orphanedTracks.size} orphaned tracks " +
+                    "that were never reconciled"
             }
+            orphanedTracks.clear()
         }
 
         // cleanup all non-local tracks
