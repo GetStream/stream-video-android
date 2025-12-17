@@ -1302,7 +1302,6 @@ public class RtcSession internal constructor(
                         }
 
                         is TrackUnpublishedEvent -> {
-
                             updatePublishState(
                                 userId = event.userId,
                                 sessionId = event.sessionId,
