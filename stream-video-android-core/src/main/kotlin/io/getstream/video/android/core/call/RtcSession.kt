@@ -1302,19 +1302,6 @@ public class RtcSession internal constructor(
                         }
 
                         is TrackUnpublishedEvent -> {
-                            // In large calls, TrackUnpublishedEvent may include participant info
-                            // instead of sending separate events
-                            if (event.participant != null) {
-                                logger.i {
-                                    "[TrackUnpublishedEvent] #orphaned-track; Participant info included, " +
-                                        "updating participant for sessionId=${event.sessionId}"
-                                }
-                                val participantState = call.state.getOrCreateParticipant(
-                                    event.participant,
-                                )
-                                // Note: For unpublish, we don't need to reconcile orphaned tracks
-                                // since tracks are being removed, not added
-                            }
 
                             updatePublishState(
                                 userId = event.userId,
