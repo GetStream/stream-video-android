@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2025 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core.notifications.internal.service.permissions
 
-import io.getstream.log.TaggedLogger
-import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.notifications.internal.service.permissions.AudioCallPermissionManager
+import android.annotation.SuppressLint
+import android.content.pm.ServiceInfo
 
-internal class AudioCallService : CallService() {
-    override val logger: TaggedLogger by taggedLogger("AudioCallService")
-    override val permissionManager = AudioCallPermissionManager()
+internal class LivestreamAudioCallPermissionManager : ForegroundServicePermissionManager() {
+
+    override val requiredForegroundTypes: Set<Int>
+        @SuppressLint("InlinedApi")
+        get() = setOf(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
+        )
 }
