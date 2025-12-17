@@ -21,7 +21,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.audio.AudioSwitchHandler
-import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.audio.CustomAudioDevice
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -71,7 +71,7 @@ class MicrophoneManagerTest {
 
         // When
         microphoneManager.enable() // 1
-        microphoneManager.select(null as StreamAudioDevice?) // 0
+        microphoneManager.select(null as CustomAudioDevice?) // 0
         microphoneManager.resume() // 2, 3, Resume calls enable internally, thus two invocations
         microphoneManager.disable() // 4
         microphoneManager.pause() // 5
