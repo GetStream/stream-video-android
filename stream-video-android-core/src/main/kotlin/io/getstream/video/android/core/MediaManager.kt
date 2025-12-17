@@ -236,7 +236,9 @@ class SpeakerManager(
                     it !is CustomAudioDevice.Speakerphone
                 }
 
-                logger.d { "#deviceDebug; selectedBeforeSpeakerCustomAudioDevice: $selectedBeforeSpeakerCustomAudioDevice" }
+                logger.d {
+                    "#deviceDebug; selectedBeforeSpeakerCustomAudioDevice: $selectedBeforeSpeakerCustomAudioDevice"
+                }
 
                 _speakerPhoneEnabled.value = true
                 microphoneManager.select(speaker)

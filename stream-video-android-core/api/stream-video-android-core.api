@@ -8397,7 +8397,9 @@ public final class io/getstream/video/android/core/SpeakerManager {
 	public final fun setAudioUsage (I)Z
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/SpeakerManager;ZZILjava/lang/Object;)V
+	public final fun setSpeakerPhone (ZLio/getstream/video/android/core/audio/CustomAudioDevice;)V
 	public final fun setSpeakerPhone (ZLio/getstream/video/android/core/audio/StreamAudioDevice;)V
+	public static synthetic fun setSpeakerPhone$default (Lio/getstream/video/android/core/SpeakerManager;ZLio/getstream/video/android/core/audio/CustomAudioDevice;ILjava/lang/Object;)V
 	public static synthetic fun setSpeakerPhone$default (Lio/getstream/video/android/core/SpeakerManager;ZLio/getstream/video/android/core/audio/StreamAudioDevice;ILjava/lang/Object;)V
 	public final fun setVolume (I)V
 }
