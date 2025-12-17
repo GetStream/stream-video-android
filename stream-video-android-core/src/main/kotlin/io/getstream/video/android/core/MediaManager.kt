@@ -122,19 +122,28 @@ class SpeakerManager(
     val speakerPhoneEnabled: StateFlow<Boolean> = _speakerPhoneEnabled
 
     internal var selectedBeforeSpeaker: StreamAudioDevice? = null
+    internal var selectedBeforeSpeakerCustomAudioDevice: CustomAudioDevice? = null
 
     internal fun enable(fromUser: Boolean = true) {
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
-        setSpeakerPhone(true)
+        if (mediaManager.useCustomAudioSwitch) {
+            setSpeakerPhone(true, null as CustomAudioDevice?)
+        } else {
+            setSpeakerPhone(true, null as StreamAudioDevice?)
+        }
     }
 
     fun disable(fromUser: Boolean = true) {
         if (fromUser) {
             _status.value = DeviceStatus.Disabled
         }
-        setSpeakerPhone(false)
+        if (mediaManager.useCustomAudioSwitch) {
+            setSpeakerPhone(false, null as CustomAudioDevice?)
+        } else {
+            setSpeakerPhone(false, null as StreamAudioDevice?)
+        }
     }
 
     /**
@@ -193,6 +202,58 @@ class SpeakerManager(
                     selectedBeforeSpeaker != null &&
                         selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
                         devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
+
+                    else -> firstNonSpeaker
+                }
+
+                microphoneManager.select(fallback)
+            }
+        }
+    }
+
+    /**
+     * Enables or disables the speakerphone.
+     *
+     * When the speaker is disabled the device that gets selected next is by default the first device
+     * that is NOT a speakerphone. To override this use [defaultFallback].
+     * If you want the earpice to be selected if the speakerphone is disabled do
+     * ```kotlin
+     * setSpeakerPhone(enable, CustomAudioDevice.Earpiece)
+     * ```
+     *
+     * @param enable if true, enables the speakerphone, if false disables it and selects another device.
+     * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
+     * */
+    fun setSpeakerPhone(enable: Boolean, defaultFallback: CustomAudioDevice? = null) {
+        microphoneManager.enforceSetup(preferSpeaker = enable) {
+            val devices = microphoneManager.customAudioDevices.value
+            if (enable) {
+                val speaker =
+                    devices.filterIsInstance<CustomAudioDevice.Speakerphone>().firstOrNull()
+                selectedBeforeSpeakerCustomAudioDevice = microphoneManager.selectedCustomAudioDevice.value.takeUnless {
+                    it is CustomAudioDevice.Speakerphone
+                } ?: devices.firstOrNull {
+                    it !is CustomAudioDevice.Speakerphone
+                }
+
+                logger.d { "#deviceDebug; selectedBeforeSpeakerCustomAudioDevice: $selectedBeforeSpeakerCustomAudioDevice" }
+
+                _speakerPhoneEnabled.value = true
+                microphoneManager.select(speaker)
+            } else {
+                _speakerPhoneEnabled.value = false
+                // swap back to the old one
+                val defaultFallbackFromType = defaultFallback?.let {
+                    devices.filterIsInstance(defaultFallback::class.java)
+                }?.firstOrNull()
+
+                val firstNonSpeaker = devices.firstOrNull { it !is CustomAudioDevice.Speakerphone }
+
+                val fallback: CustomAudioDevice? = when {
+                    defaultFallbackFromType != null -> defaultFallbackFromType
+                    selectedBeforeSpeakerCustomAudioDevice != null &&
+                        selectedBeforeSpeakerCustomAudioDevice !is CustomAudioDevice.Speakerphone &&
+                        devices.contains(selectedBeforeSpeakerCustomAudioDevice) -> selectedBeforeSpeakerCustomAudioDevice
 
                     else -> firstNonSpeaker
                 }
@@ -644,19 +705,21 @@ class MicrophoneManager(
      */
     fun select(device: StreamAudioDevice?) {
         logger.i { "selecting device $device" }
-        ifAudioHandlerInitialized { it.selectDevice(device) }
-        _selectedDevice.value = device
+        enforceSetup {
+            ifAudioHandlerInitialized { it.selectDevice(device) }
+            _selectedDevice.value = device
 
-        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
-            mediaManager.speaker._status.value = DeviceStatus.Disabled
-        }
+            if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+                mediaManager.speaker._status.value = DeviceStatus.Disabled
+            }
 
-        if (device is StreamAudioDevice.Speakerphone) {
-            mediaManager.speaker._status.value = DeviceStatus.Enabled
-        }
+            if (device is StreamAudioDevice.Speakerphone) {
+                mediaManager.speaker._status.value = DeviceStatus.Enabled
+            }
 
-        if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
-            nonHeadsetFallbackDevice = device
+            if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
+                nonHeadsetFallbackDevice = device
+            }
         }
     }
 
@@ -665,19 +728,21 @@ class MicrophoneManager(
      */
     fun select(device: CustomAudioDevice?) {
         logger.i { "selecting device $device" }
-        ifAudioHandlerInitialized { it.selectCustomAudioDevice(device) }
-        _selectedNativeDevice.value = device
+        enforceSetup {
+            ifAudioHandlerInitialized { it.selectCustomAudioDevice(device) }
+            _selectedNativeDevice.value = device
 
-        if (device !is CustomAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
-            mediaManager.speaker._status.value = DeviceStatus.Disabled
-        }
+            if (device !is CustomAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+                mediaManager.speaker._status.value = DeviceStatus.Disabled
+            }
 
-        if (device is CustomAudioDevice.Speakerphone) {
-            mediaManager.speaker._status.value = DeviceStatus.Enabled
-        }
+            if (device is CustomAudioDevice.Speakerphone) {
+                mediaManager.speaker._status.value = DeviceStatus.Enabled
+            }
 
-        if (device !is CustomAudioDevice.BluetoothHeadset && device !is CustomAudioDevice.WiredHeadset) {
-            nonHeadsetFallbackCustomeAudioDevice = device
+            if (device !is CustomAudioDevice.BluetoothHeadset && device !is CustomAudioDevice.WiredHeadset) {
+                nonHeadsetFallbackCustomeAudioDevice = device
+            }
         }
     }
 
