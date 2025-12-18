@@ -750,6 +750,7 @@ public class CallState(
             }
 
             is CallRejectedEvent -> {
+                _createdBy.value = event.call.createdBy.toUser()
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
