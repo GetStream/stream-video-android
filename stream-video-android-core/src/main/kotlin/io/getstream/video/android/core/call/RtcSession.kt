@@ -815,7 +815,6 @@ public class RtcSession internal constructor(
 
         // cleanup the publisher and subcriber peer connections
 
-
         // cleanup all non-local tracks
         supervisorJob.cancel()
 

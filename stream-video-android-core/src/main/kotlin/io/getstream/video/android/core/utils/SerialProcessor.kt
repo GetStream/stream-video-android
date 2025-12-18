@@ -93,7 +93,7 @@ internal class SerialProcessor(
                     }
                     logger.d { "[execute] SerialProcessor worker finished processing all jobs in channel" }
                 } catch (e: Exception) {
-                    logger.e(e) { "[execute] SerialProcessor (${jobName}) worker crashed: ${e.message}" }
+                    logger.e(e) { "[execute] SerialProcessor ($jobName) worker crashed: ${e.message}" }
                 } finally {
                     logger.d { "[execute] SerialProcessor worker ended (isActive: ${workerJob?.isActive})" }
                     workerJob = null

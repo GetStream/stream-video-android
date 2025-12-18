@@ -134,14 +134,14 @@ open class StreamPeerConnection(
         val pcFailedOrClosed = when (state.value) {
             PeerConnection.PeerConnectionState.CLOSED,
             PeerConnection.PeerConnectionState.FAILED,
-                -> true
+            -> true
 
             else -> false
         }
         val iceFailedOrClosed = when (iceState.value) {
             PeerConnection.IceConnectionState.FAILED,
             PeerConnection.IceConnectionState.CLOSED,
-                -> true
+            -> true
 
             else -> false
         }

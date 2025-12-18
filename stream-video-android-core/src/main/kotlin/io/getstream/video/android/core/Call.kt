@@ -108,7 +108,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
@@ -755,7 +754,7 @@ public class Call(
                 announced_tracks = publishingInfo,
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
-                reason = reason
+                reason = reason,
             )
             session.fastReconnect(reconnectDetails)
             val oldSessionStats = collectStats()
