@@ -600,6 +600,7 @@ public class RtcSession internal constructor(
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
             publisher_sdp = throwawayPublisherSdpAndOptions(),
+            unified_session_id = call.unifiedSessionId,
             session_id = sessionId,
             token = sfuToken,
             fast_reconnect = false,
@@ -1590,6 +1591,7 @@ public class RtcSession internal constructor(
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
             publisher_sdp = throwawayPublisherSdpAndOptions(),
+            unified_session_id = call.unifiedSessionId,
             session_id = sessionId,
             token = sfuToken,
             client_details = clientDetails,
