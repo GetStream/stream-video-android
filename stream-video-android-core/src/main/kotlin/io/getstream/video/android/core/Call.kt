@@ -713,7 +713,7 @@ public class Call(
         }
     }
 
-    internal suspend fun collectStats(publisher: Publisher?, subscriber: Subscriber?) : CallStatsReport {
+    internal suspend fun collectStats(publisher: Publisher?, subscriber: Subscriber?): CallStatsReport {
         val publisherStats = publisher?.getStats()
         val subscriberStats = subscriber?.getStats()
         state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
