@@ -92,16 +92,16 @@ internal class CallLifecycleManager {
 
     private fun handleIncomingCallTaskRemoved(scope: CoroutineScope, call: Call) {
         val memberCount = call.state.members.value.size
-        logger.i { "[onTaskRemoved] Total members: $memberCount" }
+        logger.i { "[handleIncomingCallTaskRemoved] Total members: $memberCount" }
 
         if (memberCount == 2) {
             scope.launch {
                 call.reject(source = "memberCount == 2")
-                logger.i { "[onTaskRemoved] Ended incoming call for both users" }
+                logger.i { "[handleIncomingCallTaskRemoved] Ended incoming call for both users" }
             }
         } else {
             call.leave()
-            logger.i { "[onTaskRemoved] Ended incoming call for me" }
+            logger.i { "[handleIncomingCallTaskRemoved] Ended incoming call for me" }
         }
     }
 }

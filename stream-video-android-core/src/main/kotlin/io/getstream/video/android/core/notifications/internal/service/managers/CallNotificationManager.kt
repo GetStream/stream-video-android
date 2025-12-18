@@ -23,14 +23,18 @@ import android.app.Service
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
+import kotlin.getValue
 
 internal class CallNotificationManager {
+    private val logger by taggedLogger("CallNotificationManager")
+
     @SuppressLint("MissingPermission")
     fun justNotify(
         service: Service,
@@ -48,6 +52,8 @@ internal class CallNotificationManager {
     }
 
     fun cancelNotifications(service: Service, callId: StreamCallId?) {
+        logger.d { "[cancelNotifications]" }
+
         val notificationManager = NotificationManagerCompat.from(service)
 
         callId?.let {
