@@ -25,6 +25,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -75,7 +76,7 @@ internal class CallEventObserver(
                 handleIncomingCallRejectedByMeOrCaller(
                     rejectedByUserId = event.user.id,
                     myUserId = streamVideo.userId,
-                    createdByUserId = call.state.createdBy.value?.id,
+                    createdByUserId = event.call.createdBy.toUser().id,
                     activeCallExists = streamVideo.state.activeCall.value != null,
                     onServiceStop = onServiceStop,
                     onRemoveIncoming = onRemoveIncoming,
@@ -94,6 +95,7 @@ internal class CallEventObserver(
         myUserId: String,
         onServiceStop: () -> Unit,
     ) {
+        logger.d { "[handleIncomingCallAcceptedByMeOnAnotherDevice]" }
         val callRingingState = call.state.ringingState.value
 
         // If I accepted the call on another device while this device is still ringing
@@ -114,6 +116,10 @@ internal class CallEventObserver(
         onRemoveIncoming: () -> Unit,
     ) {
         // Stop service if rejected by me or by the caller
+        logger.d {
+            "[handleIncomingCallRejectedByMeOrCaller] rejectedByUserId == myUserId :${rejectedByUserId == myUserId}, rejectedByUserId == createdByUserId :${rejectedByUserId == createdByUserId}"
+        }
+
         if (rejectedByUserId == myUserId || rejectedByUserId == createdByUserId) {
             if (activeCallExists) {
                 // Another call is active - just remove incoming notification
