@@ -63,6 +63,7 @@ import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
+import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.scope.ScopeProvider
@@ -91,6 +92,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -711,9 +713,9 @@ public class Call(
         }
     }
 
-    internal suspend fun collectStats(): CallStatsReport {
-        val publisherStats = session?.getPublisherStats()
-        val subscriberStats = session?.getSubscriberStats()
+    internal suspend fun collectStats(publisher: Publisher?, subscriber: Subscriber?) : CallStatsReport {
+        val publisherStats = publisher?.getStats()
+        val subscriberStats = subscriber?.getStats()
         state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
         state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
         state.stats.updateLocalStats()
@@ -733,6 +735,10 @@ public class Call(
         }
 
         return report
+    }
+
+    internal suspend fun collectStats(): CallStatsReport {
+        return collectStats(session?.publisher, session?.subscriber)
     }
 
     /**
@@ -942,7 +948,14 @@ public class Call(
             .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
-        cleanup()
+
+        clientImpl.scope.launch {
+            safeCall {
+                val stats = collectStats()
+                session?.sendCallStats(stats)
+            }
+            cleanup()
+        }
     }
 
     /** ends the call for yourself as well as other users */
