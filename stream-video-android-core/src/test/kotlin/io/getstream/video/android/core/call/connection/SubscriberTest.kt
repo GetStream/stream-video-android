@@ -114,10 +114,10 @@ class SubscriberTest {
                 sessionId = "session-id",
                 sfuClient = mockSignalServer,
                 coroutineScope = testScope,
-                onIceCandidateRequest = null,
-                fastReconnect = {},
-                rejoin = {},
                 tracer = Tracer("subscriber").also { setEnabled(false) },
+                rejoin = {},
+                fastReconnect = {},
+                onIceCandidateRequest = null,,
             ),
             recordPrivateCalls = true,
         ) {

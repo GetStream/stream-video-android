@@ -239,7 +239,7 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 2000L,
             lifecycle = lifecycle,
             onSignalingLost = { error ->
-                call.debug.fastReconnect()
+                call.debug.fastReconnect("SignalingLost:${error.message}:${error.code}")
             },
             tracer = sfuTracer,
             tokenRepository = TokenRepository(sfuToken),
@@ -462,9 +462,16 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
-                    is SfuSocketState.Connected ->
+                    is SfuSocketState.Connected -> {
                         call.state._connection.value =
                             RealtimeConnection.Connected
+
+                        val pendingTrickleEvents = iceTricklePendingEvents.toList()
+                        iceTricklePendingEvents.clear()
+                        pendingTrickleEvents.forEach {
+                            sendIceCandidate(it.first, it.second)
+                        }
+                    }
 
                     is SfuSocketState.Connecting ->
                         call.state._connection.value =
@@ -492,11 +499,11 @@ public class RtcSession internal constructor(
                 logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
                 when (reconnectStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.fastReconnect()
+                        call.fastReconnect("Error:${it.streamError.message}:WEBSOCKET_RECONNECT_STRATEGY_FAST")
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
-                        call.rejoin()
+                        call.rejoin("Error:${it.streamError.message}:WEBSOCKET_RECONNECT_STRATEGY_REJOIN")
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
@@ -600,6 +607,7 @@ public class RtcSession internal constructor(
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
             publisher_sdp = throwawayPublisherSdpAndOptions(),
+            unified_session_id = call.unifiedSessionId,
             session_id = sessionId,
             token = sfuToken,
             fast_reconnect = false,
@@ -804,16 +812,9 @@ public class RtcSession internal constructor(
             }
         }
         sfuConnectionMigrationModule = null
-        subscriber?.clear()
 
         // cleanup the publisher and subcriber peer connections
-        safeCall {
-            subscriber?.close()
-            publisher?.close(true)
-        }
 
-        subscriber = null
-        publisher = null
 
         // cleanup all non-local tracks
         supervisorJob.cancel()
@@ -899,27 +900,12 @@ public class RtcSession internal constructor(
             sessionId = sessionId,
             enableStereo = clientImpl.enableStereoForSubscriber,
             tracer = subscriberTracer,
+            sfuConnectionModule = sfuConnectionModule,
             rejoin = {
-                logger.d { "[createPublisher] rejoin attempt, connection state: ${call.state.connection.value}" }
-                if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
-                    coroutineScope.launch {
-                        serialProcessor.submit("subscriberRejoin") {
-                            logger.d {
-                                "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
-                            } // TODO Rahul, sometimes the code will come here right in the first attempt to call
-                            call.rejoin()
-                        }
-                    }
-                }
+                // Empty, handled differently
             },
             fastReconnect = {
-                coroutineScope.launch {
-                    logger.d { "[createPublisher] Fast reconnect, connection state: ${call.state.connection.value}" }
-                    if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
-                        logger.d { "[createPublisher] fast reconnect EXECUTE" }
-                        call.fastReconnect()
-                    }
-                }
+                // Empty, handled differently
             },
             onIceCandidateRequest = ::sendIceCandidate,
         )
@@ -1007,21 +993,13 @@ public class RtcSession internal constructor(
                             logger.d {
                                 "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
                             } // TODO Rahul, sometimes the code will come here right in the first attempt to call
-                            call.rejoin()
+                            call.rejoin("Publisher#ERROR_CODE_REQUEST_VALIDATION_FAILED")
                         }
                     }
                 }
             },
             fastReconnect = {
-                coroutineScope.launch {
-                    logger.d { "[createPublisher] Fast reconnect, connection state: ${call.state.connection.value}" }
-                    if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
-                        coroutineScope.launch {
-                            logger.d { "[createPublisher] fast reconnect EXECUTE" }
-                            call.fastReconnect()
-                        }
-                    }
-                }
+                // Empty on purpose
             },
             isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
         )
@@ -1248,6 +1226,8 @@ public class RtcSession internal constructor(
 
     internal val publisherPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
     internal val subscriberPendingEvents = Collections.synchronizedList(mutableListOf<VideoEvent>())
+    internal val iceTricklePendingEvents: MutableList<Pair<IceCandidate, StreamPeerType>> =
+        Collections.synchronizedList(mutableListOf<Pair<IceCandidate, StreamPeerType>>())
 
     /**
      Section, basic webrtc calls
@@ -1257,21 +1237,25 @@ public class RtcSession internal constructor(
      * Whenever onIceCandidateRequest is called we send the ice candidate
      */
     private fun sendIceCandidate(candidate: IceCandidate, peerType: StreamPeerType) {
-        coroutineScope.launch {
-            serialProcessor.submit("sendIceCandidate") {
-                flow {
-                    logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
-                    val iceTrickle = ICETrickle(
-                        peer_type = peerType.toPeerType(),
-                        ice_candidate = Json.encodeToString(candidate),
-                        session_id = sessionId,
-                    )
-                    logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
-                    val result = sendIceCandidate(iceTrickle)
-                    logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
-                    emit(result.getOrThrow())
-                }.retry(3).catch { logger.w { "sending ice candidate failed" } }.collect()
+        if (_sfuSfuSocketState.value is SfuSocketState.Connected) {
+            coroutineScope.launch {
+                serialProcessor.submit("sendIceCandidate") {
+                    flow {
+                        logger.d { "[sendIceCandidate] #sfu; #${peerType.stringify()}; candidate: $candidate" }
+                        val iceTrickle = ICETrickle(
+                            peer_type = peerType.toPeerType(),
+                            ice_candidate = Json.encodeToString(candidate),
+                            session_id = sessionId,
+                        )
+                        logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; iceTrickle: $iceTrickle" }
+                        val result = sendIceCandidate(iceTrickle)
+                        logger.v { "[sendIceCandidate] #sfu; #${peerType.stringify()}; completed: $result" }
+                        emit(result.getOrThrow())
+                    }.retry(3).catch { logger.w { "sending ice candidate failed" } }.collect()
+                }
             }
+        } else {
+            iceTricklePendingEvents.add(candidate to peerType)
         }
     }
 
@@ -1323,7 +1307,6 @@ public class RtcSession internal constructor(
             subscriberPendingEvents.add(offerEvent)
             return
         }
-        subscriber?.negotiate(offerEvent.sdp)
     }
 
     internal fun getPublisherTracksForReconnect(): List<TrackInfo> {
@@ -1590,6 +1573,7 @@ public class RtcSession internal constructor(
         val request = JoinRequest(
             subscriber_sdp = throwawaySubscriberSdpAndOptions(),
             publisher_sdp = throwawayPublisherSdpAndOptions(),
+            unified_session_id = call.unifiedSessionId,
             session_id = sessionId,
             token = sfuToken,
             client_details = clientDetails,
@@ -1607,11 +1591,11 @@ public class RtcSession internal constructor(
                 sfuConnectionModule.socketConnection.connect(request)
                 sfuConnectionModule.socketConnection.whenConnected {
                     val peerConnectionNotUsable =
-                        subscriber?.isFailedOrClosed() == true && publisher?.isFailedOrClosed() == true
+                        subscriber?.isFailedOrClosed() == true || publisher?.isFailedOrClosed() == true
                     if (peerConnectionNotUsable) {
                         logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
                         // We could not reuse the peer connections.
-                        call.rejoin()
+                        call.rejoin("fastReconnect:peerConnectionNotUsable")
                     } else {
                         publisher?.restartIce("peerConnection is usable")
                         sendCallStats(

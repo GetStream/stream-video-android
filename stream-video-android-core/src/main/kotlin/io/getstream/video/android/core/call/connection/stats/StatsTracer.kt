@@ -239,7 +239,9 @@ private fun deltaCompression(
         /* Members comparison mirrors the JS inner loop. */
         for ((name, value) in newReport.members) {
             val oldValue = oldReport?.members?.get(name)
-            if (value != oldValue) diff[name] = value
+            if (oldStats.isEmpty() || value != oldValue) {
+                diff[name] = value
+            }
         }
 
         /* Timestamp is handled after we know which report(s) are latest,

@@ -27,11 +27,13 @@ import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
@@ -76,6 +78,7 @@ internal class Subscriber(
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
+    private val sfuConnectionModule: SfuConnectionModule,
 ) : StreamPeerConnection(
     type = StreamPeerType.SUBSCRIBER,
     mediaConstraints = MediaConstraints(),
@@ -269,6 +272,7 @@ internal class Subscriber(
         val result = setRemoteDescription(offerDescription)
             .onErrorSuspend {
                 tracer.trace("negotiate-error-setremotedescription", it.message ?: "unknown")
+                rejoin()
             }
             .flatMap {
                 createAnswer()
@@ -325,6 +329,12 @@ internal class Subscriber(
         sfuClient.iceRestart(request)
     }.onError {
         tracer.trace("iceRestart-error", it.message ?: "unknown")
+    }
+
+    // TODO: Not a very great idea
+    private val pendingCalls: List<() -> Unit>
+    private fun ensureSocketIsConnected(block: () -> Unit) {
+       if (sfuConnectionModule.socketConnection.state().value !is SfuSocketState.Connected)
     }
 
     /**

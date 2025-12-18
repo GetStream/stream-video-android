@@ -91,6 +91,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -107,6 +108,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
@@ -362,12 +364,12 @@ public class Call(
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                fastReconnect()
+                fastReconnect("NetworkStateListener#onConnected")
             } else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+                rejoin("NetworkStateListener#onConnected")
             }
         }
 
@@ -738,7 +740,7 @@ public class Call(
     /**
      * Fast reconnect to the same SFU with the same participant session.
      */
-    suspend fun fastReconnect() = schedule("fast") {
+    suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
         logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
@@ -753,8 +755,11 @@ public class Call(
                 announced_tracks = publishingInfo,
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
+                reason = reason
             )
             session.fastReconnect(reconnectDetails)
+            val oldSessionStats = collectStats()
+            session.sendCallStats(oldSessionStats)
         } else {
             logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
@@ -764,7 +769,7 @@ public class Call(
     /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
-    suspend fun rejoin() = schedule("rejoin") {
+    suspend fun rejoin(reason: String = "unknown") = schedule("rejoin") {
         logger.d { "[rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
@@ -776,6 +781,7 @@ public class Call(
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 val session = this.session!!
+                val oldSessionStats = collectStats()
                 val currentOptions = this.session?.publisher?.currentOptions()
                 logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
 
@@ -787,6 +793,7 @@ public class Call(
                     announced_tracks = publishingInfo,
                     subscriptions = subscriptionsInfo,
                     reconnect_attempt = reconnectAttepmts,
+                    reason = reason,
                 )
                 this.state.removeParticipant(prevSessionId)
                 session.prepareRejoin()
@@ -807,6 +814,7 @@ public class Call(
                         },
                     )
                     this.session?.connect(reconnectDetails, currentOptions)
+                    session.sendCallStats(oldSessionStats)
                     session.cleanup()
                     monitorSession(joinResponse.value)
                 } catch (ex: Exception) {
@@ -942,7 +950,14 @@ public class Call(
             .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
-        cleanup()
+
+        clientImpl.scope.launch {
+            safeCall {
+                val stats = collectStats()
+                session?.sendCallStats(stats)
+            }
+            cleanup()
+        }
     }
 
     /** ends the call for yourself as well as other users */
@@ -1703,9 +1718,9 @@ public class Call(
             }
         }
 
-        fun fastReconnect() {
+        fun fastReconnect(reason: String = "Debug") {
             call.scope.launch {
-                call.fastReconnect()
+                call.fastReconnect(reason)
             }
         }
     }
