@@ -812,8 +812,16 @@ public class RtcSession internal constructor(
             }
         }
         sfuConnectionMigrationModule = null
+        subscriber?.clear()
 
         // cleanup the publisher and subcriber peer connections
+        safeCall {
+            subscriber?.close()
+            publisher?.close(true)
+        }
+
+        subscriber = null
+        publisher = null
 
         // cleanup all non-local tracks
         supervisorJob.cancel()
@@ -1306,6 +1314,7 @@ public class RtcSession internal constructor(
             subscriberPendingEvents.add(offerEvent)
             return
         }
+        subscriber?.negotiate(offerEvent.sdp)
     }
 
     internal fun getPublisherTracksForReconnect(): List<TrackInfo> {
