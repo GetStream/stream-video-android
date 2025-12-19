@@ -72,7 +72,7 @@ internal class SerialProcessor(
                     logger.d { "[execute] SerialProcessor worker started" }
                     for (job in channel) {
                         currentJobName = job.jobName
-                        logger.d { "[execute] Job #${job.jobId} '${currentJobName}' starting execution" }
+                        logger.d { "[execute] Job #${job.jobId} '$currentJobName' starting execution" }
                         val startTime = System.currentTimeMillis()
 
                         // run the block, capture success or failure
