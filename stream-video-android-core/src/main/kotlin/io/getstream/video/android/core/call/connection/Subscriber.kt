@@ -110,6 +110,17 @@ internal class Subscriber(
         val mediaStream: MediaTrack,
     )
 
+    /**
+     * Represents a removed media stream.
+     *
+     * @property sessionId The session ID of the participant.
+     * @property trackType The type of track.
+     */
+    data class RemovedMediaStream(
+        val sessionId: String,
+        val trackType: TrackType,
+    )
+
     private data class ViewportCompositeKey(
         val sessionId: String,
         val viewportId: String,
@@ -531,7 +542,16 @@ internal class Subscriber(
             extraBufferCapacity = 100,
         )
 
+    private val removedStreamsFlow =
+        MutableSharedFlow<RemovedMediaStream>(
+            replay = 0,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            extraBufferCapacity = 100,
+        )
+
     fun streams(): Flow<ReceivedMediaStream> = streamsFlow
+
+    fun removedStreams(): Flow<RemovedMediaStream> = removedStreamsFlow
 
     @VisibleForTesting
     internal fun onNewStream(mediaStream: MediaStream) {
@@ -590,6 +610,69 @@ internal class Subscriber(
             traceTrack(trackType, track.id(), listOf(mediaStream.id))
             setTrack(sessionId, trackType, videoTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, videoTrack))
+        }
+    }
+
+    override fun onRemoveStream(stream: MediaStream?) {
+        super.onRemoveStream(stream)
+        if (stream == null) {
+            return
+        }
+
+        logger.i { "[onRemoveStream] #sfu; #track; #orphaned-track; stream: $stream" }
+
+        // Process audio tracks
+        stream.audioTracks.forEach { track ->
+            val trackId = track.id()
+            val sessionId = trackIdToParticipant[trackId]
+            val trackType = trackIdToTrackType[trackId]
+
+            if (sessionId != null && trackType != null) {
+                logger.i {
+                    "[onRemoveStream] #sfu; #track; #orphaned-track; Removing audio track for " +
+                        "sessionId=$sessionId, trackType=$trackType, trackId=$trackId"
+                }
+
+                // Remove from internal tracking
+                tracks[sessionId]?.remove(trackType)
+                trackIdToParticipant.remove(trackId)
+                trackIdToTrackType.remove(trackId)
+
+                // Emit removal event
+                removedStreamsFlow.tryEmit(RemovedMediaStream(sessionId, trackType))
+            } else {
+                logger.w {
+                    "[onRemoveStream] #sfu; #track; #orphaned-track; Could not find sessionId or trackType " +
+                        "for removed audio track: $trackId"
+                }
+            }
+        }
+
+        // Process video tracks
+        stream.videoTracks.forEach { track ->
+            val trackId = track.id()
+            val sessionId = trackIdToParticipant[trackId]
+            val trackType = trackIdToTrackType[trackId]
+
+            if (sessionId != null && trackType != null) {
+                logger.i {
+                    "[onRemoveStream] #sfu; #track; #orphaned-track; Removing video track for " +
+                        "sessionId=$sessionId, trackType=$trackType, trackId=$trackId"
+                }
+
+                // Remove from internal tracking
+                tracks[sessionId]?.remove(trackType)
+                trackIdToParticipant.remove(trackId)
+                trackIdToTrackType.remove(trackId)
+
+                // Emit removal event
+                removedStreamsFlow.tryEmit(RemovedMediaStream(sessionId, trackType))
+            } else {
+                logger.w {
+                    "[onRemoveStream] #sfu; #track; #orphaned-track; Could not find sessionId or trackType " +
+                        "for removed video track: $trackId"
+                }
+            }
         }
     }
 

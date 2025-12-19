@@ -392,4 +392,48 @@ class SubscriberTest {
         assertEquals(sessionId, map["audio-id"])
         assertEquals(sessionId, map["video-id"])
     }
+
+    //region Track Removal Tests
+
+    @Test
+    fun `onRemoveStream removes tracks from internal tracking maps`() = runTest {
+        val sessionId = "session-id"
+        val trackId = "audio-track-id"
+        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true) {
+            every { id() } returns trackId
+        }
+
+        subscriber.setTrackLookupPrefixes(mapOf("prefix" to sessionId))
+        val stream = MockMediaStream("prefix:${TrackType.TRACK_TYPE_AUDIO.value}:0", 1)
+        stream.addTrack(audioTrack)
+
+        subscriber.onNewStream(stream)
+        assertNotNull(subscriber.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO))
+
+        subscriber.onRemoveStream(stream)
+
+        assertNull(subscriber.getTrack(sessionId, TrackType.TRACK_TYPE_AUDIO))
+        assertNull(subscriber.trackIdToParticipant()[trackId])
+    }
+
+    @Test
+    fun `onRemoveStream handles null stream gracefully`() = runTest {
+        // Should not throw
+        subscriber.onRemoveStream(null)
+    }
+
+    @Test
+    fun `onRemoveStream handles unknown track IDs gracefully`() = runTest {
+        val unknownTrack = mockk<VideoTrack>(relaxed = true) {
+            every { id() } returns "unknown-track-id"
+        }
+
+        // Create a stream with a track that was never added via onNewStream
+        val stream = MockMediaStream("unknown:1", 1)
+        stream.addTrack(unknownTrack)
+
+        // Should not throw
+        subscriber.onRemoveStream(stream)
+    }
+    //endregion
 }
