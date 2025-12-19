@@ -97,6 +97,7 @@ import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -108,6 +109,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
 import org.webrtc.PeerConnection
@@ -151,6 +153,7 @@ public class Call(
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     internal var reconnectAttepmts = 0
+    private var fastReconnectAttempts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
@@ -597,6 +600,7 @@ public class Call(
         notify: Boolean = false,
     ): Result<RtcSession> {
         reconnectAttepmts = 0
+        fastReconnectAttempts = 0
         sfuEvents?.cancel()
         sfuListener?.cancel()
 
@@ -736,10 +740,53 @@ public class Call(
     }
 
     /**
+     * Calculates exponential backoff delay for fast reconnect retries.
+     * Formula: baseDelay * (2 ^ attemptNumber) with jitter and max cap.
+     *
+     * @param attemptNumber The current attempt number (0-indexed, so 0 = first retry)
+     * @return Delay in milliseconds
+     */
+    private fun calculateExponentialBackoff(attemptNumber: Int): Long {
+        val baseDelayMs = 500L // Base delay of 500ms
+        val maxDelayMs = 10000L // Maximum delay of 10 seconds
+        val jitterRange = 0.1 // 10% jitter
+
+        // Calculate exponential backoff: baseDelay * 2^attemptNumber
+        val exponentialDelay = baseDelayMs * (1L shl attemptNumber.coerceAtMost(4)) // Cap at 2^4 = 16x
+        val cappedDelay = exponentialDelay.coerceAtMost(maxDelayMs)
+
+        // Add jitter (±10%) to prevent thundering herd
+        val jitter = (cappedDelay * jitterRange * (Math.random() * 2 - 1)).toLong()
+
+        return (cappedDelay + jitter).coerceAtLeast(0)
+    }
+
+    /**
      * Fast reconnect to the same SFU with the same participant session.
+     * Retries up to 5 times with exponential backoff, then falls back to rejoin.
      */
     suspend fun fastReconnect() = schedule("fast") {
-        logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
+        // Check if we've exceeded max attempts
+        if (fastReconnectAttempts >= 5) {
+            logger.w { "[fastReconnect] Max attempts (5) reached, falling back to rejoin. call_id:$id" }
+            fastReconnectAttempts = 0 // Reset counter before rejoining
+            rejoin()
+            return@schedule
+        }
+
+        // Apply exponential backoff before retrying (skip delay for first attempt)
+        if (fastReconnectAttempts > 0) {
+            val backoffDelay = calculateExponentialBackoff(fastReconnectAttempts - 1)
+            logger.d {
+                "[fastReconnect] Waiting ${backoffDelay}ms before retry attempt ${fastReconnectAttempts + 1}/5"
+            }
+            delay(backoffDelay)
+        }
+
+        fastReconnectAttempts++
+        logger.d {
+            "[fastReconnect] Reconnecting, attempt:$fastReconnectAttempts/5, reconnectAttepmts:$reconnectAttepmts"
+        }
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
@@ -758,7 +805,16 @@ public class Call(
         } else {
             logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
+            fastReconnectAttempts = 0 // Reset on disconnect
         }
+    }
+
+    /**
+     * Resets the fast reconnect attempts counter.
+     * Called when fast reconnect succeeds or when starting a fresh connection.
+     */
+    internal fun resetFastReconnectAttempts() {
+        fastReconnectAttempts = 0
     }
 
     /**
@@ -766,6 +822,7 @@ public class Call(
      */
     suspend fun rejoin() = schedule("rejoin") {
         logger.d { "[rejoin] Rejoining" }
+        fastReconnectAttempts = 0 // Reset fast reconnect attempts when rejoining
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
@@ -1704,6 +1761,8 @@ public class Call(
         }
 
         fun fastReconnect() {
+            // Reset counter for manual debug calls to ensure immediate action
+            call.resetFastReconnectAttempts()
             call.scope.launch {
                 call.fastReconnect()
             }

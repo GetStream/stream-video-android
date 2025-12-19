@@ -1613,6 +1613,10 @@ public class RtcSession internal constructor(
                         // We could not reuse the peer connections.
                         call.rejoin()
                     } else {
+                        // Fast reconnect succeeded, reset the attempts counter
+                        call.resetFastReconnectAttempts()
+                        // Only restart publisher ICE
+                        // subscriber ICE will be restarted by the SFU on receving a fast reconnect
                         publisher?.restartIce("peerConnection is usable")
                         sendCallStats(
                             report = call.collectStats(),
