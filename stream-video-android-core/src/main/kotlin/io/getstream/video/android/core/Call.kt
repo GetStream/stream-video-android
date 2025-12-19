@@ -577,7 +577,7 @@ public class Call(
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
                 state.toggleRingingStateUpdates(false)
-                leave()
+                leave("ring-failed (${it.message})")
             }
         }
     }
@@ -679,6 +679,19 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = scope.launch {
+            session?.publisher?.iceState?.collect {
+                when (it) {
+                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
+                        session?.publisher?.connection?.restartIce()
+                    }
+
+                    else -> {
+                        logger.d { "[monitorPubConnectionState] Ice connection state is $it" }
+                    }
+                }
+            }
+        }
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
@@ -689,7 +702,7 @@ public class Call(
                     }
 
                     else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
+                        logger.d { "[monitorSubConnectionState] Ice connection state is $it" }
                     }
                 }
             }
@@ -813,6 +826,7 @@ public class Call(
                         },
                     )
                     this.session?.connect(reconnectDetails, currentOptions)
+                    this.session?.sfuTracer?.trace("rejoin", reason)
                     session.sendCallStats(oldSessionStats)
                     session.cleanup()
                     monitorSession(joinResponse.value)
@@ -908,14 +922,18 @@ public class Call(
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave() {
+    fun leave(reason: String = "user") {
         logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        leave(disconnectionReason = null)
+        leave(null, reason)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
+    private fun leave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
         val callId = id
-        session?.leaveWithReason(disconnectionReason?.message ?: "user")
+        monitorSubscriberPCStateJob?.cancel()
+        monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = null
+        monitorSubscriberPCStateJob = null
+        session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -952,6 +970,10 @@ public class Call(
 
         clientImpl.scope.launch {
             safeCall {
+                session?.sfuTracer?.trace(
+                    "leave-call",
+                    "[reason=$reason, error=${disconnectionReason?.message}]",
+                )
                 val stats = collectStats()
                 session?.sendCallStats(stats)
             }
@@ -964,7 +986,7 @@ public class Call(
         // end the call for everyone
         val result = clientImpl.endCall(type, id)
         // cleanup
-        leave()
+        leave("call-ended")
         return result
     }
 
