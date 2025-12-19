@@ -988,7 +988,7 @@ public class RtcSession internal constructor(
                     safeCall {
                         lifecycle.removeObserver(lifecycleObserver!!)
                     }
-                    lifecycleObserver == null
+                    lifecycleObserver = null
                 }
             }
         }
