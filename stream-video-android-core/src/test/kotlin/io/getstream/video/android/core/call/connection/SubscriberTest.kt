@@ -20,6 +20,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
+import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
@@ -71,6 +72,9 @@ class SubscriberTest {
     @RelaxedMockK
     internal lateinit var mockTrackOverridesHandler: TrackOverridesHandler
 
+    @RelaxedMockK
+    internal lateinit var mockSfuConnectionModule: SfuConnectionModule
+
     @Suppress("UNCHECKED_CAST")
     class MockMediaStream(val mockedId: String, nativeStream: Long) : MediaStream(nativeStream) {
 
@@ -117,7 +121,8 @@ class SubscriberTest {
                 tracer = Tracer("subscriber").also { setEnabled(false) },
                 rejoin = {},
                 fastReconnect = {},
-                onIceCandidateRequest = null,,
+                onIceCandidateRequest = null,
+                sfuConnectionModule = mockSfuConnectionModule,
             ),
             recordPrivateCalls = true,
         ) {
