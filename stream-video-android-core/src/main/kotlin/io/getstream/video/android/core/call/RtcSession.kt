@@ -780,7 +780,7 @@ public class RtcSession internal constructor(
         sfuConnectionModule.socketConnection.connect(request)
         sfuConnectionModule.socketConnection.whenConnected(
             connectionFailed = {
-                sfuTracer.trace("fast-reconnect-connection-failed", "${it.message}")
+                sfuTracer.trace("connect-failed", "${it.message}")
                 sendCallStats()
             },
         ) {
